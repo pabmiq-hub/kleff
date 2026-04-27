@@ -42,6 +42,13 @@ export const Route = createRootRoute({
       { property: "og:site_name", content: "KLEFF" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:site", content: "@kleff.bcn" },
+      { property: "og:title", content: "KLEFF — Comunidad de juegos de mesa en Barcelona" },
+      { name: "twitter:title", content: "KLEFF — Comunidad de juegos de mesa en Barcelona" },
+      { name: "description", content: "Comunidad de aficionados a los juegos de mesa en Barcelona. Ven sólo o acompañado para disfrutar de las mejores noches de juegos." },
+      { property: "og:description", content: "Comunidad de aficionados a los juegos de mesa en Barcelona. Ven sólo o acompañado para disfrutar de las mejores noches de juegos." },
+      { name: "twitter:description", content: "Comunidad de aficionados a los juegos de mesa en Barcelona. Ven sólo o acompañado para disfrutar de las mejores noches de juegos." },
+      { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/bAnIbqAHB3bI0vZgvtW7HqSDclV2/social-images/social-1777293925502-board-games-juegos-de-mesa-kleff-barcelona.webp" },
+      { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/bAnIbqAHB3bI0vZgvtW7HqSDclV2/social-images/social-1777293925502-board-games-juegos-de-mesa-kleff-barcelona.webp" },
     ],
     links: [
       {
