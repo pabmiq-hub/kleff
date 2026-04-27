@@ -1,4 +1,4 @@
-import { Link } from "@tanstack/react-router";
+import { Link, useRouterState } from "@tanstack/react-router";
 import {
   ArrowRight,
   Sparkles,
@@ -12,9 +12,31 @@ import heroImg from "@/assets/hero-gamenight.jpg";
 import tableImg from "@/assets/hero-table.jpg";
 import { useI18n } from "@/i18n/I18nProvider";
 import { SiteLayout } from "@/components/site/SiteLayout";
+import type { MeetupEvent } from "@/server/meetup.functions";
+
+type MeetupLoaderData = {
+  events: MeetupEvent[];
+  error: string | null;
+  cachedAt: number;
+};
+
+function useMeetupEvents(): MeetupLoaderData {
+  // Index routes (es/en/ca) load events. Pick the match that has events data.
+  const data = useRouterState({
+    select: (s) => {
+      for (const m of s.matches) {
+        const ld: any = m.loaderData;
+        if (ld && Array.isArray(ld.events)) return ld as MeetupLoaderData;
+      }
+      return null;
+    },
+  });
+  return data ?? { events: [], error: null, cachedAt: 0 };
+}
 
 export function HomePage() {
-  const { t, href } = useI18n();
+  const { t, href, locale } = useI18n();
+  const { events } = useMeetupEvents();
 
   const reasons = [t.home.reason1, t.home.reason2, t.home.reason3, t.home.reason4, t.home.reason5];
 
