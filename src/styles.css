@@ -285,24 +285,25 @@
 
 /* === Snake Timeline === */
 .snake-timeline {
-  --snake-color: var(--ink);
-  --snake-thickness: 3px;
   display: grid;
+  /* Mobile: 1 col cards + 1 connector row in between (auto-sized) */
   grid-template-columns: 1fr;
-  gap: 1.5rem;
+  grid-auto-rows: auto;
+  column-gap: 1.5rem;
+  row-gap: 0;
   position: relative;
   padding: 1rem 0;
 }
 @media (min-width: 640px) {
   .snake-timeline {
     grid-template-columns: repeat(2, 1fr);
-    gap: 2rem 2.5rem;
+    column-gap: 2.5rem;
   }
 }
 @media (min-width: 1024px) {
   .snake-timeline {
     grid-template-columns: repeat(3, 1fr);
-    gap: 2.5rem 3rem;
+    column-gap: 3rem;
   }
 }
 
@@ -313,6 +314,7 @@
   border-radius: 1.5rem;
   padding: 1.4rem 1.3rem 1.5rem;
   box-shadow: 5px 5px 0 0 var(--ink);
+  margin-bottom: 0.75rem;
   opacity: 0;
   transform: translateY(24px) rotate(-1.5deg);
   transition:
@@ -337,20 +339,13 @@
   z-index: 5;
 }
 
-/* Connector dots placed on the corner facing the next card.
-   Layout flow:
-   Row 1 (cols 1,2,3): connector goes RIGHT from card to next card
-   Row 2 (cols 1,2,3 visually right→left in serpentine reading): connector LEFT
-   Easiest: paint a dashed line BETWEEN cards using ::before/::after pseudo-elements
-   anchored to the card's edge. Use grid auto-flow + direction trick. */
-
 /* Numbered step badge — top-left, makes reading order obvious */
 .snake-step {
   position: absolute;
   top: -1.1rem;
   left: -1.1rem;
-  width: 2.4rem;
-  height: 2.4rem;
+  width: 2.6rem;
+  height: 2.6rem;
   border-radius: 999px;
   background: var(--coral);
   color: var(--cream);
@@ -361,9 +356,9 @@
   justify-content: center;
   font-family: var(--font-display);
   font-weight: 700;
-  font-size: 1.15rem;
+  font-size: 1.2rem;
   line-height: 1;
-  z-index: 3;
+  z-index: 4;
   transform: scale(0) rotate(-12deg);
   transition: transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
   transition-delay: calc(var(--reveal-delay, 0ms) + 200ms);
@@ -388,6 +383,7 @@
   filter: drop-shadow(2px 2px 0 var(--ink));
   transform: rotate(10deg);
   transition: transform 0.35s ease;
+  z-index: 3;
 }
 .snake-card:hover .snake-emoji {
   transform: rotate(-12deg) scale(1.18);
@@ -412,170 +408,97 @@
   transform: rotate(2deg);
 }
 
-/* Serpentine connector lines using background image on the cards.
-   Each card draws a curved arrow toward the next.
-   We use SVG dashed lines via ::after positioned outside the card.
-   Strategy: a card on the right edge of a row connects DOWN to the card
-   below. Otherwise it connects HORIZONTALLY to its sibling. */
-.snake-card::after,
-.snake-card::before {
-  content: "";
-  position: absolute;
+/* === Snake arrows (connectors between cards) === */
+.snake-arrow {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   pointer-events: none;
-  background-repeat: no-repeat;
-  background-position: center;
   opacity: 0;
-  transition: opacity 0.6s ease;
-  transition-delay: calc(var(--reveal-delay, 0ms) + 350ms);
-  z-index: 1;
+  transition: opacity 0.5s ease;
+  transition-delay: var(--arrow-delay, 400ms);
 }
-.snake-timeline.is-visible .snake-card::after { opacity: 0.75; }
-.snake-timeline.is-visible .snake-card::before { opacity: 0.95; }
-.snake-card:last-child::after,
-.snake-card:last-child::before { display: none; }
+.snake-timeline.is-visible .snake-arrow {
+  opacity: 1;
+}
+.snake-arrow-svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
 
-/* Default (mobile, 1 col): vertical dashed line + arrow head pointing down */
-.snake-card::after {
+/* Animate the dashed path drawing in */
+.snake-arrow-path {
+  stroke-dashoffset: 0;
+  animation: dash-flow 1.6s linear infinite;
+}
+@keyframes dash-flow {
+  to { stroke-dashoffset: -26; }
+}
+
+/* Tiny coral pill with the destination step number */
+.snake-arrow-num {
+  position: absolute;
+  background: var(--cream);
+  color: var(--coral-deep);
+  border: 2px solid var(--coral-deep);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.78rem;
+  line-height: 1;
+  padding: 0.18rem 0.45rem;
+  border-radius: 999px;
+  white-space: nowrap;
+  box-shadow: 2px 2px 0 0 var(--ink);
+}
+.snake-arrow-num::before {
+  content: "→";
+  margin-right: 0.2rem;
+  font-weight: 900;
+}
+
+/* Right arrow: short row between cards */
+.snake-arrow-right {
+  height: 2.5rem;
+  align-self: center;
+  /* Position itself in the vertical center of the card row above */
+  margin-top: -3rem;
+  margin-bottom: 0.5rem;
+}
+.snake-arrow-right .snake-arrow-num {
+  top: 50%;
   left: 50%;
-  top: calc(100% + 4px);
-  width: 3px;
-  height: calc(1.5rem - 14px);
-  background-image: repeating-linear-gradient(
-    to bottom,
-    var(--ink) 0,
-    var(--ink) 6px,
-    transparent 6px,
-    transparent 12px
-  );
-  transform: translateX(-50%);
+  transform: translate(-50%, -150%);
 }
-.snake-card::before {
-  /* downward arrowhead */
+
+/* Down arrow (mobile single column) */
+.snake-arrow-down {
+  height: 3.5rem;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+.snake-arrow-down .snake-arrow-svg {
+  width: 2rem;
+  height: 100%;
+}
+.snake-arrow-down .snake-arrow-num {
+  top: 50%;
   left: 50%;
-  top: calc(100% + 1.4rem - 8px);
-  width: 14px;
-  height: 10px;
-  background-image: linear-gradient(to top right, transparent 48%, var(--ink) 48% 52%, transparent 52%),
-    linear-gradient(to top left, transparent 48%, var(--ink) 48% 52%, transparent 52%);
-  background-size: 50% 100%, 50% 100%;
-  background-position: left bottom, right bottom;
-  transform: translateX(-50%);
+  transform: translate(-50%, -50%);
 }
 
-/* Tablet (2 cols): serpentine */
-@media (min-width: 640px) {
-  /* horizontal connector (col 1 → col 2) */
-  .snake-card:nth-child(2n+1):not(:last-child)::after {
-    left: calc(100% + 4px);
-    top: 50%;
-    width: calc(2.5rem - 14px);
-    height: 3px;
-    background-image: repeating-linear-gradient(
-      to right,
-      var(--ink) 0,
-      var(--ink) 6px,
-      transparent 6px,
-      transparent 12px
-    );
-    transform: translateY(-50%);
-  }
-  .snake-card:nth-child(2n+1):not(:last-child)::before {
-    /* right-pointing arrow head */
-    left: calc(100% + 2.5rem - 12px);
-    top: 50%;
-    width: 10px;
-    height: 14px;
-    background-image: linear-gradient(to bottom right, transparent 48%, var(--ink) 48% 52%, transparent 52%),
-      linear-gradient(to top right, transparent 48%, var(--ink) 48% 52%, transparent 52%);
-    background-size: 100% 50%, 100% 50%;
-    background-position: left top, left bottom;
-    transform: translateY(-50%);
-  }
-  /* vertical wrap (col 2 → col 1 of next row) */
-  .snake-card:nth-child(2n):not(:last-child)::after {
-    left: 50%;
-    top: calc(100% + 4px);
-    width: 3px;
-    height: calc(2rem - 14px);
-    background-image: repeating-linear-gradient(
-      to bottom,
-      var(--ink) 0,
-      var(--ink) 6px,
-      transparent 6px,
-      transparent 12px
-    );
-    transform: translateX(-50%);
-  }
-  .snake-card:nth-child(2n):not(:last-child)::before {
-    left: 50%;
-    top: calc(100% + 2rem - 10px);
-    width: 14px;
-    height: 10px;
-    background-image: linear-gradient(to top right, transparent 48%, var(--ink) 48% 52%, transparent 52%),
-      linear-gradient(to top left, transparent 48%, var(--ink) 48% 52%, transparent 52%);
-    background-size: 50% 100%, 50% 100%;
-    background-position: left bottom, right bottom;
-    transform: translateX(-50%);
-  }
+/* Wrap arrow: full width, links last card of a row to first of next */
+.snake-arrow-wrap {
+  height: 4.5rem;
+  width: 100%;
+  margin: 0.25rem 0 0.5rem;
 }
-
-/* Desktop (3 cols) */
-@media (min-width: 1024px) {
-  .snake-card::after,
-  .snake-card::before { display: block; }
-
-  /* Cards at positions 1,2,4,5,7,8: horizontal → */
-  .snake-card:not(:nth-child(3n)):not(:last-child)::after {
-    left: calc(100% + 4px);
-    top: 50%;
-    width: calc(3rem - 14px);
-    height: 3px;
-    background-image: repeating-linear-gradient(
-      to right,
-      var(--ink) 0,
-      var(--ink) 6px,
-      transparent 6px,
-      transparent 12px
-    );
-    transform: translateY(-50%);
-  }
-  .snake-card:not(:nth-child(3n)):not(:last-child)::before {
-    left: calc(100% + 3rem - 12px);
-    top: 50%;
-    width: 10px;
-    height: 14px;
-    background-image: linear-gradient(to bottom right, transparent 48%, var(--ink) 48% 52%, transparent 52%),
-      linear-gradient(to top right, transparent 48%, var(--ink) 48% 52%, transparent 52%);
-    background-size: 100% 50%, 100% 50%;
-    background-position: left top, left bottom;
-    transform: translateY(-50%);
-  }
-  /* Cards at positions 3,6: vertical wrap ↓ */
-  .snake-card:nth-child(3n):not(:last-child)::after {
-    left: 50%;
-    top: calc(100% + 4px);
-    width: 3px;
-    height: calc(2.5rem - 14px);
-    background-image: repeating-linear-gradient(
-      to bottom,
-      var(--ink) 0,
-      var(--ink) 6px,
-      transparent 6px,
-      transparent 12px
-    );
-    transform: translateX(-50%);
-  }
-  .snake-card:nth-child(3n):not(:last-child)::before {
-    left: 50%;
-    top: calc(100% + 2.5rem - 10px);
-    width: 14px;
-    height: 10px;
-    background-image: linear-gradient(to top right, transparent 48%, var(--ink) 48% 52%, transparent 52%),
-      linear-gradient(to top left, transparent 48%, var(--ink) 48% 52%, transparent 52%);
-    background-size: 50% 100%, 50% 100%;
-    background-position: left bottom, right bottom;
-    transform: translateX(-50%);
-  }
+.snake-arrow-wrap .snake-arrow-num-wrap {
+  bottom: 0.2rem;
+  left: 1.5rem;
+  transform: none;
 }
 
 /* Wiggle animation for tactile elements (kept above) */
