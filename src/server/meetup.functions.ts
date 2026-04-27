@@ -184,9 +184,10 @@ function parseMeetupGroup(html: string): {
     }
   }
   if (stats.rating == null) {
-    // "4.8 • 2.700 valoraciones"
+    // Match "4.8" possibly followed by markup, then "2700 valoraciones".
+    // Allow up to 400 chars between (HTML wrappers, classes, links, …).
     const m = html.match(
-      /(\d[.,]\d)\s*(?:•|·|\|)?\s*([\d.,]+)\s*(?:valoraciones|ratings|valoracions)/i,
+      /(\d[.,]\d)[\s\S]{0,400}?(\d[\d.,]{0,8})\s*(?:valoraciones|ratings|valoracions)/i,
     );
     if (m) {
       stats.rating = parseFloat(m[1].replace(",", "."));
@@ -195,7 +196,7 @@ function parseMeetupGroup(html: string): {
     } else {
       const m2 = html.match(/(\d[.,]\d)\s*\/?\s*5/);
       if (m2) stats.rating = parseFloat(m2[1].replace(",", "."));
-      const m3 = html.match(/([\d.,]+)\s*(?:valoraciones|ratings|valoracions)/i);
+      const m3 = html.match(/(\d[\d.,]{0,8})\s*(?:valoraciones|ratings|valoracions)/i);
       if (m3) {
         const n = parseInt(m3[1].replace(/[.,]/g, ""), 10);
         if (!Number.isNaN(n)) stats.ratingCount = n;
