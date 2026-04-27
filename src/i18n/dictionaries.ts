@@ -310,13 +310,13 @@ const es: Dict = {
       "No necesitas reservar mesa ni traer a nadie. El #TeamKLEFF (camiseta roja) te recibe, te ayuda a encontrar mesa donde empezar una partida o te empareja con otra gente con ganas de jugar. En 10 minutos estás riéndote con desconocidos.",
     step1Title: "Llegas",
     step1Body:
-      "Entras en l'Estació Espai Gastronòmic. Pides una bebida (esa es la consumición de 4€) o algo de picar. El #TeamKLEFF te recibe.",
+      "Entras en l'Estació Espai Gastronòmic. Pides una bebida (esa es la consumición de 4€) o algo de picar. Un miembro del #TeamKLEFF te recibe en la recepción.",
     step2Title: "Encuentras mesa",
     step2Body:
       "El #TeamKLEFF (camiseta roja) está para ayudarte. Te emparejan con gente buscando mesa, te recomiendan un juego según tus ganas y te lo explican si no lo conoces.",
     step3Title: "Juegas y vuelves",
     step3Body:
-      "Más de 300 juegos disponibles. Cuando termines una partida, prueba otra mesa o quédate en la tuya. La noche dura 4 horas y nadie tiene prisa.",
+      "Más de 500 juegos disponibles. Cuando termines una partida, prueba otra mesa o quédate en la tuya. La noche dura 4 horas y nadie tiene prisa.",
     activitiesTitle: "Qué puedes encontrar",
     activitiesSubtitle:
       "Desde la noche de juegos semanal hasta torneos, citas lúdicas y eventos solidarios.",
