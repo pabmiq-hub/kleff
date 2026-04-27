@@ -36,7 +36,10 @@ let cache: CacheEntry | null = null;
 
 const GROUP_URL = "https://www.meetup.com/es-es/kleff-bcn/events/";
 const GROUP_HOME_URL = "https://www.meetup.com/es-es/kleff-bcn/";
-const GOOGLE_PLACE_URL = "https://maps.app.goo.gl/FwLT8EYGGDJYxGhs5";
+// Google search results expose the knowledge panel for KLEFF, including rating
+// and review count, without requiring login (the Maps page itself hides them).
+const GOOGLE_SEARCH_URL =
+  "https://www.google.com/search?q=KLEFF+Barcelona+juegos+de+mesa&hl=es";
 const FIRECRAWL_BASE = "https://api.firecrawl.dev/v2";
 
 // ----------------------------------------------------------------------------
