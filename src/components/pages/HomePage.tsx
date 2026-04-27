@@ -265,7 +265,7 @@ function formatNumber(n: number, locale: string) {
 
 export function HomePage() {
   const { t, href, locale } = useI18n();
-  const { events, stats } = useMeetupData();
+  const { events, stats, google } = useMeetupData();
 
   const reasons = [t.home.reason1, t.home.reason2, t.home.reason3, t.home.reason4, t.home.reason5];
 
@@ -273,6 +273,8 @@ export function HomePage() {
   const upcoming = stats.upcomingEventCount ?? events.length;
   const rating = stats.rating ?? 4.8;
   const ratingCount = stats.ratingCount ?? 2700;
+  const googleRating = google.rating ?? 5.0;
+  const googleRatingCount = google.ratingCount;
 
   return (
     <SiteLayout>
