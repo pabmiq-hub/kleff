@@ -408,6 +408,8 @@ const en: Dict = {
   nav: {
     home: "Home",
     about: "About",
+    how: "How it works",
+    media: "Media",
     blog: "Blog",
     contact: "Contact",
     join: "Join us",
@@ -514,6 +516,112 @@ const en: Dict = {
     success: "Thanks! We'll get back to you soon.",
     or: "or email us at",
     findUs: "Where to find us",
+  },
+  how: {
+    eyebrow: "How it works",
+    title: "How KLEFF works",
+    intro:
+      "We're a non-profit association. Our recurring activities are free, but the venue that hosts us — l'Estació Espai Gastronòmic — asks for a small minimum order of €4 when the activity starts. That's how we support the place that opens its doors to us every week.",
+    nonProfitTitle: "Non-profit association",
+    nonProfitBody:
+      "KLEFF is formally constituted as a non-profit association. Everything we generate goes back to the community: game library, special events and collaborations.",
+    consumptionBadge: "€4 minimum order · activity is free",
+    howItWorksTitle: "Come alone, as a couple or with friends. Doesn't matter.",
+    howItWorksBody:
+      "No need to book a table or bring anyone. The #TeamKLEFF (red shirts) welcomes you, helps you find a table to start a game or pairs you with other people who want to play. Within 10 minutes you're laughing with strangers.",
+    step1Title: "You arrive",
+    step1Body:
+      "Walk into l'Estació Espai Gastronòmic. Order a drink or something to snack on (that's the €4 minimum). Sign up on Meetup if you haven't already.",
+    step2Title: "You find a table",
+    step2Body:
+      "The #TeamKLEFF (red shirts) is here to help. They pair you with people looking for a table, recommend a game based on your mood and explain the rules if you don't know it.",
+    step3Title: "You play and come back",
+    step3Body:
+      "Over 300 games available. Once you finish a round, try another table or stay at yours. The night runs for 4 hours and nobody's in a rush.",
+    activitiesTitle: "What you'll find",
+    activitiesSubtitle:
+      "From the weekly game night to tournaments, social-game dating and charity events.",
+    weekly: "Weekly",
+    monthly: "Monthly",
+    yearly: "Yearly",
+    occasional: "Occasional",
+    activityWeekly1Title: "Game Night",
+    activityWeekly1Body:
+      "Regular event with open game library and scheduled rounds of Blood on the Clocktower, Catan and many more.",
+    activityOccasional1Title: "Slow Gaming Dating",
+    activityOccasional1Body:
+      "Similar concept to speed dating but using social games as the excuse to connect people.",
+    activityMonthly1Title: "Tournaments",
+    activityMonthly1Body:
+      "Competitive events for the most popular games in the community.",
+    activityMonthly2Title: "Publisher & author demos",
+    activityMonthly2Body:
+      "Sessions to learn new games directly from the people who designed and published them.",
+    activityYearly1Title: "Game Night: Carnival",
+    activityYearly1Body:
+      "Special game night with a carnival costume contest.",
+    activityYearly2Title: "Game Night: Halloween",
+    activityYearly2Body:
+      "Special game night with a Halloween-themed costume contest.",
+    activityYearly3Title: "X-Mas Game Night",
+    activityYearly3Body:
+      "Charity event raising funds for Hospital Sant Joan de Déu, specialised in childhood cancer.",
+    communitiesEyebrow: "Communities",
+    communitiesTitle: "Want to be part of a specific community?",
+    communitiesIntro:
+      "Inside KLEFF there are several communities built around specific games. Each one has its own group, regular sessions and events. Join the one you love most.",
+    community1Title: "Blood on the Clocktower",
+    community1Body:
+      "Community of the highest-rated hidden role game on the BGG ranking. We schedule at least 2 sessions per week.",
+    community1Tag: "2 sessions/week",
+    community2Title: "Catan",
+    community2Body:
+      "Community of the modern board game pioneer. We organise tournaments and activities on a recurring basis.",
+    community2Tag: "Recurring tournaments",
+    community3Title: "Unmatched",
+    community3Body:
+      "Community of the most popular skirmish board game right now. We organise tournaments frequently.",
+    community3Tag: "Frequent tournaments",
+    community4Title: "Hidden Roles",
+    community4Body:
+      "Community to discover and enjoy social deduction and hidden identity games.",
+    community4Tag: "Social deduction",
+    memberEyebrow: "Become a member",
+    memberTitle: "Be a real part of the project",
+    memberSubtitle:
+      "Becoming a KLEFF member is more than supporting the association: it unlocks perks designed for those who really show up.",
+    memberFlipHint: "Hover each benefit",
+    benefit1Title: "Borrow games",
+    benefit1Body:
+      "Take games from our 300+ title library home for a weekend or weekday.",
+    benefit2Title: "Priority access",
+    benefit2Body:
+      "Get first dibs on special events, capacity-limited tournaments and themed nights.",
+    benefit3Title: "Shop discounts",
+    benefit3Body:
+      "Discounts at partner shops in Barcelona like Mathom, The Curiosity Shop, Gameria or Kaburi.",
+    benefit4Title: "Real community",
+    benefit4Body:
+      "Access to a members-only channel, suggestions space and voting on yearly activities.",
+    memberCtaTitle: "Ready to become a member?",
+    memberCtaBody:
+      "We're finalising the annual fee and the steps to sign up. Drop us your email and we'll let you know as soon as memberships open.",
+    memberCta: "I want more info",
+  },
+  media: {
+    eyebrow: "Media",
+    title: "They've talked about us",
+    intro:
+      "Reports, podcasts, articles and reels that have told the KLEFF story. Sorted from most recent to oldest.",
+    pressTitle: "Press appearances",
+    pressSubtitle: "A selection of the outlets that have featured us.",
+    visitArticle: "Open article",
+    instagramTitle: "Follow us on Instagram",
+    instagramSubtitle:
+      "The best photos from every Game Night, upcoming events and our funniest moments live at @kleff.bcn.",
+    instagramCta: "Open @kleff.bcn",
+    loading: "Loading preview…",
+    noPreview: "Preview not available — open the link to see it.",
   },
 };
 
