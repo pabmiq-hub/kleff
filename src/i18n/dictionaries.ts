@@ -28,6 +28,7 @@ type Dict = {
     eventsSubtitle: string;
     eventsCta: string;
     eventsEmpty: string;
+    eventJoin: string;
     reasonsEyebrow: string;
     reasonsTitle: string;
     reason1: string;
