@@ -9,19 +9,35 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as MediaRouteImport } from './routes/media'
+import { Route as HowItWorksRouteImport } from './routes/how-it-works'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as BlogRouteImport } from './routes/blog'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as EnIndexRouteImport } from './routes/en.index'
 import { Route as CaIndexRouteImport } from './routes/ca.index'
+import { Route as EnMediaRouteImport } from './routes/en.media'
+import { Route as EnHowItWorksRouteImport } from './routes/en.how-it-works'
 import { Route as EnContactRouteImport } from './routes/en.contact'
 import { Route as EnBlogRouteImport } from './routes/en.blog'
 import { Route as EnAboutRouteImport } from './routes/en.about'
+import { Route as CaMediaRouteImport } from './routes/ca.media'
+import { Route as CaHowItWorksRouteImport } from './routes/ca.how-it-works'
 import { Route as CaContactRouteImport } from './routes/ca.contact'
 import { Route as CaBlogRouteImport } from './routes/ca.blog'
 import { Route as CaAboutRouteImport } from './routes/ca.about'
 
+const MediaRoute = MediaRouteImport.update({
+  id: '/media',
+  path: '/media',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HowItWorksRoute = HowItWorksRouteImport.update({
+  id: '/how-it-works',
+  path: '/how-it-works',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ContactRoute = ContactRouteImport.update({
   id: '/contact',
   path: '/contact',
@@ -52,6 +68,16 @@ const CaIndexRoute = CaIndexRouteImport.update({
   path: '/ca/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const EnMediaRoute = EnMediaRouteImport.update({
+  id: '/en/media',
+  path: '/en/media',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EnHowItWorksRoute = EnHowItWorksRouteImport.update({
+  id: '/en/how-it-works',
+  path: '/en/how-it-works',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const EnContactRoute = EnContactRouteImport.update({
   id: '/en/contact',
   path: '/en/contact',
@@ -65,6 +91,16 @@ const EnBlogRoute = EnBlogRouteImport.update({
 const EnAboutRoute = EnAboutRouteImport.update({
   id: '/en/about',
   path: '/en/about',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CaMediaRoute = CaMediaRouteImport.update({
+  id: '/ca/media',
+  path: '/ca/media',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CaHowItWorksRoute = CaHowItWorksRouteImport.update({
+  id: '/ca/how-it-works',
+  path: '/ca/how-it-works',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CaContactRoute = CaContactRouteImport.update({
@@ -88,12 +124,18 @@ export interface FileRoutesByFullPath {
   '/about': typeof AboutRoute
   '/blog': typeof BlogRoute
   '/contact': typeof ContactRoute
+  '/how-it-works': typeof HowItWorksRoute
+  '/media': typeof MediaRoute
   '/ca/about': typeof CaAboutRoute
   '/ca/blog': typeof CaBlogRoute
   '/ca/contact': typeof CaContactRoute
+  '/ca/how-it-works': typeof CaHowItWorksRoute
+  '/ca/media': typeof CaMediaRoute
   '/en/about': typeof EnAboutRoute
   '/en/blog': typeof EnBlogRoute
   '/en/contact': typeof EnContactRoute
+  '/en/how-it-works': typeof EnHowItWorksRoute
+  '/en/media': typeof EnMediaRoute
   '/ca/': typeof CaIndexRoute
   '/en/': typeof EnIndexRoute
 }
@@ -102,12 +144,18 @@ export interface FileRoutesByTo {
   '/about': typeof AboutRoute
   '/blog': typeof BlogRoute
   '/contact': typeof ContactRoute
+  '/how-it-works': typeof HowItWorksRoute
+  '/media': typeof MediaRoute
   '/ca/about': typeof CaAboutRoute
   '/ca/blog': typeof CaBlogRoute
   '/ca/contact': typeof CaContactRoute
+  '/ca/how-it-works': typeof CaHowItWorksRoute
+  '/ca/media': typeof CaMediaRoute
   '/en/about': typeof EnAboutRoute
   '/en/blog': typeof EnBlogRoute
   '/en/contact': typeof EnContactRoute
+  '/en/how-it-works': typeof EnHowItWorksRoute
+  '/en/media': typeof EnMediaRoute
   '/ca': typeof CaIndexRoute
   '/en': typeof EnIndexRoute
 }
@@ -117,12 +165,18 @@ export interface FileRoutesById {
   '/about': typeof AboutRoute
   '/blog': typeof BlogRoute
   '/contact': typeof ContactRoute
+  '/how-it-works': typeof HowItWorksRoute
+  '/media': typeof MediaRoute
   '/ca/about': typeof CaAboutRoute
   '/ca/blog': typeof CaBlogRoute
   '/ca/contact': typeof CaContactRoute
+  '/ca/how-it-works': typeof CaHowItWorksRoute
+  '/ca/media': typeof CaMediaRoute
   '/en/about': typeof EnAboutRoute
   '/en/blog': typeof EnBlogRoute
   '/en/contact': typeof EnContactRoute
+  '/en/how-it-works': typeof EnHowItWorksRoute
+  '/en/media': typeof EnMediaRoute
   '/ca/': typeof CaIndexRoute
   '/en/': typeof EnIndexRoute
 }
@@ -133,12 +187,18 @@ export interface FileRouteTypes {
     | '/about'
     | '/blog'
     | '/contact'
+    | '/how-it-works'
+    | '/media'
     | '/ca/about'
     | '/ca/blog'
     | '/ca/contact'
+    | '/ca/how-it-works'
+    | '/ca/media'
     | '/en/about'
     | '/en/blog'
     | '/en/contact'
+    | '/en/how-it-works'
+    | '/en/media'
     | '/ca/'
     | '/en/'
   fileRoutesByTo: FileRoutesByTo
@@ -147,12 +207,18 @@ export interface FileRouteTypes {
     | '/about'
     | '/blog'
     | '/contact'
+    | '/how-it-works'
+    | '/media'
     | '/ca/about'
     | '/ca/blog'
     | '/ca/contact'
+    | '/ca/how-it-works'
+    | '/ca/media'
     | '/en/about'
     | '/en/blog'
     | '/en/contact'
+    | '/en/how-it-works'
+    | '/en/media'
     | '/ca'
     | '/en'
   id:
@@ -161,12 +227,18 @@ export interface FileRouteTypes {
     | '/about'
     | '/blog'
     | '/contact'
+    | '/how-it-works'
+    | '/media'
     | '/ca/about'
     | '/ca/blog'
     | '/ca/contact'
+    | '/ca/how-it-works'
+    | '/ca/media'
     | '/en/about'
     | '/en/blog'
     | '/en/contact'
+    | '/en/how-it-works'
+    | '/en/media'
     | '/ca/'
     | '/en/'
   fileRoutesById: FileRoutesById
@@ -176,18 +248,38 @@ export interface RootRouteChildren {
   AboutRoute: typeof AboutRoute
   BlogRoute: typeof BlogRoute
   ContactRoute: typeof ContactRoute
+  HowItWorksRoute: typeof HowItWorksRoute
+  MediaRoute: typeof MediaRoute
   CaAboutRoute: typeof CaAboutRoute
   CaBlogRoute: typeof CaBlogRoute
   CaContactRoute: typeof CaContactRoute
+  CaHowItWorksRoute: typeof CaHowItWorksRoute
+  CaMediaRoute: typeof CaMediaRoute
   EnAboutRoute: typeof EnAboutRoute
   EnBlogRoute: typeof EnBlogRoute
   EnContactRoute: typeof EnContactRoute
+  EnHowItWorksRoute: typeof EnHowItWorksRoute
+  EnMediaRoute: typeof EnMediaRoute
   CaIndexRoute: typeof CaIndexRoute
   EnIndexRoute: typeof EnIndexRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/media': {
+      id: '/media'
+      path: '/media'
+      fullPath: '/media'
+      preLoaderRoute: typeof MediaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/how-it-works': {
+      id: '/how-it-works'
+      path: '/how-it-works'
+      fullPath: '/how-it-works'
+      preLoaderRoute: typeof HowItWorksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/contact': {
       id: '/contact'
       path: '/contact'
@@ -230,6 +322,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CaIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/en/media': {
+      id: '/en/media'
+      path: '/en/media'
+      fullPath: '/en/media'
+      preLoaderRoute: typeof EnMediaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/en/how-it-works': {
+      id: '/en/how-it-works'
+      path: '/en/how-it-works'
+      fullPath: '/en/how-it-works'
+      preLoaderRoute: typeof EnHowItWorksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/en/contact': {
       id: '/en/contact'
       path: '/en/contact'
@@ -249,6 +355,20 @@ declare module '@tanstack/react-router' {
       path: '/en/about'
       fullPath: '/en/about'
       preLoaderRoute: typeof EnAboutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ca/media': {
+      id: '/ca/media'
+      path: '/ca/media'
+      fullPath: '/ca/media'
+      preLoaderRoute: typeof CaMediaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ca/how-it-works': {
+      id: '/ca/how-it-works'
+      path: '/ca/how-it-works'
+      fullPath: '/ca/how-it-works'
+      preLoaderRoute: typeof CaHowItWorksRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/ca/contact': {
@@ -280,12 +400,18 @@ const rootRouteChildren: RootRouteChildren = {
   AboutRoute: AboutRoute,
   BlogRoute: BlogRoute,
   ContactRoute: ContactRoute,
+  HowItWorksRoute: HowItWorksRoute,
+  MediaRoute: MediaRoute,
   CaAboutRoute: CaAboutRoute,
   CaBlogRoute: CaBlogRoute,
   CaContactRoute: CaContactRoute,
+  CaHowItWorksRoute: CaHowItWorksRoute,
+  CaMediaRoute: CaMediaRoute,
   EnAboutRoute: EnAboutRoute,
   EnBlogRoute: EnBlogRoute,
   EnContactRoute: EnContactRoute,
+  EnHowItWorksRoute: EnHowItWorksRoute,
+  EnMediaRoute: EnMediaRoute,
   CaIndexRoute: CaIndexRoute,
   EnIndexRoute: EnIndexRoute,
 }
