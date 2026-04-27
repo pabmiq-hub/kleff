@@ -160,7 +160,7 @@ export function AboutPage() {
               <TeamCard key={i} {...m} />
             ))}
           </div>
-          <p className="mt-6 text-sm text-muted-foreground italic">
+          <p className="mt-6 text-sm text-muted-foreground">
             {locale === "es"
               ? "Pronto añadiremos las fichas reales del equipo. Envíanos vuestras fotos y bios."
               : locale === "en"
