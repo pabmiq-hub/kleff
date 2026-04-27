@@ -531,13 +531,13 @@ const en: Dict = {
       "No need to book a table or bring anyone. The #TeamKLEFF (red shirts) welcomes you, helps you find a table to start a game or pairs you with other people who want to play. Within 10 minutes you're laughing with strangers.",
     step1Title: "You arrive",
     step1Body:
-      "Walk into l'Estació Espai Gastronòmic. Order a drink (€4 minimum order) or something to snack on. A member of #TeamKLEFF welcomes you.",
+      "Walk into l'Estació Espai Gastronòmic. Order a drink (€4 minimum order) or something to snack on. A member of #TeamKLEFF welcomes you at the reception.",
     step2Title: "You find a table",
     step2Body:
       "The #TeamKLEFF (red shirts) is here to help. They pair you with people looking for a table, recommend a game based on your mood and explain the rules if you don't know it.",
     step3Title: "You play and come back",
     step3Body:
-      "Over 300 games available. Once you finish a round, try another table or stay at yours. The night runs for 4 hours and nobody's in a rush.",
+      "Over 500 games available. Once you finish a round, try another table or stay at yours. The night runs for 4 hours and nobody's in a rush.",
     activitiesTitle: "What you'll find",
     activitiesSubtitle:
       "From the weekly game night to tournaments, social-game dating and charity events.",
