@@ -28,6 +28,7 @@ type Dict = {
     eventsSubtitle: string;
     eventsCta: string;
     eventsEmpty: string;
+    eventJoin: string;
     reasonsEyebrow: string;
     reasonsTitle: string;
     reason1: string;
@@ -125,6 +126,7 @@ const es: Dict = {
     eventsSubtitle: "Lo que tenemos preparado en las próximas semanas.",
     eventsCta: "Ver todos en Meetup",
     eventsEmpty: "Estamos preparando los próximos eventos. Síguenos en Meetup para no perderte nada.",
+    eventJoin: "Apuntarme",
     reasonsEyebrow: "Game Night",
     reasonsTitle: "5 razones para venir a una Game Night",
     reason1: "🎲 Disfruta de una enorme variedad de juegos (¡te enseñamos a jugar a todos!)",
@@ -229,6 +231,7 @@ const en: Dict = {
     eventsSubtitle: "What's coming up in the next few weeks.",
     eventsCta: "See all on Meetup",
     eventsEmpty: "We're planning the next events. Follow us on Meetup so you don't miss a thing.",
+    eventJoin: "RSVP",
     reasonsEyebrow: "Game Night",
     reasonsTitle: "5 reasons to join a Game Night",
     reason1: "🎲 Enjoy a huge variety of games (we explain how to play all of them!)",
@@ -333,6 +336,7 @@ const ca: Dict = {
     eventsSubtitle: "El que tenim preparat per a les pròximes setmanes.",
     eventsCta: "Veure'ls tots a Meetup",
     eventsEmpty: "Estem preparant els pròxims esdeveniments. Segueix-nos a Meetup per no perdre't res.",
+    eventJoin: "Apuntar-m'hi",
     reasonsEyebrow: "Game Night",
     reasonsTitle: "5 raons per venir a una Game Night",
     reason1: "🎲 Gaudeix d'una enorme varietat de jocs (us ensenyem a jugar-hi a tots!)",

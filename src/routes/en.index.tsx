@@ -1,7 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { HomePage } from "@/components/pages/HomePage";
+import { getMeetupEvents } from "@/server/meetup.functions";
 
 export const Route = createFileRoute("/en/")({
+  loader: () => getMeetupEvents(),
+  staleTime: 15 * 60 * 1000,
   head: () => ({
     meta: [
       { title: "KLEFF — Board games in Barcelona" },

@@ -1,4 +1,4 @@
-import { Link } from "@tanstack/react-router";
+import { Link, useRouterState } from "@tanstack/react-router";
 import {
   ArrowRight,
   Sparkles,
@@ -12,9 +12,31 @@ import heroImg from "@/assets/hero-gamenight.jpg";
 import tableImg from "@/assets/hero-table.jpg";
 import { useI18n } from "@/i18n/I18nProvider";
 import { SiteLayout } from "@/components/site/SiteLayout";
+import type { MeetupEvent } from "@/server/meetup.functions";
+
+type MeetupLoaderData = {
+  events: MeetupEvent[];
+  error: string | null;
+  cachedAt: number;
+};
+
+function useMeetupEvents(): MeetupLoaderData {
+  // Index routes (es/en/ca) load events. Pick the match that has events data.
+  const data = useRouterState({
+    select: (s) => {
+      for (const m of s.matches) {
+        const ld: any = m.loaderData;
+        if (ld && Array.isArray(ld.events)) return ld as MeetupLoaderData;
+      }
+      return null;
+    },
+  });
+  return data ?? { events: [], error: null, cachedAt: 0 };
+}
 
 export function HomePage() {
-  const { t, href } = useI18n();
+  const { t, href, locale } = useI18n();
+  const { events } = useMeetupEvents();
 
   const reasons = [t.home.reason1, t.home.reason2, t.home.reason3, t.home.reason4, t.home.reason5];
 
@@ -61,7 +83,7 @@ export function HomePage() {
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <a
-                href="https://www.meetup.com/kleff/"
+                href="https://www.meetup.com/es-es/kleff-bcn/"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="group inline-flex items-center gap-2 rounded-full bg-coral text-primary-foreground px-6 py-3.5 text-sm font-semibold shadow-glow hover:shadow-warm hover:-translate-y-0.5 transition-all"
@@ -158,7 +180,7 @@ export function HomePage() {
               </p>
             </div>
             <a
-              href="https://www.meetup.com/kleff/"
+              href="https://www.meetup.com/es-es/kleff-bcn/events/"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 text-sm font-semibold text-coral-deep hover:text-coral transition-colors"
@@ -168,12 +190,22 @@ export function HomePage() {
             </a>
           </div>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            {/* Placeholder events; later wired to Meetup API */}
-            <EventCardPlaceholder index={0} />
-            <EventCardPlaceholder index={1} />
-            <EventCardPlaceholder index={2} />
-          </div>
+          {events.length === 0 ? (
+            <div className="rounded-2xl border border-border/60 bg-card p-10 text-center text-muted-foreground">
+              {t.home.eventsEmpty}
+            </div>
+          ) : (
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {events.slice(0, 6).map((e) => (
+                <EventCard
+                  key={e.id}
+                  event={e}
+                  locale={locale}
+                  joinLabel={t.home.eventJoin}
+                />
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
@@ -247,7 +279,7 @@ export function HomePage() {
             </p>
             <div className="relative mt-8 flex flex-wrap justify-center gap-3">
               <a
-                href="https://www.meetup.com/kleff/"
+                href="https://www.meetup.com/es-es/kleff-bcn/"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 rounded-full bg-cream px-6 py-3.5 text-sm font-semibold text-coral-deep hover:bg-cream-deep transition-colors"
@@ -283,35 +315,101 @@ function PillarCard({ icon, title, body }: { icon: React.ReactNode; title: strin
   );
 }
 
-function EventCardPlaceholder({ index }: { index: number }) {
-  // Visual placeholder until Meetup API is wired (next iteration)
-  const labels = [
-    { day: "JUE", num: "—", title: "Game Night", time: "19:00 – 23:00" },
-    { day: "SÁB", num: "—", title: "Torneo Catan", time: "17:00 – 21:00" },
-    { day: "MIÉ", num: "—", title: "Blood on the Clocktower", time: "19:30 – 22:30" },
-  ];
-  const e = labels[index];
+function EventCard({
+  event,
+  locale,
+  joinLabel,
+}: {
+  event: MeetupEvent;
+  locale: string;
+  joinLabel: string;
+}) {
+  const date = new Date(event.dateTime);
+  const localeTag = locale === "ca" ? "ca-ES" : locale === "en" ? "en-GB" : "es-ES";
+  const day = date.toLocaleDateString(localeTag, {
+    weekday: "short",
+    timeZone: "Europe/Madrid",
+  });
+  const num = date.toLocaleDateString(localeTag, {
+    day: "numeric",
+    timeZone: "Europe/Madrid",
+  });
+  const month = date.toLocaleDateString(localeTag, {
+    month: "short",
+    timeZone: "Europe/Madrid",
+  });
+  const time = date.toLocaleTimeString(localeTag, {
+    hour: "2-digit",
+    minute: "2-digit",
+    timeZone: "Europe/Madrid",
+  });
+  const endTime = event.endTime
+    ? new Date(event.endTime).toLocaleTimeString(localeTag, {
+        hour: "2-digit",
+        minute: "2-digit",
+        timeZone: "Europe/Madrid",
+      })
+    : null;
+  const fullDate = date.toLocaleDateString(localeTag, {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+    timeZone: "Europe/Madrid",
+  });
+
   return (
-    <a
-      href="https://www.meetup.com/kleff/"
-      target="_blank"
-      rel="noopener noreferrer"
-      className="group flex gap-5 p-5 rounded-2xl bg-card border border-border/60 hover:border-coral/40 hover:shadow-soft transition-all"
-    >
-      <div className="shrink-0 w-16 h-16 rounded-xl bg-coral/10 flex flex-col items-center justify-center text-coral-deep">
-        <span className="text-[10px] font-bold uppercase tracking-wider">{e.day}</span>
-        <span className="text-2xl font-display font-bold leading-none">{e.num}</span>
-      </div>
-      <div className="flex-1 min-w-0">
-        <div className="text-xs font-semibold text-coral-deep uppercase tracking-wider">
-          L'Estació de França
+    <article className="group flex flex-col rounded-3xl bg-card border border-border/60 overflow-hidden hover:border-coral/40 hover:shadow-warm hover:-translate-y-1 transition-all duration-300">
+      <div className="relative aspect-[16/10] bg-coral-soft/30 overflow-hidden">
+        {event.imageUrl ? (
+          <img
+            src={event.imageUrl}
+            alt={event.title}
+            loading="lazy"
+            className="absolute inset-0 h-full w-full object-cover group-hover:scale-105 transition-transform duration-500"
+          />
+        ) : (
+          <div className="absolute inset-0 bg-gradient-coral" />
+        )}
+        <div className="absolute top-4 left-4 bg-cream/95 backdrop-blur rounded-xl px-3 py-2 shadow-soft text-center min-w-[64px]">
+          <div className="text-[10px] font-bold uppercase tracking-wider text-coral-deep leading-none">
+            {day.replace(".", "")}
+          </div>
+          <div className="text-2xl font-display font-bold text-foreground leading-none mt-1">
+            {num}
+          </div>
+          <div className="text-[10px] font-semibold uppercase text-muted-foreground leading-none mt-1">
+            {month.replace(".", "")}
+          </div>
         </div>
-        <h3 className="mt-1 text-lg font-display font-semibold text-foreground line-clamp-1">
-          {e.title}
-        </h3>
-        <p className="mt-1 text-sm text-muted-foreground">{e.time}</p>
       </div>
-      <ArrowRight className="h-5 w-5 text-muted-foreground group-hover:text-coral group-hover:translate-x-1 transition-all self-center" />
-    </a>
+      <div className="flex-1 flex flex-col p-5">
+        <time dateTime={event.dateTime} className="text-xs font-semibold text-coral-deep uppercase tracking-wider">
+          {fullDate} · {time}
+          {endTime ? ` – ${endTime}` : ""}
+        </time>
+        <h3 className="mt-2 text-lg font-display font-semibold text-foreground line-clamp-2 leading-snug">
+          {event.title}
+        </h3>
+        {(event.venueName || event.venueAddress) && (
+          <p className="mt-2 text-sm text-muted-foreground flex items-start gap-1.5">
+            <MapPin className="h-4 w-4 shrink-0 mt-0.5 text-coral" />
+            <span className="line-clamp-2">
+              {event.venueName}
+              {event.venueAddress ? ` · ${event.venueAddress}` : ""}
+            </span>
+          </p>
+        )}
+        <a
+          href={event.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mt-4 inline-flex items-center justify-center gap-2 rounded-full bg-coral text-primary-foreground px-5 py-2.5 text-sm font-semibold hover:bg-coral-deep transition-colors self-start"
+        >
+          {joinLabel}
+          <ArrowRight className="h-4 w-4" />
+        </a>
+      </div>
+    </article>
   );
 }
