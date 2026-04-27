@@ -41,8 +41,16 @@ type Dict = {
     statGames: string;
     statHours: string;
     statGrowth: string;
+    statMembers: string;
+    statUpcoming: string;
+    statRating: string;
     joinTitle: string;
     joinSubtitle: string;
+    testimonialsEyebrow: string;
+    testimonialsTitle: string;
+    testimonialsSubtitle: string;
+    testimonialsMeetup: string;
+    testimonialsGoogle: string;
   };
   footer: {
     tagline: string;
