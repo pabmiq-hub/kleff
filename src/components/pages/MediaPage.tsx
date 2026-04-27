@@ -198,7 +198,6 @@ export function MediaPage() {
                   title="Instagram @kleff.bcn"
                   src="https://cdn.lightwidget.com/widgets/cb1a85d80c34e95c2e57c4f8b6eecaba.html"
                   scrolling="no"
-                  allowtransparency={true as unknown as boolean}
                   className="lightwidget-widget w-full"
                   style={{
                     width: "100%",
