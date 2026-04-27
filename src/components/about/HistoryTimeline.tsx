@@ -137,77 +137,9 @@ const MILESTONES: Milestone[] = [
   },
 ];
 
-/**
- * Connectors between cards in the grid. Three types:
- *  - "right":   horizontal arrow from card N to card N+1 in the same row
- *  - "wrap":    long curved arrow from end of row to start of next row
- *  - "down":    short vertical arrow (used in 1-col mobile and 2-col tablet)
- *
- * The connectors are absolutely positioned inside the timeline grid using
- * `grid-column` / `grid-row`, so they always sit between the two cards they
- * link, regardless of card height.
- */
-
-type ConnectorKind = "right" | "wrap" | "down";
-
-type Connector = {
-  index: number; // index of the source card (0-based)
-  kind: ConnectorKind;
-  // grid coords (1-based) for the source card
-  col: number;
-  row: number;
-};
-
-function buildConnectors(total: number, cols: number): Connector[] {
-  const connectors: Connector[] = [];
-  for (let i = 0; i < total - 1; i++) {
-    const col = (i % cols) + 1;
-    const row = Math.floor(i / cols) + 1;
-    const isRowEnd = col === cols;
-    if (cols === 1) {
-      connectors.push({ index: i, kind: "down", col, row });
-    } else if (isRowEnd) {
-      connectors.push({ index: i, kind: "wrap", col, row });
-    } else {
-      connectors.push({ index: i, kind: "right", col, row });
-    }
-  }
-  return connectors;
-}
-
-function useColumns(): number {
-  const [cols, setCols] = useState<number>(() => {
-    if (typeof window === "undefined") return 3;
-    if (window.matchMedia("(min-width: 1024px)").matches) return 3;
-    if (window.matchMedia("(min-width: 640px)").matches) return 2;
-    return 1;
-  });
-
-  useEffect(() => {
-    const lg = window.matchMedia("(min-width: 1024px)");
-    const md = window.matchMedia("(min-width: 640px)");
-    const update = () => {
-      if (lg.matches) setCols(3);
-      else if (md.matches) setCols(2);
-      else setCols(1);
-    };
-    update();
-    lg.addEventListener("change", update);
-    md.addEventListener("change", update);
-    return () => {
-      lg.removeEventListener("change", update);
-      md.removeEventListener("change", update);
-    };
-  }, []);
-
-  return cols;
-}
-
 export function HistoryTimeline({ locale }: { locale: Locale }) {
   const ref = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(false);
-  const cols = useColumns();
-  const connectors = buildConnectors(MILESTONES.length, cols);
 
   useEffect(() => {
     const node = ref.current;
@@ -229,22 +161,25 @@ export function HistoryTimeline({ locale }: { locale: Locale }) {
   }, []);
 
   return (
-    <div
-      ref={ref}
-      className={`snake-timeline ${visible ? "is-visible" : ""}`}
-      data-cols={cols}
-    >
+    <div ref={ref} className={`snake-timeline ${visible ? "is-visible" : ""}`}>
       {MILESTONES.map((m, i) => {
-        const delay = i * 180;
+        const delay = i * 120;
+        // In a 3-col grid: card at column (i % 3) + 1, row floor(i/3) + 1
+        // Determine arrow type to next card:
+        //   - if not last in row (col 1 or 2): arrow points right →
+        //   - if last in row (col 3) and not last card: arrow points down ↓ to next row's col 3, then bend left to col 1
+        //   - last card: no arrow
+        const col = (i % 3) + 1;
+        const isLast = i === MILESTONES.length - 1;
+        const isRowEnd = col === 3;
+        const showArrowRight = !isLast && !isRowEnd;
+        const showArrowWrap = !isLast && isRowEnd;
+
         return (
           <article
             key={m.year}
             className="snake-card"
-            style={{
-              ["--reveal-delay" as string]: `${delay}ms`,
-              gridColumn: `${(i % cols) + 1} / span 1`,
-              gridRow: `${Math.floor(i / cols) * 2 + 1} / span 1`,
-            }}
+            style={{ ["--reveal-delay" as string]: `${delay}ms` }}
           >
             <span className="snake-step" aria-label={`Paso ${i + 1}`}>{i + 1}</span>
             <span className="snake-emoji" aria-hidden>{m.emoji}</span>
@@ -255,153 +190,79 @@ export function HistoryTimeline({ locale }: { locale: Locale }) {
             <p className="mt-2 text-sm text-foreground/75 leading-relaxed">
               {m.body[locale]}
             </p>
+
+            {/* RIGHT arrow → (between cards in same row, desktop only) */}
+            {showArrowRight && (
+              <svg
+                className="snake-arrow snake-arrow-right"
+                viewBox="0 0 60 24"
+                preserveAspectRatio="none"
+                aria-hidden
+              >
+                <path
+                  d="M 2 12 L 48 12"
+                  stroke="var(--coral-deep)"
+                  strokeWidth="5"
+                  strokeLinecap="round"
+                  fill="none"
+                />
+                <path
+                  d="M 42 4 L 56 12 L 42 20 Z"
+                  fill="var(--coral-deep)"
+                />
+              </svg>
+            )}
+
+            {/* WRAP arrow ↓← (from end of row to start of next row, desktop only) */}
+            {showArrowWrap && (
+              <svg
+                className="snake-arrow snake-arrow-wrap"
+                viewBox="0 0 1200 100"
+                preserveAspectRatio="none"
+                aria-hidden
+              >
+                {/* Path: starts below this card (right column),
+                    bends down, sweeps all the way left, bends up,
+                    ends with arrowhead pointing down to next row's first card */}
+                <path
+                  d="M 1175 5 C 1195 25, 1195 70, 1140 75 L 60 75 C 5 70, 5 25, 25 90"
+                  stroke="var(--coral-deep)"
+                  strokeWidth="5"
+                  strokeLinecap="round"
+                  fill="none"
+                />
+                {/* Arrowhead pointing down at the end of the path */}
+                <path
+                  d="M 17 82 L 25 96 L 33 82 Z"
+                  fill="var(--coral-deep)"
+                />
+              </svg>
+            )}
+
+            {/* DOWN arrow ↓ for tablet/mobile (between rows, when not desktop layout) */}
+            {!isLast && (
+              <svg
+                className="snake-arrow snake-arrow-down-mobile"
+                viewBox="0 0 24 60"
+                preserveAspectRatio="none"
+                aria-hidden
+              >
+                <path
+                  d="M 12 4 L 12 44"
+                  stroke="var(--coral-deep)"
+                  strokeWidth="5"
+                  strokeLinecap="round"
+                  fill="none"
+                />
+                <path
+                  d="M 4 38 L 12 54 L 20 38 Z"
+                  fill="var(--coral-deep)"
+                />
+              </svg>
+            )}
           </article>
         );
       })}
-
-      {/* Connectors */}
-      {connectors.map((c) => (
-        <Connector key={`c-${c.index}`} c={c} cols={cols} delay={c.index * 180 + 350} />
-      ))}
-    </div>
-  );
-}
-
-function Connector({
-  c,
-  cols,
-  delay,
-}: {
-  c: Connector;
-  cols: number;
-  delay: number;
-}) {
-  const stepLabel = c.index + 2; // arrow points to step (i+2)
-
-  if (c.kind === "right") {
-    // Sits in the gap between this card and the next one (same row)
-    return (
-      <div
-        className="snake-arrow snake-arrow-right"
-        style={{
-          gridColumn: `${c.col} / span 2`,
-          gridRow: `${(c.row - 1) * 2 + 1} / span 1`,
-          ["--arrow-delay" as string]: `${delay}ms`,
-        }}
-        aria-hidden
-      >
-        <svg viewBox="0 0 100 24" preserveAspectRatio="none" className="snake-arrow-svg">
-          <defs>
-            <marker
-              id={`arrowhead-r-${c.index}`}
-              viewBox="0 0 10 10"
-              refX="8"
-              refY="5"
-              markerWidth="5"
-              markerHeight="5"
-              orient="auto-start-reverse"
-            >
-              <path d="M0,0 L10,5 L0,10 z" fill="var(--coral-deep)" />
-            </marker>
-          </defs>
-          <path
-            d="M 2 12 L 92 12"
-            fill="none"
-            stroke="var(--coral-deep)"
-            strokeWidth="3.5"
-            strokeLinecap="round"
-            strokeDasharray="6 7"
-            markerEnd={`url(#arrowhead-r-${c.index})`}
-            className="snake-arrow-path"
-          />
-        </svg>
-        <span className="snake-arrow-num">{stepLabel}</span>
-      </div>
-    );
-  }
-
-  if (c.kind === "down") {
-    // Single column: short vertical arrow between rows
-    return (
-      <div
-        className="snake-arrow snake-arrow-down"
-        style={{
-          gridColumn: `1 / span 1`,
-          gridRow: `${(c.row - 1) * 2 + 2} / span 1`,
-          ["--arrow-delay" as string]: `${delay}ms`,
-        }}
-        aria-hidden
-      >
-        <svg viewBox="0 0 24 60" preserveAspectRatio="none" className="snake-arrow-svg">
-          <defs>
-            <marker
-              id={`arrowhead-d-${c.index}`}
-              viewBox="0 0 10 10"
-              refX="8"
-              refY="5"
-              markerWidth="5"
-              markerHeight="5"
-              orient="auto-start-reverse"
-            >
-              <path d="M0,0 L10,5 L0,10 z" fill="var(--coral-deep)" />
-            </marker>
-          </defs>
-          <path
-            d="M 12 4 L 12 52"
-            fill="none"
-            stroke="var(--coral-deep)"
-            strokeWidth="3.5"
-            strokeLinecap="round"
-            strokeDasharray="6 7"
-            markerEnd={`url(#arrowhead-d-${c.index})`}
-            className="snake-arrow-path"
-          />
-        </svg>
-        <span className="snake-arrow-num">{stepLabel}</span>
-      </div>
-    );
-  }
-
-  // wrap: end of row → start of next row (1→2→3 then 4→5→6)
-  // Spans the entire row width and the gap between rows.
-  return (
-    <div
-      className="snake-arrow snake-arrow-wrap"
-      style={{
-        gridColumn: `1 / span ${cols}`,
-        gridRow: `${(c.row - 1) * 2 + 2} / span 1`,
-        ["--arrow-delay" as string]: `${delay}ms`,
-      }}
-      aria-hidden
-    >
-      <svg viewBox="0 0 600 80" preserveAspectRatio="none" className="snake-arrow-svg">
-        <defs>
-          <marker
-            id={`arrowhead-w-${c.index}`}
-            viewBox="0 0 10 10"
-            refX="8"
-            refY="5"
-            markerWidth="5"
-            markerHeight="5"
-            orient="auto-start-reverse"
-          >
-            <path d="M0,0 L10,5 L0,10 z" fill="var(--coral-deep)" />
-          </marker>
-        </defs>
-        {/* Curve: starts at right edge (below card 3), goes down-and-around,
-            sweeps across to the left edge, ends pointing down to card 4 */}
-        <path
-          d="M 580 0 C 600 40, 600 70, 540 72 L 60 72 C 0 70, 0 40, 20 80"
-          fill="none"
-          stroke="var(--coral-deep)"
-          strokeWidth="3.5"
-          strokeLinecap="round"
-          strokeDasharray="6 7"
-          markerEnd={`url(#arrowhead-w-${c.index})`}
-          className="snake-arrow-path"
-        />
-      </svg>
-      <span className="snake-arrow-num snake-arrow-num-wrap">{stepLabel}</span>
     </div>
   );
 }

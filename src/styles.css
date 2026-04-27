@@ -286,11 +286,8 @@
 /* === Snake Timeline === */
 .snake-timeline {
   display: grid;
-  /* Mobile: 1 col cards + 1 connector row in between (auto-sized) */
   grid-template-columns: 1fr;
-  grid-auto-rows: auto;
-  column-gap: 1.5rem;
-  row-gap: 0;
+  gap: 0;
   position: relative;
   padding: 1rem 0;
 }
@@ -302,8 +299,10 @@
 }
 @media (min-width: 1024px) {
   .snake-timeline {
+    /* 3-column strict layout: row 1 = cards 1,2,3; row 2 = cards 4,5,6; row 3 = cards 7,8,9 */
     grid-template-columns: repeat(3, 1fr);
-    column-gap: 3rem;
+    column-gap: 5rem;       /* extra room for the right-arrow svg */
+    row-gap: 7rem;          /* extra room for the wrap-arrow svg */
   }
 }
 
@@ -322,6 +321,11 @@
     transform 0.55s cubic-bezier(0.34, 1.56, 0.64, 1),
     box-shadow 0.2s ease;
   transition-delay: var(--reveal-delay, 0ms);
+}
+@media (min-width: 1024px) {
+  .snake-card {
+    margin-bottom: 0;
+  }
 }
 .snake-card:nth-child(even) {
   transform: translateY(24px) rotate(1.5deg);
@@ -409,99 +413,57 @@
 }
 
 /* === Snake arrows (connectors between cards) === */
+/* All arrows are absolutely positioned relative to the source card.
+   No animations: they appear immediately and stay solid. */
 .snake-arrow {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity 0.5s ease;
-  transition-delay: var(--arrow-delay, 400ms);
-}
-.snake-timeline.is-visible .snake-arrow {
-  opacity: 1;
-}
-.snake-arrow-svg {
-  width: 100%;
-  height: 100%;
-  overflow: visible;
-}
-
-/* Animate the dashed path drawing in */
-.snake-arrow-path {
-  stroke-dashoffset: 0;
-  animation: dash-flow 1.6s linear infinite;
-}
-@keyframes dash-flow {
-  to { stroke-dashoffset: -26; }
-}
-
-/* Tiny coral pill with the destination step number */
-.snake-arrow-num {
   position: absolute;
-  background: var(--cream);
-  color: var(--coral-deep);
-  border: 2px solid var(--coral-deep);
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: 0.78rem;
-  line-height: 1;
-  padding: 0.18rem 0.45rem;
-  border-radius: 999px;
-  white-space: nowrap;
-  box-shadow: 2px 2px 0 0 var(--ink);
-}
-.snake-arrow-num::before {
-  content: "→";
-  margin-right: 0.2rem;
-  font-weight: 900;
+  pointer-events: none;
+  display: block;
+  overflow: visible;
+  z-index: 2;
 }
 
-/* Right arrow: short row between cards */
+/* RIGHT arrow → between two cards in the same row (desktop only) */
 .snake-arrow-right {
-  height: 2.5rem;
-  align-self: center;
-  /* Position itself in the vertical center of the card row above */
-  margin-top: -3rem;
-  margin-bottom: 0.5rem;
-}
-.snake-arrow-right .snake-arrow-num {
+  display: none;
   top: 50%;
-  left: 50%;
-  transform: translate(-50%, -150%);
+  left: 100%;
+  width: 5rem;
+  height: 2rem;
+  transform: translateY(-50%);
+}
+@media (min-width: 1024px) {
+  .snake-arrow-right { display: block; }
 }
 
-/* Down arrow (mobile single column) */
-.snake-arrow-down {
-  height: 3.5rem;
-  width: 100%;
-  display: flex;
-  justify-content: center;
-}
-.snake-arrow-down .snake-arrow-svg {
-  width: 2rem;
-  height: 100%;
-}
-.snake-arrow-down .snake-arrow-num {
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-}
-
-/* Wrap arrow: full width, links last card of a row to first of next */
+/* WRAP arrow ↓← long arrow from end of row 1 to start of row 2 (desktop only)
+   The card at column 3 owns this arrow. It must reach across the full grid,
+   so we make it as wide as the entire timeline. */
 .snake-arrow-wrap {
-  height: 4.5rem;
-  width: 100%;
-  margin: 0.25rem 0 0.5rem;
+  display: none;
+  top: calc(100% + 0.5rem);
+  /* Stretch from the right edge of card 3 all the way back to the left edge of card 1 */
+  right: 0;
+  width: calc(300% + 10rem); /* 3 cards (100% each) + 2 gaps of 5rem */
+  height: 6rem;
 }
-.snake-arrow-wrap .snake-arrow-num-wrap {
-  bottom: 0.2rem;
-  left: 1.5rem;
-  transform: none;
+@media (min-width: 1024px) {
+  .snake-arrow-wrap { display: block; }
 }
 
-/* Wiggle animation for tactile elements (kept above) */
+/* DOWN arrow ↓ for mobile (1 col) and tablet (2 col) — between cards stacking vertically */
+.snake-arrow-down-mobile {
+  display: block;
+  top: calc(100% + 0.25rem);
+  left: 50%;
+  width: 1.5rem;
+  height: 3.5rem;
+  transform: translateX(-50%);
+}
+@media (min-width: 1024px) {
+  .snake-arrow-down-mobile { display: none; }
+}
+
 
 /* === Newspaper aesthetic === */
 @utility font-newspaper {
