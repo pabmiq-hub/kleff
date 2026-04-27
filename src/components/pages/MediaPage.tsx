@@ -192,23 +192,65 @@ export function MediaPage() {
             </div>
 
             <div className="lg:col-span-7">
-              {/* Embedded Instagram feed via LightWidget (free, no auth required) */}
-              <div className="relative bg-card border-4 border-ink rounded-3xl shadow-tactile-lg overflow-hidden">
-                <iframe
-                  title="Instagram @kleff.bcn"
-                  src="https://cdn.lightwidget.com/widgets/cb1a85d80c34e95c2e57c4f8b6eecaba.html"
-                  scrolling="no"
-                  className="lightwidget-widget w-full"
-                  style={{
-                    width: "100%",
-                    border: 0,
-                    overflow: "hidden",
-                    minHeight: 480,
-                  }}
-                />
-              </div>
+              {/* Decorative Instagram preview tiles — link to the real account */}
+              <a
+                href="https://www.instagram.com/kleff.bcn/"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Abrir Instagram @kleff.bcn"
+                className="group block"
+              >
+                <div className="relative bg-card border-4 border-ink rounded-3xl shadow-tactile-lg overflow-hidden p-5 sm:p-6">
+                  {/* header bar imitating IG */}
+                  <div className="flex items-center gap-3 mb-5">
+                    <div className="h-11 w-11 rounded-full bg-gradient-coral border-2 border-ink flex items-center justify-center text-cream">
+                      <Instagram className="h-5 w-5" />
+                    </div>
+                    <div className="leading-tight">
+                      <p className="text-sm font-bold text-foreground">@kleff.bcn</p>
+                      <p className="text-[11px] text-foreground/60">
+                        {locale === "en"
+                          ? "Barcelona · Board games community"
+                          : locale === "ca"
+                            ? "Barcelona · Comunitat de jocs de taula"
+                            : "Barcelona · Comunidad de juegos de mesa"}
+                      </p>
+                    </div>
+                    <span className="ml-auto inline-flex items-center gap-1.5 text-xs font-bold text-coral-deep group-hover:gap-2.5 transition-all">
+                      <ExternalLink className="h-3.5 w-3.5" />
+                      {t.media.instagramCta}
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-3 gap-2 sm:gap-3">
+                    {[
+                      "from-coral via-coral-deep to-mustard",
+                      "from-mustard via-coral to-coral-deep",
+                      "from-ink via-coral-deep to-coral",
+                      "from-coral-deep via-mustard to-coral",
+                      "from-coral via-ink to-coral-deep",
+                      "from-mustard via-coral-deep to-ink",
+                    ].map((grad, i) => (
+                      <div
+                        key={i}
+                        className={`relative aspect-square rounded-xl border-2 border-ink overflow-hidden bg-gradient-to-br ${grad} flex items-center justify-center`}
+                      >
+                        <Instagram className="h-7 w-7 text-cream/90 opacity-90" />
+                        <span className="absolute bottom-1.5 right-2 text-[9px] font-mono uppercase tracking-widest text-cream/70">
+                          IG
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </a>
               <p className="mt-3 text-center text-xs font-mono uppercase tracking-widest text-foreground/40">
-                Live feed · @kleff.bcn
+                @kleff.bcn ·{" "}
+                {locale === "en"
+                  ? "Tap to open Instagram"
+                  : locale === "ca"
+                    ? "Toca per obrir Instagram"
+                    : "Toca para abrir Instagram"}
               </p>
             </div>
           </div>
