@@ -173,7 +173,7 @@ export function HistoryTimeline({ locale }: { locale: Locale }) {
             className="snake-card"
             style={{ ["--reveal-delay" as string]: `${delay}ms` }}
           >
-            <span className="snake-dot" aria-hidden />
+            <span className="snake-step" aria-label={`Paso ${i + 1}`}>{i + 1}</span>
             <span className="snake-emoji" aria-hidden>{m.emoji}</span>
             <span className="snake-year">{m.year}</span>
             <h3 className="mt-3 font-display font-bold text-lg leading-tight text-foreground">

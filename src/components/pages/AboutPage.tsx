@@ -5,6 +5,118 @@ import { useI18n } from "@/i18n/I18nProvider";
 import { SiteLayout } from "@/components/site/SiteLayout";
 import { HistoryTimeline } from "@/components/about/HistoryTimeline";
 
+type TeamMember = {
+  name: string;
+  role: { es: string; en: string; ca: string };
+  bio: { es: string; en: string; ca: string };
+  favoriteGame: string;
+  color: { es: string; en: string; ca: string };
+  luckyNumber: string;
+  photo?: string;
+  emoji: string;
+};
+
+const TEAM: TeamMember[] = [
+  {
+    name: "Pau",
+    role: { es: "Fundador & Estrategia", en: "Founder & Strategy", ca: "Fundador & Estratègia" },
+    bio: {
+      es: "Responsable de buscar colaboraciones y crear nuevos eventos. Toma las decisiones estratégicas. De día abogado de startups; de noche, una buena peli con pizza margherita.",
+      en: "In charge of partnerships and new events. Makes strategic decisions. Lawyer for startups by day; movies and margherita pizza by night.",
+      ca: "Responsable de col·laboracions i nous esdeveniments. Pren les decisions estratègiques. De dia advocat de startups; de nit, una bona pel·li amb pizza margherita.",
+    },
+    favoriteGame: "King of Tokyo",
+    color: { es: "Azul", en: "Blue", ca: "Blau" },
+    luckyNumber: "7",
+    emoji: "🎲",
+    photo: "https://kleff.es/wp-content/uploads/2025/08/Pau_kleff-225x300.jpg",
+  },
+  {
+    name: "Pol",
+    role: { es: "Arquitecto de juegos", en: "Game Architect", ca: "Arquitecte de jocs" },
+    bio: {
+      es: "Mantiene el orden en la colección de juegos de KLEFF. Se describe como arquitecto de juegos, colaborando con autores y editores para perfeccionar reglas.",
+      en: "Keeps order in KLEFF's game collection. Self-described as a game architect, collaborating with designers and publishers to refine rules.",
+      ca: "Manté l'ordre en la col·lecció de jocs. Es descriu com arquitecte de jocs, col·laborant amb autors i editors per perfeccionar regles.",
+    },
+    favoriteGame: "Splendor",
+    color: { es: "Azul", en: "Blue", ca: "Blau" },
+    luckyNumber: "7",
+    emoji: "🏗️",
+    photo: "https://kleff.es/wp-content/uploads/2025/08/Pol_kleff-225x300.jpg",
+  },
+  {
+    name: "Beatriz",
+    role: { es: "Eventos & retos", en: "Events & challenges", ca: "Esdeveniments & reptes" },
+    bio: {
+      es: "Apoya en la organización de eventos. Maestra de educación infantil con corazón de jugona. Le encanta diseñar retos, enseñar jugando y vivir aventuras.",
+      en: "Supports event organization. Early-years teacher with a gamer's heart. Loves designing challenges, teaching through play and new adventures.",
+      ca: "Dona suport a l'organització d'esdeveniments. Mestra d'educació infantil amb cor de jugona. Li encanta dissenyar reptes i ensenyar jugant.",
+    },
+    favoriteGame: "Stone Age",
+    color: { es: "Me gusta variar", en: "Likes to mix it up", ca: "M'agrada variar" },
+    luckyNumber: "2",
+    emoji: "🎯",
+    photo: "https://kleff.es/wp-content/uploads/2025/09/Beatriz-225x300.jpg",
+  },
+  {
+    name: "Jordi",
+    role: { es: "Equipo KLEFF", en: "KLEFF crew", ca: "Equip KLEFF" },
+    bio: {
+      es: "Próximamente. Estamos preparando su ficha completa.",
+      en: "Coming soon. We're putting together their full profile.",
+      ca: "Pròximament. Estem preparant la seva fitxa completa.",
+    },
+    favoriteGame: "—",
+    color: { es: "—", en: "—", ca: "—" },
+    luckyNumber: "—",
+    emoji: "🎮",
+    photo: "https://kleff.es/wp-content/uploads/2025/09/Jordi-225x300.jpg",
+  },
+  {
+    name: "Karen",
+    role: { es: "Equipo KLEFF", en: "KLEFF crew", ca: "Equip KLEFF" },
+    bio: {
+      es: "Próximamente. Estamos preparando su ficha completa.",
+      en: "Coming soon. We're putting together their full profile.",
+      ca: "Pròximament. Estem preparant la seva fitxa completa.",
+    },
+    favoriteGame: "—",
+    color: { es: "—", en: "—", ca: "—" },
+    luckyNumber: "—",
+    emoji: "✨",
+    photo: "https://kleff.es/wp-content/uploads/2025/09/Karen-225x300.jpg",
+  },
+  {
+    name: "Leiro",
+    role: { es: "Equipo KLEFF", en: "KLEFF crew", ca: "Equip KLEFF" },
+    bio: {
+      es: "Próximamente. Estamos preparando su ficha completa.",
+      en: "Coming soon. We're putting together their full profile.",
+      ca: "Pròximament. Estem preparant la seva fitxa completa.",
+    },
+    favoriteGame: "—",
+    color: { es: "—", en: "—", ca: "—" },
+    luckyNumber: "—",
+    emoji: "🃏",
+    photo: "https://kleff.es/wp-content/uploads/2025/09/Leiro-225x300.jpg",
+  },
+  {
+    name: "Eric",
+    role: { es: "Equipo KLEFF", en: "KLEFF crew", ca: "Equip KLEFF" },
+    bio: {
+      es: "Próximamente. Estamos preparando su ficha completa.",
+      en: "Coming soon. We're putting together their full profile.",
+      ca: "Pròximament. Estem preparant la seva fitxa completa.",
+    },
+    favoriteGame: "—",
+    color: { es: "—", en: "—", ca: "—" },
+    luckyNumber: "—",
+    emoji: "🎲",
+    photo: "https://kleff.es/wp-content/uploads/2025/09/Eric-225x300.jpg",
+  },
+];
+
 export function AboutPage() {
   const { t, locale, href } = useI18n();
 
@@ -33,27 +145,20 @@ export function AboutPage() {
             <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-display font-semibold leading-[1.02] tracking-normal text-foreground break-words">
               {locale === "en" ? (
                 <>
-                  De una <span className="marker-coral">depresión</span> a la mayor comunidad
-                  de juegos de mesa de Barcelona.
+                  Born in <span className="marker-coral">Barcelona</span>, fueled by board games.
                 </>
               ) : locale === "ca" ? (
                 <>
-                  D'una <span className="marker-coral">depressió</span> a la comunitat de jocs
-                  de taula més gran de Barcelona.
+                  Nascuts a <span className="marker-coral">Barcelona</span>, mouts pels jocs de taula.
                 </>
               ) : (
                 <>
-                  De una <span className="marker-coral">depresión</span> a la comunidad de
-                  juegos de mesa más grande de Barcelona.
+                  Nacidos en <span className="marker-coral">Barcelona</span>, movidos por los juegos de mesa.
                 </>
               )}
             </h1>
             <p className="mt-6 text-lg sm:text-xl text-foreground/75 max-w-2xl leading-relaxed">
-              {locale === "en"
-                ? "Six years, one purpose: turning tables into meeting points. This is the story of how KLEFF came to be."
-                : locale === "ca"
-                  ? "Sis anys, un propòsit: convertir taules en punts de trobada. Aquesta és la història de com va néixer KLEFF."
-                  : "Seis años, un propósito: convertir mesas en puntos de encuentro. Esta es la historia de cómo nació KLEFF."}
+              {t.about.intro}
             </p>
           </div>
           <div className="lg:col-span-5">
@@ -87,6 +192,38 @@ export function AboutPage() {
         </div>
       </section>
 
+      {/* MISSION */}
+      <section className="py-20 md:py-24 bg-ink text-cream relative overflow-hidden">
+        <div className="absolute top-10 left-10 size-16 bg-coral border-4 border-cream/20 rounded-2xl hidden md:block" />
+        <div className="absolute bottom-10 right-20 size-20 bg-coral/40 border-4 border-cream/20 rounded-full hidden md:block" />
+        <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 relative">
+          <span className="inline-block bg-coral text-cream px-3 py-1 text-xs font-bold uppercase tracking-widest mb-6">
+            {locale === "en" ? "Mission" : locale === "ca" ? "Missió" : "Misión"}
+          </span>
+          <h2 className="text-4xl sm:text-5xl lg:text-6xl font-display font-semibold text-cream leading-tight">
+            {locale === "en"
+              ? "A meeting point for young people from anywhere in the world."
+              : locale === "ca"
+                ? "Un punt de trobada per a joves d'arreu del món."
+                : "Un punto de encuentro para jóvenes de todo el mundo."}
+          </h2>
+          <p className="mt-8 text-lg sm:text-xl text-cream/85 max-w-3xl leading-relaxed">
+            {locale === "en"
+              ? "It doesn't matter where you're from or how old you are. The only thing needed to be a #kleffer is wanting to make new friends and learn new ways to have fun. Board games are the perfect excuse we use to connect people and break the ice."
+              : locale === "ca"
+                ? "No importa d'on vinguis ni quants anys tinguis. L'únic necessari per ser un #kleffer és voler fer nous amics i aprendre noves formes de divertir-se. Els jocs de taula són l'excusa perfecta per connectar persones i trencar el gel."
+                : "No importa de dónde vengas ni cuántos años tengas. Lo único necesario para ser un #kleffer es querer hacer nuevos amigos y aprender nuevas formas de divertirse. Los juegos de mesa son la excusa perfecta que usamos para conectar a las personas y romper el hielo."}
+          </p>
+          <p className="mt-6 text-lg font-display font-semibold text-coral">
+            {locale === "en"
+              ? "Dare to be part of our community?"
+              : locale === "ca"
+                ? "T'atreveixes a formar part de la nostra comunitat?"
+                : "¿Te atreves a ser parte de nuestra comunidad?"}
+          </p>
+        </div>
+      </section>
+
       {/* TIMELINE */}
       <section className="py-20 md:py-28 bg-cream-deep/40 border-b-2 border-ink/10">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -105,28 +242,51 @@ export function AboutPage() {
             </h2>
             <p className="mt-4 text-lg text-foreground/70">
               {locale === "en"
-                ? "Scroll to follow the story →"
+                ? "Follow the numbers to walk through KLEFF's story →"
                 : locale === "ca"
-                  ? "Desplaça't per seguir la història →"
-                  : "Desliza para seguir la historia →"}
+                  ? "Segueix els números per recórrer la història de KLEFF →"
+                  : "Sigue los números para recorrer la historia de KLEFF →"}
             </p>
           </div>
         </div>
-        <div className="mx-auto max-w-7xl mt-10">
+        <div className="mx-auto max-w-7xl mt-10 px-4 sm:px-6 lg:px-8">
           <HistoryTimeline locale={locale} />
+        </div>
+      </section>
+
+      {/* TEAM — Flip cards */}
+      <section className="py-20 md:py-28 bg-cream border-b-2 border-ink/10">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="max-w-2xl">
+            <span className="inline-block stamp-coral text-xs font-bold uppercase tracking-widest mb-4">
+              #TeamKLEFF
+            </span>
+            <h2 className="text-4xl sm:text-5xl lg:text-6xl font-display font-semibold text-foreground leading-tight">
+              {t.about.teamTitle}
+            </h2>
+            <p className="mt-4 text-lg text-foreground/70">
+              {t.about.teamSubtitle}{" "}
+              <span className="hidden md:inline text-foreground/55">
+                ({locale === "en" ? "hover or tap to flip" : locale === "ca" ? "passa-hi o toca per girar" : "pasa el ratón o toca para voltear"})
+              </span>
+            </p>
+          </div>
+          <div className="mt-12 grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {TEAM.map((m) => (
+              <TeamFlipCard key={m.name} member={m} locale={locale} />
+            ))}
+          </div>
         </div>
       </section>
 
       {/* MANIFESTO — what drives us */}
       <section className="relative py-24 md:py-32 bg-coral text-cream overflow-hidden">
-        {/* Decorative giant quote */}
         <div className="absolute -top-12 left-4 sm:left-12 text-[14rem] sm:text-[20rem] font-display leading-none text-cream/15 select-none pointer-events-none">
           “
         </div>
         <div className="absolute -bottom-32 right-4 sm:right-12 text-[14rem] sm:text-[20rem] font-display leading-none text-cream/15 select-none pointer-events-none rotate-180">
           “
         </div>
-        {/* Floating dice */}
         <div className="absolute top-12 right-10 size-16 bg-cream/10 border-2 border-cream/30 rounded-2xl rotate-12 hidden md:block animate-wiggle" />
         <div className="absolute bottom-16 left-16 size-12 bg-cream/10 border-2 border-cream/30 rounded-full hidden md:block animate-wiggle" style={{ animationDelay: "1s" }} />
 
@@ -187,5 +347,86 @@ export function AboutPage() {
         </div>
       </section>
     </SiteLayout>
+  );
+}
+
+/* === SUB-COMPONENTS === */
+
+function TeamFlipCard({
+  member,
+  locale,
+}: {
+  member: TeamMember;
+  locale: "es" | "en" | "ca";
+}) {
+  return (
+    <div className="flip-card aspect-[3/4] rounded-3xl">
+      <div className="flip-card-inner">
+        {/* FRONT */}
+        <div className="flip-card-face bg-card border-2 border-ink shadow-tactile-sm rounded-3xl flex flex-col">
+          <div className="relative flex-1 bg-gradient-to-br from-coral/20 via-cream-deep/50 to-coral/30 overflow-hidden">
+            {member.photo ? (
+              <img
+                src={member.photo}
+                alt={member.name}
+                loading="lazy"
+                className="absolute inset-0 h-full w-full object-cover"
+              />
+            ) : (
+              <div className="absolute inset-0 flex items-center justify-center text-7xl">
+                {member.emoji}
+              </div>
+            )}
+            <div className="absolute top-3 right-3 size-10 bg-cream border-2 border-ink rounded-full flex items-center justify-center text-xl shadow-tactile-sm">
+              {member.emoji}
+            </div>
+          </div>
+          <div className="p-4 border-t-2 border-ink bg-cream">
+            <div className="text-xl font-display font-bold text-foreground">{member.name}</div>
+            <div className="text-xs font-bold uppercase tracking-wider text-coral-deep mt-0.5">
+              {member.role[locale]}
+            </div>
+          </div>
+        </div>
+
+        {/* BACK */}
+        <div className="flip-card-back flip-card-face bg-ink text-cream border-2 border-ink shadow-tactile-sm rounded-3xl p-5 flex flex-col">
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="text-xl font-display font-bold text-cream">{member.name}</div>
+              <div className="text-[10px] font-bold uppercase tracking-wider text-coral mt-0.5">
+                {member.role[locale]}
+              </div>
+            </div>
+            <div className="size-10 bg-coral border-2 border-cream rounded-full flex items-center justify-center text-lg">
+              {member.emoji}
+            </div>
+          </div>
+          <p className="mt-4 text-sm text-cream/85 leading-relaxed flex-1 line-clamp-6">
+            {member.bio[locale]}
+          </p>
+          <dl className="mt-4 pt-4 border-t border-cream/15 space-y-1.5 text-xs">
+            <div className="flex justify-between gap-2">
+              <dt className="text-cream/60 uppercase tracking-wider font-bold">
+                {locale === "en" ? "Fav game" : locale === "ca" ? "Joc preferit" : "Juego fav."}
+              </dt>
+              <dd className="text-cream font-display font-semibold text-right">{member.favoriteGame}</dd>
+            </div>
+            <div className="flex justify-between gap-2">
+              <dt className="text-cream/60 uppercase tracking-wider font-bold">
+                {locale === "en" ? "Color" : "Color"}
+              </dt>
+              <dd className="text-cream font-display font-semibold text-right">{member.color[locale]}</dd>
+            </div>
+            <div className="flex justify-between gap-2">
+              <dt className="text-cream/60 uppercase tracking-wider font-bold">
+                {locale === "en" ? "Lucky #" : locale === "ca" ? "Núm. sort" : "Núm. suerte"}
+              </dt>
+              <dd className="text-cream font-display font-semibold text-right tabular-nums">{member.luckyNumber}</dd>
+            </div>
+          </dl>
+        </div>
+      </div>
+    </div>
   );
 }
