@@ -16,11 +16,12 @@ import heroImg from "@/assets/hero-gamenight.jpg";
 import tableImg from "@/assets/hero-table.jpg";
 import { useI18n } from "@/i18n/I18nProvider";
 import { SiteLayout } from "@/components/site/SiteLayout";
-import type { MeetupEvent, MeetupGroupStats } from "@/server/meetup.functions";
+import type { MeetupEvent, MeetupGroupStats, GoogleStats } from "@/server/meetup.functions";
 
 type MeetupLoaderData = {
   events: MeetupEvent[];
   stats: MeetupGroupStats;
+  google: GoogleStats;
   error: string | null;
   cachedAt: number;
 };
@@ -39,6 +40,7 @@ function useMeetupData(): MeetupLoaderData {
     data ?? {
       events: [],
       stats: { memberCount: null, upcomingEventCount: null, rating: null, ratingCount: null },
+      google: { rating: null, ratingCount: null },
       error: null,
       cachedAt: 0,
     }
