@@ -21,11 +21,13 @@ export function SiteHeader() {
   const logicalPath = stripLocaleFromPath(pathname);
 
   return (
-    <header className="sticky top-0 z-50 backdrop-blur-md bg-cream/80 border-b border-border/60">
+    <header className="sticky top-0 z-50 backdrop-blur-md bg-cream/85 border-b-2 border-ink/15">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex items-center justify-between h-16 md:h-20">
-        <Link to={href("/")} className="flex items-center gap-2">
-          <img src={logo} alt="KLEFF" className="h-9 md:h-10 w-auto rounded-md" />
-          <span className="sr-only">KLEFF</span>
+        <Link to={href("/")} className="flex items-center gap-3 group">
+          <div className="size-10 bg-coral rounded-xl rotate-3 border-2 border-ink flex items-center justify-center font-display font-bold text-cream shadow-tactile-sm group-hover:rotate-6 transition-transform overflow-hidden">
+            <img src={logo} alt="" className="h-9 w-9 object-contain" />
+          </div>
+          <span className="font-display font-bold text-xl tracking-tight text-foreground">KLEFF</span>
         </Link>
 
         <nav className="hidden md:flex items-center gap-1">
@@ -34,8 +36,8 @@ export function SiteHeader() {
               key={item.path}
               to={href(item.path)}
               activeOptions={{ exact: item.path === "/" }}
-              activeProps={{ className: "text-coral-deep" }}
-              className="px-4 py-2 rounded-full text-sm font-medium text-foreground/80 hover:text-coral-deep hover:bg-primary-soft/40 transition-colors"
+              activeProps={{ className: "text-coral-deep underline decoration-coral decoration-2 underline-offset-4" }}
+              className="px-4 py-2 text-sm font-semibold text-foreground/80 hover:text-coral-deep transition-colors"
             >
               {item.label}
             </Link>
@@ -48,7 +50,7 @@ export function SiteHeader() {
             href="https://www.meetup.com/es-es/kleff-bcn/"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center justify-center rounded-full bg-coral text-primary-foreground px-5 py-2.5 text-sm font-semibold shadow-glow hover:shadow-warm hover:-translate-y-0.5 transition-all"
+            className="inline-flex items-center justify-center rounded-xl bg-coral text-cream border-2 border-ink px-5 py-2.5 text-sm font-bold shadow-tactile-sm hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all"
           >
             {t.nav.join}
           </a>
@@ -104,14 +106,14 @@ function LanguageSwitcher({
   buildHref: (l: Locale) => string;
 }) {
   return (
-    <div className="flex items-center gap-1 rounded-full bg-cream-deep/70 p-1">
+    <div className="flex items-center gap-1 rounded-xl bg-card border-2 border-ink p-1 shadow-tactile-sm">
       {LOCALES.map((l) => (
         <Link
           key={l}
           to={buildHref(l)}
-          className={`px-2.5 py-1 rounded-full text-xs font-semibold transition-colors ${
+          className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-colors ${
             current === l
-              ? "bg-coral text-primary-foreground shadow-soft"
+              ? "bg-ink text-cream"
               : "text-foreground/60 hover:text-foreground"
           }`}
         >
