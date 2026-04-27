@@ -13,7 +13,15 @@ export type MeetupEvent = {
   going: number | null;
 };
 
-type CacheEntry = { at: number; data: MeetupEvent[] };
+export type MeetupGroupStats = {
+  memberCount: number | null;
+  upcomingEventCount: number | null;
+  rating: number | null;
+  ratingCount: number | null;
+};
+
+type CacheData = { events: MeetupEvent[]; stats: MeetupGroupStats };
+type CacheEntry = { at: number; data: CacheData };
 const CACHE_TTL_MS = 15 * 60 * 1000; // 15 min
 let cache: CacheEntry | null = null;
 
