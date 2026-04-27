@@ -16,11 +16,12 @@ import heroImg from "@/assets/hero-gamenight.jpg";
 import tableImg from "@/assets/hero-table.jpg";
 import { useI18n } from "@/i18n/I18nProvider";
 import { SiteLayout } from "@/components/site/SiteLayout";
-import type { MeetupEvent, MeetupGroupStats } from "@/server/meetup.functions";
+import type { MeetupEvent, MeetupGroupStats, GoogleStats } from "@/server/meetup.functions";
 
 type MeetupLoaderData = {
   events: MeetupEvent[];
   stats: MeetupGroupStats;
+  google: GoogleStats;
   error: string | null;
   cachedAt: number;
 };
@@ -39,6 +40,7 @@ function useMeetupData(): MeetupLoaderData {
     data ?? {
       events: [],
       stats: { memberCount: null, upcomingEventCount: null, rating: null, ratingCount: null },
+      google: { rating: null, ratingCount: null },
       error: null,
       cachedAt: 0,
     }
@@ -263,7 +265,7 @@ function formatNumber(n: number, locale: string) {
 
 export function HomePage() {
   const { t, href, locale } = useI18n();
-  const { events, stats } = useMeetupData();
+  const { events, stats, google } = useMeetupData();
 
   const reasons = [t.home.reason1, t.home.reason2, t.home.reason3, t.home.reason4, t.home.reason5];
 
@@ -271,6 +273,8 @@ export function HomePage() {
   const upcoming = stats.upcomingEventCount ?? events.length;
   const rating = stats.rating ?? 4.8;
   const ratingCount = stats.ratingCount ?? 2700;
+  const googleRating = google.rating ?? 5.0;
+  const googleRatingCount = google.ratingCount;
 
   return (
     <SiteLayout>
@@ -478,9 +482,11 @@ export function HomePage() {
             <div className="inline-flex items-center gap-2 bg-card border-2 border-ink rounded-2xl px-4 py-2 shadow-tactile-sm">
               <Star className="h-4 w-4 text-coral fill-coral" />
               <span className="font-display font-bold text-lg tabular-nums">
-                {locale === "en" ? "5.0" : "5,0"}
+                {googleRating.toFixed(1).replace(".", locale === "en" ? "." : ",")}
               </span>
-              <span className="text-xs font-bold uppercase tracking-wider text-foreground/60">Google</span>
+              <span className="text-xs font-bold uppercase tracking-wider text-foreground/60">
+                Google{googleRatingCount != null ? ` · ${formatNumber(googleRatingCount, locale)}` : ""}
+              </span>
             </div>
           </div>
 
