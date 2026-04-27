@@ -187,3 +187,69 @@
 @utility shadow-glow {
   box-shadow: var(--shadow-glow);
 }
+
+/* === Tactile Game Board utilities === */
+
+@utility shadow-tactile {
+  box-shadow: 6px 6px 0 0 var(--ink);
+}
+@utility shadow-tactile-sm {
+  box-shadow: 3px 3px 0 0 var(--ink);
+}
+@utility shadow-tactile-lg {
+  box-shadow: 8px 8px 0 0 var(--ink);
+}
+
+/* Marker highlight (replaces italics to emphasize words) */
+@utility marker-coral {
+  background-image: linear-gradient(120deg, var(--coral) 0%, var(--coral) 100%);
+  background-repeat: no-repeat;
+  background-size: 100% 0.32em;
+  background-position: 0 88%;
+  padding: 0 0.1em;
+  display: inline;
+}
+@utility marker-soft {
+  background-image: linear-gradient(120deg, var(--primary-soft) 0%, var(--primary-soft) 100%);
+  background-repeat: no-repeat;
+  background-size: 100% 0.42em;
+  background-position: 0 82%;
+  padding: 0 0.15em;
+  display: inline;
+}
+
+/* Solid stamps (replace italics/cursivas) */
+@utility stamp-ink {
+  background-color: var(--ink);
+  color: var(--cream);
+  padding: 0 0.35em;
+  display: inline-block;
+}
+@utility stamp-coral {
+  background-color: var(--coral);
+  color: var(--cream);
+  padding: 0 0.35em;
+  display: inline-block;
+}
+
+/* Sticky tape effect for collage */
+@utility tape {
+  position: absolute;
+  height: 1.75rem;
+  width: 6rem;
+  background: oklch(0.95 0.12 95 / 0.55);
+  backdrop-filter: blur(1px);
+  border-left: 1px solid oklch(1 0 0 / 0.25);
+  border-right: 1px solid oklch(1 0 0 / 0.25);
+  pointer-events: none;
+}
+
+/* Wiggle animation for tactile elements */
+@keyframes wiggle {
+  0%, 100% { transform: rotate(-1deg); }
+  50% { transform: rotate(1deg); }
+}
+@utility animate-wiggle {
+  animation: wiggle 4s ease-in-out infinite;
+}
+
