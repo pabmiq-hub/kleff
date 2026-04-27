@@ -1,7 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { AboutPage } from "@/components/pages/AboutPage";
+import { getOgPreviews } from "@/server/og.functions";
+import { PRESS_LINKS } from "@/data/press";
 
 export const Route = createFileRoute("/about")({
+  loader: () => getOgPreviews({ data: { urls: PRESS_LINKS.map((p) => p.url) } }),
+  staleTime: 24 * 60 * 60 * 1000,
   head: () => ({
     meta: [
       { title: "Quiénes somos — KLEFF" },

@@ -13,7 +13,15 @@ export type MeetupEvent = {
   going: number | null;
 };
 
-type CacheEntry = { at: number; data: MeetupEvent[] };
+export type MeetupGroupStats = {
+  memberCount: number | null;
+  upcomingEventCount: number | null;
+  rating: number | null;
+  ratingCount: number | null;
+};
+
+type CacheData = { events: MeetupEvent[]; stats: MeetupGroupStats };
+type CacheEntry = { at: number; data: CacheData };
 const CACHE_TTL_MS = 15 * 60 * 1000; // 15 min
 let cache: CacheEntry | null = null;
 
@@ -62,7 +70,7 @@ function refToObj(state: Record<string, any>, ref: any): any {
   return ref;
 }
 
-async function fetchAndParse(): Promise<MeetupEvent[]> {
+async function fetchAndParse(): Promise<CacheData> {
   const res = await fetch(GROUP_URL, {
     headers: {
       "User-Agent":
@@ -73,7 +81,50 @@ async function fetchAndParse(): Promise<MeetupEvent[]> {
   if (!res.ok) throw new Error(`Meetup responded ${res.status}`);
   const html = await res.text();
   const state = extractApolloState(html);
-  if (!state) return [];
+
+  // Parse group stats from HTML (visible text fallback) and Apollo state when available
+  const stats: MeetupGroupStats = {
+    memberCount: null,
+    upcomingEventCount: null,
+    rating: null,
+    ratingCount: null,
+  };
+
+  // Try to find member count from Apollo state first
+  if (state) {
+    for (const key of Object.keys(state)) {
+      if (key.startsWith("Group:")) {
+        const g: any = state[key];
+        if (g) {
+          if (typeof g.memberships === "number") stats.memberCount = g.memberships;
+          if (typeof g.totalMemberships === "number") stats.memberCount = g.totalMemberships;
+          if (typeof g.upcomingEvents?.count === "number") stats.upcomingEventCount = g.upcomingEvents.count;
+          if (typeof g.averageRating === "number") stats.rating = g.averageRating;
+          if (typeof g.totalRatings === "number") stats.ratingCount = g.totalRatings;
+        }
+      }
+    }
+  }
+
+  // HTML fallback for member count: "13.071 miembros" / "13,071 members" / "13071 membres"
+  if (stats.memberCount == null) {
+    const m = html.match(/([\d.,\s]{2,12})\s*(?:miembros|members|membres)/i);
+    if (m) {
+      const n = parseInt(m[1].replace(/[.,\s]/g, ""), 10);
+      if (!Number.isNaN(n)) stats.memberCount = n;
+    }
+  }
+  // Rating fallback: "4.8" before "valoraciones/ratings/valoracions"
+  if (stats.rating == null) {
+    const m = html.match(/(\d\.\d)\s*•\s*\[?(\d[\d.,]*)\s*(?:valoraciones|ratings|valoracions)/i);
+    if (m) {
+      stats.rating = parseFloat(m[1]);
+      const n = parseInt(m[2].replace(/[.,]/g, ""), 10);
+      if (!Number.isNaN(n)) stats.ratingCount = n;
+    }
+  }
+
+  if (!state) return { events: [], stats };
 
   const events: MeetupEvent[] = [];
   const now = Date.now();
@@ -104,34 +155,43 @@ async function fetchAndParse(): Promise<MeetupEvent[]> {
     });
   }
   events.sort((a, b) => new Date(a.dateTime).getTime() - new Date(b.dateTime).getTime());
-  return events;
+  if (stats.upcomingEventCount == null) stats.upcomingEventCount = events.length;
+  return { events, stats };
 }
 
 export const getMeetupEvents = createServerFn({ method: "GET" }).handler(
-  async (): Promise<{ events: MeetupEvent[]; error: string | null; cachedAt: number }> => {
+  async (): Promise<{
+    events: MeetupEvent[];
+    stats: MeetupGroupStats;
+    error: string | null;
+    cachedAt: number;
+  }> => {
     const now = Date.now();
     if (cache && now - cache.at < CACHE_TTL_MS) {
-      return { events: cache.data, error: null, cachedAt: cache.at };
+      return { events: cache.data.events, stats: cache.data.stats, error: null, cachedAt: cache.at };
     }
     try {
       const data = await fetchAndParse();
       cache = { at: now, data };
-      return { events: data, error: null, cachedAt: now };
+      return { events: data.events, stats: data.stats, error: null, cachedAt: now };
     } catch (err) {
       console.error("[meetup] fetch failed:", err);
       // Serve stale if we have it
       if (cache) {
         return {
-          events: cache.data,
+          events: cache.data.events,
+          stats: cache.data.stats,
           error: "stale",
           cachedAt: cache.at,
         };
       }
       return {
         events: [],
+        stats: { memberCount: null, upcomingEventCount: null, rating: null, ratingCount: null },
         error: err instanceof Error ? err.message : "unknown",
         cachedAt: now,
       };
     }
   },
 );
+

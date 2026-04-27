@@ -41,8 +41,16 @@ type Dict = {
     statGames: string;
     statHours: string;
     statGrowth: string;
+    statMembers: string;
+    statUpcoming: string;
+    statRating: string;
     joinTitle: string;
     joinSubtitle: string;
+    testimonialsEyebrow: string;
+    testimonialsTitle: string;
+    testimonialsSubtitle: string;
+    testimonialsMeetup: string;
+    testimonialsGoogle: string;
   };
   footer: {
     tagline: string;
@@ -139,8 +147,16 @@ const es: Dict = {
     statGames: "Juegos de mesa disponibles",
     statHours: "Horas de juego cada semana",
     statGrowth: "Crecimiento anual",
+    statMembers: "Kleffers en Meetup",
+    statUpcoming: "Próximos eventos",
+    statRating: "Valoración media",
     joinTitle: "¿Listo para tu primera partida?",
     joinSubtitle: "Únete a nuestra comunidad y reserva tu sitio en el próximo evento.",
+    testimonialsEyebrow: "Lo que dicen los kleffers",
+    testimonialsTitle: "Más de 2.700 valoraciones lo avalan",
+    testimonialsSubtitle: "4,8 ★ en Meetup · 5,0 ★ en Google. Estas son algunas voces de la comunidad.",
+    testimonialsMeetup: "Ver todas en Meetup",
+    testimonialsGoogle: "Ver en Google Maps",
   },
   footer: {
     tagline: "Conectamos personas a través de los juegos de mesa.",
@@ -244,8 +260,16 @@ const en: Dict = {
     statGames: "Board games available",
     statHours: "Hours of play every week",
     statGrowth: "Annual growth",
+    statMembers: "Kleffers on Meetup",
+    statUpcoming: "Upcoming events",
+    statRating: "Average rating",
     joinTitle: "Ready for your first game?",
     joinSubtitle: "Join our community and grab your spot at the next event.",
+    testimonialsEyebrow: "What kleffers say",
+    testimonialsTitle: "Backed by 2,700+ ratings",
+    testimonialsSubtitle: "4.8 ★ on Meetup · 5.0 ★ on Google. A few voices from the community.",
+    testimonialsMeetup: "Read all on Meetup",
+    testimonialsGoogle: "See on Google Maps",
   },
   footer: {
     tagline: "Connecting people through board games.",
@@ -349,8 +373,16 @@ const ca: Dict = {
     statGames: "Jocs de taula disponibles",
     statHours: "Hores de joc cada setmana",
     statGrowth: "Creixement anual",
+    statMembers: "Kleffers a Meetup",
+    statUpcoming: "Pròxims esdeveniments",
+    statRating: "Valoració mitjana",
     joinTitle: "A punt per a la teva primera partida?",
     joinSubtitle: "Uneix-te a la nostra comunitat i reserva el teu lloc al pròxim esdeveniment.",
+    testimonialsEyebrow: "El que diuen els kleffers",
+    testimonialsTitle: "Més de 2.700 valoracions ho avalen",
+    testimonialsSubtitle: "4,8 ★ a Meetup · 5,0 ★ a Google. Aquestes són algunes veus de la comunitat.",
+    testimonialsMeetup: "Veure-les totes a Meetup",
+    testimonialsGoogle: "Veure a Google Maps",
   },
   footer: {
     tagline: "Connectem persones a través dels jocs de taula.",
