@@ -271,12 +271,19 @@ function parseGoogleStats(html: string): GoogleStats {
   }
   if (out.ratingCount == null) {
     const m = html.match(
-      /([\d.,]+)\s*(?:reviews?|reseñas|ressenyes|opiniones|opinions)/i,
+      /(\d[\d.,]*)\s*(?:reviews?|reseñas|ressenyes|opiniones|opinions)/i,
     );
     if (m) {
       const n = parseInt(m[1].replace(/[.,]/g, ""), 10);
       if (!Number.isNaN(n)) out.ratingCount = n;
     }
+  }
+  // Pattern from Google search: "5.0[170 opiniones" / "5,0 · 170 reseñas"
+  if (out.rating == null && out.ratingCount != null) {
+    const m = html.match(
+      /(\d[.,]\d)[^\d]{0,8}\d[\d.,]*\s*(?:reviews?|reseñas|opiniones)/i,
+    );
+    if (m) out.rating = parseFloat(m[1].replace(",", "."));
   }
   // Pattern: "★★★★★ · 4,9 (1.234)" common in Google's meta description
   if (out.rating == null || out.ratingCount == null) {
