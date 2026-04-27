@@ -302,7 +302,7 @@ async function fetchAll(): Promise<CacheData> {
   const [eventsHtml, homeHtml, googleHtml] = await Promise.all([
     fetchHtml(GROUP_URL),
     fetchHtml(GROUP_HOME_URL),
-    fetchHtml(GOOGLE_PLACE_URL),
+    fetchHtml(GOOGLE_SEARCH_URL),
   ]);
 
   let events: MeetupEvent[] = [];
