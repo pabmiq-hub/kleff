@@ -1,26 +1,21 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { HomePage } from "@/components/pages/HomePage";
 
 export const Route = createFileRoute("/")({
-  component: Index,
+  head: () => ({
+    meta: [
+      { title: "KLEFF — Juegos de mesa en Barcelona" },
+      {
+        name: "description",
+        content:
+          "La comunidad de juegos de mesa más grande de Europa. Game Nights cada semana en l'Estació de França. +300 juegos, ambiente inclusivo y multilingüe.",
+      },
+      { property: "og:title", content: "KLEFF — Juegos de mesa en Barcelona" },
+      {
+        property: "og:description",
+        content: "La comunidad de juegos de mesa más grande de Europa. Únete a nuestras Game Nights cada semana.",
+      },
+    ],
+  }),
+  component: HomePage,
 });
-
-// IMPORTANT: Replace this placeholder. For sites with multiple pages (About, Services, Contact, etc.),
-// create separate route files (about.tsx, services.tsx, contact.tsx) — don't put all pages in this file.
-function PlaceholderIndex() {
-  return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
-    </div>
-  );
-}
-
-function Index() {
-  return <PlaceholderIndex />;
-}
