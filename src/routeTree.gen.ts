@@ -14,7 +14,13 @@ import { Route as BlogRouteImport } from './routes/blog'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as EnIndexRouteImport } from './routes/en.index'
+import { Route as CaIndexRouteImport } from './routes/ca.index'
+import { Route as EnContactRouteImport } from './routes/en.contact'
+import { Route as EnBlogRouteImport } from './routes/en.blog'
 import { Route as EnAboutRouteImport } from './routes/en.about'
+import { Route as CaContactRouteImport } from './routes/ca.contact'
+import { Route as CaBlogRouteImport } from './routes/ca.blog'
+import { Route as CaAboutRouteImport } from './routes/ca.about'
 
 const ContactRoute = ContactRouteImport.update({
   id: '/contact',
@@ -41,9 +47,39 @@ const EnIndexRoute = EnIndexRouteImport.update({
   path: '/en/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CaIndexRoute = CaIndexRouteImport.update({
+  id: '/ca/',
+  path: '/ca/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EnContactRoute = EnContactRouteImport.update({
+  id: '/en/contact',
+  path: '/en/contact',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EnBlogRoute = EnBlogRouteImport.update({
+  id: '/en/blog',
+  path: '/en/blog',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const EnAboutRoute = EnAboutRouteImport.update({
   id: '/en/about',
   path: '/en/about',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CaContactRoute = CaContactRouteImport.update({
+  id: '/ca/contact',
+  path: '/ca/contact',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CaBlogRoute = CaBlogRouteImport.update({
+  id: '/ca/blog',
+  path: '/ca/blog',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CaAboutRoute = CaAboutRouteImport.update({
+  id: '/ca/about',
+  path: '/ca/about',
   getParentRoute: () => rootRouteImport,
 } as any)
 
@@ -52,7 +88,13 @@ export interface FileRoutesByFullPath {
   '/about': typeof AboutRoute
   '/blog': typeof BlogRoute
   '/contact': typeof ContactRoute
+  '/ca/about': typeof CaAboutRoute
+  '/ca/blog': typeof CaBlogRoute
+  '/ca/contact': typeof CaContactRoute
   '/en/about': typeof EnAboutRoute
+  '/en/blog': typeof EnBlogRoute
+  '/en/contact': typeof EnContactRoute
+  '/ca/': typeof CaIndexRoute
   '/en/': typeof EnIndexRoute
 }
 export interface FileRoutesByTo {
@@ -60,7 +102,13 @@ export interface FileRoutesByTo {
   '/about': typeof AboutRoute
   '/blog': typeof BlogRoute
   '/contact': typeof ContactRoute
+  '/ca/about': typeof CaAboutRoute
+  '/ca/blog': typeof CaBlogRoute
+  '/ca/contact': typeof CaContactRoute
   '/en/about': typeof EnAboutRoute
+  '/en/blog': typeof EnBlogRoute
+  '/en/contact': typeof EnContactRoute
+  '/ca': typeof CaIndexRoute
   '/en': typeof EnIndexRoute
 }
 export interface FileRoutesById {
@@ -69,15 +117,58 @@ export interface FileRoutesById {
   '/about': typeof AboutRoute
   '/blog': typeof BlogRoute
   '/contact': typeof ContactRoute
+  '/ca/about': typeof CaAboutRoute
+  '/ca/blog': typeof CaBlogRoute
+  '/ca/contact': typeof CaContactRoute
   '/en/about': typeof EnAboutRoute
+  '/en/blog': typeof EnBlogRoute
+  '/en/contact': typeof EnContactRoute
+  '/ca/': typeof CaIndexRoute
   '/en/': typeof EnIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/about' | '/blog' | '/contact' | '/en/about' | '/en/'
+  fullPaths:
+    | '/'
+    | '/about'
+    | '/blog'
+    | '/contact'
+    | '/ca/about'
+    | '/ca/blog'
+    | '/ca/contact'
+    | '/en/about'
+    | '/en/blog'
+    | '/en/contact'
+    | '/ca/'
+    | '/en/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/about' | '/blog' | '/contact' | '/en/about' | '/en'
-  id: '__root__' | '/' | '/about' | '/blog' | '/contact' | '/en/about' | '/en/'
+  to:
+    | '/'
+    | '/about'
+    | '/blog'
+    | '/contact'
+    | '/ca/about'
+    | '/ca/blog'
+    | '/ca/contact'
+    | '/en/about'
+    | '/en/blog'
+    | '/en/contact'
+    | '/ca'
+    | '/en'
+  id:
+    | '__root__'
+    | '/'
+    | '/about'
+    | '/blog'
+    | '/contact'
+    | '/ca/about'
+    | '/ca/blog'
+    | '/ca/contact'
+    | '/en/about'
+    | '/en/blog'
+    | '/en/contact'
+    | '/ca/'
+    | '/en/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -85,7 +176,13 @@ export interface RootRouteChildren {
   AboutRoute: typeof AboutRoute
   BlogRoute: typeof BlogRoute
   ContactRoute: typeof ContactRoute
+  CaAboutRoute: typeof CaAboutRoute
+  CaBlogRoute: typeof CaBlogRoute
+  CaContactRoute: typeof CaContactRoute
   EnAboutRoute: typeof EnAboutRoute
+  EnBlogRoute: typeof EnBlogRoute
+  EnContactRoute: typeof EnContactRoute
+  CaIndexRoute: typeof CaIndexRoute
   EnIndexRoute: typeof EnIndexRoute
 }
 
@@ -126,11 +223,53 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EnIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/ca/': {
+      id: '/ca/'
+      path: '/ca'
+      fullPath: '/ca/'
+      preLoaderRoute: typeof CaIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/en/contact': {
+      id: '/en/contact'
+      path: '/en/contact'
+      fullPath: '/en/contact'
+      preLoaderRoute: typeof EnContactRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/en/blog': {
+      id: '/en/blog'
+      path: '/en/blog'
+      fullPath: '/en/blog'
+      preLoaderRoute: typeof EnBlogRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/en/about': {
       id: '/en/about'
       path: '/en/about'
       fullPath: '/en/about'
       preLoaderRoute: typeof EnAboutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ca/contact': {
+      id: '/ca/contact'
+      path: '/ca/contact'
+      fullPath: '/ca/contact'
+      preLoaderRoute: typeof CaContactRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ca/blog': {
+      id: '/ca/blog'
+      path: '/ca/blog'
+      fullPath: '/ca/blog'
+      preLoaderRoute: typeof CaBlogRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ca/about': {
+      id: '/ca/about'
+      path: '/ca/about'
+      fullPath: '/ca/about'
+      preLoaderRoute: typeof CaAboutRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -141,7 +280,13 @@ const rootRouteChildren: RootRouteChildren = {
   AboutRoute: AboutRoute,
   BlogRoute: BlogRoute,
   ContactRoute: ContactRoute,
+  CaAboutRoute: CaAboutRoute,
+  CaBlogRoute: CaBlogRoute,
+  CaContactRoute: CaContactRoute,
   EnAboutRoute: EnAboutRoute,
+  EnBlogRoute: EnBlogRoute,
+  EnContactRoute: EnContactRoute,
+  CaIndexRoute: CaIndexRoute,
   EnIndexRoute: EnIndexRoute,
 }
 export const routeTree = rootRouteImport
