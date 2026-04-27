@@ -417,7 +417,8 @@
    We use SVG dashed lines via ::after positioned outside the card.
    Strategy: a card on the right edge of a row connects DOWN to the card
    below. Otherwise it connects HORIZONTALLY to its sibling. */
-.snake-card::after {
+.snake-card::after,
+.snake-card::before {
   content: "";
   position: absolute;
   pointer-events: none;
@@ -426,17 +427,19 @@
   opacity: 0;
   transition: opacity 0.6s ease;
   transition-delay: calc(var(--reveal-delay, 0ms) + 350ms);
+  z-index: 1;
 }
-.snake-timeline.is-visible .snake-card::after {
-  opacity: 0.7;
-}
+.snake-timeline.is-visible .snake-card::after { opacity: 0.75; }
+.snake-timeline.is-visible .snake-card::before { opacity: 0.95; }
+.snake-card:last-child::after,
+.snake-card:last-child::before { display: none; }
 
-/* Default (mobile, 1 col): vertical dashed line going down */
+/* Default (mobile, 1 col): vertical dashed line + arrow head pointing down */
 .snake-card::after {
   left: 50%;
   top: calc(100% + 4px);
   width: 3px;
-  height: calc(1.5rem - 8px);
+  height: calc(1.5rem - 14px);
   background-image: repeating-linear-gradient(
     to bottom,
     var(--ink) 0,
@@ -446,15 +449,26 @@
   );
   transform: translateX(-50%);
 }
-.snake-card:last-child::after { display: none; }
+.snake-card::before {
+  /* downward arrowhead */
+  left: 50%;
+  top: calc(100% + 1.4rem - 8px);
+  width: 14px;
+  height: 10px;
+  background-image: linear-gradient(to top right, transparent 48%, var(--ink) 48% 52%, transparent 52%),
+    linear-gradient(to top left, transparent 48%, var(--ink) 48% 52%, transparent 52%);
+  background-size: 50% 100%, 50% 100%;
+  background-position: left bottom, right bottom;
+  transform: translateX(-50%);
+}
 
-/* Tablet (2 cols): serpentine. Odd cards connect →, last in row connects ↓ */
+/* Tablet (2 cols): serpentine */
 @media (min-width: 640px) {
-  /* horizontal connector (between col 1 → col 2) */
+  /* horizontal connector (col 1 → col 2) */
   .snake-card:nth-child(2n+1):not(:last-child)::after {
     left: calc(100% + 4px);
     top: 50%;
-    width: calc(2.5rem - 8px);
+    width: calc(2.5rem - 14px);
     height: 3px;
     background-image: repeating-linear-gradient(
       to right,
@@ -465,12 +479,24 @@
     );
     transform: translateY(-50%);
   }
-  /* vertical wrap (col 2 → col 1 of next row, draw down on right side) */
+  .snake-card:nth-child(2n+1):not(:last-child)::before {
+    /* right-pointing arrow head */
+    left: calc(100% + 2.5rem - 12px);
+    top: 50%;
+    width: 10px;
+    height: 14px;
+    background-image: linear-gradient(to bottom right, transparent 48%, var(--ink) 48% 52%, transparent 52%),
+      linear-gradient(to top right, transparent 48%, var(--ink) 48% 52%, transparent 52%);
+    background-size: 100% 50%, 100% 50%;
+    background-position: left top, left bottom;
+    transform: translateY(-50%);
+  }
+  /* vertical wrap (col 2 → col 1 of next row) */
   .snake-card:nth-child(2n):not(:last-child)::after {
     left: 50%;
     top: calc(100% + 4px);
     width: 3px;
-    height: calc(2rem - 8px);
+    height: calc(2rem - 14px);
     background-image: repeating-linear-gradient(
       to bottom,
       var(--ink) 0,
@@ -480,24 +506,29 @@
     );
     transform: translateX(-50%);
   }
+  .snake-card:nth-child(2n):not(:last-child)::before {
+    left: 50%;
+    top: calc(100% + 2rem - 10px);
+    width: 14px;
+    height: 10px;
+    background-image: linear-gradient(to top right, transparent 48%, var(--ink) 48% 52%, transparent 52%),
+      linear-gradient(to top left, transparent 48%, var(--ink) 48% 52%, transparent 52%);
+    background-size: 50% 100%, 50% 100%;
+    background-position: left bottom, right bottom;
+    transform: translateX(-50%);
+  }
 }
 
-/* Desktop (3 cols): true serpentine
-   Row1: 1→2→3 (horizontal arrows on cards 1 and 2; card 3 wraps down)
-   Row2: visually 6,5,4 (because we reverse). To keep DOM order natural and
-   make it look serpentine, we use direction:rtl on even rows via grid
-   selector trick: nth-child(6n+4|5|6) get reversed order. Simpler:
-   we DON'T reorder DOM, we just draw connectors that match the visual flow
-    of left-to-right rows. The eye scans left→right on every row, so dashes
-   between consecutive cards are enough — no need for reversal. */
+/* Desktop (3 cols) */
 @media (min-width: 1024px) {
-  .snake-card::after { display: block; }
+  .snake-card::after,
+  .snake-card::before { display: block; }
 
-  /* Cards in positions 1,2,4,5,7,8 (not at right edge): horizontal → */
+  /* Cards at positions 1,2,4,5,7,8: horizontal → */
   .snake-card:not(:nth-child(3n)):not(:last-child)::after {
     left: calc(100% + 4px);
     top: 50%;
-    width: calc(3rem - 8px);
+    width: calc(3rem - 14px);
     height: 3px;
     background-image: repeating-linear-gradient(
       to right,
@@ -508,12 +539,23 @@
     );
     transform: translateY(-50%);
   }
-  /* Cards at positions 3,6 (right edge): vertical wrap ↓ */
+  .snake-card:not(:nth-child(3n)):not(:last-child)::before {
+    left: calc(100% + 3rem - 12px);
+    top: 50%;
+    width: 10px;
+    height: 14px;
+    background-image: linear-gradient(to bottom right, transparent 48%, var(--ink) 48% 52%, transparent 52%),
+      linear-gradient(to top right, transparent 48%, var(--ink) 48% 52%, transparent 52%);
+    background-size: 100% 50%, 100% 50%;
+    background-position: left top, left bottom;
+    transform: translateY(-50%);
+  }
+  /* Cards at positions 3,6: vertical wrap ↓ */
   .snake-card:nth-child(3n):not(:last-child)::after {
     left: 50%;
     top: calc(100% + 4px);
     width: 3px;
-    height: calc(2.5rem - 8px);
+    height: calc(2.5rem - 14px);
     background-image: repeating-linear-gradient(
       to bottom,
       var(--ink) 0,
@@ -521,6 +563,17 @@
       transparent 6px,
       transparent 12px
     );
+    transform: translateX(-50%);
+  }
+  .snake-card:nth-child(3n):not(:last-child)::before {
+    left: 50%;
+    top: calc(100% + 2.5rem - 10px);
+    width: 14px;
+    height: 10px;
+    background-image: linear-gradient(to top right, transparent 48%, var(--ink) 48% 52%, transparent 52%),
+      linear-gradient(to top left, transparent 48%, var(--ink) 48% 52%, transparent 52%);
+    background-size: 50% 100%, 50% 100%;
+    background-position: left bottom, right bottom;
     transform: translateX(-50%);
   }
 }
