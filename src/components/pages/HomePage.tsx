@@ -83,7 +83,7 @@ export function HomePage() {
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <a
-                href="https://www.meetup.com/kleff/"
+                href="https://www.meetup.com/es-es/kleff-bcn/"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="group inline-flex items-center gap-2 rounded-full bg-coral text-primary-foreground px-6 py-3.5 text-sm font-semibold shadow-glow hover:shadow-warm hover:-translate-y-0.5 transition-all"
@@ -279,7 +279,7 @@ export function HomePage() {
             </p>
             <div className="relative mt-8 flex flex-wrap justify-center gap-3">
               <a
-                href="https://www.meetup.com/kleff/"
+                href="https://www.meetup.com/es-es/kleff-bcn/"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 rounded-full bg-cream px-6 py-3.5 text-sm font-semibold text-coral-deep hover:bg-cream-deep transition-colors"

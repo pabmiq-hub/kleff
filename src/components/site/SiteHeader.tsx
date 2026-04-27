@@ -45,7 +45,7 @@ export function SiteHeader() {
         <div className="hidden md:flex items-center gap-4">
           <LanguageSwitcher current={locale} buildHref={(l) => hrefFor(logicalPath, l)} />
           <a
-            href="https://www.meetup.com/kleff/"
+            href="https://www.meetup.com/es-es/kleff-bcn/"
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center justify-center rounded-full bg-coral text-primary-foreground px-5 py-2.5 text-sm font-semibold shadow-glow hover:shadow-warm hover:-translate-y-0.5 transition-all"
@@ -81,7 +81,7 @@ export function SiteHeader() {
             <div className="flex items-center justify-between mt-4 pt-4 border-t border-border/60">
               <LanguageSwitcher current={locale} buildHref={(l) => hrefFor(logicalPath, l)} />
               <a
-                href="https://www.meetup.com/kleff/"
+                href="https://www.meetup.com/es-es/kleff-bcn/"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center justify-center rounded-full bg-coral text-primary-foreground px-5 py-2.5 text-sm font-semibold"

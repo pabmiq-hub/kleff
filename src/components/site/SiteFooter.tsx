@@ -60,7 +60,7 @@ export function SiteFooter() {
             </li>
             <li>
               <a
-                href="https://www.meetup.com/kleff/"
+                href="https://www.meetup.com/es-es/kleff-bcn/"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 hover:text-coral transition-colors"
