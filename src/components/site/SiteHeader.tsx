@@ -24,7 +24,7 @@ export function SiteHeader() {
     <header className="sticky top-0 z-50 backdrop-blur-md bg-cream/85 border-b-2 border-ink/15">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex items-center justify-between h-16 md:h-20">
         <Link to={href("/")} className="flex items-center gap-3 group">
-          <div className="size-10 bg-coral rounded-xl rotate-3 border-2 border-ink flex items-center justify-center font-display font-bold text-cream shadow-tactile-sm group-hover:rotate-6 transition-transform overflow-hidden">
+          <div className="size-10 bg-coral rounded-xl border-2 border-ink flex items-center justify-center font-display font-bold text-cream shadow-tactile-sm group-hover:scale-105 transition-transform overflow-hidden">
             <img src={logo} alt="" className="h-9 w-9 object-contain" />
           </div>
           <span className="font-display font-bold text-xl tracking-tight text-foreground">KLEFF</span>

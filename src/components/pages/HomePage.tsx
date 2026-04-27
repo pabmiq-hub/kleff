@@ -39,17 +39,13 @@ function PillarCard({
   icon,
   title,
   body,
-  rotation,
 }: {
   icon: React.ReactNode;
   title: string;
   body: string;
-  rotation: string;
 }) {
   return (
-    <div
-      className={`group relative bg-card p-7 border-2 border-ink rounded-3xl shadow-tactile hover:translate-x-[3px] hover:translate-y-[3px] hover:shadow-tactile-sm transition-all duration-200 ${rotation}`}
-    >
+    <div className="group relative bg-card p-7 border-2 border-ink rounded-3xl shadow-tactile hover:translate-x-[3px] hover:translate-y-[3px] hover:shadow-tactile-sm transition-all duration-200">
       <div className="h-14 w-14 rounded-2xl bg-coral text-cream border-2 border-ink flex items-center justify-center shadow-tactile-sm">
         {icon}
       </div>
@@ -63,12 +59,10 @@ function EventCard({
   event,
   locale,
   joinLabel,
-  rotation,
 }: {
   event: MeetupEvent;
   locale: string;
   joinLabel: string;
-  rotation: string;
 }) {
   const date = new Date(event.dateTime);
   const localeTag = locale === "ca" ? "ca-ES" : locale === "en" ? "en-GB" : "es-ES";
@@ -89,9 +83,7 @@ function EventCard({
     : null;
 
   return (
-    <article
-      className={`group relative bg-card border-2 border-ink rounded-3xl shadow-tactile hover:translate-x-[3px] hover:translate-y-[3px] hover:shadow-tactile-sm transition-all duration-200 overflow-hidden ${rotation}`}
-    >
+    <article className="group relative bg-card border-2 border-ink rounded-3xl shadow-tactile hover:translate-x-[3px] hover:translate-y-[3px] hover:shadow-tactile-sm transition-all duration-200 overflow-hidden">
       {event.imageUrl && (
         <div className="relative aspect-[16/10] border-b-2 border-ink overflow-hidden">
           <img
@@ -169,19 +161,17 @@ export function HomePage() {
     { value: "+25%", label: t.home.statGrowth },
   ];
 
-  // Predefined rotations to avoid hydration mismatch
-  const cardRotations = ["", "rotate-1", "-rotate-1", "rotate-1", "-rotate-1", "rotate-1"];
 
   return (
     <SiteLayout>
       {/* HERO */}
-      <section className="relative bg-cream overflow-hidden">
+      <section className="relative bg-cream overflow-x-clip">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-12 md:pt-20 pb-24 md:pb-32 grid lg:grid-cols-12 gap-12 lg:gap-16 items-center">
-          <div className="lg:col-span-7 relative z-10">
-            <span className="inline-flex items-center gap-2 rounded-full bg-coral/10 border-2 border-coral/30 px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-coral-deep -rotate-2">
+          <div className="lg:col-span-7 relative z-10 min-w-0">
+            <span className="inline-flex items-center gap-2 rounded-full bg-coral/10 border-2 border-coral/30 px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-coral-deep">
               <Sparkles className="h-3.5 w-3.5" /> {t.home.eyebrow}
             </span>
-            <h1 className="mt-6 text-5xl sm:text-6xl lg:text-7xl xl:text-8xl font-display font-semibold leading-[0.92] tracking-tight text-foreground">
+            <h1 className="mt-6 text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-display font-semibold leading-[0.98] sm:leading-[0.95] tracking-normal text-foreground break-words">
               {t.home.titleA}{" "}
               <span className="marker-coral text-foreground">{t.home.titleHighlight}</span>{" "}
               {t.home.titleB}
@@ -189,19 +179,19 @@ export function HomePage() {
             <p className="mt-7 text-lg sm:text-xl text-foreground/75 max-w-xl leading-relaxed">
               {t.home.subtitle}
             </p>
-            <div className="mt-9 flex flex-wrap gap-4 items-center">
+            <div className="mt-9 flex flex-wrap gap-4 items-center max-w-full">
               <a
                 href="https://www.meetup.com/es-es/kleff-bcn/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="group inline-flex items-center gap-2 rounded-2xl bg-coral text-cream border-2 border-ink px-7 py-4 text-base font-bold shadow-tactile hover:translate-x-[3px] hover:translate-y-[3px] hover:shadow-tactile-sm transition-all duration-200"
+                className="group inline-flex items-center justify-center gap-2 rounded-2xl bg-coral text-cream border-2 border-ink px-5 py-3.5 sm:px-7 sm:py-4 text-sm sm:text-base font-bold shadow-tactile hover:translate-x-[3px] hover:translate-y-[3px] hover:shadow-tactile-sm transition-all duration-200 text-center whitespace-normal max-w-full"
               >
-                {t.home.ctaPrimary}
-                <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                <span>{t.home.ctaPrimary}</span>
+                <ArrowRight className="h-5 w-5 shrink-0 group-hover:translate-x-1 transition-transform" />
               </a>
               <Link
                 to={href("/about")}
-                className="inline-flex items-center gap-2 rounded-2xl bg-card text-foreground border-2 border-ink px-7 py-4 text-base font-bold hover:bg-cream-deep transition-colors"
+                className="inline-flex items-center justify-center gap-2 rounded-2xl bg-card text-foreground border-2 border-ink px-5 py-3.5 sm:px-7 sm:py-4 text-sm sm:text-base font-bold hover:bg-cream-deep transition-colors text-center max-w-full"
               >
                 {t.home.ctaSecondary}
               </Link>
@@ -225,7 +215,7 @@ export function HomePage() {
           <div className="lg:col-span-5 relative">
             <div className="relative">
               {/* Main image with hard border + tactile shadow */}
-              <div className="relative bg-card border-4 border-ink rounded-3xl shadow-tactile-lg overflow-hidden -rotate-2 aspect-[4/5]">
+              <div className="relative bg-card border-4 border-ink rounded-3xl shadow-tactile-lg overflow-hidden aspect-[4/5]">
                 <img
                   src={heroImg}
                   alt="Comunidad KLEFF jugando juegos de mesa"
@@ -233,12 +223,10 @@ export function HomePage() {
                   height={2000}
                   className="absolute inset-0 h-full w-full object-cover"
                 />
-                {/* Tape on top */}
-                <div className="tape -top-2 left-1/2 -translate-x-1/2 rotate-1" />
               </div>
 
               {/* Floating token: community */}
-              <div className="hidden sm:flex absolute -bottom-8 -left-8 size-28 bg-cream border-4 border-ink rounded-full items-center justify-center rotate-12 shadow-tactile-lg">
+              <div className="hidden sm:flex absolute -bottom-6 -left-4 size-24 lg:size-28 bg-cream border-4 border-ink rounded-full items-center justify-center shadow-tactile-lg">
                 <div className="text-center">
                   <div className="text-2xl font-display font-bold text-foreground leading-none">10K+</div>
                   <div className="text-[9px] font-bold uppercase tracking-wider text-foreground/60 mt-1">
@@ -248,7 +236,7 @@ export function HomePage() {
               </div>
 
               {/* Floating token: games */}
-              <div className="hidden md:flex absolute -top-6 -right-6 bg-coral text-cream border-4 border-ink rounded-2xl px-5 py-3 items-center gap-3 shadow-tactile -rotate-6">
+              <div className="hidden md:flex absolute -top-4 -right-4 bg-coral text-cream border-4 border-ink rounded-2xl px-5 py-3 items-center gap-3 shadow-tactile">
                 <Dice5 className="h-7 w-7" />
                 <div>
                   <div className="text-xl font-display font-bold leading-none">300+</div>
@@ -256,11 +244,6 @@ export function HomePage() {
                     {locale === "en" ? "games" : locale === "ca" ? "jocs" : "juegos"}
                   </div>
                 </div>
-              </div>
-
-              {/* Annotation sticker */}
-              <div className="hidden lg:block absolute top-1/2 -right-12 bg-yellow-100 border-2 border-ink px-3 py-1.5 rotate-6 shadow-tactile-sm text-xs font-bold">
-                {locale === "en" ? "Every Wednesday!" : locale === "ca" ? "Cada dimecres!" : "¡Cada miércoles!"}
               </div>
             </div>
           </div>
@@ -285,19 +268,16 @@ export function HomePage() {
               icon={<Users className="h-7 w-7" />}
               title={t.home.pillar1Title}
               body={t.home.pillar1Body}
-              rotation="-rotate-1"
             />
             <PillarCard
               icon={<Heart className="h-7 w-7" />}
               title={t.home.pillar2Title}
               body={t.home.pillar2Body}
-              rotation="rotate-1"
             />
             <PillarCard
               icon={<Globe2 className="h-7 w-7" />}
               title={t.home.pillar3Title}
               body={t.home.pillar3Body}
-              rotation="-rotate-1"
             />
           </div>
         </div>
@@ -333,13 +313,12 @@ export function HomePage() {
             </div>
           ) : (
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
-              {events.slice(0, 6).map((e, i) => (
+              {events.slice(0, 6).map((e) => (
                 <EventCard
                   key={e.id}
                   event={e}
                   locale={locale}
                   joinLabel={t.home.eventJoin}
-                  rotation={cardRotations[i % cardRotations.length]}
                 />
               ))}
             </div>
@@ -351,7 +330,7 @@ export function HomePage() {
       <section className="py-20 md:py-28 bg-cream-deep/40 border-y-2 border-ink/10">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
           <div className="order-2 lg:order-1 relative">
-            <div className="relative border-4 border-ink rounded-3xl shadow-tactile-lg overflow-hidden rotate-2">
+            <div className="relative border-4 border-ink rounded-3xl shadow-tactile-lg overflow-hidden">
               <img
                 src={tableImg}
                 alt="Mesa de juegos KLEFF"
@@ -360,11 +339,9 @@ export function HomePage() {
                 loading="lazy"
                 className="w-full h-[500px] object-cover"
               />
-              <div className="tape -top-2 left-10 -rotate-3" />
-              <div className="tape -bottom-2 right-12 rotate-3" />
             </div>
             {/* Stamp annotation */}
-            <div className="absolute -bottom-6 -right-4 bg-cream border-2 border-ink rounded-2xl px-4 py-2 -rotate-6 shadow-tactile-sm">
+            <div className="mt-4 inline-block bg-cream border-2 border-ink rounded-2xl px-4 py-2 shadow-tactile-sm">
               <p className="font-display font-bold text-sm">
                 {locale === "en" ? "100% real cardboard" : locale === "ca" ? "100% cartró real" : "100% cartón real"}
               </p>
@@ -404,8 +381,8 @@ export function HomePage() {
       {/* STATS */}
       <section className="py-20 md:py-28 bg-ink text-cream relative overflow-hidden">
         {/* Decorative coral squares */}
-        <div className="absolute top-10 left-10 size-16 bg-coral border-4 border-cream/20 rounded-2xl rotate-12 hidden md:block" />
-        <div className="absolute bottom-10 right-20 size-20 bg-coral/40 border-4 border-cream/20 rounded-full -rotate-6 hidden md:block" />
+        <div className="absolute top-10 left-10 size-16 bg-coral border-4 border-cream/20 rounded-2xl hidden md:block" />
+        <div className="absolute bottom-10 right-20 size-20 bg-coral/40 border-4 border-cream/20 rounded-full hidden md:block" />
 
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative">
           <span className="inline-block bg-coral text-cream px-3 py-1 text-xs font-bold uppercase tracking-widest mb-6">
@@ -435,12 +412,12 @@ export function HomePage() {
       {/* FINAL CTA */}
       <section className="py-20 md:py-28 bg-cream">
         <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
-          <div className="relative bg-coral border-4 border-ink rounded-[2.5rem] px-8 sm:px-16 py-16 sm:py-20 text-center shadow-tactile-lg -rotate-1">
+          <div className="relative bg-coral border-4 border-ink rounded-[2.5rem] px-6 sm:px-16 py-14 sm:py-20 text-center shadow-tactile-lg">
             {/* Decorative corner stickers */}
-            <div className="hidden sm:block absolute -top-5 -left-5 size-16 bg-cream border-4 border-ink rounded-full flex items-center justify-center font-display font-bold text-2xl rotate-12 shadow-tactile-sm">
+            <div className="hidden sm:block absolute -top-5 -left-5 size-16 bg-cream border-4 border-ink rounded-full flex items-center justify-center font-display font-bold text-2xl shadow-tactile-sm">
               <Dice5 className="h-7 w-7 text-coral" />
             </div>
-            <div className="hidden sm:flex absolute -bottom-5 -right-5 size-16 bg-ink border-4 border-cream rounded-full items-center justify-center -rotate-12 shadow-tactile-sm">
+            <div className="hidden sm:flex absolute -bottom-5 -right-5 size-16 bg-ink border-4 border-cream rounded-full items-center justify-center shadow-tactile-sm">
               <Sparkles className="h-7 w-7 text-coral" />
             </div>
 
