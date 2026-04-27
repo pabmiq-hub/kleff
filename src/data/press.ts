@@ -19,6 +19,13 @@ export type PressLink = {
   descriptionOverride?: string;
 };
 
+// Imágenes de cabecera locales para medios sin OG image fiable
+import imgSaraPostcard from "@/assets/media-sara-postcard.jpg";
+import imgVidasInfinitas from "@/assets/media-vidas-infinitas.jpg";
+import img2d6 from "@/assets/media-2d6.jpg";
+import imgCadenaSer from "@/assets/media-cadena-ser.jpg";
+import imgCatalunyaRadio from "@/assets/media-catalunya-radio.jpg";
+
 // Lista cronológica (de más reciente a más antiguo)
 export const PRESS_LINKS: PressLink[] = [
   // ~ enero 2026
@@ -28,6 +35,7 @@ export const PRESS_LINKS: PressLink[] = [
     date: "ENE 2026",
     year: 2026,
     month: 1,
+    imageOverride: imgCatalunyaRadio,
     descriptionOverride:
       "Reportaje en Catalunya Ràdio sobre los juegos de mesa para enamorarse y para todas las ocasiones, con KLEFF como referente.",
   },
@@ -39,6 +47,7 @@ export const PRESS_LINKS: PressLink[] = [
     date: "JUN 2025",
     year: 2025,
     month: 6,
+    imageOverride: imgCadenaSer,
     descriptionOverride:
       "Episodio del podcast Aquí Barcelona (Cadena SER) dedicado a la escena lúdica de la ciudad.",
   },
@@ -117,6 +126,7 @@ export const PRESS_LINKS: PressLink[] = [
     date: "FEB 2025",
     year: 2025,
     month: 2,
+    imageOverride: imgSaraPostcard,
     descriptionOverride:
       "Reel viral en Instagram donde Sara Postcard descubre las Game Nights de KLEFF.",
   },
@@ -128,6 +138,7 @@ export const PRESS_LINKS: PressLink[] = [
     date: "NOV 2022",
     year: 2022,
     month: 11,
+    imageOverride: imgVidasInfinitas,
     descriptionOverride:
       "Episodio 65 del podcast Vidas Infinitas dedicado íntegramente a la comunidad de KLEFF.",
   },
@@ -139,6 +150,7 @@ export const PRESS_LINKS: PressLink[] = [
     date: "ABR 2020",
     year: 2020,
     month: 4,
+    imageOverride: img2d6,
     descriptionOverride:
       "Artículo en 2d6 Magazine #21 sobre los inicios de KLEFF como afterwork lúdico de Barcelona.",
   },
