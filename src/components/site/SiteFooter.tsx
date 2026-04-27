@@ -44,6 +44,16 @@ export function SiteFooter() {
               </Link>
             </li>
             <li>
+              <Link to={href("/how-it-works")} className="hover:text-coral transition-colors font-medium">
+                {t.nav.how}
+              </Link>
+            </li>
+            <li>
+              <Link to={href("/media")} className="hover:text-coral transition-colors font-medium">
+                {t.nav.media}
+              </Link>
+            </li>
+            <li>
               <Link to={href("/blog")} className="hover:text-coral transition-colors font-medium">
                 {t.nav.blog}
               </Link>

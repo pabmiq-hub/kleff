@@ -4,9 +4,90 @@ type Dict = {
   nav: {
     home: string;
     about: string;
+    how: string;
+    media: string;
     blog: string;
     contact: string;
     join: string;
+  };
+  how: {
+    eyebrow: string;
+    title: string;
+    intro: string;
+    nonProfitTitle: string;
+    nonProfitBody: string;
+    consumptionBadge: string;
+    howItWorksTitle: string;
+    howItWorksBody: string;
+    step1Title: string;
+    step1Body: string;
+    step2Title: string;
+    step2Body: string;
+    step3Title: string;
+    step3Body: string;
+    activitiesTitle: string;
+    activitiesSubtitle: string;
+    weekly: string;
+    monthly: string;
+    yearly: string;
+    occasional: string;
+    activityWeekly1Title: string;
+    activityWeekly1Body: string;
+    activityOccasional1Title: string;
+    activityOccasional1Body: string;
+    activityMonthly1Title: string;
+    activityMonthly1Body: string;
+    activityMonthly2Title: string;
+    activityMonthly2Body: string;
+    activityYearly1Title: string;
+    activityYearly1Body: string;
+    activityYearly2Title: string;
+    activityYearly2Body: string;
+    activityYearly3Title: string;
+    activityYearly3Body: string;
+    communitiesEyebrow: string;
+    communitiesTitle: string;
+    communitiesIntro: string;
+    community1Title: string;
+    community1Body: string;
+    community1Tag: string;
+    community2Title: string;
+    community2Body: string;
+    community2Tag: string;
+    community3Title: string;
+    community3Body: string;
+    community3Tag: string;
+    community4Title: string;
+    community4Body: string;
+    community4Tag: string;
+    memberEyebrow: string;
+    memberTitle: string;
+    memberSubtitle: string;
+    memberFlipHint: string;
+    benefit1Title: string;
+    benefit1Body: string;
+    benefit2Title: string;
+    benefit2Body: string;
+    benefit3Title: string;
+    benefit3Body: string;
+    benefit4Title: string;
+    benefit4Body: string;
+    memberCtaTitle: string;
+    memberCtaBody: string;
+    memberCta: string;
+  };
+  media: {
+    eyebrow: string;
+    title: string;
+    intro: string;
+    pressTitle: string;
+    pressSubtitle: string;
+    visitArticle: string;
+    instagramTitle: string;
+    instagramSubtitle: string;
+    instagramCta: string;
+    loading: string;
+    noPreview: string;
   };
   home: {
     eyebrow: string;
@@ -106,6 +187,8 @@ const es: Dict = {
   nav: {
     home: "Inicio",
     about: "Quiénes somos",
+    how: "Cómo funciona",
+    media: "Media",
     blog: "Blog",
     contact: "Contacto",
     join: "Únete",
@@ -213,12 +296,120 @@ const es: Dict = {
     or: "o escríbenos a",
     findUs: "Dónde estamos",
   },
+  how: {
+    eyebrow: "Cómo funciona",
+    title: "Así funciona KLEFF",
+    intro:
+      "Somos una asociación sin ánimo de lucro. Las actividades recurrentes son gratuitas, pero el espacio que nos cede l'Estació Espai Gastronòmic pide una consumición mínima de 4€ al iniciar la actividad. Así apoyamos al local que nos abre las puertas cada semana.",
+    nonProfitTitle: "Asociación sin ánimo de lucro",
+    nonProfitBody:
+      "KLEFF se constituye formalmente como asociación sin finalidad de lucro. Todo lo que generamos vuelve a la comunidad: ludoteca, eventos especiales y colaboraciones.",
+    consumptionBadge: "4€ de consumición · gratis la actividad",
+    howItWorksTitle: "Vienes solo, en pareja o con amigos. Da igual.",
+    howItWorksBody:
+      "No necesitas reservar mesa ni traer a nadie. El #TeamKLEFF (camiseta roja) te recibe, te ayuda a encontrar mesa donde empezar una partida o te empareja con otra gente con ganas de jugar. En 10 minutos estás riéndote con desconocidos.",
+    step1Title: "Llegas",
+    step1Body:
+      "Entras en l'Estació Espai Gastronòmic. Pides una bebida o algo de picar (esa es la consumición de 4€). Te apuntas en Meetup si todavía no lo has hecho.",
+    step2Title: "Encuentras mesa",
+    step2Body:
+      "El #TeamKLEFF (camiseta roja) está para ayudarte. Te emparejan con gente buscando mesa, te recomiendan un juego según tus ganas y te lo explican si no lo conoces.",
+    step3Title: "Juegas y vuelves",
+    step3Body:
+      "Más de 300 juegos disponibles. Cuando termines una partida, prueba otra mesa o quédate en la tuya. La noche dura 4 horas y nadie tiene prisa.",
+    activitiesTitle: "Qué puedes encontrar",
+    activitiesSubtitle:
+      "Desde la noche de juegos semanal hasta torneos, citas lúdicas y eventos solidarios.",
+    weekly: "Semanal",
+    monthly: "Mensual",
+    yearly: "Anual",
+    occasional: "Puntual",
+    activityWeekly1Title: "Noche de Juegos",
+    activityWeekly1Body:
+      "Evento regular con ludoteca abierta y partidas programadas de Blood on the Clocktower, Catan y otros muchos.",
+    activityOccasional1Title: "Slow Dating Lúdico",
+    activityOccasional1Body:
+      "Concepto similar al speed dating, pero con juegos sociales como excusa para conectar a personas.",
+    activityMonthly1Title: "Torneos",
+    activityMonthly1Body:
+      "Actividad competitiva de los juegos más populares de la comunidad.",
+    activityMonthly2Title: "Demostraciones de editoriales y autores",
+    activityMonthly2Body:
+      "Jornadas para aprender juegos nuevos directamente con quienes los han creado y publicado.",
+    activityYearly1Title: "Game Night: Carnival",
+    activityYearly1Body:
+      "Noche de juegos especial con concurso de disfraces de carnaval.",
+    activityYearly2Title: "Game Night: Halloween",
+    activityYearly2Body:
+      "Noche de juegos especial con concurso de disfraces de temática Halloween.",
+    activityYearly3Title: "X-Mas Game Night",
+    activityYearly3Body:
+      "Evento solidario para recaudar fondos para el Hospital Sant Joan de Déu, especializado en cáncer infantil.",
+    communitiesEyebrow: "Comunidades",
+    communitiesTitle: "¿Quieres formar parte de una comunidad específica?",
+    communitiesIntro:
+      "Dentro de KLEFF conviven varias comunidades alrededor de juegos concretos. Cada una tiene su grupo, sus partidas regulares y sus eventos. Únete a la que más te guste.",
+    community1Title: "Blood on the Clocktower",
+    community1Body:
+      "Comunidad del juego de roles ocultos mejor valorado en el ranking de la BGG. Programamos como mínimo 2 partidas semanales.",
+    community1Tag: "2 partidas/semana",
+    community2Title: "Catan",
+    community2Body:
+      "Comunidad del precursor de los juegos de mesa modernos. Organizamos torneos y actividades de forma recurrente.",
+    community2Tag: "Torneos recurrentes",
+    community3Title: "Unmatched",
+    community3Body:
+      "Comunidad del juego de mesa de enfrentamientos más popular del momento. Organizamos torneos de forma frecuente.",
+    community3Tag: "Torneos frecuentes",
+    community4Title: "Roles Ocultos",
+    community4Body:
+      "Comunidad para descubrir y disfrutar de juegos de deducción social e identidades secretas.",
+    community4Tag: "Deducción social",
+    memberEyebrow: "Hazte socio",
+    memberTitle: "Sé parte real del proyecto",
+    memberSubtitle:
+      "Ser socio de KLEFF no es solo apoyar la asociación: es desbloquear ventajas pensadas para quien viene de verdad.",
+    memberFlipHint: "Pasa el ratón sobre cada ventaja",
+    benefit1Title: "Alquiler de juegos",
+    benefit1Body:
+      "Llévate juegos de nuestra ludoteca de más de 300 títulos a casa por un fin de semana o entre semana.",
+    benefit2Title: "Acceso prioritario",
+    benefit2Body:
+      "Reserva primero plaza en eventos especiales, torneos con aforo limitado y noches temáticas.",
+    benefit3Title: "Descuentos en tiendas",
+    benefit3Body:
+      "Descuentos en tiendas colaboradoras de Barcelona como Mathom, The Curiosity Shop, Gameria o Kaburi.",
+    benefit4Title: "Comunidad real",
+    benefit4Body:
+      "Acceso a un canal exclusivo de socios, propuestas de mejora y voto en las actividades anuales.",
+    memberCtaTitle: "¿Listo para hacerte socio?",
+    memberCtaBody:
+      "Estamos terminando de definir la cuota anual y los pasos para apuntarse. Déjanos tu correo y te avisamos en cuanto abramos las inscripciones.",
+    memberCta: "Quiero más info",
+  },
+  media: {
+    eyebrow: "Media",
+    title: "Han hablado de nosotros",
+    intro:
+      "Reportajes, podcasts, artículos y reels que han contado la historia de KLEFF. Ordenados de más reciente a más antiguo.",
+    pressTitle: "Apariciones en prensa",
+    pressSubtitle: "Selección de los medios donde hemos salido los últimos años.",
+    visitArticle: "Ver publicación",
+    instagramTitle: "Síguenos en Instagram",
+    instagramSubtitle:
+      "Las mejores fotos de cada Game Night, los próximos eventos y los momentos más divertidos están en @kleff.bcn.",
+    instagramCta: "Abrir @kleff.bcn",
+    loading: "Cargando vista previa…",
+    noPreview: "Vista previa no disponible — abre el enlace para verlo.",
+  },
 };
 
 const en: Dict = {
   nav: {
     home: "Home",
     about: "About",
+    how: "How it works",
+    media: "Media",
     blog: "Blog",
     contact: "Contact",
     join: "Join us",
@@ -326,12 +517,120 @@ const en: Dict = {
     or: "or email us at",
     findUs: "Where to find us",
   },
+  how: {
+    eyebrow: "How it works",
+    title: "How KLEFF works",
+    intro:
+      "We're a non-profit association. Our recurring activities are free, but the venue that hosts us — l'Estació Espai Gastronòmic — asks for a small minimum order of €4 when the activity starts. That's how we support the place that opens its doors to us every week.",
+    nonProfitTitle: "Non-profit association",
+    nonProfitBody:
+      "KLEFF is formally constituted as a non-profit association. Everything we generate goes back to the community: game library, special events and collaborations.",
+    consumptionBadge: "€4 minimum order · activity is free",
+    howItWorksTitle: "Come alone, as a couple or with friends. Doesn't matter.",
+    howItWorksBody:
+      "No need to book a table or bring anyone. The #TeamKLEFF (red shirts) welcomes you, helps you find a table to start a game or pairs you with other people who want to play. Within 10 minutes you're laughing with strangers.",
+    step1Title: "You arrive",
+    step1Body:
+      "Walk into l'Estació Espai Gastronòmic. Order a drink or something to snack on (that's the €4 minimum). Sign up on Meetup if you haven't already.",
+    step2Title: "You find a table",
+    step2Body:
+      "The #TeamKLEFF (red shirts) is here to help. They pair you with people looking for a table, recommend a game based on your mood and explain the rules if you don't know it.",
+    step3Title: "You play and come back",
+    step3Body:
+      "Over 300 games available. Once you finish a round, try another table or stay at yours. The night runs for 4 hours and nobody's in a rush.",
+    activitiesTitle: "What you'll find",
+    activitiesSubtitle:
+      "From the weekly game night to tournaments, social-game dating and charity events.",
+    weekly: "Weekly",
+    monthly: "Monthly",
+    yearly: "Yearly",
+    occasional: "Occasional",
+    activityWeekly1Title: "Game Night",
+    activityWeekly1Body:
+      "Regular event with open game library and scheduled rounds of Blood on the Clocktower, Catan and many more.",
+    activityOccasional1Title: "Slow Gaming Dating",
+    activityOccasional1Body:
+      "Similar concept to speed dating but using social games as the excuse to connect people.",
+    activityMonthly1Title: "Tournaments",
+    activityMonthly1Body:
+      "Competitive events for the most popular games in the community.",
+    activityMonthly2Title: "Publisher & author demos",
+    activityMonthly2Body:
+      "Sessions to learn new games directly from the people who designed and published them.",
+    activityYearly1Title: "Game Night: Carnival",
+    activityYearly1Body:
+      "Special game night with a carnival costume contest.",
+    activityYearly2Title: "Game Night: Halloween",
+    activityYearly2Body:
+      "Special game night with a Halloween-themed costume contest.",
+    activityYearly3Title: "X-Mas Game Night",
+    activityYearly3Body:
+      "Charity event raising funds for Hospital Sant Joan de Déu, specialised in childhood cancer.",
+    communitiesEyebrow: "Communities",
+    communitiesTitle: "Want to be part of a specific community?",
+    communitiesIntro:
+      "Inside KLEFF there are several communities built around specific games. Each one has its own group, regular sessions and events. Join the one you love most.",
+    community1Title: "Blood on the Clocktower",
+    community1Body:
+      "Community of the highest-rated hidden role game on the BGG ranking. We schedule at least 2 sessions per week.",
+    community1Tag: "2 sessions/week",
+    community2Title: "Catan",
+    community2Body:
+      "Community of the modern board game pioneer. We organise tournaments and activities on a recurring basis.",
+    community2Tag: "Recurring tournaments",
+    community3Title: "Unmatched",
+    community3Body:
+      "Community of the most popular skirmish board game right now. We organise tournaments frequently.",
+    community3Tag: "Frequent tournaments",
+    community4Title: "Hidden Roles",
+    community4Body:
+      "Community to discover and enjoy social deduction and hidden identity games.",
+    community4Tag: "Social deduction",
+    memberEyebrow: "Become a member",
+    memberTitle: "Be a real part of the project",
+    memberSubtitle:
+      "Becoming a KLEFF member is more than supporting the association: it unlocks perks designed for those who really show up.",
+    memberFlipHint: "Hover each benefit",
+    benefit1Title: "Borrow games",
+    benefit1Body:
+      "Take games from our 300+ title library home for a weekend or weekday.",
+    benefit2Title: "Priority access",
+    benefit2Body:
+      "Get first dibs on special events, capacity-limited tournaments and themed nights.",
+    benefit3Title: "Shop discounts",
+    benefit3Body:
+      "Discounts at partner shops in Barcelona like Mathom, The Curiosity Shop, Gameria or Kaburi.",
+    benefit4Title: "Real community",
+    benefit4Body:
+      "Access to a members-only channel, suggestions space and voting on yearly activities.",
+    memberCtaTitle: "Ready to become a member?",
+    memberCtaBody:
+      "We're finalising the annual fee and the steps to sign up. Drop us your email and we'll let you know as soon as memberships open.",
+    memberCta: "I want more info",
+  },
+  media: {
+    eyebrow: "Media",
+    title: "They've talked about us",
+    intro:
+      "Reports, podcasts, articles and reels that have told the KLEFF story. Sorted from most recent to oldest.",
+    pressTitle: "Press appearances",
+    pressSubtitle: "A selection of the outlets that have featured us.",
+    visitArticle: "Open article",
+    instagramTitle: "Follow us on Instagram",
+    instagramSubtitle:
+      "The best photos from every Game Night, upcoming events and our funniest moments live at @kleff.bcn.",
+    instagramCta: "Open @kleff.bcn",
+    loading: "Loading preview…",
+    noPreview: "Preview not available — open the link to see it.",
+  },
 };
 
 const ca: Dict = {
   nav: {
     home: "Inici",
     about: "Qui som",
+    how: "Com funciona",
+    media: "Media",
     blog: "Blog",
     contact: "Contacte",
     join: "Uneix-te",
@@ -438,6 +737,112 @@ const ca: Dict = {
     success: "Gràcies! Et respondrem aviat.",
     or: "o escriu-nos a",
     findUs: "On som",
+  },
+  how: {
+    eyebrow: "Com funciona",
+    title: "Així funciona KLEFF",
+    intro:
+      "Som una associació sense ànim de lucre. Les activitats recurrents són gratuïtes, però l'espai que ens cedeix l'Estació Espai Gastronòmic demana una consumició mínima de 4€ a l'inici de l'activitat. Així donem suport al local que ens obre les portes cada setmana.",
+    nonProfitTitle: "Associació sense ànim de lucre",
+    nonProfitBody:
+      "KLEFF es constitueix formalment com a associació sense finalitat de lucre. Tot el que generem torna a la comunitat: ludoteca, esdeveniments especials i col·laboracions.",
+    consumptionBadge: "4€ de consumició · activitat gratuïta",
+    howItWorksTitle: "Vens sol, en parella o amb amics. Tant és.",
+    howItWorksBody:
+      "No cal reservar taula ni portar ningú. El #TeamKLEFF (samarreta vermella) et rep, t'ajuda a trobar taula per començar una partida o t'aparella amb altra gent amb ganes de jugar. En 10 minuts ja estàs rient amb desconeguts.",
+    step1Title: "Arribes",
+    step1Body:
+      "Entres a l'Estació Espai Gastronòmic. Demanes una beguda o alguna cosa per picar (això és la consumició de 4€). T'apuntes a Meetup si encara no ho has fet.",
+    step2Title: "Trobes taula",
+    step2Body:
+      "El #TeamKLEFF (samarreta vermella) hi és per ajudar-te. T'aparellen amb gent que busca taula, et recomanen un joc segons les teves ganes i te l'expliquen si no el coneixes.",
+    step3Title: "Jugues i tornes",
+    step3Body:
+      "Més de 300 jocs disponibles. Quan acabis una partida, prova una altra taula o queda't a la teva. La nit dura 4 hores i ningú no té pressa.",
+    activitiesTitle: "Què hi pots trobar",
+    activitiesSubtitle:
+      "Des de la nit de jocs setmanal fins a tornejos, cites lúdiques i esdeveniments solidaris.",
+    weekly: "Setmanal",
+    monthly: "Mensual",
+    yearly: "Anual",
+    occasional: "Puntual",
+    activityWeekly1Title: "Nit de Jocs",
+    activityWeekly1Body:
+      "Esdeveniment regular amb ludoteca oberta i partides programades de Blood on the Clocktower, Catan i molts més.",
+    activityOccasional1Title: "Slow Dating Lúdic",
+    activityOccasional1Body:
+      "Concepte similar al speed dating però amb jocs socials com a excusa per connectar persones.",
+    activityMonthly1Title: "Tornejos",
+    activityMonthly1Body:
+      "Activitat competitiva dels jocs més populars de la comunitat.",
+    activityMonthly2Title: "Demostracions d'editorials i autors",
+    activityMonthly2Body:
+      "Jornades per aprendre jocs nous directament amb qui els ha creat i publicat.",
+    activityYearly1Title: "Game Night: Carnival",
+    activityYearly1Body:
+      "Nit de jocs especial amb concurs de disfresses de carnaval.",
+    activityYearly2Title: "Game Night: Halloween",
+    activityYearly2Body:
+      "Nit de jocs especial amb concurs de disfresses de temàtica Halloween.",
+    activityYearly3Title: "X-Mas Game Night",
+    activityYearly3Body:
+      "Esdeveniment solidari per recaptar fons per a l'Hospital Sant Joan de Déu, especialitzat en càncer infantil.",
+    communitiesEyebrow: "Comunitats",
+    communitiesTitle: "Vols formar part d'una comunitat específica?",
+    communitiesIntro:
+      "Dins de KLEFF hi conviuen diverses comunitats al voltant de jocs concrets. Cadascuna té el seu grup, les seves partides regulars i els seus esdeveniments. Uneix-te a la que més t'agradi.",
+    community1Title: "Blood on the Clocktower",
+    community1Body:
+      "Comunitat del joc de rols ocults més ben valorat al rànquing de la BGG. Programem com a mínim 2 partides setmanals.",
+    community1Tag: "2 partides/setmana",
+    community2Title: "Catan",
+    community2Body:
+      "Comunitat del precursor dels jocs de taula moderns. Organitzem tornejos i activitats de manera recurrent.",
+    community2Tag: "Tornejos recurrents",
+    community3Title: "Unmatched",
+    community3Body:
+      "Comunitat del joc de taula d'enfrontaments més popular del moment. Organitzem tornejos amb freqüència.",
+    community3Tag: "Tornejos freqüents",
+    community4Title: "Rols Ocults",
+    community4Body:
+      "Comunitat per descobrir i gaudir de jocs de deducció social i identitats secretes.",
+    community4Tag: "Deducció social",
+    memberEyebrow: "Fes-te soci",
+    memberTitle: "Sigues part real del projecte",
+    memberSubtitle:
+      "Ser soci de KLEFF no és només donar suport a l'associació: desbloqueja avantatges pensats per a qui ve de veritat.",
+    memberFlipHint: "Passa el ratolí sobre cada avantatge",
+    benefit1Title: "Lloguer de jocs",
+    benefit1Body:
+      "Emporta't jocs de la nostra ludoteca de més de 300 títols a casa per un cap de setmana o entre setmana.",
+    benefit2Title: "Accés prioritari",
+    benefit2Body:
+      "Reserva primer plaça en esdeveniments especials, tornejos amb aforament limitat i nits temàtiques.",
+    benefit3Title: "Descomptes en botigues",
+    benefit3Body:
+      "Descomptes en botigues col·laboradores de Barcelona com Mathom, The Curiosity Shop, Gameria o Kaburi.",
+    benefit4Title: "Comunitat real",
+    benefit4Body:
+      "Accés a un canal exclusiu de socis, propostes de millora i vot en les activitats anuals.",
+    memberCtaTitle: "A punt per fer-te soci?",
+    memberCtaBody:
+      "Estem acabant de definir la quota anual i els passos per apuntar-s'hi. Deixa'ns el teu correu i t'avisem quan obrim les inscripcions.",
+    memberCta: "Vull més info",
+  },
+  media: {
+    eyebrow: "Media",
+    title: "N'han parlat",
+    intro:
+      "Reportatges, podcasts, articles i reels que han explicat la història de KLEFF. Ordenats de més recent a més antic.",
+    pressTitle: "Aparicions a premsa",
+    pressSubtitle: "Selecció dels mitjans on hem aparegut els darrers anys.",
+    visitArticle: "Veure publicació",
+    instagramTitle: "Segueix-nos a Instagram",
+    instagramSubtitle:
+      "Les millors fotos de cada Game Night, els pròxims esdeveniments i els moments més divertits són a @kleff.bcn.",
+    instagramCta: "Obrir @kleff.bcn",
+    loading: "Carregant vista prèvia…",
+    noPreview: "Vista prèvia no disponible — obre l'enllaç per veure-ho.",
   },
 };
 
