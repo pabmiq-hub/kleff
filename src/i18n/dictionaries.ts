@@ -752,13 +752,13 @@ const ca: Dict = {
       "No cal reservar taula ni portar ningú. El #TeamKLEFF (samarreta vermella) et rep, t'ajuda a trobar taula per començar una partida o t'aparella amb altra gent amb ganes de jugar. En 10 minuts ja estàs rient amb desconeguts.",
     step1Title: "Arribes",
     step1Body:
-      "Entres a l'Estació Espai Gastronòmic. Demanes una beguda (això és la consumició de 4€) o alguna cosa per picar. El #TeamKLEFF et rep.",
+      "Entres a l'Estació Espai Gastronòmic. Demanes una beguda (això és la consumició de 4€) o alguna cosa per picar. Un membre del #TeamKLEFF et rep a la recepció.",
     step2Title: "Trobes taula",
     step2Body:
       "El #TeamKLEFF (samarreta vermella) hi és per ajudar-te. T'aparellen amb gent que busca taula, et recomanen un joc segons les teves ganes i te l'expliquen si no el coneixes.",
     step3Title: "Jugues i tornes",
     step3Body:
-      "Més de 300 jocs disponibles. Quan acabis una partida, prova una altra taula o queda't a la teva. La nit dura 4 hores i ningú no té pressa.",
+      "Més de 500 jocs disponibles. Quan acabis una partida, prova una altra taula o queda't a la teva. La nit dura 4 hores i ningú no té pressa.",
     activitiesTitle: "Què hi pots trobar",
     activitiesSubtitle:
       "Des de la nit de jocs setmanal fins a tornejos, cites lúdiques i esdeveniments solidaris.",
