@@ -154,44 +154,37 @@ export function HistoryTimeline({ locale }: { locale: Locale }) {
           }
         }
       },
-      { threshold: 0.15 },
+      { threshold: 0.1 },
     );
     observer.observe(node);
     return () => observer.disconnect();
   }, []);
 
   return (
-    <div className="overflow-x-auto pb-6 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8">
-      <div
-        ref={ref}
-        className={`timeline-track ${visible ? "is-visible" : ""}`}
-      >
-        <div className="timeline-line" aria-hidden />
-        {MILESTONES.map((m, i) => {
-          const top = i % 2 === 0;
-          const delay = i * 220;
-          return (
-            <div
-              key={m.year}
-              className={`timeline-node ${top ? "timeline-node--top" : "timeline-node--bottom"}`}
-              style={{ ["--reveal-delay" as string]: `${delay}ms` }}
-            >
-              <div className="timeline-card">
-                <span className="timeline-emoji" aria-hidden>{m.emoji}</span>
-                <span className="timeline-year">{m.year}</span>
-                <h3 className="mt-3 font-display font-bold text-lg leading-tight text-foreground">
-                  {m.title[locale]}
-                </h3>
-                <p className="mt-2 text-sm text-foreground/75 leading-relaxed">
-                  {m.body[locale]}
-                </p>
-              </div>
-              <div className="timeline-stem" aria-hidden />
-              <div className="timeline-dot" aria-hidden />
-            </div>
-          );
-        })}
-      </div>
+    <div
+      ref={ref}
+      className={`snake-timeline ${visible ? "is-visible" : ""}`}
+    >
+      {MILESTONES.map((m, i) => {
+        const delay = i * 180;
+        return (
+          <article
+            key={m.year}
+            className="snake-card"
+            style={{ ["--reveal-delay" as string]: `${delay}ms` }}
+          >
+            <span className="snake-dot" aria-hidden />
+            <span className="snake-emoji" aria-hidden>{m.emoji}</span>
+            <span className="snake-year">{m.year}</span>
+            <h3 className="mt-3 font-display font-bold text-lg leading-tight text-foreground">
+              {m.title[locale]}
+            </h3>
+            <p className="mt-2 text-sm text-foreground/75 leading-relaxed">
+              {m.body[locale]}
+            </p>
+          </article>
+        );
+      })}
     </div>
   );
 }
