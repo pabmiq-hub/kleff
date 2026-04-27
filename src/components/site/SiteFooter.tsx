@@ -55,7 +55,8 @@ export function SiteFooter() {
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 hover:text-coral transition-colors"
               >
-                <Instagram className="h-4 w-4" /> @kleff.bcn
+                <Instagram className="h-4 w-4" />
+                <span>@kleff.bcn</span>
               </a>
             </li>
             <li>
@@ -65,7 +66,8 @@ export function SiteFooter() {
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 hover:text-coral transition-colors"
               >
-                <MessageCircle className="h-4 w-4" /> Meetup
+                <MessageCircle className="h-4 w-4" />
+                <span>Meetup</span>
               </a>
             </li>
             <li>
