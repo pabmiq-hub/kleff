@@ -161,8 +161,6 @@ export function HomePage() {
     { value: "+25%", label: t.home.statGrowth },
   ];
 
-  // Predefined rotations to avoid hydration mismatch
-  const cardRotations = ["", "rotate-1", "-rotate-1", "rotate-1", "-rotate-1", "rotate-1"];
 
   return (
     <SiteLayout>
@@ -270,19 +268,16 @@ export function HomePage() {
               icon={<Users className="h-7 w-7" />}
               title={t.home.pillar1Title}
               body={t.home.pillar1Body}
-              rotation="-rotate-1"
             />
             <PillarCard
               icon={<Heart className="h-7 w-7" />}
               title={t.home.pillar2Title}
               body={t.home.pillar2Body}
-              rotation="rotate-1"
             />
             <PillarCard
               icon={<Globe2 className="h-7 w-7" />}
               title={t.home.pillar3Title}
               body={t.home.pillar3Body}
-              rotation="-rotate-1"
             />
           </div>
         </div>
@@ -318,13 +313,12 @@ export function HomePage() {
             </div>
           ) : (
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
-              {events.slice(0, 6).map((e, i) => (
+              {events.slice(0, 6).map((e) => (
                 <EventCard
                   key={e.id}
                   event={e}
                   locale={locale}
                   joinLabel={t.home.eventJoin}
-                  rotation={cardRotations[i % cardRotations.length]}
                 />
               ))}
             </div>
