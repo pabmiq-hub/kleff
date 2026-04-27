@@ -1,12 +1,23 @@
+import { useState } from "react";
 import { useRouterState } from "@tanstack/react-router";
-import { Sparkles, ExternalLink, Instagram, Newspaper, Calendar } from "lucide-react";
+import {
+  Sparkles,
+  ExternalLink,
+  Instagram,
+  Newspaper,
+  Calendar,
+  ChevronDown,
+} from "lucide-react";
 import { useI18n } from "@/i18n/I18nProvider";
 import { SiteLayout } from "@/components/site/SiteLayout";
 import type { MediaItem } from "@/server/media.functions";
 
-type LoaderData = { mediaItems: MediaItem[] };
+type LoaderData = {
+  mediaItems: MediaItem[];
+  followers: { count: number | null; updatedAt: string };
+};
 
-function useMediaData(): MediaItem[] {
+function useMediaData(): LoaderData {
   const data = useRouterState({
     select: (s) => {
       for (const m of s.matches) {
@@ -16,7 +27,12 @@ function useMediaData(): MediaItem[] {
       return null;
     },
   });
-  return data?.mediaItems ?? [];
+  return (
+    data ?? {
+      mediaItems: [],
+      followers: { count: null, updatedAt: new Date().toISOString() },
+    }
+  );
 }
 
 function hostnameOf(url: string) {
@@ -84,11 +100,69 @@ function MediaCard({ item, fallbackLabel }: { item: MediaItem; fallbackLabel: st
   );
 }
 
+function YearAccordion({
+  year,
+  items,
+  defaultOpen,
+  fallbackLabel,
+  appearancesLabel,
+}: {
+  year: number;
+  items: MediaItem[];
+  defaultOpen: boolean;
+  fallbackLabel: string;
+  appearancesLabel: string;
+}) {
+  const [open, setOpen] = useState(defaultOpen);
+  return (
+    <div className="border-2 border-ink rounded-3xl bg-cream shadow-tactile overflow-hidden">
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        aria-expanded={open}
+        className="w-full flex items-center gap-4 px-6 sm:px-8 py-5 sm:py-6 text-left hover:bg-coral/5 transition-colors"
+      >
+        <span className="font-display font-bold text-4xl sm:text-5xl text-coral leading-none tabular-nums">
+          {year}
+        </span>
+        <span className="flex-1 newspaper-rule" />
+        <span className="text-xs sm:text-sm font-bold uppercase tracking-widest text-foreground/60 tabular-nums whitespace-nowrap">
+          {items.length} {appearancesLabel}
+        </span>
+        <ChevronDown
+          className={`h-6 w-6 text-ink transition-transform duration-300 ${open ? "rotate-180" : ""}`}
+          aria-hidden
+        />
+      </button>
+      {open && (
+        <div className="border-t-2 border-ink/15 bg-cream-deep/30 px-5 sm:px-7 py-7 sm:py-8">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-7">
+            {items.map((item) => (
+              <MediaCard key={item.url} item={item} fallbackLabel={fallbackLabel} />
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function formatFollowers(count: number | null, locale: string): string {
+  if (count == null) return "—";
+  if (count >= 1000) {
+    const k = count / 1000;
+    const formatted =
+      locale === "en" ? k.toFixed(1).replace(/\.0$/, "") : k.toFixed(1).replace(".", ",").replace(/,0$/, "");
+    return `${formatted}K`;
+  }
+  return count.toLocaleString(locale === "en" ? "en-US" : "es-ES");
+}
+
 export function MediaPage() {
   const { t, locale } = useI18n();
-  const items = useMediaData();
+  const { mediaItems: items, followers } = useMediaData();
 
-  // Group items by year for a cleaner cronological feel
+  // Group items by year, newest first
   const byYear = items.reduce<Record<number, MediaItem[]>>((acc, item) => {
     (acc[item.year] = acc[item.year] ?? []).push(item);
     return acc;
@@ -96,6 +170,15 @@ export function MediaPage() {
   const years = Object.keys(byYear)
     .map(Number)
     .sort((a, b) => b - a);
+
+  const appearancesLabel =
+    locale === "en" ? "appearances" : locale === "ca" ? "aparicions" : "apariciones";
+  const followersLabel =
+    locale === "en"
+      ? "followers on Instagram"
+      : locale === "ca"
+        ? "seguidors a Instagram"
+        : "seguidores en Instagram";
 
   return (
     <SiteLayout>
@@ -114,44 +197,38 @@ export function MediaPage() {
         </div>
       </section>
 
-      {/* PRESS GRID — chronological by year */}
+      {/* PRESS — collapsible accordions per year */}
       <section className="py-16 md:py-20 bg-cream-deep/40 border-y-2 border-ink/10">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="max-w-3xl mb-12">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+          <div className="max-w-3xl mb-10">
             <span className="inline-block stamp-ink text-xs font-bold uppercase tracking-widest mb-4">
               {t.media.pressTitle}
             </span>
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-display font-semibold leading-tight">
               {t.media.pressSubtitle}
             </h2>
+            <p className="mt-4 text-sm text-foreground/60">
+              {locale === "en"
+                ? "Click each year to expand."
+                : locale === "ca"
+                  ? "Fes clic a cada any per desplegar-lo."
+                  : "Haz click en cada año para desplegarlo."}
+            </p>
           </div>
 
           {years.length === 0 ? (
             <p className="text-center text-foreground/60 py-12">{t.media.loading}</p>
           ) : (
-            <div className="space-y-16">
-              {years.map((year) => (
-                <div key={year}>
-                  <div className="flex items-end gap-4 mb-8">
-                    <span className="font-display font-bold text-5xl sm:text-6xl text-coral leading-none tabular-nums">
-                      {year}
-                    </span>
-                    <span className="flex-1 newspaper-rule mb-3" />
-                    <span className="text-xs font-bold uppercase tracking-widest text-foreground/50 mb-3 tabular-nums">
-                      {byYear[year].length}{" "}
-                      {locale === "en"
-                        ? "appearances"
-                        : locale === "ca"
-                          ? "aparicions"
-                          : "apariciones"}
-                    </span>
-                  </div>
-                  <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-7">
-                    {byYear[year].map((item) => (
-                      <MediaCard key={item.url} item={item} fallbackLabel={t.media.visitArticle} />
-                    ))}
-                  </div>
-                </div>
+            <div className="space-y-4">
+              {years.map((year, i) => (
+                <YearAccordion
+                  key={year}
+                  year={year}
+                  items={byYear[year]}
+                  defaultOpen={i === 0}
+                  fallbackLabel={t.media.visitArticle}
+                  appearancesLabel={appearancesLabel}
+                />
               ))}
             </div>
           )}
@@ -182,17 +259,12 @@ export function MediaPage() {
                 {t.media.instagramCta}
               </a>
               <p className="mt-4 text-sm text-foreground/60 tabular-nums">
-                <strong className="text-foreground">10,3k</strong>{" "}
-                {locale === "en"
-                  ? "followers on Instagram"
-                  : locale === "ca"
-                    ? "seguidors a Instagram"
-                    : "seguidores en Instagram"}
+                <strong className="text-foreground">{formatFollowers(followers.count, locale)}</strong>{" "}
+                {followersLabel}
               </p>
             </div>
 
             <div className="lg:col-span-7">
-              {/* Decorative Instagram preview tiles — link to the real account */}
               <a
                 href="https://www.instagram.com/kleff.bcn/"
                 target="_blank"
@@ -201,7 +273,6 @@ export function MediaPage() {
                 className="group block"
               >
                 <div className="relative bg-card border-4 border-ink rounded-3xl shadow-tactile-lg overflow-hidden p-5 sm:p-6">
-                  {/* header bar imitating IG */}
                   <div className="flex items-center gap-3 mb-5">
                     <div className="h-11 w-11 rounded-full bg-gradient-coral border-2 border-ink flex items-center justify-center text-cream">
                       <Instagram className="h-5 w-5" />
