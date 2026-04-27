@@ -310,13 +310,13 @@ const es: Dict = {
       "No necesitas reservar mesa ni traer a nadie. El #TeamKLEFF (camiseta roja) te recibe, te ayuda a encontrar mesa donde empezar una partida o te empareja con otra gente con ganas de jugar. En 10 minutos estás riéndote con desconocidos.",
     step1Title: "Llegas",
     step1Body:
-      "Entras en l'Estació Espai Gastronòmic. Pides una bebida (esa es la consumición de 4€) o algo de picar. El #TeamKLEFF te recibe.",
+      "Entras en l'Estació Espai Gastronòmic. Pides una bebida (esa es la consumición de 4€) o algo de picar. Un miembro del #TeamKLEFF te recibe en la recepción.",
     step2Title: "Encuentras mesa",
     step2Body:
       "El #TeamKLEFF (camiseta roja) está para ayudarte. Te emparejan con gente buscando mesa, te recomiendan un juego según tus ganas y te lo explican si no lo conoces.",
     step3Title: "Juegas y vuelves",
     step3Body:
-      "Más de 300 juegos disponibles. Cuando termines una partida, prueba otra mesa o quédate en la tuya. La noche dura 4 horas y nadie tiene prisa.",
+      "Más de 500 juegos disponibles. Cuando termines una partida, prueba otra mesa o quédate en la tuya. La noche dura 4 horas y nadie tiene prisa.",
     activitiesTitle: "Qué puedes encontrar",
     activitiesSubtitle:
       "Desde la noche de juegos semanal hasta torneos, citas lúdicas y eventos solidarios.",
@@ -531,13 +531,13 @@ const en: Dict = {
       "No need to book a table or bring anyone. The #TeamKLEFF (red shirts) welcomes you, helps you find a table to start a game or pairs you with other people who want to play. Within 10 minutes you're laughing with strangers.",
     step1Title: "You arrive",
     step1Body:
-      "Walk into l'Estació Espai Gastronòmic. Order a drink (€4 minimum order) or something to snack on. A member of #TeamKLEFF welcomes you.",
+      "Walk into l'Estació Espai Gastronòmic. Order a drink (€4 minimum order) or something to snack on. A member of #TeamKLEFF welcomes you at the reception.",
     step2Title: "You find a table",
     step2Body:
       "The #TeamKLEFF (red shirts) is here to help. They pair you with people looking for a table, recommend a game based on your mood and explain the rules if you don't know it.",
     step3Title: "You play and come back",
     step3Body:
-      "Over 300 games available. Once you finish a round, try another table or stay at yours. The night runs for 4 hours and nobody's in a rush.",
+      "Over 500 games available. Once you finish a round, try another table or stay at yours. The night runs for 4 hours and nobody's in a rush.",
     activitiesTitle: "What you'll find",
     activitiesSubtitle:
       "From the weekly game night to tournaments, social-game dating and charity events.",
@@ -752,13 +752,13 @@ const ca: Dict = {
       "No cal reservar taula ni portar ningú. El #TeamKLEFF (samarreta vermella) et rep, t'ajuda a trobar taula per començar una partida o t'aparella amb altra gent amb ganes de jugar. En 10 minuts ja estàs rient amb desconeguts.",
     step1Title: "Arribes",
     step1Body:
-      "Entres a l'Estació Espai Gastronòmic. Demanes una beguda (això és la consumició de 4€) o alguna cosa per picar. El #TeamKLEFF et rep.",
+      "Entres a l'Estació Espai Gastronòmic. Demanes una beguda (això és la consumició de 4€) o alguna cosa per picar. Un membre del #TeamKLEFF et rep a la recepció.",
     step2Title: "Trobes taula",
     step2Body:
       "El #TeamKLEFF (samarreta vermella) hi és per ajudar-te. T'aparellen amb gent que busca taula, et recomanen un joc segons les teves ganes i te l'expliquen si no el coneixes.",
     step3Title: "Jugues i tornes",
     step3Body:
-      "Més de 300 jocs disponibles. Quan acabis una partida, prova una altra taula o queda't a la teva. La nit dura 4 hores i ningú no té pressa.",
+      "Més de 500 jocs disponibles. Quan acabis una partida, prova una altra taula o queda't a la teva. La nit dura 4 hores i ningú no té pressa.",
     activitiesTitle: "Què hi pots trobar",
     activitiesSubtitle:
       "Des de la nit de jocs setmanal fins a tornejos, cites lúdiques i esdeveniments solidaris.",
