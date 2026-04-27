@@ -73,7 +73,8 @@ export function SiteFooter() {
                 href="mailto:hola@kleff.es"
                 className="inline-flex items-center gap-2 hover:text-coral transition-colors"
               >
-                <Mail className="h-4 w-4" /> hola@kleff.es
+                <Mail className="h-4 w-4" />
+                <span>hola@kleff.es</span>
               </a>
             </li>
           </ul>
