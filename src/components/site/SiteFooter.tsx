@@ -10,13 +10,13 @@ export function SiteFooter() {
   return (
     <footer className="mt-24 bg-ink text-cream relative overflow-hidden border-t-4 border-coral">
       {/* Decorative coral square */}
-      <div className="absolute top-12 right-12 size-12 bg-coral rounded-2xl rotate-12 hidden md:block" />
-      <div className="absolute bottom-32 left-20 size-8 bg-coral/40 rounded-full -rotate-6 hidden md:block" />
+      <div className="absolute top-12 right-12 size-12 bg-coral rounded-2xl hidden md:block" />
+      <div className="absolute bottom-32 left-20 size-8 bg-coral/40 rounded-full hidden md:block" />
 
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16 grid gap-12 md:grid-cols-4 relative">
         <div className="md:col-span-2">
           <div className="flex items-center gap-3 mb-5">
-            <div className="size-12 bg-coral rounded-xl rotate-3 border-2 border-cream/20 flex items-center justify-center overflow-hidden">
+            <div className="size-12 bg-coral rounded-xl border-2 border-cream/20 flex items-center justify-center overflow-hidden">
               <img src={logo} alt="" className="h-10 w-10 object-contain" />
             </div>
             <span className="font-display font-bold text-2xl tracking-tight">KLEFF</span>
