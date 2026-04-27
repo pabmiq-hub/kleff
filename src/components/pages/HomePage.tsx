@@ -330,7 +330,7 @@ export function HomePage() {
       <section className="py-20 md:py-28 bg-cream-deep/40 border-y-2 border-ink/10">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
           <div className="order-2 lg:order-1 relative">
-            <div className="relative border-4 border-ink rounded-3xl shadow-tactile-lg overflow-hidden rotate-2">
+            <div className="relative border-4 border-ink rounded-3xl shadow-tactile-lg overflow-hidden">
               <img
                 src={tableImg}
                 alt="Mesa de juegos KLEFF"
@@ -339,11 +339,9 @@ export function HomePage() {
                 loading="lazy"
                 className="w-full h-[500px] object-cover"
               />
-              <div className="tape -top-2 left-10 -rotate-3" />
-              <div className="tape -bottom-2 right-12 rotate-3" />
             </div>
             {/* Stamp annotation */}
-            <div className="absolute -bottom-6 -right-4 bg-cream border-2 border-ink rounded-2xl px-4 py-2 -rotate-6 shadow-tactile-sm">
+            <div className="mt-4 inline-block bg-cream border-2 border-ink rounded-2xl px-4 py-2 shadow-tactile-sm">
               <p className="font-display font-bold text-sm">
                 {locale === "en" ? "100% real cardboard" : locale === "ca" ? "100% cartró real" : "100% cartón real"}
               </p>
@@ -383,8 +381,8 @@ export function HomePage() {
       {/* STATS */}
       <section className="py-20 md:py-28 bg-ink text-cream relative overflow-hidden">
         {/* Decorative coral squares */}
-        <div className="absolute top-10 left-10 size-16 bg-coral border-4 border-cream/20 rounded-2xl rotate-12 hidden md:block" />
-        <div className="absolute bottom-10 right-20 size-20 bg-coral/40 border-4 border-cream/20 rounded-full -rotate-6 hidden md:block" />
+        <div className="absolute top-10 left-10 size-16 bg-coral border-4 border-cream/20 rounded-2xl hidden md:block" />
+        <div className="absolute bottom-10 right-20 size-20 bg-coral/40 border-4 border-cream/20 rounded-full hidden md:block" />
 
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative">
           <span className="inline-block bg-coral text-cream px-3 py-1 text-xs font-bold uppercase tracking-widest mb-6">
@@ -414,12 +412,12 @@ export function HomePage() {
       {/* FINAL CTA */}
       <section className="py-20 md:py-28 bg-cream">
         <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
-          <div className="relative bg-coral border-4 border-ink rounded-[2.5rem] px-8 sm:px-16 py-16 sm:py-20 text-center shadow-tactile-lg -rotate-1">
+          <div className="relative bg-coral border-4 border-ink rounded-[2.5rem] px-6 sm:px-16 py-14 sm:py-20 text-center shadow-tactile-lg">
             {/* Decorative corner stickers */}
-            <div className="hidden sm:block absolute -top-5 -left-5 size-16 bg-cream border-4 border-ink rounded-full flex items-center justify-center font-display font-bold text-2xl rotate-12 shadow-tactile-sm">
+            <div className="hidden sm:block absolute -top-5 -left-5 size-16 bg-cream border-4 border-ink rounded-full flex items-center justify-center font-display font-bold text-2xl shadow-tactile-sm">
               <Dice5 className="h-7 w-7 text-coral" />
             </div>
-            <div className="hidden sm:flex absolute -bottom-5 -right-5 size-16 bg-ink border-4 border-cream rounded-full items-center justify-center -rotate-12 shadow-tactile-sm">
+            <div className="hidden sm:flex absolute -bottom-5 -right-5 size-16 bg-ink border-4 border-cream rounded-full items-center justify-center shadow-tactile-sm">
               <Sparkles className="h-7 w-7 text-coral" />
             </div>
 
