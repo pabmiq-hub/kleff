@@ -310,7 +310,7 @@ const es: Dict = {
       "No necesitas reservar mesa ni traer a nadie. El #TeamKLEFF (camiseta roja) te recibe, te ayuda a encontrar mesa donde empezar una partida o te empareja con otra gente con ganas de jugar. En 10 minutos estás riéndote con desconocidos.",
     step1Title: "Llegas",
     step1Body:
-      "Entras en l'Estació Espai Gastronòmic. Pides una bebida o algo de picar (esa es la consumición de 4€). Te apuntas en Meetup si todavía no lo has hecho.",
+      "Entras en l'Estació Espai Gastronòmic. Pides una bebida (esa es la consumición de 4€) o algo de picar. El #TeamKLEFF te recibe.",
     step2Title: "Encuentras mesa",
     step2Body:
       "El #TeamKLEFF (camiseta roja) está para ayudarte. Te emparejan con gente buscando mesa, te recomiendan un juego según tus ganas y te lo explican si no lo conoces.",
@@ -531,7 +531,7 @@ const en: Dict = {
       "No need to book a table or bring anyone. The #TeamKLEFF (red shirts) welcomes you, helps you find a table to start a game or pairs you with other people who want to play. Within 10 minutes you're laughing with strangers.",
     step1Title: "You arrive",
     step1Body:
-      "Walk into l'Estació Espai Gastronòmic. Order a drink or something to snack on (that's the €4 minimum). Sign up on Meetup if you haven't already.",
+      "Walk into l'Estació Espai Gastronòmic. Order a drink (€4 minimum order) or something to snack on. A member of #TeamKLEFF welcomes you.",
     step2Title: "You find a table",
     step2Body:
       "The #TeamKLEFF (red shirts) is here to help. They pair you with people looking for a table, recommend a game based on your mood and explain the rules if you don't know it.",
@@ -752,7 +752,7 @@ const ca: Dict = {
       "No cal reservar taula ni portar ningú. El #TeamKLEFF (samarreta vermella) et rep, t'ajuda a trobar taula per començar una partida o t'aparella amb altra gent amb ganes de jugar. En 10 minuts ja estàs rient amb desconeguts.",
     step1Title: "Arribes",
     step1Body:
-      "Entres a l'Estació Espai Gastronòmic. Demanes una beguda o alguna cosa per picar (això és la consumició de 4€). T'apuntes a Meetup si encara no ho has fet.",
+      "Entres a l'Estació Espai Gastronòmic. Demanes una beguda (això és la consumició de 4€) o alguna cosa per picar. El #TeamKLEFF et rep.",
     step2Title: "Trobes taula",
     step2Body:
       "El #TeamKLEFF (samarreta vermella) hi és per ajudar-te. T'aparellen amb gent que busca taula, et recomanen un joc segons les teves ganes i te l'expliquen si no el coneixes.",
