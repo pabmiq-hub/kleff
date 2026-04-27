@@ -1,96 +1,78 @@
-# Plan — KLEFF.es v2 (Fase 1)
+## Problema
 
-Construimos una web pública nueva, multi-idioma, con estética cálida y comunitaria (coral/crema del logo). Mantenemos tu WordPress actual como editor del blog (headless) para conservar las publicaciones existentes y la indexación en Google. La parte privada (carnet, alquiler de juegos, super admin) queda planificada como **Fase 2**.
+En móvil (360px) hay dos tipos de desalineación:
 
-## Lo que construiremos en esta fase
+1. **Rotaciones decorativas** (`-rotate-1`, `rotate-2`, `rotate-12`, `-rotate-6`, etc.) en hero, eventos, pilares, CTAs, sello de imagen, header (logo) y footer.
+2. **Overflow horizontal de elementos grandes**:
+   - La **"J" de "Juegos"** del título hero se sale del contenedor por la izquierda. Causa: `text-5xl sm:text-6xl` (40-48px) con `tracking-tight` y la serif `Fraunces` que tiene serifas anchas, sin padding lateral suficiente y con `leading-[0.92]`.
+   - El **CTA "Apúntate a la próxima Game Night"** sobresale por la derecha. Causa: botón con `px-7 py-4` + texto largo en flex-wrap que en 360px no rompe bien y el `border-2` + `shadow-tactile` (6px de offset) suma ancho extra que desborda el padding del contenedor.
 
-### 1. Estética y sistema de diseño
-- Paleta basada en tu logo: coral/salmón como color principal, crema como fondo, acentos cálidos.
-- Tipografías amables (sans serif redondeada para titulares + sans legible para texto).
-- Componentes reutilizables: botones, cards, hero, secciones de stats, "ficha de persona", grid de eventos, header/footer.
-- Mucho aire, fotos grandes de gente jugando, esquinas redondeadas, microinteracciones suaves.
-- Modo claro como predeterminado; estructura preparada por si más adelante quieres modo oscuro.
+## Objetivo
 
-### 2. Multi-idioma (ES / EN / CA)
-- Cada idioma tiene su propio prefijo de URL para máximo SEO:
-  - `/` → español (idioma principal)
-  - `/en/...` → inglés
-  - `/ca/...` → catalán
-- Selector de idioma en el header (banderitas o códigos ES/EN/CA).
-- Detección automática del idioma del navegador la primera visita, con posibilidad de cambiar.
-- Etiquetas `hreflang` en cada página para que Google sepa que son la misma página en otros idiomas.
-- Textos de la web informativa traducidos a los 3 idiomas desde el principio.
+Eliminar todas las rotaciones de bloques de contenido y arreglar el overflow horizontal en móvil para que **nada sobresalga del contenedor** en ningún ancho.
 
-### 3. Páginas (rutas separadas, no anclas)
-Cada sección será una página propia con su título, descripción, imagen de compartir y URL indexable:
+## Cambios
 
-- **Home** (`/`) — Hero con claim "Jugar a juegos de mesa en Barcelona", 3 pilares (comunidad, ubicación céntrica, buen ambiente), próximos eventos de Meetup, sección "4 razones para unirte a Game Night" con imagen/reel + 5 puntos, CTAs hacia Meetup/WhatsApp/Telegram, footer con redes y contacto.
-- **Quiénes somos** (`/quienes-somos` / `/en/about` / `/ca/qui-som`) — Historia, valores, stats (asistentes, juegos, crecimiento, alcance en redes), público objetivo, qué hacemos (semanal, mensual, anual), comunidades (Blood on the Clocktower, Catan, Unmatched, Roles Ocultos), colaboradores y editoriales, presencia en medios, **fichas interactivas del equipo** con foto, nombre, rol y bio que se expanden al pasar el ratón / tocar.
-- **Blog** (`/blog`) — Listado de posts traídos desde tu WordPress + detalle de cada post (`/blog/[slug]`).
-- **Contacto** (`/contacto`) — Datos, redes y formulario simple.
+### `src/components/pages/HomePage.tsx`
 
-### 4. Integración con Meetup
-- Sección en la home con los próximos eventos cargados automáticamente desde Meetup (título, fecha, hora, lugar, botón "Apuntarme").
-- Caché en servidor para evitar peticiones constantes y carga rápida.
-- Si Meetup no responde, mostramos mensaje amable y enlace directo al perfil.
+**Hero — fix overflow + rotaciones:**
+- Título hero: bajar el tamaño base en móvil de `text-5xl` a `text-4xl` y mantener escalado (`sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl`). Cambiar `tracking-tight` a `tracking-normal` para evitar que las serifas se salgan. Añadir `break-words` por seguridad.
+- Eyebrow badge: quitar `-rotate-2`.
+- Marco imagen principal: quitar `-rotate-2`.
+- Quitar la cinta superior (`tape ... rotate-1`).
+- Token "10K+ personas": quitar `rotate-12`.
+- Token "300+ juegos": quitar `-rotate-6`.
+- Sticker "Cada miércoles": quitar `rotate-6` y convertirlo en chip recto.
 
-### 5. Blog headless con WordPress
-- Tu WordPress sigue siendo el editor: cuando publicas un post nuevo en WordPress, aparece automáticamente en la nueva web.
-- Leemos los posts vía la **API REST de WordPress** (`/wp-json/wp/v2/posts`) — no hace falta plugin de pago.
-- **URLs preservadas**: cada post mantiene el slug actual (`/blog/mi-post-existente`) para no perder posicionamiento.
-- Renderizado en servidor (SSR) con metadatos correctos (title, description, og:image desde la imagen destacada del post) para que Google y redes sociales lo indexen igual o mejor que ahora.
-- Listado paginado, búsqueda básica por título, filtro por categoría.
-- Caché por post para que la web vaya rápida.
+**CTAs — fix overflow:**
+- Reducir padding en móvil del CTA primario: de `px-7 py-4` a `px-5 py-3.5 sm:px-7 sm:py-4`.
+- Añadir `max-w-full` al contenedor de botones y `whitespace-normal text-center` al CTA primario para permitir wrap del texto largo.
+- Asegurar que el `shadow-tactile` (6px offset) no fuerce desbordamiento: envolver con `overflow-x-clip` en la sección hero.
 
-### 6. Traducción automática del blog con IA
-- Cuando un post nuevo de WordPress se carga por primera vez en un idioma que no existe, lo traducimos al vuelo con la IA de Lovable y guardamos la traducción.
-- Cada traducción tiene su propia URL (`/en/blog/my-post`, `/ca/blog/el-meu-post`) → SEO multi-idioma real.
-- Las traducciones quedan guardadas para no re-traducir cada visita (ahorra coste y es instantáneo).
-- Botón discreto "¿Mejor traducción?" para regenerar manualmente si una traducción no convence.
+**Pillars:**
+- Quitar la prop `rotation` de `PillarCard` y de las tres llamadas.
 
-### 7. SEO y rendimiento
-- Renderizado en servidor (SSR) en todas las páginas.
-- `sitemap.xml` automático con todas las páginas y todos los posts en los 3 idiomas.
-- `robots.txt` correcto.
-- Metadatos Open Graph y Twitter Card por página (incluyendo posts del blog con su imagen destacada).
-- Datos estructurados JSON-LD (Organization, BlogPosting) para resultados enriquecidos en Google.
-- Imágenes optimizadas y carga diferida.
+**Events:**
+- Eliminar `cardRotations` y la prop `rotation` de `EventCard`. Cards rectas.
 
-### 8. Migración desde el WordPress actual
-- Antes de cambiar el dominio, mapeamos las URLs antiguas a las nuevas (debería ser 1:1 para los posts del blog).
-- Plan de redirecciones 301 para cualquier URL que cambie, para no perder nada de SEO.
-- Coordinamos el cambio de DNS contigo cuando todo esté listo.
+**Reasons + Image:**
+- Quitar `rotate-2` del marco de la imagen.
+- Quitar las dos cintas (`-rotate-3`, `rotate-3`).
+- Sello "100% cartón real": quitar `-rotate-6`, dejar recto.
 
----
+**Stats (sección oscura):**
+- Quitar `rotate-12` y `-rotate-6` de las formas decorativas.
 
-## Detalles técnicos (sección para tu equipo técnico)
+**Final CTA:**
+- Quitar `-rotate-1` de la tarjeta coral grande.
+- Stickers de esquina: quitar `rotate-12` / `-rotate-12`.
 
-- **Stack**: TanStack Start (React 19 + SSR) sobre Cloudflare Workers, Tailwind CSS v4. Despliegue desde Lovable.
-- **Backend**: Lovable Cloud (Supabase) para almacenar traducciones cacheadas, configuración del sitio y, en Fase 2, los datos de usuarios/auth.
-- **WordPress**: Tu instalación actual permanece intacta. Consumimos `wp-json/wp/v2/posts?_embed` desde server functions con caché. Los slugs originales de posts se respetan tal cual.
-- **Traducciones IA**: Lovable AI Gateway (Gemini Flash por coste/velocidad) invocado desde server function; resultado guardado en tabla `post_translations` con `(post_id, locale)` como clave. Para textos estáticos de la UI usamos archivos JSON por idioma (`es.json`, `en.json`, `ca.json`).
-- **Meetup**: API REST pública del grupo, server function con caché de 10 minutos.
-- **Routing i18n**: rutas con prefijo (`/en/*`, `/ca/*`) usando layouts de TanStack Router; tags `hreflang` y `lang` correctos.
-- **Sitemap**: ruta server `/sitemap.xml` que combina rutas estáticas + slugs de WordPress en los 3 idiomas.
+### `src/components/site/SiteHeader.tsx`
 
----
+- Logo: quitar `rotate-3` y `group-hover:rotate-6` del contenedor del logo.
 
-## Lo que NO incluye esta fase (Fase 2 propuesta más adelante)
+### `src/components/site/SiteFooter.tsx`
 
-- Sistema de autenticación, registro por invitación y panel de Super Admin.
-- Carnet de Kleffer.
-- Sistema de alquiler de juegos sincronizado con BoardGameGeek.
-- Panel privado de usuario.
+- Quitar `rotate-12` y `-rotate-6` de las dos formas decorativas flotantes.
+- Logo del footer: quitar `rotate-3`.
 
-Lo dejamos diseñado en cuanto a arquitectura (la base de datos y el sistema de roles ya quedarán pensados) pero no construido, para que la fase 1 salga rápida y limpia.
+### Anti-overflow global (en `src/styles.css`)
 
----
+- Añadir `html, body { overflow-x: hidden; }` como red de seguridad para que ninguna rotación o sombra residual cause scroll horizontal en móvil.
 
-## Antes de empezar necesitaré de ti
+### About / Blog / Contact
 
-1. **URL exacta del WordPress actual** y confirmar que `kleff.es/wp-json/wp/v2/posts` responde (es público por defecto).
-2. **Acceso o URL pública del grupo de Meetup** de KLEFF.
-3. **Fotos del equipo** (o me dices si las saco de las redes sociales) y nombres + roles + bio corta de cada miembro.
-4. **Confirmar paleta exacta**: ¿usamos el coral del logo tal cual o quieres ajustar tono?
+Sin rotaciones detectadas y sin titulares que desborden. No requieren cambios.
 
-Cuando aprobes el plan, empezaré por el sistema de diseño + la home en español, y luego iremos extendiendo a las demás páginas e idiomas.
+## Lo que se mantiene
+
+- Bordes negros gruesos `border-2 / border-4 border-ink`.
+- Sombras duras `shadow-tactile` (sin rotación).
+- Hover con desplazamiento.
+- Marker highlights (`marker-coral`) en el título del hero.
+- Stamps (`stamp-ink`, `stamp-coral`) en eyebrows.
+- Tokens flotantes rectos, paleta cálida.
+
+## Resultado esperado
+
+En móvil 360px y desktop: la "J" de "Juegos" queda dentro del contenedor, el CTA "Apúntate a la próxima Game Night" no desborda (con wrap si hace falta), y todos los bloques (texto, imágenes, cards, badges, logo) están rectos y alineados al grid en todas las páginas.
