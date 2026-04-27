@@ -180,7 +180,7 @@ export function HomePage() {
               </p>
             </div>
             <a
-              href="https://www.meetup.com/kleff/"
+              href="https://www.meetup.com/es-es/kleff-bcn/events/"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 text-sm font-semibold text-coral-deep hover:text-coral transition-colors"
@@ -190,12 +190,22 @@ export function HomePage() {
             </a>
           </div>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            {/* Placeholder events; later wired to Meetup API */}
-            <EventCardPlaceholder index={0} />
-            <EventCardPlaceholder index={1} />
-            <EventCardPlaceholder index={2} />
-          </div>
+          {events.length === 0 ? (
+            <div className="rounded-2xl border border-border/60 bg-card p-10 text-center text-muted-foreground">
+              {t.home.eventsEmpty}
+            </div>
+          ) : (
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {events.slice(0, 6).map((e) => (
+                <EventCard
+                  key={e.id}
+                  event={e}
+                  locale={locale}
+                  joinLabel={t.home.eventJoin}
+                />
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
