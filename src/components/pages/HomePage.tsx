@@ -482,9 +482,11 @@ export function HomePage() {
             <div className="inline-flex items-center gap-2 bg-card border-2 border-ink rounded-2xl px-4 py-2 shadow-tactile-sm">
               <Star className="h-4 w-4 text-coral fill-coral" />
               <span className="font-display font-bold text-lg tabular-nums">
-                {locale === "en" ? "5.0" : "5,0"}
+                {googleRating.toFixed(1).replace(".", locale === "en" ? "." : ",")}
               </span>
-              <span className="text-xs font-bold uppercase tracking-wider text-foreground/60">Google</span>
+              <span className="text-xs font-bold uppercase tracking-wider text-foreground/60">
+                Google{googleRatingCount != null ? ` · ${formatNumber(googleRatingCount, locale)}` : ""}
+              </span>
             </div>
           </div>
 
