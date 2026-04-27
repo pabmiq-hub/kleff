@@ -34,6 +34,98 @@ function useMeetupEvents(): MeetupLoaderData {
   return data ?? { events: [], error: null, cachedAt: 0 };
 }
 
+function PillarCard({ icon, title, body }: { icon: React.ReactNode; title: string; body: string }) {
+  return (
+    <div className="group relative p-7 rounded-3xl bg-card border border-border/60 hover:border-coral/40 hover:shadow-warm hover:-translate-y-1 transition-all duration-300">
+      <div className="h-12 w-12 rounded-2xl bg-coral/15 text-coral-deep flex items-center justify-center group-hover:bg-coral group-hover:text-cream transition-colors">
+        {icon}
+      </div>
+      <h3 className="mt-5 text-2xl font-display font-semibold text-foreground">{title}</h3>
+      <p className="mt-3 text-base text-muted-foreground leading-relaxed">{body}</p>
+    </div>
+  );
+}
+
+function EventCard({
+  event,
+  locale,
+  joinLabel,
+}: {
+  event: MeetupEvent;
+  locale: string;
+  joinLabel: string;
+}) {
+  const date = new Date(event.dateTime);
+  const localeTag = locale === "ca" ? "ca-ES" : locale === "en" ? "en-GB" : "es-ES";
+  const day = date.toLocaleDateString(localeTag, { weekday: "short", timeZone: "Europe/Madrid" });
+  const num = date.toLocaleDateString(localeTag, { day: "numeric", timeZone: "Europe/Madrid" });
+  const month = date.toLocaleDateString(localeTag, { month: "short", timeZone: "Europe/Madrid" });
+  const time = date.toLocaleTimeString(localeTag, { hour: "2-digit", minute: "2-digit", timeZone: "Europe/Madrid" });
+  const endTime = event.endTime
+    ? new Date(event.endTime).toLocaleTimeString(localeTag, { hour: "2-digit", minute: "2-digit", timeZone: "Europe/Madrid" })
+    : null;
+  const fullDate = date.toLocaleDateString(localeTag, {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+    timeZone: "Europe/Madrid",
+  });
+
+  return (
+    <article className="group flex flex-col rounded-3xl bg-card border border-border/60 overflow-hidden hover:border-coral/40 hover:shadow-warm hover:-translate-y-1 transition-all duration-300">
+      <div className="relative aspect-[16/10] bg-primary-soft/30 overflow-hidden">
+        {event.imageUrl ? (
+          <img
+            src={event.imageUrl}
+            alt={event.title}
+            loading="lazy"
+            className="absolute inset-0 h-full w-full object-cover group-hover:scale-105 transition-transform duration-500"
+          />
+        ) : (
+          <div className="absolute inset-0 bg-gradient-coral" />
+        )}
+        <div className="absolute top-4 left-4 bg-cream/95 backdrop-blur rounded-xl px-3 py-2 shadow-soft text-center min-w-[64px]">
+          <div className="text-[10px] font-bold uppercase tracking-wider text-coral-deep leading-none">
+            {day.replace(".", "")}
+          </div>
+          <div className="text-2xl font-display font-bold text-foreground leading-none mt-1">{num}</div>
+          <div className="text-[10px] font-semibold uppercase text-muted-foreground leading-none mt-1">
+            {month.replace(".", "")}
+          </div>
+        </div>
+      </div>
+      <div className="flex-1 flex flex-col p-5">
+        <time dateTime={event.dateTime} className="text-xs font-semibold text-coral-deep uppercase tracking-wider">
+          {fullDate} · {time}
+          {endTime ? ` – ${endTime}` : ""}
+        </time>
+        <h3 className="mt-2 text-lg font-display font-semibold text-foreground line-clamp-2 leading-snug">
+          {event.title}
+        </h3>
+        {(event.venueName || event.venueAddress) && (
+          <p className="mt-2 text-sm text-muted-foreground flex items-start gap-1.5">
+            <MapPin className="h-4 w-4 shrink-0 mt-0.5 text-coral" />
+            <span className="line-clamp-2">
+              {event.venueName}
+              {event.venueAddress ? ` · ${event.venueAddress}` : ""}
+            </span>
+          </p>
+        )}
+        <a
+          href={event.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mt-4 inline-flex items-center justify-center gap-2 rounded-full bg-coral text-primary-foreground px-5 py-2.5 text-sm font-semibold hover:bg-coral-deep transition-colors self-start"
+        >
+          {joinLabel}
+          <ArrowRight className="h-4 w-4" />
+        </a>
+      </div>
+    </article>
+  );
+}
+
 export function HomePage() {
   const { t, href, locale } = useI18n();
   const { events } = useMeetupEvents();
@@ -303,113 +395,3 @@ export function HomePage() {
   );
 }
 
-function PillarCard({ icon, title, body }: { icon: React.ReactNode; title: string; body: string }) {
-  return (
-    <div className="group relative p-7 rounded-3xl bg-card border border-border/60 hover:border-coral/40 hover:shadow-warm hover:-translate-y-1 transition-all duration-300">
-      <div className="h-12 w-12 rounded-2xl bg-coral/15 text-coral-deep flex items-center justify-center group-hover:bg-coral group-hover:text-cream transition-colors">
-        {icon}
-      </div>
-      <h3 className="mt-5 text-2xl font-display font-semibold text-foreground">{title}</h3>
-      <p className="mt-3 text-base text-muted-foreground leading-relaxed">{body}</p>
-    </div>
-  );
-}
-
-function EventCard({
-  event,
-  locale,
-  joinLabel,
-}: {
-  event: MeetupEvent;
-  locale: string;
-  joinLabel: string;
-}) {
-  const date = new Date(event.dateTime);
-  const localeTag = locale === "ca" ? "ca-ES" : locale === "en" ? "en-GB" : "es-ES";
-  const day = date.toLocaleDateString(localeTag, {
-    weekday: "short",
-    timeZone: "Europe/Madrid",
-  });
-  const num = date.toLocaleDateString(localeTag, {
-    day: "numeric",
-    timeZone: "Europe/Madrid",
-  });
-  const month = date.toLocaleDateString(localeTag, {
-    month: "short",
-    timeZone: "Europe/Madrid",
-  });
-  const time = date.toLocaleTimeString(localeTag, {
-    hour: "2-digit",
-    minute: "2-digit",
-    timeZone: "Europe/Madrid",
-  });
-  const endTime = event.endTime
-    ? new Date(event.endTime).toLocaleTimeString(localeTag, {
-        hour: "2-digit",
-        minute: "2-digit",
-        timeZone: "Europe/Madrid",
-      })
-    : null;
-  const fullDate = date.toLocaleDateString(localeTag, {
-    weekday: "long",
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-    timeZone: "Europe/Madrid",
-  });
-
-  return (
-    <article className="group flex flex-col rounded-3xl bg-card border border-border/60 overflow-hidden hover:border-coral/40 hover:shadow-warm hover:-translate-y-1 transition-all duration-300">
-      <div className="relative aspect-[16/10] bg-coral-soft/30 overflow-hidden">
-        {event.imageUrl ? (
-          <img
-            src={event.imageUrl}
-            alt={event.title}
-            loading="lazy"
-            className="absolute inset-0 h-full w-full object-cover group-hover:scale-105 transition-transform duration-500"
-          />
-        ) : (
-          <div className="absolute inset-0 bg-gradient-coral" />
-        )}
-        <div className="absolute top-4 left-4 bg-cream/95 backdrop-blur rounded-xl px-3 py-2 shadow-soft text-center min-w-[64px]">
-          <div className="text-[10px] font-bold uppercase tracking-wider text-coral-deep leading-none">
-            {day.replace(".", "")}
-          </div>
-          <div className="text-2xl font-display font-bold text-foreground leading-none mt-1">
-            {num}
-          </div>
-          <div className="text-[10px] font-semibold uppercase text-muted-foreground leading-none mt-1">
-            {month.replace(".", "")}
-          </div>
-        </div>
-      </div>
-      <div className="flex-1 flex flex-col p-5">
-        <time dateTime={event.dateTime} className="text-xs font-semibold text-coral-deep uppercase tracking-wider">
-          {fullDate} · {time}
-          {endTime ? ` – ${endTime}` : ""}
-        </time>
-        <h3 className="mt-2 text-lg font-display font-semibold text-foreground line-clamp-2 leading-snug">
-          {event.title}
-        </h3>
-        {(event.venueName || event.venueAddress) && (
-          <p className="mt-2 text-sm text-muted-foreground flex items-start gap-1.5">
-            <MapPin className="h-4 w-4 shrink-0 mt-0.5 text-coral" />
-            <span className="line-clamp-2">
-              {event.venueName}
-              {event.venueAddress ? ` · ${event.venueAddress}` : ""}
-            </span>
-          </p>
-        )}
-        <a
-          href={event.url}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="mt-4 inline-flex items-center justify-center gap-2 rounded-full bg-coral text-primary-foreground px-5 py-2.5 text-sm font-semibold hover:bg-coral-deep transition-colors self-start"
-        >
-          {joinLabel}
-          <ArrowRight className="h-4 w-4" />
-        </a>
-      </div>
-    </article>
-  );
-}
