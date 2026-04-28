@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as MediaRouteImport } from './routes/media'
+import { Route as LoginRouteImport } from './routes/login'
 import { Route as HowItWorksRouteImport } from './routes/how-it-works'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as BlogRouteImport } from './routes/blog'
@@ -17,6 +18,7 @@ import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as EnIndexRouteImport } from './routes/en.index'
 import { Route as CaIndexRouteImport } from './routes/ca.index'
+import { Route as InviteTokenRouteImport } from './routes/invite.$token'
 import { Route as EnMediaRouteImport } from './routes/en.media'
 import { Route as EnHowItWorksRouteImport } from './routes/en.how-it-works'
 import { Route as EnContactRouteImport } from './routes/en.contact'
@@ -31,6 +33,11 @@ import { Route as CaAboutRouteImport } from './routes/ca.about'
 const MediaRoute = MediaRouteImport.update({
   id: '/media',
   path: '/media',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
 const HowItWorksRoute = HowItWorksRouteImport.update({
@@ -66,6 +73,11 @@ const EnIndexRoute = EnIndexRouteImport.update({
 const CaIndexRoute = CaIndexRouteImport.update({
   id: '/ca/',
   path: '/ca/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const InviteTokenRoute = InviteTokenRouteImport.update({
+  id: '/invite/$token',
+  path: '/invite/$token',
   getParentRoute: () => rootRouteImport,
 } as any)
 const EnMediaRoute = EnMediaRouteImport.update({
@@ -125,6 +137,7 @@ export interface FileRoutesByFullPath {
   '/blog': typeof BlogRoute
   '/contact': typeof ContactRoute
   '/how-it-works': typeof HowItWorksRoute
+  '/login': typeof LoginRoute
   '/media': typeof MediaRoute
   '/ca/about': typeof CaAboutRoute
   '/ca/blog': typeof CaBlogRoute
@@ -136,6 +149,7 @@ export interface FileRoutesByFullPath {
   '/en/contact': typeof EnContactRoute
   '/en/how-it-works': typeof EnHowItWorksRoute
   '/en/media': typeof EnMediaRoute
+  '/invite/$token': typeof InviteTokenRoute
   '/ca/': typeof CaIndexRoute
   '/en/': typeof EnIndexRoute
 }
@@ -145,6 +159,7 @@ export interface FileRoutesByTo {
   '/blog': typeof BlogRoute
   '/contact': typeof ContactRoute
   '/how-it-works': typeof HowItWorksRoute
+  '/login': typeof LoginRoute
   '/media': typeof MediaRoute
   '/ca/about': typeof CaAboutRoute
   '/ca/blog': typeof CaBlogRoute
@@ -156,6 +171,7 @@ export interface FileRoutesByTo {
   '/en/contact': typeof EnContactRoute
   '/en/how-it-works': typeof EnHowItWorksRoute
   '/en/media': typeof EnMediaRoute
+  '/invite/$token': typeof InviteTokenRoute
   '/ca': typeof CaIndexRoute
   '/en': typeof EnIndexRoute
 }
@@ -166,6 +182,7 @@ export interface FileRoutesById {
   '/blog': typeof BlogRoute
   '/contact': typeof ContactRoute
   '/how-it-works': typeof HowItWorksRoute
+  '/login': typeof LoginRoute
   '/media': typeof MediaRoute
   '/ca/about': typeof CaAboutRoute
   '/ca/blog': typeof CaBlogRoute
@@ -177,6 +194,7 @@ export interface FileRoutesById {
   '/en/contact': typeof EnContactRoute
   '/en/how-it-works': typeof EnHowItWorksRoute
   '/en/media': typeof EnMediaRoute
+  '/invite/$token': typeof InviteTokenRoute
   '/ca/': typeof CaIndexRoute
   '/en/': typeof EnIndexRoute
 }
@@ -188,6 +206,7 @@ export interface FileRouteTypes {
     | '/blog'
     | '/contact'
     | '/how-it-works'
+    | '/login'
     | '/media'
     | '/ca/about'
     | '/ca/blog'
@@ -199,6 +218,7 @@ export interface FileRouteTypes {
     | '/en/contact'
     | '/en/how-it-works'
     | '/en/media'
+    | '/invite/$token'
     | '/ca/'
     | '/en/'
   fileRoutesByTo: FileRoutesByTo
@@ -208,6 +228,7 @@ export interface FileRouteTypes {
     | '/blog'
     | '/contact'
     | '/how-it-works'
+    | '/login'
     | '/media'
     | '/ca/about'
     | '/ca/blog'
@@ -219,6 +240,7 @@ export interface FileRouteTypes {
     | '/en/contact'
     | '/en/how-it-works'
     | '/en/media'
+    | '/invite/$token'
     | '/ca'
     | '/en'
   id:
@@ -228,6 +250,7 @@ export interface FileRouteTypes {
     | '/blog'
     | '/contact'
     | '/how-it-works'
+    | '/login'
     | '/media'
     | '/ca/about'
     | '/ca/blog'
@@ -239,6 +262,7 @@ export interface FileRouteTypes {
     | '/en/contact'
     | '/en/how-it-works'
     | '/en/media'
+    | '/invite/$token'
     | '/ca/'
     | '/en/'
   fileRoutesById: FileRoutesById
@@ -249,6 +273,7 @@ export interface RootRouteChildren {
   BlogRoute: typeof BlogRoute
   ContactRoute: typeof ContactRoute
   HowItWorksRoute: typeof HowItWorksRoute
+  LoginRoute: typeof LoginRoute
   MediaRoute: typeof MediaRoute
   CaAboutRoute: typeof CaAboutRoute
   CaBlogRoute: typeof CaBlogRoute
@@ -260,6 +285,7 @@ export interface RootRouteChildren {
   EnContactRoute: typeof EnContactRoute
   EnHowItWorksRoute: typeof EnHowItWorksRoute
   EnMediaRoute: typeof EnMediaRoute
+  InviteTokenRoute: typeof InviteTokenRoute
   CaIndexRoute: typeof CaIndexRoute
   EnIndexRoute: typeof EnIndexRoute
 }
@@ -271,6 +297,13 @@ declare module '@tanstack/react-router' {
       path: '/media'
       fullPath: '/media'
       preLoaderRoute: typeof MediaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/how-it-works': {
@@ -320,6 +353,13 @@ declare module '@tanstack/react-router' {
       path: '/ca'
       fullPath: '/ca/'
       preLoaderRoute: typeof CaIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/invite/$token': {
+      id: '/invite/$token'
+      path: '/invite/$token'
+      fullPath: '/invite/$token'
+      preLoaderRoute: typeof InviteTokenRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/en/media': {
@@ -401,6 +441,7 @@ const rootRouteChildren: RootRouteChildren = {
   BlogRoute: BlogRoute,
   ContactRoute: ContactRoute,
   HowItWorksRoute: HowItWorksRoute,
+  LoginRoute: LoginRoute,
   MediaRoute: MediaRoute,
   CaAboutRoute: CaAboutRoute,
   CaBlogRoute: CaBlogRoute,
@@ -412,6 +453,7 @@ const rootRouteChildren: RootRouteChildren = {
   EnContactRoute: EnContactRoute,
   EnHowItWorksRoute: EnHowItWorksRoute,
   EnMediaRoute: EnMediaRoute,
+  InviteTokenRoute: InviteTokenRoute,
   CaIndexRoute: CaIndexRoute,
   EnIndexRoute: EnIndexRoute,
 }
