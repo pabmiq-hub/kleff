@@ -51,6 +51,7 @@ const homeSchema: PageSchema = {
         ctaPrimary: { kind: "text", label: "Botón principal — texto" },
         ctaPrimaryHref: { kind: "url", label: "Botón principal — enlace" },
         ctaSecondary: { kind: "text", label: "Botón secundario — texto" },
+        image: { kind: "image", label: "Imagen principal" },
       },
       defaults: {
         eyebrow: "",
@@ -61,6 +62,7 @@ const homeSchema: PageSchema = {
         ctaPrimary: "",
         ctaPrimaryHref: "https://www.meetup.com/es-ES/kleff-bcn/events/?type=upcoming",
         ctaSecondary: "",
+        image: "",
       },
     },
     {
