@@ -71,6 +71,86 @@ export type Database = {
         }
         Relationships: []
       }
+      page_blocks: {
+        Row: {
+          content: Json
+          created_at: string
+          id: string
+          page_id: string
+          position: number
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          content?: Json
+          created_at?: string
+          id?: string
+          page_id: string
+          position?: number
+          type: string
+          updated_at?: string
+        }
+        Update: {
+          content?: Json
+          created_at?: string
+          id?: string
+          page_id?: string
+          position?: number
+          type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "page_blocks_page_id_fkey"
+            columns: ["page_id"]
+            isOneToOne: false
+            referencedRelation: "pages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pages: {
+        Row: {
+          created_at: string
+          created_by: string
+          description: string | null
+          id: string
+          locale: Database["public"]["Enums"]["page_locale"]
+          og_image_url: string | null
+          published_at: string | null
+          slug: string
+          status: Database["public"]["Enums"]["page_status"]
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          description?: string | null
+          id?: string
+          locale?: Database["public"]["Enums"]["page_locale"]
+          og_image_url?: string | null
+          published_at?: string | null
+          slug: string
+          status?: Database["public"]["Enums"]["page_status"]
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          id?: string
+          locale?: Database["public"]["Enums"]["page_locale"]
+          og_image_url?: string | null
+          published_at?: string | null
+          slug?: string
+          status?: Database["public"]["Enums"]["page_status"]
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -322,6 +402,8 @@ export type Database = {
         | "non_binary"
         | "other"
         | "prefer_not_to_say"
+      page_locale: "es" | "ca" | "en"
+      page_status: "draft" | "published"
       rental_request_status: "pending" | "approved" | "rejected" | "cancelled"
       rental_status: "active" | "returned" | "overdue" | "lost"
     }
@@ -459,6 +541,8 @@ export const Constants = {
         "other",
         "prefer_not_to_say",
       ],
+      page_locale: ["es", "ca", "en"],
+      page_status: ["draft", "published"],
       rental_request_status: ["pending", "approved", "rejected", "cancelled"],
       rental_status: ["active", "returned", "overdue", "lost"],
     },
