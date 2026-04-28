@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
+import type { Json } from "@/integrations/supabase/types";
 
 const pathSchema = z.string().min(1).max(256).regex(/^\/[a-zA-Z0-9/_-]*$/);
 const elementIdSchema = z.string().min(1).max(128).regex(/^[a-zA-Z0-9._:-]+$/);
@@ -11,8 +12,18 @@ export type OverrideRow = {
   page_path: string;
   element_id: string;
   property: string;
-  value: unknown;
+  value: Json | null;
   status: "draft" | "published";
+};
+
+export type PageRow = {
+  id: string;
+  path: string;
+  title: string;
+  template: string;
+  is_builtin: boolean;
+  is_published: boolean;
+  updated_at: string;
 };
 
 // PUBLIC: get published overrides for a page (for visitors)
