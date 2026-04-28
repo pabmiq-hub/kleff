@@ -566,7 +566,7 @@ export function HomePage() {
           <div className="order-2 lg:order-1 relative">
             <div className="relative border-4 border-ink rounded-3xl shadow-tactile-lg overflow-hidden">
               <img
-                src={tableImg}
+                src={or(reasonsSec.image, tableImg) as string}
                 alt="Mesa de juegos KLEFF"
                 width={1200}
                 height={1400}
@@ -576,17 +576,17 @@ export function HomePage() {
             </div>
             <div className="mt-4 inline-block bg-cream border-2 border-ink rounded-2xl px-4 py-2 shadow-tactile-sm">
               <p className="font-display font-bold text-sm">
-                {locale === "en" ? "100% real cardboard" : locale === "ca" ? "100% cartró real" : "100% cartón real"}
+                {or(reasonsSec.imageBadge, locale === "en" ? "100% real cardboard" : locale === "ca" ? "100% cartró real" : "100% cartón real")}
               </p>
             </div>
           </div>
 
           <div className="order-1 lg:order-2">
             <span className="inline-block stamp-coral text-xs font-bold uppercase tracking-widest mb-4">
-              {t.home.reasonsEyebrow}
+              {or(reasonsSec.eyebrow, t.home.reasonsEyebrow)}
             </span>
             <h2 className="text-4xl sm:text-5xl lg:text-6xl font-display font-semibold text-foreground leading-[1.05]">
-              {t.home.reasonsTitle}
+              {or(reasonsSec.title, t.home.reasonsTitle)}
             </h2>
             <ul className="mt-10 space-y-4">
               {reasons.map((r, i) => {
