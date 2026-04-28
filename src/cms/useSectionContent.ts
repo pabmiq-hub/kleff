@@ -18,7 +18,8 @@ export function useSectionContent<T extends Record<string, unknown> = Record<str
       for (const m of s.matches) {
         const ld: any = m.loaderData;
         if (ld?.pageContent?.sections && sectionKey in ld.pageContent.sections) {
-          return ld.pageContent.sections[sectionKey] as Record<string, unknown>;
+          const v = ld.pageContent.sections[sectionKey];
+          return (v && typeof v === "object" ? v : {}) as Record<string, unknown>;
         }
       }
       return null;
