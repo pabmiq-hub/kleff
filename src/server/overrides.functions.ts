@@ -174,9 +174,9 @@ export const listContentPages = createServerFn({ method: "GET" }).handler(async 
     .order("title", { ascending: true });
   if (error) {
     console.error("listContentPages error", error);
-    return { pages: [] as Array<Record<string, unknown>> };
+    return { pages: [] as PageRow[] };
   }
-  return { pages: (data ?? []) as Array<Record<string, unknown>> };
+  return { pages: (data ?? []) as PageRow[] };
 });
 
 // ADMIN: create a new custom page
