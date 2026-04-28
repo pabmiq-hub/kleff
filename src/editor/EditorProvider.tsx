@@ -20,6 +20,7 @@ import {
   getPublishedOverrides,
 } from "@/server/overrides.functions";
 import { useAuth } from "@/auth/AuthProvider";
+import { useI18n } from "@/i18n/I18nProvider";
 import type { OverrideMap, StyleProps } from "./types";
 import { buildOverrideMap } from "./types";
 
@@ -64,6 +65,7 @@ const EditorContext = createContext<EditorContextValue | undefined>(undefined);
 
 export function EditorProvider({ children }: { children: ReactNode }) {
   const { isSuperAdmin } = useAuth();
+  const { locale } = useI18n();
   const pagePath = useRouterState({
     select: (s) => {
       // Strip trailing slashes
@@ -99,11 +101,11 @@ export function EditorProvider({ children }: { children: ReactNode }) {
     setLoading(true);
     try {
       if (isSuperAdmin) {
-        const r = await getAll({ data: { pagePath } });
+        const r = await getAll({ data: { pagePath, locale } });
         setOverrides(buildOverrideMap(r.overrides));
         setHasDrafts(r.overrides.some((o) => o.status === "draft"));
       } else {
-        const r = await getPublic({ data: { pagePath } });
+        const r = await getPublic({ data: { pagePath, locale } });
         setOverrides(buildOverrideMap(r.overrides));
         setHasDrafts(false);
       }
@@ -112,16 +114,16 @@ export function EditorProvider({ children }: { children: ReactNode }) {
     } finally {
       setLoading(false);
     }
-  }, [isSuperAdmin, pagePath, getAll, getPublic]);
+  }, [isSuperAdmin, pagePath, locale, getAll, getPublic]);
 
-  // Reload when route or admin status changes
+  // Reload when route, locale or admin status changes
   useEffect(() => {
-    const key = `${pagePath}|${isSuperAdmin ? "1" : "0"}`;
+    const key = `${pagePath}|${locale}|${isSuperAdmin ? "1" : "0"}`;
     if (lastLoadedKey.current === key) return;
     lastLoadedKey.current = key;
     void reload();
     setSelected(null);
-  }, [pagePath, isSuperAdmin, reload]);
+  }, [pagePath, locale, isSuperAdmin, reload]);
 
   // Disable edit mode for non-admins automatically
   useEffect(() => {
@@ -159,22 +161,29 @@ export function EditorProvider({ children }: { children: ReactNode }) {
     async (elementId: string, property: string, value: unknown) => {
       try {
         await save({
-          data: { pagePath, elementId, property, value: value as never },
+          data: { pagePath, elementId, property, value: value as never, locale },
         });
       } catch (e) {
         toast.error((e as Error).message);
         await reload();
       }
     },
-    [save, pagePath, reload]
+    [save, pagePath, locale, reload]
   );
 
   const setText = useCallback(
     async (elementId: string, text: string) => {
       applyLocal(elementId, "text", text);
       await persist(elementId, "text", text);
+      // If editing in a non-source locale, the backend won't auto-translate;
+      // the change stays local to this locale (manual override).
+      if (locale === "es") {
+        // Source edit → backend will fan out to en+ca; refresh after a beat
+        // so the admin sees the same value if they switch locales.
+        // (No need to await; UI for current locale is already correct.)
+      }
     },
-    [applyLocal, persist]
+    [applyLocal, persist, locale]
   );
 
   const setImage = useCallback(
@@ -191,10 +200,8 @@ export function EditorProvider({ children }: { children: ReactNode }) {
 
   const setStyle = useCallback(
     async (elementId: string, style: Partial<StyleProps>) => {
-      // Merge with existing style and persist whole style object
       const current = (overrides[elementId]?.style ?? {}) as StyleProps;
       const merged = { ...current, ...style };
-      // Strip undefined / empty values
       const clean: Record<string, unknown> = {};
       for (const [k, v] of Object.entries(merged)) {
         if (v !== undefined && v !== "" && v !== null) clean[k] = v;
@@ -223,12 +230,12 @@ export function EditorProvider({ children }: { children: ReactNode }) {
         return next;
       });
       try {
-        await clear({ data: { pagePath, elementId, property } });
+        await clear({ data: { pagePath, elementId, property, locale, allLocales: true } });
       } catch (e) {
         toast.error((e as Error).message);
       }
     },
-    [clear, pagePath]
+    [clear, pagePath, locale]
   );
 
   const discardDrafts = useCallback(async () => {

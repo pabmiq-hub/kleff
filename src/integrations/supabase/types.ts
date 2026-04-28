@@ -18,6 +18,7 @@ export type Database = {
         Row: {
           element_id: string
           id: string
+          locale: string
           page_path: string
           property: string
           status: string
@@ -28,6 +29,7 @@ export type Database = {
         Insert: {
           element_id: string
           id?: string
+          locale?: string
           page_path: string
           property: string
           status?: string
@@ -38,6 +40,7 @@ export type Database = {
         Update: {
           element_id?: string
           id?: string
+          locale?: string
           page_path?: string
           property?: string
           status?: string
