@@ -33,7 +33,7 @@ function LoginPage() {
   const [submitting, setSubmitting] = useState(false);
 
   if (!loading && session) {
-    const dest = redirect || (isSuperAdmin ? "/app/admin" : "/app");
+    const dest = redirect || "/app";
     void navigate({ to: dest });
   }
 
