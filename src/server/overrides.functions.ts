@@ -105,16 +105,28 @@ export const getPublishedOverrides = createServerFn({ method: "GET" })
   .handler(async ({ data }) => {
     const { data: rows, error } = await supabaseAdmin
       .from("content_overrides" as never)
-      .select("element_id, property, value")
+      .select("element_id, property, value, locale")
       .eq("page_path", data.pagePath)
       .eq("status", "published")
-      .eq("locale", data.locale);
+      .in("locale", data.locale === SOURCE_LOCALE ? [SOURCE_LOCALE] : [data.locale, SOURCE_LOCALE]);
     if (error) {
       console.error("getPublishedOverrides error", error);
       return { overrides: [] as Array<{ element_id: string; property: string; value: Json | null }> };
     }
+    const preferred = new Map<string, { element_id: string; property: string; value: Json | null }>();
+    for (const row of (rows ?? []) as Array<{ element_id: string; property: string; value: Json | null; locale: string }>) {
+      const key = `${row.element_id}::${row.property}`;
+      const existing = preferred.get(key);
+      if (!existing || row.locale === data.locale) {
+        preferred.set(key, {
+          element_id: row.element_id,
+          property: row.property,
+          value: row.value,
+        });
+      }
+    }
     return {
-      overrides: (rows ?? []) as Array<{ element_id: string; property: string; value: Json | null }>,
+      overrides: Array.from(preferred.values()),
     };
   });
 
@@ -129,14 +141,21 @@ export const adminGetPageOverrides = createServerFn({ method: "POST" })
     })
   )
   .handler(async ({ data, context }) => {
-    const { supabase } = context;
-    const { data: rows, error } = await supabase
+    const { data: rows, error } = await supabaseAdmin
       .from("content_overrides" as never)
       .select("element_id, property, value, status, updated_at, locale")
       .eq("page_path", data.pagePath)
-      .eq("locale", data.locale);
+      .in("locale", data.locale === SOURCE_LOCALE ? [SOURCE_LOCALE] : [data.locale, SOURCE_LOCALE]);
     if (error) throw new Error(error.message);
-    return { overrides: (rows ?? []) as OverrideRow[] };
+    const preferred = new Map<string, OverrideRow>();
+    for (const row of (rows ?? []) as OverrideRow[]) {
+      const key = `${row.element_id}::${row.property}::${row.status}`;
+      const existing = preferred.get(key);
+      if (!existing || row.locale === data.locale) {
+        preferred.set(key, row);
+      }
+    }
+    return { overrides: Array.from(preferred.values()) };
   });
 
 // ---------- Admin writes ----------
@@ -168,10 +187,10 @@ export const adminSaveOverride = createServerFn({ method: "POST" })
     })
   )
   .handler(async ({ data, context }) => {
-    const { supabase, userId } = context;
+    const { userId } = context;
 
     const writeOne = async (locale: string, value: unknown) => {
-      const { error } = await supabase
+      const { error } = await supabaseAdmin
         .from("content_overrides" as never)
         .upsert(
           {
