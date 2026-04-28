@@ -42,11 +42,11 @@ async function translateHtml(
   source: string,
   fromLocale: string,
   toLocale: string
-): Promise<string> {
+): Promise<string | null> {
   const apiKey = process.env.LOVABLE_API_KEY;
   if (!apiKey) {
     console.warn("[overrides] LOVABLE_API_KEY missing — skipping translation");
-    return source;
+    return null;
   }
   if (!source.trim()) return source;
 
@@ -70,7 +70,7 @@ async function translateHtml(
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
+        model: "google/gemini-3-flash-preview",
         messages: [
           { role: "system", content: system },
           { role: "user", content: source },
@@ -80,16 +80,35 @@ async function translateHtml(
     if (!res.ok) {
       const t = await res.text().catch(() => "");
       console.error("[overrides] translate failed", res.status, t);
-      return source;
+      return null;
     }
     const json = (await res.json()) as {
       choices?: Array<{ message?: { content?: string } }>;
     };
     const out = json.choices?.[0]?.message?.content?.trim();
-    return out && out.length > 0 ? out : source;
+    if (!out || out.length === 0) return null;
+
+    const normalize = (value: string) =>
+      value
+        .replace(/<[^>]+>/g, " ")
+        .replace(/&nbsp;/gi, " ")
+        .replace(/\s+/g, " ")
+        .trim()
+        .toLowerCase();
+
+    const normalizedSource = normalize(source);
+    const normalizedOut = normalize(out);
+    const looksTranslatable = /[a-záéíóúàèìòùçñ]{4,}/i.test(normalizedSource);
+
+    if (fromLocale !== toLocale && looksTranslatable && normalizedOut === normalizedSource) {
+      console.warn(`[overrides] untranslated output detected for ${fromLocale}->${toLocale}`);
+      return null;
+    }
+
+    return out;
   } catch (e) {
     console.error("[overrides] translate error", e);
-    return source;
+    return null;
   }
 }
 
@@ -105,16 +124,28 @@ export const getPublishedOverrides = createServerFn({ method: "GET" })
   .handler(async ({ data }) => {
     const { data: rows, error } = await supabaseAdmin
       .from("content_overrides" as never)
-      .select("element_id, property, value")
+      .select("element_id, property, value, locale")
       .eq("page_path", data.pagePath)
       .eq("status", "published")
-      .eq("locale", data.locale);
+      .in("locale", data.locale === SOURCE_LOCALE ? [SOURCE_LOCALE] : [data.locale, SOURCE_LOCALE]);
     if (error) {
       console.error("getPublishedOverrides error", error);
       return { overrides: [] as Array<{ element_id: string; property: string; value: Json | null }> };
     }
+    const preferred = new Map<string, { element_id: string; property: string; value: Json | null }>();
+    for (const row of (rows ?? []) as Array<{ element_id: string; property: string; value: Json | null; locale: string }>) {
+      const key = `${row.element_id}::${row.property}`;
+      const existing = preferred.get(key);
+      if (!existing || row.locale === data.locale) {
+        preferred.set(key, {
+          element_id: row.element_id,
+          property: row.property,
+          value: row.value,
+        });
+      }
+    }
     return {
-      overrides: (rows ?? []) as Array<{ element_id: string; property: string; value: Json | null }>,
+      overrides: Array.from(preferred.values()),
     };
   });
 
@@ -129,14 +160,21 @@ export const adminGetPageOverrides = createServerFn({ method: "POST" })
     })
   )
   .handler(async ({ data, context }) => {
-    const { supabase } = context;
-    const { data: rows, error } = await supabase
+    const { data: rows, error } = await supabaseAdmin
       .from("content_overrides" as never)
       .select("element_id, property, value, status, updated_at, locale")
       .eq("page_path", data.pagePath)
-      .eq("locale", data.locale);
+      .in("locale", data.locale === SOURCE_LOCALE ? [SOURCE_LOCALE] : [data.locale, SOURCE_LOCALE]);
     if (error) throw new Error(error.message);
-    return { overrides: (rows ?? []) as OverrideRow[] };
+    const preferred = new Map<string, OverrideRow>();
+    for (const row of (rows ?? []) as OverrideRow[]) {
+      const key = `${row.element_id}::${row.property}::${row.status}`;
+      const existing = preferred.get(key);
+      if (!existing || row.locale === data.locale) {
+        preferred.set(key, row);
+      }
+    }
+    return { overrides: Array.from(preferred.values()) };
   });
 
 // ---------- Admin writes ----------
@@ -168,10 +206,10 @@ export const adminSaveOverride = createServerFn({ method: "POST" })
     })
   )
   .handler(async ({ data, context }) => {
-    const { supabase, userId } = context;
+    const { userId } = context;
 
     const writeOne = async (locale: string, value: unknown) => {
-      const { error } = await supabase
+      const { error } = await supabaseAdmin
         .from("content_overrides" as never)
         .upsert(
           {
@@ -206,6 +244,7 @@ export const adminSaveOverride = createServerFn({ method: "POST" })
         targets.map(async (target) => {
           try {
             const translated = await translateHtml(source, SOURCE_LOCALE, target);
+            if (translated == null) return;
             await writeOne(target, translated);
           } catch (e) {
             console.error(`[overrides] failed to translate to ${target}`, e);
