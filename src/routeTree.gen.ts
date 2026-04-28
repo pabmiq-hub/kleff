@@ -16,11 +16,13 @@ import { Route as HowItWorksRouteImport } from './routes/how-it-works'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as BlogRouteImport } from './routes/blog'
 import { Route as AppRouteImport } from './routes/app'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as EnIndexRouteImport } from './routes/en.index'
 import { Route as CaIndexRouteImport } from './routes/ca.index'
 import { Route as AppIndexRouteImport } from './routes/app.index'
+import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as InviteTokenRouteImport } from './routes/invite.$token'
 import { Route as EnMediaRouteImport } from './routes/en.media'
 import { Route as EnHowItWorksRouteImport } from './routes/en.how-it-works'
@@ -36,6 +38,9 @@ import { Route as AppRentalsRouteImport } from './routes/app.rentals'
 import { Route as AppProfileRouteImport } from './routes/app.profile'
 import { Route as AppCarnetRouteImport } from './routes/app.carnet'
 import { Route as AppAdminRouteImport } from './routes/app.admin'
+import { Route as AdminMembersRouteImport } from './routes/admin.members'
+import { Route as AdminInvitationsRouteImport } from './routes/admin.invitations'
+import { Route as AdminContentRouteImport } from './routes/admin.content'
 import { Route as AppAdminIndexRouteImport } from './routes/app.admin.index'
 import { Route as AppAdminUsersRouteImport } from './routes/app.admin.users'
 import { Route as AppAdminInvitationsRouteImport } from './routes/app.admin.invitations'
@@ -76,6 +81,11 @@ const AppRoute = AppRouteImport.update({
   path: '/app',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AboutRoute = AboutRouteImport.update({
   id: '/about',
   path: '/about',
@@ -100,6 +110,11 @@ const AppIndexRoute = AppIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => AppRoute,
+} as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminRoute,
 } as any)
 const InviteTokenRoute = InviteTokenRouteImport.update({
   id: '/invite/$token',
@@ -176,6 +191,21 @@ const AppAdminRoute = AppAdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => AppRoute,
 } as any)
+const AdminMembersRoute = AdminMembersRouteImport.update({
+  id: '/members',
+  path: '/members',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminInvitationsRoute = AdminInvitationsRouteImport.update({
+  id: '/invitations',
+  path: '/invitations',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminContentRoute = AdminContentRouteImport.update({
+  id: '/content',
+  path: '/content',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AppAdminIndexRoute = AppAdminIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -201,6 +231,7 @@ const ApiPublicUploadInviteAvatarRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/admin': typeof AdminRouteWithChildren
   '/app': typeof AppRouteWithChildren
   '/blog': typeof BlogRoute
   '/contact': typeof ContactRoute
@@ -208,6 +239,9 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/media': typeof MediaRoute
   '/super-admin': typeof SuperAdminRoute
+  '/admin/content': typeof AdminContentRoute
+  '/admin/invitations': typeof AdminInvitationsRoute
+  '/admin/members': typeof AdminMembersRoute
   '/app/admin': typeof AppAdminRouteWithChildren
   '/app/carnet': typeof AppCarnetRoute
   '/app/profile': typeof AppProfileRoute
@@ -223,6 +257,7 @@ export interface FileRoutesByFullPath {
   '/en/how-it-works': typeof EnHowItWorksRoute
   '/en/media': typeof EnMediaRoute
   '/invite/$token': typeof InviteTokenRoute
+  '/admin/': typeof AdminIndexRoute
   '/app/': typeof AppIndexRoute
   '/ca/': typeof CaIndexRoute
   '/en/': typeof EnIndexRoute
@@ -240,6 +275,9 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/media': typeof MediaRoute
   '/super-admin': typeof SuperAdminRoute
+  '/admin/content': typeof AdminContentRoute
+  '/admin/invitations': typeof AdminInvitationsRoute
+  '/admin/members': typeof AdminMembersRoute
   '/app/carnet': typeof AppCarnetRoute
   '/app/profile': typeof AppProfileRoute
   '/app/rentals': typeof AppRentalsRoute
@@ -254,6 +292,7 @@ export interface FileRoutesByTo {
   '/en/how-it-works': typeof EnHowItWorksRoute
   '/en/media': typeof EnMediaRoute
   '/invite/$token': typeof InviteTokenRoute
+  '/admin': typeof AdminIndexRoute
   '/app': typeof AppIndexRoute
   '/ca': typeof CaIndexRoute
   '/en': typeof EnIndexRoute
@@ -266,6 +305,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/admin': typeof AdminRouteWithChildren
   '/app': typeof AppRouteWithChildren
   '/blog': typeof BlogRoute
   '/contact': typeof ContactRoute
@@ -273,6 +313,9 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/media': typeof MediaRoute
   '/super-admin': typeof SuperAdminRoute
+  '/admin/content': typeof AdminContentRoute
+  '/admin/invitations': typeof AdminInvitationsRoute
+  '/admin/members': typeof AdminMembersRoute
   '/app/admin': typeof AppAdminRouteWithChildren
   '/app/carnet': typeof AppCarnetRoute
   '/app/profile': typeof AppProfileRoute
@@ -288,6 +331,7 @@ export interface FileRoutesById {
   '/en/how-it-works': typeof EnHowItWorksRoute
   '/en/media': typeof EnMediaRoute
   '/invite/$token': typeof InviteTokenRoute
+  '/admin/': typeof AdminIndexRoute
   '/app/': typeof AppIndexRoute
   '/ca/': typeof CaIndexRoute
   '/en/': typeof EnIndexRoute
@@ -301,6 +345,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/about'
+    | '/admin'
     | '/app'
     | '/blog'
     | '/contact'
@@ -308,6 +353,9 @@ export interface FileRouteTypes {
     | '/login'
     | '/media'
     | '/super-admin'
+    | '/admin/content'
+    | '/admin/invitations'
+    | '/admin/members'
     | '/app/admin'
     | '/app/carnet'
     | '/app/profile'
@@ -323,6 +371,7 @@ export interface FileRouteTypes {
     | '/en/how-it-works'
     | '/en/media'
     | '/invite/$token'
+    | '/admin/'
     | '/app/'
     | '/ca/'
     | '/en/'
@@ -340,6 +389,9 @@ export interface FileRouteTypes {
     | '/login'
     | '/media'
     | '/super-admin'
+    | '/admin/content'
+    | '/admin/invitations'
+    | '/admin/members'
     | '/app/carnet'
     | '/app/profile'
     | '/app/rentals'
@@ -354,6 +406,7 @@ export interface FileRouteTypes {
     | '/en/how-it-works'
     | '/en/media'
     | '/invite/$token'
+    | '/admin'
     | '/app'
     | '/ca'
     | '/en'
@@ -365,6 +418,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/about'
+    | '/admin'
     | '/app'
     | '/blog'
     | '/contact'
@@ -372,6 +426,9 @@ export interface FileRouteTypes {
     | '/login'
     | '/media'
     | '/super-admin'
+    | '/admin/content'
+    | '/admin/invitations'
+    | '/admin/members'
     | '/app/admin'
     | '/app/carnet'
     | '/app/profile'
@@ -387,6 +444,7 @@ export interface FileRouteTypes {
     | '/en/how-it-works'
     | '/en/media'
     | '/invite/$token'
+    | '/admin/'
     | '/app/'
     | '/ca/'
     | '/en/'
@@ -399,6 +457,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
+  AdminRoute: typeof AdminRouteWithChildren
   AppRoute: typeof AppRouteWithChildren
   BlogRoute: typeof BlogRoute
   ContactRoute: typeof ContactRoute
@@ -473,6 +532,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/about': {
       id: '/about'
       path: '/about'
@@ -507,6 +573,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/app/'
       preLoaderRoute: typeof AppIndexRouteImport
       parentRoute: typeof AppRoute
+    }
+    '/admin/': {
+      id: '/admin/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof AdminRoute
     }
     '/invite/$token': {
       id: '/invite/$token'
@@ -613,6 +686,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAdminRouteImport
       parentRoute: typeof AppRoute
     }
+    '/admin/members': {
+      id: '/admin/members'
+      path: '/members'
+      fullPath: '/admin/members'
+      preLoaderRoute: typeof AdminMembersRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/invitations': {
+      id: '/admin/invitations'
+      path: '/invitations'
+      fullPath: '/admin/invitations'
+      preLoaderRoute: typeof AdminInvitationsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/content': {
+      id: '/admin/content'
+      path: '/content'
+      fullPath: '/admin/content'
+      preLoaderRoute: typeof AdminContentRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/app/admin/': {
       id: '/app/admin/'
       path: '/'
@@ -643,6 +737,22 @@ declare module '@tanstack/react-router' {
     }
   }
 }
+
+interface AdminRouteChildren {
+  AdminContentRoute: typeof AdminContentRoute
+  AdminInvitationsRoute: typeof AdminInvitationsRoute
+  AdminMembersRoute: typeof AdminMembersRoute
+  AdminIndexRoute: typeof AdminIndexRoute
+}
+
+const AdminRouteChildren: AdminRouteChildren = {
+  AdminContentRoute: AdminContentRoute,
+  AdminInvitationsRoute: AdminInvitationsRoute,
+  AdminMembersRoute: AdminMembersRoute,
+  AdminIndexRoute: AdminIndexRoute,
+}
+
+const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
 interface AppAdminRouteChildren {
   AppAdminInvitationsRoute: typeof AppAdminInvitationsRoute
@@ -681,6 +791,7 @@ const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
+  AdminRoute: AdminRouteWithChildren,
   AppRoute: AppRouteWithChildren,
   BlogRoute: BlogRoute,
   ContactRoute: ContactRoute,
