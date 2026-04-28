@@ -1,6 +1,5 @@
 // Server-only BGG sync logic. Imports the admin Supabase client, so this
-// file MUST NOT be imported from any client-reachable module. The thin
-// createServerFn wrapper lives in bgg.functions.ts.
+// file MUST NOT be imported from any client-reachable module.
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
@@ -351,20 +350,6 @@ export async function syncBggCollection(): Promise<{
     removedInactive,
   };
 }
-
-// ---------- exposed server fns ----------
-
-async function assertSuperAdmin(userId: string): Promise<void> {
-  const { data, error } = await supabaseAdmin
-    .from("user_roles")
-    .select("role")
-    .eq("user_id", userId)
-    .eq("role", "super_admin")
-    .maybeSingle();
-  if (error) throw new Error(error.message);
-  if (!data) throw new Error("Forbidden");
-}
-
 
 export async function assertSuperAdminBgg(userId: string): Promise<void> {
   const { data, error } = await supabaseAdmin
