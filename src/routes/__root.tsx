@@ -94,11 +94,31 @@ function RootComponent() {
     <AuthProvider>
       <I18nProvider>
         <EditorProvider>
-          <Outlet />
+          <EditorLayoutShift>
+            <Outlet />
+          </EditorLayoutShift>
           <EditorOverlay />
           <Toaster />
         </EditorProvider>
       </I18nProvider>
     </AuthProvider>
+  );
+}
+
+import { useEditor } from "@/editor/EditorProvider";
+function EditorLayoutShift({ children }: { children: React.ReactNode }) {
+  const { editMode, isSuperAdmin } = useEditor();
+  const active = editMode && isSuperAdmin;
+  return (
+    <div
+      style={{
+        paddingRight: active ? 360 : 0,
+        paddingTop: active ? 48 : 0,
+        transition: "padding 200ms ease",
+        minHeight: "100vh",
+      }}
+    >
+      {children}
+    </div>
   );
 }
