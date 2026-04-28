@@ -27,13 +27,13 @@ export const Route = createFileRoute("/login")({
 function LoginPage() {
   const navigate = useNavigate();
   const { redirect } = Route.useSearch();
-  const { session, isSuperAdmin, loading } = useAuth();
+  const { session, loading } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
   if (!loading && session) {
-    const dest = redirect || (isSuperAdmin ? "/app/admin" : "/app");
+    const dest = redirect || "/app";
     void navigate({ to: dest });
   }
 

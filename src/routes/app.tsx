@@ -1,7 +1,7 @@
-import { createFileRoute, Outlet, redirect, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Outlet, Link, useNavigate } from "@tanstack/react-router";
 import { useAuth } from "@/auth/AuthProvider";
 import { Button } from "@/components/ui/button";
-import { Home, User, IdCard, Dices, Settings, LogOut, Shield } from "lucide-react";
+import { Home, User, IdCard, Dices, LogOut, Shield } from "lucide-react";
 
 export const Route = createFileRoute("/app")({
   head: () => ({
@@ -44,17 +44,23 @@ function AppLayout() {
         <nav className="flex md:flex-col gap-1 flex-1 ml-auto md:ml-0">
           <NavLink to="/app" icon={<Home className="h-4 w-4" />} label="Inicio" exact />
           <NavLink to="/app/profile" icon={<User className="h-4 w-4" />} label="Mi perfil" />
-          <NavLink to="/app/carnet" icon={<IdCard className="h-4 w-4" />} label="Carnet" />
-          <NavLink to="/app/rentals" icon={<Dices className="h-4 w-4" />} label="Alquiler" />
-          {isSuperAdmin && (
-            <NavLink to="/app/admin" icon={<Shield className="h-4 w-4" />} label="Admin" />
-          )}
+          <NavLink to="/app/carnet" icon={<IdCard className="h-4 w-4" />} label="Mi carnet" />
+          <NavLink to="/app/rentals" icon={<Dices className="h-4 w-4" />} label="Alquilar" />
+          <NavLink to="/app/rentals/mine" icon={<Dices className="h-4 w-4" />} label="Mis alquileres" />
         </nav>
         <Button variant="ghost" size="sm" onClick={handleLogout} className="md:mt-auto">
           <LogOut className="h-4 w-4 mr-2" /> Salir
         </Button>
       </aside>
       <main className="flex-1 p-4 md:p-8 max-w-5xl">
+        {isSuperAdmin && (
+          <Link
+            to="/admin"
+            className="mb-4 flex items-center gap-2 text-sm bg-ink text-cream rounded-lg px-3 py-2 w-fit hover:bg-ink/90"
+          >
+            <Shield className="h-4 w-4" /> Eres super admin · ir al panel de administración
+          </Link>
+        )}
         <Outlet />
       </main>
     </div>

@@ -1,0 +1,112 @@
+import { createFileRoute, Outlet, Link, useNavigate } from "@tanstack/react-router";
+import { useAuth } from "@/auth/AuthProvider";
+import { Button } from "@/components/ui/button";
+import {
+  LayoutDashboard,
+  Users,
+  Mail,
+  Dices,
+  FileText,
+  LogOut,
+  Shield,
+  ExternalLink,
+} from "lucide-react";
+
+export const Route = createFileRoute("/admin")({
+  head: () => ({
+    meta: [
+      { title: "Administración — KLEFF" },
+      { name: "robots", content: "noindex, nofollow" },
+    ],
+  }),
+  component: AdminLayout,
+});
+
+function AdminLayout() {
+  const { session, loading, isSuperAdmin, user, signOut } = useAuth();
+  const navigate = useNavigate();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-ink text-cream">
+        <p className="text-cream/70">Cargando…</p>
+      </div>
+    );
+  }
+
+  if (!session) {
+    void navigate({ to: "/super-admin", search: { redirect: window.location.pathname } });
+    return null;
+  }
+
+  if (!isSuperAdmin) {
+    void navigate({ to: "/app" });
+    return null;
+  }
+
+  const handleLogout = async () => {
+    await signOut();
+    void navigate({ to: "/super-admin" });
+  };
+
+  return (
+    <div className="min-h-screen bg-ink text-cream flex flex-col md:flex-row">
+      <aside className="md:w-64 bg-ink-deep/80 border-b-2 md:border-b-0 md:border-r border-cream/10 p-4 md:p-6 flex md:flex-col gap-2 md:min-h-screen">
+        <Link to="/admin" className="font-display font-bold text-xl tracking-tight mb-0 md:mb-6 text-cream">
+          KLEFF{" "}
+          <span className="text-coral text-xs font-sans font-semibold inline-flex items-center gap-1">
+            <Shield className="h-3 w-3" /> ADMIN
+          </span>
+        </Link>
+        <nav className="flex md:flex-col gap-1 flex-1 ml-auto md:ml-0">
+          <AdminNavLink to="/admin" exact icon={<LayoutDashboard className="h-4 w-4" />} label="Resumen" />
+          <AdminNavLink to="/admin/members" icon={<Users className="h-4 w-4" />} label="Socios" />
+          <AdminNavLink to="/admin/invitations" icon={<Mail className="h-4 w-4" />} label="Invitaciones" />
+          <AdminNavLink to="/admin/rentals" icon={<Dices className="h-4 w-4" />} label="Alquiler" />
+          <AdminNavLink to="/admin/content" icon={<FileText className="h-4 w-4" />} label="Contenido" />
+        </nav>
+        <div className="md:mt-auto space-y-1">
+          <Link
+            to="/app"
+            className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-cream/60 hover:text-cream hover:bg-cream/5 transition-colors"
+          >
+            <ExternalLink className="h-3.5 w-3.5" />
+            <span className="hidden md:inline">Ir a zona socio</span>
+          </Link>
+          <div className="hidden md:block px-3 pt-2 text-xs text-cream/50 border-t border-cream/10">
+            {user?.email}
+          </div>
+          <Button variant="ghost" size="sm" onClick={handleLogout} className="w-full text-cream hover:text-cream hover:bg-cream/10">
+            <LogOut className="h-4 w-4 mr-2" /> <span className="hidden md:inline">Salir</span>
+          </Button>
+        </div>
+      </aside>
+      <main className="flex-1 p-4 md:p-8 max-w-6xl">
+        <Outlet />
+      </main>
+    </div>
+  );
+}
+
+function AdminNavLink({
+  to,
+  icon,
+  label,
+  exact,
+}: {
+  to: string;
+  icon: React.ReactNode;
+  label: string;
+  exact?: boolean;
+}) {
+  return (
+    <Link
+      to={to}
+      activeOptions={{ exact }}
+      activeProps={{ className: "bg-coral text-cream" }}
+      className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-cream/80 hover:bg-cream/10 transition-colors"
+    >
+      {icon} <span className="hidden md:inline">{label}</span>
+    </Link>
+  );
+}

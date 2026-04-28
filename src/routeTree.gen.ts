@@ -16,11 +16,13 @@ import { Route as HowItWorksRouteImport } from './routes/how-it-works'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as BlogRouteImport } from './routes/blog'
 import { Route as AppRouteImport } from './routes/app'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as EnIndexRouteImport } from './routes/en.index'
 import { Route as CaIndexRouteImport } from './routes/ca.index'
 import { Route as AppIndexRouteImport } from './routes/app.index'
+import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as InviteTokenRouteImport } from './routes/invite.$token'
 import { Route as EnMediaRouteImport } from './routes/en.media'
 import { Route as EnHowItWorksRouteImport } from './routes/en.how-it-works'
@@ -35,11 +37,16 @@ import { Route as CaAboutRouteImport } from './routes/ca.about'
 import { Route as AppRentalsRouteImport } from './routes/app.rentals'
 import { Route as AppProfileRouteImport } from './routes/app.profile'
 import { Route as AppCarnetRouteImport } from './routes/app.carnet'
-import { Route as AppAdminRouteImport } from './routes/app.admin'
-import { Route as AppAdminIndexRouteImport } from './routes/app.admin.index'
-import { Route as AppAdminUsersRouteImport } from './routes/app.admin.users'
-import { Route as AppAdminInvitationsRouteImport } from './routes/app.admin.invitations'
+import { Route as AdminRentalsRouteImport } from './routes/admin.rentals'
+import { Route as AdminMembersRouteImport } from './routes/admin.members'
+import { Route as AdminInvitationsRouteImport } from './routes/admin.invitations'
+import { Route as AdminContentRouteImport } from './routes/admin.content'
+import { Route as AdminRentalsIndexRouteImport } from './routes/admin.rentals.index'
+import { Route as AppRentalsMineRouteImport } from './routes/app.rentals.mine'
 import { Route as ApiPublicUploadInviteAvatarRouteImport } from './routes/api.public.upload-invite-avatar'
+import { Route as AdminRentalsHistoryRouteImport } from './routes/admin.rentals.history'
+import { Route as AdminRentalsCatalogRouteImport } from './routes/admin.rentals.catalog'
+import { Route as AdminRentalsActiveRouteImport } from './routes/admin.rentals.active'
 
 const SuperAdminRoute = SuperAdminRouteImport.update({
   id: '/super-admin',
@@ -76,6 +83,11 @@ const AppRoute = AppRouteImport.update({
   path: '/app',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AboutRoute = AboutRouteImport.update({
   id: '/about',
   path: '/about',
@@ -100,6 +112,11 @@ const AppIndexRoute = AppIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => AppRoute,
+} as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminRoute,
 } as any)
 const InviteTokenRoute = InviteTokenRouteImport.update({
   id: '/invite/$token',
@@ -171,25 +188,35 @@ const AppCarnetRoute = AppCarnetRouteImport.update({
   path: '/carnet',
   getParentRoute: () => AppRoute,
 } as any)
-const AppAdminRoute = AppAdminRouteImport.update({
-  id: '/admin',
-  path: '/admin',
-  getParentRoute: () => AppRoute,
+const AdminRentalsRoute = AdminRentalsRouteImport.update({
+  id: '/rentals',
+  path: '/rentals',
+  getParentRoute: () => AdminRoute,
 } as any)
-const AppAdminIndexRoute = AppAdminIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => AppAdminRoute,
+const AdminMembersRoute = AdminMembersRouteImport.update({
+  id: '/members',
+  path: '/members',
+  getParentRoute: () => AdminRoute,
 } as any)
-const AppAdminUsersRoute = AppAdminUsersRouteImport.update({
-  id: '/users',
-  path: '/users',
-  getParentRoute: () => AppAdminRoute,
-} as any)
-const AppAdminInvitationsRoute = AppAdminInvitationsRouteImport.update({
+const AdminInvitationsRoute = AdminInvitationsRouteImport.update({
   id: '/invitations',
   path: '/invitations',
-  getParentRoute: () => AppAdminRoute,
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminContentRoute = AdminContentRouteImport.update({
+  id: '/content',
+  path: '/content',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminRentalsIndexRoute = AdminRentalsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminRentalsRoute,
+} as any)
+const AppRentalsMineRoute = AppRentalsMineRouteImport.update({
+  id: '/mine',
+  path: '/mine',
+  getParentRoute: () => AppRentalsRoute,
 } as any)
 const ApiPublicUploadInviteAvatarRoute =
   ApiPublicUploadInviteAvatarRouteImport.update({
@@ -197,10 +224,26 @@ const ApiPublicUploadInviteAvatarRoute =
     path: '/api/public/upload-invite-avatar',
     getParentRoute: () => rootRouteImport,
   } as any)
+const AdminRentalsHistoryRoute = AdminRentalsHistoryRouteImport.update({
+  id: '/history',
+  path: '/history',
+  getParentRoute: () => AdminRentalsRoute,
+} as any)
+const AdminRentalsCatalogRoute = AdminRentalsCatalogRouteImport.update({
+  id: '/catalog',
+  path: '/catalog',
+  getParentRoute: () => AdminRentalsRoute,
+} as any)
+const AdminRentalsActiveRoute = AdminRentalsActiveRouteImport.update({
+  id: '/active',
+  path: '/active',
+  getParentRoute: () => AdminRentalsRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/admin': typeof AdminRouteWithChildren
   '/app': typeof AppRouteWithChildren
   '/blog': typeof BlogRoute
   '/contact': typeof ContactRoute
@@ -208,10 +251,13 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/media': typeof MediaRoute
   '/super-admin': typeof SuperAdminRoute
-  '/app/admin': typeof AppAdminRouteWithChildren
+  '/admin/content': typeof AdminContentRoute
+  '/admin/invitations': typeof AdminInvitationsRoute
+  '/admin/members': typeof AdminMembersRoute
+  '/admin/rentals': typeof AdminRentalsRouteWithChildren
   '/app/carnet': typeof AppCarnetRoute
   '/app/profile': typeof AppProfileRoute
-  '/app/rentals': typeof AppRentalsRoute
+  '/app/rentals': typeof AppRentalsRouteWithChildren
   '/ca/about': typeof CaAboutRoute
   '/ca/blog': typeof CaBlogRoute
   '/ca/contact': typeof CaContactRoute
@@ -223,13 +269,16 @@ export interface FileRoutesByFullPath {
   '/en/how-it-works': typeof EnHowItWorksRoute
   '/en/media': typeof EnMediaRoute
   '/invite/$token': typeof InviteTokenRoute
+  '/admin/': typeof AdminIndexRoute
   '/app/': typeof AppIndexRoute
   '/ca/': typeof CaIndexRoute
   '/en/': typeof EnIndexRoute
+  '/admin/rentals/active': typeof AdminRentalsActiveRoute
+  '/admin/rentals/catalog': typeof AdminRentalsCatalogRoute
+  '/admin/rentals/history': typeof AdminRentalsHistoryRoute
   '/api/public/upload-invite-avatar': typeof ApiPublicUploadInviteAvatarRoute
-  '/app/admin/invitations': typeof AppAdminInvitationsRoute
-  '/app/admin/users': typeof AppAdminUsersRoute
-  '/app/admin/': typeof AppAdminIndexRoute
+  '/app/rentals/mine': typeof AppRentalsMineRoute
+  '/admin/rentals/': typeof AdminRentalsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -240,9 +289,12 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/media': typeof MediaRoute
   '/super-admin': typeof SuperAdminRoute
+  '/admin/content': typeof AdminContentRoute
+  '/admin/invitations': typeof AdminInvitationsRoute
+  '/admin/members': typeof AdminMembersRoute
   '/app/carnet': typeof AppCarnetRoute
   '/app/profile': typeof AppProfileRoute
-  '/app/rentals': typeof AppRentalsRoute
+  '/app/rentals': typeof AppRentalsRouteWithChildren
   '/ca/about': typeof CaAboutRoute
   '/ca/blog': typeof CaBlogRoute
   '/ca/contact': typeof CaContactRoute
@@ -254,18 +306,22 @@ export interface FileRoutesByTo {
   '/en/how-it-works': typeof EnHowItWorksRoute
   '/en/media': typeof EnMediaRoute
   '/invite/$token': typeof InviteTokenRoute
+  '/admin': typeof AdminIndexRoute
   '/app': typeof AppIndexRoute
   '/ca': typeof CaIndexRoute
   '/en': typeof EnIndexRoute
+  '/admin/rentals/active': typeof AdminRentalsActiveRoute
+  '/admin/rentals/catalog': typeof AdminRentalsCatalogRoute
+  '/admin/rentals/history': typeof AdminRentalsHistoryRoute
   '/api/public/upload-invite-avatar': typeof ApiPublicUploadInviteAvatarRoute
-  '/app/admin/invitations': typeof AppAdminInvitationsRoute
-  '/app/admin/users': typeof AppAdminUsersRoute
-  '/app/admin': typeof AppAdminIndexRoute
+  '/app/rentals/mine': typeof AppRentalsMineRoute
+  '/admin/rentals': typeof AdminRentalsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/admin': typeof AdminRouteWithChildren
   '/app': typeof AppRouteWithChildren
   '/blog': typeof BlogRoute
   '/contact': typeof ContactRoute
@@ -273,10 +329,13 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/media': typeof MediaRoute
   '/super-admin': typeof SuperAdminRoute
-  '/app/admin': typeof AppAdminRouteWithChildren
+  '/admin/content': typeof AdminContentRoute
+  '/admin/invitations': typeof AdminInvitationsRoute
+  '/admin/members': typeof AdminMembersRoute
+  '/admin/rentals': typeof AdminRentalsRouteWithChildren
   '/app/carnet': typeof AppCarnetRoute
   '/app/profile': typeof AppProfileRoute
-  '/app/rentals': typeof AppRentalsRoute
+  '/app/rentals': typeof AppRentalsRouteWithChildren
   '/ca/about': typeof CaAboutRoute
   '/ca/blog': typeof CaBlogRoute
   '/ca/contact': typeof CaContactRoute
@@ -288,19 +347,23 @@ export interface FileRoutesById {
   '/en/how-it-works': typeof EnHowItWorksRoute
   '/en/media': typeof EnMediaRoute
   '/invite/$token': typeof InviteTokenRoute
+  '/admin/': typeof AdminIndexRoute
   '/app/': typeof AppIndexRoute
   '/ca/': typeof CaIndexRoute
   '/en/': typeof EnIndexRoute
+  '/admin/rentals/active': typeof AdminRentalsActiveRoute
+  '/admin/rentals/catalog': typeof AdminRentalsCatalogRoute
+  '/admin/rentals/history': typeof AdminRentalsHistoryRoute
   '/api/public/upload-invite-avatar': typeof ApiPublicUploadInviteAvatarRoute
-  '/app/admin/invitations': typeof AppAdminInvitationsRoute
-  '/app/admin/users': typeof AppAdminUsersRoute
-  '/app/admin/': typeof AppAdminIndexRoute
+  '/app/rentals/mine': typeof AppRentalsMineRoute
+  '/admin/rentals/': typeof AdminRentalsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
     | '/about'
+    | '/admin'
     | '/app'
     | '/blog'
     | '/contact'
@@ -308,7 +371,10 @@ export interface FileRouteTypes {
     | '/login'
     | '/media'
     | '/super-admin'
-    | '/app/admin'
+    | '/admin/content'
+    | '/admin/invitations'
+    | '/admin/members'
+    | '/admin/rentals'
     | '/app/carnet'
     | '/app/profile'
     | '/app/rentals'
@@ -323,13 +389,16 @@ export interface FileRouteTypes {
     | '/en/how-it-works'
     | '/en/media'
     | '/invite/$token'
+    | '/admin/'
     | '/app/'
     | '/ca/'
     | '/en/'
+    | '/admin/rentals/active'
+    | '/admin/rentals/catalog'
+    | '/admin/rentals/history'
     | '/api/public/upload-invite-avatar'
-    | '/app/admin/invitations'
-    | '/app/admin/users'
-    | '/app/admin/'
+    | '/app/rentals/mine'
+    | '/admin/rentals/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -340,6 +409,9 @@ export interface FileRouteTypes {
     | '/login'
     | '/media'
     | '/super-admin'
+    | '/admin/content'
+    | '/admin/invitations'
+    | '/admin/members'
     | '/app/carnet'
     | '/app/profile'
     | '/app/rentals'
@@ -354,17 +426,21 @@ export interface FileRouteTypes {
     | '/en/how-it-works'
     | '/en/media'
     | '/invite/$token'
+    | '/admin'
     | '/app'
     | '/ca'
     | '/en'
+    | '/admin/rentals/active'
+    | '/admin/rentals/catalog'
+    | '/admin/rentals/history'
     | '/api/public/upload-invite-avatar'
-    | '/app/admin/invitations'
-    | '/app/admin/users'
-    | '/app/admin'
+    | '/app/rentals/mine'
+    | '/admin/rentals'
   id:
     | '__root__'
     | '/'
     | '/about'
+    | '/admin'
     | '/app'
     | '/blog'
     | '/contact'
@@ -372,7 +448,10 @@ export interface FileRouteTypes {
     | '/login'
     | '/media'
     | '/super-admin'
-    | '/app/admin'
+    | '/admin/content'
+    | '/admin/invitations'
+    | '/admin/members'
+    | '/admin/rentals'
     | '/app/carnet'
     | '/app/profile'
     | '/app/rentals'
@@ -387,18 +466,22 @@ export interface FileRouteTypes {
     | '/en/how-it-works'
     | '/en/media'
     | '/invite/$token'
+    | '/admin/'
     | '/app/'
     | '/ca/'
     | '/en/'
+    | '/admin/rentals/active'
+    | '/admin/rentals/catalog'
+    | '/admin/rentals/history'
     | '/api/public/upload-invite-avatar'
-    | '/app/admin/invitations'
-    | '/app/admin/users'
-    | '/app/admin/'
+    | '/app/rentals/mine'
+    | '/admin/rentals/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
+  AdminRoute: typeof AdminRouteWithChildren
   AppRoute: typeof AppRouteWithChildren
   BlogRoute: typeof BlogRoute
   ContactRoute: typeof ContactRoute
@@ -473,6 +556,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/about': {
       id: '/about'
       path: '/about'
@@ -507,6 +597,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/app/'
       preLoaderRoute: typeof AppIndexRouteImport
       parentRoute: typeof AppRoute
+    }
+    '/admin/': {
+      id: '/admin/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof AdminRoute
     }
     '/invite/$token': {
       id: '/invite/$token'
@@ -606,33 +703,47 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppCarnetRouteImport
       parentRoute: typeof AppRoute
     }
-    '/app/admin': {
-      id: '/app/admin'
-      path: '/admin'
-      fullPath: '/app/admin'
-      preLoaderRoute: typeof AppAdminRouteImport
-      parentRoute: typeof AppRoute
+    '/admin/rentals': {
+      id: '/admin/rentals'
+      path: '/rentals'
+      fullPath: '/admin/rentals'
+      preLoaderRoute: typeof AdminRentalsRouteImport
+      parentRoute: typeof AdminRoute
     }
-    '/app/admin/': {
-      id: '/app/admin/'
-      path: '/'
-      fullPath: '/app/admin/'
-      preLoaderRoute: typeof AppAdminIndexRouteImport
-      parentRoute: typeof AppAdminRoute
+    '/admin/members': {
+      id: '/admin/members'
+      path: '/members'
+      fullPath: '/admin/members'
+      preLoaderRoute: typeof AdminMembersRouteImport
+      parentRoute: typeof AdminRoute
     }
-    '/app/admin/users': {
-      id: '/app/admin/users'
-      path: '/users'
-      fullPath: '/app/admin/users'
-      preLoaderRoute: typeof AppAdminUsersRouteImport
-      parentRoute: typeof AppAdminRoute
-    }
-    '/app/admin/invitations': {
-      id: '/app/admin/invitations'
+    '/admin/invitations': {
+      id: '/admin/invitations'
       path: '/invitations'
-      fullPath: '/app/admin/invitations'
-      preLoaderRoute: typeof AppAdminInvitationsRouteImport
-      parentRoute: typeof AppAdminRoute
+      fullPath: '/admin/invitations'
+      preLoaderRoute: typeof AdminInvitationsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/content': {
+      id: '/admin/content'
+      path: '/content'
+      fullPath: '/admin/content'
+      preLoaderRoute: typeof AdminContentRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/rentals/': {
+      id: '/admin/rentals/'
+      path: '/'
+      fullPath: '/admin/rentals/'
+      preLoaderRoute: typeof AdminRentalsIndexRouteImport
+      parentRoute: typeof AdminRentalsRoute
+    }
+    '/app/rentals/mine': {
+      id: '/app/rentals/mine'
+      path: '/mine'
+      fullPath: '/app/rentals/mine'
+      preLoaderRoute: typeof AppRentalsMineRouteImport
+      parentRoute: typeof AppRentalsRoute
     }
     '/api/public/upload-invite-avatar': {
       id: '/api/public/upload-invite-avatar'
@@ -641,38 +752,89 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicUploadInviteAvatarRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/rentals/history': {
+      id: '/admin/rentals/history'
+      path: '/history'
+      fullPath: '/admin/rentals/history'
+      preLoaderRoute: typeof AdminRentalsHistoryRouteImport
+      parentRoute: typeof AdminRentalsRoute
+    }
+    '/admin/rentals/catalog': {
+      id: '/admin/rentals/catalog'
+      path: '/catalog'
+      fullPath: '/admin/rentals/catalog'
+      preLoaderRoute: typeof AdminRentalsCatalogRouteImport
+      parentRoute: typeof AdminRentalsRoute
+    }
+    '/admin/rentals/active': {
+      id: '/admin/rentals/active'
+      path: '/active'
+      fullPath: '/admin/rentals/active'
+      preLoaderRoute: typeof AdminRentalsActiveRouteImport
+      parentRoute: typeof AdminRentalsRoute
+    }
   }
 }
 
-interface AppAdminRouteChildren {
-  AppAdminInvitationsRoute: typeof AppAdminInvitationsRoute
-  AppAdminUsersRoute: typeof AppAdminUsersRoute
-  AppAdminIndexRoute: typeof AppAdminIndexRoute
+interface AdminRentalsRouteChildren {
+  AdminRentalsActiveRoute: typeof AdminRentalsActiveRoute
+  AdminRentalsCatalogRoute: typeof AdminRentalsCatalogRoute
+  AdminRentalsHistoryRoute: typeof AdminRentalsHistoryRoute
+  AdminRentalsIndexRoute: typeof AdminRentalsIndexRoute
 }
 
-const AppAdminRouteChildren: AppAdminRouteChildren = {
-  AppAdminInvitationsRoute: AppAdminInvitationsRoute,
-  AppAdminUsersRoute: AppAdminUsersRoute,
-  AppAdminIndexRoute: AppAdminIndexRoute,
+const AdminRentalsRouteChildren: AdminRentalsRouteChildren = {
+  AdminRentalsActiveRoute: AdminRentalsActiveRoute,
+  AdminRentalsCatalogRoute: AdminRentalsCatalogRoute,
+  AdminRentalsHistoryRoute: AdminRentalsHistoryRoute,
+  AdminRentalsIndexRoute: AdminRentalsIndexRoute,
 }
 
-const AppAdminRouteWithChildren = AppAdminRoute._addFileChildren(
-  AppAdminRouteChildren,
+const AdminRentalsRouteWithChildren = AdminRentalsRoute._addFileChildren(
+  AdminRentalsRouteChildren,
+)
+
+interface AdminRouteChildren {
+  AdminContentRoute: typeof AdminContentRoute
+  AdminInvitationsRoute: typeof AdminInvitationsRoute
+  AdminMembersRoute: typeof AdminMembersRoute
+  AdminRentalsRoute: typeof AdminRentalsRouteWithChildren
+  AdminIndexRoute: typeof AdminIndexRoute
+}
+
+const AdminRouteChildren: AdminRouteChildren = {
+  AdminContentRoute: AdminContentRoute,
+  AdminInvitationsRoute: AdminInvitationsRoute,
+  AdminMembersRoute: AdminMembersRoute,
+  AdminRentalsRoute: AdminRentalsRouteWithChildren,
+  AdminIndexRoute: AdminIndexRoute,
+}
+
+const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
+
+interface AppRentalsRouteChildren {
+  AppRentalsMineRoute: typeof AppRentalsMineRoute
+}
+
+const AppRentalsRouteChildren: AppRentalsRouteChildren = {
+  AppRentalsMineRoute: AppRentalsMineRoute,
+}
+
+const AppRentalsRouteWithChildren = AppRentalsRoute._addFileChildren(
+  AppRentalsRouteChildren,
 )
 
 interface AppRouteChildren {
-  AppAdminRoute: typeof AppAdminRouteWithChildren
   AppCarnetRoute: typeof AppCarnetRoute
   AppProfileRoute: typeof AppProfileRoute
-  AppRentalsRoute: typeof AppRentalsRoute
+  AppRentalsRoute: typeof AppRentalsRouteWithChildren
   AppIndexRoute: typeof AppIndexRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
-  AppAdminRoute: AppAdminRouteWithChildren,
   AppCarnetRoute: AppCarnetRoute,
   AppProfileRoute: AppProfileRoute,
-  AppRentalsRoute: AppRentalsRoute,
+  AppRentalsRoute: AppRentalsRouteWithChildren,
   AppIndexRoute: AppIndexRoute,
 }
 
@@ -681,6 +843,7 @@ const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
+  AdminRoute: AdminRouteWithChildren,
   AppRoute: AppRouteWithChildren,
   BlogRoute: BlogRoute,
   ContactRoute: ContactRoute,

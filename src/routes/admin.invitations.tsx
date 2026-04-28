@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 
-export const Route = createFileRoute("/app/admin/invitations")({
+export const Route = createFileRoute("/admin/invitations")({
   component: InvitationsPage,
 });
 
@@ -35,7 +35,9 @@ function InvitationsPage() {
     setItems(r.invitations as Invitation[]);
   };
 
-  useEffect(() => { void refresh(); }, []);
+  useEffect(() => {
+    void refresh();
+  }, []);
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -65,40 +67,62 @@ function InvitationsPage() {
 
   return (
     <div className="space-y-6">
-      <form onSubmit={handleCreate} className="bg-card border-2 border-ink rounded-2xl p-6 shadow-tactile-sm space-y-3">
+      <header>
+        <h1 className="font-display text-4xl font-bold">Invitaciones</h1>
+        <p className="text-cream/60 mt-1">Invita a nuevos socios al club.</p>
+      </header>
+
+      <form onSubmit={handleCreate} className="bg-cream/5 border border-cream/15 rounded-2xl p-6 space-y-3">
         <h2 className="font-display font-bold text-xl">Invitar a alguien</h2>
-        <div className="flex gap-2">
-          <div className="flex-1 space-y-1">
-            <Label htmlFor="email">Correo electrónico</Label>
-            <Input id="email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
+        <div className="flex flex-wrap gap-2 items-end">
+          <div className="flex-1 min-w-[240px] space-y-1">
+            <Label htmlFor="email" className="text-cream/80">Correo electrónico</Label>
+            <Input
+              id="email"
+              type="email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="bg-cream/10 border-cream/20 text-cream placeholder:text-cream/40"
+            />
           </div>
-          <Button type="submit" disabled={submitting} className="self-end">
+          <Button type="submit" disabled={submitting} className="bg-coral hover:bg-coral-deep text-cream">
             {submitting ? "Enviando…" : "Crear invitación"}
           </Button>
         </div>
         {lastUrl && (
-          <div className="bg-primary-soft/30 border border-coral/40 rounded-lg p-3 text-sm">
+          <div className="bg-coral/15 border border-coral/40 rounded-lg p-3 text-sm">
             <p className="font-semibold mb-1">Enlace de invitación (cópialo y envíaselo):</p>
-            <code className="block break-all text-xs bg-background rounded px-2 py-1">{lastUrl}</code>
-            <p className="text-xs text-muted-foreground mt-1">En la próxima iteración este enlace se enviará por email automáticamente.</p>
+            <code className="block break-all text-xs bg-ink/50 rounded px-2 py-1 text-cream">{lastUrl}</code>
+            <p className="text-xs text-cream/60 mt-1">En la próxima iteración este enlace se enviará por email automáticamente.</p>
           </div>
         )}
       </form>
 
-      <div className="bg-card border-2 border-ink rounded-2xl p-6 shadow-tactile-sm">
-        <h2 className="font-display font-bold text-xl mb-4">Invitaciones</h2>
+      <div className="bg-cream/5 border border-cream/15 rounded-2xl p-6">
+        <h2 className="font-display font-bold text-xl mb-4">Historial</h2>
         <div className="space-y-2">
-          {items.length === 0 && <p className="text-sm text-muted-foreground">Sin invitaciones todavía.</p>}
+          {items.length === 0 && <p className="text-sm text-cream/50">Sin invitaciones todavía.</p>}
           {items.map((inv) => {
-            const status = inv.revoked_at ? "Revocada" : inv.accepted_at ? "Aceptada" : new Date(inv.expires_at) < new Date() ? "Caducada" : "Pendiente";
+            const status = inv.revoked_at
+              ? "Revocada"
+              : inv.accepted_at
+                ? "Aceptada"
+                : new Date(inv.expires_at) < new Date()
+                  ? "Caducada"
+                  : "Pendiente";
             return (
-              <div key={inv.id} className="flex items-center justify-between border-b border-border/60 py-2">
+              <div key={inv.id} className="flex items-center justify-between border-b border-cream/10 py-2 last:border-0">
                 <div>
                   <p className="font-medium text-sm">{inv.email}</p>
-                  <p className="text-xs text-muted-foreground">{status} · creada {new Date(inv.created_at).toLocaleDateString()}</p>
+                  <p className="text-xs text-cream/50">
+                    {status} · creada {new Date(inv.created_at).toLocaleDateString()}
+                  </p>
                 </div>
                 {status === "Pendiente" && (
-                  <Button variant="ghost" size="sm" onClick={() => handleRevoke(inv.id)}>Revocar</Button>
+                  <Button variant="ghost" size="sm" className="text-cream/70 hover:text-cream hover:bg-cream/10" onClick={() => handleRevoke(inv.id)}>
+                    Revocar
+                  </Button>
                 )}
               </div>
             );
