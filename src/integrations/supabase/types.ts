@@ -14,6 +14,63 @@ export type Database = {
   }
   public: {
     Tables: {
+      content_section_history: {
+        Row: {
+          content: Json
+          id: string
+          saved_at: string
+          saved_by: string | null
+          schema_version: number
+          section_key: string
+        }
+        Insert: {
+          content: Json
+          id?: string
+          saved_at?: string
+          saved_by?: string | null
+          schema_version: number
+          section_key: string
+        }
+        Update: {
+          content?: Json
+          id?: string
+          saved_at?: string
+          saved_by?: string | null
+          schema_version?: number
+          section_key?: string
+        }
+        Relationships: []
+      }
+      content_sections: {
+        Row: {
+          content: Json
+          created_at: string
+          id: string
+          schema_version: number
+          section_key: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          content?: Json
+          created_at?: string
+          id?: string
+          schema_version?: number
+          section_key: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          content?: Json
+          created_at?: string
+          id?: string
+          schema_version?: number
+          section_key?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       id_document_audit: {
         Row: {
           accessed_at: string
@@ -68,86 +125,6 @@ export type Database = {
           invited_by?: string
           revoked_at?: string | null
           token_hash?: string
-        }
-        Relationships: []
-      }
-      page_blocks: {
-        Row: {
-          content: Json
-          created_at: string
-          id: string
-          page_id: string
-          position: number
-          type: string
-          updated_at: string
-        }
-        Insert: {
-          content?: Json
-          created_at?: string
-          id?: string
-          page_id: string
-          position?: number
-          type: string
-          updated_at?: string
-        }
-        Update: {
-          content?: Json
-          created_at?: string
-          id?: string
-          page_id?: string
-          position?: number
-          type?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "page_blocks_page_id_fkey"
-            columns: ["page_id"]
-            isOneToOne: false
-            referencedRelation: "pages"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      pages: {
-        Row: {
-          created_at: string
-          created_by: string
-          description: string | null
-          id: string
-          locale: Database["public"]["Enums"]["page_locale"]
-          og_image_url: string | null
-          published_at: string | null
-          slug: string
-          status: Database["public"]["Enums"]["page_status"]
-          title: string
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          created_by: string
-          description?: string | null
-          id?: string
-          locale?: Database["public"]["Enums"]["page_locale"]
-          og_image_url?: string | null
-          published_at?: string | null
-          slug: string
-          status?: Database["public"]["Enums"]["page_status"]
-          title: string
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          created_by?: string
-          description?: string | null
-          id?: string
-          locale?: Database["public"]["Enums"]["page_locale"]
-          og_image_url?: string | null
-          published_at?: string | null
-          slug?: string
-          status?: Database["public"]["Enums"]["page_status"]
-          title?: string
-          updated_at?: string
         }
         Relationships: []
       }
@@ -402,8 +379,6 @@ export type Database = {
         | "non_binary"
         | "other"
         | "prefer_not_to_say"
-      page_locale: "es" | "ca" | "en"
-      page_status: "draft" | "published"
       rental_request_status: "pending" | "approved" | "rejected" | "cancelled"
       rental_status: "active" | "returned" | "overdue" | "lost"
     }
@@ -541,8 +516,6 @@ export const Constants = {
         "other",
         "prefer_not_to_say",
       ],
-      page_locale: ["es", "ca", "en"],
-      page_status: ["draft", "published"],
       rental_request_status: ["pending", "approved", "rejected", "cancelled"],
       rental_status: ["active", "returned", "overdue", "lost"],
     },

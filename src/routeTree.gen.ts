@@ -23,7 +23,6 @@ import { Route as EnIndexRouteImport } from './routes/en.index'
 import { Route as CaIndexRouteImport } from './routes/ca.index'
 import { Route as AppIndexRouteImport } from './routes/app.index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
-import { Route as PSlugRouteImport } from './routes/p.$slug'
 import { Route as InviteTokenRouteImport } from './routes/invite.$token'
 import { Route as EnMediaRouteImport } from './routes/en.media'
 import { Route as EnHowItWorksRouteImport } from './routes/en.how-it-works'
@@ -48,7 +47,7 @@ import { Route as ApiPublicUploadInviteAvatarRouteImport } from './routes/api.pu
 import { Route as AdminRentalsHistoryRouteImport } from './routes/admin.rentals.history'
 import { Route as AdminRentalsCatalogRouteImport } from './routes/admin.rentals.catalog'
 import { Route as AdminRentalsActiveRouteImport } from './routes/admin.rentals.active'
-import { Route as AdminContentIdRouteImport } from './routes/admin.content.$id'
+import { Route as AdminContentPageKeyRouteImport } from './routes/admin.content.$pageKey'
 
 const SuperAdminRoute = SuperAdminRouteImport.update({
   id: '/super-admin',
@@ -119,11 +118,6 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => AdminRoute,
-} as any)
-const PSlugRoute = PSlugRouteImport.update({
-  id: '/p/$slug',
-  path: '/p/$slug',
-  getParentRoute: () => rootRouteImport,
 } as any)
 const InviteTokenRoute = InviteTokenRouteImport.update({
   id: '/invite/$token',
@@ -246,9 +240,9 @@ const AdminRentalsActiveRoute = AdminRentalsActiveRouteImport.update({
   path: '/active',
   getParentRoute: () => AdminRentalsRoute,
 } as any)
-const AdminContentIdRoute = AdminContentIdRouteImport.update({
-  id: '/$id',
-  path: '/$id',
+const AdminContentPageKeyRoute = AdminContentPageKeyRouteImport.update({
+  id: '/$pageKey',
+  path: '/$pageKey',
   getParentRoute: () => AdminContentRoute,
 } as any)
 
@@ -281,12 +275,11 @@ export interface FileRoutesByFullPath {
   '/en/how-it-works': typeof EnHowItWorksRoute
   '/en/media': typeof EnMediaRoute
   '/invite/$token': typeof InviteTokenRoute
-  '/p/$slug': typeof PSlugRoute
   '/admin/': typeof AdminIndexRoute
   '/app/': typeof AppIndexRoute
   '/ca/': typeof CaIndexRoute
   '/en/': typeof EnIndexRoute
-  '/admin/content/$id': typeof AdminContentIdRoute
+  '/admin/content/$pageKey': typeof AdminContentPageKeyRoute
   '/admin/rentals/active': typeof AdminRentalsActiveRoute
   '/admin/rentals/catalog': typeof AdminRentalsCatalogRoute
   '/admin/rentals/history': typeof AdminRentalsHistoryRoute
@@ -320,12 +313,11 @@ export interface FileRoutesByTo {
   '/en/how-it-works': typeof EnHowItWorksRoute
   '/en/media': typeof EnMediaRoute
   '/invite/$token': typeof InviteTokenRoute
-  '/p/$slug': typeof PSlugRoute
   '/admin': typeof AdminIndexRoute
   '/app': typeof AppIndexRoute
   '/ca': typeof CaIndexRoute
   '/en': typeof EnIndexRoute
-  '/admin/content/$id': typeof AdminContentIdRoute
+  '/admin/content/$pageKey': typeof AdminContentPageKeyRoute
   '/admin/rentals/active': typeof AdminRentalsActiveRoute
   '/admin/rentals/catalog': typeof AdminRentalsCatalogRoute
   '/admin/rentals/history': typeof AdminRentalsHistoryRoute
@@ -363,12 +355,11 @@ export interface FileRoutesById {
   '/en/how-it-works': typeof EnHowItWorksRoute
   '/en/media': typeof EnMediaRoute
   '/invite/$token': typeof InviteTokenRoute
-  '/p/$slug': typeof PSlugRoute
   '/admin/': typeof AdminIndexRoute
   '/app/': typeof AppIndexRoute
   '/ca/': typeof CaIndexRoute
   '/en/': typeof EnIndexRoute
-  '/admin/content/$id': typeof AdminContentIdRoute
+  '/admin/content/$pageKey': typeof AdminContentPageKeyRoute
   '/admin/rentals/active': typeof AdminRentalsActiveRoute
   '/admin/rentals/catalog': typeof AdminRentalsCatalogRoute
   '/admin/rentals/history': typeof AdminRentalsHistoryRoute
@@ -407,12 +398,11 @@ export interface FileRouteTypes {
     | '/en/how-it-works'
     | '/en/media'
     | '/invite/$token'
-    | '/p/$slug'
     | '/admin/'
     | '/app/'
     | '/ca/'
     | '/en/'
-    | '/admin/content/$id'
+    | '/admin/content/$pageKey'
     | '/admin/rentals/active'
     | '/admin/rentals/catalog'
     | '/admin/rentals/history'
@@ -446,12 +436,11 @@ export interface FileRouteTypes {
     | '/en/how-it-works'
     | '/en/media'
     | '/invite/$token'
-    | '/p/$slug'
     | '/admin'
     | '/app'
     | '/ca'
     | '/en'
-    | '/admin/content/$id'
+    | '/admin/content/$pageKey'
     | '/admin/rentals/active'
     | '/admin/rentals/catalog'
     | '/admin/rentals/history'
@@ -488,12 +477,11 @@ export interface FileRouteTypes {
     | '/en/how-it-works'
     | '/en/media'
     | '/invite/$token'
-    | '/p/$slug'
     | '/admin/'
     | '/app/'
     | '/ca/'
     | '/en/'
-    | '/admin/content/$id'
+    | '/admin/content/$pageKey'
     | '/admin/rentals/active'
     | '/admin/rentals/catalog'
     | '/admin/rentals/history'
@@ -524,7 +512,6 @@ export interface RootRouteChildren {
   EnHowItWorksRoute: typeof EnHowItWorksRoute
   EnMediaRoute: typeof EnMediaRoute
   InviteTokenRoute: typeof InviteTokenRoute
-  PSlugRoute: typeof PSlugRoute
   CaIndexRoute: typeof CaIndexRoute
   EnIndexRoute: typeof EnIndexRoute
   ApiPublicUploadInviteAvatarRoute: typeof ApiPublicUploadInviteAvatarRoute
@@ -629,13 +616,6 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/'
       preLoaderRoute: typeof AdminIndexRouteImport
       parentRoute: typeof AdminRoute
-    }
-    '/p/$slug': {
-      id: '/p/$slug'
-      path: '/p/$slug'
-      fullPath: '/p/$slug'
-      preLoaderRoute: typeof PSlugRouteImport
-      parentRoute: typeof rootRouteImport
     }
     '/invite/$token': {
       id: '/invite/$token'
@@ -805,22 +785,22 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminRentalsActiveRouteImport
       parentRoute: typeof AdminRentalsRoute
     }
-    '/admin/content/$id': {
-      id: '/admin/content/$id'
-      path: '/$id'
-      fullPath: '/admin/content/$id'
-      preLoaderRoute: typeof AdminContentIdRouteImport
+    '/admin/content/$pageKey': {
+      id: '/admin/content/$pageKey'
+      path: '/$pageKey'
+      fullPath: '/admin/content/$pageKey'
+      preLoaderRoute: typeof AdminContentPageKeyRouteImport
       parentRoute: typeof AdminContentRoute
     }
   }
 }
 
 interface AdminContentRouteChildren {
-  AdminContentIdRoute: typeof AdminContentIdRoute
+  AdminContentPageKeyRoute: typeof AdminContentPageKeyRoute
 }
 
 const AdminContentRouteChildren: AdminContentRouteChildren = {
-  AdminContentIdRoute: AdminContentIdRoute,
+  AdminContentPageKeyRoute: AdminContentPageKeyRoute,
 }
 
 const AdminContentRouteWithChildren = AdminContentRoute._addFileChildren(
@@ -913,7 +893,6 @@ const rootRouteChildren: RootRouteChildren = {
   EnHowItWorksRoute: EnHowItWorksRoute,
   EnMediaRoute: EnMediaRoute,
   InviteTokenRoute: InviteTokenRoute,
-  PSlugRoute: PSlugRoute,
   CaIndexRoute: CaIndexRoute,
   EnIndexRoute: EnIndexRoute,
   ApiPublicUploadInviteAvatarRoute: ApiPublicUploadInviteAvatarRoute,

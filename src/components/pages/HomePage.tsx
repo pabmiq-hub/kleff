@@ -16,7 +16,14 @@ import heroImg from "@/assets/hero-gamenight.jpg";
 import tableImg from "@/assets/hero-table.jpg";
 import { useI18n } from "@/i18n/I18nProvider";
 import { SiteLayout } from "@/components/site/SiteLayout";
+import { useSectionContent } from "@/cms/useSectionContent";
 import type { MeetupEvent, MeetupGroupStats, GoogleStats } from "@/server/meetup.functions";
+
+// Returns `value` if it's a non-empty string, otherwise `fallback`. Used to
+// overlay CMS-edited copy on top of the static i18n dictionaries.
+function or(value: unknown, fallback: string): string {
+  return typeof value === "string" && value.trim() ? value : fallback;
+}
 
 type MeetupLoaderData = {
   events: MeetupEvent[];
@@ -267,7 +274,30 @@ export function HomePage() {
   const { t, href, locale } = useI18n();
   const { events, stats, google } = useMeetupData();
 
-  const reasons = [t.home.reason1, t.home.reason2, t.home.reason3, t.home.reason4, t.home.reason5];
+  // CMS-editable zones (with i18n fallback)
+  const hero = useSectionContent("home.hero");
+  const pillars = useSectionContent("home.pillars");
+  const eventsSec = useSectionContent("home.events");
+  const testimonialsSec = useSectionContent<{
+    eyebrow: string;
+    title: string;
+    subtitle: string;
+    items: Array<{ quote?: string; author?: string; source?: string }>;
+  }>("home.testimonials");
+  const reasonsSec = useSectionContent<{
+    eyebrow: string;
+    title: string;
+    image: string;
+    imageBadge: string;
+    items: Array<{ text?: string }>;
+  }>("home.reasons");
+
+  const cmsTestimonials = (testimonialsSec.items ?? []).filter((it) => it?.quote);
+  const cmsReasons = (reasonsSec.items ?? []).map((it) => it?.text).filter(Boolean) as string[];
+
+  const reasons = cmsReasons.length
+    ? cmsReasons
+    : [t.home.reason1, t.home.reason2, t.home.reason3, t.home.reason4, t.home.reason5];
 
   const memberCount = stats.memberCount ?? 13071;
   const upcoming = stats.upcomingEventCount ?? events.length;
@@ -283,31 +313,31 @@ export function HomePage() {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-12 md:pt-20 pb-24 md:pb-32 grid lg:grid-cols-12 gap-12 lg:gap-16 items-center">
           <div className="lg:col-span-7 relative z-10 min-w-0">
             <span className="inline-flex items-center gap-2 rounded-full bg-coral/10 border-2 border-coral/30 px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-coral-deep">
-              <Sparkles className="h-3.5 w-3.5" /> {t.home.eyebrow}
+              <Sparkles className="h-3.5 w-3.5" /> {or(hero.eyebrow, t.home.eyebrow)}
             </span>
             <h1 className="mt-6 text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-display font-semibold leading-[0.98] sm:leading-[0.95] tracking-normal text-foreground break-words">
-              {t.home.titleA}{" "}
-              <span className="marker-coral text-foreground">{t.home.titleHighlight}</span>{" "}
-              {t.home.titleB}
+              {or(hero.titleA, t.home.titleA)}{" "}
+              <span className="marker-coral text-foreground">{or(hero.titleHighlight, t.home.titleHighlight)}</span>{" "}
+              {or(hero.titleB, t.home.titleB)}
             </h1>
             <p className="mt-7 text-lg sm:text-xl text-foreground/75 max-w-xl leading-relaxed">
-              {t.home.subtitle}
+              {or(hero.subtitle, t.home.subtitle)}
             </p>
             <div className="mt-9 flex flex-wrap gap-4 items-center max-w-full">
               <a
-                href="https://www.meetup.com/es-ES/kleff-bcn/events/?type=upcoming"
+                href={or(hero.ctaPrimaryHref, "https://www.meetup.com/es-ES/kleff-bcn/events/?type=upcoming")}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="group inline-flex items-center justify-center gap-2 rounded-2xl bg-coral text-cream border-2 border-ink px-5 py-3.5 sm:px-7 sm:py-4 text-sm sm:text-base font-bold shadow-tactile hover:translate-x-[3px] hover:translate-y-[3px] hover:shadow-tactile-sm transition-all duration-200 text-center whitespace-normal max-w-full"
               >
-                <span>{t.home.ctaPrimary}</span>
+                <span>{or(hero.ctaPrimary, t.home.ctaPrimary)}</span>
                 <ArrowRight className="h-5 w-5 shrink-0 group-hover:translate-x-1 transition-transform" />
               </a>
               <Link
                 to={href("/about")}
                 className="inline-flex items-center justify-center gap-2 rounded-2xl bg-card text-foreground border-2 border-ink px-5 py-3.5 sm:px-7 sm:py-4 text-sm sm:text-base font-bold hover:bg-cream-deep transition-colors text-center max-w-full"
               >
-                {t.home.ctaSecondary}
+                {or(hero.ctaSecondary, t.home.ctaSecondary)}
               </Link>
             </div>
 
@@ -370,29 +400,29 @@ export function HomePage() {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="max-w-2xl">
             <span className="inline-block stamp-ink text-xs font-bold uppercase tracking-widest mb-4">
-              {locale === "en" ? "Why Kleff" : locale === "ca" ? "Per què Kleff" : "Por qué Kleff"}
+              {or(pillars.eyebrow, locale === "en" ? "Why Kleff" : locale === "ca" ? "Per què Kleff" : "Por qué Kleff")}
             </span>
             <h2 className="text-4xl sm:text-5xl lg:text-6xl font-display font-semibold text-foreground leading-tight">
-              {t.home.pillarsTitle}
+              {or(pillars.title, t.home.pillarsTitle)}
             </h2>
-            <p className="mt-4 text-lg text-foreground/70">{t.home.pillarsSubtitle}</p>
+            <p className="mt-4 text-lg text-foreground/70">{or(pillars.subtitle, t.home.pillarsSubtitle)}</p>
           </div>
 
           <div className="mt-16 grid md:grid-cols-3 gap-8">
             <PillarCard
               icon={<Users className="h-7 w-7" />}
-              title={t.home.pillar1Title}
-              body={t.home.pillar1Body}
+              title={or(pillars.pillar1Title, t.home.pillar1Title)}
+              body={or(pillars.pillar1Body, t.home.pillar1Body)}
             />
             <PillarCard
               icon={<Heart className="h-7 w-7" />}
-              title={t.home.pillar2Title}
-              body={t.home.pillar2Body}
+              title={or(pillars.pillar2Title, t.home.pillar2Title)}
+              body={or(pillars.pillar2Body, t.home.pillar2Body)}
             />
             <PillarCard
               icon={<Globe2 className="h-7 w-7" />}
-              title={t.home.pillar3Title}
-              body={t.home.pillar3Body}
+              title={or(pillars.pillar3Title, t.home.pillar3Title)}
+              body={or(pillars.pillar3Body, t.home.pillar3Body)}
             />
           </div>
         </div>
@@ -407,9 +437,9 @@ export function HomePage() {
                 <Calendar className="h-3.5 w-3.5" /> Meetup
               </span>
               <h2 className="text-4xl sm:text-5xl lg:text-6xl font-display font-semibold text-foreground leading-tight">
-                {t.home.eventsTitle}
+                {or(eventsSec.title, t.home.eventsTitle)}
               </h2>
-              <p className="mt-4 text-lg text-foreground/70 max-w-xl">{t.home.eventsSubtitle}</p>
+              <p className="mt-4 text-lg text-foreground/70 max-w-xl">{or(eventsSec.subtitle, t.home.eventsSubtitle)}</p>
             </div>
             <a
               href="https://www.meetup.com/es-ES/kleff-bcn/events/?type=upcoming"
@@ -417,7 +447,7 @@ export function HomePage() {
               rel="noopener noreferrer"
               className="self-start inline-flex items-center gap-2 px-5 py-3 border-2 border-ink rounded-full text-sm font-bold bg-card hover:bg-cream-deep transition-colors shadow-tactile-sm"
             >
-              {t.home.eventsCta}
+              {or(eventsSec.ctaText, t.home.eventsCta)}
               <ExternalLink className="h-4 w-4" />
             </a>
           </div>
@@ -460,12 +490,12 @@ export function HomePage() {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="max-w-3xl">
             <span className="inline-flex items-center gap-2 stamp-ink text-xs font-bold uppercase tracking-widest mb-4">
-              <Star className="h-3.5 w-3.5 fill-cream" /> {t.home.testimonialsEyebrow}
+              <Star className="h-3.5 w-3.5 fill-cream" /> {or(testimonialsSec.eyebrow, t.home.testimonialsEyebrow)}
             </span>
             <h2 className="text-4xl sm:text-5xl lg:text-6xl font-display font-semibold text-foreground leading-tight">
-              {t.home.testimonialsTitle}
+              {or(testimonialsSec.title, t.home.testimonialsTitle)}
             </h2>
-            <p className="mt-4 text-lg text-foreground/70">{t.home.testimonialsSubtitle}</p>
+            <p className="mt-4 text-lg text-foreground/70">{or(testimonialsSec.subtitle, t.home.testimonialsSubtitle)}</p>
           </div>
 
           {/* Rating summary chips */}
@@ -491,9 +521,20 @@ export function HomePage() {
           </div>
 
           <div className="mt-12 grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {TESTIMONIALS.map((t, i) => (
-              <TestimonialCard key={i} t={t} locale={locale} />
-            ))}
+            {cmsTestimonials.length > 0
+              ? cmsTestimonials.map((it, i) => (
+                  <TestimonialCard
+                    key={i}
+                    t={{
+                      quote: { es: it.quote ?? "", en: it.quote ?? "", ca: it.quote ?? "" },
+                      author: it.author ?? "",
+                      source: (it.source === "Meetup" ? "Meetup" : "Google") as "Meetup" | "Google",
+                      rating: 5,
+                    }}
+                    locale={locale}
+                  />
+                ))
+              : TESTIMONIALS.map((t, i) => <TestimonialCard key={i} t={t} locale={locale} />)}
           </div>
 
           <div className="mt-12 flex flex-wrap gap-4">
@@ -525,7 +566,7 @@ export function HomePage() {
           <div className="order-2 lg:order-1 relative">
             <div className="relative border-4 border-ink rounded-3xl shadow-tactile-lg overflow-hidden">
               <img
-                src={tableImg}
+                src={or(reasonsSec.image, tableImg) as string}
                 alt="Mesa de juegos KLEFF"
                 width={1200}
                 height={1400}
@@ -535,17 +576,17 @@ export function HomePage() {
             </div>
             <div className="mt-4 inline-block bg-cream border-2 border-ink rounded-2xl px-4 py-2 shadow-tactile-sm">
               <p className="font-display font-bold text-sm">
-                {locale === "en" ? "100% real cardboard" : locale === "ca" ? "100% cartró real" : "100% cartón real"}
+                {or(reasonsSec.imageBadge, locale === "en" ? "100% real cardboard" : locale === "ca" ? "100% cartró real" : "100% cartón real")}
               </p>
             </div>
           </div>
 
           <div className="order-1 lg:order-2">
             <span className="inline-block stamp-coral text-xs font-bold uppercase tracking-widest mb-4">
-              {t.home.reasonsEyebrow}
+              {or(reasonsSec.eyebrow, t.home.reasonsEyebrow)}
             </span>
             <h2 className="text-4xl sm:text-5xl lg:text-6xl font-display font-semibold text-foreground leading-[1.05]">
-              {t.home.reasonsTitle}
+              {or(reasonsSec.title, t.home.reasonsTitle)}
             </h2>
             <ul className="mt-10 space-y-4">
               {reasons.map((r, i) => {
