@@ -42,11 +42,11 @@ async function translateHtml(
   source: string,
   fromLocale: string,
   toLocale: string
-): Promise<string> {
+): Promise<string | null> {
   const apiKey = process.env.LOVABLE_API_KEY;
   if (!apiKey) {
     console.warn("[overrides] LOVABLE_API_KEY missing — skipping translation");
-    return source;
+    return null;
   }
   if (!source.trim()) return source;
 
@@ -70,7 +70,7 @@ async function translateHtml(
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
+        model: "google/gemini-3-flash-preview",
         messages: [
           { role: "system", content: system },
           { role: "user", content: source },
@@ -80,16 +80,35 @@ async function translateHtml(
     if (!res.ok) {
       const t = await res.text().catch(() => "");
       console.error("[overrides] translate failed", res.status, t);
-      return source;
+      return null;
     }
     const json = (await res.json()) as {
       choices?: Array<{ message?: { content?: string } }>;
     };
     const out = json.choices?.[0]?.message?.content?.trim();
-    return out && out.length > 0 ? out : source;
+    if (!out || out.length === 0) return null;
+
+    const normalize = (value: string) =>
+      value
+        .replace(/<[^>]+>/g, " ")
+        .replace(/&nbsp;/gi, " ")
+        .replace(/\s+/g, " ")
+        .trim()
+        .toLowerCase();
+
+    const normalizedSource = normalize(source);
+    const normalizedOut = normalize(out);
+    const looksTranslatable = /[a-záéíóúàèìòùçñ]{4,}/i.test(normalizedSource);
+
+    if (fromLocale !== toLocale && looksTranslatable && normalizedOut === normalizedSource) {
+      console.warn(`[overrides] untranslated output detected for ${fromLocale}->${toLocale}`);
+      return null;
+    }
+
+    return out;
   } catch (e) {
     console.error("[overrides] translate error", e);
-    return source;
+    return null;
   }
 }
 
