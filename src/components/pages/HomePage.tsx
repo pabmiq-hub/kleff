@@ -16,7 +16,14 @@ import heroImg from "@/assets/hero-gamenight.jpg";
 import tableImg from "@/assets/hero-table.jpg";
 import { useI18n } from "@/i18n/I18nProvider";
 import { SiteLayout } from "@/components/site/SiteLayout";
+import { useSectionContent } from "@/cms/useSectionContent";
 import type { MeetupEvent, MeetupGroupStats, GoogleStats } from "@/server/meetup.functions";
+
+// Returns `value` if it's a non-empty string, otherwise `fallback`. Used to
+// overlay CMS-edited copy on top of the static i18n dictionaries.
+function or(value: unknown, fallback: string): string {
+  return typeof value === "string" && value.trim() ? value : fallback;
+}
 
 type MeetupLoaderData = {
   events: MeetupEvent[];
@@ -267,7 +274,30 @@ export function HomePage() {
   const { t, href, locale } = useI18n();
   const { events, stats, google } = useMeetupData();
 
-  const reasons = [t.home.reason1, t.home.reason2, t.home.reason3, t.home.reason4, t.home.reason5];
+  // CMS-editable zones (with i18n fallback)
+  const hero = useSectionContent("home.hero");
+  const pillars = useSectionContent("home.pillars");
+  const eventsSec = useSectionContent("home.events");
+  const testimonialsSec = useSectionContent<{
+    eyebrow: string;
+    title: string;
+    subtitle: string;
+    items: Array<{ quote?: string; author?: string; source?: string }>;
+  }>("home.testimonials");
+  const reasonsSec = useSectionContent<{
+    eyebrow: string;
+    title: string;
+    image: string;
+    imageBadge: string;
+    items: Array<{ text?: string }>;
+  }>("home.reasons");
+
+  const cmsTestimonials = (testimonialsSec.items ?? []).filter((it) => it?.quote);
+  const cmsReasons = (reasonsSec.items ?? []).map((it) => it?.text).filter(Boolean) as string[];
+
+  const reasons = cmsReasons.length
+    ? cmsReasons
+    : [t.home.reason1, t.home.reason2, t.home.reason3, t.home.reason4, t.home.reason5];
 
   const memberCount = stats.memberCount ?? 13071;
   const upcoming = stats.upcomingEventCount ?? events.length;
