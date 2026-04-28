@@ -7,6 +7,9 @@ import type { Json } from "@/integrations/supabase/types";
 const pathSchema = z.string().min(1).max(256).regex(/^\/[a-zA-Z0-9/_-]*$/);
 const elementIdSchema = z.string().min(1).max(128).regex(/^[a-zA-Z0-9._:-]+$/);
 const propertySchema = z.string().min(1).max(64).regex(/^[a-zA-Z0-9._-]+$/);
+const localeSchema = z.enum(["es", "en", "ca"]);
+const SOURCE_LOCALE = "es" as const;
+const ALL_LOCALES = ["es", "en", "ca"] as const;
 
 export type OverrideRow = {
   page_path: string;
@@ -14,6 +17,7 @@ export type OverrideRow = {
   property: string;
   value: Json | null;
   status: "draft" | "published";
+  locale: string;
 };
 
 export type PageRow = {
@@ -26,37 +30,131 @@ export type PageRow = {
   updated_at: string;
 };
 
-// PUBLIC: get published overrides for a page (for visitors)
+// ---------- Translation helper (Lovable AI Gateway) ----------
+
+const LANG_NAMES: Record<string, string> = {
+  es: "Spanish (Castellano)",
+  en: "English",
+  ca: "Catalan (Català)",
+};
+
+async function translateHtml(
+  source: string,
+  fromLocale: string,
+  toLocale: string
+): Promise<string> {
+  const apiKey = process.env.LOVABLE_API_KEY;
+  if (!apiKey) {
+    console.warn("[overrides] LOVABLE_API_KEY missing — skipping translation");
+    return source;
+  }
+  if (!source.trim()) return source;
+
+  const system = [
+    `You are a professional translator for a board-games community website (KLEFF, Barcelona).`,
+    `Translate the user's snippet from ${LANG_NAMES[fromLocale] ?? fromLocale} to ${LANG_NAMES[toLocale] ?? toLocale}.`,
+    `STRICT RULES:`,
+    `- Preserve ALL HTML tags and attributes exactly (e.g. <b>, <i>, <u>, <a href="…">, <br>, <span>).`,
+    `- Translate only the visible text content.`,
+    `- Do NOT translate brand names: KLEFF.`,
+    `- Keep the same tone (warm, direct, community-friendly).`,
+    `- Do NOT add quotes, explanations, or markdown around your answer.`,
+    `- Return ONLY the translated snippet.`,
+  ].join("\n");
+
+  try {
+    const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "google/gemini-2.5-flash",
+        messages: [
+          { role: "system", content: system },
+          { role: "user", content: source },
+        ],
+      }),
+    });
+    if (!res.ok) {
+      const t = await res.text().catch(() => "");
+      console.error("[overrides] translate failed", res.status, t);
+      return source;
+    }
+    const json = (await res.json()) as {
+      choices?: Array<{ message?: { content?: string } }>;
+    };
+    const out = json.choices?.[0]?.message?.content?.trim();
+    return out && out.length > 0 ? out : source;
+  } catch (e) {
+    console.error("[overrides] translate error", e);
+    return source;
+  }
+}
+
+// ---------- Public read (filtered by locale) ----------
+
 export const getPublishedOverrides = createServerFn({ method: "GET" })
-  .inputValidator(z.object({ pagePath: pathSchema }))
+  .inputValidator(
+    z.object({
+      pagePath: pathSchema,
+      locale: localeSchema.optional().default("es"),
+    })
+  )
   .handler(async ({ data }) => {
     const { data: rows, error } = await supabaseAdmin
       .from("content_overrides" as never)
       .select("element_id, property, value")
       .eq("page_path", data.pagePath)
-      .eq("status", "published");
+      .eq("status", "published")
+      .eq("locale", data.locale);
     if (error) {
       console.error("getPublishedOverrides error", error);
       return { overrides: [] as Array<{ element_id: string; property: string; value: Json | null }> };
     }
-    return { overrides: (rows ?? []) as Array<{ element_id: string; property: string; value: Json | null }> };
+    return {
+      overrides: (rows ?? []) as Array<{ element_id: string; property: string; value: Json | null }>,
+    };
   });
 
-// ADMIN: get all overrides (draft + published) for a page, merged
+// ---------- Admin reads ----------
+
 export const adminGetPageOverrides = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator(z.object({ pagePath: pathSchema }))
+  .inputValidator(
+    z.object({
+      pagePath: pathSchema,
+      locale: localeSchema.optional().default("es"),
+    })
+  )
   .handler(async ({ data, context }) => {
     const { supabase } = context;
     const { data: rows, error } = await supabase
       .from("content_overrides" as never)
-      .select("element_id, property, value, status, updated_at")
-      .eq("page_path", data.pagePath);
+      .select("element_id, property, value, status, updated_at, locale")
+      .eq("page_path", data.pagePath)
+      .eq("locale", data.locale);
     if (error) throw new Error(error.message);
     return { overrides: (rows ?? []) as OverrideRow[] };
   });
 
-// ADMIN: save a single draft override (upsert)
+// ---------- Admin writes ----------
+
+/**
+ * Save a single draft override.
+ *
+ * Behavior:
+ * - Non-text properties (style, hidden, src, alt, ...) are written ONLY for the
+ *   source locale (es). They are language-independent and we don't want to
+ *   duplicate them per locale (keeps the read filtered by locale + a fallback
+ *   to es overrides for non-text props if needed).
+ * - For `text` (and only `text`):
+ *     - Always saved for `es` (source).
+ *     - Auto-translated to `en` and `ca` and saved as drafts too.
+ *   The frontend can pass `skipTranslate: true` if the admin is editing a
+ *   non-source locale directly (manual override).
+ */
 export const adminSaveOverride = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator(
@@ -65,28 +163,72 @@ export const adminSaveOverride = createServerFn({ method: "POST" })
       elementId: elementIdSchema,
       property: propertySchema,
       value: z.unknown(),
+      locale: localeSchema.optional().default("es"),
+      skipTranslate: z.boolean().optional().default(false),
     })
   )
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
-    const { error } = await supabase
-      .from("content_overrides" as never)
-      .upsert(
-        {
-          page_path: data.pagePath,
-          element_id: data.elementId,
-          property: data.property,
-          value: (data.value ?? null) as never,
-          status: "draft",
-          updated_by: userId,
-        } as never,
-        { onConflict: "page_path,element_id,property,status" }
+
+    const writeOne = async (locale: string, value: unknown) => {
+      const { error } = await supabase
+        .from("content_overrides" as never)
+        .upsert(
+          {
+            page_path: data.pagePath,
+            element_id: data.elementId,
+            property: data.property,
+            value: (value ?? null) as never,
+            status: "draft",
+            locale,
+            updated_by: userId,
+          } as never,
+          { onConflict: "page_path,element_id,property,status,locale" }
+        );
+      if (error) throw new Error(error.message);
+    };
+
+    // 1) Always write the value the admin sent for the locale they edited in.
+    await writeOne(data.locale, data.value);
+
+    // 2) If it's a `text` property edited from the source locale (es) and
+    //    translation isn't disabled, translate to the other locales.
+    if (
+      data.property === "text" &&
+      data.locale === SOURCE_LOCALE &&
+      !data.skipTranslate &&
+      typeof data.value === "string"
+    ) {
+      const source = data.value;
+      const targets = ALL_LOCALES.filter((l) => l !== SOURCE_LOCALE);
+      // Run translations in parallel; never let a failed translation break the save.
+      await Promise.all(
+        targets.map(async (target) => {
+          try {
+            const translated = await translateHtml(source, SOURCE_LOCALE, target);
+            await writeOne(target, translated);
+          } catch (e) {
+            console.error(`[overrides] failed to translate to ${target}`, e);
+          }
+        })
       );
-    if (error) throw new Error(error.message);
+    }
+
+    // 3) Style/hidden/src/alt: also mirror to the other locales so that the
+    //    visual change is visible everywhere (these are language-agnostic).
+    if (
+      data.property !== "text" &&
+      data.locale === SOURCE_LOCALE
+    ) {
+      const targets = ALL_LOCALES.filter((l) => l !== SOURCE_LOCALE);
+      await Promise.all(
+        targets.map((target) => writeOne(target, data.value).catch(() => undefined))
+      );
+    }
+
     return { ok: true };
   });
 
-// ADMIN: clear a single draft override (revert to published / default)
 export const adminClearOverride = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator(
@@ -94,27 +236,33 @@ export const adminClearOverride = createServerFn({ method: "POST" })
       pagePath: pathSchema,
       elementId: elementIdSchema,
       property: propertySchema,
+      locale: localeSchema.optional().default("es"),
+      allLocales: z.boolean().optional().default(true),
     })
   )
   .handler(async ({ data, context }) => {
     const { supabase } = context;
-    const { error } = await supabase
+    let q = supabase
       .from("content_overrides" as never)
       .delete()
       .eq("page_path", data.pagePath)
       .eq("element_id", data.elementId)
       .eq("property", data.property)
       .eq("status", "draft");
+    if (!data.allLocales) {
+      q = q.eq("locale", data.locale);
+    }
+    const { error } = await q;
     if (error) throw new Error(error.message);
     return { ok: true };
   });
 
-// ADMIN: discard ALL drafts for a page
 export const adminDiscardDrafts = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator(z.object({ pagePath: pathSchema }))
   .handler(async ({ data, context }) => {
     const { supabase } = context;
+    // Discard drafts across ALL locales for this page.
     const { error } = await supabase
       .from("content_overrides" as never)
       .delete()
@@ -124,21 +272,26 @@ export const adminDiscardDrafts = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
-// ADMIN: publish drafts → copy each draft over its published row, then delete drafts
 export const adminPublishPage = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator(z.object({ pagePath: pathSchema }))
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
 
+    // Promote drafts -> published across ALL locales.
     const { data: drafts, error: dErr } = await supabase
       .from("content_overrides" as never)
-      .select("element_id, property, value")
+      .select("element_id, property, value, locale")
       .eq("page_path", data.pagePath)
       .eq("status", "draft");
     if (dErr) throw new Error(dErr.message);
 
-    const draftRows = (drafts ?? []) as Array<{ element_id: string; property: string; value: unknown }>;
+    const draftRows = (drafts ?? []) as Array<{
+      element_id: string;
+      property: string;
+      value: unknown;
+      locale: string;
+    }>;
     if (draftRows.length === 0) return { published: 0 };
 
     const upsertPayload = draftRows.map((d) => ({
@@ -147,12 +300,15 @@ export const adminPublishPage = createServerFn({ method: "POST" })
       property: d.property,
       value: (d.value ?? null) as never,
       status: "published" as const,
+      locale: d.locale,
       updated_by: userId,
     }));
 
     const { error: pErr } = await supabase
       .from("content_overrides" as never)
-      .upsert(upsertPayload as never, { onConflict: "page_path,element_id,property,status" });
+      .upsert(upsertPayload as never, {
+        onConflict: "page_path,element_id,property,status,locale",
+      });
     if (pErr) throw new Error(pErr.message);
 
     const { error: delErr } = await supabase
@@ -165,7 +321,8 @@ export const adminPublishPage = createServerFn({ method: "POST" })
     return { published: draftRows.length };
   });
 
-// PUBLIC: list pages
+// ---------- Pages CRUD (unchanged) ----------
+
 export const listContentPages = createServerFn({ method: "GET" }).handler(async () => {
   const { data, error } = await supabaseAdmin
     .from("content_pages" as never)
@@ -179,7 +336,6 @@ export const listContentPages = createServerFn({ method: "GET" }).handler(async 
   return { pages: (data ?? []) as PageRow[] };
 });
 
-// ADMIN: create a new custom page
 export const adminCreatePage = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator(
