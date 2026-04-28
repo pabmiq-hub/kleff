@@ -45,7 +45,7 @@ export const getPublishedPage = createServerFn({ method: "POST" })
       .eq("status", "published")
       .maybeSingle();
     if (error) throw new Error(error.message);
-    if (!page) return { page: null as null, blocks: [] as Array<{ id: string; type: string; position: number; content: Record<string, never> }> };
+    if (!page) return { page: null, blocks: [] };
     const { data: blocks, error: blocksError } = await supabaseAdmin
       .from("page_blocks")
       .select("id, type, position, content")
