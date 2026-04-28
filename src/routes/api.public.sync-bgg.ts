@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { syncBggCollection } from "@/server/bgg.functions";
+import { syncBggCollection } from "@/server/bgg.server";
 
 // Public cron endpoint to sync BGG collection.
 // Called daily by pg_cron. Lightweight token check via SYNC_TOKEN if configured;
