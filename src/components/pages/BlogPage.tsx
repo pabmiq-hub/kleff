@@ -1,6 +1,7 @@
 import { useI18n } from "@/i18n/I18nProvider";
 import { SiteLayout } from "@/components/site/SiteLayout";
 import { Newspaper } from "lucide-react";
+import { EditableText } from "@/editor/Editable";
 
 export function BlogPage() {
   const { locale } = useI18n();
