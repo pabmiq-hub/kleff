@@ -437,9 +437,9 @@ export function HomePage() {
                 <Calendar className="h-3.5 w-3.5" /> Meetup
               </span>
               <h2 className="text-4xl sm:text-5xl lg:text-6xl font-display font-semibold text-foreground leading-tight">
-                {t.home.eventsTitle}
+                {or(eventsSec.title, t.home.eventsTitle)}
               </h2>
-              <p className="mt-4 text-lg text-foreground/70 max-w-xl">{t.home.eventsSubtitle}</p>
+              <p className="mt-4 text-lg text-foreground/70 max-w-xl">{or(eventsSec.subtitle, t.home.eventsSubtitle)}</p>
             </div>
             <a
               href="https://www.meetup.com/es-ES/kleff-bcn/events/?type=upcoming"
@@ -447,7 +447,7 @@ export function HomePage() {
               rel="noopener noreferrer"
               className="self-start inline-flex items-center gap-2 px-5 py-3 border-2 border-ink rounded-full text-sm font-bold bg-card hover:bg-cream-deep transition-colors shadow-tactile-sm"
             >
-              {t.home.eventsCta}
+              {or(eventsSec.ctaText, t.home.eventsCta)}
               <ExternalLink className="h-4 w-4" />
             </a>
           </div>
@@ -490,12 +490,12 @@ export function HomePage() {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="max-w-3xl">
             <span className="inline-flex items-center gap-2 stamp-ink text-xs font-bold uppercase tracking-widest mb-4">
-              <Star className="h-3.5 w-3.5 fill-cream" /> {t.home.testimonialsEyebrow}
+              <Star className="h-3.5 w-3.5 fill-cream" /> {or(testimonialsSec.eyebrow, t.home.testimonialsEyebrow)}
             </span>
             <h2 className="text-4xl sm:text-5xl lg:text-6xl font-display font-semibold text-foreground leading-tight">
-              {t.home.testimonialsTitle}
+              {or(testimonialsSec.title, t.home.testimonialsTitle)}
             </h2>
-            <p className="mt-4 text-lg text-foreground/70">{t.home.testimonialsSubtitle}</p>
+            <p className="mt-4 text-lg text-foreground/70">{or(testimonialsSec.subtitle, t.home.testimonialsSubtitle)}</p>
           </div>
 
           {/* Rating summary chips */}
@@ -521,9 +521,20 @@ export function HomePage() {
           </div>
 
           <div className="mt-12 grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {TESTIMONIALS.map((t, i) => (
-              <TestimonialCard key={i} t={t} locale={locale} />
-            ))}
+            {cmsTestimonials.length > 0
+              ? cmsTestimonials.map((it, i) => (
+                  <TestimonialCard
+                    key={i}
+                    t={{
+                      quote: { es: it.quote ?? "", en: it.quote ?? "", ca: it.quote ?? "" },
+                      author: it.author ?? "",
+                      source: (it.source === "Meetup" ? "Meetup" : "Google") as "Meetup" | "Google",
+                      rating: 5,
+                    }}
+                    locale={locale}
+                  />
+                ))
+              : TESTIMONIALS.map((t, i) => <TestimonialCard key={i} t={t} locale={locale} />)}
           </div>
 
           <div className="mt-12 flex flex-wrap gap-4">
