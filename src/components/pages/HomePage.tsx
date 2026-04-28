@@ -400,29 +400,29 @@ export function HomePage() {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="max-w-2xl">
             <span className="inline-block stamp-ink text-xs font-bold uppercase tracking-widest mb-4">
-              {locale === "en" ? "Why Kleff" : locale === "ca" ? "Per què Kleff" : "Por qué Kleff"}
+              {or(pillars.eyebrow, locale === "en" ? "Why Kleff" : locale === "ca" ? "Per què Kleff" : "Por qué Kleff")}
             </span>
             <h2 className="text-4xl sm:text-5xl lg:text-6xl font-display font-semibold text-foreground leading-tight">
-              {t.home.pillarsTitle}
+              {or(pillars.title, t.home.pillarsTitle)}
             </h2>
-            <p className="mt-4 text-lg text-foreground/70">{t.home.pillarsSubtitle}</p>
+            <p className="mt-4 text-lg text-foreground/70">{or(pillars.subtitle, t.home.pillarsSubtitle)}</p>
           </div>
 
           <div className="mt-16 grid md:grid-cols-3 gap-8">
             <PillarCard
               icon={<Users className="h-7 w-7" />}
-              title={t.home.pillar1Title}
-              body={t.home.pillar1Body}
+              title={or(pillars.pillar1Title, t.home.pillar1Title)}
+              body={or(pillars.pillar1Body, t.home.pillar1Body)}
             />
             <PillarCard
               icon={<Heart className="h-7 w-7" />}
-              title={t.home.pillar2Title}
-              body={t.home.pillar2Body}
+              title={or(pillars.pillar2Title, t.home.pillar2Title)}
+              body={or(pillars.pillar2Body, t.home.pillar2Body)}
             />
             <PillarCard
               icon={<Globe2 className="h-7 w-7" />}
-              title={t.home.pillar3Title}
-              body={t.home.pillar3Body}
+              title={or(pillars.pillar3Title, t.home.pillar3Title)}
+              body={or(pillars.pillar3Body, t.home.pillar3Body)}
             />
           </div>
         </div>
