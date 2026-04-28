@@ -30,6 +30,47 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setIsSuperAdmin((data ?? []).some((r) => r.role === "super_admin"));
   };
 
+  // Install a fetch interceptor that injects the Supabase access token
+  // into same-origin /_serverFn/ requests so server functions using
+  // requireSupabaseAuth receive the user's Bearer token.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const w = window as typeof window & { __serverFnFetchPatched?: boolean };
+    if (w.__serverFnFetchPatched) return;
+    w.__serverFnFetchPatched = true;
+
+    const originalFetch = window.fetch.bind(window);
+    window.fetch = async (input, init) => {
+      try {
+        const url =
+          typeof input === "string"
+            ? input
+            : input instanceof URL
+              ? input.toString()
+              : input instanceof Request
+                ? input.url
+                : "";
+        const isServerFn = url.includes("/_serverFn/");
+        if (isServerFn) {
+          const { data } = await supabase.auth.getSession();
+          const token = data.session?.access_token;
+          if (token) {
+            const headers = new Headers(
+              init?.headers ?? (input instanceof Request ? input.headers : undefined),
+            );
+            if (!headers.has("authorization")) {
+              headers.set("authorization", `Bearer ${token}`);
+            }
+            return originalFetch(input, { ...init, headers });
+          }
+        }
+      } catch {
+        // fall through to original fetch
+      }
+      return originalFetch(input, init);
+    };
+  }, []);
+
   useEffect(() => {
     // Subscribe FIRST
     const {
