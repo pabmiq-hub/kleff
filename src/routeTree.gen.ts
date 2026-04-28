@@ -9,15 +9,18 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SuperAdminRouteImport } from './routes/super-admin'
 import { Route as MediaRouteImport } from './routes/media'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as HowItWorksRouteImport } from './routes/how-it-works'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as BlogRouteImport } from './routes/blog'
+import { Route as AppRouteImport } from './routes/app'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as EnIndexRouteImport } from './routes/en.index'
 import { Route as CaIndexRouteImport } from './routes/ca.index'
+import { Route as AppIndexRouteImport } from './routes/app.index'
 import { Route as InviteTokenRouteImport } from './routes/invite.$token'
 import { Route as EnMediaRouteImport } from './routes/en.media'
 import { Route as EnHowItWorksRouteImport } from './routes/en.how-it-works'
@@ -29,7 +32,20 @@ import { Route as CaHowItWorksRouteImport } from './routes/ca.how-it-works'
 import { Route as CaContactRouteImport } from './routes/ca.contact'
 import { Route as CaBlogRouteImport } from './routes/ca.blog'
 import { Route as CaAboutRouteImport } from './routes/ca.about'
+import { Route as AppRentalsRouteImport } from './routes/app.rentals'
+import { Route as AppProfileRouteImport } from './routes/app.profile'
+import { Route as AppCarnetRouteImport } from './routes/app.carnet'
+import { Route as AppAdminRouteImport } from './routes/app.admin'
+import { Route as AppAdminIndexRouteImport } from './routes/app.admin.index'
+import { Route as AppAdminUsersRouteImport } from './routes/app.admin.users'
+import { Route as AppAdminInvitationsRouteImport } from './routes/app.admin.invitations'
+import { Route as ApiPublicUploadInviteAvatarRouteImport } from './routes/api.public.upload-invite-avatar'
 
+const SuperAdminRoute = SuperAdminRouteImport.update({
+  id: '/super-admin',
+  path: '/super-admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const MediaRoute = MediaRouteImport.update({
   id: '/media',
   path: '/media',
@@ -55,6 +71,11 @@ const BlogRoute = BlogRouteImport.update({
   path: '/blog',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AppRoute = AppRouteImport.update({
+  id: '/app',
+  path: '/app',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AboutRoute = AboutRouteImport.update({
   id: '/about',
   path: '/about',
@@ -74,6 +95,11 @@ const CaIndexRoute = CaIndexRouteImport.update({
   id: '/ca/',
   path: '/ca/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AppIndexRoute = AppIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AppRoute,
 } as any)
 const InviteTokenRoute = InviteTokenRouteImport.update({
   id: '/invite/$token',
@@ -130,15 +156,62 @@ const CaAboutRoute = CaAboutRouteImport.update({
   path: '/ca/about',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AppRentalsRoute = AppRentalsRouteImport.update({
+  id: '/rentals',
+  path: '/rentals',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppProfileRoute = AppProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppCarnetRoute = AppCarnetRouteImport.update({
+  id: '/carnet',
+  path: '/carnet',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppAdminRoute = AppAdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppAdminIndexRoute = AppAdminIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AppAdminRoute,
+} as any)
+const AppAdminUsersRoute = AppAdminUsersRouteImport.update({
+  id: '/users',
+  path: '/users',
+  getParentRoute: () => AppAdminRoute,
+} as any)
+const AppAdminInvitationsRoute = AppAdminInvitationsRouteImport.update({
+  id: '/invitations',
+  path: '/invitations',
+  getParentRoute: () => AppAdminRoute,
+} as any)
+const ApiPublicUploadInviteAvatarRoute =
+  ApiPublicUploadInviteAvatarRouteImport.update({
+    id: '/api/public/upload-invite-avatar',
+    path: '/api/public/upload-invite-avatar',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/app': typeof AppRouteWithChildren
   '/blog': typeof BlogRoute
   '/contact': typeof ContactRoute
   '/how-it-works': typeof HowItWorksRoute
   '/login': typeof LoginRoute
   '/media': typeof MediaRoute
+  '/super-admin': typeof SuperAdminRoute
+  '/app/admin': typeof AppAdminRouteWithChildren
+  '/app/carnet': typeof AppCarnetRoute
+  '/app/profile': typeof AppProfileRoute
+  '/app/rentals': typeof AppRentalsRoute
   '/ca/about': typeof CaAboutRoute
   '/ca/blog': typeof CaBlogRoute
   '/ca/contact': typeof CaContactRoute
@@ -150,8 +223,13 @@ export interface FileRoutesByFullPath {
   '/en/how-it-works': typeof EnHowItWorksRoute
   '/en/media': typeof EnMediaRoute
   '/invite/$token': typeof InviteTokenRoute
+  '/app/': typeof AppIndexRoute
   '/ca/': typeof CaIndexRoute
   '/en/': typeof EnIndexRoute
+  '/api/public/upload-invite-avatar': typeof ApiPublicUploadInviteAvatarRoute
+  '/app/admin/invitations': typeof AppAdminInvitationsRoute
+  '/app/admin/users': typeof AppAdminUsersRoute
+  '/app/admin/': typeof AppAdminIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -161,6 +239,10 @@ export interface FileRoutesByTo {
   '/how-it-works': typeof HowItWorksRoute
   '/login': typeof LoginRoute
   '/media': typeof MediaRoute
+  '/super-admin': typeof SuperAdminRoute
+  '/app/carnet': typeof AppCarnetRoute
+  '/app/profile': typeof AppProfileRoute
+  '/app/rentals': typeof AppRentalsRoute
   '/ca/about': typeof CaAboutRoute
   '/ca/blog': typeof CaBlogRoute
   '/ca/contact': typeof CaContactRoute
@@ -172,18 +254,29 @@ export interface FileRoutesByTo {
   '/en/how-it-works': typeof EnHowItWorksRoute
   '/en/media': typeof EnMediaRoute
   '/invite/$token': typeof InviteTokenRoute
+  '/app': typeof AppIndexRoute
   '/ca': typeof CaIndexRoute
   '/en': typeof EnIndexRoute
+  '/api/public/upload-invite-avatar': typeof ApiPublicUploadInviteAvatarRoute
+  '/app/admin/invitations': typeof AppAdminInvitationsRoute
+  '/app/admin/users': typeof AppAdminUsersRoute
+  '/app/admin': typeof AppAdminIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/app': typeof AppRouteWithChildren
   '/blog': typeof BlogRoute
   '/contact': typeof ContactRoute
   '/how-it-works': typeof HowItWorksRoute
   '/login': typeof LoginRoute
   '/media': typeof MediaRoute
+  '/super-admin': typeof SuperAdminRoute
+  '/app/admin': typeof AppAdminRouteWithChildren
+  '/app/carnet': typeof AppCarnetRoute
+  '/app/profile': typeof AppProfileRoute
+  '/app/rentals': typeof AppRentalsRoute
   '/ca/about': typeof CaAboutRoute
   '/ca/blog': typeof CaBlogRoute
   '/ca/contact': typeof CaContactRoute
@@ -195,19 +288,30 @@ export interface FileRoutesById {
   '/en/how-it-works': typeof EnHowItWorksRoute
   '/en/media': typeof EnMediaRoute
   '/invite/$token': typeof InviteTokenRoute
+  '/app/': typeof AppIndexRoute
   '/ca/': typeof CaIndexRoute
   '/en/': typeof EnIndexRoute
+  '/api/public/upload-invite-avatar': typeof ApiPublicUploadInviteAvatarRoute
+  '/app/admin/invitations': typeof AppAdminInvitationsRoute
+  '/app/admin/users': typeof AppAdminUsersRoute
+  '/app/admin/': typeof AppAdminIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
     | '/about'
+    | '/app'
     | '/blog'
     | '/contact'
     | '/how-it-works'
     | '/login'
     | '/media'
+    | '/super-admin'
+    | '/app/admin'
+    | '/app/carnet'
+    | '/app/profile'
+    | '/app/rentals'
     | '/ca/about'
     | '/ca/blog'
     | '/ca/contact'
@@ -219,8 +323,13 @@ export interface FileRouteTypes {
     | '/en/how-it-works'
     | '/en/media'
     | '/invite/$token'
+    | '/app/'
     | '/ca/'
     | '/en/'
+    | '/api/public/upload-invite-avatar'
+    | '/app/admin/invitations'
+    | '/app/admin/users'
+    | '/app/admin/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -230,6 +339,10 @@ export interface FileRouteTypes {
     | '/how-it-works'
     | '/login'
     | '/media'
+    | '/super-admin'
+    | '/app/carnet'
+    | '/app/profile'
+    | '/app/rentals'
     | '/ca/about'
     | '/ca/blog'
     | '/ca/contact'
@@ -241,17 +354,28 @@ export interface FileRouteTypes {
     | '/en/how-it-works'
     | '/en/media'
     | '/invite/$token'
+    | '/app'
     | '/ca'
     | '/en'
+    | '/api/public/upload-invite-avatar'
+    | '/app/admin/invitations'
+    | '/app/admin/users'
+    | '/app/admin'
   id:
     | '__root__'
     | '/'
     | '/about'
+    | '/app'
     | '/blog'
     | '/contact'
     | '/how-it-works'
     | '/login'
     | '/media'
+    | '/super-admin'
+    | '/app/admin'
+    | '/app/carnet'
+    | '/app/profile'
+    | '/app/rentals'
     | '/ca/about'
     | '/ca/blog'
     | '/ca/contact'
@@ -263,18 +387,25 @@ export interface FileRouteTypes {
     | '/en/how-it-works'
     | '/en/media'
     | '/invite/$token'
+    | '/app/'
     | '/ca/'
     | '/en/'
+    | '/api/public/upload-invite-avatar'
+    | '/app/admin/invitations'
+    | '/app/admin/users'
+    | '/app/admin/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
+  AppRoute: typeof AppRouteWithChildren
   BlogRoute: typeof BlogRoute
   ContactRoute: typeof ContactRoute
   HowItWorksRoute: typeof HowItWorksRoute
   LoginRoute: typeof LoginRoute
   MediaRoute: typeof MediaRoute
+  SuperAdminRoute: typeof SuperAdminRoute
   CaAboutRoute: typeof CaAboutRoute
   CaBlogRoute: typeof CaBlogRoute
   CaContactRoute: typeof CaContactRoute
@@ -288,10 +419,18 @@ export interface RootRouteChildren {
   InviteTokenRoute: typeof InviteTokenRoute
   CaIndexRoute: typeof CaIndexRoute
   EnIndexRoute: typeof EnIndexRoute
+  ApiPublicUploadInviteAvatarRoute: typeof ApiPublicUploadInviteAvatarRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/super-admin': {
+      id: '/super-admin'
+      path: '/super-admin'
+      fullPath: '/super-admin'
+      preLoaderRoute: typeof SuperAdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/media': {
       id: '/media'
       path: '/media'
@@ -327,6 +466,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BlogRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/app': {
+      id: '/app'
+      path: '/app'
+      fullPath: '/app'
+      preLoaderRoute: typeof AppRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/about': {
       id: '/about'
       path: '/about'
@@ -354,6 +500,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/ca/'
       preLoaderRoute: typeof CaIndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/app/': {
+      id: '/app/'
+      path: '/'
+      fullPath: '/app/'
+      preLoaderRoute: typeof AppIndexRouteImport
+      parentRoute: typeof AppRoute
     }
     '/invite/$token': {
       id: '/invite/$token'
@@ -432,17 +585,109 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CaAboutRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/app/rentals': {
+      id: '/app/rentals'
+      path: '/rentals'
+      fullPath: '/app/rentals'
+      preLoaderRoute: typeof AppRentalsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/profile': {
+      id: '/app/profile'
+      path: '/profile'
+      fullPath: '/app/profile'
+      preLoaderRoute: typeof AppProfileRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/carnet': {
+      id: '/app/carnet'
+      path: '/carnet'
+      fullPath: '/app/carnet'
+      preLoaderRoute: typeof AppCarnetRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/admin': {
+      id: '/app/admin'
+      path: '/admin'
+      fullPath: '/app/admin'
+      preLoaderRoute: typeof AppAdminRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/admin/': {
+      id: '/app/admin/'
+      path: '/'
+      fullPath: '/app/admin/'
+      preLoaderRoute: typeof AppAdminIndexRouteImport
+      parentRoute: typeof AppAdminRoute
+    }
+    '/app/admin/users': {
+      id: '/app/admin/users'
+      path: '/users'
+      fullPath: '/app/admin/users'
+      preLoaderRoute: typeof AppAdminUsersRouteImport
+      parentRoute: typeof AppAdminRoute
+    }
+    '/app/admin/invitations': {
+      id: '/app/admin/invitations'
+      path: '/invitations'
+      fullPath: '/app/admin/invitations'
+      preLoaderRoute: typeof AppAdminInvitationsRouteImport
+      parentRoute: typeof AppAdminRoute
+    }
+    '/api/public/upload-invite-avatar': {
+      id: '/api/public/upload-invite-avatar'
+      path: '/api/public/upload-invite-avatar'
+      fullPath: '/api/public/upload-invite-avatar'
+      preLoaderRoute: typeof ApiPublicUploadInviteAvatarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
+
+interface AppAdminRouteChildren {
+  AppAdminInvitationsRoute: typeof AppAdminInvitationsRoute
+  AppAdminUsersRoute: typeof AppAdminUsersRoute
+  AppAdminIndexRoute: typeof AppAdminIndexRoute
+}
+
+const AppAdminRouteChildren: AppAdminRouteChildren = {
+  AppAdminInvitationsRoute: AppAdminInvitationsRoute,
+  AppAdminUsersRoute: AppAdminUsersRoute,
+  AppAdminIndexRoute: AppAdminIndexRoute,
+}
+
+const AppAdminRouteWithChildren = AppAdminRoute._addFileChildren(
+  AppAdminRouteChildren,
+)
+
+interface AppRouteChildren {
+  AppAdminRoute: typeof AppAdminRouteWithChildren
+  AppCarnetRoute: typeof AppCarnetRoute
+  AppProfileRoute: typeof AppProfileRoute
+  AppRentalsRoute: typeof AppRentalsRoute
+  AppIndexRoute: typeof AppIndexRoute
+}
+
+const AppRouteChildren: AppRouteChildren = {
+  AppAdminRoute: AppAdminRouteWithChildren,
+  AppCarnetRoute: AppCarnetRoute,
+  AppProfileRoute: AppProfileRoute,
+  AppRentalsRoute: AppRentalsRoute,
+  AppIndexRoute: AppIndexRoute,
+}
+
+const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
+  AppRoute: AppRouteWithChildren,
   BlogRoute: BlogRoute,
   ContactRoute: ContactRoute,
   HowItWorksRoute: HowItWorksRoute,
   LoginRoute: LoginRoute,
   MediaRoute: MediaRoute,
+  SuperAdminRoute: SuperAdminRoute,
   CaAboutRoute: CaAboutRoute,
   CaBlogRoute: CaBlogRoute,
   CaContactRoute: CaContactRoute,
@@ -456,7 +701,17 @@ const rootRouteChildren: RootRouteChildren = {
   InviteTokenRoute: InviteTokenRoute,
   CaIndexRoute: CaIndexRoute,
   EnIndexRoute: EnIndexRoute,
+  ApiPublicUploadInviteAvatarRoute: ApiPublicUploadInviteAvatarRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
