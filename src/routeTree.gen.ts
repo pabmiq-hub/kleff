@@ -42,6 +42,7 @@ import { Route as AdminMembersRouteImport } from './routes/admin.members'
 import { Route as AdminInvitationsRouteImport } from './routes/admin.invitations'
 import { Route as AdminContentRouteImport } from './routes/admin.content'
 import { Route as AdminRentalsIndexRouteImport } from './routes/admin.rentals.index'
+import { Route as AdminContentIndexRouteImport } from './routes/admin.content.index'
 import { Route as AppRentalsMineRouteImport } from './routes/app.rentals.mine'
 import { Route as ApiPublicUploadInviteAvatarRouteImport } from './routes/api.public.upload-invite-avatar'
 import { Route as AdminRentalsHistoryRouteImport } from './routes/admin.rentals.history'
@@ -214,6 +215,11 @@ const AdminRentalsIndexRoute = AdminRentalsIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AdminRentalsRoute,
 } as any)
+const AdminContentIndexRoute = AdminContentIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminContentRoute,
+} as any)
 const AppRentalsMineRoute = AppRentalsMineRouteImport.update({
   id: '/mine',
   path: '/mine',
@@ -285,6 +291,7 @@ export interface FileRoutesByFullPath {
   '/admin/rentals/history': typeof AdminRentalsHistoryRoute
   '/api/public/upload-invite-avatar': typeof ApiPublicUploadInviteAvatarRoute
   '/app/rentals/mine': typeof AppRentalsMineRoute
+  '/admin/content/': typeof AdminContentIndexRoute
   '/admin/rentals/': typeof AdminRentalsIndexRoute
 }
 export interface FileRoutesByTo {
@@ -296,7 +303,6 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/media': typeof MediaRoute
   '/super-admin': typeof SuperAdminRoute
-  '/admin/content': typeof AdminContentRouteWithChildren
   '/admin/invitations': typeof AdminInvitationsRoute
   '/admin/members': typeof AdminMembersRoute
   '/app/carnet': typeof AppCarnetRoute
@@ -323,6 +329,7 @@ export interface FileRoutesByTo {
   '/admin/rentals/history': typeof AdminRentalsHistoryRoute
   '/api/public/upload-invite-avatar': typeof ApiPublicUploadInviteAvatarRoute
   '/app/rentals/mine': typeof AppRentalsMineRoute
+  '/admin/content': typeof AdminContentIndexRoute
   '/admin/rentals': typeof AdminRentalsIndexRoute
 }
 export interface FileRoutesById {
@@ -365,6 +372,7 @@ export interface FileRoutesById {
   '/admin/rentals/history': typeof AdminRentalsHistoryRoute
   '/api/public/upload-invite-avatar': typeof ApiPublicUploadInviteAvatarRoute
   '/app/rentals/mine': typeof AppRentalsMineRoute
+  '/admin/content/': typeof AdminContentIndexRoute
   '/admin/rentals/': typeof AdminRentalsIndexRoute
 }
 export interface FileRouteTypes {
@@ -408,6 +416,7 @@ export interface FileRouteTypes {
     | '/admin/rentals/history'
     | '/api/public/upload-invite-avatar'
     | '/app/rentals/mine'
+    | '/admin/content/'
     | '/admin/rentals/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -419,7 +428,6 @@ export interface FileRouteTypes {
     | '/login'
     | '/media'
     | '/super-admin'
-    | '/admin/content'
     | '/admin/invitations'
     | '/admin/members'
     | '/app/carnet'
@@ -446,6 +454,7 @@ export interface FileRouteTypes {
     | '/admin/rentals/history'
     | '/api/public/upload-invite-avatar'
     | '/app/rentals/mine'
+    | '/admin/content'
     | '/admin/rentals'
   id:
     | '__root__'
@@ -487,6 +496,7 @@ export interface FileRouteTypes {
     | '/admin/rentals/history'
     | '/api/public/upload-invite-avatar'
     | '/app/rentals/mine'
+    | '/admin/content/'
     | '/admin/rentals/'
   fileRoutesById: FileRoutesById
 }
@@ -750,6 +760,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminRentalsIndexRouteImport
       parentRoute: typeof AdminRentalsRoute
     }
+    '/admin/content/': {
+      id: '/admin/content/'
+      path: '/'
+      fullPath: '/admin/content/'
+      preLoaderRoute: typeof AdminContentIndexRouteImport
+      parentRoute: typeof AdminContentRoute
+    }
     '/app/rentals/mine': {
       id: '/app/rentals/mine'
       path: '/mine'
@@ -797,10 +814,12 @@ declare module '@tanstack/react-router' {
 
 interface AdminContentRouteChildren {
   AdminContentPageKeyRoute: typeof AdminContentPageKeyRoute
+  AdminContentIndexRoute: typeof AdminContentIndexRoute
 }
 
 const AdminContentRouteChildren: AdminContentRouteChildren = {
   AdminContentPageKeyRoute: AdminContentPageKeyRoute,
+  AdminContentIndexRoute: AdminContentIndexRoute,
 }
 
 const AdminContentRouteWithChildren = AdminContentRoute._addFileChildren(
