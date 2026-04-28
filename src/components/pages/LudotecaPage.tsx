@@ -181,7 +181,7 @@ function FilterChip({
 export function LudotecaPage() {
   const { locale } = useI18n();
   const t = T[locale];
-  const fn = useServerFn(listLudoteca);
+  
 
   const [games, setGames] = useState<BggGame[]>([]);
   const [syncedAt, setSyncedAt] = useState<string | null>(null);
