@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { useEditor } from "./EditorProvider";
+import { InlineFormatToolbar } from "./Editable";
 import type { StyleProps } from "./types";
 import { uploadMedia } from "@/server/media.functions";
 import { Button } from "@/components/ui/button";
@@ -104,6 +105,9 @@ export function EditorOverlay() {
       {editMode && (
         <PropertiesPanel onClose={() => setSelected(null)} hasSelection={!!selected} />
       )}
+
+      {/* Floating B/I/U toolbar that appears over the text selection */}
+      {editMode && <InlineFormatToolbar />}
     </>
   );
 }
@@ -165,12 +169,17 @@ function PropertiesPanel({ onClose, hasSelection }: { onClose: () => void; hasSe
         <div className="p-4 space-y-5">
           {selected.kind === "text" && (
             <Section icon={<Type className="h-4 w-4" />} title="Contenido">
+              <p className="text-[11px] text-neutral-500 mb-2 leading-snug">
+                <strong>Doble clic</strong> sobre el texto en la página para editarlo en línea.
+                Selecciona palabras y usa la barra flotante para <b>negrita</b>, <i>cursiva</i> o
+                enlaces.
+              </p>
               <Textarea
                 value={ov.text ?? ""}
                 onChange={(e) => void setText(selected.id, e.target.value)}
-                placeholder="Texto…"
-                rows={3}
-                className="bg-white border-neutral-300 text-neutral-900"
+                placeholder="Texto (admite HTML básico: <b>, <i>, <u>, <a>)…"
+                rows={4}
+                className="bg-white border-neutral-300 text-neutral-900 font-mono text-xs"
               />
               {ov.text !== undefined && (
                 <button

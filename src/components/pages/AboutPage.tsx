@@ -192,30 +192,30 @@ export function AboutPage() {
         <div className="absolute top-10 left-10 size-16 bg-coral border-4 border-cream/20 rounded-2xl hidden md:block" />
         <div className="absolute bottom-10 right-20 size-20 bg-coral/40 border-4 border-cream/20 rounded-full hidden md:block" />
         <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 relative">
-          <span className="inline-block bg-coral text-cream px-3 py-1 text-xs font-bold uppercase tracking-widest mb-6">
+          <EditableText id="about.mission.eyebrow" as="span" className="inline-block bg-coral text-cream px-3 py-1 text-xs font-bold uppercase tracking-widest mb-6">
             {locale === "en" ? "Mission" : locale === "ca" ? "Missió" : "Misión"}
-          </span>
-          <h2 className="text-4xl sm:text-5xl lg:text-6xl font-display font-semibold text-cream leading-tight">
+          </EditableText>
+          <EditableText id="about.mission.title" as="h2" className="text-4xl sm:text-5xl lg:text-6xl font-display font-semibold text-cream leading-tight">
             {locale === "en"
               ? "A meeting point for young people from anywhere in the world."
               : locale === "ca"
                 ? "Un punt de trobada per a joves d'arreu del món."
                 : "Un punto de encuentro para jóvenes de todo el mundo."}
-          </h2>
-          <p className="mt-8 text-lg sm:text-xl text-cream/85 max-w-3xl leading-relaxed">
+          </EditableText>
+          <EditableText id="about.mission.body" as="p" className="mt-8 text-lg sm:text-xl text-cream/85 max-w-3xl leading-relaxed">
             {locale === "en"
               ? "It doesn't matter where you're from or how old you are. The only thing needed to be a #kleffer is wanting to make new friends and learn new ways to have fun. Board games are the perfect excuse we use to connect people and break the ice."
               : locale === "ca"
                 ? "No importa d'on vinguis ni quants anys tinguis. L'únic necessari per ser un #kleffer és voler fer nous amics i aprendre noves formes de divertir-se. Els jocs de taula són l'excusa perfecta per connectar persones i trencar el gel."
                 : "No importa de dónde vengas ni cuántos años tengas. Lo único necesario para ser un #kleffer es querer hacer nuevos amigos y aprender nuevas formas de divertirse. Los juegos de mesa son la excusa perfecta que usamos para conectar a las personas y romper el hielo."}
-          </p>
-          <p className="mt-6 text-lg font-display font-semibold text-coral">
+          </EditableText>
+          <EditableText id="about.mission.cta" as="p" className="mt-6 text-lg font-display font-semibold text-coral">
             {locale === "en"
               ? "Dare to be part of our community?"
               : locale === "ca"
                 ? "T'atreveixes a formar part de la nostra comunitat?"
                 : "¿Te atreves a ser parte de nuestra comunidad?"}
-          </p>
+          </EditableText>
         </div>
       </section>
 
@@ -286,23 +286,27 @@ export function AboutPage() {
         <div className="absolute bottom-16 left-16 size-12 bg-cream/10 border-2 border-cream/30 rounded-full hidden md:block animate-wiggle" style={{ animationDelay: "1s" }} />
 
         <div className="relative mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 text-center">
-          <span className="inline-block bg-cream text-coral-deep px-3 py-1 text-xs font-bold uppercase tracking-[0.3em] mb-8 border-2 border-ink shadow-tactile-sm">
+          <EditableText id="about.manifesto.eyebrow" as="span" className="inline-block bg-cream text-coral-deep px-3 py-1 text-xs font-bold uppercase tracking-[0.3em] mb-8 border-2 border-ink shadow-tactile-sm">
             {locale === "en" ? "What drives us" : locale === "ca" ? "El que ens mou" : "Lo que nos mueve"}
-          </span>
+          </EditableText>
           <blockquote className="font-display font-semibold text-3xl sm:text-5xl lg:text-6xl leading-[1.1] tracking-tight text-cream">
-            {manifestoLine1}
+            <EditableText id="about.manifesto.line1" as="span">
+              {manifestoLine1}
+            </EditableText>
             <br />
-            <span className="italic text-cream">{manifestoLine2}</span>
+            <EditableText id="about.manifesto.line2" as="span" className="italic text-cream">
+              {manifestoLine2}
+            </EditableText>
           </blockquote>
           <div className="mt-10 flex items-center justify-center gap-3">
             <div className="w-10 h-px bg-cream" />
-            <span className="text-xs font-bold tracking-[0.3em] text-cream/85">
+            <EditableText id="about.manifesto.author" as="span" className="text-xs font-bold tracking-[0.3em] text-cream/85">
               {locale === "en"
                 ? "PAU · KLEFF FOUNDER"
                 : locale === "ca"
                   ? "PAU · FUNDADOR DE KLEFF"
                   : "PAU · FUNDADOR DE KLEFF"}
-            </span>
+            </EditableText>
             <div className="w-10 h-px bg-cream" />
           </div>
         </div>
@@ -313,13 +317,13 @@ export function AboutPage() {
         <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
           <div className="relative bg-cream border-4 border-ink rounded-[2.5rem] px-6 sm:px-14 py-12 sm:py-16 text-center shadow-tactile-lg">
             <Calendar className="h-10 w-10 text-coral mx-auto" />
-            <h2 className="mt-4 text-3xl sm:text-4xl lg:text-5xl font-display font-semibold text-foreground">
+            <EditableText id="about.cta.title" as="h2" className="mt-4 text-3xl sm:text-4xl lg:text-5xl font-display font-semibold text-foreground">
               {locale === "en"
                 ? "Want to be part of what comes next?"
                 : locale === "ca"
                   ? "Vols formar part del que vindrà?"
                   : "¿Quieres formar parte de lo que viene?"}
-            </h2>
+            </EditableText>
             <div className="mt-8 flex flex-wrap justify-center gap-4">
               <a
                 href="https://www.meetup.com/es-ES/kleff-bcn/events/?type=upcoming"

@@ -56,10 +56,12 @@ function useMeetupData(): MeetupLoaderData {
 }
 
 function PillarCard({
+  id,
   icon,
   title,
   body,
 }: {
+  id: string;
   icon: React.ReactNode;
   title: string;
   body: string;
@@ -69,8 +71,12 @@ function PillarCard({
       <div className="h-14 w-14 rounded-2xl bg-coral text-cream border-2 border-ink flex items-center justify-center shadow-tactile-sm">
         {icon}
       </div>
-      <h3 className="mt-5 text-2xl font-display font-semibold text-foreground">{title}</h3>
-      <p className="mt-3 text-base text-foreground/70 leading-relaxed">{body}</p>
+      <EditableText id={`${id}.title`} as="h3" className="mt-5 text-2xl font-display font-semibold text-foreground">
+        {title}
+      </EditableText>
+      <EditableText id={`${id}.body`} as="p" className="mt-3 text-base text-foreground/70 leading-relaxed">
+        {body}
+      </EditableText>
     </div>
   );
 }
@@ -421,16 +427,19 @@ export function HomePage() {
 
           <div className="mt-16 grid md:grid-cols-3 gap-8">
             <PillarCard
+              id="home.pillar1"
               icon={<Users className="h-7 w-7" />}
               title={or(pillars.pillar1Title, t.home.pillar1Title)}
               body={or(pillars.pillar1Body, t.home.pillar1Body)}
             />
             <PillarCard
+              id="home.pillar2"
               icon={<Heart className="h-7 w-7" />}
               title={or(pillars.pillar2Title, t.home.pillar2Title)}
               body={or(pillars.pillar2Body, t.home.pillar2Body)}
             />
             <PillarCard
+              id="home.pillar3"
               icon={<Globe2 className="h-7 w-7" />}
               title={or(pillars.pillar3Title, t.home.pillar3Title)}
               body={or(pillars.pillar3Body, t.home.pillar3Body)}
@@ -612,9 +621,13 @@ export function HomePage() {
                     <span className="shrink-0 size-12 rounded-xl bg-coral/15 border-2 border-coral/40 flex items-center justify-center text-2xl">
                       {emoji}
                     </span>
-                    <span className="text-base text-foreground/85 leading-relaxed self-center">
+                    <EditableText
+                      id={`home.reason${i + 1}`}
+                      as="span"
+                      className="text-base text-foreground/85 leading-relaxed self-center"
+                    >
                       {text}
-                    </span>
+                    </EditableText>
                   </li>
                 );
               })}
