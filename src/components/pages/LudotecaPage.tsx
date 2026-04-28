@@ -467,7 +467,7 @@ export function LudotecaPage() {
                     {g.mechanics && g.mechanics.length > 0 && (
                       <p className="text-[10px] text-foreground/50 line-clamp-2 leading-snug">
                         <Brain className="h-2.5 w-2.5 inline mr-1" />
-                        {g.mechanics.slice(0, 3).join(" · ")}
+                        {g.mechanics.slice(0, 4).join(" · ")}
                       </p>
                     )}
                     {g.bgg_url && (
