@@ -6,9 +6,7 @@ import { supabaseAdmin } from "@/integrations/supabase/client.server";
 // PUBLIC: read all sections for a page (no auth required, used by SSR loaders)
 export const getPageContent = createServerFn({ method: "GET" })
   .inputValidator(z.object({ pageKey: z.string().min(1).max(64) }))
-  .handler(async ({ data }) => {
-    // We allow public read via RLS, but use admin client here because this is
-    // server-side and we want a single round-trip without auth headers.
+  .handler(async ({ data }): Promise<{ sections: Record<string, Record<string, unknown>> }> => {
     const { data: rows, error } = await supabaseAdmin
       .from("content_sections")
       .select("section_key, content, schema_version, updated_at")
@@ -16,7 +14,7 @@ export const getPageContent = createServerFn({ method: "GET" })
 
     if (error) {
       console.error("getPageContent error", error);
-      return { sections: {} as Record<string, Record<string, unknown>> };
+      return { sections: {} };
     }
 
     const sections: Record<string, Record<string, unknown>> = {};

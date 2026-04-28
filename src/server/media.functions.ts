@@ -240,3 +240,39 @@ export const getInstagramFollowers = createServerFn({ method: "GET" }).handler(
     };
   },
 );
+
+// ============================================================================
+// Media uploads — admin only, stores files in the public `media` bucket.
+// ============================================================================
+
+import { z } from "zod";
+import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { supabaseAdmin } from "@/integrations/supabase/client.server";
+
+export const uploadMedia = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator(
+    z.object({
+      fileName: z.string().min(1).max(255),
+      contentType: z.string().min(1).max(128),
+      base64: z.string().min(1),
+    }),
+  )
+  .handler(async ({ data }) => {
+    const safeName = data.fileName.replace(/[^a-zA-Z0-9._-]/g, "_").slice(-100);
+    const path = `cms/${Date.now()}-${Math.random().toString(36).slice(2, 8)}-${safeName}`;
+
+    // Decode base64 → bytes
+    const binary = atob(data.base64);
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+
+    const { error } = await supabaseAdmin.storage
+      .from("media")
+      .upload(path, bytes, { contentType: data.contentType, upsert: false });
+
+    if (error) throw new Error(error.message);
+
+    const { data: pub } = supabaseAdmin.storage.from("media").getPublicUrl(path);
+    return { url: pub.publicUrl, path };
+  });
