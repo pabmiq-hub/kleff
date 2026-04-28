@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState } from "react";
-import { useServerFn } from "@tanstack/react-start";
 import { Search, Users, Clock, Brain, Star, ExternalLink, RefreshCw, Filter, X } from "lucide-react";
 import { useI18n } from "@/i18n/I18nProvider";
 import { SiteLayout } from "@/components/site/SiteLayout";
@@ -182,11 +181,12 @@ function FilterChip({
 export function LudotecaPage() {
   const { locale } = useI18n();
   const t = T[locale];
-  const fn = useServerFn(listLudoteca);
+  
 
   const [games, setGames] = useState<BggGame[]>([]);
   const [syncedAt, setSyncedAt] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [players, setPlayers] = useState<string | null>(null);
   const [duration, setDuration] = useState<string | null>(null);
@@ -198,20 +198,25 @@ export function LudotecaPage() {
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
-    fn()
+    listLudoteca()
       .then((res) => {
         if (cancelled) return;
         setGames((res.games ?? []) as BggGame[]);
         setSyncedAt(res.syncedAt);
       })
-      .catch(() => {
-        if (!cancelled) setGames([]);
+      .catch((err: unknown) => {
+        if (cancelled) return;
+        console.error("[ludoteca] load failed", err);
+        setError(err instanceof Error ? err.message : "Error desconocido");
+        setGames([]);
       })
-      .finally(() => !cancelled && setLoading(false));
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
     return () => {
       cancelled = true;
     };
-  }, [fn]);
+  }, []);
 
   const types = useMemo(() => {
     const set = new Set<string>();
@@ -389,6 +394,11 @@ export function LudotecaPage() {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           {loading ? (
             <p className="text-foreground/50">{t.loading}</p>
+          ) : error ? (
+            <div className="bg-card border-2 border-red-500/40 rounded-3xl p-6 text-center text-red-700">
+              <p className="font-bold mb-1">Error</p>
+              <p className="text-sm opacity-80">{error}</p>
+            </div>
           ) : games.length === 0 ? (
             <div className="bg-card border-2 border-dashed border-ink/30 rounded-3xl p-10 text-center text-foreground/60">
               {t.notSynced}
