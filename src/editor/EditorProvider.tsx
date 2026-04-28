@@ -20,6 +20,7 @@ import {
   getPublishedOverrides,
 } from "@/server/overrides.functions";
 import { useAuth } from "@/auth/AuthProvider";
+import { useI18n } from "@/i18n/I18nProvider";
 import type { OverrideMap, StyleProps } from "./types";
 import { buildOverrideMap } from "./types";
 
