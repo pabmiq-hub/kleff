@@ -313,31 +313,31 @@ export function HomePage() {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-12 md:pt-20 pb-24 md:pb-32 grid lg:grid-cols-12 gap-12 lg:gap-16 items-center">
           <div className="lg:col-span-7 relative z-10 min-w-0">
             <span className="inline-flex items-center gap-2 rounded-full bg-coral/10 border-2 border-coral/30 px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-coral-deep">
-              <Sparkles className="h-3.5 w-3.5" /> {t.home.eyebrow}
+              <Sparkles className="h-3.5 w-3.5" /> {or(hero.eyebrow, t.home.eyebrow)}
             </span>
             <h1 className="mt-6 text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-display font-semibold leading-[0.98] sm:leading-[0.95] tracking-normal text-foreground break-words">
-              {t.home.titleA}{" "}
-              <span className="marker-coral text-foreground">{t.home.titleHighlight}</span>{" "}
-              {t.home.titleB}
+              {or(hero.titleA, t.home.titleA)}{" "}
+              <span className="marker-coral text-foreground">{or(hero.titleHighlight, t.home.titleHighlight)}</span>{" "}
+              {or(hero.titleB, t.home.titleB)}
             </h1>
             <p className="mt-7 text-lg sm:text-xl text-foreground/75 max-w-xl leading-relaxed">
-              {t.home.subtitle}
+              {or(hero.subtitle, t.home.subtitle)}
             </p>
             <div className="mt-9 flex flex-wrap gap-4 items-center max-w-full">
               <a
-                href="https://www.meetup.com/es-ES/kleff-bcn/events/?type=upcoming"
+                href={or(hero.ctaPrimaryHref, "https://www.meetup.com/es-ES/kleff-bcn/events/?type=upcoming")}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="group inline-flex items-center justify-center gap-2 rounded-2xl bg-coral text-cream border-2 border-ink px-5 py-3.5 sm:px-7 sm:py-4 text-sm sm:text-base font-bold shadow-tactile hover:translate-x-[3px] hover:translate-y-[3px] hover:shadow-tactile-sm transition-all duration-200 text-center whitespace-normal max-w-full"
               >
-                <span>{t.home.ctaPrimary}</span>
+                <span>{or(hero.ctaPrimary, t.home.ctaPrimary)}</span>
                 <ArrowRight className="h-5 w-5 shrink-0 group-hover:translate-x-1 transition-transform" />
               </a>
               <Link
                 to={href("/about")}
                 className="inline-flex items-center justify-center gap-2 rounded-2xl bg-card text-foreground border-2 border-ink px-5 py-3.5 sm:px-7 sm:py-4 text-sm sm:text-base font-bold hover:bg-cream-deep transition-colors text-center max-w-full"
               >
-                {t.home.ctaSecondary}
+                {or(hero.ctaSecondary, t.home.ctaSecondary)}
               </Link>
             </div>
 
