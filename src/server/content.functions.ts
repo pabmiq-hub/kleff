@@ -2,11 +2,12 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
+import type { Json } from "@/integrations/supabase/types";
 
 // PUBLIC: read all sections for a page (no auth required, used by SSR loaders)
 export const getPageContent = createServerFn({ method: "GET" })
   .inputValidator(z.object({ pageKey: z.string().min(1).max(64) }))
-  .handler(async ({ data }): Promise<{ sections: Record<string, Record<string, unknown>> }> => {
+  .handler(async ({ data }) => {
     const { data: rows, error } = await supabaseAdmin
       .from("content_sections")
       .select("section_key, content, schema_version, updated_at")
@@ -14,12 +15,12 @@ export const getPageContent = createServerFn({ method: "GET" })
 
     if (error) {
       console.error("getPageContent error", error);
-      return { sections: {} };
+      return { sections: {} as Record<string, Json> };
     }
 
-    const sections: Record<string, Record<string, unknown>> = {};
+    const sections: Record<string, Json> = {};
     for (const r of rows ?? []) {
-      sections[r.section_key] = (r.content ?? {}) as Record<string, unknown>;
+      sections[r.section_key] = (r.content ?? {}) as Json;
     }
     return { sections };
   });
