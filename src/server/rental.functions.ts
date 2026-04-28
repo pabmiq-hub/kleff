@@ -84,7 +84,7 @@ export const updateRentalGame = createServerFn({ method: "POST" })
     if (rest.maxRentalDays !== undefined) update.max_rental_days = rest.maxRentalDays;
     if (rest.totalCopies !== undefined) update.total_copies = rest.totalCopies;
     if (rest.isActive !== undefined) update.is_active = rest.isActive;
-    const { error } = await supabaseAdmin.from("rental_games").update(update).eq("id", id);
+    const { error } = await supabaseAdmin.from("rental_games").update(update as never).eq("id", id);
     if (error) throw new Error(error.message);
     return { success: true };
   });
