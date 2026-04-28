@@ -2,12 +2,13 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { listRentalGames, createRentalGame, updateRentalGame, deleteRentalGame } from "@/server/rental.functions";
+import { adminSyncBggCollection } from "@/server/bgg.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2, RefreshCw } from "lucide-react";
 
 export const Route = createFileRoute("/admin/rentals/catalog")({
   component: CatalogPage,
@@ -28,11 +29,30 @@ function CatalogPage() {
   const createFn = useServerFn(createRentalGame);
   const updateFn = useServerFn(updateRentalGame);
   const deleteFn = useServerFn(deleteRentalGame);
+  const syncFn = useServerFn(adminSyncBggCollection);
 
   const [games, setGames] = useState<Game[]>([]);
   const [loading, setLoading] = useState(true);
+  const [syncing, setSyncing] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({ title: "", description: "", imageUrl: "", maxRentalDays: 14, totalCopies: 1 });
+
+  const handleSync = async () => {
+    setSyncing(true);
+    try {
+      const r = await syncFn();
+      toast.success(`Sync BGG OK: ${r.upserted} juegos · ${r.removedInactive} desactivados`);
+      await refresh();
+    } catch (err) {
+      toast.error(
+        err instanceof Error
+          ? `Sync falló: ${err.message}. Si estás en preview, prueba en producción (BGG bloquea IPs de desarrollo).`
+          : "Error",
+      );
+    } finally {
+      setSyncing(false);
+    }
+  };
 
   const refresh = async () => {
     const r = await listFn({ data: undefined as never });
@@ -90,7 +110,16 @@ function CatalogPage() {
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-end">
+      <div className="flex flex-wrap justify-end gap-2">
+        <Button
+          variant="outline"
+          className="border-cream/30 text-cream hover:bg-cream/10"
+          onClick={handleSync}
+          disabled={syncing}
+        >
+          <RefreshCw className={`h-4 w-4 mr-1 ${syncing ? "animate-spin" : ""}`} />
+          {syncing ? "Sincronizando…" : "Sincronizar BGG"}
+        </Button>
         <Button className="bg-coral hover:bg-coral-deep text-cream" onClick={() => setShowForm((v) => !v)}>
           <Plus className="h-4 w-4 mr-1" /> Añadir juego
         </Button>

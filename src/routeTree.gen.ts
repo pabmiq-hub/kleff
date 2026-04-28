@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SuperAdminRouteImport } from './routes/super-admin'
 import { Route as MediaRouteImport } from './routes/media'
+import { Route as LudotecaRouteImport } from './routes/ludoteca'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as HowItWorksRouteImport } from './routes/how-it-works'
 import { Route as ContactRouteImport } from './routes/contact'
@@ -25,11 +26,13 @@ import { Route as AppIndexRouteImport } from './routes/app.index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as InviteTokenRouteImport } from './routes/invite.$token'
 import { Route as EnMediaRouteImport } from './routes/en.media'
+import { Route as EnLudotecaRouteImport } from './routes/en.ludoteca'
 import { Route as EnHowItWorksRouteImport } from './routes/en.how-it-works'
 import { Route as EnContactRouteImport } from './routes/en.contact'
 import { Route as EnBlogRouteImport } from './routes/en.blog'
 import { Route as EnAboutRouteImport } from './routes/en.about'
 import { Route as CaMediaRouteImport } from './routes/ca.media'
+import { Route as CaLudotecaRouteImport } from './routes/ca.ludoteca'
 import { Route as CaHowItWorksRouteImport } from './routes/ca.how-it-works'
 import { Route as CaContactRouteImport } from './routes/ca.contact'
 import { Route as CaBlogRouteImport } from './routes/ca.blog'
@@ -59,6 +62,11 @@ const SuperAdminRoute = SuperAdminRouteImport.update({
 const MediaRoute = MediaRouteImport.update({
   id: '/media',
   path: '/media',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LudotecaRoute = LudotecaRouteImport.update({
+  id: '/ludoteca',
+  path: '/ludoteca',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -131,6 +139,11 @@ const EnMediaRoute = EnMediaRouteImport.update({
   path: '/en/media',
   getParentRoute: () => rootRouteImport,
 } as any)
+const EnLudotecaRoute = EnLudotecaRouteImport.update({
+  id: '/en/ludoteca',
+  path: '/en/ludoteca',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const EnHowItWorksRoute = EnHowItWorksRouteImport.update({
   id: '/en/how-it-works',
   path: '/en/how-it-works',
@@ -154,6 +167,11 @@ const EnAboutRoute = EnAboutRouteImport.update({
 const CaMediaRoute = CaMediaRouteImport.update({
   id: '/ca/media',
   path: '/ca/media',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CaLudotecaRoute = CaLudotecaRouteImport.update({
+  id: '/ca/ludoteca',
+  path: '/ca/ludoteca',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CaHowItWorksRoute = CaHowItWorksRouteImport.update({
@@ -267,6 +285,7 @@ export interface FileRoutesByFullPath {
   '/contact': typeof ContactRoute
   '/how-it-works': typeof HowItWorksRoute
   '/login': typeof LoginRoute
+  '/ludoteca': typeof LudotecaRoute
   '/media': typeof MediaRoute
   '/super-admin': typeof SuperAdminRoute
   '/admin/content': typeof AdminContentRouteWithChildren
@@ -280,11 +299,13 @@ export interface FileRoutesByFullPath {
   '/ca/blog': typeof CaBlogRoute
   '/ca/contact': typeof CaContactRoute
   '/ca/how-it-works': typeof CaHowItWorksRoute
+  '/ca/ludoteca': typeof CaLudotecaRoute
   '/ca/media': typeof CaMediaRoute
   '/en/about': typeof EnAboutRoute
   '/en/blog': typeof EnBlogRoute
   '/en/contact': typeof EnContactRoute
   '/en/how-it-works': typeof EnHowItWorksRoute
+  '/en/ludoteca': typeof EnLudotecaRoute
   '/en/media': typeof EnMediaRoute
   '/invite/$token': typeof InviteTokenRoute
   '/admin/': typeof AdminIndexRoute
@@ -308,6 +329,7 @@ export interface FileRoutesByTo {
   '/contact': typeof ContactRoute
   '/how-it-works': typeof HowItWorksRoute
   '/login': typeof LoginRoute
+  '/ludoteca': typeof LudotecaRoute
   '/media': typeof MediaRoute
   '/super-admin': typeof SuperAdminRoute
   '/admin/invitations': typeof AdminInvitationsRoute
@@ -319,11 +341,13 @@ export interface FileRoutesByTo {
   '/ca/blog': typeof CaBlogRoute
   '/ca/contact': typeof CaContactRoute
   '/ca/how-it-works': typeof CaHowItWorksRoute
+  '/ca/ludoteca': typeof CaLudotecaRoute
   '/ca/media': typeof CaMediaRoute
   '/en/about': typeof EnAboutRoute
   '/en/blog': typeof EnBlogRoute
   '/en/contact': typeof EnContactRoute
   '/en/how-it-works': typeof EnHowItWorksRoute
+  '/en/ludoteca': typeof EnLudotecaRoute
   '/en/media': typeof EnMediaRoute
   '/invite/$token': typeof InviteTokenRoute
   '/admin': typeof AdminIndexRoute
@@ -350,6 +374,7 @@ export interface FileRoutesById {
   '/contact': typeof ContactRoute
   '/how-it-works': typeof HowItWorksRoute
   '/login': typeof LoginRoute
+  '/ludoteca': typeof LudotecaRoute
   '/media': typeof MediaRoute
   '/super-admin': typeof SuperAdminRoute
   '/admin/content': typeof AdminContentRouteWithChildren
@@ -363,11 +388,13 @@ export interface FileRoutesById {
   '/ca/blog': typeof CaBlogRoute
   '/ca/contact': typeof CaContactRoute
   '/ca/how-it-works': typeof CaHowItWorksRoute
+  '/ca/ludoteca': typeof CaLudotecaRoute
   '/ca/media': typeof CaMediaRoute
   '/en/about': typeof EnAboutRoute
   '/en/blog': typeof EnBlogRoute
   '/en/contact': typeof EnContactRoute
   '/en/how-it-works': typeof EnHowItWorksRoute
+  '/en/ludoteca': typeof EnLudotecaRoute
   '/en/media': typeof EnMediaRoute
   '/invite/$token': typeof InviteTokenRoute
   '/admin/': typeof AdminIndexRoute
@@ -395,6 +422,7 @@ export interface FileRouteTypes {
     | '/contact'
     | '/how-it-works'
     | '/login'
+    | '/ludoteca'
     | '/media'
     | '/super-admin'
     | '/admin/content'
@@ -408,11 +436,13 @@ export interface FileRouteTypes {
     | '/ca/blog'
     | '/ca/contact'
     | '/ca/how-it-works'
+    | '/ca/ludoteca'
     | '/ca/media'
     | '/en/about'
     | '/en/blog'
     | '/en/contact'
     | '/en/how-it-works'
+    | '/en/ludoteca'
     | '/en/media'
     | '/invite/$token'
     | '/admin/'
@@ -436,6 +466,7 @@ export interface FileRouteTypes {
     | '/contact'
     | '/how-it-works'
     | '/login'
+    | '/ludoteca'
     | '/media'
     | '/super-admin'
     | '/admin/invitations'
@@ -447,11 +478,13 @@ export interface FileRouteTypes {
     | '/ca/blog'
     | '/ca/contact'
     | '/ca/how-it-works'
+    | '/ca/ludoteca'
     | '/ca/media'
     | '/en/about'
     | '/en/blog'
     | '/en/contact'
     | '/en/how-it-works'
+    | '/en/ludoteca'
     | '/en/media'
     | '/invite/$token'
     | '/admin'
@@ -477,6 +510,7 @@ export interface FileRouteTypes {
     | '/contact'
     | '/how-it-works'
     | '/login'
+    | '/ludoteca'
     | '/media'
     | '/super-admin'
     | '/admin/content'
@@ -490,11 +524,13 @@ export interface FileRouteTypes {
     | '/ca/blog'
     | '/ca/contact'
     | '/ca/how-it-works'
+    | '/ca/ludoteca'
     | '/ca/media'
     | '/en/about'
     | '/en/blog'
     | '/en/contact'
     | '/en/how-it-works'
+    | '/en/ludoteca'
     | '/en/media'
     | '/invite/$token'
     | '/admin/'
@@ -521,17 +557,20 @@ export interface RootRouteChildren {
   ContactRoute: typeof ContactRoute
   HowItWorksRoute: typeof HowItWorksRoute
   LoginRoute: typeof LoginRoute
+  LudotecaRoute: typeof LudotecaRoute
   MediaRoute: typeof MediaRoute
   SuperAdminRoute: typeof SuperAdminRoute
   CaAboutRoute: typeof CaAboutRoute
   CaBlogRoute: typeof CaBlogRoute
   CaContactRoute: typeof CaContactRoute
   CaHowItWorksRoute: typeof CaHowItWorksRoute
+  CaLudotecaRoute: typeof CaLudotecaRoute
   CaMediaRoute: typeof CaMediaRoute
   EnAboutRoute: typeof EnAboutRoute
   EnBlogRoute: typeof EnBlogRoute
   EnContactRoute: typeof EnContactRoute
   EnHowItWorksRoute: typeof EnHowItWorksRoute
+  EnLudotecaRoute: typeof EnLudotecaRoute
   EnMediaRoute: typeof EnMediaRoute
   InviteTokenRoute: typeof InviteTokenRoute
   CaIndexRoute: typeof CaIndexRoute
@@ -554,6 +593,13 @@ declare module '@tanstack/react-router' {
       path: '/media'
       fullPath: '/media'
       preLoaderRoute: typeof MediaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ludoteca': {
+      id: '/ludoteca'
+      path: '/ludoteca'
+      fullPath: '/ludoteca'
+      preLoaderRoute: typeof LudotecaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -654,6 +700,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EnMediaRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/en/ludoteca': {
+      id: '/en/ludoteca'
+      path: '/en/ludoteca'
+      fullPath: '/en/ludoteca'
+      preLoaderRoute: typeof EnLudotecaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/en/how-it-works': {
       id: '/en/how-it-works'
       path: '/en/how-it-works'
@@ -687,6 +740,13 @@ declare module '@tanstack/react-router' {
       path: '/ca/media'
       fullPath: '/ca/media'
       preLoaderRoute: typeof CaMediaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ca/ludoteca': {
+      id: '/ca/ludoteca'
+      path: '/ca/ludoteca'
+      fullPath: '/ca/ludoteca'
+      preLoaderRoute: typeof CaLudotecaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/ca/how-it-works': {
@@ -919,17 +979,20 @@ const rootRouteChildren: RootRouteChildren = {
   ContactRoute: ContactRoute,
   HowItWorksRoute: HowItWorksRoute,
   LoginRoute: LoginRoute,
+  LudotecaRoute: LudotecaRoute,
   MediaRoute: MediaRoute,
   SuperAdminRoute: SuperAdminRoute,
   CaAboutRoute: CaAboutRoute,
   CaBlogRoute: CaBlogRoute,
   CaContactRoute: CaContactRoute,
   CaHowItWorksRoute: CaHowItWorksRoute,
+  CaLudotecaRoute: CaLudotecaRoute,
   CaMediaRoute: CaMediaRoute,
   EnAboutRoute: EnAboutRoute,
   EnBlogRoute: EnBlogRoute,
   EnContactRoute: EnContactRoute,
   EnHowItWorksRoute: EnHowItWorksRoute,
+  EnLudotecaRoute: EnLudotecaRoute,
   EnMediaRoute: EnMediaRoute,
   InviteTokenRoute: InviteTokenRoute,
   CaIndexRoute: CaIndexRoute,
