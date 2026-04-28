@@ -101,11 +101,11 @@ export function EditorProvider({ children }: { children: ReactNode }) {
     setLoading(true);
     try {
       if (isSuperAdmin) {
-        const r = await getAll({ data: { pagePath } });
+        const r = await getAll({ data: { pagePath, locale } });
         setOverrides(buildOverrideMap(r.overrides));
         setHasDrafts(r.overrides.some((o) => o.status === "draft"));
       } else {
-        const r = await getPublic({ data: { pagePath } });
+        const r = await getPublic({ data: { pagePath, locale } });
         setOverrides(buildOverrideMap(r.overrides));
         setHasDrafts(false);
       }
@@ -114,16 +114,16 @@ export function EditorProvider({ children }: { children: ReactNode }) {
     } finally {
       setLoading(false);
     }
-  }, [isSuperAdmin, pagePath, getAll, getPublic]);
+  }, [isSuperAdmin, pagePath, locale, getAll, getPublic]);
 
-  // Reload when route or admin status changes
+  // Reload when route, locale or admin status changes
   useEffect(() => {
-    const key = `${pagePath}|${isSuperAdmin ? "1" : "0"}`;
+    const key = `${pagePath}|${locale}|${isSuperAdmin ? "1" : "0"}`;
     if (lastLoadedKey.current === key) return;
     lastLoadedKey.current = key;
     void reload();
     setSelected(null);
-  }, [pagePath, isSuperAdmin, reload]);
+  }, [pagePath, locale, isSuperAdmin, reload]);
 
   // Disable edit mode for non-admins automatically
   useEffect(() => {
