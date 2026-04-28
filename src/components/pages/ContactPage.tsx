@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Mail, MapPin, Phone, Instagram, Send, CheckCircle2 } from "lucide-react";
 import { useI18n } from "@/i18n/I18nProvider";
 import { SiteLayout } from "@/components/site/SiteLayout";
+import { EditableText } from "@/editor/Editable";
 
 export function ContactPage() {
   const { t } = useI18n();
@@ -11,15 +12,15 @@ export function ContactPage() {
     <SiteLayout>
       <section className="bg-gradient-hero">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-16 md:pt-24 pb-12 text-center">
-          <span className="inline-flex items-center gap-2 rounded-full bg-primary-soft/60 px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-coral-deep">
+          <EditableText id="contact.hero.eyebrow" as="span" className="inline-flex items-center gap-2 rounded-full bg-primary-soft/60 px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-coral-deep">
             {t.contact.eyebrow}
-          </span>
-          <h1 className="mt-5 text-5xl sm:text-6xl font-display font-semibold text-foreground">
+          </EditableText>
+          <EditableText id="contact.hero.title" as="h1" className="mt-5 text-5xl sm:text-6xl font-display font-semibold text-foreground">
             {t.contact.title}
-          </h1>
-          <p className="mt-5 text-lg text-foreground/75 max-w-2xl mx-auto leading-relaxed">
+          </EditableText>
+          <EditableText id="contact.hero.subtitle" as="p" className="mt-5 text-lg text-foreground/75 max-w-2xl mx-auto leading-relaxed">
             {t.contact.subtitle}
-          </p>
+          </EditableText>
         </div>
       </section>
 
