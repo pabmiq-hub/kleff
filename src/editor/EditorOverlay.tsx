@@ -50,17 +50,17 @@ export function EditorOverlay() {
       {!editMode && (
         <button
           onClick={toggleEditMode}
-          className="fixed bottom-6 right-6 z-[60] inline-flex items-center gap-2 px-4 py-3 bg-coral hover:bg-coral-deep text-cream rounded-full shadow-2xl font-medium"
+          className="fixed bottom-6 right-6 z-[60] inline-flex items-center gap-2 px-4 py-3 bg-coral hover:bg-coral-deep text-white rounded-full shadow-2xl font-medium"
           aria-label="Activar modo edición"
         >
           <Pencil className="h-4 w-4" /> Editar página
         </button>
       )}
 
-      {/* Top bar */}
+      {/* Top bar — sólida, oscura, full width */}
       {editMode && (
-        <div className="fixed top-0 left-0 right-0 z-[55] bg-charcoal/95 backdrop-blur border-b border-cream/15 text-cream">
-          <div className="flex items-center justify-between gap-3 px-4 py-2.5">
+        <div className="fixed top-0 left-0 right-0 z-[70] h-12 bg-[#1a1a1a] border-b border-black/20 text-white shadow-md">
+          <div className="flex h-full items-center justify-between gap-3 px-4">
             <div className="flex items-center gap-2 text-sm">
               <Pencil className="h-4 w-4 text-coral" />
               <span className="font-semibold">Modo edición</span>
@@ -76,7 +76,7 @@ export function EditorOverlay() {
                 size="sm"
                 onClick={discardDrafts}
                 disabled={!hasDrafts}
-                className="text-cream/80 hover:text-cream hover:bg-cream/10"
+                className="text-white/80 hover:text-white hover:bg-white/10"
               >
                 <RotateCcw className="h-4 w-4 mr-1.5" /> Descartar
               </Button>
@@ -84,13 +84,13 @@ export function EditorOverlay() {
                 size="sm"
                 onClick={publish}
                 disabled={!hasDrafts}
-                className="bg-coral hover:bg-coral-deep text-cream"
+                className="bg-coral hover:bg-coral-deep text-white"
               >
                 <Save className="h-4 w-4 mr-1.5" /> Publicar
               </Button>
               <button
                 onClick={toggleEditMode}
-                className="ml-1 p-1.5 hover:bg-cream/10 rounded"
+                className="ml-1 p-1.5 hover:bg-white/10 rounded"
                 aria-label="Salir del modo edición"
               >
                 <X className="h-5 w-5" />
@@ -100,22 +100,9 @@ export function EditorOverlay() {
         </div>
       )}
 
-      {/* Top bar spacer */}
-      {editMode && <div className="h-12" />}
-
-      {/* Side properties panel */}
-      {editMode && selected && (
-        <PropertiesPanel
-          key={selected.id}
-          onClose={() => setSelected(null)}
-        />
-      )}
-
-      {/* Empty selection helper */}
-      {editMode && !selected && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[55] px-4 py-2 bg-charcoal/95 text-cream/80 text-sm rounded-full border border-cream/15 shadow-lg pointer-events-none">
-          Haz clic en cualquier texto o imagen para editarlo
-        </div>
+      {/* Side properties panel — siempre visible en modo edición (no flota sobre la página) */}
+      {editMode && (
+        <PropertiesPanel onClose={() => setSelected(null)} hasSelection={!!selected} />
       )}
     </>
   );
