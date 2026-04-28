@@ -14,6 +14,108 @@ export type Database = {
   }
   public: {
     Tables: {
+      bgg_games: {
+        Row: {
+          bgg_id: number | null
+          bgg_rank: number | null
+          bgg_rating: number | null
+          bgg_rating_users: number | null
+          bgg_type: string | null
+          bgg_url: string | null
+          bgg_weight: number | null
+          bgg_weight_users: number | null
+          categories: string[] | null
+          created_at: string
+          description: string | null
+          designers: string[] | null
+          duration_minutes: number | null
+          families: string[] | null
+          id: string
+          image_url: string | null
+          is_active: boolean
+          last_synced_at: string | null
+          max_players: number | null
+          max_playtime: number | null
+          max_rental_days: number
+          mechanics: string[] | null
+          min_age: number | null
+          min_players: number | null
+          min_playtime: number | null
+          publishers: string[] | null
+          thumbnail_url: string | null
+          title: string
+          total_copies: number
+          updated_at: string
+          year_published: number | null
+        }
+        Insert: {
+          bgg_id?: number | null
+          bgg_rank?: number | null
+          bgg_rating?: number | null
+          bgg_rating_users?: number | null
+          bgg_type?: string | null
+          bgg_url?: string | null
+          bgg_weight?: number | null
+          bgg_weight_users?: number | null
+          categories?: string[] | null
+          created_at?: string
+          description?: string | null
+          designers?: string[] | null
+          duration_minutes?: number | null
+          families?: string[] | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          last_synced_at?: string | null
+          max_players?: number | null
+          max_playtime?: number | null
+          max_rental_days?: number
+          mechanics?: string[] | null
+          min_age?: number | null
+          min_players?: number | null
+          min_playtime?: number | null
+          publishers?: string[] | null
+          thumbnail_url?: string | null
+          title: string
+          total_copies?: number
+          updated_at?: string
+          year_published?: number | null
+        }
+        Update: {
+          bgg_id?: number | null
+          bgg_rank?: number | null
+          bgg_rating?: number | null
+          bgg_rating_users?: number | null
+          bgg_type?: string | null
+          bgg_url?: string | null
+          bgg_weight?: number | null
+          bgg_weight_users?: number | null
+          categories?: string[] | null
+          created_at?: string
+          description?: string | null
+          designers?: string[] | null
+          duration_minutes?: number | null
+          families?: string[] | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          last_synced_at?: string | null
+          max_players?: number | null
+          max_playtime?: number | null
+          max_rental_days?: number
+          mechanics?: string[] | null
+          min_age?: number | null
+          min_players?: number | null
+          min_playtime?: number | null
+          publishers?: string[] | null
+          thumbnail_url?: string | null
+          title?: string
+          total_copies?: number
+          updated_at?: string
+          year_published?: number | null
+        }
+        Relationships: []
+      }
       content_overrides: {
         Row: {
           element_id: string
@@ -245,54 +347,6 @@ export type Database = {
         }
         Relationships: []
       }
-      rental_games: {
-        Row: {
-          bgg_id: number | null
-          created_at: string
-          description: string | null
-          duration_minutes: number | null
-          id: string
-          image_url: string | null
-          is_active: boolean
-          max_players: number | null
-          max_rental_days: number
-          min_players: number | null
-          title: string
-          total_copies: number
-          updated_at: string
-        }
-        Insert: {
-          bgg_id?: number | null
-          created_at?: string
-          description?: string | null
-          duration_minutes?: number | null
-          id?: string
-          image_url?: string | null
-          is_active?: boolean
-          max_players?: number | null
-          max_rental_days?: number
-          min_players?: number | null
-          title: string
-          total_copies?: number
-          updated_at?: string
-        }
-        Update: {
-          bgg_id?: number | null
-          created_at?: string
-          description?: string | null
-          duration_minutes?: number | null
-          id?: string
-          image_url?: string | null
-          is_active?: boolean
-          max_players?: number | null
-          max_rental_days?: number
-          min_players?: number | null
-          title?: string
-          total_copies?: number
-          updated_at?: string
-        }
-        Relationships: []
-      }
       rental_requests: {
         Row: {
           created_at: string
@@ -338,7 +392,7 @@ export type Database = {
             foreignKeyName: "rental_requests_game_id_fkey"
             columns: ["game_id"]
             isOneToOne: false
-            referencedRelation: "rental_games"
+            referencedRelation: "bgg_games"
             referencedColumns: ["id"]
           },
         ]
@@ -391,7 +445,7 @@ export type Database = {
             foreignKeyName: "rentals_game_id_fkey"
             columns: ["game_id"]
             isOneToOne: false
-            referencedRelation: "rental_games"
+            referencedRelation: "bgg_games"
             referencedColumns: ["id"]
           },
           {
