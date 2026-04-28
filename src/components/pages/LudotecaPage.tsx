@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Search, Users, Clock, Brain, Star, ExternalLink, RefreshCw, Filter, X } from "lucide-react";
 import { useI18n } from "@/i18n/I18nProvider";
 import { SiteLayout } from "@/components/site/SiteLayout";
-import { listLudoteca } from "@/server/bgg.functions";
+import { listLudoteca } from "@/server/ludoteca.functions";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 

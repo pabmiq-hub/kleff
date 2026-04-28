@@ -371,14 +371,6 @@ export const adminSyncBggCollection = createServerFn({ method: "POST" })
     return result;
   });
 
-export const listLudoteca = createServerFn({ method: "GET" }).handler(async () => {
-  const { data, error } = await supabaseAdmin
-    .from("bgg_games")
-    .select(
-      "id, bgg_id, title, image_url, thumbnail_url, year_published, min_players, max_players, min_playtime, max_playtime, duration_minutes, min_age, bgg_rating, bgg_rating_users, bgg_weight, bgg_weight_users, bgg_rank, bgg_type, categories, mechanics, bgg_url, is_active, last_synced_at",
-    )
-    .eq("is_active", true)
-    .order("bgg_rating", { ascending: false, nullsFirst: false });
-  if (error) throw new Error(error.message);
-  return { games: data ?? [], syncedAt: data?.[0]?.last_synced_at ?? null };
-});
+// listLudoteca lives in ./ludoteca.functions.ts so the LudotecaPage component
+// does not transitively import the admin client (service role key).
+
