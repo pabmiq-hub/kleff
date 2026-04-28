@@ -621,9 +621,13 @@ export function HomePage() {
                     <span className="shrink-0 size-12 rounded-xl bg-coral/15 border-2 border-coral/40 flex items-center justify-center text-2xl">
                       {emoji}
                     </span>
-                    <span className="text-base text-foreground/85 leading-relaxed self-center">
+                    <EditableText
+                      id={`home.reason${i + 1}`}
+                      as="span"
+                      className="text-base text-foreground/85 leading-relaxed self-center"
+                    >
                       {text}
-                    </span>
+                    </EditableText>
                   </li>
                 );
               })}
