@@ -1,7 +1,6 @@
 // Server-only BGG sync logic. Imports the admin Supabase client, so this
 // file MUST NOT be imported from any client-reachable module.
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
-import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 const BGG_USERNAME = "kleff_bcn";
 const BGG_BASE = "https://boardgamegeek.com/xmlapi2";
