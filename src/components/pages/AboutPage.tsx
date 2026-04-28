@@ -317,13 +317,13 @@ export function AboutPage() {
         <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
           <div className="relative bg-cream border-4 border-ink rounded-[2.5rem] px-6 sm:px-14 py-12 sm:py-16 text-center shadow-tactile-lg">
             <Calendar className="h-10 w-10 text-coral mx-auto" />
-            <h2 className="mt-4 text-3xl sm:text-4xl lg:text-5xl font-display font-semibold text-foreground">
+            <EditableText id="about.cta.title" as="h2" className="mt-4 text-3xl sm:text-4xl lg:text-5xl font-display font-semibold text-foreground">
               {locale === "en"
                 ? "Want to be part of what comes next?"
                 : locale === "ca"
                   ? "Vols formar part del que vindrà?"
                   : "¿Quieres formar parte de lo que viene?"}
-            </h2>
+            </EditableText>
             <div className="mt-8 flex flex-wrap justify-center gap-4">
               <a
                 href="https://www.meetup.com/es-ES/kleff-bcn/events/?type=upcoming"
