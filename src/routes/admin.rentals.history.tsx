@@ -13,7 +13,7 @@ interface RentalRow {
   due_at: string;
   returned_at: string | null;
   status: string;
-  rental_games: { title: string; image_url: string | null } | null;
+  bgg_games: { title: string; image_url: string | null } | null;
   profile?: { full_name: string; member_number: number } | null;
 }
 
@@ -49,7 +49,7 @@ function HistoryPage() {
           )}
           {items.map((r) => (
             <tr key={r.id} className="border-t border-cream/10">
-              <td className="px-4 py-3">{r.rental_games?.title ?? "—"}</td>
+              <td className="px-4 py-3">{r.bgg_games?.title ?? "—"}</td>
               <td className="px-4 py-3">
                 {r.profile && (
                   <>

@@ -15,7 +15,7 @@ interface ReqRow {
   requested_days: number;
   created_at: string;
   decision_note: string | null;
-  rental_games: { title: string; image_url: string | null } | null;
+  bgg_games: { title: string; image_url: string | null } | null;
 }
 
 interface RentalRow {
@@ -24,7 +24,7 @@ interface RentalRow {
   started_at: string;
   due_at: string;
   returned_at: string | null;
-  rental_games: { title: string; image_url: string | null } | null;
+  bgg_games: { title: string; image_url: string | null } | null;
 }
 
 const statusLabel: Record<string, string> = {
@@ -85,7 +85,7 @@ function MyRentalsPage() {
           <Empty msg="No tienes juegos alquilados ahora mismo." />
         ) : (
           activeRentals.map((r) => (
-            <Row key={r.id} title={r.rental_games?.title ?? "Juego"} img={r.rental_games?.image_url} sub={`Devolución: ${new Date(r.due_at).toLocaleDateString()}`} badge={statusLabel[r.status]} />
+            <Row key={r.id} title={r.bgg_games?.title ?? "Juego"} img={r.bgg_games?.image_url} sub={`Devolución: ${new Date(r.due_at).toLocaleDateString()}`} badge={statusLabel[r.status]} />
           ))
         )}
       </Section>
@@ -97,8 +97,8 @@ function MyRentalsPage() {
           pendingReq.map((r) => (
             <Row
               key={r.id}
-              title={r.rental_games?.title ?? "Juego"}
-              img={r.rental_games?.image_url}
+              title={r.bgg_games?.title ?? "Juego"}
+              img={r.bgg_games?.image_url}
               sub={`${r.requested_days} días · enviada ${new Date(r.created_at).toLocaleDateString()}`}
               badge="Pendiente"
               action={
@@ -117,10 +117,10 @@ function MyRentalsPage() {
         ) : (
           <>
             {pastRentals.map((r) => (
-              <Row key={r.id} title={r.rental_games?.title ?? "Juego"} img={r.rental_games?.image_url} sub={`Devuelto el ${r.returned_at ? new Date(r.returned_at).toLocaleDateString() : "—"}`} badge="Devuelto" />
+              <Row key={r.id} title={r.bgg_games?.title ?? "Juego"} img={r.bgg_games?.image_url} sub={`Devuelto el ${r.returned_at ? new Date(r.returned_at).toLocaleDateString() : "—"}`} badge="Devuelto" />
             ))}
             {decidedReq.map((r) => (
-              <Row key={r.id} title={r.rental_games?.title ?? "Juego"} img={r.rental_games?.image_url} sub={r.decision_note ?? `Solicitud ${statusLabel[r.status]?.toLowerCase()}`} badge={statusLabel[r.status]} />
+              <Row key={r.id} title={r.bgg_games?.title ?? "Juego"} img={r.bgg_games?.image_url} sub={r.decision_note ?? `Solicitud ${statusLabel[r.status]?.toLowerCase()}`} badge={statusLabel[r.status]} />
             ))}
           </>
         )}

@@ -17,7 +17,7 @@ interface RentalRow {
   due_at: string;
   returned_at: string | null;
   status: string;
-  rental_games: { title: string; image_url: string | null } | null;
+  bgg_games: { title: string; image_url: string | null } | null;
   profile?: { full_name: string; username: string; member_number: number } | null;
 }
 
@@ -60,13 +60,13 @@ function ActivePage() {
         const overdue = new Date(r.due_at) < new Date();
         return (
           <div key={r.id} className={`border rounded-2xl p-4 flex flex-wrap items-start gap-4 ${overdue ? "border-coral bg-coral/10" : "border-cream/15 bg-cream/5"}`}>
-            {r.rental_games?.image_url ? (
-              <img src={r.rental_games.image_url} alt="" className="h-16 w-16 rounded-lg object-cover border border-cream/20" />
+            {r.bgg_games?.image_url ? (
+              <img src={r.bgg_games.image_url} alt="" className="h-16 w-16 rounded-lg object-cover border border-cream/20" />
             ) : (
               <div className="h-16 w-16 rounded-lg bg-coral/30 flex items-center justify-center font-bold text-cream">🎲</div>
             )}
             <div className="flex-1 min-w-[200px]">
-              <p className="font-semibold">{r.rental_games?.title ?? "Juego"}</p>
+              <p className="font-semibold">{r.bgg_games?.title ?? "Juego"}</p>
               <p className="text-xs text-cream/60">
                 {r.profile && (
                   <>

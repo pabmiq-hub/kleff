@@ -33,7 +33,7 @@ export const listRentalGames = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     const { data, error } = await context.supabase
-      .from("rental_games")
+      .from("bgg_games")
       .select("*")
       .order("title", { ascending: true });
     if (error) throw new Error(error.message);
@@ -46,7 +46,7 @@ export const createRentalGame = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     await assertSuperAdmin(context.userId);
     const { data: row, error } = await supabaseAdmin
-      .from("rental_games")
+      .from("bgg_games")
       .insert({
         title: data.title,
         description: data.description ?? null,
@@ -84,7 +84,7 @@ export const updateRentalGame = createServerFn({ method: "POST" })
     if (rest.maxRentalDays !== undefined) update.max_rental_days = rest.maxRentalDays;
     if (rest.totalCopies !== undefined) update.total_copies = rest.totalCopies;
     if (rest.isActive !== undefined) update.is_active = rest.isActive;
-    const { error } = await supabaseAdmin.from("rental_games").update(update as never).eq("id", id);
+    const { error } = await supabaseAdmin.from("bgg_games").update(update as never).eq("id", id);
     if (error) throw new Error(error.message);
     return { success: true };
   });
@@ -94,7 +94,7 @@ export const deleteRentalGame = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => z.object({ id: z.string().uuid() }).parse(input))
   .handler(async ({ data, context }) => {
     await assertSuperAdmin(context.userId);
-    const { error } = await supabaseAdmin.from("rental_games").delete().eq("id", data.id);
+    const { error } = await supabaseAdmin.from("bgg_games").delete().eq("id", data.id);
     if (error) throw new Error(error.message);
     return { success: true };
   });
@@ -143,7 +143,7 @@ export const listMyRentalRequests = createServerFn({ method: "POST" })
   .handler(async ({ context }) => {
     const { data, error } = await context.supabase
       .from("rental_requests")
-      .select("*, rental_games(title, image_url)")
+      .select("*, bgg_games(title, image_url)")
       .eq("user_id", context.userId)
       .order("created_at", { ascending: false });
     if (error) throw new Error(error.message);
@@ -163,7 +163,7 @@ export const listAllRentalRequests = createServerFn({ method: "POST" })
     await assertSuperAdmin(context.userId);
     let q = supabaseAdmin
       .from("rental_requests")
-      .select("*, rental_games(title, image_url), profiles!rental_requests_user_id_fkey(full_name, username, member_number)")
+      .select("*, bgg_games(title, image_url), profiles!rental_requests_user_id_fkey(full_name, username, member_number)")
       .order("created_at", { ascending: false });
     if (data.status) q = q.eq("status", data.status);
     const { data: rows, error } = await q;
@@ -171,7 +171,7 @@ export const listAllRentalRequests = createServerFn({ method: "POST" })
       // Fallback if FK alias not present: do manual join
       const { data: r2, error: e2 } = await supabaseAdmin
         .from("rental_requests")
-        .select("*, rental_games(title, image_url)")
+        .select("*, bgg_games(title, image_url)")
         .order("created_at", { ascending: false });
       if (e2) throw new Error(e2.message);
       const userIds = Array.from(new Set((r2 ?? []).map((r) => r.user_id)));
@@ -248,7 +248,7 @@ export const listMyRentals = createServerFn({ method: "POST" })
   .handler(async ({ context }) => {
     const { data, error } = await context.supabase
       .from("rentals")
-      .select("*, rental_games(title, image_url)")
+      .select("*, bgg_games(title, image_url)")
       .eq("user_id", context.userId)
       .order("started_at", { ascending: false });
     if (error) throw new Error(error.message);
@@ -268,7 +268,7 @@ export const listAllRentals = createServerFn({ method: "POST" })
     await assertSuperAdmin(context.userId);
     let q = supabaseAdmin
       .from("rentals")
-      .select("*, rental_games(title, image_url)")
+      .select("*, bgg_games(title, image_url)")
       .order("started_at", { ascending: false });
     if (data.status) q = q.eq("status", data.status);
     const { data: rows, error } = await q;
