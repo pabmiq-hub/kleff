@@ -81,6 +81,7 @@ export type Database = {
           id: string
           id_document_encrypted: string
           id_document_nonce: string
+          member_number: number
           updated_at: string
           username: string
         }
@@ -93,6 +94,7 @@ export type Database = {
           id: string
           id_document_encrypted: string
           id_document_nonce: string
+          member_number?: number
           updated_at?: string
           username: string
         }
@@ -105,10 +107,169 @@ export type Database = {
           id?: string
           id_document_encrypted?: string
           id_document_nonce?: string
+          member_number?: number
           updated_at?: string
           username?: string
         }
         Relationships: []
+      }
+      rental_games: {
+        Row: {
+          bgg_id: number | null
+          created_at: string
+          description: string | null
+          duration_minutes: number | null
+          id: string
+          image_url: string | null
+          is_active: boolean
+          max_players: number | null
+          max_rental_days: number
+          min_players: number | null
+          title: string
+          total_copies: number
+          updated_at: string
+        }
+        Insert: {
+          bgg_id?: number | null
+          created_at?: string
+          description?: string | null
+          duration_minutes?: number | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          max_players?: number | null
+          max_rental_days?: number
+          min_players?: number | null
+          title: string
+          total_copies?: number
+          updated_at?: string
+        }
+        Update: {
+          bgg_id?: number | null
+          created_at?: string
+          description?: string | null
+          duration_minutes?: number | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          max_players?: number | null
+          max_rental_days?: number
+          min_players?: number | null
+          title?: string
+          total_copies?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      rental_requests: {
+        Row: {
+          created_at: string
+          decided_at: string | null
+          decided_by: string | null
+          decision_note: string | null
+          game_id: string
+          id: string
+          message: string | null
+          requested_days: number
+          status: Database["public"]["Enums"]["rental_request_status"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          decided_at?: string | null
+          decided_by?: string | null
+          decision_note?: string | null
+          game_id: string
+          id?: string
+          message?: string | null
+          requested_days?: number
+          status?: Database["public"]["Enums"]["rental_request_status"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          decided_at?: string | null
+          decided_by?: string | null
+          decision_note?: string | null
+          game_id?: string
+          id?: string
+          message?: string | null
+          requested_days?: number
+          status?: Database["public"]["Enums"]["rental_request_status"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rental_requests_game_id_fkey"
+            columns: ["game_id"]
+            isOneToOne: false
+            referencedRelation: "rental_games"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      rentals: {
+        Row: {
+          created_at: string
+          created_by: string
+          due_at: string
+          game_id: string
+          id: string
+          notes: string | null
+          request_id: string | null
+          returned_at: string | null
+          started_at: string
+          status: Database["public"]["Enums"]["rental_status"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          due_at: string
+          game_id: string
+          id?: string
+          notes?: string | null
+          request_id?: string | null
+          returned_at?: string | null
+          started_at?: string
+          status?: Database["public"]["Enums"]["rental_status"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          due_at?: string
+          game_id?: string
+          id?: string
+          notes?: string | null
+          request_id?: string | null
+          returned_at?: string | null
+          started_at?: string
+          status?: Database["public"]["Enums"]["rental_status"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rentals_game_id_fkey"
+            columns: ["game_id"]
+            isOneToOne: false
+            referencedRelation: "rental_games"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rentals_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "rental_requests"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {
@@ -161,6 +322,8 @@ export type Database = {
         | "non_binary"
         | "other"
         | "prefer_not_to_say"
+      rental_request_status: "pending" | "approved" | "rejected" | "cancelled"
+      rental_status: "active" | "returned" | "overdue" | "lost"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -296,6 +459,8 @@ export const Constants = {
         "other",
         "prefer_not_to_say",
       ],
+      rental_request_status: ["pending", "approved", "rejected", "cancelled"],
+      rental_status: ["active", "returned", "overdue", "lost"],
     },
   },
 } as const
