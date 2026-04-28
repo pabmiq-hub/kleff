@@ -360,7 +360,7 @@ export function HomePage() {
             <div className="relative">
               <div className="relative bg-card border-4 border-ink rounded-3xl shadow-tactile-lg overflow-hidden aspect-[4/5]">
                 <img
-                  src={heroImg}
+                  src={or(hero.image, heroImg) as string}
                   alt="Comunidad KLEFF jugando juegos de mesa"
                   width={1600}
                   height={2000}
