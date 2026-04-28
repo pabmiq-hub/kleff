@@ -244,6 +244,7 @@ export const adminSaveOverride = createServerFn({ method: "POST" })
         targets.map(async (target) => {
           try {
             const translated = await translateHtml(source, SOURCE_LOCALE, target);
+            if (translated == null) return;
             await writeOne(target, translated);
           } catch (e) {
             console.error(`[overrides] failed to translate to ${target}`, e);
