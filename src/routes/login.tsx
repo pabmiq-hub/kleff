@@ -27,13 +27,14 @@ export const Route = createFileRoute("/login")({
 function LoginPage() {
   const navigate = useNavigate();
   const { redirect } = Route.useSearch();
-  const { session, loading } = useAuth();
+  const { session, isSuperAdmin, loading } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
   if (!loading && session) {
-    void navigate({ to: redirect || "/app" });
+    const dest = redirect || (isSuperAdmin ? "/app/admin" : "/app");
+    void navigate({ to: dest });
   }
 
   const handleSubmit = async (e: FormEvent) => {
@@ -49,7 +50,7 @@ function LoginPage() {
       return;
     }
     toast.success("Bienvenido");
-    void navigate({ to: redirect || "/app" });
+    // Navigation will happen automatically via the effect above once session updates
   };
 
   return (
