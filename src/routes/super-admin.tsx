@@ -35,7 +35,7 @@ function SuperAdminLoginPage() {
   // Already logged in
   if (!loading && session) {
     if (isSuperAdmin) {
-      void navigate({ to: redirect || "/app/admin" });
+      void navigate({ to: redirect || "/admin" });
       return null;
     }
     // Logged in as a non-admin user — show notice
@@ -84,7 +84,7 @@ function SuperAdminLoginPage() {
     }
     setSubmitting(false);
     toast.success("Bienvenido al panel de administración");
-    void navigate({ to: redirect || "/app/admin" });
+    void navigate({ to: redirect || "/admin" });
   };
 
   return (
