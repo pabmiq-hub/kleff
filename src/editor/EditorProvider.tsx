@@ -66,8 +66,17 @@ export function EditorProvider({ children }: { children: ReactNode }) {
   const { isSuperAdmin } = useAuth();
   const pagePath = useRouterState({
     select: (s) => {
-      const p = s.location.pathname.replace(/\/+$/, "");
-      return p === "" ? "/" : p;
+      // Strip trailing slashes
+      let p = s.location.pathname.replace(/\/+$/, "");
+      if (p === "") p = "/";
+      // Strip locale prefix so /about, /en/about and /ca/about share the same overrides.
+      // Locales: es (default, no prefix), en, ca.
+      const localeMatch = p.match(/^\/(en|ca)(\/.*)?$/);
+      if (localeMatch) {
+        p = localeMatch[2] ?? "/";
+        if (p === "") p = "/";
+      }
+      return p;
     },
   });
 
