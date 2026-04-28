@@ -14,6 +14,78 @@ export type Database = {
   }
   public: {
     Tables: {
+      content_overrides: {
+        Row: {
+          element_id: string
+          id: string
+          page_path: string
+          property: string
+          status: string
+          updated_at: string
+          updated_by: string | null
+          value: Json | null
+        }
+        Insert: {
+          element_id: string
+          id?: string
+          page_path: string
+          property: string
+          status?: string
+          updated_at?: string
+          updated_by?: string | null
+          value?: Json | null
+        }
+        Update: {
+          element_id?: string
+          id?: string
+          page_path?: string
+          property?: string
+          status?: string
+          updated_at?: string
+          updated_by?: string | null
+          value?: Json | null
+        }
+        Relationships: []
+      }
+      content_pages: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          is_builtin: boolean
+          is_published: boolean
+          path: string
+          template: string
+          title: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_builtin?: boolean
+          is_published?: boolean
+          path: string
+          template?: string
+          title: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_builtin?: boolean
+          is_published?: boolean
+          path?: string
+          template?: string
+          title?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       content_section_history: {
         Row: {
           content: Json
