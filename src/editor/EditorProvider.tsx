@@ -65,6 +65,7 @@ const EditorContext = createContext<EditorContextValue | undefined>(undefined);
 
 export function EditorProvider({ children }: { children: ReactNode }) {
   const { isSuperAdmin } = useAuth();
+  const { locale } = useI18n();
   const pagePath = useRouterState({
     select: (s) => {
       // Strip trailing slashes
