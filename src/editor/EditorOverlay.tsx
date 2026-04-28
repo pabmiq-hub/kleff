@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { useEditor } from "./EditorProvider";
+import { InlineFormatToolbar } from "./Editable";
 import type { StyleProps } from "./types";
 import { uploadMedia } from "@/server/media.functions";
 import { Button } from "@/components/ui/button";
@@ -104,6 +105,9 @@ export function EditorOverlay() {
       {editMode && (
         <PropertiesPanel onClose={() => setSelected(null)} hasSelection={!!selected} />
       )}
+
+      {/* Floating B/I/U toolbar that appears over the text selection */}
+      {editMode && <InlineFormatToolbar />}
     </>
   );
 }
