@@ -23,6 +23,7 @@ import { Route as EnIndexRouteImport } from './routes/en.index'
 import { Route as CaIndexRouteImport } from './routes/ca.index'
 import { Route as AppIndexRouteImport } from './routes/app.index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
+import { Route as PSlugRouteImport } from './routes/p.$slug'
 import { Route as InviteTokenRouteImport } from './routes/invite.$token'
 import { Route as EnMediaRouteImport } from './routes/en.media'
 import { Route as EnHowItWorksRouteImport } from './routes/en.how-it-works'
@@ -117,6 +118,11 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => AdminRoute,
+} as any)
+const PSlugRoute = PSlugRouteImport.update({
+  id: '/p/$slug',
+  path: '/p/$slug',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const InviteTokenRoute = InviteTokenRouteImport.update({
   id: '/invite/$token',
@@ -269,6 +275,7 @@ export interface FileRoutesByFullPath {
   '/en/how-it-works': typeof EnHowItWorksRoute
   '/en/media': typeof EnMediaRoute
   '/invite/$token': typeof InviteTokenRoute
+  '/p/$slug': typeof PSlugRoute
   '/admin/': typeof AdminIndexRoute
   '/app/': typeof AppIndexRoute
   '/ca/': typeof CaIndexRoute
@@ -306,6 +313,7 @@ export interface FileRoutesByTo {
   '/en/how-it-works': typeof EnHowItWorksRoute
   '/en/media': typeof EnMediaRoute
   '/invite/$token': typeof InviteTokenRoute
+  '/p/$slug': typeof PSlugRoute
   '/admin': typeof AdminIndexRoute
   '/app': typeof AppIndexRoute
   '/ca': typeof CaIndexRoute
@@ -347,6 +355,7 @@ export interface FileRoutesById {
   '/en/how-it-works': typeof EnHowItWorksRoute
   '/en/media': typeof EnMediaRoute
   '/invite/$token': typeof InviteTokenRoute
+  '/p/$slug': typeof PSlugRoute
   '/admin/': typeof AdminIndexRoute
   '/app/': typeof AppIndexRoute
   '/ca/': typeof CaIndexRoute
@@ -389,6 +398,7 @@ export interface FileRouteTypes {
     | '/en/how-it-works'
     | '/en/media'
     | '/invite/$token'
+    | '/p/$slug'
     | '/admin/'
     | '/app/'
     | '/ca/'
@@ -426,6 +436,7 @@ export interface FileRouteTypes {
     | '/en/how-it-works'
     | '/en/media'
     | '/invite/$token'
+    | '/p/$slug'
     | '/admin'
     | '/app'
     | '/ca'
@@ -466,6 +477,7 @@ export interface FileRouteTypes {
     | '/en/how-it-works'
     | '/en/media'
     | '/invite/$token'
+    | '/p/$slug'
     | '/admin/'
     | '/app/'
     | '/ca/'
@@ -500,6 +512,7 @@ export interface RootRouteChildren {
   EnHowItWorksRoute: typeof EnHowItWorksRoute
   EnMediaRoute: typeof EnMediaRoute
   InviteTokenRoute: typeof InviteTokenRoute
+  PSlugRoute: typeof PSlugRoute
   CaIndexRoute: typeof CaIndexRoute
   EnIndexRoute: typeof EnIndexRoute
   ApiPublicUploadInviteAvatarRoute: typeof ApiPublicUploadInviteAvatarRoute
@@ -604,6 +617,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/'
       preLoaderRoute: typeof AdminIndexRouteImport
       parentRoute: typeof AdminRoute
+    }
+    '/p/$slug': {
+      id: '/p/$slug'
+      path: '/p/$slug'
+      fullPath: '/p/$slug'
+      preLoaderRoute: typeof PSlugRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/invite/$token': {
       id: '/invite/$token'
@@ -862,6 +882,7 @@ const rootRouteChildren: RootRouteChildren = {
   EnHowItWorksRoute: EnHowItWorksRoute,
   EnMediaRoute: EnMediaRoute,
   InviteTokenRoute: InviteTokenRoute,
+  PSlugRoute: PSlugRoute,
   CaIndexRoute: CaIndexRoute,
   EnIndexRoute: EnIndexRoute,
   ApiPublicUploadInviteAvatarRoute: ApiPublicUploadInviteAvatarRoute,
