@@ -18,6 +18,7 @@ import {
   Swords,
   EyeOff,
 } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 import { useI18n } from "@/i18n/I18nProvider";
 import { SiteLayout } from "@/components/site/SiteLayout";
 import { EditableText } from "@/editor/Editable";
@@ -267,6 +268,19 @@ export function HowItWorksPage() {
               <Coffee className="h-5 w-5" />
               <span className="text-sm font-bold">{t.how.consumptionBadge}</span>
             </div>
+            <Link
+              to={locale === "en" ? "/en/ludoteca" : locale === "ca" ? "/ca/ludoteca" : "/ludoteca"}
+              className="inline-flex items-center gap-2 bg-ink text-cream border-2 border-ink rounded-2xl px-4 py-2.5 shadow-tactile-sm hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all"
+            >
+              <Library className="h-5 w-5" />
+              <span className="text-sm font-bold">
+                {locale === "en"
+                  ? "Discover our library"
+                  : locale === "ca"
+                    ? "Coneix la nostra ludoteca"
+                    : "Conoce nuestra ludoteca"}
+              </span>
+            </Link>
           </div>
         </div>
       </section>
