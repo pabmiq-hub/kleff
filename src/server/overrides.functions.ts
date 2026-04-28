@@ -37,9 +37,9 @@ export const getPublishedOverrides = createServerFn({ method: "GET" })
       .eq("status", "published");
     if (error) {
       console.error("getPublishedOverrides error", error);
-      return { overrides: [] as Array<{ element_id: string; property: string; value: unknown }> };
+      return { overrides: [] as Array<{ element_id: string; property: string; value: Json | null }> };
     }
-    return { overrides: (rows ?? []) as Array<{ element_id: string; property: string; value: unknown }> };
+    return { overrides: (rows ?? []) as Array<{ element_id: string; property: string; value: Json | null }> };
   });
 
 // ADMIN: get all overrides (draft + published) for a page, merged
