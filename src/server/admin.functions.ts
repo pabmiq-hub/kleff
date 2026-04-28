@@ -233,8 +233,8 @@ export const listUsers = createServerFn({ method: "POST" })
     await assertSuperAdmin(context.userId);
     const { data: profiles, error } = await supabaseAdmin
       .from("profiles")
-      .select("id, username, full_name, avatar_url, date_of_birth, gender, created_at")
-      .order("created_at", { ascending: false });
+      .select("id, member_number, username, full_name, avatar_url, date_of_birth, gender, created_at")
+      .order("member_number", { ascending: true });
     if (error) throw new Error(error.message);
 
     const { data: roles } = await supabaseAdmin
