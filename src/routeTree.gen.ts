@@ -45,6 +45,7 @@ import { Route as AdminRentalsIndexRouteImport } from './routes/admin.rentals.in
 import { Route as AdminContentIndexRouteImport } from './routes/admin.content.index'
 import { Route as AppRentalsMineRouteImport } from './routes/app.rentals.mine'
 import { Route as ApiPublicUploadInviteAvatarRouteImport } from './routes/api.public.upload-invite-avatar'
+import { Route as ApiPublicSyncBggRouteImport } from './routes/api.public.sync-bgg'
 import { Route as AdminRentalsHistoryRouteImport } from './routes/admin.rentals.history'
 import { Route as AdminRentalsCatalogRouteImport } from './routes/admin.rentals.catalog'
 import { Route as AdminRentalsActiveRouteImport } from './routes/admin.rentals.active'
@@ -231,6 +232,11 @@ const ApiPublicUploadInviteAvatarRoute =
     path: '/api/public/upload-invite-avatar',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicSyncBggRoute = ApiPublicSyncBggRouteImport.update({
+  id: '/api/public/sync-bgg',
+  path: '/api/public/sync-bgg',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminRentalsHistoryRoute = AdminRentalsHistoryRouteImport.update({
   id: '/history',
   path: '/history',
@@ -289,6 +295,7 @@ export interface FileRoutesByFullPath {
   '/admin/rentals/active': typeof AdminRentalsActiveRoute
   '/admin/rentals/catalog': typeof AdminRentalsCatalogRoute
   '/admin/rentals/history': typeof AdminRentalsHistoryRoute
+  '/api/public/sync-bgg': typeof ApiPublicSyncBggRoute
   '/api/public/upload-invite-avatar': typeof ApiPublicUploadInviteAvatarRoute
   '/app/rentals/mine': typeof AppRentalsMineRoute
   '/admin/content/': typeof AdminContentIndexRoute
@@ -327,6 +334,7 @@ export interface FileRoutesByTo {
   '/admin/rentals/active': typeof AdminRentalsActiveRoute
   '/admin/rentals/catalog': typeof AdminRentalsCatalogRoute
   '/admin/rentals/history': typeof AdminRentalsHistoryRoute
+  '/api/public/sync-bgg': typeof ApiPublicSyncBggRoute
   '/api/public/upload-invite-avatar': typeof ApiPublicUploadInviteAvatarRoute
   '/app/rentals/mine': typeof AppRentalsMineRoute
   '/admin/content': typeof AdminContentIndexRoute
@@ -370,6 +378,7 @@ export interface FileRoutesById {
   '/admin/rentals/active': typeof AdminRentalsActiveRoute
   '/admin/rentals/catalog': typeof AdminRentalsCatalogRoute
   '/admin/rentals/history': typeof AdminRentalsHistoryRoute
+  '/api/public/sync-bgg': typeof ApiPublicSyncBggRoute
   '/api/public/upload-invite-avatar': typeof ApiPublicUploadInviteAvatarRoute
   '/app/rentals/mine': typeof AppRentalsMineRoute
   '/admin/content/': typeof AdminContentIndexRoute
@@ -414,6 +423,7 @@ export interface FileRouteTypes {
     | '/admin/rentals/active'
     | '/admin/rentals/catalog'
     | '/admin/rentals/history'
+    | '/api/public/sync-bgg'
     | '/api/public/upload-invite-avatar'
     | '/app/rentals/mine'
     | '/admin/content/'
@@ -452,6 +462,7 @@ export interface FileRouteTypes {
     | '/admin/rentals/active'
     | '/admin/rentals/catalog'
     | '/admin/rentals/history'
+    | '/api/public/sync-bgg'
     | '/api/public/upload-invite-avatar'
     | '/app/rentals/mine'
     | '/admin/content'
@@ -494,6 +505,7 @@ export interface FileRouteTypes {
     | '/admin/rentals/active'
     | '/admin/rentals/catalog'
     | '/admin/rentals/history'
+    | '/api/public/sync-bgg'
     | '/api/public/upload-invite-avatar'
     | '/app/rentals/mine'
     | '/admin/content/'
@@ -524,6 +536,7 @@ export interface RootRouteChildren {
   InviteTokenRoute: typeof InviteTokenRoute
   CaIndexRoute: typeof CaIndexRoute
   EnIndexRoute: typeof EnIndexRoute
+  ApiPublicSyncBggRoute: typeof ApiPublicSyncBggRoute
   ApiPublicUploadInviteAvatarRoute: typeof ApiPublicUploadInviteAvatarRoute
 }
 
@@ -781,6 +794,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicUploadInviteAvatarRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/sync-bgg': {
+      id: '/api/public/sync-bgg'
+      path: '/api/public/sync-bgg'
+      fullPath: '/api/public/sync-bgg'
+      preLoaderRoute: typeof ApiPublicSyncBggRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/rentals/history': {
       id: '/admin/rentals/history'
       path: '/history'
@@ -914,6 +934,7 @@ const rootRouteChildren: RootRouteChildren = {
   InviteTokenRoute: InviteTokenRoute,
   CaIndexRoute: CaIndexRoute,
   EnIndexRoute: EnIndexRoute,
+  ApiPublicSyncBggRoute: ApiPublicSyncBggRoute,
   ApiPublicUploadInviteAvatarRoute: ApiPublicUploadInviteAvatarRoute,
 }
 export const routeTree = rootRouteImport
