@@ -186,6 +186,7 @@ export function LudotecaPage() {
   const [games, setGames] = useState<BggGame[]>([]);
   const [syncedAt, setSyncedAt] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [players, setPlayers] = useState<string | null>(null);
   const [duration, setDuration] = useState<string | null>(null);
@@ -197,20 +198,25 @@ export function LudotecaPage() {
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
-    fn()
+    listLudoteca()
       .then((res) => {
         if (cancelled) return;
         setGames((res.games ?? []) as BggGame[]);
         setSyncedAt(res.syncedAt);
       })
-      .catch(() => {
-        if (!cancelled) setGames([]);
+      .catch((err: unknown) => {
+        if (cancelled) return;
+        console.error("[ludoteca] load failed", err);
+        setError(err instanceof Error ? err.message : "Error desconocido");
+        setGames([]);
       })
-      .finally(() => !cancelled && setLoading(false));
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
     return () => {
       cancelled = true;
     };
-  }, [fn]);
+  }, []);
 
   const types = useMemo(() => {
     const set = new Set<string>();
