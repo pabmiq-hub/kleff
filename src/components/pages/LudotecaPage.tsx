@@ -394,6 +394,11 @@ export function LudotecaPage() {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           {loading ? (
             <p className="text-foreground/50">{t.loading}</p>
+          ) : error ? (
+            <div className="bg-card border-2 border-red-500/40 rounded-3xl p-6 text-center text-red-700">
+              <p className="font-bold mb-1">Error</p>
+              <p className="text-sm opacity-80">{error}</p>
+            </div>
           ) : games.length === 0 ? (
             <div className="bg-card border-2 border-dashed border-ink/30 rounded-3xl p-10 text-center text-foreground/60">
               {t.notSynced}
