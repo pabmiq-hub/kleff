@@ -1,53 +1,169 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { PAGE_SCHEMAS } from "@/cms/schemas";
-import { FileText, Pencil } from "lucide-react";
+import { createFileRoute } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
+import { FileText, ExternalLink, Plus, Pencil } from "lucide-react";
+import { toast } from "sonner";
+import { listContentPages, adminCreatePage, type PageRow } from "@/server/overrides.functions";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 export const Route = createFileRoute("/admin/content/")({
+  loader: () => listContentPages(),
   component: ContentIndex,
 });
 
 function ContentIndex() {
+  const initial = Route.useLoaderData();
+  const [pages, setPages] = useState<PageRow[]>(initial.pages);
+  const list = useServerFn(listContentPages);
+  const create = useServerFn(adminCreatePage);
+
+  const [open, setOpen] = useState(false);
+  const [slug, setSlug] = useState("");
+  const [title, setTitle] = useState("");
+  const [creating, setCreating] = useState(false);
+
+  const reload = async () => {
+    const r = await list();
+    setPages(r.pages);
+  };
+
+  useEffect(() => {
+    void reload();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const handleCreate = async () => {
+    setCreating(true);
+    try {
+      const r = await create({ data: { slug, title } });
+      toast.success("Página creada");
+      setOpen(false);
+      setSlug("");
+      setTitle("");
+      await reload();
+      // open the new page in edit mode
+      window.open(`${(r.page as { path: string }).path}?edit=1`, "_blank");
+    } catch (e) {
+      toast.error((e as Error).message);
+    } finally {
+      setCreating(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
-      <header>
-        <h1 className="font-display text-4xl font-bold">Contenido de la web</h1>
-        <p className="text-cream/60 mt-1">
-          Edita las páginas reales del sitio. El diseño se mantiene; tú cambias los textos e imágenes.
-        </p>
+      <header className="flex items-start justify-between gap-4 flex-wrap">
+        <div>
+          <h1 className="font-display text-4xl font-bold">Contenido de la web</h1>
+          <p className="text-cream/60 mt-1 max-w-2xl">
+            Haz clic en cualquier página para abrirla con el editor visual: podrás cambiar
+            textos, colores, tipografía, imágenes y espaciado directamente sobre la web real.
+          </p>
+        </div>
+
+        <Dialog open={open} onOpenChange={setOpen}>
+          <DialogTrigger asChild>
+            <Button className="bg-coral hover:bg-coral-deep text-cream">
+              <Plus className="h-4 w-4 mr-1.5" /> Nueva página
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Crear nueva página</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label>Título</Label>
+                <Input
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  placeholder="Ej: Eventos especiales"
+                  className="mt-1.5"
+                />
+              </div>
+              <div>
+                <Label>Slug (URL)</Label>
+                <div className="mt-1.5 flex items-center gap-2">
+                  <span className="text-sm text-cream/50 font-mono">/p/</span>
+                  <Input
+                    value={slug}
+                    onChange={(e) => setSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, "-"))}
+                    placeholder="eventos-especiales"
+                  />
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="ghost" onClick={() => setOpen(false)}>Cancelar</Button>
+              <Button
+                onClick={handleCreate}
+                disabled={creating || !slug || !title}
+                className="bg-coral hover:bg-coral-deep text-cream"
+              >
+                {creating ? "Creando…" : "Crear y editar"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </header>
 
-      <div className="grid gap-4">
-        {PAGE_SCHEMAS.map((page) => (
-          <Link
-            key={page.key}
-            to="/admin/content/$pageKey"
-            params={{ pageKey: page.key }}
-            className="block bg-cream/5 border border-cream/15 rounded-2xl p-5 hover:border-coral/50 transition-colors"
+      <div className="grid gap-3">
+        {pages.map((page) => (
+          <div
+            key={page.id}
+            className="bg-cream/5 border border-cream/15 rounded-2xl p-5 hover:border-coral/50 transition-colors"
           >
-            <div className="flex items-start justify-between gap-4">
-              <div className="flex gap-4 items-start">
+            <div className="flex items-center justify-between gap-4 flex-wrap">
+              <div className="flex gap-4 items-start min-w-0 flex-1">
                 <div className="h-10 w-10 rounded-xl bg-coral/15 text-coral flex items-center justify-center shrink-0">
                   <FileText className="h-5 w-5" />
                 </div>
-                <div>
-                  <h2 className="font-display text-xl font-semibold text-cream">{page.label}</h2>
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <h2 className="font-display text-xl font-semibold text-cream">{page.title}</h2>
+                    {!page.is_builtin && (
+                      <span className="text-[10px] uppercase tracking-wider bg-coral/15 text-coral px-2 py-0.5 rounded">
+                        Personalizada
+                      </span>
+                    )}
+                    {!page.is_published && (
+                      <span className="text-[10px] uppercase tracking-wider bg-cream/10 text-cream/60 px-2 py-0.5 rounded">
+                        Borrador
+                      </span>
+                    )}
+                  </div>
                   <p className="text-xs text-cream/50 font-mono mt-0.5">{page.path}</p>
-                  {page.description && (
-                    <p className="text-sm text-cream/60 mt-2">{page.description}</p>
-                  )}
-                  <p className="text-xs text-cream/40 mt-3">
-                    {page.sections.length} {page.sections.length === 1 ? "zona editable" : "zonas editables"}
-                  </p>
                 </div>
               </div>
-              <Pencil className="h-4 w-4 text-cream/40 mt-1" />
+              <div className="flex items-center gap-2">
+                <a
+                  href={page.path}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-1.5 px-3 py-2 bg-cream/5 hover:bg-cream/10 rounded-lg text-sm"
+                >
+                  Ver <ExternalLink className="h-3.5 w-3.5" />
+                </a>
+                <a
+                  href={`${page.path}?edit=1`}
+                  className="inline-flex items-center gap-1.5 px-3 py-2 bg-coral hover:bg-coral-deep text-cream rounded-lg text-sm font-medium"
+                >
+                  <Pencil className="h-3.5 w-3.5" /> Editar
+                </a>
+              </div>
             </div>
-          </Link>
+          </div>
         ))}
-      </div>
-
-      <div className="bg-cream/5 border border-dashed border-cream/15 rounded-2xl p-5 text-sm text-cream/60">
-        El blog se gestionará en una sección dedicada (en preparación).
       </div>
     </div>
   );

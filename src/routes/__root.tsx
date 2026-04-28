@@ -3,6 +3,8 @@ import { Outlet, Link, createRootRoute, HeadContent, Scripts } from "@tanstack/r
 import appCss from "../styles.css?url";
 import { I18nProvider } from "@/i18n/I18nProvider";
 import { AuthProvider } from "@/auth/AuthProvider";
+import { EditorProvider } from "@/editor/EditorProvider";
+import { EditorOverlay } from "@/editor/EditorOverlay";
 import { Toaster } from "@/components/ui/sonner";
 
 function NotFoundComponent() {
@@ -91,8 +93,11 @@ function RootComponent() {
   return (
     <AuthProvider>
       <I18nProvider>
-        <Outlet />
-        <Toaster />
+        <EditorProvider>
+          <Outlet />
+          <EditorOverlay />
+          <Toaster />
+        </EditorProvider>
       </I18nProvider>
     </AuthProvider>
   );
