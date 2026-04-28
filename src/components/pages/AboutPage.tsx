@@ -4,6 +4,7 @@ import venueImg from "@/assets/about-venue.jpg";
 import { useI18n } from "@/i18n/I18nProvider";
 import { SiteLayout } from "@/components/site/SiteLayout";
 import { HistoryTimeline } from "@/components/about/HistoryTimeline";
+import { EditableText, EditableImage } from "@/editor/Editable";
 
 type TeamMember = {
   name: string;
@@ -140,30 +141,24 @@ export function AboutPage() {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-16 md:pt-24 pb-20 grid lg:grid-cols-12 gap-12 items-center">
           <div className="lg:col-span-7">
             <span className="inline-flex items-center gap-2 stamp-coral text-xs font-bold uppercase tracking-widest mb-5">
-              <Sparkles className="h-3.5 w-3.5" /> {t.about.eyebrow}
+              <Sparkles className="h-3.5 w-3.5" />
+              <EditableText id="about.hero.eyebrow" as="span">{t.about.eyebrow}</EditableText>
             </span>
-            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-display font-semibold leading-[1.02] tracking-normal text-foreground break-words">
-              {locale === "en" ? (
-                <>
-                  Born in <span className="marker-coral">Barcelona</span>, fueled by board games.
-                </>
-              ) : locale === "ca" ? (
-                <>
-                  Nascuts a <span className="marker-coral">Barcelona</span>, mouts pels jocs de taula.
-                </>
-              ) : (
-                <>
-                  Nacidos en <span className="marker-coral">Barcelona</span>, movidos por los juegos de mesa.
-                </>
-              )}
-            </h1>
-            <p className="mt-6 text-lg sm:text-xl text-foreground/75 max-w-2xl leading-relaxed">
+            <EditableText id="about.hero.title" as="h1" className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-display font-semibold leading-[1.02] tracking-normal text-foreground break-words">
+              {locale === "en"
+                ? "Born in Barcelona, fueled by board games."
+                : locale === "ca"
+                  ? "Nascuts a Barcelona, mouts pels jocs de taula."
+                  : "Nacidos en Barcelona, movidos por los juegos de mesa."}
+            </EditableText>
+            <EditableText id="about.hero.intro" as="p" className="mt-6 text-lg sm:text-xl text-foreground/75 max-w-2xl leading-relaxed">
               {t.about.intro}
-            </p>
+            </EditableText>
           </div>
           <div className="lg:col-span-5">
             <div className="relative bg-card border-4 border-ink rounded-3xl shadow-tactile-lg overflow-hidden aspect-[4/3]">
-              <img
+              <EditableImage
+                id="about.hero.image"
                 src={venueImg}
                 alt="L'Estació de França — sede de KLEFF"
                 width={1600}

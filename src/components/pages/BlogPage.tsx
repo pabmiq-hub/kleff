@@ -1,6 +1,7 @@
 import { useI18n } from "@/i18n/I18nProvider";
 import { SiteLayout } from "@/components/site/SiteLayout";
 import { Newspaper } from "lucide-react";
+import { EditableText } from "@/editor/Editable";
 
 export function BlogPage() {
   const { locale } = useI18n();
@@ -30,14 +31,14 @@ export function BlogPage() {
     <SiteLayout>
       <section className="bg-gradient-hero">
         <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 pt-20 md:pt-28 pb-20 text-center">
-          <div className="inline-flex items-center gap-2 rounded-full bg-primary-soft/60 px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-coral-deep">
+          <EditableText id="blog.hero.eyebrow" as="div" className="inline-flex items-center gap-2 rounded-full bg-primary-soft/60 px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-coral-deep">
             {copy.eyebrow}
-          </div>
+          </EditableText>
           <Newspaper className="h-12 w-12 text-coral mx-auto mt-8" />
-          <h1 className="mt-5 text-5xl sm:text-6xl font-display font-semibold text-foreground">
+          <EditableText id="blog.hero.title" as="h1" className="mt-5 text-5xl sm:text-6xl font-display font-semibold text-foreground">
             {copy.title}
-          </h1>
-          <p className="mt-6 text-lg text-foreground/75 leading-relaxed">{copy.body}</p>
+          </EditableText>
+          <EditableText id="blog.hero.body" as="p" className="mt-6 text-lg text-foreground/75 leading-relaxed">{copy.body}</EditableText>
         </div>
       </section>
     </SiteLayout>

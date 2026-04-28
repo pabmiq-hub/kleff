@@ -410,13 +410,13 @@ export function HomePage() {
       <section className="py-20 md:py-28 bg-cream-deep/40 border-y-2 border-ink/10">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="max-w-2xl">
-            <span className="inline-block stamp-ink text-xs font-bold uppercase tracking-widest mb-4">
+            <EditableText id="home.pillars.eyebrow" as="span" className="inline-block stamp-ink text-xs font-bold uppercase tracking-widest mb-4">
               {or(pillars.eyebrow, locale === "en" ? "Why Kleff" : locale === "ca" ? "Per què Kleff" : "Por qué Kleff")}
-            </span>
-            <h2 className="text-4xl sm:text-5xl lg:text-6xl font-display font-semibold text-foreground leading-tight">
+            </EditableText>
+            <EditableText id="home.pillars.title" as="h2" className="text-4xl sm:text-5xl lg:text-6xl font-display font-semibold text-foreground leading-tight">
               {or(pillars.title, t.home.pillarsTitle)}
-            </h2>
-            <p className="mt-4 text-lg text-foreground/70">{or(pillars.subtitle, t.home.pillarsSubtitle)}</p>
+            </EditableText>
+            <EditableText id="home.pillars.subtitle" as="p" className="mt-4 text-lg text-foreground/70">{or(pillars.subtitle, t.home.pillarsSubtitle)}</EditableText>
           </div>
 
           <div className="mt-16 grid md:grid-cols-3 gap-8">
@@ -447,10 +447,10 @@ export function HomePage() {
               <span className="inline-flex items-center gap-2 stamp-coral text-xs font-bold uppercase tracking-widest mb-4">
                 <Calendar className="h-3.5 w-3.5" /> Meetup
               </span>
-              <h2 className="text-4xl sm:text-5xl lg:text-6xl font-display font-semibold text-foreground leading-tight">
+              <EditableText id="home.events.title" as="h2" className="text-4xl sm:text-5xl lg:text-6xl font-display font-semibold text-foreground leading-tight">
                 {or(eventsSec.title, t.home.eventsTitle)}
-              </h2>
-              <p className="mt-4 text-lg text-foreground/70 max-w-xl">{or(eventsSec.subtitle, t.home.eventsSubtitle)}</p>
+              </EditableText>
+              <EditableText id="home.events.subtitle" as="p" className="mt-4 text-lg text-foreground/70 max-w-xl">{or(eventsSec.subtitle, t.home.eventsSubtitle)}</EditableText>
             </div>
             <a
               href="https://www.meetup.com/es-ES/kleff-bcn/events/?type=upcoming"
@@ -503,10 +503,10 @@ export function HomePage() {
             <span className="inline-flex items-center gap-2 stamp-ink text-xs font-bold uppercase tracking-widest mb-4">
               <Star className="h-3.5 w-3.5 fill-cream" /> {or(testimonialsSec.eyebrow, t.home.testimonialsEyebrow)}
             </span>
-            <h2 className="text-4xl sm:text-5xl lg:text-6xl font-display font-semibold text-foreground leading-tight">
+            <EditableText id="home.testimonials.title" as="h2" className="text-4xl sm:text-5xl lg:text-6xl font-display font-semibold text-foreground leading-tight">
               {or(testimonialsSec.title, t.home.testimonialsTitle)}
-            </h2>
-            <p className="mt-4 text-lg text-foreground/70">{or(testimonialsSec.subtitle, t.home.testimonialsSubtitle)}</p>
+            </EditableText>
+            <EditableText id="home.testimonials.subtitle" as="p" className="mt-4 text-lg text-foreground/70">{or(testimonialsSec.subtitle, t.home.testimonialsSubtitle)}</EditableText>
           </div>
 
           {/* Rating summary chips */}
@@ -576,7 +576,8 @@ export function HomePage() {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
           <div className="order-2 lg:order-1 relative">
             <div className="relative border-4 border-ink rounded-3xl shadow-tactile-lg overflow-hidden">
-              <img
+              <EditableImage
+                id="home.reasons.image"
                 src={or(reasonsSec.image, tableImg) as string}
                 alt="Mesa de juegos KLEFF"
                 width={1200}
@@ -596,9 +597,9 @@ export function HomePage() {
             <span className="inline-block stamp-coral text-xs font-bold uppercase tracking-widest mb-4">
               {or(reasonsSec.eyebrow, t.home.reasonsEyebrow)}
             </span>
-            <h2 className="text-4xl sm:text-5xl lg:text-6xl font-display font-semibold text-foreground leading-[1.05]">
+            <EditableText id="home.reasons.title" as="h2" className="text-4xl sm:text-5xl lg:text-6xl font-display font-semibold text-foreground leading-[1.05]">
               {or(reasonsSec.title, t.home.reasonsTitle)}
-            </h2>
+            </EditableText>
             <ul className="mt-10 space-y-4">
               {reasons.map((r, i) => {
                 const emoji = r.split(" ")[0];
