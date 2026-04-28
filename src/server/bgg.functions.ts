@@ -80,14 +80,21 @@ async function sleep(ms: number) {
   return new Promise((r) => setTimeout(r, ms));
 }
 
-async function fetchBgg(url: string, maxAttempts = 8): Promise<string> {
+async function fetchBgg(url: string, maxAttempts = 10): Promise<string> {
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-    const res = await fetch(url, { headers: { Accept: "application/xml" } });
+    const res = await fetch(url, {
+      headers: {
+        Accept: "application/xml,text/xml,*/*",
+        "Accept-Language": "en-US,en;q=0.9",
+        "User-Agent":
+          "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+      },
+    });
     if (res.status === 202) {
       await sleep(2000 * attempt);
       continue;
     }
-    if (res.status === 429) {
+    if (res.status === 429 || res.status === 503) {
       await sleep(5000 * attempt);
       continue;
     }
