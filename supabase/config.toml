@@ -1,1 +1,4 @@
 project_id = "gyecpblbaovmprdvgmct"
+
+[functions.sync-bgg]
+verify_jwt = false
