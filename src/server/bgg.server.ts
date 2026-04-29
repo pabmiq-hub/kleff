@@ -225,6 +225,7 @@ function parseGeekdoItem(item: GeekdoItem): BggThingExtras {
 async function fetchGeekdoItem(id: number): Promise<GeekdoItem | null> {
   const url = `${GEEKDO_BASE}?objectid=${id}&objecttype=thing&showcount=10`;
   // 1) Try direct fetch with a realistic browser UA.
+  let directStatus: number | string = "no-resp";
   for (let attempt = 1; attempt <= 3; attempt++) {
     try {
       const res = await fetch(url, {
@@ -236,6 +237,7 @@ async function fetchGeekdoItem(id: number): Promise<GeekdoItem | null> {
             "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
         },
       });
+      directStatus = res.status;
       if (res.status === 429 || res.status === 503) {
         await sleep(1500 * attempt);
         continue;
@@ -244,14 +246,18 @@ async function fetchGeekdoItem(id: number): Promise<GeekdoItem | null> {
         const data = (await res.json()) as { item?: GeekdoItem };
         if (data.item) return data.item;
       }
-      break; // non-retryable failure → fall through to Firecrawl
-    } catch {
+      break;
+    } catch (e) {
+      directStatus = `err:${e instanceof Error ? e.message : String(e)}`;
       await sleep(800 * attempt);
     }
   }
   // 2) Firecrawl fallback (BGG often blocks Workers' egress IPs).
   const fcKey = process.env.FIRECRAWL_API_KEY;
-  if (!fcKey) return null;
+  if (!fcKey) {
+    console.log(`[bgg-enrich] direct=${directStatus}, no FIRECRAWL_API_KEY`);
+    return null;
+  }
   try {
     const fc = await fetch("https://api.firecrawl.dev/v1/scrape", {
       method: "POST",
@@ -265,17 +271,23 @@ async function fetchGeekdoItem(id: number): Promise<GeekdoItem | null> {
         onlyMainContent: false,
       }),
     });
-    if (!fc.ok) return null;
+    if (!fc.ok) {
+      console.log(`[bgg-enrich] direct=${directStatus}, firecrawl=${fc.status}`);
+      return null;
+    }
     const fcData = (await fc.json()) as {
       data?: { rawHtml?: string };
     };
     const raw = fcData.data?.rawHtml ?? "";
-    // Extract the JSON body from inside the <pre> wrapper Firecrawl returns.
     const match = raw.match(/\{[\s\S]*\}/);
-    if (!match) return null;
+    if (!match) {
+      console.log(`[bgg-enrich] direct=${directStatus}, firecrawl-ok but no json (len=${raw.length})`);
+      return null;
+    }
     const parsed = JSON.parse(match[0]) as { item?: GeekdoItem };
     return parsed.item ?? null;
-  } catch {
+  } catch (e) {
+    console.log(`[bgg-enrich] direct=${directStatus}, firecrawl error: ${e instanceof Error ? e.message : String(e)}`);
     return null;
   }
 }
