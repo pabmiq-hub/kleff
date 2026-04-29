@@ -2,17 +2,17 @@
 // file MUST NOT be imported from any client-reachable module.
 //
 // Source of truth: https://api.ludoya.com/users/kleff/boardgames
-// (BGG's public API blocks our outbound IPs, so we rely on the Ludoya
+// (BGG's public XML API blocks our outbound IPs, so we rely on the Ludoya
 // mirror that already aggregates the kleff_bcn collection.)
 //
-// Optional enrichment: BGG XML API2 `/thing` for mechanics/categories/type.
-// If BGG is reachable from the runtime we fold that data in; if not, we
-// still persist the full Ludoya catalog with everything Ludoya exposes.
+// Enrichment: BGG's internal JSON API at api.geekdo.com/api/geekitems —
+// it is publicly reachable and returns mechanics, categories and the
+// "subdomain" (which BGG uses for the family/strategy/party… classification).
 
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 
 const LUDOYA_URL = "https://api.ludoya.com/users/kleff/boardgames";
-const BGG_BASE = "https://boardgamegeek.com/xmlapi2";
+const GEEKDO_BASE = "https://api.geekdo.com/api/geekitems";
 
 // ---------- tiny XML parser (no deps) ----------
 
