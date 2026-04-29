@@ -254,7 +254,7 @@ export function LudotecaPage() {
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
-    return games.filter((g) => {
+    const list = games.filter((g) => {
       if (q) {
         const hay = `${g.title} ${(g.mechanics ?? []).join(" ")} ${(g.categories ?? []).join(" ")}`.toLowerCase();
         if (!hay.includes(q)) return false;
@@ -276,7 +276,27 @@ export function LudotecaPage() {
       if (mechanic && !(g.mechanics ?? []).includes(mechanic)) return false;
       return true;
     });
-  }, [games, search, players, duration, weight, type, mechanic]);
+    const collator = new Intl.Collator(locale, { sensitivity: "base", numeric: true });
+    const sorted = [...list];
+    switch (sort) {
+      case "alpha":
+        sorted.sort((a, b) => collator.compare(a.title, b.title));
+        break;
+      case "alpha-desc":
+        sorted.sort((a, b) => collator.compare(b.title, a.title));
+        break;
+      case "rating":
+        sorted.sort((a, b) => (b.bgg_rating ?? -1) - (a.bgg_rating ?? -1));
+        break;
+      case "weight-asc":
+        sorted.sort((a, b) => (a.bgg_weight ?? 99) - (b.bgg_weight ?? 99));
+        break;
+      case "weight-desc":
+        sorted.sort((a, b) => (b.bgg_weight ?? -1) - (a.bgg_weight ?? -1));
+        break;
+    }
+    return sorted;
+  }, [games, search, players, duration, weight, type, mechanic, sort, locale]);
 
   const clearFilters = () => {
     setSearch("");
