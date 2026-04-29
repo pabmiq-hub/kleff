@@ -2,85 +2,17 @@
 // file MUST NOT be imported from any client-reachable module.
 //
 // Source of truth: https://api.ludoya.com/users/kleff/boardgames
-// (BGG's public API blocks our outbound IPs, so we rely on the Ludoya
+// (BGG's public XML API blocks our outbound IPs, so we rely on the Ludoya
 // mirror that already aggregates the kleff_bcn collection.)
 //
-// Optional enrichment: BGG XML API2 `/thing` for mechanics/categories/type.
-// If BGG is reachable from the runtime we fold that data in; if not, we
-// still persist the full Ludoya catalog with everything Ludoya exposes.
+// Enrichment: BGG's internal JSON API at api.geekdo.com/api/geekitems —
+// it is publicly reachable and returns mechanics, categories and the
+// "subdomain" (which BGG uses for the family/strategy/party… classification).
 
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 
 const LUDOYA_URL = "https://api.ludoya.com/users/kleff/boardgames";
-const BGG_BASE = "https://boardgamegeek.com/xmlapi2";
-
-// ---------- tiny XML parser (no deps) ----------
-
-interface XmlNode {
-  tag: string;
-  attrs: Record<string, string>;
-  children: XmlNode[];
-  text: string;
-}
-
-function parseXml(xml: string): XmlNode {
-  const cleaned = xml
-    .replace(/<\?xml[^?]*\?>/g, "")
-    .replace(/<!--[\s\S]*?-->/g, "");
-  const root: XmlNode = { tag: "#root", attrs: {}, children: [], text: "" };
-  const stack: XmlNode[] = [root];
-  const re = /<\/?([\w:.-]+)((?:\s+[\w:.-]+="[^"]*")*)\s*(\/?)>|([^<]+)/g;
-  let m: RegExpExecArray | null;
-  while ((m = re.exec(cleaned))) {
-    const [full, tag, attrsStr, selfClose, text] = m;
-    if (text !== undefined) {
-      const t = text.trim();
-      if (t) stack[stack.length - 1].text += t;
-      continue;
-    }
-    if (full.startsWith("</")) {
-      stack.pop();
-      continue;
-    }
-    const attrs: Record<string, string> = {};
-    const attrRe = /([\w:.-]+)="([^"]*)"/g;
-    let am: RegExpExecArray | null;
-    while ((am = attrRe.exec(attrsStr))) {
-      attrs[am[1]] = decodeEntities(am[2]);
-    }
-    const node: XmlNode = { tag, attrs, children: [], text: "" };
-    stack[stack.length - 1].children.push(node);
-    if (!selfClose) stack.push(node);
-  }
-  return root;
-}
-
-function decodeEntities(s: string): string {
-  return s
-    .replace(/&amp;/g, "&")
-    .replace(/&lt;/g, "<")
-    .replace(/&gt;/g, ">")
-    .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, "'")
-    .replace(/&#(\d+);/g, (_, n) => String.fromCharCode(parseInt(n, 10)));
-}
-
-function findAll(node: XmlNode, tag: string): XmlNode[] {
-  const out: XmlNode[] = [];
-  for (const c of node.children) {
-    if (c.tag === tag) out.push(c);
-    out.push(...findAll(c, tag));
-  }
-  return out;
-}
-
-function findChildren(node: XmlNode, tag: string): XmlNode[] {
-  return node.children.filter((c) => c.tag === tag);
-}
-
-function firstChild(node: XmlNode, tag: string): XmlNode | undefined {
-  return node.children.find((c) => c.tag === tag);
-}
+const GEEKDO_BASE = "https://api.geekdo.com/api/geekitems";
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
@@ -167,36 +99,7 @@ async function fetchLudoyaBggId(slug: string): Promise<number | null> {
   }
 }
 
-// ---------- BGG XML enrichment (best effort) ----------
-
-async function fetchBgg(url: string, maxAttempts = 4): Promise<string | null> {
-  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-    try {
-      const res = await fetch(url, {
-        headers: {
-          Accept: "application/xml,text/xml,*/*",
-          "Accept-Language": "en-US,en;q=0.9",
-          "User-Agent":
-            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
-        },
-      });
-      if (res.status === 202) {
-        await sleep(2000 * attempt);
-        continue;
-      }
-      if (res.status === 401 || res.status === 403) return null; // blocked
-      if (res.status === 429 || res.status === 503) {
-        await sleep(3000 * attempt);
-        continue;
-      }
-      if (!res.ok) return null;
-      return await res.text();
-    } catch {
-      await sleep(1000 * attempt);
-    }
-  }
-  return null;
-}
+// ---------- BGG enrichment via geekdo JSON API ----------
 
 interface BggThingExtras {
   categories: string[];
@@ -215,78 +118,90 @@ interface BggThingExtras {
   thumbnail_url: string | null;
 }
 
-function pickLinks(thing: XmlNode, type: string): string[] {
-  return findChildren(thing, "link")
-    .filter((l) => l.attrs.type === type)
-    .map((l) => l.attrs.value)
+interface GeekdoLink {
+  name?: string;
+}
+interface GeekdoItem {
+  name?: string;
+  imageurl?: string | null;
+  short_description?: string | null;
+  description?: string | null;
+  links?: Record<string, GeekdoLink[]>;
+  stats?: {
+    average?: number | string | null;
+    usersrated?: number | string | null;
+    averageweight?: number | string | null;
+    numweights?: number | string | null;
+    rank?: Array<{ name?: string; type?: string; rank?: string | number | null }>;
+  };
+}
+
+function pickNames(item: GeekdoItem, key: string): string[] {
+  const arr = item.links?.[key];
+  if (!Array.isArray(arr)) return [];
+  return arr
+    .map((l) => (l && typeof l.name === "string" ? l.name : ""))
     .filter(Boolean);
 }
-function pickIntAttr(node: XmlNode | undefined, attr: string): number | null {
-  if (!node) return null;
-  const v = parseInt(node.attrs[attr], 10);
-  return Number.isFinite(v) ? v : null;
+
+function num(v: unknown): number | null {
+  const n = typeof v === "number" ? v : parseFloat(String(v ?? ""));
+  return Number.isFinite(n) ? n : null;
 }
-function pickFloatAttr(
-  node: XmlNode | undefined,
-  attr: string,
-): number | null {
-  if (!node) return null;
-  const v = parseFloat(node.attrs[attr]);
-  return Number.isFinite(v) ? v : null;
+function intNum(v: unknown): number | null {
+  const n = typeof v === "number" ? v : parseInt(String(v ?? ""), 10);
+  return Number.isFinite(n) ? n : null;
 }
 
-function inferType(
-  families: string[],
-  categories: string[],
-): string | null {
+function mapSubdomainToType(subdomains: string[]): string | null {
+  // BGG's subdomain values: "Family Games", "Strategy Games", "Thematic Games",
+  // "Party Games", "Wargames", "Customizable Games", "Abstract Games",
+  // "Children's Games". We strip the trailing "Games" and singularize.
+  if (subdomains.length === 0) return null;
+  const map: Record<string, string> = {
+    "Family Games": "Familiar",
+    "Strategy Games": "Estrategia",
+    "Thematic Games": "Temático",
+    "Party Games": "Party",
+    "Wargames": "Wargame",
+    "Customizable Games": "Coleccionable",
+    "Abstract Games": "Abstracto",
+    "Children's Games": "Infantil",
+  };
+  return map[subdomains[0]] ?? subdomains[0].replace(/\s*Games?$/i, "").trim();
+}
+
+function inferTypeFallback(families: string[], categories: string[]): string {
   const familyText = families.join(" ").toLowerCase();
   if (familyText.includes("party game")) return "Party";
-  if (categories.some((c) => /children/i.test(c))) return "Children";
-  if (familyText.includes("strategy")) return "Strategy";
-  if (familyText.includes("thematic")) return "Thematic";
+  if (categories.some((c) => /children/i.test(c))) return "Infantil";
+  if (familyText.includes("strategy")) return "Estrategia";
+  if (familyText.includes("thematic")) return "Temático";
   if (familyText.includes("wargame")) return "Wargame";
-  if (familyText.includes("customizable")) return "Customizable";
-  if (familyText.includes("abstract")) return "Abstract";
-  return "Family";
+  if (familyText.includes("abstract")) return "Abstracto";
+  return "Familiar";
 }
 
-function parseThingExtras(thing: XmlNode): BggThingExtras {
-  const stats = firstChild(thing, "statistics");
-  const ratings = stats ? firstChild(stats, "ratings") : undefined;
-  const average = ratings ? firstChild(ratings, "average") : undefined;
-  const usersrated = ratings ? firstChild(ratings, "usersrated") : undefined;
-  const averageweight = ratings
-    ? firstChild(ratings, "averageweight")
-    : undefined;
-  const numweights = ratings ? firstChild(ratings, "numweights") : undefined;
+function parseGeekdoItem(item: GeekdoItem): BggThingExtras {
+  const categories = pickNames(item, "boardgamecategory");
+  const mechanics = pickNames(item, "boardgamemechanic");
+  const families = pickNames(item, "boardgamefamily");
+  const designers = pickNames(item, "boardgamedesigner");
+  const publishers = pickNames(item, "boardgamepublisher");
+  const subdomains = pickNames(item, "boardgamesubdomain");
 
-  let rank: number | null = null;
-  if (ratings) {
-    const ranks = firstChild(ratings, "ranks");
-    if (ranks) {
-      const overall = findChildren(ranks, "rank").find(
-        (r) => r.attrs.name === "boardgame" && r.attrs.type === "subtype",
-      );
-      if (
-        overall &&
-        overall.attrs.value &&
-        overall.attrs.value !== "Not Ranked"
-      ) {
-        const v = parseInt(overall.attrs.value, 10);
-        if (Number.isFinite(v)) rank = v;
-      }
+  let bgg_rank: number | null = null;
+  const ranks = item.stats?.rank;
+  if (Array.isArray(ranks)) {
+    const overall = ranks.find(
+      (r) => r?.name === "boardgame" && r?.type === "subtype",
+    );
+    if (overall && overall.rank && overall.rank !== "Not Ranked") {
+      bgg_rank = intNum(overall.rank);
     }
   }
 
-  const categories = pickLinks(thing, "boardgamecategory");
-  const mechanics = pickLinks(thing, "boardgamemechanic");
-  const families = pickLinks(thing, "boardgamefamily");
-  const designers = pickLinks(thing, "boardgamedesigner");
-  const publishers = pickLinks(thing, "boardgamepublisher");
-
-  const description = firstChild(thing, "description")?.text ?? null;
-  const image = firstChild(thing, "image")?.text ?? null;
-  const thumb = firstChild(thing, "thumbnail")?.text ?? null;
+  const desc = item.short_description ?? item.description ?? null;
 
   return {
     categories,
@@ -294,16 +209,87 @@ function parseThingExtras(thing: XmlNode): BggThingExtras {
     families,
     designers,
     publishers,
-    description: description ? decodeEntities(description).slice(0, 4000) : null,
-    bgg_rank: rank,
-    bgg_rating: pickFloatAttr(average, "value"),
-    bgg_rating_users: pickIntAttr(usersrated, "value"),
-    bgg_weight: pickFloatAttr(averageweight, "value"),
-    bgg_weight_users: pickIntAttr(numweights, "value"),
-    bgg_type: inferType(families, categories),
-    image_url: image,
-    thumbnail_url: thumb,
+    description: desc ? String(desc).slice(0, 4000) : null,
+    bgg_rank,
+    bgg_rating: num(item.stats?.average),
+    bgg_rating_users: intNum(item.stats?.usersrated),
+    bgg_weight: num(item.stats?.averageweight),
+    bgg_weight_users: intNum(item.stats?.numweights),
+    bgg_type:
+      mapSubdomainToType(subdomains) ?? inferTypeFallback(families, categories),
+    image_url: item.imageurl ?? null,
+    thumbnail_url: null,
   };
+}
+
+async function fetchGeekdoItem(id: number): Promise<GeekdoItem | null> {
+  const url = `${GEEKDO_BASE}?objectid=${id}&objecttype=thing&showcount=10`;
+  // 1) Try direct fetch with a realistic browser UA.
+  let directStatus: number | string = "no-resp";
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    try {
+      const res = await fetch(url, {
+        headers: {
+          Accept: "application/json,text/plain,*/*",
+          "Accept-Language": "en-US,en;q=0.9",
+          Referer: "https://boardgamegeek.com/",
+          "User-Agent":
+            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+        },
+      });
+      directStatus = res.status;
+      if (res.status === 429 || res.status === 503) {
+        await sleep(1500 * attempt);
+        continue;
+      }
+      if (res.ok) {
+        const data = (await res.json()) as { item?: GeekdoItem };
+        if (data.item) return data.item;
+      }
+      break;
+    } catch (e) {
+      directStatus = `err:${e instanceof Error ? e.message : String(e)}`;
+      await sleep(800 * attempt);
+    }
+  }
+  // 2) Firecrawl fallback (BGG often blocks Workers' egress IPs).
+  const fcKey = process.env.FIRECRAWL_API_KEY;
+  if (!fcKey) {
+    console.log(`[bgg-enrich] direct=${directStatus}, no FIRECRAWL_API_KEY`);
+    return null;
+  }
+  try {
+    const fc = await fetch("https://api.firecrawl.dev/v1/scrape", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${fcKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        url,
+        formats: ["rawHtml"],
+        onlyMainContent: false,
+      }),
+    });
+    if (!fc.ok) {
+      console.log(`[bgg-enrich] direct=${directStatus}, firecrawl=${fc.status}`);
+      return null;
+    }
+    const fcData = (await fc.json()) as {
+      data?: { rawHtml?: string };
+    };
+    const raw = fcData.data?.rawHtml ?? "";
+    const match = raw.match(/\{[\s\S]*\}/);
+    if (!match) {
+      console.log(`[bgg-enrich] direct=${directStatus}, firecrawl-ok but no json (len=${raw.length})`);
+      return null;
+    }
+    const parsed = JSON.parse(match[0]) as { item?: GeekdoItem };
+    return parsed.item ?? null;
+  } catch (e) {
+    console.log(`[bgg-enrich] direct=${directStatus}, firecrawl error: ${e instanceof Error ? e.message : String(e)}`);
+    return null;
+  }
 }
 
 async function enrichWithBgg(
@@ -312,25 +298,25 @@ async function enrichWithBgg(
   const out = new Map<number, BggThingExtras>();
   if (ids.length === 0) return out;
 
-  // Probe once. If BGG blocks us, skip enrichment entirely.
-  const probe = await fetchBgg(`${BGG_BASE}/thing?id=${ids[0]}&stats=1`);
-  if (!probe) return out;
+  // Probe once. If geekdo is unreachable from this runtime, skip enrichment.
+  const probe = await fetchGeekdoItem(ids[0]);
+  if (!probe) {
+    console.warn(`[bgg-enrich] probe failed for id=${ids[0]} → skipping enrichment`);
+    return out;
+  }
+  out.set(ids[0], parseGeekdoItem(probe));
 
-  const chunkSize = 20;
-  // Process the probe's chunk normally (re-issue first chunk for consistency)
-  for (let i = 0; i < ids.length; i += chunkSize) {
-    const chunk = ids.slice(i, i + chunkSize);
-    const xml = await fetchBgg(
-      `${BGG_BASE}/thing?id=${chunk.join(",")}&stats=1`,
-    );
-    if (!xml) continue;
-    const root = parseXml(xml);
-    for (const thing of findAll(root, "item")) {
-      const id = parseInt(thing.attrs.id, 10);
-      if (!Number.isFinite(id)) continue;
-      out.set(id, parseThingExtras(thing));
-    }
-    await sleep(800);
+  // Process in small parallel batches to be polite.
+  const CONCURRENCY = 4;
+  const remaining = ids.slice(1);
+  for (let i = 0; i < remaining.length; i += CONCURRENCY) {
+    const batch = remaining.slice(i, i + CONCURRENCY);
+    const results = await Promise.all(batch.map((id) => fetchGeekdoItem(id)));
+    batch.forEach((id, idx) => {
+      const item = results[idx];
+      if (item) out.set(id, parseGeekdoItem(item));
+    });
+    await sleep(200);
   }
   return out;
 }

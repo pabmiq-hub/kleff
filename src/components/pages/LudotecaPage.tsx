@@ -45,6 +45,12 @@ const T = {
     weight: "Dificultad",
     type: "Tipo",
     mechanic: "Mecánica",
+    sort: "Ordenar",
+    sortAlpha: "A → Z",
+    sortAlphaDesc: "Z → A",
+    sortRating: "Mejor valorados",
+    sortWeightAsc: "Menos complejos",
+    sortWeightDesc: "Más complejos",
     any: "Cualquiera",
     minutes: "min",
     rating: "Valoración",
@@ -71,6 +77,12 @@ const T = {
     weight: "Weight",
     type: "Type",
     mechanic: "Mechanic",
+    sort: "Sort",
+    sortAlpha: "A → Z",
+    sortAlphaDesc: "Z → A",
+    sortRating: "Top rated",
+    sortWeightAsc: "Lightest first",
+    sortWeightDesc: "Heaviest first",
     any: "Any",
     minutes: "min",
     rating: "Rating",
@@ -97,6 +109,12 @@ const T = {
     weight: "Dificultat",
     type: "Tipus",
     mechanic: "Mecànica",
+    sort: "Ordena",
+    sortAlpha: "A → Z",
+    sortAlphaDesc: "Z → A",
+    sortRating: "Millor valorats",
+    sortWeightAsc: "Menys complexos",
+    sortWeightDesc: "Més complexos",
     any: "Qualsevol",
     minutes: "min",
     rating: "Valoració",
@@ -193,6 +211,7 @@ export function LudotecaPage() {
   const [weight, setWeight] = useState<string | null>(null);
   const [type, setType] = useState<string | null>(null);
   const [mechanic, setMechanic] = useState<string | null>(null);
+  const [sort, setSort] = useState<"alpha" | "alpha-desc" | "rating" | "weight-asc" | "weight-desc">("alpha");
   const [showFilters, setShowFilters] = useState(true);
 
   useEffect(() => {
@@ -235,7 +254,7 @@ export function LudotecaPage() {
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
-    return games.filter((g) => {
+    const list = games.filter((g) => {
       if (q) {
         const hay = `${g.title} ${(g.mechanics ?? []).join(" ")} ${(g.categories ?? []).join(" ")}`.toLowerCase();
         if (!hay.includes(q)) return false;
@@ -257,7 +276,27 @@ export function LudotecaPage() {
       if (mechanic && !(g.mechanics ?? []).includes(mechanic)) return false;
       return true;
     });
-  }, [games, search, players, duration, weight, type, mechanic]);
+    const collator = new Intl.Collator(locale, { sensitivity: "base", numeric: true });
+    const sorted = [...list];
+    switch (sort) {
+      case "alpha":
+        sorted.sort((a, b) => collator.compare(a.title, b.title));
+        break;
+      case "alpha-desc":
+        sorted.sort((a, b) => collator.compare(b.title, a.title));
+        break;
+      case "rating":
+        sorted.sort((a, b) => (b.bgg_rating ?? -1) - (a.bgg_rating ?? -1));
+        break;
+      case "weight-asc":
+        sorted.sort((a, b) => (a.bgg_weight ?? 99) - (b.bgg_weight ?? 99));
+        break;
+      case "weight-desc":
+        sorted.sort((a, b) => (b.bgg_weight ?? -1) - (a.bgg_weight ?? -1));
+        break;
+    }
+    return sorted;
+  }, [games, search, players, duration, weight, type, mechanic, sort, locale]);
 
   const clearFilters = () => {
     setSearch("");
@@ -329,6 +368,22 @@ export function LudotecaPage() {
       {showFilters && (
         <section className="bg-cream-deep/40 border-b-2 border-ink/10">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6 space-y-4">
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-widest text-foreground/60 mb-2">{t.sort}</p>
+              <div className="flex flex-wrap gap-2">
+                {([
+                  ["alpha", t.sortAlpha],
+                  ["alpha-desc", t.sortAlphaDesc],
+                  ["rating", t.sortRating],
+                  ["weight-asc", t.sortWeightAsc],
+                  ["weight-desc", t.sortWeightDesc],
+                ] as const).map(([key, label]) => (
+                  <FilterChip key={key} active={sort === key} onClick={() => setSort(key)}>
+                    {label}
+                  </FilterChip>
+                ))}
+              </div>
+            </div>
             <div>
               <p className="text-[10px] font-bold uppercase tracking-widest text-foreground/60 mb-2">{t.players}</p>
               <div className="flex flex-wrap gap-2">
