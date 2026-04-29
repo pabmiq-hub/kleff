@@ -299,13 +299,11 @@ async function enrichWithBgg(
   if (ids.length === 0) return out;
 
   // Probe once. If geekdo is unreachable from this runtime, skip enrichment.
-  console.log(`[bgg-enrich] probing id=${ids[0]} (${ids.length} total)`);
   const probe = await fetchGeekdoItem(ids[0]);
   if (!probe) {
-    console.log(`[bgg-enrich] probe failed for id=${ids[0]} → skipping enrichment`);
+    console.warn(`[bgg-enrich] probe failed for id=${ids[0]} → skipping enrichment`);
     return out;
   }
-  console.log(`[bgg-enrich] probe OK, name=${probe.name}, mechanics=${(probe.links?.boardgamemechanic ?? []).length}`);
   out.set(ids[0], parseGeekdoItem(probe));
 
   // Process in small parallel batches to be polite.
