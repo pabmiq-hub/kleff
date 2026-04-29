@@ -369,6 +369,22 @@ export function LudotecaPage() {
         <section className="bg-cream-deep/40 border-b-2 border-ink/10">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6 space-y-4">
             <div>
+              <p className="text-[10px] font-bold uppercase tracking-widest text-foreground/60 mb-2">{t.sort}</p>
+              <div className="flex flex-wrap gap-2">
+                {([
+                  ["alpha", t.sortAlpha],
+                  ["alpha-desc", t.sortAlphaDesc],
+                  ["rating", t.sortRating],
+                  ["weight-asc", t.sortWeightAsc],
+                  ["weight-desc", t.sortWeightDesc],
+                ] as const).map(([key, label]) => (
+                  <FilterChip key={key} active={sort === key} onClick={() => setSort(key)}>
+                    {label}
+                  </FilterChip>
+                ))}
+              </div>
+            </div>
+            <div>
               <p className="text-[10px] font-bold uppercase tracking-widest text-foreground/60 mb-2">{t.players}</p>
               <div className="flex flex-wrap gap-2">
                 {PLAYER_BUCKETS.map((b) => (
