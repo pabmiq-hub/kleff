@@ -211,6 +211,7 @@ export function LudotecaPage() {
   const [weight, setWeight] = useState<string | null>(null);
   const [type, setType] = useState<string | null>(null);
   const [mechanic, setMechanic] = useState<string | null>(null);
+  const [sort, setSort] = useState<"alpha" | "alpha-desc" | "rating" | "weight-asc" | "weight-desc">("alpha");
   const [showFilters, setShowFilters] = useState(true);
 
   useEffect(() => {
