@@ -83,6 +83,24 @@ export const PRESS_LINKS: PressLink[] = [
 
   // ~ junio 2025
   {
+    url: "https://www.eldebate.com/espana/cataluna/barcelona/20250616/kleff-congrega-250-personas-cada-miercoles-barcelona-convierte-mayor-comunidad-juegos-mesa-europa_307188.html",
+    outlet: "El Debate",
+    date: "JUN 2025",
+    year: 2025,
+    month: 6,
+    descriptionOverride:
+      "KLEFF congrega a 250 personas cada miércoles en Barcelona, convirtiéndose en la mayor comunidad de juegos de mesa de Europa.",
+  },
+  {
+    url: "https://as.com/meristation/noticias/empezo-siendo-una-comunidad-y-acabo-convirtiendose-en-la-partida-mas-grande-de-juegos-de-mesa-de-europa-se-celebra-cada-miercoles-en-este-rincon-espanol-n/",
+    outlet: "AS · Meristation",
+    date: "JUN 2025",
+    year: 2025,
+    month: 6,
+    descriptionOverride:
+      "Empezó como una comunidad y acabó siendo la mayor partida de juegos de mesa de Europa, cada miércoles en Barcelona.",
+  },
+  {
     url: "https://cadenaser.com/podcast/sercat/aqui-barcelona/3953/p2/",
     outlet: "Cadena SER · Aquí Barcelona",
     date: "JUN 2025",
