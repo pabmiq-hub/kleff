@@ -305,6 +305,54 @@ export type Database = {
         }
         Relationships: []
       }
+      kv_cache: {
+        Row: {
+          fetched_at: string
+          key: string
+          value: Json
+        }
+        Insert: {
+          fetched_at?: string
+          key: string
+          value: Json
+        }
+        Update: {
+          fetched_at?: string
+          key?: string
+          value?: Json
+        }
+        Relationships: []
+      }
+      media_og_cache: {
+        Row: {
+          error: string | null
+          fetched_at: string
+          og_description: string | null
+          og_image: string | null
+          og_site_name: string | null
+          og_title: string | null
+          url: string
+        }
+        Insert: {
+          error?: string | null
+          fetched_at?: string
+          og_description?: string | null
+          og_image?: string | null
+          og_site_name?: string | null
+          og_title?: string | null
+          url: string
+        }
+        Update: {
+          error?: string | null
+          fetched_at?: string
+          og_description?: string | null
+          og_image?: string | null
+          og_site_name?: string | null
+          og_title?: string | null
+          url?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
