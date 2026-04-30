@@ -49,6 +49,7 @@ import { Route as AdminContentIndexRouteImport } from './routes/admin.content.in
 import { Route as AppRentalsMineRouteImport } from './routes/app.rentals.mine'
 import { Route as ApiPublicUploadInviteAvatarRouteImport } from './routes/api.public.upload-invite-avatar'
 import { Route as ApiPublicSyncBggRouteImport } from './routes/api.public.sync-bgg'
+import { Route as ApiPublicRefreshMediaOgRouteImport } from './routes/api.public.refresh-media-og'
 import { Route as AdminRentalsHistoryRouteImport } from './routes/admin.rentals.history'
 import { Route as AdminRentalsCatalogRouteImport } from './routes/admin.rentals.catalog'
 import { Route as AdminRentalsActiveRouteImport } from './routes/admin.rentals.active'
@@ -255,6 +256,11 @@ const ApiPublicSyncBggRoute = ApiPublicSyncBggRouteImport.update({
   path: '/api/public/sync-bgg',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicRefreshMediaOgRoute = ApiPublicRefreshMediaOgRouteImport.update({
+  id: '/api/public/refresh-media-og',
+  path: '/api/public/refresh-media-og',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminRentalsHistoryRoute = AdminRentalsHistoryRouteImport.update({
   id: '/history',
   path: '/history',
@@ -316,6 +322,7 @@ export interface FileRoutesByFullPath {
   '/admin/rentals/active': typeof AdminRentalsActiveRoute
   '/admin/rentals/catalog': typeof AdminRentalsCatalogRoute
   '/admin/rentals/history': typeof AdminRentalsHistoryRoute
+  '/api/public/refresh-media-og': typeof ApiPublicRefreshMediaOgRoute
   '/api/public/sync-bgg': typeof ApiPublicSyncBggRoute
   '/api/public/upload-invite-avatar': typeof ApiPublicUploadInviteAvatarRoute
   '/app/rentals/mine': typeof AppRentalsMineRoute
@@ -358,6 +365,7 @@ export interface FileRoutesByTo {
   '/admin/rentals/active': typeof AdminRentalsActiveRoute
   '/admin/rentals/catalog': typeof AdminRentalsCatalogRoute
   '/admin/rentals/history': typeof AdminRentalsHistoryRoute
+  '/api/public/refresh-media-og': typeof ApiPublicRefreshMediaOgRoute
   '/api/public/sync-bgg': typeof ApiPublicSyncBggRoute
   '/api/public/upload-invite-avatar': typeof ApiPublicUploadInviteAvatarRoute
   '/app/rentals/mine': typeof AppRentalsMineRoute
@@ -405,6 +413,7 @@ export interface FileRoutesById {
   '/admin/rentals/active': typeof AdminRentalsActiveRoute
   '/admin/rentals/catalog': typeof AdminRentalsCatalogRoute
   '/admin/rentals/history': typeof AdminRentalsHistoryRoute
+  '/api/public/refresh-media-og': typeof ApiPublicRefreshMediaOgRoute
   '/api/public/sync-bgg': typeof ApiPublicSyncBggRoute
   '/api/public/upload-invite-avatar': typeof ApiPublicUploadInviteAvatarRoute
   '/app/rentals/mine': typeof AppRentalsMineRoute
@@ -453,6 +462,7 @@ export interface FileRouteTypes {
     | '/admin/rentals/active'
     | '/admin/rentals/catalog'
     | '/admin/rentals/history'
+    | '/api/public/refresh-media-og'
     | '/api/public/sync-bgg'
     | '/api/public/upload-invite-avatar'
     | '/app/rentals/mine'
@@ -495,6 +505,7 @@ export interface FileRouteTypes {
     | '/admin/rentals/active'
     | '/admin/rentals/catalog'
     | '/admin/rentals/history'
+    | '/api/public/refresh-media-og'
     | '/api/public/sync-bgg'
     | '/api/public/upload-invite-avatar'
     | '/app/rentals/mine'
@@ -541,6 +552,7 @@ export interface FileRouteTypes {
     | '/admin/rentals/active'
     | '/admin/rentals/catalog'
     | '/admin/rentals/history'
+    | '/api/public/refresh-media-og'
     | '/api/public/sync-bgg'
     | '/api/public/upload-invite-avatar'
     | '/app/rentals/mine'
@@ -575,6 +587,7 @@ export interface RootRouteChildren {
   InviteTokenRoute: typeof InviteTokenRoute
   CaIndexRoute: typeof CaIndexRoute
   EnIndexRoute: typeof EnIndexRoute
+  ApiPublicRefreshMediaOgRoute: typeof ApiPublicRefreshMediaOgRoute
   ApiPublicSyncBggRoute: typeof ApiPublicSyncBggRoute
   ApiPublicUploadInviteAvatarRoute: typeof ApiPublicUploadInviteAvatarRoute
 }
@@ -861,6 +874,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicSyncBggRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/refresh-media-og': {
+      id: '/api/public/refresh-media-og'
+      path: '/api/public/refresh-media-og'
+      fullPath: '/api/public/refresh-media-og'
+      preLoaderRoute: typeof ApiPublicRefreshMediaOgRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/rentals/history': {
       id: '/admin/rentals/history'
       path: '/history'
@@ -997,6 +1017,7 @@ const rootRouteChildren: RootRouteChildren = {
   InviteTokenRoute: InviteTokenRoute,
   CaIndexRoute: CaIndexRoute,
   EnIndexRoute: EnIndexRoute,
+  ApiPublicRefreshMediaOgRoute: ApiPublicRefreshMediaOgRoute,
   ApiPublicSyncBggRoute: ApiPublicSyncBggRoute,
   ApiPublicUploadInviteAvatarRoute: ApiPublicUploadInviteAvatarRoute,
 }
