@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { PRESS_LINKS, type PressLink } from "@/data/press";
+import { supabaseAdmin } from "@/integrations/supabase/client.server";
 
 export type MediaItem = PressLink & {
   ogTitle: string | null;
@@ -9,11 +10,12 @@ export type MediaItem = PressLink & {
 };
 
 const FIRECRAWL_BASE = "https://api.firecrawl.dev/v2";
-const CACHE_TTL_MS = 24 * 60 * 60 * 1000; // 24h
+// Refresca como mucho una vez cada 30 días por URL.
+const REFRESH_AFTER_MS = 30 * 24 * 60 * 60 * 1000;
+// Cache de seguidores de Instagram: 6 horas.
+const FOLLOWERS_REFRESH_MS = 6 * 60 * 60 * 1000;
 
 type OgFields = Omit<MediaItem, keyof PressLink>;
-type CacheEntry = { at: number; data: OgFields };
-const cache = new Map<string, CacheEntry>();
 
 const EMPTY_OG: OgFields = {
   ogTitle: null,
@@ -22,12 +24,10 @@ const EMPTY_OG: OgFields = {
   ogSiteName: null,
 };
 
-/**
- * Read a metadata field tolerating multiple Firecrawl naming conventions:
- *   - "og:image" (raw OG namespace, what v2 actually returns)
- *   - "ogImage" (camelCased alias)
- *   - "twitter:image"
- */
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
+
 function readMeta(meta: Record<string, unknown>, ...keys: string[]): string | null {
   for (const k of keys) {
     const v = meta[k];
@@ -37,7 +37,7 @@ function readMeta(meta: Record<string, unknown>, ...keys: string[]): string | nu
   return null;
 }
 
-async function fetchOg(url: string): Promise<OgFields> {
+async function fetchOgFromFirecrawl(url: string): Promise<OgFields> {
   const apiKey = process.env.FIRECRAWL_API_KEY;
   if (!apiKey) return EMPTY_OG;
 
@@ -74,7 +74,6 @@ async function fetchOg(url: string): Promise<OgFields> {
   const meta: Record<string, unknown> = data.metadata ?? {};
   const html: string = typeof data.html === "string" ? data.html : "";
 
-  // Fallback: parse meta tags directly from HTML if metadata key is missing.
   const pickHtml = (name: string) => {
     const re = new RegExp(
       `<meta[^>]+(?:property|name)=["']${name}["'][^>]+content=["']([^"']+)["']`,
@@ -110,6 +109,92 @@ async function fetchOg(url: string): Promise<OgFields> {
   };
 }
 
+// ---------------------------------------------------------------------------
+// Persistent cache (Postgres)
+// ---------------------------------------------------------------------------
+
+type CacheRow = {
+  url: string;
+  og_title: string | null;
+  og_description: string | null;
+  og_image: string | null;
+  og_site_name: string | null;
+  fetched_at: string;
+  error: string | null;
+};
+
+async function loadCache(urls: string[]): Promise<Map<string, CacheRow>> {
+  const out = new Map<string, CacheRow>();
+  if (urls.length === 0) return out;
+  try {
+    const { data, error } = await supabaseAdmin
+      .from("media_og_cache" as any)
+      .select("*")
+      .in("url", urls);
+    if (error) {
+      console.error("[media] loadCache error", error);
+      return out;
+    }
+    for (const row of (data ?? []) as CacheRow[]) {
+      out.set(row.url, row);
+    }
+  } catch (err) {
+    console.error("[media] loadCache exception", err);
+  }
+  return out;
+}
+
+async function upsertCache(url: string, og: OgFields, error: string | null = null) {
+  try {
+    const { error: dbErr } = await supabaseAdmin.from("media_og_cache" as any).upsert(
+      {
+        url,
+        og_title: og.ogTitle,
+        og_description: og.ogDescription,
+        og_image: og.ogImage,
+        og_site_name: og.ogSiteName,
+        fetched_at: new Date().toISOString(),
+        error,
+      },
+      { onConflict: "url" },
+    );
+    if (dbErr) console.error("[media] upsertCache error", dbErr);
+  } catch (err) {
+    console.error("[media] upsertCache exception", err);
+  }
+}
+
+/**
+ * Fire-and-forget background scrape: writes the result to the DB cache when done.
+ * Uses waitUntil if the runtime exposes it, otherwise a plain unawaited promise.
+ */
+function scheduleBackgroundRefresh(urls: string[]) {
+  if (urls.length === 0) return;
+  const work = (async () => {
+    for (const url of urls) {
+      try {
+        const og = await fetchOgFromFirecrawl(url);
+        await upsertCache(url, og, null);
+      } catch (err) {
+        console.error("[media] background scrape failed for", url, err);
+        await upsertCache(url, EMPTY_OG, err instanceof Error ? err.message : "unknown");
+      }
+    }
+  })();
+  const wu = (globalThis as any).waitUntil;
+  if (typeof wu === "function") {
+    try {
+      wu(work);
+    } catch {
+      // ignore — promise already running
+    }
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Public server function
+// ---------------------------------------------------------------------------
+
 export const getMediaItems = createServerFn({ method: "GET" }).handler(
   async (): Promise<MediaItem[]> => {
     const sorted = [...PRESS_LINKS].sort((a, b) => {
@@ -117,42 +202,77 @@ export const getMediaItems = createServerFn({ method: "GET" }).handler(
       return b.month - a.month;
     });
 
-    // Use Promise.allSettled so a single failing scrape never breaks the page.
-    const results = await Promise.allSettled(
-      sorted.map(async (link) => {
-        // If the link already has a manual image override, skip the network call entirely.
-        if (link.imageOverride) {
-          return { ...link, ...EMPTY_OG };
-        }
-        const now = Date.now();
-        const hit = cache.get(link.url);
-        if (hit && now - hit.at < CACHE_TTL_MS) {
-          return { ...link, ...hit.data };
-        }
-        try {
-          const og = await fetchOg(link.url);
-          cache.set(link.url, { at: now, data: og });
-          return { ...link, ...og };
-        } catch (err) {
-          console.error("[media] og fetch failed for", link.url, err);
-          return { ...link, ...EMPTY_OG };
-        }
-      }),
-    );
+    // URLs that need OG enrichment (skip those with manual imageOverride only? they still
+    // benefit from OG title/description, so we cache all of them).
+    const urls = sorted.map((l) => l.url);
+    const cache = await loadCache(urls);
 
-    return results.map((r, i) =>
-      r.status === "fulfilled" ? r.value : { ...sorted[i], ...EMPTY_OG },
-    );
+    const now = Date.now();
+    const stale: string[] = [];
+
+    const items: MediaItem[] = sorted.map((link) => {
+      const row = cache.get(link.url);
+      if (!row) {
+        stale.push(link.url);
+        return { ...link, ...EMPTY_OG };
+      }
+      const age = now - new Date(row.fetched_at).getTime();
+      if (age > REFRESH_AFTER_MS) stale.push(link.url);
+      return {
+        ...link,
+        ogTitle: row.og_title,
+        ogDescription: row.og_description,
+        ogImage: row.og_image,
+        ogSiteName: row.og_site_name,
+      };
+    });
+
+    // Refresh missing/stale entries in the background — never block the response.
+    scheduleBackgroundRefresh(stale);
+
+    return items;
   },
 );
 
-// ============================================================================
-// Instagram followers — cached for 1 hour
-// ============================================================================
+// ---------------------------------------------------------------------------
+// Instagram followers — persistent cache
+// ---------------------------------------------------------------------------
 
-type FollowerCache = { at: number; count: number | null };
-let followersCache: FollowerCache = { at: 0, count: null };
-const FOLLOWERS_TTL_MS = 60 * 60 * 1000; // 1 hour
+const FOLLOWERS_KEY = "instagram_followers";
+
+type FollowersValue = { count: number | null };
+
+async function loadFollowersCache(): Promise<{ value: FollowersValue; fetchedAt: number } | null> {
+  try {
+    const { data, error } = await supabaseAdmin
+      .from("kv_cache" as any)
+      .select("value, fetched_at")
+      .eq("key", FOLLOWERS_KEY)
+      .maybeSingle();
+    if (error || !data) return null;
+    return {
+      value: (data as any).value as FollowersValue,
+      fetchedAt: new Date((data as any).fetched_at).getTime(),
+    };
+  } catch {
+    return null;
+  }
+}
+
+async function saveFollowersCache(count: number | null) {
+  try {
+    await supabaseAdmin.from("kv_cache" as any).upsert(
+      {
+        key: FOLLOWERS_KEY,
+        value: { count } as any,
+        fetched_at: new Date().toISOString(),
+      },
+      { onConflict: "key" },
+    );
+  } catch (err) {
+    console.error("[media] saveFollowersCache error", err);
+  }
+}
 
 async function scrapeFollowers(): Promise<number | null> {
   const apiKey = process.env.FIRECRAWL_API_KEY;
@@ -178,8 +298,6 @@ async function scrapeFollowers(): Promise<number | null> {
     const meta: Record<string, unknown> = json.data?.metadata ?? {};
     const html: string = typeof json.data?.html === "string" ? json.data.html : "";
 
-    // Instagram exposes follower count in og:description like:
-    //   "10,3K Followers, 234 Following, 1,2K Posts - ..."
     const description =
       readMeta(meta, "og:description", "ogDescription", "description") ??
       html.match(
@@ -189,7 +307,6 @@ async function scrapeFollowers(): Promise<number | null> {
 
     if (!description) return null;
 
-    // Match "10,3K Followers" or "10.3K seguidores" or "10300 followers"
     const m = description.match(
       /([\d.,]+\s*[KMkm]?)\s*(?:Followers|seguidores|seguidors|Seguidores|Seguidors|followers)/i,
     );
@@ -204,7 +321,6 @@ async function scrapeFollowers(): Promise<number | null> {
       multiplier = 1_000_000;
       raw = raw.slice(0, -1);
     }
-    // Spanish/Catalan use "," as decimal separator, English uses "." — normalize both.
     const normalized = raw.replace(/\.(?=\d{3}(\D|$))/g, "").replace(",", ".");
     const num = Number.parseFloat(normalized);
     if (!Number.isFinite(num)) return null;
@@ -215,29 +331,38 @@ async function scrapeFollowers(): Promise<number | null> {
   }
 }
 
+function scheduleFollowersRefresh() {
+  const work = (async () => {
+    const count = await scrapeFollowers();
+    if (count !== null) await saveFollowersCache(count);
+  })();
+  const wu = (globalThis as any).waitUntil;
+  if (typeof wu === "function") {
+    try {
+      wu(work);
+    } catch {
+      // ignore
+    }
+  }
+}
+
 export const getInstagramFollowers = createServerFn({ method: "GET" }).handler(
   async (): Promise<{ count: number | null; updatedAt: string }> => {
+    const cached = await loadFollowersCache();
     const now = Date.now();
-    if (followersCache.count !== null && now - followersCache.at < FOLLOWERS_TTL_MS) {
+
+    if (cached) {
+      const age = now - cached.fetchedAt;
+      if (age > FOLLOWERS_REFRESH_MS) scheduleFollowersRefresh();
       return {
-        count: followersCache.count,
-        updatedAt: new Date(followersCache.at).toISOString(),
+        count: cached.value?.count ?? null,
+        updatedAt: new Date(cached.fetchedAt).toISOString(),
       };
     }
-    const count = await scrapeFollowers();
-    if (count !== null) {
-      followersCache = { at: now, count };
-    } else if (followersCache.count !== null) {
-      // Keep last known good value if scrape failed.
-      return {
-        count: followersCache.count,
-        updatedAt: new Date(followersCache.at).toISOString(),
-      };
-    }
-    return {
-      count,
-      updatedAt: new Date(now).toISOString(),
-    };
+
+    // No cache yet — schedule a refresh and return a placeholder so the page still loads fast.
+    scheduleFollowersRefresh();
+    return { count: null, updatedAt: new Date(now).toISOString() };
   },
 );
 
@@ -247,7 +372,6 @@ export const getInstagramFollowers = createServerFn({ method: "GET" }).handler(
 
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { supabaseAdmin } from "@/integrations/supabase/client.server";
 
 export const uploadMedia = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -262,7 +386,6 @@ export const uploadMedia = createServerFn({ method: "POST" })
     const safeName = data.fileName.replace(/[^a-zA-Z0-9._-]/g, "_").slice(-100);
     const path = `cms/${Date.now()}-${Math.random().toString(36).slice(2, 8)}-${safeName}`;
 
-    // Decode base64 → bytes
     const binary = atob(data.base64);
     const bytes = new Uint8Array(binary.length);
     for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
