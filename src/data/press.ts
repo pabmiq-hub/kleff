@@ -26,6 +26,17 @@ import img2d6 from "@/assets/media-2d6.jpg";
 
 // Lista cronológica (de más reciente a más antiguo)
 export const PRESS_LINKS: PressLink[] = [
+  // ~ febrero 2026
+  {
+    url: "https://www.elperiodico.com/es/que-hacer/planes/20260226/barcelona-festival-gratuito-juegos-mesa-gratis-cronomaster-127232263",
+    outlet: "El Periódico · Qué hacer",
+    date: "FEB 2026",
+    year: 2026,
+    month: 2,
+    descriptionOverride:
+      "Festival gratuito de juegos de mesa en Barcelona: Cronomaster y la comunidad KLEFF como protagonistas.",
+  },
+
   // ~ enero 2026
   {
     url: "https://www.3cat.cat/3cat/jocs-de-taula-per-enamorar-se-i-per-a-totes-les-ocasions/audio/1266795/",
