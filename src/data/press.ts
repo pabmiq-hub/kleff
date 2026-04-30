@@ -129,14 +129,14 @@ export const PRESS_LINKS: PressLink[] = [
 
   // ~ noviembre 2022
   {
-    url: "https://www.vidasinfinitas.es/2022/11/18/episodio65-el-de-kleff/",
+    url: "https://www.deezer.com/da/episode/454129797",
     outlet: "Vidas Infinitas (podcast)",
     date: "NOV 2022",
     year: 2022,
     month: 11,
     imageOverride: imgVidasInfinitas,
     descriptionOverride:
-      "Episodio 65 del podcast Vidas Infinitas dedicado íntegramente a la comunidad de KLEFF.",
+      "Episodio del podcast Vidas Infinitas dedicado íntegramente a la comunidad de KLEFF.",
   },
 
   // ~ abril 2020
