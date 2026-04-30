@@ -26,6 +26,17 @@ import img2d6 from "@/assets/media-2d6.jpg";
 
 // Lista cronológica (de más reciente a más antiguo)
 export const PRESS_LINKS: PressLink[] = [
+  // ~ febrero 2026
+  {
+    url: "https://www.elperiodico.com/es/que-hacer/planes/20260226/barcelona-festival-gratuito-juegos-mesa-gratis-cronomaster-127232263",
+    outlet: "El Periódico · Qué hacer",
+    date: "FEB 2026",
+    year: 2026,
+    month: 2,
+    descriptionOverride:
+      "Festival gratuito de juegos de mesa en Barcelona: Cronomaster y la comunidad KLEFF como protagonistas.",
+  },
+
   // ~ enero 2026
   {
     url: "https://www.3cat.cat/3cat/jocs-de-taula-per-enamorar-se-i-per-a-totes-les-ocasions/audio/1266795/",
@@ -35,6 +46,17 @@ export const PRESS_LINKS: PressLink[] = [
     month: 1,
     descriptionOverride:
       "Reportaje en Catalunya Ràdio sobre los juegos de mesa para enamorarse y para todas las ocasiones, con KLEFF como referente.",
+  },
+
+  // ~ diciembre 2025
+  {
+    url: "https://www.elperiodico.com/es/que-hacer/planes/20251219/donde-hacer-amigos-barcelona-eventos-conocer-gente-124943066",
+    outlet: "El Periódico · Qué hacer",
+    date: "DIC 2025",
+    year: 2025,
+    month: 12,
+    descriptionOverride:
+      "Dónde hacer amigos en Barcelona: eventos para conocer gente, con KLEFF entre las recomendaciones.",
   },
 
   // ~ octubre 2025
@@ -60,6 +82,24 @@ export const PRESS_LINKS: PressLink[] = [
   },
 
   // ~ junio 2025
+  {
+    url: "https://www.eldebate.com/espana/cataluna/barcelona/20250616/kleff-congrega-250-personas-cada-miercoles-barcelona-convierte-mayor-comunidad-juegos-mesa-europa_307188.html",
+    outlet: "El Debate",
+    date: "JUN 2025",
+    year: 2025,
+    month: 6,
+    descriptionOverride:
+      "KLEFF congrega a 250 personas cada miércoles en Barcelona, convirtiéndose en la mayor comunidad de juegos de mesa de Europa.",
+  },
+  {
+    url: "https://as.com/meristation/noticias/empezo-siendo-una-comunidad-y-acabo-convirtiendose-en-la-partida-mas-grande-de-juegos-de-mesa-de-europa-se-celebra-cada-miercoles-en-este-rincon-espanol-n/",
+    outlet: "AS · Meristation",
+    date: "JUN 2025",
+    year: 2025,
+    month: 6,
+    descriptionOverride:
+      "Empezó como una comunidad y acabó siendo la mayor partida de juegos de mesa de Europa, cada miércoles en Barcelona.",
+  },
   {
     url: "https://cadenaser.com/podcast/sercat/aqui-barcelona/3953/p2/",
     outlet: "Cadena SER · Aquí Barcelona",
