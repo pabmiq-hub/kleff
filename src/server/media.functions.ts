@@ -135,7 +135,7 @@ async function loadCache(urls: string[]): Promise<Map<string, CacheRow>> {
       console.error("[media] loadCache error", error);
       return out;
     }
-    for (const row of (data ?? []) as CacheRow[]) {
+    for (const row of (data ?? []) as unknown as CacheRow[]) {
       out.set(row.url, row);
     }
   } catch (err) {
