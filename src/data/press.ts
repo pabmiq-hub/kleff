@@ -37,6 +37,28 @@ export const PRESS_LINKS: PressLink[] = [
       "Reportaje en Catalunya Ràdio sobre los juegos de mesa para enamorarse y para todas las ocasiones, con KLEFF como referente.",
   },
 
+  // ~ octubre 2025
+  {
+    url: "https://www.youtube.com/watch?v=FWvOB_YyKns",
+    outlet: "Cunyadisme Lúdic (YouTube)",
+    date: "OCT 2025",
+    year: 2025,
+    month: 10,
+    descriptionOverride:
+      "Episodio del canal Cunyadisme Lúdic dedicado a la comunidad KLEFF y su escena lúdica en Barcelona.",
+  },
+
+  // ~ septiembre 2025
+  {
+    url: "https://www.elperiodico.com/es/que-hacer/planes/20250926/convento-oculto-barcelona-demonios-bares-restaurantes-tematicos-121967054",
+    outlet: "El Periódico · Qué hacer",
+    date: "SEP 2025",
+    year: 2025,
+    month: 9,
+    descriptionOverride:
+      "Reportaje sobre bares y restaurantes temáticos de Barcelona, con KLEFF entre los espacios destacados.",
+  },
+
   // ~ junio 2025
   {
     url: "https://cadenaser.com/podcast/sercat/aqui-barcelona/3953/p2/",
