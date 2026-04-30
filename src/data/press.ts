@@ -48,6 +48,17 @@ export const PRESS_LINKS: PressLink[] = [
       "Reportaje en Catalunya Ràdio sobre los juegos de mesa para enamorarse y para todas las ocasiones, con KLEFF como referente.",
   },
 
+  // ~ diciembre 2025
+  {
+    url: "https://www.elperiodico.com/es/que-hacer/planes/20251219/donde-hacer-amigos-barcelona-eventos-conocer-gente-124943066",
+    outlet: "El Periódico · Qué hacer",
+    date: "DIC 2025",
+    year: 2025,
+    month: 12,
+    descriptionOverride:
+      "Dónde hacer amigos en Barcelona: eventos para conocer gente, con KLEFF entre las recomendaciones.",
+  },
+
   // ~ octubre 2025
   {
     url: "https://www.youtube.com/watch?v=FWvOB_YyKns",
