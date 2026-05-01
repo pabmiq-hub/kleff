@@ -267,7 +267,7 @@ function ImageField({
     setUploading(true);
     try {
       const buf = await file.arrayBuffer();
-      const base64 = btoa(String.fromCharCode(...new Uint8Array(buf)));
+      const base64 = arrayBufferToBase64(buf);
       const r = await upload({
         data: {
           fileName: file.name,
