@@ -393,7 +393,7 @@ export function HowItWorksPage() {
               icon={<Skull className="h-7 w-7 text-cream" />}
               accent="coral"
               href="/clocktower"
-              ctaLabel={t.nav?.viewMore ?? "Ver página"}
+              ctaLabel="Ver página"
             />
             <CommunityCard
               title={t.how.community2Title}
