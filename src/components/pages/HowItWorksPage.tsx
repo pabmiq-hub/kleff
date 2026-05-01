@@ -97,20 +97,20 @@ function CommunityCard({
   tag,
   icon,
   accent,
+  href,
+  ctaLabel,
 }: {
   title: string;
   body: string;
   tag: string;
   icon: React.ReactNode;
   accent: "coral" | "ink";
+  href?: string;
+  ctaLabel?: string;
 }) {
   const isCoral = accent === "coral";
-  return (
-    <article
-      className={`relative overflow-hidden border-2 border-ink rounded-3xl p-7 shadow-tactile hover:-translate-x-[2px] hover:-translate-y-[2px] transition-all duration-200 ${
-        isCoral ? "bg-coral text-cream" : "bg-ink text-cream"
-      }`}
-    >
+  const inner = (
+    <>
       <div
         className={`size-14 rounded-2xl border-2 border-cream/40 flex items-center justify-center mb-5 ${
           isCoral ? "bg-coral-deep" : "bg-cream/10"
@@ -120,11 +120,32 @@ function CommunityCard({
       </div>
       <h3 className="text-2xl font-display font-semibold leading-tight">{title}</h3>
       <p className="mt-3 text-sm leading-relaxed opacity-90">{body}</p>
-      <span className="mt-5 inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest bg-cream text-ink border-2 border-cream rounded-full px-3 py-1">
-        <Tag className="h-3 w-3" /> {tag}
-      </span>
-    </article>
+      <div className="mt-5 flex items-center justify-between gap-2 flex-wrap">
+        <span className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest bg-cream text-ink border-2 border-cream rounded-full px-3 py-1">
+          <Tag className="h-3 w-3" /> {tag}
+        </span>
+        {href && (
+          <span className="inline-flex items-center gap-1 text-[11px] font-bold uppercase tracking-widest opacity-90 group-hover:opacity-100">
+            {ctaLabel ?? "Ver más"} <ArrowRight className="h-3 w-3" />
+          </span>
+        )}
+      </div>
+    </>
   );
+
+  const cls = `group relative overflow-hidden border-2 border-ink rounded-3xl p-7 shadow-tactile transition-all duration-200 hover:-translate-x-[2px] hover:-translate-y-[2px] ${
+    isCoral ? "bg-coral text-cream" : "bg-ink text-cream"
+  } ${href ? "cursor-pointer" : ""}`;
+
+  if (href) {
+    return (
+      <Link to={href} className={`${cls} block no-underline`}>
+        {inner}
+      </Link>
+    );
+  }
+
+  return <article className={cls}>{inner}</article>;
 }
 
 function BenefitFlipCard({
@@ -371,6 +392,8 @@ export function HowItWorksPage() {
               tag={t.how.community1Tag}
               icon={<Skull className="h-7 w-7 text-cream" />}
               accent="coral"
+              href="/clocktower"
+              ctaLabel={t.nav?.viewMore ?? "Ver página"}
             />
             <CommunityCard
               title={t.how.community2Title}
