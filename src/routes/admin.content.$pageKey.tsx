@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { getPageSchema, withDefaults, type FieldType, type SectionSchema } from "@/cms/schemas";
 import { adminGetSection, adminSaveSection } from "@/server/content.functions";
 import { uploadMedia } from "@/server/media.functions";
+import { arrayBufferToBase64 } from "@/lib/base64";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";

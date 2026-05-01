@@ -21,6 +21,7 @@ import { useEditor } from "./EditorProvider";
 import { InlineFormatToolbar } from "./Editable";
 import type { StyleProps } from "./types";
 import { uploadMedia } from "@/server/media.functions";
+import { arrayBufferToBase64 } from "@/lib/base64";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
