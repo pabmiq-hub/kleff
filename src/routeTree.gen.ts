@@ -15,6 +15,7 @@ import { Route as LudotecaRouteImport } from './routes/ludoteca'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as HowItWorksRouteImport } from './routes/how-it-works'
 import { Route as ContactRouteImport } from './routes/contact'
+import { Route as ClocktowerRouteImport } from './routes/clocktower'
 import { Route as BlogRouteImport } from './routes/blog'
 import { Route as AppRouteImport } from './routes/app'
 import { Route as AdminRouteImport } from './routes/admin'
@@ -29,12 +30,14 @@ import { Route as EnMediaRouteImport } from './routes/en.media'
 import { Route as EnLudotecaRouteImport } from './routes/en.ludoteca'
 import { Route as EnHowItWorksRouteImport } from './routes/en.how-it-works'
 import { Route as EnContactRouteImport } from './routes/en.contact'
+import { Route as EnClocktowerRouteImport } from './routes/en.clocktower'
 import { Route as EnBlogRouteImport } from './routes/en.blog'
 import { Route as EnAboutRouteImport } from './routes/en.about'
 import { Route as CaMediaRouteImport } from './routes/ca.media'
 import { Route as CaLudotecaRouteImport } from './routes/ca.ludoteca'
 import { Route as CaHowItWorksRouteImport } from './routes/ca.how-it-works'
 import { Route as CaContactRouteImport } from './routes/ca.contact'
+import { Route as CaClocktowerRouteImport } from './routes/ca.clocktower'
 import { Route as CaBlogRouteImport } from './routes/ca.blog'
 import { Route as CaAboutRouteImport } from './routes/ca.about'
 import { Route as AppRentalsRouteImport } from './routes/app.rentals'
@@ -83,6 +86,11 @@ const HowItWorksRoute = HowItWorksRouteImport.update({
 const ContactRoute = ContactRouteImport.update({
   id: '/contact',
   path: '/contact',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ClocktowerRoute = ClocktowerRouteImport.update({
+  id: '/clocktower',
+  path: '/clocktower',
   getParentRoute: () => rootRouteImport,
 } as any)
 const BlogRoute = BlogRouteImport.update({
@@ -155,6 +163,11 @@ const EnContactRoute = EnContactRouteImport.update({
   path: '/en/contact',
   getParentRoute: () => rootRouteImport,
 } as any)
+const EnClocktowerRoute = EnClocktowerRouteImport.update({
+  id: '/en/clocktower',
+  path: '/en/clocktower',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const EnBlogRoute = EnBlogRouteImport.update({
   id: '/en/blog',
   path: '/en/blog',
@@ -183,6 +196,11 @@ const CaHowItWorksRoute = CaHowItWorksRouteImport.update({
 const CaContactRoute = CaContactRouteImport.update({
   id: '/ca/contact',
   path: '/ca/contact',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CaClocktowerRoute = CaClocktowerRouteImport.update({
+  id: '/ca/clocktower',
+  path: '/ca/clocktower',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CaBlogRoute = CaBlogRouteImport.update({
@@ -288,6 +306,7 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRouteWithChildren
   '/app': typeof AppRouteWithChildren
   '/blog': typeof BlogRoute
+  '/clocktower': typeof ClocktowerRoute
   '/contact': typeof ContactRoute
   '/how-it-works': typeof HowItWorksRoute
   '/login': typeof LoginRoute
@@ -303,12 +322,14 @@ export interface FileRoutesByFullPath {
   '/app/rentals': typeof AppRentalsRouteWithChildren
   '/ca/about': typeof CaAboutRoute
   '/ca/blog': typeof CaBlogRoute
+  '/ca/clocktower': typeof CaClocktowerRoute
   '/ca/contact': typeof CaContactRoute
   '/ca/how-it-works': typeof CaHowItWorksRoute
   '/ca/ludoteca': typeof CaLudotecaRoute
   '/ca/media': typeof CaMediaRoute
   '/en/about': typeof EnAboutRoute
   '/en/blog': typeof EnBlogRoute
+  '/en/clocktower': typeof EnClocktowerRoute
   '/en/contact': typeof EnContactRoute
   '/en/how-it-works': typeof EnHowItWorksRoute
   '/en/ludoteca': typeof EnLudotecaRoute
@@ -333,6 +354,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/blog': typeof BlogRoute
+  '/clocktower': typeof ClocktowerRoute
   '/contact': typeof ContactRoute
   '/how-it-works': typeof HowItWorksRoute
   '/login': typeof LoginRoute
@@ -346,12 +368,14 @@ export interface FileRoutesByTo {
   '/app/rentals': typeof AppRentalsRouteWithChildren
   '/ca/about': typeof CaAboutRoute
   '/ca/blog': typeof CaBlogRoute
+  '/ca/clocktower': typeof CaClocktowerRoute
   '/ca/contact': typeof CaContactRoute
   '/ca/how-it-works': typeof CaHowItWorksRoute
   '/ca/ludoteca': typeof CaLudotecaRoute
   '/ca/media': typeof CaMediaRoute
   '/en/about': typeof EnAboutRoute
   '/en/blog': typeof EnBlogRoute
+  '/en/clocktower': typeof EnClocktowerRoute
   '/en/contact': typeof EnContactRoute
   '/en/how-it-works': typeof EnHowItWorksRoute
   '/en/ludoteca': typeof EnLudotecaRoute
@@ -379,6 +403,7 @@ export interface FileRoutesById {
   '/admin': typeof AdminRouteWithChildren
   '/app': typeof AppRouteWithChildren
   '/blog': typeof BlogRoute
+  '/clocktower': typeof ClocktowerRoute
   '/contact': typeof ContactRoute
   '/how-it-works': typeof HowItWorksRoute
   '/login': typeof LoginRoute
@@ -394,12 +419,14 @@ export interface FileRoutesById {
   '/app/rentals': typeof AppRentalsRouteWithChildren
   '/ca/about': typeof CaAboutRoute
   '/ca/blog': typeof CaBlogRoute
+  '/ca/clocktower': typeof CaClocktowerRoute
   '/ca/contact': typeof CaContactRoute
   '/ca/how-it-works': typeof CaHowItWorksRoute
   '/ca/ludoteca': typeof CaLudotecaRoute
   '/ca/media': typeof CaMediaRoute
   '/en/about': typeof EnAboutRoute
   '/en/blog': typeof EnBlogRoute
+  '/en/clocktower': typeof EnClocktowerRoute
   '/en/contact': typeof EnContactRoute
   '/en/how-it-works': typeof EnHowItWorksRoute
   '/en/ludoteca': typeof EnLudotecaRoute
@@ -428,6 +455,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/app'
     | '/blog'
+    | '/clocktower'
     | '/contact'
     | '/how-it-works'
     | '/login'
@@ -443,12 +471,14 @@ export interface FileRouteTypes {
     | '/app/rentals'
     | '/ca/about'
     | '/ca/blog'
+    | '/ca/clocktower'
     | '/ca/contact'
     | '/ca/how-it-works'
     | '/ca/ludoteca'
     | '/ca/media'
     | '/en/about'
     | '/en/blog'
+    | '/en/clocktower'
     | '/en/contact'
     | '/en/how-it-works'
     | '/en/ludoteca'
@@ -473,6 +503,7 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/blog'
+    | '/clocktower'
     | '/contact'
     | '/how-it-works'
     | '/login'
@@ -486,12 +517,14 @@ export interface FileRouteTypes {
     | '/app/rentals'
     | '/ca/about'
     | '/ca/blog'
+    | '/ca/clocktower'
     | '/ca/contact'
     | '/ca/how-it-works'
     | '/ca/ludoteca'
     | '/ca/media'
     | '/en/about'
     | '/en/blog'
+    | '/en/clocktower'
     | '/en/contact'
     | '/en/how-it-works'
     | '/en/ludoteca'
@@ -518,6 +551,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/app'
     | '/blog'
+    | '/clocktower'
     | '/contact'
     | '/how-it-works'
     | '/login'
@@ -533,12 +567,14 @@ export interface FileRouteTypes {
     | '/app/rentals'
     | '/ca/about'
     | '/ca/blog'
+    | '/ca/clocktower'
     | '/ca/contact'
     | '/ca/how-it-works'
     | '/ca/ludoteca'
     | '/ca/media'
     | '/en/about'
     | '/en/blog'
+    | '/en/clocktower'
     | '/en/contact'
     | '/en/how-it-works'
     | '/en/ludoteca'
@@ -566,6 +602,7 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRouteWithChildren
   AppRoute: typeof AppRouteWithChildren
   BlogRoute: typeof BlogRoute
+  ClocktowerRoute: typeof ClocktowerRoute
   ContactRoute: typeof ContactRoute
   HowItWorksRoute: typeof HowItWorksRoute
   LoginRoute: typeof LoginRoute
@@ -574,12 +611,14 @@ export interface RootRouteChildren {
   SuperAdminRoute: typeof SuperAdminRoute
   CaAboutRoute: typeof CaAboutRoute
   CaBlogRoute: typeof CaBlogRoute
+  CaClocktowerRoute: typeof CaClocktowerRoute
   CaContactRoute: typeof CaContactRoute
   CaHowItWorksRoute: typeof CaHowItWorksRoute
   CaLudotecaRoute: typeof CaLudotecaRoute
   CaMediaRoute: typeof CaMediaRoute
   EnAboutRoute: typeof EnAboutRoute
   EnBlogRoute: typeof EnBlogRoute
+  EnClocktowerRoute: typeof EnClocktowerRoute
   EnContactRoute: typeof EnContactRoute
   EnHowItWorksRoute: typeof EnHowItWorksRoute
   EnLudotecaRoute: typeof EnLudotecaRoute
@@ -634,6 +673,13 @@ declare module '@tanstack/react-router' {
       path: '/contact'
       fullPath: '/contact'
       preLoaderRoute: typeof ContactRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/clocktower': {
+      id: '/clocktower'
+      path: '/clocktower'
+      fullPath: '/clocktower'
+      preLoaderRoute: typeof ClocktowerRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/blog': {
@@ -734,6 +780,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EnContactRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/en/clocktower': {
+      id: '/en/clocktower'
+      path: '/en/clocktower'
+      fullPath: '/en/clocktower'
+      preLoaderRoute: typeof EnClocktowerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/en/blog': {
       id: '/en/blog'
       path: '/en/blog'
@@ -774,6 +827,13 @@ declare module '@tanstack/react-router' {
       path: '/ca/contact'
       fullPath: '/ca/contact'
       preLoaderRoute: typeof CaContactRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ca/clocktower': {
+      id: '/ca/clocktower'
+      path: '/ca/clocktower'
+      fullPath: '/ca/clocktower'
+      preLoaderRoute: typeof CaClocktowerRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/ca/blog': {
@@ -996,6 +1056,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRoute: AdminRouteWithChildren,
   AppRoute: AppRouteWithChildren,
   BlogRoute: BlogRoute,
+  ClocktowerRoute: ClocktowerRoute,
   ContactRoute: ContactRoute,
   HowItWorksRoute: HowItWorksRoute,
   LoginRoute: LoginRoute,
@@ -1004,12 +1065,14 @@ const rootRouteChildren: RootRouteChildren = {
   SuperAdminRoute: SuperAdminRoute,
   CaAboutRoute: CaAboutRoute,
   CaBlogRoute: CaBlogRoute,
+  CaClocktowerRoute: CaClocktowerRoute,
   CaContactRoute: CaContactRoute,
   CaHowItWorksRoute: CaHowItWorksRoute,
   CaLudotecaRoute: CaLudotecaRoute,
   CaMediaRoute: CaMediaRoute,
   EnAboutRoute: EnAboutRoute,
   EnBlogRoute: EnBlogRoute,
+  EnClocktowerRoute: EnClocktowerRoute,
   EnContactRoute: EnContactRoute,
   EnHowItWorksRoute: EnHowItWorksRoute,
   EnLudotecaRoute: EnLudotecaRoute,
