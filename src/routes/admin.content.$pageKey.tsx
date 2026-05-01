@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { getPageSchema, withDefaults, type FieldType, type SectionSchema } from "@/cms/schemas";
 import { adminGetSection, adminSaveSection } from "@/server/content.functions";
 import { uploadMedia } from "@/server/media.functions";
+import { arrayBufferToBase64 } from "@/lib/base64";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -260,14 +261,14 @@ function ImageField({
   const [uploading, setUploading] = useState(false);
 
   const handleFile = async (file: File) => {
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error("La imagen debe pesar menos de 5 MB");
+    if (file.size > 25 * 1024 * 1024) {
+      toast.error("La imagen debe pesar menos de 25 MB");
       return;
     }
     setUploading(true);
     try {
       const buf = await file.arrayBuffer();
-      const base64 = btoa(String.fromCharCode(...new Uint8Array(buf)));
+      const base64 = arrayBufferToBase64(buf);
       const r = await upload({
         data: {
           fileName: file.name,

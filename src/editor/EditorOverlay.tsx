@@ -21,6 +21,7 @@ import { useEditor } from "./EditorProvider";
 import { InlineFormatToolbar } from "./Editable";
 import type { StyleProps } from "./types";
 import { uploadMedia } from "@/server/media.functions";
+import { arrayBufferToBase64 } from "@/lib/base64";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -119,14 +120,14 @@ function PropertiesPanel({ onClose, hasSelection }: { onClose: () => void; hasSe
 
   const handleUpload = async (file: File) => {
     if (!selected) return;
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error("La imagen debe pesar menos de 5 MB");
+    if (file.size > 25 * 1024 * 1024) {
+      toast.error("La imagen debe pesar menos de 25 MB");
       return;
     }
     setUploading(true);
     try {
       const buf = await file.arrayBuffer();
-      const base64 = btoa(String.fromCharCode(...new Uint8Array(buf)));
+      const base64 = arrayBufferToBase64(buf);
       const r = await upload({
         data: { fileName: file.name, contentType: file.type || "application/octet-stream", base64 },
       });
