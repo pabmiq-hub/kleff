@@ -119,8 +119,8 @@ function PropertiesPanel({ onClose, hasSelection }: { onClose: () => void; hasSe
 
   const handleUpload = async (file: File) => {
     if (!selected) return;
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error("La imagen debe pesar menos de 5 MB");
+    if (file.size > 25 * 1024 * 1024) {
+      toast.error("La imagen debe pesar menos de 25 MB");
       return;
     }
     setUploading(true);

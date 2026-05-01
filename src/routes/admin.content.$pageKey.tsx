@@ -260,8 +260,8 @@ function ImageField({
   const [uploading, setUploading] = useState(false);
 
   const handleFile = async (file: File) => {
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error("La imagen debe pesar menos de 5 MB");
+    if (file.size > 25 * 1024 * 1024) {
+      toast.error("La imagen debe pesar menos de 25 MB");
       return;
     }
     setUploading(true);
