@@ -158,9 +158,163 @@ const homeSchema: PageSchema = {
   ],
 };
 
+// ---------------- BLOOD ON THE CLOCKTOWER ----------------
+
+const clocktowerSchema: PageSchema = {
+  key: "clocktower",
+  label: "Blood on the Clocktower",
+  path: "/clocktower",
+  description:
+    "Página dedicada a la comunidad de Blood on the Clocktower de KLEFF: descripción del juego, reel de Instagram, localizaciones donde se juega y enlace al grupo de WhatsApp.",
+  sections: [
+    {
+      key: "clocktower.hero",
+      label: "Hero (cabecera)",
+      description: "Cabecera principal con eyebrow, título, subtítulo y CTA al grupo de WhatsApp.",
+      fields: {
+        eyebrow: { kind: "text", label: "Etiqueta superior", placeholder: "Comunidad activa · Partidas semanales" },
+        title: { kind: "text", label: "Título principal" },
+        subtitle: { kind: "textarea", label: "Subtítulo / intro", rows: 3 },
+        whatsappLabel: { kind: "text", label: "Texto del botón de WhatsApp" },
+        whatsappUrl: { kind: "url", label: "Enlace del grupo de WhatsApp" },
+        heroImage: { kind: "image", label: "Imagen de cabecera (ambiente)" },
+      },
+      defaults: {
+        eyebrow: "Comunidad activa · Partidas semanales",
+        title: "Blood on the Clocktower en KLEFF",
+        subtitle:
+          "Una comunidad activa que se reúne cada semana para jugar al juego de deducción social más adictivo de los últimos años. En cada noche organizamos hasta 3 partidas simultáneas con diferentes niveles, para que tanto si es tu primera vez como si ya eres un veterano encuentres tu sitio.",
+        whatsappLabel: "Únete al grupo de WhatsApp",
+        whatsappUrl: "https://chat.whatsapp.com/CrNuzqf2ly5JMDCnxdJq6E",
+        heroImage: "",
+      },
+    },
+    {
+      key: "clocktower.about",
+      label: "¿Qué es Blood on the Clocktower?",
+      description: "Bloque de descripción del juego, con título, párrafos largos y enlace a la web oficial.",
+      fields: {
+        eyebrow: { kind: "text", label: "Etiqueta superior" },
+        title: { kind: "text", label: "Título de la sección" },
+        body: { kind: "textarea", label: "Descripción (puedes usar varios párrafos)", rows: 8 },
+        officialLabel: { kind: "text", label: "Texto del enlace a la web oficial" },
+        officialUrl: { kind: "url", label: "URL oficial del juego" },
+      },
+      defaults: {
+        eyebrow: "El juego",
+        title: "Un pueblo, un asesino y una torre que no para nunca.",
+        body:
+          "Blood on the Clocktower es un juego de deducción social para 5 a 20 jugadores. Cada partida transcurre en el pueblo ficticio de Ravenswood Bluff, donde un Demonio se esconde entre los habitantes y mata cada noche a uno de los aldeanos. El equipo del Bien debe descubrir quién es el Demonio antes de que sea demasiado tarde; el equipo del Mal hará todo lo posible por impedirlo: mentir, manipular y sembrar la confusión.\n\nLo especial de Clocktower es que ningún jugador queda eliminado: aunque mueras, sigues participando, votando y ayudando a tu bando. Cada personaje tiene una habilidad única que cambia por completo el flujo de la partida, así que dos partidas nunca son iguales. Hay un Narrador (el Storyteller) que dirige el juego y mantiene los secretos.\n\nEs un juego pensado para hablar, observar y sospechar. Se aprende rapidísimo, pero la profundidad estratégica es enorme: por eso engancha tanto y por eso ya tenemos una comunidad fija que repite cada semana.",
+        officialLabel: "Web oficial del juego",
+        officialUrl: "https://bloodontheclocktower.com/",
+      },
+    },
+    {
+      key: "clocktower.reel",
+      label: "Reel de Instagram",
+      description: "Vídeo embebido de Instagram para mostrar el ambiente de las partidas.",
+      fields: {
+        eyebrow: { kind: "text", label: "Etiqueta superior" },
+        title: { kind: "text", label: "Título" },
+        subtitle: { kind: "textarea", label: "Subtítulo", rows: 2 },
+        reelUrl: {
+          kind: "url",
+          label: "URL del reel de Instagram",
+          placeholder: "https://www.instagram.com/reel/…/",
+        },
+      },
+      defaults: {
+        eyebrow: "El ambiente",
+        title: "Así se vive una noche de Clocktower",
+        subtitle: "Mira el reel y entenderás por qué la gente se engancha desde la primera partida.",
+        reelUrl: "https://www.instagram.com/reel/DLKwPSCo72N/",
+      },
+    },
+    {
+      key: "clocktower.locations",
+      label: "Localizaciones",
+      description:
+        "Sitios donde se juega a Clocktower. Para cada uno puedes editar nombre, frecuencia, idiomas, niveles y hasta tres imágenes de galería.",
+      fields: {
+        eyebrow: { kind: "text", label: "Etiqueta superior" },
+        title: { kind: "text", label: "Título de la sección" },
+        intro: { kind: "textarea", label: "Texto introductorio", rows: 2 },
+        items: {
+          kind: "list",
+          label: "Localizaciones",
+          itemLabel: "Localización",
+          fields: {
+            name: { kind: "text", label: "Nombre de la localización" },
+            frequency: { kind: "text", label: "Frecuencia (ej: Partidas semanales)" },
+            tables: { kind: "text", label: "Mesas / formato (ej: 3 partidas simultáneas)" },
+            languages: { kind: "text", label: "Idiomas (ej: Castellano e inglés)" },
+            levels: { kind: "text", label: "Niveles (ej: Principiante, intermedio y avanzado)" },
+            description: { kind: "textarea", label: "Descripción opcional", rows: 3 },
+            image1: { kind: "image", label: "Imagen 1" },
+            image2: { kind: "image", label: "Imagen 2" },
+            image3: { kind: "image", label: "Imagen 3" },
+          },
+        },
+      },
+      defaults: {
+        eyebrow: "Dónde jugamos",
+        title: "Dos sedes, una misma comunidad.",
+        intro:
+          "Cada localización tiene su carácter, su frecuencia y su nivel. Elige la que mejor te encaje y nos vemos en la mesa.",
+        items: [
+          {
+            name: "L'Estació · Espai Gastronòmic",
+            frequency: "Partidas semanales",
+            tables: "3 partidas simultáneas",
+            languages: "Castellano e inglés",
+            levels: "Principiante, intermedio y avanzado",
+            description:
+              "Nuestra sede principal. Cada semana montamos tres mesas en paralelo para que cualquiera pueda venir, sea su primera partida o la número cien.",
+            image1: "",
+            image2: "",
+            image3: "",
+          },
+          {
+            name: "El Convento",
+            frequency: "Partidas esporádicas",
+            tables: "",
+            languages: "Castellano",
+            levels: "Intermedio y avanzado",
+            description:
+              "Sesiones especiales en un entorno único. Pensadas para jugadores con experiencia que buscan partidas más largas y atmosféricas.",
+            image1: "",
+            image2: "",
+            image3: "",
+          },
+        ],
+      },
+    },
+    {
+      key: "clocktower.cta",
+      label: "CTA final · Únete",
+      description: "Bloque final con llamada a unirse al grupo de WhatsApp.",
+      fields: {
+        eyebrow: { kind: "text", label: "Etiqueta superior" },
+        title: { kind: "text", label: "Título" },
+        subtitle: { kind: "textarea", label: "Subtítulo", rows: 2 },
+        whatsappLabel: { kind: "text", label: "Texto del botón" },
+        whatsappUrl: { kind: "url", label: "Enlace del grupo" },
+      },
+      defaults: {
+        eyebrow: "Únete",
+        title: "¿Listo para jugar?",
+        subtitle:
+          "Entra al grupo de WhatsApp para enterarte de la próxima partida, apuntarte y conocer al resto de la comunidad.",
+        whatsappLabel: "Unirme al WhatsApp",
+        whatsappUrl: "https://chat.whatsapp.com/CrNuzqf2ly5JMDCnxdJq6E",
+      },
+    },
+  ],
+};
+
 // ---------------- REGISTRY ----------------
 
-export const PAGE_SCHEMAS: PageSchema[] = [homeSchema];
+export const PAGE_SCHEMAS: PageSchema[] = [homeSchema, clocktowerSchema];
 
 export function getPageSchema(key: string): PageSchema | undefined {
   return PAGE_SCHEMAS.find((p) => p.key === key);
