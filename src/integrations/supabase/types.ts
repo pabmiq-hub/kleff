@@ -159,7 +159,11 @@ export type Database = {
           id: string
           is_builtin: boolean
           is_published: boolean
+          page_key: string | null
           path: string
+          slug_ca: string | null
+          slug_en: string | null
+          slug_es: string | null
           template: string
           title: string
           updated_at: string
@@ -171,7 +175,11 @@ export type Database = {
           id?: string
           is_builtin?: boolean
           is_published?: boolean
+          page_key?: string | null
           path: string
+          slug_ca?: string | null
+          slug_en?: string | null
+          slug_es?: string | null
           template?: string
           title: string
           updated_at?: string
@@ -183,11 +191,45 @@ export type Database = {
           id?: string
           is_builtin?: boolean
           is_published?: boolean
+          page_key?: string | null
           path?: string
+          slug_ca?: string | null
+          slug_en?: string | null
+          slug_es?: string | null
           template?: string
           title?: string
           updated_at?: string
           updated_by?: string | null
+        }
+        Relationships: []
+      }
+      content_redirects: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          from_path: string
+          id: string
+          locale: string | null
+          page_key: string | null
+          to_path: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          from_path: string
+          id?: string
+          locale?: string | null
+          page_key?: string | null
+          to_path: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          from_path?: string
+          id?: string
+          locale?: string | null
+          page_key?: string | null
+          to_path?: string
         }
         Relationships: []
       }
