@@ -383,8 +383,33 @@ export const uploadMedia = createServerFn({ method: "POST" })
     }),
   )
   .handler(async ({ data }) => {
-    const safeName = data.fileName.replace(/[^a-zA-Z0-9._-]/g, "_").slice(-100);
-    const path = `cms/${Date.now()}-${Math.random().toString(36).slice(2, 8)}-${safeName}`;
+    // Preserve the original filename for SEO ("blood-on-the-clocktower.jpg"
+    // stays meaningful) but slugify minimally and append a short random suffix
+    // so two uploads with the same name don't collide.
+    //
+    // Examples:
+    //   "Blood On The Clocktower.JPG"  -> "blood-on-the-clocktower-a1b2c3.jpg"
+    //   "logo.png"                      -> "logo-7f8e9d.png"
+    //   "imagen áéí.webp"               -> "imagen-aei-1q2w3e.webp"
+    const rawName = data.fileName.trim();
+    const lastDot = rawName.lastIndexOf(".");
+    const baseRaw = lastDot > 0 ? rawName.slice(0, lastDot) : rawName;
+    const extRaw = lastDot > 0 ? rawName.slice(lastDot + 1) : "";
+
+    const slugify = (s: string) =>
+      s
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "") // strip diacritics
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "")
+        .slice(0, 80);
+
+    const baseSlug = slugify(baseRaw) || "file";
+    const ext = (extRaw || "bin").toLowerCase().replace(/[^a-z0-9]/g, "").slice(0, 8) || "bin";
+    const suffix = Math.random().toString(36).slice(2, 8);
+    const finalName = `${baseSlug}-${suffix}.${ext}`;
+    const path = `cms/${finalName}`;
 
     const binary = atob(data.base64);
     const bytes = new Uint8Array(binary.length);
