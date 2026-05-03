@@ -68,7 +68,7 @@ type LocationItem = {
 };
 
 export function ClocktowerPage() {
-  const { locale } = useI18n();
+  const { locale, href } = useI18n();
 
   const hero = useSectionContent<{
     eyebrow: string;
