@@ -11,7 +11,7 @@ export const Route = createFileRoute("/$")({
     const path = location.pathname;
     const { to } = await lookupRedirect({ data: { path } });
     if (to) {
-      throw redirect({ to, statusCode: 301, reloadDocument: true });
+      throw redirect({ href: to, statusCode: 301, reloadDocument: true });
     }
     return { path, splat: params._splat };
   },
