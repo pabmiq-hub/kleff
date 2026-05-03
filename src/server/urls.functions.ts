@@ -119,14 +119,11 @@ export const adminUpdatePageSlug = createServerFn({ method: "POST" })
     const newPath = pathFor(data.locale, data.slug, false);
     const oldPath = oldSlug ? pathFor(data.locale, oldSlug, false) : null;
 
-    const updatePayload: Record<string, unknown> = {
+    const updatePayload = {
       [slugCol]: data.slug,
       updated_by: userId,
-    };
-    // If ES slug changes, also update primary `path` for backward compat
-    if (data.locale === "es") {
-      updatePayload.path = newPath;
-    }
+      ...(data.locale === "es" ? { path: newPath } : {}),
+    } as never;
 
     const { error: uErr } = await supabaseAdmin
       .from("content_pages")
