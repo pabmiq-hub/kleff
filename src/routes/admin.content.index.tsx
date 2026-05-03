@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { FileText, ExternalLink, Plus, Pencil } from "lucide-react";
@@ -69,6 +69,14 @@ function ContentIndex() {
             Haz clic en cualquier página para abrirla con el editor visual: podrás cambiar
             textos, colores, tipografía, imágenes y espaciado directamente sobre la web real.
           </p>
+          <div className="mt-3 flex gap-3 text-sm">
+            <Link to="/admin/content/urls" className="text-coral hover:underline">
+              URLs por idioma →
+            </Link>
+            <Link to="/admin/content/redirects" className="text-coral hover:underline">
+              Redirecciones 301 →
+            </Link>
+          </div>
         </div>
 
         <Dialog open={open} onOpenChange={setOpen}>
