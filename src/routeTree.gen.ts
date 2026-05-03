@@ -57,6 +57,7 @@ import { Route as AdminRentalsHistoryRouteImport } from './routes/admin.rentals.
 import { Route as AdminRentalsCatalogRouteImport } from './routes/admin.rentals.catalog'
 import { Route as AdminRentalsActiveRouteImport } from './routes/admin.rentals.active'
 import { Route as AdminContentUrlsRouteImport } from './routes/admin.content.urls'
+import { Route as AdminContentRedirectsRouteImport } from './routes/admin.content.redirects'
 import { Route as AdminContentPageKeyRouteImport } from './routes/admin.content.$pageKey'
 
 const SuperAdminRoute = SuperAdminRouteImport.update({
@@ -300,6 +301,11 @@ const AdminContentUrlsRoute = AdminContentUrlsRouteImport.update({
   path: '/urls',
   getParentRoute: () => AdminContentRoute,
 } as any)
+const AdminContentRedirectsRoute = AdminContentRedirectsRouteImport.update({
+  id: '/redirects',
+  path: '/redirects',
+  getParentRoute: () => AdminContentRoute,
+} as any)
 const AdminContentPageKeyRoute = AdminContentPageKeyRouteImport.update({
   id: '/$pageKey',
   path: '/$pageKey',
@@ -346,6 +352,7 @@ export interface FileRoutesByFullPath {
   '/ca/': typeof CaIndexRoute
   '/en/': typeof EnIndexRoute
   '/admin/content/$pageKey': typeof AdminContentPageKeyRoute
+  '/admin/content/redirects': typeof AdminContentRedirectsRoute
   '/admin/content/urls': typeof AdminContentUrlsRoute
   '/admin/rentals/active': typeof AdminRentalsActiveRoute
   '/admin/rentals/catalog': typeof AdminRentalsCatalogRoute
@@ -393,6 +400,7 @@ export interface FileRoutesByTo {
   '/ca': typeof CaIndexRoute
   '/en': typeof EnIndexRoute
   '/admin/content/$pageKey': typeof AdminContentPageKeyRoute
+  '/admin/content/redirects': typeof AdminContentRedirectsRoute
   '/admin/content/urls': typeof AdminContentUrlsRoute
   '/admin/rentals/active': typeof AdminRentalsActiveRoute
   '/admin/rentals/catalog': typeof AdminRentalsCatalogRoute
@@ -445,6 +453,7 @@ export interface FileRoutesById {
   '/ca/': typeof CaIndexRoute
   '/en/': typeof EnIndexRoute
   '/admin/content/$pageKey': typeof AdminContentPageKeyRoute
+  '/admin/content/redirects': typeof AdminContentRedirectsRoute
   '/admin/content/urls': typeof AdminContentUrlsRoute
   '/admin/rentals/active': typeof AdminRentalsActiveRoute
   '/admin/rentals/catalog': typeof AdminRentalsCatalogRoute
@@ -498,6 +507,7 @@ export interface FileRouteTypes {
     | '/ca/'
     | '/en/'
     | '/admin/content/$pageKey'
+    | '/admin/content/redirects'
     | '/admin/content/urls'
     | '/admin/rentals/active'
     | '/admin/rentals/catalog'
@@ -545,6 +555,7 @@ export interface FileRouteTypes {
     | '/ca'
     | '/en'
     | '/admin/content/$pageKey'
+    | '/admin/content/redirects'
     | '/admin/content/urls'
     | '/admin/rentals/active'
     | '/admin/rentals/catalog'
@@ -596,6 +607,7 @@ export interface FileRouteTypes {
     | '/ca/'
     | '/en/'
     | '/admin/content/$pageKey'
+    | '/admin/content/redirects'
     | '/admin/content/urls'
     | '/admin/rentals/active'
     | '/admin/rentals/catalog'
@@ -981,6 +993,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminContentUrlsRouteImport
       parentRoute: typeof AdminContentRoute
     }
+    '/admin/content/redirects': {
+      id: '/admin/content/redirects'
+      path: '/redirects'
+      fullPath: '/admin/content/redirects'
+      preLoaderRoute: typeof AdminContentRedirectsRouteImport
+      parentRoute: typeof AdminContentRoute
+    }
     '/admin/content/$pageKey': {
       id: '/admin/content/$pageKey'
       path: '/$pageKey'
@@ -993,12 +1012,14 @@ declare module '@tanstack/react-router' {
 
 interface AdminContentRouteChildren {
   AdminContentPageKeyRoute: typeof AdminContentPageKeyRoute
+  AdminContentRedirectsRoute: typeof AdminContentRedirectsRoute
   AdminContentUrlsRoute: typeof AdminContentUrlsRoute
   AdminContentIndexRoute: typeof AdminContentIndexRoute
 }
 
 const AdminContentRouteChildren: AdminContentRouteChildren = {
   AdminContentPageKeyRoute: AdminContentPageKeyRoute,
+  AdminContentRedirectsRoute: AdminContentRedirectsRoute,
   AdminContentUrlsRoute: AdminContentUrlsRoute,
   AdminContentIndexRoute: AdminContentIndexRoute,
 }
