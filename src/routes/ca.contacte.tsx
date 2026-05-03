@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { ContactPage } from "@/components/pages/ContactPage";
 
-export const Route = createFileRoute("/ca/contact")({
+export const Route = createFileRoute("/ca/contacte")({
   head: () => ({
     meta: [
       { title: "Contacte — KLEFF" },

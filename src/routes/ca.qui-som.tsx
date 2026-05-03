@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { AboutPage } from "@/components/pages/AboutPage";
 
-export const Route = createFileRoute("/ca/about")({
+export const Route = createFileRoute("/ca/qui-som")({
   head: () => ({
     meta: [
       { title: "Qui som — KLEFF" },
