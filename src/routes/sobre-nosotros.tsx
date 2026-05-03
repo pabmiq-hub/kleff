@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { AboutPage } from "@/components/pages/AboutPage";
 
-export const Route = createFileRoute("/about")({
+export const Route = createFileRoute("/sobre-nosotros")({
   head: () => ({
     meta: [
       { title: "Quiénes somos — KLEFF" },

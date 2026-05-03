@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { HowItWorksPage } from "@/components/pages/HowItWorksPage";
 
-export const Route = createFileRoute("/how-it-works")({
+export const Route = createFileRoute("/como-funciona")({
   head: () => ({
     meta: [
       { title: "Cómo funciona — KLEFF" },
