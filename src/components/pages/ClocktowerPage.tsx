@@ -68,7 +68,7 @@ type LocationItem = {
 };
 
 export function ClocktowerPage() {
-  const { locale } = useI18n();
+  const { locale, href } = useI18n();
 
   const hero = useSectionContent<{
     eyebrow: string;
@@ -142,7 +142,7 @@ export function ClocktowerPage() {
         <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-12 md:pt-20 pb-20 grid lg:grid-cols-12 gap-10 items-center">
           <div className="lg:col-span-7 order-2 lg:order-1">
             <Link
-              to="/how-it-works"
+              to={href("/how-it-works")}
               className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest text-cream/60 hover:text-coral mb-5"
             >
               {backLabel}
@@ -316,7 +316,7 @@ export function ClocktowerPage() {
                 {cta.whatsappLabel}
               </a>
               <Link
-                to="/how-it-works"
+                to={href("/how-it-works")}
                 className="inline-flex items-center gap-2 rounded-2xl bg-ink text-cream border-2 border-ink px-6 py-3.5 text-sm font-bold hover:bg-foreground transition-colors"
               >
                 {locale === "en" ? "Other communities" : locale === "ca" ? "Altres comunitats" : "Otras comunidades"}
