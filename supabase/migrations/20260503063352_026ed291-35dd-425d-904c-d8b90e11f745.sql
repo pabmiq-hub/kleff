@@ -1,0 +1,1 @@
+ALTER TABLE public.content_redirects ADD CONSTRAINT content_redirects_from_path_key UNIQUE (from_path);
