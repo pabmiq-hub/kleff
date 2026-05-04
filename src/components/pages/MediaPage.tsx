@@ -12,6 +12,8 @@ import { useI18n } from "@/i18n/I18nProvider";
 import { SiteLayout } from "@/components/site/SiteLayout";
 import type { MediaItem } from "@/server/media.functions";
 import { EditableText } from "@/editor/Editable";
+import { useSectionContent } from "@/cms/useSectionContent";
+import { or } from "@/cms/or";
 
 type LoaderData = {
   mediaItems: MediaItem[];
