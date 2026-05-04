@@ -84,25 +84,25 @@ export function ContactPage() {
             <InfoCard
               icon={<Mail className="h-5 w-5" />}
               title="Email"
-              value="hola@kleff.es"
-              href="mailto:hola@kleff.es"
+              value={info.email}
+              href={`mailto:${info.email}`}
             />
             <InfoCard
               icon={<Phone className="h-5 w-5" />}
               title="Teléfono"
-              value="605 355 109"
-              href="tel:+34605355109"
+              value={info.phone}
+              href={`tel:${info.phone.replace(/\s+/g, "")}`}
             />
             <InfoCard
               icon={<Instagram className="h-5 w-5" />}
               title="Instagram"
-              value="@kleff.bcn"
-              href="https://www.instagram.com/kleff.bcn/"
+              value={info.instagram}
+              href={info.instagramUrl}
             />
             <InfoCard
               icon={<MapPin className="h-5 w-5" />}
               title={t.contact.findUs}
-              value="L'Estació Espai Gastronòmic · Av. Marquès de l'Argentera 6-8, Barcelona"
+              value={info.address}
             />
           </div>
         </div>
