@@ -3,9 +3,19 @@ import { Mail, MapPin, Phone, Instagram, Send, CheckCircle2 } from "lucide-react
 import { useI18n } from "@/i18n/I18nProvider";
 import { SiteLayout } from "@/components/site/SiteLayout";
 import { EditableText } from "@/editor/Editable";
+import { useSectionContent } from "@/cms/useSectionContent";
+import { or } from "@/cms/or";
 
 export function ContactPage() {
   const { t } = useI18n();
+  const hero = useSectionContent("contact.hero");
+  const info = useSectionContent<{
+    email: string;
+    phone: string;
+    instagram: string;
+    instagramUrl: string;
+    address: string;
+  }>("contact.info");
   const [submitted, setSubmitted] = useState(false);
 
   return (
