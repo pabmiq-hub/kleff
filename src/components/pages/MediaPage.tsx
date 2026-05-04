@@ -12,6 +12,8 @@ import { useI18n } from "@/i18n/I18nProvider";
 import { SiteLayout } from "@/components/site/SiteLayout";
 import type { MediaItem } from "@/server/media.functions";
 import { EditableText } from "@/editor/Editable";
+import { useSectionContent } from "@/cms/useSectionContent";
+import { or } from "@/cms/or";
 
 type LoaderData = {
   mediaItems: MediaItem[];
@@ -162,6 +164,8 @@ function formatFollowers(count: number | null, locale: string): string {
 export function MediaPage() {
   const { t, locale } = useI18n();
   const { mediaItems: items, followers } = useMediaData();
+  const hero = useSectionContent("media.hero");
+  const ig = useSectionContent("media.instagram");
 
   // Group items by year, newest first
   const byYear = items.reduce<Record<number, MediaItem[]>>((acc, item) => {
@@ -188,13 +192,13 @@ export function MediaPage() {
         <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 pt-16 md:pt-24 pb-16 text-center">
           <span className="inline-flex items-center gap-2 rounded-full bg-coral/10 border-2 border-coral/30 px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-coral-deep">
             <Sparkles className="h-3.5 w-3.5" />
-            <EditableText id="media.hero.eyebrow" as="span">{t.media.eyebrow}</EditableText>
+          <EditableText id="media.hero.eyebrow" as="span">{or(hero.eyebrow, t.media.eyebrow)}</EditableText>
           </span>
           <EditableText id="media.hero.title" as="h1" className="mt-6 text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-display font-semibold leading-[0.98] tracking-tight">
-            {t.media.title}
+            {or(hero.title, t.media.title)}
           </EditableText>
           <EditableText id="media.hero.intro" as="p" className="mt-7 text-lg sm:text-xl text-foreground/75 max-w-3xl mx-auto leading-relaxed">
-            {t.media.intro}
+            {or(hero.intro, t.media.intro)}
           </EditableText>
         </div>
       </section>
@@ -245,12 +249,12 @@ export function MediaPage() {
               <span className="inline-flex items-center gap-2 bg-coral text-cream border-2 border-ink rounded-full px-3 py-1 text-xs font-bold uppercase tracking-widest shadow-tactile-sm">
                 <Instagram className="h-3.5 w-3.5" /> @kleff.bcn
               </span>
-              <h2 className="mt-6 text-3xl sm:text-4xl lg:text-5xl font-display font-semibold leading-tight">
-                {t.media.instagramTitle}
-              </h2>
-              <p className="mt-5 text-lg text-foreground/75 leading-relaxed">
-                {t.media.instagramSubtitle}
-              </p>
+              <EditableText id="media.instagram.title" as="h2" className="mt-6 text-3xl sm:text-4xl lg:text-5xl font-display font-semibold leading-tight">
+                {or(ig.title, t.media.instagramTitle)}
+              </EditableText>
+              <EditableText id="media.instagram.subtitle" as="p" className="mt-5 text-lg text-foreground/75 leading-relaxed">
+                {or(ig.subtitle, t.media.instagramSubtitle)}
+              </EditableText>
               <a
                 href="https://www.instagram.com/kleff.bcn/"
                 target="_blank"
@@ -258,7 +262,7 @@ export function MediaPage() {
                 className="mt-8 inline-flex items-center gap-2 rounded-2xl bg-ink text-cream border-2 border-ink px-7 py-4 text-base font-bold shadow-tactile hover:translate-x-[3px] hover:translate-y-[3px] hover:shadow-tactile-sm transition-all"
               >
                 <Instagram className="h-5 w-5" />
-                {t.media.instagramCta}
+                {or(ig.ctaLabel, t.media.instagramCta)}
               </a>
               <p className="mt-4 text-sm text-foreground/60 tabular-nums">
                 <strong className="text-foreground">{formatFollowers(followers.count, locale)}</strong>{" "}

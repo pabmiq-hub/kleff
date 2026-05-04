@@ -5,6 +5,9 @@ import { SiteLayout } from "@/components/site/SiteLayout";
 import { listLudoteca } from "@/server/ludoteca.functions";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { EditableText } from "@/editor/Editable";
+import { useSectionContent } from "@/cms/useSectionContent";
+import { or } from "@/cms/or";
 
 interface BggGame {
   id: string;
@@ -199,7 +202,7 @@ function FilterChip({
 export function LudotecaPage() {
   const { locale } = useI18n();
   const t = T[locale];
-  
+  const hero = useSectionContent("ludoteca.hero");
 
   const [games, setGames] = useState<BggGame[]>([]);
   const [syncedAt, setSyncedAt] = useState<string | null>(null);
@@ -316,12 +319,12 @@ export function LudotecaPage() {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-14 md:pt-20 pb-10">
           <span className="inline-flex items-center gap-2 rounded-full bg-coral/10 border-2 border-coral/30 px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-coral-deep">
             <Star className="h-3.5 w-3.5" />
-            {t.eyebrow}
+            <EditableText id="ludoteca.hero.eyebrow" as="span">{or(hero.eyebrow, t.eyebrow)}</EditableText>
           </span>
-          <h1 className="mt-5 text-4xl sm:text-5xl md:text-6xl font-display font-semibold leading-[1.02] tracking-tight">
-            {t.title}
-          </h1>
-          <p className="mt-5 text-lg text-foreground/75 max-w-3xl leading-relaxed">{t.intro}</p>
+          <EditableText id="ludoteca.hero.title" as="h1" className="mt-5 text-4xl sm:text-5xl md:text-6xl font-display font-semibold leading-[1.02] tracking-tight">
+            {or(hero.title, t.title)}
+          </EditableText>
+          <EditableText id="ludoteca.hero.intro" as="p" className="mt-5 text-lg text-foreground/75 max-w-3xl leading-relaxed">{or(hero.intro, t.intro)}</EditableText>
 
           <div className="mt-8 flex flex-col sm:flex-row gap-3 sm:items-center">
             <div className="relative flex-1 max-w-2xl">

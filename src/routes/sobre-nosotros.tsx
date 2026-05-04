@@ -1,7 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { getPageContent } from "@/server/content.functions";
 import { AboutPage } from "@/components/pages/AboutPage";
 
 export const Route = createFileRoute("/sobre-nosotros")({
+  loader: () => getPageContent({ data: { pageKey: "about" } }).then((pageContent) => ({ pageContent })),
   head: () => ({
     meta: [
       { title: "Quiénes somos — KLEFF" },

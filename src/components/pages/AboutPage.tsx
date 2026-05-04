@@ -5,6 +5,8 @@ import { useI18n } from "@/i18n/I18nProvider";
 import { SiteLayout } from "@/components/site/SiteLayout";
 import { HistoryTimeline } from "@/components/about/HistoryTimeline";
 import { EditableText, EditableImage } from "@/editor/Editable";
+import { useSectionContent } from "@/cms/useSectionContent";
+import { or } from "@/cms/or";
 
 type TeamMember = {
   name: string;
@@ -120,6 +122,10 @@ const TEAM: TeamMember[] = [
 
 export function AboutPage() {
   const { t, locale, href } = useI18n();
+  const hero = useSectionContent("about.hero");
+  const mission = useSectionContent("about.mission");
+  const manifesto = useSectionContent("about.manifesto");
+  const cta = useSectionContent("about.cta");
 
   const manifestoLine1 =
     locale === "en"
@@ -142,24 +148,27 @@ export function AboutPage() {
           <div className="lg:col-span-7">
             <span className="inline-flex items-center gap-2 stamp-coral text-xs font-bold uppercase tracking-widest mb-5">
               <Sparkles className="h-3.5 w-3.5" />
-              <EditableText id="about.hero.eyebrow" as="span">{t.about.eyebrow}</EditableText>
+              <EditableText id="about.hero.eyebrow" as="span">{or(hero.eyebrow, t.about.eyebrow)}</EditableText>
             </span>
             <EditableText id="about.hero.title" as="h1" className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-display font-semibold leading-[1.02] tracking-normal text-foreground break-words">
-              {locale === "en"
-                ? "Born in Barcelona, fueled by board games."
-                : locale === "ca"
-                  ? "Nascuts a Barcelona, mouts pels jocs de taula."
-                  : "Nacidos en Barcelona, movidos por los juegos de mesa."}
+              {or(
+                hero.title,
+                locale === "en"
+                  ? "Born in Barcelona, fueled by board games."
+                  : locale === "ca"
+                    ? "Nascuts a Barcelona, mouts pels jocs de taula."
+                    : "Nacidos en Barcelona, movidos por los juegos de mesa."
+              )}
             </EditableText>
             <EditableText id="about.hero.intro" as="p" className="mt-6 text-lg sm:text-xl text-foreground/75 max-w-2xl leading-relaxed">
-              {t.about.intro}
+              {or(hero.intro, t.about.intro)}
             </EditableText>
           </div>
           <div className="lg:col-span-5">
             <div className="relative bg-card border-4 border-ink rounded-3xl shadow-tactile-lg overflow-hidden aspect-[4/3]">
               <EditableImage
                 id="about.hero.image"
-                src={venueImg}
+                src={or(hero.image, venueImg)}
                 alt="L'Estació de França — sede de KLEFF"
                 width={1600}
                 height={1200}
@@ -193,28 +202,37 @@ export function AboutPage() {
         <div className="absolute bottom-10 right-20 size-20 bg-coral/40 border-4 border-cream/20 rounded-full hidden md:block" />
         <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 relative">
           <EditableText id="about.mission.eyebrow" as="span" className="inline-block bg-coral text-cream px-3 py-1 text-xs font-bold uppercase tracking-widest mb-6">
-            {locale === "en" ? "Mission" : locale === "ca" ? "Missió" : "Misión"}
+            {or(mission.eyebrow, locale === "en" ? "Mission" : locale === "ca" ? "Missió" : "Misión")}
           </EditableText>
           <EditableText id="about.mission.title" as="h2" className="text-4xl sm:text-5xl lg:text-6xl font-display font-semibold text-cream leading-tight">
-            {locale === "en"
-              ? "A meeting point for young people from anywhere in the world."
-              : locale === "ca"
-                ? "Un punt de trobada per a joves d'arreu del món."
-                : "Un punto de encuentro para jóvenes de todo el mundo."}
+            {or(
+              mission.title,
+              locale === "en"
+                ? "A meeting point for young people from anywhere in the world."
+                : locale === "ca"
+                  ? "Un punt de trobada per a joves d'arreu del món."
+                  : "Un punto de encuentro para jóvenes de todo el mundo."
+            )}
           </EditableText>
           <EditableText id="about.mission.body" as="p" className="mt-8 text-lg sm:text-xl text-cream/85 max-w-3xl leading-relaxed">
-            {locale === "en"
-              ? "It doesn't matter where you're from or how old you are. The only thing needed to be a #kleffer is wanting to make new friends and learn new ways to have fun. Board games are the perfect excuse we use to connect people and break the ice."
-              : locale === "ca"
-                ? "No importa d'on vinguis ni quants anys tinguis. L'únic necessari per ser un #kleffer és voler fer nous amics i aprendre noves formes de divertir-se. Els jocs de taula són l'excusa perfecta per connectar persones i trencar el gel."
-                : "No importa de dónde vengas ni cuántos años tengas. Lo único necesario para ser un #kleffer es querer hacer nuevos amigos y aprender nuevas formas de divertirse. Los juegos de mesa son la excusa perfecta que usamos para conectar a las personas y romper el hielo."}
+            {or(
+              mission.body,
+              locale === "en"
+                ? "It doesn't matter where you're from or how old you are. The only thing needed to be a #kleffer is wanting to make new friends and learn new ways to have fun. Board games are the perfect excuse we use to connect people and break the ice."
+                : locale === "ca"
+                  ? "No importa d'on vinguis ni quants anys tinguis. L'únic necessari per ser un #kleffer és voler fer nous amics i aprendre noves formes de divertir-se. Els jocs de taula són l'excusa perfecta per connectar persones i trencar el gel."
+                  : "No importa de dónde vengas ni cuántos años tengas. Lo único necesario para ser un #kleffer es querer hacer nuevos amigos y aprender nuevas formas de divertirse. Los juegos de mesa son la excusa perfecta que usamos para conectar a las personas y romper el hielo."
+            )}
           </EditableText>
           <EditableText id="about.mission.cta" as="p" className="mt-6 text-lg font-display font-semibold text-coral">
-            {locale === "en"
-              ? "Dare to be part of our community?"
-              : locale === "ca"
-                ? "T'atreveixes a formar part de la nostra comunitat?"
-                : "¿Te atreves a ser parte de nuestra comunidad?"}
+            {or(
+              mission.cta,
+              locale === "en"
+                ? "Dare to be part of our community?"
+                : locale === "ca"
+                  ? "T'atreveixes a formar part de la nostra comunitat?"
+                  : "¿Te atreves a ser parte de nuestra comunidad?"
+            )}
           </EditableText>
         </div>
       </section>
@@ -287,25 +305,21 @@ export function AboutPage() {
 
         <div className="relative mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 text-center">
           <EditableText id="about.manifesto.eyebrow" as="span" className="inline-block bg-cream text-coral-deep px-3 py-1 text-xs font-bold uppercase tracking-[0.3em] mb-8 border-2 border-ink shadow-tactile-sm">
-            {locale === "en" ? "What drives us" : locale === "ca" ? "El que ens mou" : "Lo que nos mueve"}
+            {or(manifesto.eyebrow, locale === "en" ? "What drives us" : locale === "ca" ? "El que ens mou" : "Lo que nos mueve")}
           </EditableText>
           <blockquote className="font-display font-semibold text-3xl sm:text-5xl lg:text-6xl leading-[1.1] tracking-tight text-cream">
             <EditableText id="about.manifesto.line1" as="span">
-              {manifestoLine1}
+              {or(manifesto.line1, manifestoLine1)}
             </EditableText>
             <br />
             <EditableText id="about.manifesto.line2" as="span" className="italic text-cream">
-              {manifestoLine2}
+              {or(manifesto.line2, manifestoLine2)}
             </EditableText>
           </blockquote>
           <div className="mt-10 flex items-center justify-center gap-3">
             <div className="w-10 h-px bg-cream" />
             <EditableText id="about.manifesto.author" as="span" className="text-xs font-bold tracking-[0.3em] text-cream/85">
-              {locale === "en"
-                ? "PAU · KLEFF FOUNDER"
-                : locale === "ca"
-                  ? "PAU · FUNDADOR DE KLEFF"
-                  : "PAU · FUNDADOR DE KLEFF"}
+              {or(manifesto.author, locale === "en" ? "PAU · KLEFF FOUNDER" : "PAU · FUNDADOR DE KLEFF")}
             </EditableText>
             <div className="w-10 h-px bg-cream" />
           </div>
@@ -318,11 +332,14 @@ export function AboutPage() {
           <div className="relative bg-cream border-4 border-ink rounded-[2.5rem] px-6 sm:px-14 py-12 sm:py-16 text-center shadow-tactile-lg">
             <Calendar className="h-10 w-10 text-coral mx-auto" />
             <EditableText id="about.cta.title" as="h2" className="mt-4 text-3xl sm:text-4xl lg:text-5xl font-display font-semibold text-foreground">
-              {locale === "en"
-                ? "Want to be part of what comes next?"
-                : locale === "ca"
-                  ? "Vols formar part del que vindrà?"
-                  : "¿Quieres formar parte de lo que viene?"}
+              {or(
+                cta.title,
+                locale === "en"
+                  ? "Want to be part of what comes next?"
+                  : locale === "ca"
+                    ? "Vols formar part del que vindrà?"
+                    : "¿Quieres formar parte de lo que viene?"
+              )}
             </EditableText>
             <div className="mt-8 flex flex-wrap justify-center gap-4">
               <a

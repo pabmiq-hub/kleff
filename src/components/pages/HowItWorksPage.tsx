@@ -22,6 +22,8 @@ import { Link } from "@tanstack/react-router";
 import { useI18n } from "@/i18n/I18nProvider";
 import { SiteLayout } from "@/components/site/SiteLayout";
 import { EditableText } from "@/editor/Editable";
+import { useSectionContent } from "@/cms/useSectionContent";
+import { or } from "@/cms/or";
 
 type Cadence = "weekly" | "monthly" | "yearly" | "occasional";
 
@@ -193,6 +195,7 @@ function BenefitFlipCard({
 
 export function HowItWorksPage() {
   const { t, locale } = useI18n();
+  const hero = useSectionContent("how.hero");
   const [flipped, setFlipped] = useState<number | null>(null);
 
   const toggle = (i: number) => setFlipped((cur) => (cur === i ? null : i));
@@ -270,13 +273,13 @@ export function HowItWorksPage() {
         <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 pt-16 md:pt-24 pb-20 text-center">
           <span className="inline-flex items-center gap-2 rounded-full bg-coral/10 border-2 border-coral/30 px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-coral-deep">
             <Sparkles className="h-3.5 w-3.5" />
-            <EditableText id="how.hero.eyebrow" as="span">{t.how.eyebrow}</EditableText>
+            <EditableText id="how.hero.eyebrow" as="span">{or(hero.eyebrow, t.how.eyebrow)}</EditableText>
           </span>
           <EditableText id="how.hero.title" as="h1" className="mt-6 text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-display font-semibold leading-[0.98] tracking-tight">
-            {t.how.title}
+            {or(hero.title, t.how.title)}
           </EditableText>
           <EditableText id="how.hero.intro" as="p" className="mt-7 text-lg sm:text-xl text-foreground/75 max-w-3xl mx-auto leading-relaxed">
-            {t.how.intro}
+            {or(hero.intro, t.how.intro)}
           </EditableText>
 
           {/* Non-profit + consumption stickers */}

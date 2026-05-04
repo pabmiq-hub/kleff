@@ -1,7 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { getPageContent } from "@/server/content.functions";
 import { ContactPage } from "@/components/pages/ContactPage";
 
 export const Route = createFileRoute("/contacto")({
+  loader: () => getPageContent({ data: { pageKey: "contact" } }).then((pageContent) => ({ pageContent })),
   head: () => ({
     meta: [
       { title: "Contacto — KLEFF" },

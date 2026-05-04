@@ -312,9 +312,242 @@ const clocktowerSchema: PageSchema = {
   ],
 };
 
+// ---------------- ABOUT ----------------
+
+const aboutSchema: PageSchema = {
+  key: "about",
+  label: "Quiénes somos",
+  path: "/sobre-nosotros",
+  description: "Página About: hero, misión, manifiesto y CTA final. El equipo y el timeline se gestionan en código.",
+  sections: [
+    {
+      key: "about.hero",
+      label: "Hero (cabecera)",
+      fields: {
+        eyebrow: { kind: "text", label: "Etiqueta superior" },
+        title: { kind: "text", label: "Título principal" },
+        intro: { kind: "textarea", label: "Intro", rows: 3 },
+        image: { kind: "image", label: "Imagen lateral" },
+      },
+      defaults: { eyebrow: "", title: "", intro: "", image: "" },
+    },
+    {
+      key: "about.mission",
+      label: "Misión",
+      fields: {
+        eyebrow: { kind: "text", label: "Etiqueta superior" },
+        title: { kind: "text", label: "Título" },
+        body: { kind: "textarea", label: "Texto", rows: 5 },
+        cta: { kind: "text", label: "Línea final destacada" },
+      },
+      defaults: { eyebrow: "", title: "", body: "", cta: "" },
+    },
+    {
+      key: "about.manifesto",
+      label: "Manifiesto",
+      fields: {
+        eyebrow: { kind: "text", label: "Etiqueta superior" },
+        line1: { kind: "text", label: "Frase 1" },
+        line2: { kind: "text", label: "Frase 2 (cursiva)" },
+        author: { kind: "text", label: "Autor" },
+      },
+      defaults: { eyebrow: "", line1: "", line2: "", author: "" },
+    },
+    {
+      key: "about.cta",
+      label: "CTA final",
+      fields: {
+        title: { kind: "text", label: "Título" },
+      },
+      defaults: { title: "" },
+    },
+  ],
+};
+
+// ---------------- HOW IT WORKS ----------------
+
+const howSchema: PageSchema = {
+  key: "how",
+  label: "Cómo funciona",
+  path: "/como-funciona",
+  description: "Página de cómo funciona KLEFF. Las listas largas de actividades, beneficios y comunidades se gestionan desde el código.",
+  sections: [
+    {
+      key: "how.hero",
+      label: "Hero",
+      fields: {
+        eyebrow: { kind: "text", label: "Etiqueta superior" },
+        title: { kind: "text", label: "Título" },
+        intro: { kind: "textarea", label: "Intro", rows: 4 },
+      },
+      defaults: { eyebrow: "", title: "", intro: "" },
+    },
+    {
+      key: "how.steps",
+      label: "Cómo funciona — encabezado",
+      fields: {
+        title: { kind: "text", label: "Título" },
+        body: { kind: "textarea", label: "Cuerpo", rows: 3 },
+      },
+      defaults: { title: "", body: "" },
+    },
+    {
+      key: "how.activities",
+      label: "Actividades — encabezado",
+      fields: {
+        title: { kind: "text", label: "Título" },
+        subtitle: { kind: "textarea", label: "Subtítulo", rows: 2 },
+      },
+      defaults: { title: "", subtitle: "" },
+    },
+    {
+      key: "how.communities",
+      label: "Comunidades — encabezado",
+      fields: {
+        eyebrow: { kind: "text", label: "Etiqueta" },
+        title: { kind: "text", label: "Título" },
+        intro: { kind: "textarea", label: "Intro", rows: 3 },
+      },
+      defaults: { eyebrow: "", title: "", intro: "" },
+    },
+    {
+      key: "how.member",
+      label: "Hazte socio",
+      fields: {
+        eyebrow: { kind: "text", label: "Etiqueta" },
+        title: { kind: "text", label: "Título" },
+        subtitle: { kind: "textarea", label: "Subtítulo", rows: 2 },
+        ctaTitle: { kind: "text", label: "CTA — título" },
+        ctaBody: { kind: "textarea", label: "CTA — cuerpo", rows: 3 },
+        ctaLabel: { kind: "text", label: "CTA — botón" },
+      },
+      defaults: { eyebrow: "", title: "", subtitle: "", ctaTitle: "", ctaBody: "", ctaLabel: "" },
+    },
+  ],
+};
+
+// ---------------- CONTACT ----------------
+
+const contactSchema: PageSchema = {
+  key: "contact",
+  label: "Contacto",
+  path: "/contacto",
+  sections: [
+    {
+      key: "contact.hero",
+      label: "Hero",
+      fields: {
+        eyebrow: { kind: "text", label: "Etiqueta" },
+        title: { kind: "text", label: "Título" },
+        subtitle: { kind: "textarea", label: "Subtítulo", rows: 3 },
+      },
+      defaults: { eyebrow: "", title: "", subtitle: "" },
+    },
+    {
+      key: "contact.info",
+      label: "Datos de contacto",
+      fields: {
+        email: { kind: "text", label: "Email" },
+        phone: { kind: "text", label: "Teléfono" },
+        instagram: { kind: "text", label: "Instagram (handle)" },
+        instagramUrl: { kind: "url", label: "Instagram URL" },
+        address: { kind: "textarea", label: "Dirección", rows: 2 },
+      },
+      defaults: {
+        email: "hola@kleff.es",
+        phone: "605 355 109",
+        instagram: "@kleff.bcn",
+        instagramUrl: "https://www.instagram.com/kleff.bcn/",
+        address: "L'Estació Espai Gastronòmic · Av. Marquès de l'Argentera 6-8, Barcelona",
+      },
+    },
+  ],
+};
+
+// ---------------- MEDIA ----------------
+
+const mediaSchema: PageSchema = {
+  key: "media",
+  label: "Media",
+  path: "/medios",
+  description: "Página de medios. La lista de apariciones de prensa se gestiona desde el panel de Media.",
+  sections: [
+    {
+      key: "media.hero",
+      label: "Hero",
+      fields: {
+        eyebrow: { kind: "text", label: "Etiqueta" },
+        title: { kind: "text", label: "Título" },
+        intro: { kind: "textarea", label: "Intro", rows: 3 },
+      },
+      defaults: { eyebrow: "", title: "", intro: "" },
+    },
+    {
+      key: "media.instagram",
+      label: "Bloque Instagram",
+      fields: {
+        title: { kind: "text", label: "Título" },
+        subtitle: { kind: "textarea", label: "Subtítulo", rows: 3 },
+        ctaLabel: { kind: "text", label: "Texto del botón" },
+      },
+      defaults: { title: "", subtitle: "", ctaLabel: "" },
+    },
+  ],
+};
+
+// ---------------- BLOG ----------------
+
+const blogSchema: PageSchema = {
+  key: "blog",
+  label: "Blog",
+  path: "/blog",
+  sections: [
+    {
+      key: "blog.hero",
+      label: "Hero",
+      fields: {
+        eyebrow: { kind: "text", label: "Etiqueta" },
+        title: { kind: "text", label: "Título" },
+        body: { kind: "textarea", label: "Cuerpo", rows: 4 },
+      },
+      defaults: { eyebrow: "", title: "", body: "" },
+    },
+  ],
+};
+
+// ---------------- LUDOTECA ----------------
+
+const ludotecaSchema: PageSchema = {
+  key: "ludoteca",
+  label: "Ludoteca",
+  path: "/ludoteca",
+  description: "Página de la ludoteca. La colección de juegos se sincroniza con BGG.",
+  sections: [
+    {
+      key: "ludoteca.hero",
+      label: "Hero",
+      fields: {
+        eyebrow: { kind: "text", label: "Etiqueta" },
+        title: { kind: "text", label: "Título" },
+        intro: { kind: "textarea", label: "Intro", rows: 3 },
+      },
+      defaults: { eyebrow: "", title: "", intro: "" },
+    },
+  ],
+};
+
 // ---------------- REGISTRY ----------------
 
-export const PAGE_SCHEMAS: PageSchema[] = [homeSchema, clocktowerSchema];
+export const PAGE_SCHEMAS: PageSchema[] = [
+  homeSchema,
+  clocktowerSchema,
+  aboutSchema,
+  howSchema,
+  contactSchema,
+  mediaSchema,
+  blogSchema,
+  ludotecaSchema,
+];
 
 export function getPageSchema(key: string): PageSchema | undefined {
   return PAGE_SCHEMAS.find((p) => p.key === key);
