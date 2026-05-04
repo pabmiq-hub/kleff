@@ -148,17 +148,20 @@ export function AboutPage() {
           <div className="lg:col-span-7">
             <span className="inline-flex items-center gap-2 stamp-coral text-xs font-bold uppercase tracking-widest mb-5">
               <Sparkles className="h-3.5 w-3.5" />
-              <EditableText id="about.hero.eyebrow" as="span">{t.about.eyebrow}</EditableText>
+              <EditableText id="about.hero.eyebrow" as="span">{or(hero.eyebrow, t.about.eyebrow)}</EditableText>
             </span>
             <EditableText id="about.hero.title" as="h1" className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-display font-semibold leading-[1.02] tracking-normal text-foreground break-words">
-              {locale === "en"
-                ? "Born in Barcelona, fueled by board games."
-                : locale === "ca"
-                  ? "Nascuts a Barcelona, mouts pels jocs de taula."
-                  : "Nacidos en Barcelona, movidos por los juegos de mesa."}
+              {or(
+                hero.title,
+                locale === "en"
+                  ? "Born in Barcelona, fueled by board games."
+                  : locale === "ca"
+                    ? "Nascuts a Barcelona, mouts pels jocs de taula."
+                    : "Nacidos en Barcelona, movidos por los juegos de mesa."
+              )}
             </EditableText>
             <EditableText id="about.hero.intro" as="p" className="mt-6 text-lg sm:text-xl text-foreground/75 max-w-2xl leading-relaxed">
-              {t.about.intro}
+              {or(hero.intro, t.about.intro)}
             </EditableText>
           </div>
           <div className="lg:col-span-5">
