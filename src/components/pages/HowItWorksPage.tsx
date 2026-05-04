@@ -22,6 +22,8 @@ import { Link } from "@tanstack/react-router";
 import { useI18n } from "@/i18n/I18nProvider";
 import { SiteLayout } from "@/components/site/SiteLayout";
 import { EditableText } from "@/editor/Editable";
+import { useSectionContent } from "@/cms/useSectionContent";
+import { or } from "@/cms/or";
 
 type Cadence = "weekly" | "monthly" | "yearly" | "occasional";
 
