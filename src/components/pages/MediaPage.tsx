@@ -249,12 +249,12 @@ export function MediaPage() {
               <span className="inline-flex items-center gap-2 bg-coral text-cream border-2 border-ink rounded-full px-3 py-1 text-xs font-bold uppercase tracking-widest shadow-tactile-sm">
                 <Instagram className="h-3.5 w-3.5" /> @kleff.bcn
               </span>
-              <h2 className="mt-6 text-3xl sm:text-4xl lg:text-5xl font-display font-semibold leading-tight">
-                {t.media.instagramTitle}
-              </h2>
-              <p className="mt-5 text-lg text-foreground/75 leading-relaxed">
-                {t.media.instagramSubtitle}
-              </p>
+              <EditableText id="media.instagram.title" as="h2" className="mt-6 text-3xl sm:text-4xl lg:text-5xl font-display font-semibold leading-tight">
+                {or(ig.title, t.media.instagramTitle)}
+              </EditableText>
+              <EditableText id="media.instagram.subtitle" as="p" className="mt-5 text-lg text-foreground/75 leading-relaxed">
+                {or(ig.subtitle, t.media.instagramSubtitle)}
+              </EditableText>
               <a
                 href="https://www.instagram.com/kleff.bcn/"
                 target="_blank"
@@ -262,7 +262,7 @@ export function MediaPage() {
                 className="mt-8 inline-flex items-center gap-2 rounded-2xl bg-ink text-cream border-2 border-ink px-7 py-4 text-base font-bold shadow-tactile hover:translate-x-[3px] hover:translate-y-[3px] hover:shadow-tactile-sm transition-all"
               >
                 <Instagram className="h-5 w-5" />
-                {t.media.instagramCta}
+                {or(ig.ctaLabel, t.media.instagramCta)}
               </a>
               <p className="mt-4 text-sm text-foreground/60 tabular-nums">
                 <strong className="text-foreground">{formatFollowers(followers.count, locale)}</strong>{" "}
