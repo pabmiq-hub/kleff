@@ -195,6 +195,7 @@ function BenefitFlipCard({
 
 export function HowItWorksPage() {
   const { t, locale } = useI18n();
+  const hero = useSectionContent("how.hero");
   const [flipped, setFlipped] = useState<number | null>(null);
 
   const toggle = (i: number) => setFlipped((cur) => (cur === i ? null : i));
