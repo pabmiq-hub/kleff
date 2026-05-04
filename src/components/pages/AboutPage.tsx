@@ -202,28 +202,37 @@ export function AboutPage() {
         <div className="absolute bottom-10 right-20 size-20 bg-coral/40 border-4 border-cream/20 rounded-full hidden md:block" />
         <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 relative">
           <EditableText id="about.mission.eyebrow" as="span" className="inline-block bg-coral text-cream px-3 py-1 text-xs font-bold uppercase tracking-widest mb-6">
-            {locale === "en" ? "Mission" : locale === "ca" ? "Missió" : "Misión"}
+            {or(mission.eyebrow, locale === "en" ? "Mission" : locale === "ca" ? "Missió" : "Misión")}
           </EditableText>
           <EditableText id="about.mission.title" as="h2" className="text-4xl sm:text-5xl lg:text-6xl font-display font-semibold text-cream leading-tight">
-            {locale === "en"
-              ? "A meeting point for young people from anywhere in the world."
-              : locale === "ca"
-                ? "Un punt de trobada per a joves d'arreu del món."
-                : "Un punto de encuentro para jóvenes de todo el mundo."}
+            {or(
+              mission.title,
+              locale === "en"
+                ? "A meeting point for young people from anywhere in the world."
+                : locale === "ca"
+                  ? "Un punt de trobada per a joves d'arreu del món."
+                  : "Un punto de encuentro para jóvenes de todo el mundo."
+            )}
           </EditableText>
           <EditableText id="about.mission.body" as="p" className="mt-8 text-lg sm:text-xl text-cream/85 max-w-3xl leading-relaxed">
-            {locale === "en"
-              ? "It doesn't matter where you're from or how old you are. The only thing needed to be a #kleffer is wanting to make new friends and learn new ways to have fun. Board games are the perfect excuse we use to connect people and break the ice."
-              : locale === "ca"
-                ? "No importa d'on vinguis ni quants anys tinguis. L'únic necessari per ser un #kleffer és voler fer nous amics i aprendre noves formes de divertir-se. Els jocs de taula són l'excusa perfecta per connectar persones i trencar el gel."
-                : "No importa de dónde vengas ni cuántos años tengas. Lo único necesario para ser un #kleffer es querer hacer nuevos amigos y aprender nuevas formas de divertirse. Los juegos de mesa son la excusa perfecta que usamos para conectar a las personas y romper el hielo."}
+            {or(
+              mission.body,
+              locale === "en"
+                ? "It doesn't matter where you're from or how old you are. The only thing needed to be a #kleffer is wanting to make new friends and learn new ways to have fun. Board games are the perfect excuse we use to connect people and break the ice."
+                : locale === "ca"
+                  ? "No importa d'on vinguis ni quants anys tinguis. L'únic necessari per ser un #kleffer és voler fer nous amics i aprendre noves formes de divertir-se. Els jocs de taula són l'excusa perfecta per connectar persones i trencar el gel."
+                  : "No importa de dónde vengas ni cuántos años tengas. Lo único necesario para ser un #kleffer es querer hacer nuevos amigos y aprender nuevas formas de divertirse. Los juegos de mesa son la excusa perfecta que usamos para conectar a las personas y romper el hielo."
+            )}
           </EditableText>
           <EditableText id="about.mission.cta" as="p" className="mt-6 text-lg font-display font-semibold text-coral">
-            {locale === "en"
-              ? "Dare to be part of our community?"
-              : locale === "ca"
-                ? "T'atreveixes a formar part de la nostra comunitat?"
-                : "¿Te atreves a ser parte de nuestra comunidad?"}
+            {or(
+              mission.cta,
+              locale === "en"
+                ? "Dare to be part of our community?"
+                : locale === "ca"
+                  ? "T'atreveixes a formar part de la nostra comunitat?"
+                  : "¿Te atreves a ser parte de nuestra comunidad?"
+            )}
           </EditableText>
         </div>
       </section>
