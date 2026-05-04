@@ -122,6 +122,10 @@ const TEAM: TeamMember[] = [
 
 export function AboutPage() {
   const { t, locale, href } = useI18n();
+  const hero = useSectionContent("about.hero");
+  const mission = useSectionContent("about.mission");
+  const manifesto = useSectionContent("about.manifesto");
+  const cta = useSectionContent("about.cta");
 
   const manifestoLine1 =
     locale === "en"
