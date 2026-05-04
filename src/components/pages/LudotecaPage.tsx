@@ -5,6 +5,9 @@ import { SiteLayout } from "@/components/site/SiteLayout";
 import { listLudoteca } from "@/server/ludoteca.functions";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { EditableText } from "@/editor/Editable";
+import { useSectionContent } from "@/cms/useSectionContent";
+import { or } from "@/cms/or";
 
 interface BggGame {
   id: string;
