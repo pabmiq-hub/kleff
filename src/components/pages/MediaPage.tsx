@@ -164,6 +164,8 @@ function formatFollowers(count: number | null, locale: string): string {
 export function MediaPage() {
   const { t, locale } = useI18n();
   const { mediaItems: items, followers } = useMediaData();
+  const hero = useSectionContent("media.hero");
+  const ig = useSectionContent("media.instagram");
 
   // Group items by year, newest first
   const byYear = items.reduce<Record<number, MediaItem[]>>((acc, item) => {
