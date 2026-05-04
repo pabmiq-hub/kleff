@@ -1,14 +1,16 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { MediaPage } from "@/components/pages/MediaPage";
 import { getMediaItems, getInstagramFollowers } from "@/server/media.functions";
+import { getPageContent } from "@/server/content.functions";
 
 export const Route = createFileRoute("/medios")({
   loader: async () => {
-    const [mediaItems, followers] = await Promise.all([
+    const [mediaItems, followers, pageContent] = await Promise.all([
       getMediaItems(),
       getInstagramFollowers(),
+      getPageContent({ data: { pageKey: "media" } }),
     ]);
-    return { mediaItems, followers };
+    return { mediaItems, followers, pageContent };
   },
   head: () => ({
     meta: [
