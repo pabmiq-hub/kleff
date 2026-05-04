@@ -5,6 +5,8 @@ import { useI18n } from "@/i18n/I18nProvider";
 import { SiteLayout } from "@/components/site/SiteLayout";
 import { HistoryTimeline } from "@/components/about/HistoryTimeline";
 import { EditableText, EditableImage } from "@/editor/Editable";
+import { useSectionContent } from "@/cms/useSectionContent";
+import { or } from "@/cms/or";
 
 type TeamMember = {
   name: string;
