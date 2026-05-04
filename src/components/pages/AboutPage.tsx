@@ -305,25 +305,21 @@ export function AboutPage() {
 
         <div className="relative mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 text-center">
           <EditableText id="about.manifesto.eyebrow" as="span" className="inline-block bg-cream text-coral-deep px-3 py-1 text-xs font-bold uppercase tracking-[0.3em] mb-8 border-2 border-ink shadow-tactile-sm">
-            {locale === "en" ? "What drives us" : locale === "ca" ? "El que ens mou" : "Lo que nos mueve"}
+            {or(manifesto.eyebrow, locale === "en" ? "What drives us" : locale === "ca" ? "El que ens mou" : "Lo que nos mueve")}
           </EditableText>
           <blockquote className="font-display font-semibold text-3xl sm:text-5xl lg:text-6xl leading-[1.1] tracking-tight text-cream">
             <EditableText id="about.manifesto.line1" as="span">
-              {manifestoLine1}
+              {or(manifesto.line1, manifestoLine1)}
             </EditableText>
             <br />
             <EditableText id="about.manifesto.line2" as="span" className="italic text-cream">
-              {manifestoLine2}
+              {or(manifesto.line2, manifestoLine2)}
             </EditableText>
           </blockquote>
           <div className="mt-10 flex items-center justify-center gap-3">
             <div className="w-10 h-px bg-cream" />
             <EditableText id="about.manifesto.author" as="span" className="text-xs font-bold tracking-[0.3em] text-cream/85">
-              {locale === "en"
-                ? "PAU · KLEFF FOUNDER"
-                : locale === "ca"
-                  ? "PAU · FUNDADOR DE KLEFF"
-                  : "PAU · FUNDADOR DE KLEFF"}
+              {or(manifesto.author, locale === "en" ? "PAU · KLEFF FOUNDER" : "PAU · FUNDADOR DE KLEFF")}
             </EditableText>
             <div className="w-10 h-px bg-cream" />
           </div>
