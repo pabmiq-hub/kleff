@@ -168,7 +168,7 @@ export function AboutPage() {
             <div className="relative bg-card border-4 border-ink rounded-3xl shadow-tactile-lg overflow-hidden aspect-[4/3]">
               <EditableImage
                 id="about.hero.image"
-                src={venueImg}
+                src={or(hero.image, venueImg)}
                 alt="L'Estació de França — sede de KLEFF"
                 width={1600}
                 height={1200}
