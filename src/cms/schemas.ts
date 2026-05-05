@@ -163,7 +163,7 @@ const homeSchema: PageSchema = {
 const clocktowerSchema: PageSchema = {
   key: "clocktower",
   label: "Blood on the Clocktower",
-  path: "/clocktower",
+  path: "/blood-on-the-clocktower",
   description:
     "Página dedicada a la comunidad de Blood on the Clocktower de KLEFF: descripción del juego, reel de Instagram, localizaciones donde se juega y enlace al grupo de WhatsApp.",
   sections: [
@@ -172,7 +172,7 @@ const clocktowerSchema: PageSchema = {
       label: "Hero (cabecera)",
       description: "Cabecera principal con eyebrow, título, subtítulo y CTA al grupo de WhatsApp.",
       fields: {
-        eyebrow: { kind: "text", label: "Etiqueta superior", placeholder: "Comunidad activa · Partidas semanales" },
+        eyebrow: { kind: "text", label: "Etiqueta (badge junto al WhatsApp)", placeholder: "Comunidad activa · Partidas semanales" },
         title: { kind: "text", label: "Título principal" },
         subtitle: { kind: "textarea", label: "Subtítulo / intro", rows: 3 },
         whatsappLabel: { kind: "text", label: "Texto del botón de WhatsApp" },
@@ -318,7 +318,7 @@ const aboutSchema: PageSchema = {
   key: "about",
   label: "Quiénes somos",
   path: "/sobre-nosotros",
-  description: "Página About: hero, misión, manifiesto y CTA final. El equipo y el timeline se gestionan en código.",
+  description: "Página About: hero, misión, manifiesto, El Hilo (timeline editable) y Equipo (miembros editables).",
   sections: [
     {
       key: "about.hero",
@@ -341,6 +341,86 @@ const aboutSchema: PageSchema = {
         cta: { kind: "text", label: "Línea final destacada" },
       },
       defaults: { eyebrow: "", title: "", body: "", cta: "" },
+    },
+    {
+      key: "about.timeline",
+      label: "El Hilo (timeline)",
+      description: "Hitos en la historia de KLEFF. Puedes añadir, editar y reordenar.",
+      fields: {
+        eyebrow: { kind: "text", label: "Etiqueta superior" },
+        titlePrefix: { kind: "text", label: "Título — prefijo" },
+        titleHighlight: { kind: "text", label: "Título — palabra destacada (con marker)" },
+        titleSuffix: { kind: "text", label: "Título — sufijo" },
+        intro: { kind: "text", label: "Intro corta" },
+        items: {
+          kind: "list",
+          label: "Hitos",
+          itemLabel: "Hito",
+          fields: {
+            year: { kind: "text", label: "Año / etiqueta (ej: 2018, 2019 (I), OCT 2019)" },
+            emoji: { kind: "text", label: "Emoji" },
+            title: { kind: "text", label: "Título del hito" },
+            body: { kind: "textarea", label: "Descripción", rows: 3 },
+          },
+        },
+      },
+      defaults: {
+        eyebrow: "El hilo",
+        titlePrefix: "De 2018 a",
+        titleHighlight: "hoy",
+        titleSuffix: ", hito a hito.",
+        intro: "Sigue los números para recorrer la historia de KLEFF →",
+        items: [
+          { year: "2018", emoji: "🌱", title: "Una receta inesperada", body: "Pau atraviesa una depresión. La psicóloga le receta algo poco común: salir, probar, conocer gente. Idiomas, teatro, fotografía… y un Meetup de juegos de mesa que lo cambiaría todo." },
+          { year: "2019 (I)", emoji: "🎲", title: "Martes de juegos, domingos al sol", body: "Pau empieza a organizar martes noche de juegos y desayunos dominicales con juegos en el Parc de la Ciutadella." },
+          { year: "OCT 2019", emoji: "🎉", title: "Nace KLEFF", body: "Tras un año reuniéndose cada semana, Pau y su socio fundan KLEFF. Era hora de convertir aquella afición en comunidad." },
+          { year: "2019 (II)", emoji: "🍻", title: "+30 personas cada semana", body: "La noche de juegos semanal se establece como evento fijo. Las mesas se llenan, los desconocidos se hacen amigos." },
+          { year: "2020-21", emoji: "🕵️", title: "Pandemia y Treasure Hunts", body: "Seguimos jugando online y, después, presencial al aire libre. Nacen los Treasure Hunt: «Descubre Barcelona», «Movie's Walk» y «El Caso Méliès»." },
+          { year: "2021", emoji: "🍽️", title: "Pasatapas, casa nueva", body: "Nos instalamos en el Restaurante Pasatapas. KLEFF se convierte en la comunidad de juegos de mesa más grande de Barcelona." },
+          { year: "2023", emoji: "🎬", title: "Boardgaming for Fun", body: "Junto con Mathom organizamos «Barcelona Boardgaming for Fun» en el Movistar Centre, mezclando juegos y exposiciones audiovisuales." },
+          { year: "2025", emoji: "🚉", title: "L'Estació, +200 por noche", body: "KLEFF se reinventa: nueva sede en L'Estació – Espai Gastronòmic, más colaboradores y noches multitudinarias con más de 200 asistentes." },
+          { year: "2026", emoji: "📜", title: "Asociación oficial", body: "KLEFF se constituye formalmente como asociación sin ánimo de lucro. Lo que empezó como terapia, hoy es movimiento." },
+        ],
+      },
+    },
+    {
+      key: "about.team",
+      label: "Equipo (#TeamKLEFF)",
+      description: "Miembros del equipo. Cada uno tiene una foto, rol, bio (parte trasera de la tarjeta), juego favorito, color y número de la suerte.",
+      fields: {
+        eyebrow: { kind: "text", label: "Etiqueta superior" },
+        title: { kind: "text", label: "Título" },
+        subtitle: { kind: "text", label: "Subtítulo" },
+        items: {
+          kind: "list",
+          label: "Miembros",
+          itemLabel: "Miembro",
+          fields: {
+            name: { kind: "text", label: "Nombre" },
+            role: { kind: "text", label: "Rol (ej: Arquitecto de juegos)" },
+            emoji: { kind: "text", label: "Emoji (ej: 🎲)" },
+            photo: { kind: "image", label: "Foto" },
+            bio: { kind: "textarea", label: "Bio (parte trasera)", rows: 4 },
+            favoriteGame: { kind: "text", label: "Juego favorito" },
+            color: { kind: "text", label: "Color favorito" },
+            luckyNumber: { kind: "text", label: "Número de la suerte" },
+          },
+        },
+      },
+      defaults: {
+        eyebrow: "#TeamKLEFF",
+        title: "El equipo",
+        subtitle: "Las personas detrás de cada Game Night.",
+        items: [
+          { name: "Pau", role: "Fundador & Estrategia", emoji: "🎲", photo: "https://kleff.es/wp-content/uploads/2025/08/Pau_kleff-225x300.jpg", bio: "Responsable de buscar colaboraciones y crear nuevos eventos. Toma las decisiones estratégicas. De día abogado de startups; de noche, una buena peli con pizza margherita.", favoriteGame: "King of Tokyo", color: "Azul", luckyNumber: "7" },
+          { name: "Pol", role: "Arquitecto de juegos", emoji: "🏗️", photo: "https://kleff.es/wp-content/uploads/2025/08/Pol_kleff-225x300.jpg", bio: "Mantiene el orden en la colección de juegos de KLEFF. Se describe como arquitecto de juegos, colaborando con autores y editores para perfeccionar reglas.", favoriteGame: "Splendor", color: "Azul", luckyNumber: "7" },
+          { name: "Beatriz", role: "Eventos & retos", emoji: "🎯", photo: "https://kleff.es/wp-content/uploads/2025/09/Beatriz-225x300.jpg", bio: "Apoya en la organización de eventos. Maestra de educación infantil con corazón de jugona. Le encanta diseñar retos, enseñar jugando y vivir aventuras.", favoriteGame: "Stone Age", color: "Me gusta variar", luckyNumber: "2" },
+          { name: "Jordi", role: "Equipo KLEFF", emoji: "🎮", photo: "https://kleff.es/wp-content/uploads/2025/09/Jordi-225x300.jpg", bio: "Próximamente. Estamos preparando su ficha completa.", favoriteGame: "—", color: "—", luckyNumber: "—" },
+          { name: "Karen", role: "Equipo KLEFF", emoji: "✨", photo: "https://kleff.es/wp-content/uploads/2025/09/Karen-225x300.jpg", bio: "Próximamente. Estamos preparando su ficha completa.", favoriteGame: "—", color: "—", luckyNumber: "—" },
+          { name: "Leiro", role: "Equipo KLEFF", emoji: "🃏", photo: "https://kleff.es/wp-content/uploads/2025/09/Leiro-225x300.jpg", bio: "Próximamente. Estamos preparando su ficha completa.", favoriteGame: "—", color: "—", luckyNumber: "—" },
+          { name: "Eric", role: "Equipo KLEFF", emoji: "🎲", photo: "https://kleff.es/wp-content/uploads/2025/09/Eric-225x300.jpg", bio: "Próximamente. Estamos preparando su ficha completa.", favoriteGame: "—", color: "—", luckyNumber: "—" },
+        ],
+      },
     },
     {
       key: "about.manifesto",
@@ -370,7 +450,7 @@ const howSchema: PageSchema = {
   key: "how",
   label: "Cómo funciona",
   path: "/como-funciona",
-  description: "Página de cómo funciona KLEFF. Las listas largas de actividades, beneficios y comunidades se gestionan desde el código.",
+  description: "Página de cómo funciona KLEFF. Pasos, actividades, comunidades y beneficios de socio totalmente editables.",
   sections: [
     {
       key: "how.hero",
@@ -379,49 +459,147 @@ const howSchema: PageSchema = {
         eyebrow: { kind: "text", label: "Etiqueta superior" },
         title: { kind: "text", label: "Título" },
         intro: { kind: "textarea", label: "Intro", rows: 4 },
+        nonProfitTitle: { kind: "text", label: "Badge ONG" },
+        consumptionBadge: { kind: "text", label: "Badge consumición" },
       },
-      defaults: { eyebrow: "", title: "", intro: "" },
+      defaults: { eyebrow: "", title: "", intro: "", nonProfitTitle: "Asociación sin ánimo de lucro", consumptionBadge: "Consumición 4 €" },
     },
     {
       key: "how.steps",
-      label: "Cómo funciona — encabezado",
+      label: "Paso a paso (3 pasos)",
+      description: "Cabecera + los 3 bloques de 'cómo funciona una noche'.",
       fields: {
+        eyebrow: { kind: "text", label: "Etiqueta superior" },
         title: { kind: "text", label: "Título" },
-        body: { kind: "textarea", label: "Cuerpo", rows: 3 },
+        body: { kind: "textarea", label: "Cuerpo bajo el título", rows: 3 },
+        items: {
+          kind: "list",
+          label: "Pasos",
+          itemLabel: "Paso",
+          fields: {
+            title: { kind: "text", label: "Título del paso" },
+            body: { kind: "textarea", label: "Descripción", rows: 3 },
+          },
+        },
       },
-      defaults: { title: "", body: "" },
+      defaults: {
+        eyebrow: "Paso a paso",
+        title: "Vienes solo, en pareja o con amigos. Da igual.",
+        body: "No necesitas reservar mesa ni traer a nadie. Si vienes solo, te emparejan con gente buscando mesa, te recomiendan un juego según tus ganas y te lo explican si no lo conoces. En 10 minutos estás riéndote con desconocidos.",
+        items: [
+          { title: "Llegas", body: "Entras en l'Estació Espai Gastronòmic. Pides una bebida (esa es la consumición de 4 €) o algo de picar. Un miembro del #TeamKLEFF te recibe en la recepción." },
+          { title: "Encuentras mesa", body: "Si vienes sin compañía, te emparejamos con gente buscando mesa, recomendamos un juego según tus preferencias y te lo explicamos si no lo conoces." },
+          { title: "Juegas y vuelves", body: "Más de 500 juegos disponibles. Cuando termines una partida, prueba otra mesa o quédate en la tuya. La noche dura 4 horas y nadie tiene prisa." },
+        ],
+      },
     },
     {
       key: "how.activities",
-      label: "Actividades — encabezado",
+      label: "Actividades",
+      description: "Cabecera + lista de actividades. Cada una con frecuencia (etiqueta) y emoji.",
       fields: {
+        eyebrow: { kind: "text", label: "Etiqueta superior" },
         title: { kind: "text", label: "Título" },
         subtitle: { kind: "textarea", label: "Subtítulo", rows: 2 },
+        items: {
+          kind: "list",
+          label: "Actividades",
+          itemLabel: "Actividad",
+          fields: {
+            cadence: { kind: "text", label: "Cadencia (Semanal / Mensual / Anual / Puntual)" },
+            title: { kind: "text", label: "Título" },
+            body: { kind: "textarea", label: "Descripción", rows: 3 },
+            emoji: { kind: "text", label: "Emoji" },
+          },
+        },
       },
-      defaults: { title: "", subtitle: "" },
+      defaults: {
+        eyebrow: "Actividades",
+        title: "Qué puedes encontrar",
+        subtitle: "Desde la noche de juegos semanal hasta torneos, citas lúdicas y eventos solidarios.",
+        items: [
+          { cadence: "Semanal", title: "Noche de Juegos", body: "Evento regular con ludoteca abierta y partidas programadas de Blood on the Clocktower, Catan y otros muchos.", emoji: "🎲" },
+          { cadence: "Mensual", title: "Torneos", body: "Actividad competitiva de los juegos más populares de la comunidad.", emoji: "🏆" },
+          { cadence: "Mensual", title: "Demostraciones de editoriales y autores", body: "Jornadas para aprender juegos nuevos directamente con quienes los han creado y publicado.", emoji: "📦" },
+          { cadence: "Puntual", title: "Slow Dating Lúdico", body: "Concepto similar al speed dating, pero con juegos sociales como excusa para conectar a personas.", emoji: "💘" },
+          { cadence: "Anual", title: "Game Night: Carnival", body: "Noche de juegos especial con concurso de disfraces de carnaval.", emoji: "🎭" },
+          { cadence: "Anual", title: "Game Night: Halloween", body: "Noche de juegos especial con concurso de disfraces de temática Halloween.", emoji: "🎃" },
+          { cadence: "Anual", title: "X-Mas Game Night", body: "Evento solidario para recaudar fondos para el Hospital Sant Joan de Déu, especializado en cáncer infantil.", emoji: "🎄" },
+        ],
+      },
     },
     {
       key: "how.communities",
-      label: "Comunidades — encabezado",
+      label: "Comunidades",
+      description: "4 comunidades destacadas. Cada una puede llevar a otra página interna.",
       fields: {
-        eyebrow: { kind: "text", label: "Etiqueta" },
+        eyebrow: { kind: "text", label: "Etiqueta superior" },
         title: { kind: "text", label: "Título" },
         intro: { kind: "textarea", label: "Intro", rows: 3 },
+        items: {
+          kind: "list",
+          label: "Comunidades",
+          itemLabel: "Comunidad",
+          fields: {
+            title: { kind: "text", label: "Título" },
+            body: { kind: "textarea", label: "Descripción", rows: 3 },
+            tag: { kind: "text", label: "Etiqueta (chip)" },
+            emoji: { kind: "text", label: "Emoji" },
+            href: { kind: "url", label: "Enlace (opcional, ej: /blood-on-the-clocktower)" },
+            ctaLabel: { kind: "text", label: "Texto del enlace (si hay href)" },
+          },
+        },
       },
-      defaults: { eyebrow: "", title: "", intro: "" },
+      defaults: {
+        eyebrow: "Comunidades",
+        title: "Comunidades dentro de KLEFF",
+        intro: "Más allá de las noches de juegos, hay grupos vivos alrededor de juegos concretos.",
+        items: [
+          { title: "Blood on the Clocktower", body: "Comunidad activa que se reúne cada semana. Hasta 3 partidas simultáneas con diferentes niveles.", tag: "Semanal", emoji: "💀", href: "/blood-on-the-clocktower", ctaLabel: "Ver página" },
+          { title: "Catan", body: "Grupo de jugadores de Catan que se reúnen para partidas regulares y torneos.", tag: "Mensual", emoji: "⬢", href: "", ctaLabel: "" },
+          { title: "Wargames", body: "Comunidad para amantes de los juegos de estrategia y guerra: desde Risk hasta wargames de miniaturas.", tag: "Puntual", emoji: "⚔️", href: "", ctaLabel: "" },
+          { title: "Juegos ocultos", body: "Grupo de juegos de información oculta y deducción: roles secretos, traidores, deducción social.", tag: "Mensual", emoji: "👁️", href: "", ctaLabel: "" },
+        ],
+      },
     },
     {
       key: "how.member",
       label: "Hazte socio",
+      description: "Cabecera, lista de beneficios (cards flip) y CTA final.",
       fields: {
-        eyebrow: { kind: "text", label: "Etiqueta" },
+        eyebrow: { kind: "text", label: "Etiqueta superior" },
         title: { kind: "text", label: "Título" },
         subtitle: { kind: "textarea", label: "Subtítulo", rows: 2 },
+        flipHint: { kind: "text", label: "Pista para girar las tarjetas" },
         ctaTitle: { kind: "text", label: "CTA — título" },
         ctaBody: { kind: "textarea", label: "CTA — cuerpo", rows: 3 },
         ctaLabel: { kind: "text", label: "CTA — botón" },
+        items: {
+          kind: "list",
+          label: "Beneficios",
+          itemLabel: "Beneficio",
+          fields: {
+            title: { kind: "text", label: "Título" },
+            body: { kind: "textarea", label: "Descripción (parte trasera)", rows: 3 },
+            emoji: { kind: "text", label: "Emoji" },
+          },
+        },
       },
-      defaults: { eyebrow: "", title: "", subtitle: "", ctaTitle: "", ctaBody: "", ctaLabel: "" },
+      defaults: {
+        eyebrow: "Hazte socio",
+        title: "Beneficios de ser #kleffer",
+        subtitle: "Apoya la asociación, accede a beneficios y forma parte del núcleo de la comunidad.",
+        flipHint: "Toca cada tarjeta para descubrir el beneficio",
+        ctaTitle: "¿Listo para unirte?",
+        ctaBody: "Escríbenos un email y te explicamos cómo darte de alta como socio.",
+        ctaLabel: "Quiero ser socio",
+        items: [
+          { title: "Ludoteca para llevar", body: "Llévate juegos a casa para probar entre semana, gratis para socios.", emoji: "📚" },
+          { title: "Eventos exclusivos", body: "Acceso prioritario a torneos, demos cerradas y noches especiales.", emoji: "⚡" },
+          { title: "Descuentos", body: "Descuentos en colaboraciones con tiendas y editoriales.", emoji: "🏷️" },
+          { title: "Apoyas la causa", body: "Tu cuota ayuda a que KLEFF siga organizando eventos solidarios y abiertos a todos.", emoji: "❤️" },
+        ],
+      },
     },
   ],
 };
@@ -481,6 +659,16 @@ const mediaSchema: PageSchema = {
         intro: { kind: "textarea", label: "Intro", rows: 3 },
       },
       defaults: { eyebrow: "", title: "", intro: "" },
+    },
+    {
+      key: "media.press",
+      label: "Cabecera de prensa",
+      fields: {
+        eyebrow: { kind: "text", label: "Etiqueta" },
+        title: { kind: "text", label: "Título" },
+        helper: { kind: "text", label: "Texto de ayuda (debajo del título)" },
+      },
+      defaults: { eyebrow: "Apariciones en prensa", title: "Lo que dicen los medios", helper: "" },
     },
     {
       key: "media.instagram",
@@ -573,7 +761,11 @@ export function withDefaults(
   const out: Record<string, unknown> = { ...schema.defaults };
   if (!stored) return out;
   for (const [k, v] of Object.entries(stored)) {
-    if (v !== undefined && v !== null && v !== "") out[k] = v;
+    // Allow arrays and non-empty values to override defaults; preserve falsy
+    // numeric/boolean false (e.g. 0) but skip undefined / null / empty strings.
+    if (v === undefined || v === null) continue;
+    if (typeof v === "string" && v === "") continue;
+    out[k] = v;
   }
   return out;
 }

@@ -1,7 +1,5 @@
 import { useMemo } from "react";
-import { Link } from "@tanstack/react-router";
 import {
-  ArrowRight,
   Clock,
   ExternalLink,
   Globe2,
@@ -68,7 +66,7 @@ type LocationItem = {
 };
 
 export function ClocktowerPage() {
-  const { locale, href } = useI18n();
+  const { locale } = useI18n();
 
   const hero = useSectionContent<{
     eyebrow: string;
@@ -112,13 +110,6 @@ export function ClocktowerPage() {
   const heroImg = hero.heroImage || clocktowerHero;
   const embedUrl = reelToEmbed(reel.reelUrl);
 
-  const backLabel =
-    locale === "en"
-      ? "← Back to How it works"
-      : locale === "ca"
-        ? "← Tornar a Com funciona"
-        : "← Volver a Cómo funciona";
-
   return (
     <SiteLayout>
       {/* HERO */}
@@ -141,16 +132,6 @@ export function ClocktowerPage() {
 
         <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-12 md:pt-20 pb-20 grid lg:grid-cols-12 gap-10 items-center">
           <div className="lg:col-span-7 order-2 lg:order-1">
-            <Link
-              to={href("/how-it-works")}
-              className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest text-cream/60 hover:text-coral mb-5"
-            >
-              {backLabel}
-            </Link>
-            <span className="inline-flex items-center gap-2 bg-coral text-cream border-2 border-cream/20 rounded-full px-3 py-1 text-xs font-bold uppercase tracking-widest mb-6">
-              <Skull className="h-3.5 w-3.5" />
-              {hero.eyebrow}
-            </span>
             <h1 className="font-display font-semibold text-4xl sm:text-5xl md:text-6xl lg:text-7xl leading-[1.02] tracking-tight">
               {hero.title}
             </h1>
@@ -158,7 +139,7 @@ export function ClocktowerPage() {
               {hero.subtitle}
             </p>
 
-            <div className="mt-8 flex flex-wrap items-center gap-4">
+            <div className="mt-8 flex flex-wrap items-center gap-3">
               <a
                 href={hero.whatsappUrl}
                 target="_blank"
@@ -168,6 +149,10 @@ export function ClocktowerPage() {
                 <MessageCircle className="h-4 w-4" />
                 {hero.whatsappLabel}
               </a>
+              <span className="inline-flex items-center gap-2 bg-coral text-cream border-2 border-cream/20 rounded-full px-3 py-2 text-xs font-bold uppercase tracking-widest">
+                <Skull className="h-3.5 w-3.5" />
+                {hero.eyebrow}
+              </span>
               <a
                 href={about.officialUrl}
                 target="_blank"
@@ -315,13 +300,6 @@ export function ClocktowerPage() {
                 <MessageCircle className="h-4 w-4" />
                 {cta.whatsappLabel}
               </a>
-              <Link
-                to={href("/how-it-works")}
-                className="inline-flex items-center gap-2 rounded-2xl bg-ink text-cream border-2 border-ink px-6 py-3.5 text-sm font-bold hover:bg-foreground transition-colors"
-              >
-                {locale === "en" ? "Other communities" : locale === "ca" ? "Altres comunitats" : "Otras comunidades"}
-                <ArrowRight className="h-4 w-4" />
-              </Link>
             </div>
           </div>
         </div>
