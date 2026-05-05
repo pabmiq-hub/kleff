@@ -32,7 +32,7 @@ export const Route = createFileRoute("/admin/content/$pageKey")({
 function PageEditor() {
   const { schema } = Route.useLoaderData();
   const [activeKey, setActiveKey] = useState(schema.sections[0]?.key ?? "");
-  const activeSection = schema.sections.find((s) => s.key === activeKey) ?? schema.sections[0];
+  const activeSection = schema.sections.find((s: SectionSchema) => s.key === activeKey) ?? schema.sections[0];
 
   return (
     <div className="space-y-6">
@@ -59,7 +59,7 @@ function PageEditor() {
       <div className="grid lg:grid-cols-[260px_1fr] gap-6">
         <nav className="space-y-1">
           <p className="text-xs uppercase tracking-wider text-cream/40 px-3 mb-2">Zonas editables</p>
-          {schema.sections.map((s) => (
+          {schema.sections.map((s: SectionSchema) => (
             <button
               key={s.key}
               onClick={() => setActiveKey(s.key)}
