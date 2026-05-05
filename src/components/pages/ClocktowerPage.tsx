@@ -66,7 +66,7 @@ type LocationItem = {
 };
 
 export function ClocktowerPage() {
-  const { locale, href } = useI18n();
+  const { locale } = useI18n();
 
   const hero = useSectionContent<{
     eyebrow: string;
@@ -109,13 +109,6 @@ export function ClocktowerPage() {
 
   const heroImg = hero.heroImage || clocktowerHero;
   const embedUrl = reelToEmbed(reel.reelUrl);
-
-  const backLabel =
-    locale === "en"
-      ? "← Back to How it works"
-      : locale === "ca"
-        ? "← Tornar a Com funciona"
-        : "← Volver a Cómo funciona";
 
   return (
     <SiteLayout>
