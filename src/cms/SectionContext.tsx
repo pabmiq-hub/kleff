@@ -54,12 +54,14 @@ export function SectionProvider({
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const pending = useRef<SectionData | null>(null);
 
-  // Re-sync local state when the route loader returns fresh data (locale switch, navigation)
+  // Re-sync local state only when the sectionKey changes (mount / route change).
+  // After that, local state is the source of truth — otherwise optimistic edits
+  // would be clobbered by a stale loader re-read.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     setData(stored);
-    // clear pending writes on remount
     pending.current = null;
-  }, [sectionKey, stored]);
+  }, [sectionKey]);
 
   const persist = useCallback(
     (next: SectionData) => {
