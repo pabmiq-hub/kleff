@@ -237,6 +237,7 @@ export type Database = {
         Row: {
           content: Json
           id: string
+          locale: string
           saved_at: string
           saved_by: string | null
           schema_version: number
@@ -245,6 +246,7 @@ export type Database = {
         Insert: {
           content: Json
           id?: string
+          locale?: string
           saved_at?: string
           saved_by?: string | null
           schema_version: number
@@ -253,6 +255,7 @@ export type Database = {
         Update: {
           content?: Json
           id?: string
+          locale?: string
           saved_at?: string
           saved_by?: string | null
           schema_version?: number
@@ -265,6 +268,7 @@ export type Database = {
           content: Json
           created_at: string
           id: string
+          locale: string
           schema_version: number
           section_key: string
           updated_at: string
@@ -274,6 +278,7 @@ export type Database = {
           content?: Json
           created_at?: string
           id?: string
+          locale?: string
           schema_version?: number
           section_key: string
           updated_at?: string
@@ -283,6 +288,7 @@ export type Database = {
           content?: Json
           created_at?: string
           id?: string
+          locale?: string
           schema_version?: number
           section_key?: string
           updated_at?: string
