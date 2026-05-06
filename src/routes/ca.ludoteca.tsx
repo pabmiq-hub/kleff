@@ -3,7 +3,7 @@ import { getPageContent } from "@/server/content.functions";
 import { LudotecaPage } from "@/components/pages/LudotecaPage";
 
 export const Route = createFileRoute("/ca/ludoteca")({
-  loader: () => getPageContent({ data: { pageKey: "ludoteca" } }).then((pageContent) => ({ pageContent })),
+  loader: () => getPageContent({ data: { pageKey: "ludoteca", locale: "ca" } }).then((pageContent) => ({ pageContent })),
   head: () => ({
     meta: [
       { title: "Ludoteca KLEFF — La nostra col·lecció de jocs" },

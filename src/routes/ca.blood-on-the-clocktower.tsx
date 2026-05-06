@@ -3,7 +3,7 @@ import { ClocktowerPage } from "@/components/pages/ClocktowerPage";
 import { getPageContent } from "@/server/content.functions";
 
 export const Route = createFileRoute("/ca/blood-on-the-clocktower")({
-  loader: () => getPageContent({ data: { pageKey: "clocktower" } }).then((pageContent) => ({ pageContent })),
+  loader: () => getPageContent({ data: { pageKey: "clocktower", locale: "ca" } }).then((pageContent) => ({ pageContent })),
   staleTime: 5 * 60 * 1000,
   head: () => ({
     meta: [

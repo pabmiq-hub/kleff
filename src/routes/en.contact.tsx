@@ -3,7 +3,7 @@ import { getPageContent } from "@/server/content.functions";
 import { ContactPage } from "@/components/pages/ContactPage";
 
 export const Route = createFileRoute("/en/contact")({
-  loader: () => getPageContent({ data: { pageKey: "contact" } }).then((pageContent) => ({ pageContent })),
+  loader: () => getPageContent({ data: { pageKey: "contact", locale: "en" } }).then((pageContent) => ({ pageContent })),
   head: () => ({
     meta: [
       { title: "Contact — KLEFF" },

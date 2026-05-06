@@ -3,7 +3,7 @@ import { getPageContent } from "@/server/content.functions";
 import { HowItWorksPage } from "@/components/pages/HowItWorksPage";
 
 export const Route = createFileRoute("/ca/com-funciona")({
-  loader: () => getPageContent({ data: { pageKey: "how" } }).then((pageContent) => ({ pageContent })),
+  loader: () => getPageContent({ data: { pageKey: "how", locale: "ca" } }).then((pageContent) => ({ pageContent })),
   head: () => ({
     meta: [
       { title: "Com funciona — KLEFF" },

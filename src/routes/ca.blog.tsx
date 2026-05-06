@@ -3,7 +3,7 @@ import { getPageContent } from "@/server/content.functions";
 import { BlogPage } from "@/components/pages/BlogPage";
 
 export const Route = createFileRoute("/ca/blog")({
-  loader: () => getPageContent({ data: { pageKey: "blog" } }).then((pageContent) => ({ pageContent })),
+  loader: () => getPageContent({ data: { pageKey: "blog", locale: "ca" } }).then((pageContent) => ({ pageContent })),
   head: () => ({
     meta: [
       { title: "Blog — KLEFF" },

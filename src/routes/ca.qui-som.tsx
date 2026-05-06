@@ -3,7 +3,7 @@ import { getPageContent } from "@/server/content.functions";
 import { AboutPage } from "@/components/pages/AboutPage";
 
 export const Route = createFileRoute("/ca/qui-som")({
-  loader: () => getPageContent({ data: { pageKey: "about" } }).then((pageContent) => ({ pageContent })),
+  loader: () => getPageContent({ data: { pageKey: "about", locale: "ca" } }).then((pageContent) => ({ pageContent })),
   head: () => ({
     meta: [
       { title: "Qui som — KLEFF" },

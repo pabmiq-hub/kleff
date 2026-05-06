@@ -12,6 +12,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { adminSaveSection } from "@/server/content.functions";
 import { useEditor } from "@/editor/EditorProvider";
+import { useI18n } from "@/i18n/I18nProvider";
 import { getSectionSchema, withDefaults } from "./schemas";
 import { useSectionContent } from "./useSectionContent";
 
@@ -50,6 +51,7 @@ export function SectionProvider({
   const stored = useSectionContent(sectionKey); // already merged with defaults
   const [data, setData] = useState<SectionData>(stored);
   const { isSuperAdmin } = useEditor();
+  const { locale } = useI18n();
   const save = useServerFn(adminSaveSection);
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const pending = useRef<SectionData | null>(null);
@@ -73,14 +75,18 @@ export function SectionProvider({
         if (!payload) return;
         pending.current = null;
         try {
-          // Strip out schema defaults? No — store full document, simpler & more portable.
-          await save({ data: { sectionKey, content: payload, schemaVersion: 1 } });
+          await save({ data: { sectionKey, content: payload, schemaVersion: 1, locale } });
+          if (locale === "es") {
+            toast.success("Guardado. Traduciendo a CA y EN…", { duration: 2000 });
+          } else {
+            toast.success("Guardado");
+          }
         } catch (e) {
           toast.error(`No se pudo guardar: ${(e as Error).message}`);
         }
       }, 500);
     },
-    [isSuperAdmin, save, sectionKey]
+    [isSuperAdmin, save, sectionKey, locale]
   );
 
   // Flush pending save on unmount so quick edits don't get lost
@@ -90,10 +96,10 @@ export function SectionProvider({
       const payload = pending.current;
       if (payload && isSuperAdmin) {
         // Fire-and-forget; we can't await in cleanup
-        save({ data: { sectionKey, content: payload, schemaVersion: 1 } }).catch(() => undefined);
+        save({ data: { sectionKey, content: payload, schemaVersion: 1, locale } }).catch(() => undefined);
       }
     };
-  }, [isSuperAdmin, save, sectionKey]);
+  }, [isSuperAdmin, save, sectionKey, locale]);
 
   const setField = useCallback(
     (path: string, value: unknown) => {
