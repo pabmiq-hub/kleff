@@ -8,7 +8,7 @@ export const Route = createFileRoute("/ca/mitjans")({
     const [mediaItems, followers, pageContent] = await Promise.all([
       getMediaItems(),
       getInstagramFollowers(),
-      getPageContent({ data: { pageKey: "media" } }),
+      getPageContent({ data: { pageKey: "media", locale: "ca" } }),
     ]);
     return { mediaItems, followers, pageContent };
   },
