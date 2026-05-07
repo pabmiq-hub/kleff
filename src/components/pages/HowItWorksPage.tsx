@@ -404,12 +404,14 @@ export function HowItWorksPage() {
               tag={t.how.community2Tag}
               icon={<Hexagon className="h-7 w-7 text-cream" />}
               accent="ink"
+              href={locale === "en" ? "/en/catan" : locale === "ca" ? "/ca/catan" : "/catan"}
+              ctaLabel={locale === "en" ? "View page" : locale === "ca" ? "Veure pàgina" : "Ver página"}
             />
             <CommunityCard
               title={t.how.community3Title}
               body={t.how.community3Body}
               tag={t.how.community3Tag}
-              icon={<Swords className="h-7 w-7 text-cream" />}
+              icon={<Trophy className="h-7 w-7 text-cream" />}
               accent="coral"
             />
             <CommunityCard
