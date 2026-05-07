@@ -357,10 +357,10 @@ const es: Dict = {
     community2Body:
       "Comunidad del precursor de los juegos de mesa modernos. Organizamos torneos y actividades de forma recurrente.",
     community2Tag: "Torneos recurrentes",
-    community3Title: "Unmatched",
+    community3Title: "Torneos",
     community3Body:
-      "Comunidad del juego de mesa de enfrentamientos más popular del momento. Organizamos torneos de forma frecuente.",
-    community3Tag: "Torneos frecuentes",
+      "Comunidad con torneos de diferentes juegos casi cada semana: Unmatched, Catan, Magic, party games y mucho más.",
+    community3Tag: "Torneos casi cada semana",
     community4Title: "Roles Ocultos",
     community4Body:
       "Comunidad para descubrir y disfrutar de juegos de deducción social e identidades secretas.",
@@ -578,10 +578,10 @@ const en: Dict = {
     community2Body:
       "Community of the modern board game pioneer. We organise tournaments and activities on a recurring basis.",
     community2Tag: "Recurring tournaments",
-    community3Title: "Unmatched",
+    community3Title: "Tournaments",
     community3Body:
-      "Community of the most popular skirmish board game right now. We organise tournaments frequently.",
-    community3Tag: "Frequent tournaments",
+      "A community with tournaments across different games almost every week: Unmatched, Catan, Magic, party games and more.",
+    community3Tag: "Tournaments almost weekly",
     community4Title: "Hidden Roles",
     community4Body:
       "Community to discover and enjoy social deduction and hidden identity games.",
@@ -799,10 +799,10 @@ const ca: Dict = {
     community2Body:
       "Comunitat del precursor dels jocs de taula moderns. Organitzem tornejos i activitats de manera recurrent.",
     community2Tag: "Tornejos recurrents",
-    community3Title: "Unmatched",
+    community3Title: "Tornejos",
     community3Body:
-      "Comunitat del joc de taula d'enfrontaments més popular del moment. Organitzem tornejos amb freqüència.",
-    community3Tag: "Tornejos freqüents",
+      "Comunitat amb tornejos de diferents jocs gairebé cada setmana: Unmatched, Catan, Magic, party games i molt més.",
+    community3Tag: "Tornejos gairebé cada setmana",
     community4Title: "Rols Ocults",
     community4Body:
       "Comunitat per descobrir i gaudir de jocs de deducció social i identitats secretes.",
