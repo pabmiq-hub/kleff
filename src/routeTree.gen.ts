@@ -16,6 +16,7 @@ import { Route as LudotecaRouteImport } from './routes/ludoteca'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as ContactoRouteImport } from './routes/contacto'
 import { Route as ComoFuncionaRouteImport } from './routes/como-funciona'
+import { Route as CatanRouteImport } from './routes/catan'
 import { Route as BloodOnTheClocktowerRouteImport } from './routes/blood-on-the-clocktower'
 import { Route as BlogRouteImport } from './routes/blog'
 import { Route as AppRouteImport } from './routes/app'
@@ -31,6 +32,7 @@ import { Route as EnMediaRouteImport } from './routes/en.media'
 import { Route as EnLudotecaRouteImport } from './routes/en.ludoteca'
 import { Route as EnHowItWorksRouteImport } from './routes/en.how-it-works'
 import { Route as EnContactRouteImport } from './routes/en.contact'
+import { Route as EnCatanRouteImport } from './routes/en.catan'
 import { Route as EnBloodOnTheClocktowerRouteImport } from './routes/en.blood-on-the-clocktower'
 import { Route as EnBlogRouteImport } from './routes/en.blog'
 import { Route as EnAboutRouteImport } from './routes/en.about'
@@ -39,6 +41,7 @@ import { Route as CaMitjansRouteImport } from './routes/ca.mitjans'
 import { Route as CaLudotecaRouteImport } from './routes/ca.ludoteca'
 import { Route as CaContacteRouteImport } from './routes/ca.contacte'
 import { Route as CaComFuncionaRouteImport } from './routes/ca.com-funciona'
+import { Route as CaCatanRouteImport } from './routes/ca.catan'
 import { Route as CaBloodOnTheClocktowerRouteImport } from './routes/ca.blood-on-the-clocktower'
 import { Route as CaBlogRouteImport } from './routes/ca.blog'
 import { Route as AppRentalsRouteImport } from './routes/app.rentals'
@@ -94,6 +97,11 @@ const ContactoRoute = ContactoRouteImport.update({
 const ComoFuncionaRoute = ComoFuncionaRouteImport.update({
   id: '/como-funciona',
   path: '/como-funciona',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CatanRoute = CatanRouteImport.update({
+  id: '/catan',
+  path: '/catan',
   getParentRoute: () => rootRouteImport,
 } as any)
 const BloodOnTheClocktowerRoute = BloodOnTheClocktowerRouteImport.update({
@@ -171,6 +179,11 @@ const EnContactRoute = EnContactRouteImport.update({
   path: '/en/contact',
   getParentRoute: () => rootRouteImport,
 } as any)
+const EnCatanRoute = EnCatanRouteImport.update({
+  id: '/en/catan',
+  path: '/en/catan',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const EnBloodOnTheClocktowerRoute = EnBloodOnTheClocktowerRouteImport.update({
   id: '/en/blood-on-the-clocktower',
   path: '/en/blood-on-the-clocktower',
@@ -209,6 +222,11 @@ const CaContacteRoute = CaContacteRouteImport.update({
 const CaComFuncionaRoute = CaComFuncionaRouteImport.update({
   id: '/ca/com-funciona',
   path: '/ca/com-funciona',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CaCatanRoute = CaCatanRouteImport.update({
+  id: '/ca/catan',
+  path: '/ca/catan',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CaBloodOnTheClocktowerRoute = CaBloodOnTheClocktowerRouteImport.update({
@@ -325,6 +343,7 @@ export interface FileRoutesByFullPath {
   '/app': typeof AppRouteWithChildren
   '/blog': typeof BlogRoute
   '/blood-on-the-clocktower': typeof BloodOnTheClocktowerRoute
+  '/catan': typeof CatanRoute
   '/como-funciona': typeof ComoFuncionaRoute
   '/contacto': typeof ContactoRoute
   '/login': typeof LoginRoute
@@ -341,6 +360,7 @@ export interface FileRoutesByFullPath {
   '/app/rentals': typeof AppRentalsRouteWithChildren
   '/ca/blog': typeof CaBlogRoute
   '/ca/blood-on-the-clocktower': typeof CaBloodOnTheClocktowerRoute
+  '/ca/catan': typeof CaCatanRoute
   '/ca/com-funciona': typeof CaComFuncionaRoute
   '/ca/contacte': typeof CaContacteRoute
   '/ca/ludoteca': typeof CaLudotecaRoute
@@ -349,6 +369,7 @@ export interface FileRoutesByFullPath {
   '/en/about': typeof EnAboutRoute
   '/en/blog': typeof EnBlogRoute
   '/en/blood-on-the-clocktower': typeof EnBloodOnTheClocktowerRoute
+  '/en/catan': typeof EnCatanRoute
   '/en/contact': typeof EnContactRoute
   '/en/how-it-works': typeof EnHowItWorksRoute
   '/en/ludoteca': typeof EnLudotecaRoute
@@ -376,6 +397,7 @@ export interface FileRoutesByTo {
   '/$': typeof SplatRoute
   '/blog': typeof BlogRoute
   '/blood-on-the-clocktower': typeof BloodOnTheClocktowerRoute
+  '/catan': typeof CatanRoute
   '/como-funciona': typeof ComoFuncionaRoute
   '/contacto': typeof ContactoRoute
   '/login': typeof LoginRoute
@@ -390,6 +412,7 @@ export interface FileRoutesByTo {
   '/app/rentals': typeof AppRentalsRouteWithChildren
   '/ca/blog': typeof CaBlogRoute
   '/ca/blood-on-the-clocktower': typeof CaBloodOnTheClocktowerRoute
+  '/ca/catan': typeof CaCatanRoute
   '/ca/com-funciona': typeof CaComFuncionaRoute
   '/ca/contacte': typeof CaContacteRoute
   '/ca/ludoteca': typeof CaLudotecaRoute
@@ -398,6 +421,7 @@ export interface FileRoutesByTo {
   '/en/about': typeof EnAboutRoute
   '/en/blog': typeof EnBlogRoute
   '/en/blood-on-the-clocktower': typeof EnBloodOnTheClocktowerRoute
+  '/en/catan': typeof EnCatanRoute
   '/en/contact': typeof EnContactRoute
   '/en/how-it-works': typeof EnHowItWorksRoute
   '/en/ludoteca': typeof EnLudotecaRoute
@@ -428,6 +452,7 @@ export interface FileRoutesById {
   '/app': typeof AppRouteWithChildren
   '/blog': typeof BlogRoute
   '/blood-on-the-clocktower': typeof BloodOnTheClocktowerRoute
+  '/catan': typeof CatanRoute
   '/como-funciona': typeof ComoFuncionaRoute
   '/contacto': typeof ContactoRoute
   '/login': typeof LoginRoute
@@ -444,6 +469,7 @@ export interface FileRoutesById {
   '/app/rentals': typeof AppRentalsRouteWithChildren
   '/ca/blog': typeof CaBlogRoute
   '/ca/blood-on-the-clocktower': typeof CaBloodOnTheClocktowerRoute
+  '/ca/catan': typeof CaCatanRoute
   '/ca/com-funciona': typeof CaComFuncionaRoute
   '/ca/contacte': typeof CaContacteRoute
   '/ca/ludoteca': typeof CaLudotecaRoute
@@ -452,6 +478,7 @@ export interface FileRoutesById {
   '/en/about': typeof EnAboutRoute
   '/en/blog': typeof EnBlogRoute
   '/en/blood-on-the-clocktower': typeof EnBloodOnTheClocktowerRoute
+  '/en/catan': typeof EnCatanRoute
   '/en/contact': typeof EnContactRoute
   '/en/how-it-works': typeof EnHowItWorksRoute
   '/en/ludoteca': typeof EnLudotecaRoute
@@ -483,6 +510,7 @@ export interface FileRouteTypes {
     | '/app'
     | '/blog'
     | '/blood-on-the-clocktower'
+    | '/catan'
     | '/como-funciona'
     | '/contacto'
     | '/login'
@@ -499,6 +527,7 @@ export interface FileRouteTypes {
     | '/app/rentals'
     | '/ca/blog'
     | '/ca/blood-on-the-clocktower'
+    | '/ca/catan'
     | '/ca/com-funciona'
     | '/ca/contacte'
     | '/ca/ludoteca'
@@ -507,6 +536,7 @@ export interface FileRouteTypes {
     | '/en/about'
     | '/en/blog'
     | '/en/blood-on-the-clocktower'
+    | '/en/catan'
     | '/en/contact'
     | '/en/how-it-works'
     | '/en/ludoteca'
@@ -534,6 +564,7 @@ export interface FileRouteTypes {
     | '/$'
     | '/blog'
     | '/blood-on-the-clocktower'
+    | '/catan'
     | '/como-funciona'
     | '/contacto'
     | '/login'
@@ -548,6 +579,7 @@ export interface FileRouteTypes {
     | '/app/rentals'
     | '/ca/blog'
     | '/ca/blood-on-the-clocktower'
+    | '/ca/catan'
     | '/ca/com-funciona'
     | '/ca/contacte'
     | '/ca/ludoteca'
@@ -556,6 +588,7 @@ export interface FileRouteTypes {
     | '/en/about'
     | '/en/blog'
     | '/en/blood-on-the-clocktower'
+    | '/en/catan'
     | '/en/contact'
     | '/en/how-it-works'
     | '/en/ludoteca'
@@ -585,6 +618,7 @@ export interface FileRouteTypes {
     | '/app'
     | '/blog'
     | '/blood-on-the-clocktower'
+    | '/catan'
     | '/como-funciona'
     | '/contacto'
     | '/login'
@@ -601,6 +635,7 @@ export interface FileRouteTypes {
     | '/app/rentals'
     | '/ca/blog'
     | '/ca/blood-on-the-clocktower'
+    | '/ca/catan'
     | '/ca/com-funciona'
     | '/ca/contacte'
     | '/ca/ludoteca'
@@ -609,6 +644,7 @@ export interface FileRouteTypes {
     | '/en/about'
     | '/en/blog'
     | '/en/blood-on-the-clocktower'
+    | '/en/catan'
     | '/en/contact'
     | '/en/how-it-works'
     | '/en/ludoteca'
@@ -639,6 +675,7 @@ export interface RootRouteChildren {
   AppRoute: typeof AppRouteWithChildren
   BlogRoute: typeof BlogRoute
   BloodOnTheClocktowerRoute: typeof BloodOnTheClocktowerRoute
+  CatanRoute: typeof CatanRoute
   ComoFuncionaRoute: typeof ComoFuncionaRoute
   ContactoRoute: typeof ContactoRoute
   LoginRoute: typeof LoginRoute
@@ -648,6 +685,7 @@ export interface RootRouteChildren {
   SuperAdminRoute: typeof SuperAdminRoute
   CaBlogRoute: typeof CaBlogRoute
   CaBloodOnTheClocktowerRoute: typeof CaBloodOnTheClocktowerRoute
+  CaCatanRoute: typeof CaCatanRoute
   CaComFuncionaRoute: typeof CaComFuncionaRoute
   CaContacteRoute: typeof CaContacteRoute
   CaLudotecaRoute: typeof CaLudotecaRoute
@@ -656,6 +694,7 @@ export interface RootRouteChildren {
   EnAboutRoute: typeof EnAboutRoute
   EnBlogRoute: typeof EnBlogRoute
   EnBloodOnTheClocktowerRoute: typeof EnBloodOnTheClocktowerRoute
+  EnCatanRoute: typeof EnCatanRoute
   EnContactRoute: typeof EnContactRoute
   EnHowItWorksRoute: typeof EnHowItWorksRoute
   EnLudotecaRoute: typeof EnLudotecaRoute
@@ -717,6 +756,13 @@ declare module '@tanstack/react-router' {
       path: '/como-funciona'
       fullPath: '/como-funciona'
       preLoaderRoute: typeof ComoFuncionaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/catan': {
+      id: '/catan'
+      path: '/catan'
+      fullPath: '/catan'
+      preLoaderRoute: typeof CatanRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/blood-on-the-clocktower': {
@@ -824,6 +870,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EnContactRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/en/catan': {
+      id: '/en/catan'
+      path: '/en/catan'
+      fullPath: '/en/catan'
+      preLoaderRoute: typeof EnCatanRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/en/blood-on-the-clocktower': {
       id: '/en/blood-on-the-clocktower'
       path: '/en/blood-on-the-clocktower'
@@ -878,6 +931,13 @@ declare module '@tanstack/react-router' {
       path: '/ca/com-funciona'
       fullPath: '/ca/com-funciona'
       preLoaderRoute: typeof CaComFuncionaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ca/catan': {
+      id: '/ca/catan'
+      path: '/ca/catan'
+      fullPath: '/ca/catan'
+      preLoaderRoute: typeof CaCatanRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/ca/blood-on-the-clocktower': {
@@ -1119,6 +1179,7 @@ const rootRouteChildren: RootRouteChildren = {
   AppRoute: AppRouteWithChildren,
   BlogRoute: BlogRoute,
   BloodOnTheClocktowerRoute: BloodOnTheClocktowerRoute,
+  CatanRoute: CatanRoute,
   ComoFuncionaRoute: ComoFuncionaRoute,
   ContactoRoute: ContactoRoute,
   LoginRoute: LoginRoute,
@@ -1128,6 +1189,7 @@ const rootRouteChildren: RootRouteChildren = {
   SuperAdminRoute: SuperAdminRoute,
   CaBlogRoute: CaBlogRoute,
   CaBloodOnTheClocktowerRoute: CaBloodOnTheClocktowerRoute,
+  CaCatanRoute: CaCatanRoute,
   CaComFuncionaRoute: CaComFuncionaRoute,
   CaContacteRoute: CaContacteRoute,
   CaLudotecaRoute: CaLudotecaRoute,
@@ -1136,6 +1198,7 @@ const rootRouteChildren: RootRouteChildren = {
   EnAboutRoute: EnAboutRoute,
   EnBlogRoute: EnBlogRoute,
   EnBloodOnTheClocktowerRoute: EnBloodOnTheClocktowerRoute,
+  EnCatanRoute: EnCatanRoute,
   EnContactRoute: EnContactRoute,
   EnHowItWorksRoute: EnHowItWorksRoute,
   EnLudotecaRoute: EnLudotecaRoute,
