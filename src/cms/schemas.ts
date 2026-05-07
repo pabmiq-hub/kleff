@@ -935,6 +935,7 @@ const ludotecaSchema: PageSchema = {
 export const PAGE_SCHEMAS: PageSchema[] = [
   homeSchema,
   clocktowerSchema,
+  catanSchema,
   aboutSchema,
   howSchema,
   contactSchema,
