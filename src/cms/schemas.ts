@@ -312,6 +312,212 @@ const clocktowerSchema: PageSchema = {
   ],
 };
 
+// ---------------- CATAN ----------------
+
+const catanSchema: PageSchema = {
+  key: "catan",
+  label: "Catan",
+  path: "/catan",
+  description:
+    "Página dedicada a la comunidad de Catan: hero con WhatsApp, historia del juego, infografía visual de recursos y reglas, torneos.",
+  sections: [
+    {
+      key: "catan.hero",
+      label: "Hero (cabecera)",
+      fields: {
+        eyebrow: { kind: "text", label: "Etiqueta superior" },
+        title: { kind: "text", label: "Título principal" },
+        subtitle: { kind: "textarea", label: "Subtítulo / intro", rows: 3 },
+        whatsappLabel: { kind: "text", label: "Texto del botón de WhatsApp" },
+        whatsappUrl: { kind: "url", label: "Enlace del grupo de WhatsApp" },
+        stat1Label: { kind: "text", label: "Estadística 1 — etiqueta" },
+        stat2Label: { kind: "text", label: "Estadística 2 — etiqueta" },
+        stat3Label: { kind: "text", label: "Estadística 3 — etiqueta" },
+      },
+      defaults: {
+        eyebrow: "Comunidad Catan · Tornejos cada mes",
+        title: "Catan en KLEFF",
+        subtitle:
+          "Una de las comunidades más grandes y activas del local: más de 250 miembros, torneos cada mes y partidas constantes. Da igual si eres principiante o veterano: en Catan siempre hay sitio para una colonia más.",
+        whatsappLabel: "Únete al grupo de WhatsApp",
+        whatsappUrl: "https://chat.whatsapp.com/FbVhgyrIZXBJPrxC0DqoCE",
+        stat1Label: "Miembros",
+        stat2Label: "Torneos/año",
+        stat3Label: "Partidas",
+      },
+    },
+    {
+      key: "catan.history",
+      label: "Historia de Catan",
+      description: "Hitos en la historia del juego (basado en Devirpedia).",
+      fields: {
+        eyebrow: { kind: "text", label: "Etiqueta superior" },
+        title: { kind: "text", label: "Título de la sección" },
+        sourceLabel: { kind: "text", label: "Texto del enlace a la fuente" },
+        sourceUrl: { kind: "url", label: "URL de la fuente" },
+        items: {
+          kind: "list",
+          label: "Hitos",
+          itemLabel: "Hito",
+          fields: {
+            year: { kind: "text", label: "Año" },
+            title: { kind: "text", label: "Título" },
+            body: { kind: "textarea", label: "Descripción", rows: 4 },
+          },
+        },
+      },
+      defaults: {
+        eyebrow: "La historia",
+        title: "El juego que cambió la mesa moderna.",
+        sourceLabel: "Fuente: Devirpedia",
+        sourceUrl: "https://devir.es/devirpedia/catan",
+        items: [
+          {
+            year: "1995",
+            title: "Nace Die Siedler von Catan",
+            body: "Klaus Teuber publica «Los Colonos de Catán» en Alemania. La fórmula —construir, comerciar, expandirse en una isla modular— revoluciona los juegos de mesa modernos y abre la puerta a los «eurogames».",
+          },
+          {
+            year: "1996",
+            title: "Spiel des Jahres",
+            body: "Catan gana el premio más prestigioso del sector y se convierte en el primer fenómeno global del board gaming moderno. Empiezan a aparecer expansiones que multiplican las posibilidades.",
+          },
+          {
+            year: "2000s",
+            title: "Una saga inacabable",
+            body: "Llegan «Marineros», «Ciudades y Caballeros», «Bárbaros y Comerciantes»… y versiones para 2 jugadores, infantil, en cartas, en versión histórica y hasta en el espacio. Catan es ya un universo.",
+          },
+          {
+            year: "Hoy",
+            title: "Más de 40 millones de copias",
+            body: "Traducido a más de 40 idiomas y con torneos oficiales en todo el mundo. En España, Devir lo distribuye y mantiene viva la comunidad. En KLEFF, lo jugamos cada semana.",
+          },
+        ],
+      },
+    },
+    {
+      key: "catan.infographic",
+      label: "Infografía: cómo funciona",
+      description: "Recursos del juego y reglas básicas en formato visual.",
+      fields: {
+        eyebrow: { kind: "text", label: "Etiqueta superior" },
+        title: { kind: "text", label: "Título" },
+        subtitle: { kind: "textarea", label: "Subtítulo", rows: 2 },
+        resourcesTitle: { kind: "text", label: "Título del bloque de recursos" },
+        resource1Label: { kind: "text", label: "Recurso 1 — nombre" },
+        resource1Use: { kind: "text", label: "Recurso 1 — uso" },
+        resource2Label: { kind: "text", label: "Recurso 2 — nombre" },
+        resource2Use: { kind: "text", label: "Recurso 2 — uso" },
+        resource3Label: { kind: "text", label: "Recurso 3 — nombre" },
+        resource3Use: { kind: "text", label: "Recurso 3 — uso" },
+        resource4Label: { kind: "text", label: "Recurso 4 — nombre" },
+        resource4Use: { kind: "text", label: "Recurso 4 — uso" },
+        resource5Label: { kind: "text", label: "Recurso 5 — nombre" },
+        resource5Use: { kind: "text", label: "Recurso 5 — uso" },
+        rules: {
+          kind: "list",
+          label: "Conceptos / reglas",
+          itemLabel: "Regla",
+          fields: {
+            title: { kind: "text", label: "Título" },
+            body: { kind: "textarea", label: "Explicación", rows: 3 },
+          },
+        },
+      },
+      defaults: {
+        eyebrow: "Cómo se juega",
+        title: "Una isla, cinco recursos, mil partidas.",
+        subtitle:
+          "Catan se juega sobre un mapa modular de losetas hexagonales. Cada loseta produce un recurso y los jugadores compiten por construir el mejor imperio comercial. Aquí lo tienes en un vistazo.",
+        resourcesTitle: "Los 5 recursos",
+        resource1Label: "Madera",
+        resource1Use: "Caminos y cartas de desarrollo",
+        resource2Label: "Piedra",
+        resource2Use: "Ciudades y desarrollo",
+        resource3Label: "Trigo",
+        resource3Use: "Colonos, ciudades y desarrollo",
+        resource4Label: "Arcilla",
+        resource4Use: "Caminos y poblados",
+        resource5Label: "Lana",
+        resource5Use: "Poblados y desarrollo",
+        rules: [
+          {
+            title: "Construye y expande",
+            body: "Empiezas con dos poblados y dos caminos. En cada turno, tira los dados, recolecta recursos y decide: ¿caminos, poblados, ciudades o cartas de desarrollo?",
+          },
+          {
+            title: "Comercia con todos",
+            body: "El alma de Catan es el trueque. Cambia tus recursos sobrantes con otros jugadores o con el banco. Negociar bien vale más que tirar buenos dados.",
+          },
+          {
+            title: "Llega a 10 puntos",
+            body: "Cada poblado vale 1 punto, cada ciudad 2. Suma con la carretera más larga, el ejército más grande y las cartas de victoria. El primero en 10 gana.",
+          },
+        ],
+      },
+    },
+    {
+      key: "catan.tournaments",
+      label: "Torneos y comunidad",
+      fields: {
+        eyebrow: { kind: "text", label: "Etiqueta superior" },
+        title: { kind: "text", label: "Título" },
+        subtitle: { kind: "textarea", label: "Subtítulo", rows: 2 },
+        items: {
+          kind: "list",
+          label: "Torneos / actividades",
+          itemLabel: "Torneo",
+          fields: {
+            title: { kind: "text", label: "Nombre del torneo" },
+            body: { kind: "textarea", label: "Descripción", rows: 3 },
+            image: { kind: "image", label: "Imagen (opcional)" },
+          },
+        },
+      },
+      defaults: {
+        eyebrow: "La comunidad",
+        title: "Torneos cada mes, partidas cada semana",
+        subtitle:
+          "Organizamos torneos abiertos a todos los niveles cada mes, además de partidas regulares semanales. Apúntate por WhatsApp y nos vemos en la mesa.",
+        items: [
+          {
+            title: "Liga mensual KLEFF Catan",
+            body: "Una jornada al mes con formato de liga: rondas suizas, premios y mucha negociación. Apto para todos los niveles.",
+            image: "",
+          },
+          {
+            title: "Catan para principiantes",
+            body: "Mesa específica para quienes nunca han jugado. Te explicamos las reglas y juegas tu primera partida con jugadores que también empiezan.",
+            image: "",
+          },
+          {
+            title: "Noches de expansión",
+            body: "Marineros, Ciudades y Caballeros, Bárbaros… organizamos noches temáticas para descubrir cada expansión.",
+            image: "",
+          },
+        ],
+      },
+    },
+    {
+      key: "catan.cta",
+      label: "CTA final · WhatsApp",
+      fields: {
+        title: { kind: "text", label: "Título" },
+        subtitle: { kind: "textarea", label: "Subtítulo", rows: 2 },
+        whatsappLabel: { kind: "text", label: "Texto del botón" },
+        whatsappUrl: { kind: "url", label: "Enlace del grupo" },
+      },
+      defaults: {
+        title: "¿Te unes a la colonia?",
+        subtitle:
+          "Entra al grupo de WhatsApp para enterarte del próximo torneo, apuntarte a las partidas semanales y conocer al resto de la comunidad de Catan en KLEFF.",
+        whatsappLabel: "Unirme al WhatsApp",
+        whatsappUrl: "https://chat.whatsapp.com/FbVhgyrIZXBJPrxC0DqoCE",
+      },
+    },
+  ],
+};
+
 // ---------------- ABOUT ----------------
 
 const aboutSchema: PageSchema = {
