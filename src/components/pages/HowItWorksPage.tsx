@@ -15,7 +15,7 @@ import {
   Crown,
   Skull,
   Hexagon,
-  Swords,
+  Trophy,
   EyeOff,
 } from "lucide-react";
 import { Link } from "@tanstack/react-router";
