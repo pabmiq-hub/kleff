@@ -733,6 +733,7 @@ const tournamentsSchema: PageSchema = {
       },
     },
     {
+      key: "tournaments.cta",
       label: "CTA final · WhatsApp",
       fields: {
         title: { kind: "text", label: "Título" },
