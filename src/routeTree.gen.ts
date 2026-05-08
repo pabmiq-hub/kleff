@@ -37,6 +37,7 @@ import { Route as EnCatanRouteImport } from './routes/en.catan'
 import { Route as EnBloodOnTheClocktowerRouteImport } from './routes/en.blood-on-the-clocktower'
 import { Route as EnBlogRouteImport } from './routes/en.blog'
 import { Route as EnAboutRouteImport } from './routes/en.about'
+import { Route as CaTornejosRouteImport } from './routes/ca.tornejos'
 import { Route as CaQuiSomRouteImport } from './routes/ca.qui-som'
 import { Route as CaMitjansRouteImport } from './routes/ca.mitjans'
 import { Route as CaLudotecaRouteImport } from './routes/ca.ludoteca'
@@ -203,6 +204,11 @@ const EnBlogRoute = EnBlogRouteImport.update({
 const EnAboutRoute = EnAboutRouteImport.update({
   id: '/en/about',
   path: '/en/about',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CaTornejosRoute = CaTornejosRouteImport.update({
+  id: '/ca/tornejos',
+  path: '/ca/tornejos',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CaQuiSomRoute = CaQuiSomRouteImport.update({
@@ -373,6 +379,7 @@ export interface FileRoutesByFullPath {
   '/ca/ludoteca': typeof CaLudotecaRoute
   '/ca/mitjans': typeof CaMitjansRoute
   '/ca/qui-som': typeof CaQuiSomRoute
+  '/ca/tornejos': typeof CaTornejosRoute
   '/en/about': typeof EnAboutRoute
   '/en/blog': typeof EnBlogRoute
   '/en/blood-on-the-clocktower': typeof EnBloodOnTheClocktowerRoute
@@ -426,6 +433,7 @@ export interface FileRoutesByTo {
   '/ca/ludoteca': typeof CaLudotecaRoute
   '/ca/mitjans': typeof CaMitjansRoute
   '/ca/qui-som': typeof CaQuiSomRoute
+  '/ca/tornejos': typeof CaTornejosRoute
   '/en/about': typeof EnAboutRoute
   '/en/blog': typeof EnBlogRoute
   '/en/blood-on-the-clocktower': typeof EnBloodOnTheClocktowerRoute
@@ -484,6 +492,7 @@ export interface FileRoutesById {
   '/ca/ludoteca': typeof CaLudotecaRoute
   '/ca/mitjans': typeof CaMitjansRoute
   '/ca/qui-som': typeof CaQuiSomRoute
+  '/ca/tornejos': typeof CaTornejosRoute
   '/en/about': typeof EnAboutRoute
   '/en/blog': typeof EnBlogRoute
   '/en/blood-on-the-clocktower': typeof EnBloodOnTheClocktowerRoute
@@ -543,6 +552,7 @@ export interface FileRouteTypes {
     | '/ca/ludoteca'
     | '/ca/mitjans'
     | '/ca/qui-som'
+    | '/ca/tornejos'
     | '/en/about'
     | '/en/blog'
     | '/en/blood-on-the-clocktower'
@@ -596,6 +606,7 @@ export interface FileRouteTypes {
     | '/ca/ludoteca'
     | '/ca/mitjans'
     | '/ca/qui-som'
+    | '/ca/tornejos'
     | '/en/about'
     | '/en/blog'
     | '/en/blood-on-the-clocktower'
@@ -653,6 +664,7 @@ export interface FileRouteTypes {
     | '/ca/ludoteca'
     | '/ca/mitjans'
     | '/ca/qui-som'
+    | '/ca/tornejos'
     | '/en/about'
     | '/en/blog'
     | '/en/blood-on-the-clocktower'
@@ -704,6 +716,7 @@ export interface RootRouteChildren {
   CaLudotecaRoute: typeof CaLudotecaRoute
   CaMitjansRoute: typeof CaMitjansRoute
   CaQuiSomRoute: typeof CaQuiSomRoute
+  CaTornejosRoute: typeof CaTornejosRoute
   EnAboutRoute: typeof EnAboutRoute
   EnBlogRoute: typeof EnBlogRoute
   EnBloodOnTheClocktowerRoute: typeof EnBloodOnTheClocktowerRoute
@@ -916,6 +929,13 @@ declare module '@tanstack/react-router' {
       path: '/en/about'
       fullPath: '/en/about'
       preLoaderRoute: typeof EnAboutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ca/tornejos': {
+      id: '/ca/tornejos'
+      path: '/ca/tornejos'
+      fullPath: '/ca/tornejos'
+      preLoaderRoute: typeof CaTornejosRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/ca/qui-som': {
@@ -1216,6 +1236,7 @@ const rootRouteChildren: RootRouteChildren = {
   CaLudotecaRoute: CaLudotecaRoute,
   CaMitjansRoute: CaMitjansRoute,
   CaQuiSomRoute: CaQuiSomRoute,
+  CaTornejosRoute: CaTornejosRoute,
   EnAboutRoute: EnAboutRoute,
   EnBlogRoute: EnBlogRoute,
   EnBloodOnTheClocktowerRoute: EnBloodOnTheClocktowerRoute,
