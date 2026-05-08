@@ -518,6 +518,177 @@ const catanSchema: PageSchema = {
   ],
 };
 
+// ---------------- TOURNAMENTS ----------------
+
+const tournamentsSchema: PageSchema = {
+  key: "tournaments",
+  label: "Torneos",
+  path: "/torneos",
+  description:
+    "Página de la comunidad de Torneos: hero, formatos, premios y galería. Editable inline y con auto-traducción a CA y EN.",
+  sections: [
+    {
+      key: "tournaments.hero",
+      label: "Hero (cabecera)",
+      fields: {
+        eyebrow: { kind: "text", label: "Etiqueta superior" },
+        title: { kind: "text", label: "Título principal" },
+        subtitle: { kind: "textarea", label: "Subtítulo / intro", rows: 4 },
+        whatsappLabel: { kind: "text", label: "Texto del botón de WhatsApp" },
+        whatsappUrl: { kind: "url", label: "Enlace del grupo de WhatsApp" },
+        catanLinkLabel: { kind: "text", label: "Texto del enlace a Catan" },
+        stat1Label: { kind: "text", label: "Estadística 1 — etiqueta" },
+        stat2Label: { kind: "text", label: "Estadística 2 — etiqueta" },
+        stat3Label: { kind: "text", label: "Estadística 3 — etiqueta" },
+      },
+      defaults: {
+        eyebrow: "Comunidad · Torneos cada mes",
+        title: "Torneos en KLEFF",
+        subtitle:
+          "Varios torneos al mes de los juegos más populares de la comunidad: aptos para todos los públicos, formatos avanzados y temáticos. Tenemos jornadas especiales del clásico Catan (echa un vistazo a su comunidad), torneos relámpago de juegos rápidos y eliminatorias temáticas.",
+        whatsappLabel: "Únete al grupo de WhatsApp",
+        whatsappUrl: "https://chat.whatsapp.com/EI7DjJU1UtgKcvsQO8KUOX",
+        catanLinkLabel: "Ver comunidad Catan →",
+        stat1Label: "Torneos / mes",
+        stat2Label: "Jugadores",
+        stat3Label: "Juegos al año",
+      },
+    },
+    {
+      key: "tournaments.formats",
+      label: "Cómo funcionan los torneos",
+      fields: {
+        eyebrow: { kind: "text", label: "Etiqueta superior" },
+        title: { kind: "text", label: "Título" },
+        subtitle: { kind: "textarea", label: "Subtítulo", rows: 3 },
+        freeTitle: { kind: "text", label: "Inscripción gratuita — título" },
+        freeBody: { kind: "textarea", label: "Inscripción gratuita — cuerpo", rows: 3 },
+        paidTitle: { kind: "text", label: "Inscripción con premio — título" },
+        paidBody: { kind: "textarea", label: "Inscripción con premio — cuerpo", rows: 3 },
+        items: {
+          kind: "list",
+          label: "Formatos",
+          itemLabel: "Formato",
+          fields: {
+            title: { kind: "text", label: "Nombre del formato" },
+            body: { kind: "textarea", label: "Descripción", rows: 3 },
+          },
+        },
+      },
+      defaults: {
+        eyebrow: "Cómo funcionan",
+        title: "Formatos para todos los gustos",
+        subtitle:
+          "Algunos torneos son totalmente gratuitos. En otros, hay una pequeña cuota de inscripción que se destina íntegramente a los premios para los ganadores.",
+        freeTitle: "Inscripción gratuita",
+        freeBody:
+          "La mayoría de torneos son gratis. Solo necesitas la consumición habitual del local. Apuntarte por WhatsApp y presentarte el día.",
+        paidTitle: "Cuota destinada a premios",
+        paidBody:
+          "En los torneos con cuota, el 100% del dinero se reparte como premios entre los primeros clasificados. Sin ánimo de lucro, todo para la comunidad.",
+        items: [
+          {
+            title: "1 vs 1",
+            body: "Enfrentamientos directos en juegos para dos. Eliminación o ronda de grupos según jugadores.",
+          },
+          {
+            title: "Sistema suizo",
+            body: "Todos juegan el mismo número de rondas. Cada ronda emparejas con alguien de tu mismo nivel de victorias. Justo y rápido.",
+          },
+          {
+            title: "Clasificatorio + final",
+            body: "Fase de grupos para clasificar a los mejores y final a una sola partida. Tensión máxima.",
+          },
+          {
+            title: "Aptos para todos",
+            body: "Mezclamos jugadores nuevos y veteranos. Siempre hay categoría principiante y nadie queda fuera.",
+          },
+          {
+            title: "Avanzados",
+            body: "Algunos torneos son específicamente para jugadores con experiencia. Reglas oficiales, reloj de tiempo y reglas avanzadas.",
+          },
+          {
+            title: "Temáticos",
+            body: "Noches especiales: Halloween, Navidad, expansiones concretas… cada mes un giro distinto.",
+          },
+        ],
+      },
+    },
+    {
+      key: "tournaments.prizes",
+      label: "Premios",
+      fields: {
+        eyebrow: { kind: "text", label: "Etiqueta superior" },
+        title: { kind: "text", label: "Título" },
+        subtitle: { kind: "textarea", label: "Subtítulo", rows: 3 },
+        items: {
+          kind: "list",
+          label: "Ejemplos de premios",
+          itemLabel: "Premio",
+          fields: {
+            title: { kind: "text", label: "Premio" },
+            body: { kind: "textarea", label: "Descripción", rows: 3 },
+            image: { kind: "image", label: "Imagen del premio" },
+          },
+        },
+      },
+      defaults: {
+        eyebrow: "Los premios",
+        title: "Algo más que un trofeo",
+        subtitle:
+          "Juegos, expansiones, vales para la ludoteca, descuentos en colaboradores… cada torneo tiene sus propios premios. Aquí tienes algunos ejemplos.",
+        items: [
+          { title: "Juegos de mesa", body: "Cajas nuevas donadas por editoriales y tiendas colaboradoras.", image: "" },
+          { title: "Expansiones", body: "Para que sigas alargando la vida de tus juegos favoritos.", image: "" },
+          { title: "Vales y descuentos", body: "Vales para la ludoteca KLEFF y descuentos en tiendas colaboradoras.", image: "" },
+        ],
+      },
+    },
+    {
+      key: "tournaments.gallery",
+      label: "Galería · Participantes",
+      fields: {
+        eyebrow: { kind: "text", label: "Etiqueta superior" },
+        title: { kind: "text", label: "Título" },
+        subtitle: { kind: "textarea", label: "Subtítulo", rows: 2 },
+        items: {
+          kind: "list",
+          label: "Fotos",
+          itemLabel: "Foto",
+          fields: {
+            image: { kind: "image", label: "Imagen" },
+            caption: { kind: "text", label: "Pie de foto" },
+          },
+        },
+      },
+      defaults: {
+        eyebrow: "El ambiente",
+        title: "La gente que hace los torneos",
+        subtitle:
+          "Caras conocidas, partidas reñidas y mucha buena onda. Así se viven los torneos de KLEFF.",
+        items: [],
+      },
+    },
+    {
+      key: "tournaments.cta",
+      label: "CTA final · WhatsApp",
+      fields: {
+        title: { kind: "text", label: "Título" },
+        subtitle: { kind: "textarea", label: "Subtítulo", rows: 2 },
+        whatsappLabel: { kind: "text", label: "Texto del botón" },
+        whatsappUrl: { kind: "url", label: "Enlace del grupo" },
+      },
+      defaults: {
+        title: "¿Te animas al próximo torneo?",
+        subtitle:
+          "Entra al grupo de WhatsApp para enterarte de las fechas, formatos y premios de los próximos torneos en KLEFF.",
+        whatsappLabel: "Unirme al WhatsApp",
+        whatsappUrl: "https://chat.whatsapp.com/EI7DjJU1UtgKcvsQO8KUOX",
+      },
+    },
+  ],
+};
+
 // ---------------- ABOUT ----------------
 
 const aboutSchema: PageSchema = {
@@ -936,6 +1107,7 @@ export const PAGE_SCHEMAS: PageSchema[] = [
   homeSchema,
   clocktowerSchema,
   catanSchema,
+  tournamentsSchema,
   aboutSchema,
   howSchema,
   contactSchema,

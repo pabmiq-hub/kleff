@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as TorneosRouteImport } from './routes/torneos'
 import { Route as SuperAdminRouteImport } from './routes/super-admin'
 import { Route as SobreNosotrosRouteImport } from './routes/sobre-nosotros'
 import { Route as MediosRouteImport } from './routes/medios'
@@ -28,6 +29,7 @@ import { Route as CaIndexRouteImport } from './routes/ca.index'
 import { Route as AppIndexRouteImport } from './routes/app.index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as InviteTokenRouteImport } from './routes/invite.$token'
+import { Route as EnTournamentsRouteImport } from './routes/en.tournaments'
 import { Route as EnMediaRouteImport } from './routes/en.media'
 import { Route as EnLudotecaRouteImport } from './routes/en.ludoteca'
 import { Route as EnHowItWorksRouteImport } from './routes/en.how-it-works'
@@ -36,6 +38,7 @@ import { Route as EnCatanRouteImport } from './routes/en.catan'
 import { Route as EnBloodOnTheClocktowerRouteImport } from './routes/en.blood-on-the-clocktower'
 import { Route as EnBlogRouteImport } from './routes/en.blog'
 import { Route as EnAboutRouteImport } from './routes/en.about'
+import { Route as CaTornejosRouteImport } from './routes/ca.tornejos'
 import { Route as CaQuiSomRouteImport } from './routes/ca.qui-som'
 import { Route as CaMitjansRouteImport } from './routes/ca.mitjans'
 import { Route as CaLudotecaRouteImport } from './routes/ca.ludoteca'
@@ -64,6 +67,11 @@ import { Route as AdminContentUrlsRouteImport } from './routes/admin.content.url
 import { Route as AdminContentRedirectsRouteImport } from './routes/admin.content.redirects'
 import { Route as AdminContentPageKeyRouteImport } from './routes/admin.content.$pageKey'
 
+const TorneosRoute = TorneosRouteImport.update({
+  id: '/torneos',
+  path: '/torneos',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SuperAdminRoute = SuperAdminRouteImport.update({
   id: '/super-admin',
   path: '/super-admin',
@@ -159,6 +167,11 @@ const InviteTokenRoute = InviteTokenRouteImport.update({
   path: '/invite/$token',
   getParentRoute: () => rootRouteImport,
 } as any)
+const EnTournamentsRoute = EnTournamentsRouteImport.update({
+  id: '/en/tournaments',
+  path: '/en/tournaments',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const EnMediaRoute = EnMediaRouteImport.update({
   id: '/en/media',
   path: '/en/media',
@@ -197,6 +210,11 @@ const EnBlogRoute = EnBlogRouteImport.update({
 const EnAboutRoute = EnAboutRouteImport.update({
   id: '/en/about',
   path: '/en/about',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CaTornejosRoute = CaTornejosRouteImport.update({
+  id: '/ca/tornejos',
+  path: '/ca/tornejos',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CaQuiSomRoute = CaQuiSomRouteImport.update({
@@ -351,6 +369,7 @@ export interface FileRoutesByFullPath {
   '/medios': typeof MediosRoute
   '/sobre-nosotros': typeof SobreNosotrosRoute
   '/super-admin': typeof SuperAdminRoute
+  '/torneos': typeof TorneosRoute
   '/admin/content': typeof AdminContentRouteWithChildren
   '/admin/invitations': typeof AdminInvitationsRoute
   '/admin/members': typeof AdminMembersRoute
@@ -366,6 +385,7 @@ export interface FileRoutesByFullPath {
   '/ca/ludoteca': typeof CaLudotecaRoute
   '/ca/mitjans': typeof CaMitjansRoute
   '/ca/qui-som': typeof CaQuiSomRoute
+  '/ca/tornejos': typeof CaTornejosRoute
   '/en/about': typeof EnAboutRoute
   '/en/blog': typeof EnBlogRoute
   '/en/blood-on-the-clocktower': typeof EnBloodOnTheClocktowerRoute
@@ -374,6 +394,7 @@ export interface FileRoutesByFullPath {
   '/en/how-it-works': typeof EnHowItWorksRoute
   '/en/ludoteca': typeof EnLudotecaRoute
   '/en/media': typeof EnMediaRoute
+  '/en/tournaments': typeof EnTournamentsRoute
   '/invite/$token': typeof InviteTokenRoute
   '/admin/': typeof AdminIndexRoute
   '/app/': typeof AppIndexRoute
@@ -405,6 +426,7 @@ export interface FileRoutesByTo {
   '/medios': typeof MediosRoute
   '/sobre-nosotros': typeof SobreNosotrosRoute
   '/super-admin': typeof SuperAdminRoute
+  '/torneos': typeof TorneosRoute
   '/admin/invitations': typeof AdminInvitationsRoute
   '/admin/members': typeof AdminMembersRoute
   '/app/carnet': typeof AppCarnetRoute
@@ -418,6 +440,7 @@ export interface FileRoutesByTo {
   '/ca/ludoteca': typeof CaLudotecaRoute
   '/ca/mitjans': typeof CaMitjansRoute
   '/ca/qui-som': typeof CaQuiSomRoute
+  '/ca/tornejos': typeof CaTornejosRoute
   '/en/about': typeof EnAboutRoute
   '/en/blog': typeof EnBlogRoute
   '/en/blood-on-the-clocktower': typeof EnBloodOnTheClocktowerRoute
@@ -426,6 +449,7 @@ export interface FileRoutesByTo {
   '/en/how-it-works': typeof EnHowItWorksRoute
   '/en/ludoteca': typeof EnLudotecaRoute
   '/en/media': typeof EnMediaRoute
+  '/en/tournaments': typeof EnTournamentsRoute
   '/invite/$token': typeof InviteTokenRoute
   '/admin': typeof AdminIndexRoute
   '/app': typeof AppIndexRoute
@@ -460,6 +484,7 @@ export interface FileRoutesById {
   '/medios': typeof MediosRoute
   '/sobre-nosotros': typeof SobreNosotrosRoute
   '/super-admin': typeof SuperAdminRoute
+  '/torneos': typeof TorneosRoute
   '/admin/content': typeof AdminContentRouteWithChildren
   '/admin/invitations': typeof AdminInvitationsRoute
   '/admin/members': typeof AdminMembersRoute
@@ -475,6 +500,7 @@ export interface FileRoutesById {
   '/ca/ludoteca': typeof CaLudotecaRoute
   '/ca/mitjans': typeof CaMitjansRoute
   '/ca/qui-som': typeof CaQuiSomRoute
+  '/ca/tornejos': typeof CaTornejosRoute
   '/en/about': typeof EnAboutRoute
   '/en/blog': typeof EnBlogRoute
   '/en/blood-on-the-clocktower': typeof EnBloodOnTheClocktowerRoute
@@ -483,6 +509,7 @@ export interface FileRoutesById {
   '/en/how-it-works': typeof EnHowItWorksRoute
   '/en/ludoteca': typeof EnLudotecaRoute
   '/en/media': typeof EnMediaRoute
+  '/en/tournaments': typeof EnTournamentsRoute
   '/invite/$token': typeof InviteTokenRoute
   '/admin/': typeof AdminIndexRoute
   '/app/': typeof AppIndexRoute
@@ -518,6 +545,7 @@ export interface FileRouteTypes {
     | '/medios'
     | '/sobre-nosotros'
     | '/super-admin'
+    | '/torneos'
     | '/admin/content'
     | '/admin/invitations'
     | '/admin/members'
@@ -533,6 +561,7 @@ export interface FileRouteTypes {
     | '/ca/ludoteca'
     | '/ca/mitjans'
     | '/ca/qui-som'
+    | '/ca/tornejos'
     | '/en/about'
     | '/en/blog'
     | '/en/blood-on-the-clocktower'
@@ -541,6 +570,7 @@ export interface FileRouteTypes {
     | '/en/how-it-works'
     | '/en/ludoteca'
     | '/en/media'
+    | '/en/tournaments'
     | '/invite/$token'
     | '/admin/'
     | '/app/'
@@ -572,6 +602,7 @@ export interface FileRouteTypes {
     | '/medios'
     | '/sobre-nosotros'
     | '/super-admin'
+    | '/torneos'
     | '/admin/invitations'
     | '/admin/members'
     | '/app/carnet'
@@ -585,6 +616,7 @@ export interface FileRouteTypes {
     | '/ca/ludoteca'
     | '/ca/mitjans'
     | '/ca/qui-som'
+    | '/ca/tornejos'
     | '/en/about'
     | '/en/blog'
     | '/en/blood-on-the-clocktower'
@@ -593,6 +625,7 @@ export interface FileRouteTypes {
     | '/en/how-it-works'
     | '/en/ludoteca'
     | '/en/media'
+    | '/en/tournaments'
     | '/invite/$token'
     | '/admin'
     | '/app'
@@ -626,6 +659,7 @@ export interface FileRouteTypes {
     | '/medios'
     | '/sobre-nosotros'
     | '/super-admin'
+    | '/torneos'
     | '/admin/content'
     | '/admin/invitations'
     | '/admin/members'
@@ -641,6 +675,7 @@ export interface FileRouteTypes {
     | '/ca/ludoteca'
     | '/ca/mitjans'
     | '/ca/qui-som'
+    | '/ca/tornejos'
     | '/en/about'
     | '/en/blog'
     | '/en/blood-on-the-clocktower'
@@ -649,6 +684,7 @@ export interface FileRouteTypes {
     | '/en/how-it-works'
     | '/en/ludoteca'
     | '/en/media'
+    | '/en/tournaments'
     | '/invite/$token'
     | '/admin/'
     | '/app/'
@@ -683,6 +719,7 @@ export interface RootRouteChildren {
   MediosRoute: typeof MediosRoute
   SobreNosotrosRoute: typeof SobreNosotrosRoute
   SuperAdminRoute: typeof SuperAdminRoute
+  TorneosRoute: typeof TorneosRoute
   CaBlogRoute: typeof CaBlogRoute
   CaBloodOnTheClocktowerRoute: typeof CaBloodOnTheClocktowerRoute
   CaCatanRoute: typeof CaCatanRoute
@@ -691,6 +728,7 @@ export interface RootRouteChildren {
   CaLudotecaRoute: typeof CaLudotecaRoute
   CaMitjansRoute: typeof CaMitjansRoute
   CaQuiSomRoute: typeof CaQuiSomRoute
+  CaTornejosRoute: typeof CaTornejosRoute
   EnAboutRoute: typeof EnAboutRoute
   EnBlogRoute: typeof EnBlogRoute
   EnBloodOnTheClocktowerRoute: typeof EnBloodOnTheClocktowerRoute
@@ -699,6 +737,7 @@ export interface RootRouteChildren {
   EnHowItWorksRoute: typeof EnHowItWorksRoute
   EnLudotecaRoute: typeof EnLudotecaRoute
   EnMediaRoute: typeof EnMediaRoute
+  EnTournamentsRoute: typeof EnTournamentsRoute
   InviteTokenRoute: typeof InviteTokenRoute
   CaIndexRoute: typeof CaIndexRoute
   EnIndexRoute: typeof EnIndexRoute
@@ -709,6 +748,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/torneos': {
+      id: '/torneos'
+      path: '/torneos'
+      fullPath: '/torneos'
+      preLoaderRoute: typeof TorneosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/super-admin': {
       id: '/super-admin'
       path: '/super-admin'
@@ -842,6 +888,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof InviteTokenRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/en/tournaments': {
+      id: '/en/tournaments'
+      path: '/en/tournaments'
+      fullPath: '/en/tournaments'
+      preLoaderRoute: typeof EnTournamentsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/en/media': {
       id: '/en/media'
       path: '/en/media'
@@ -896,6 +949,13 @@ declare module '@tanstack/react-router' {
       path: '/en/about'
       fullPath: '/en/about'
       preLoaderRoute: typeof EnAboutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ca/tornejos': {
+      id: '/ca/tornejos'
+      path: '/ca/tornejos'
+      fullPath: '/ca/tornejos'
+      preLoaderRoute: typeof CaTornejosRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/ca/qui-som': {
@@ -1187,6 +1247,7 @@ const rootRouteChildren: RootRouteChildren = {
   MediosRoute: MediosRoute,
   SobreNosotrosRoute: SobreNosotrosRoute,
   SuperAdminRoute: SuperAdminRoute,
+  TorneosRoute: TorneosRoute,
   CaBlogRoute: CaBlogRoute,
   CaBloodOnTheClocktowerRoute: CaBloodOnTheClocktowerRoute,
   CaCatanRoute: CaCatanRoute,
@@ -1195,6 +1256,7 @@ const rootRouteChildren: RootRouteChildren = {
   CaLudotecaRoute: CaLudotecaRoute,
   CaMitjansRoute: CaMitjansRoute,
   CaQuiSomRoute: CaQuiSomRoute,
+  CaTornejosRoute: CaTornejosRoute,
   EnAboutRoute: EnAboutRoute,
   EnBlogRoute: EnBlogRoute,
   EnBloodOnTheClocktowerRoute: EnBloodOnTheClocktowerRoute,
@@ -1203,6 +1265,7 @@ const rootRouteChildren: RootRouteChildren = {
   EnHowItWorksRoute: EnHowItWorksRoute,
   EnLudotecaRoute: EnLudotecaRoute,
   EnMediaRoute: EnMediaRoute,
+  EnTournamentsRoute: EnTournamentsRoute,
   InviteTokenRoute: InviteTokenRoute,
   CaIndexRoute: CaIndexRoute,
   EnIndexRoute: EnIndexRoute,
