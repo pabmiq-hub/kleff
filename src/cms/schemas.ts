@@ -1107,6 +1107,7 @@ export const PAGE_SCHEMAS: PageSchema[] = [
   homeSchema,
   clocktowerSchema,
   catanSchema,
+  tournamentsSchema,
   aboutSchema,
   howSchema,
   contactSchema,
