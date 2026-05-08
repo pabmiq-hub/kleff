@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as TorneosRouteImport } from './routes/torneos'
 import { Route as SuperAdminRouteImport } from './routes/super-admin'
 import { Route as SobreNosotrosRouteImport } from './routes/sobre-nosotros'
 import { Route as MediosRouteImport } from './routes/medios'
@@ -64,6 +65,11 @@ import { Route as AdminContentUrlsRouteImport } from './routes/admin.content.url
 import { Route as AdminContentRedirectsRouteImport } from './routes/admin.content.redirects'
 import { Route as AdminContentPageKeyRouteImport } from './routes/admin.content.$pageKey'
 
+const TorneosRoute = TorneosRouteImport.update({
+  id: '/torneos',
+  path: '/torneos',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SuperAdminRoute = SuperAdminRouteImport.update({
   id: '/super-admin',
   path: '/super-admin',
@@ -351,6 +357,7 @@ export interface FileRoutesByFullPath {
   '/medios': typeof MediosRoute
   '/sobre-nosotros': typeof SobreNosotrosRoute
   '/super-admin': typeof SuperAdminRoute
+  '/torneos': typeof TorneosRoute
   '/admin/content': typeof AdminContentRouteWithChildren
   '/admin/invitations': typeof AdminInvitationsRoute
   '/admin/members': typeof AdminMembersRoute
@@ -405,6 +412,7 @@ export interface FileRoutesByTo {
   '/medios': typeof MediosRoute
   '/sobre-nosotros': typeof SobreNosotrosRoute
   '/super-admin': typeof SuperAdminRoute
+  '/torneos': typeof TorneosRoute
   '/admin/invitations': typeof AdminInvitationsRoute
   '/admin/members': typeof AdminMembersRoute
   '/app/carnet': typeof AppCarnetRoute
@@ -460,6 +468,7 @@ export interface FileRoutesById {
   '/medios': typeof MediosRoute
   '/sobre-nosotros': typeof SobreNosotrosRoute
   '/super-admin': typeof SuperAdminRoute
+  '/torneos': typeof TorneosRoute
   '/admin/content': typeof AdminContentRouteWithChildren
   '/admin/invitations': typeof AdminInvitationsRoute
   '/admin/members': typeof AdminMembersRoute
@@ -518,6 +527,7 @@ export interface FileRouteTypes {
     | '/medios'
     | '/sobre-nosotros'
     | '/super-admin'
+    | '/torneos'
     | '/admin/content'
     | '/admin/invitations'
     | '/admin/members'
@@ -572,6 +582,7 @@ export interface FileRouteTypes {
     | '/medios'
     | '/sobre-nosotros'
     | '/super-admin'
+    | '/torneos'
     | '/admin/invitations'
     | '/admin/members'
     | '/app/carnet'
@@ -626,6 +637,7 @@ export interface FileRouteTypes {
     | '/medios'
     | '/sobre-nosotros'
     | '/super-admin'
+    | '/torneos'
     | '/admin/content'
     | '/admin/invitations'
     | '/admin/members'
@@ -683,6 +695,7 @@ export interface RootRouteChildren {
   MediosRoute: typeof MediosRoute
   SobreNosotrosRoute: typeof SobreNosotrosRoute
   SuperAdminRoute: typeof SuperAdminRoute
+  TorneosRoute: typeof TorneosRoute
   CaBlogRoute: typeof CaBlogRoute
   CaBloodOnTheClocktowerRoute: typeof CaBloodOnTheClocktowerRoute
   CaCatanRoute: typeof CaCatanRoute
@@ -709,6 +722,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/torneos': {
+      id: '/torneos'
+      path: '/torneos'
+      fullPath: '/torneos'
+      preLoaderRoute: typeof TorneosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/super-admin': {
       id: '/super-admin'
       path: '/super-admin'
@@ -1187,6 +1207,7 @@ const rootRouteChildren: RootRouteChildren = {
   MediosRoute: MediosRoute,
   SobreNosotrosRoute: SobreNosotrosRoute,
   SuperAdminRoute: SuperAdminRoute,
+  TorneosRoute: TorneosRoute,
   CaBlogRoute: CaBlogRoute,
   CaBloodOnTheClocktowerRoute: CaBloodOnTheClocktowerRoute,
   CaCatanRoute: CaCatanRoute,
