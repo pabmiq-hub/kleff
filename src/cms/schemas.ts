@@ -670,7 +670,69 @@ const tournamentsSchema: PageSchema = {
       },
     },
     {
-      key: "tournaments.cta",
+      key: "tournaments.faq",
+      label: "FAQ",
+      description: "Preguntas frecuentes con respuesta desplegable. Categorías sugeridas: formatos, cuotas, reglas, cómo apuntarse.",
+      fields: {
+        eyebrow: { kind: "text", label: "Etiqueta superior" },
+        title: { kind: "text", label: "Título" },
+        subtitle: { kind: "textarea", label: "Subtítulo", rows: 2 },
+        items: {
+          kind: "list",
+          label: "Preguntas",
+          itemLabel: "Pregunta",
+          fields: {
+            category: { kind: "text", label: "Categoría (Formatos / Cuotas / Reglas / Cómo apuntarse)" },
+            question: { kind: "text", label: "Pregunta" },
+            answer: { kind: "textarea", label: "Respuesta", rows: 5 },
+          },
+        },
+      },
+      defaults: {
+        eyebrow: "Preguntas frecuentes",
+        title: "Todo lo que quieres saber",
+        subtitle: "Resolvemos las dudas más habituales sobre nuestros torneos.",
+        items: [
+          {
+            category: "Formatos",
+            question: "¿Qué formatos de torneo organizáis?",
+            answer:
+              "Organizamos formatos 1 vs 1 para juegos de dos jugadores, sistema suizo (todos juegan el mismo número de rondas) y clasificatorios con fase de grupos y final. Algunos torneos son temáticos (Halloween, Navidad, expansiones concretas).",
+          },
+          {
+            category: "Cuotas",
+            question: "¿Los torneos tienen coste de inscripción?",
+            answer:
+              "La mayoría son gratuitos: solo necesitas la consumición habitual del local. En los torneos con cuota, el 100% del importe se reparte como premios entre los ganadores. KLEFF es una asociación sin ánimo de lucro: nada se queda en la organización.",
+          },
+          {
+            category: "Reglas",
+            question: "¿Qué reglas se utilizan?",
+            answer:
+              "Usamos las reglas oficiales de cada juego. En torneos avanzados aplicamos también reloj de tiempo y reglas competitivas oficiales. Antes de empezar siempre se hace un repaso para que todo el mundo juegue con las mismas reglas.",
+          },
+          {
+            category: "Reglas",
+            question: "¿Hace falta tener experiencia para participar?",
+            answer:
+              "No. La mayoría de torneos son aptos para todos los niveles, incluyendo principiantes. Mezclamos jugadores nuevos y veteranos. Algunos torneos están específicamente marcados como 'avanzados' y se anuncia con antelación.",
+          },
+          {
+            category: "Cómo apuntarse",
+            question: "¿Cómo me apunto a un torneo?",
+            answer:
+              "Únete al grupo de WhatsApp de Torneos. Allí publicamos las fechas, formatos, juegos y enlace para apuntarte. La inscripción suele cerrarse 24-48 horas antes del torneo para poder organizar las mesas.",
+          },
+          {
+            category: "Cómo apuntarse",
+            question: "¿Puedo venir solo?",
+            answer:
+              "Sí, de hecho mucha gente viene sola. En los torneos te emparejamos automáticamente con otros jugadores. Es una de las mejores formas de conocer a la comunidad.",
+          },
+        ],
+      },
+    },
+    {
       label: "CTA final · WhatsApp",
       fields: {
         title: { kind: "text", label: "Título" },
