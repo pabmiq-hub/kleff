@@ -9,11 +9,18 @@ import {
   Award,
   Target,
   Crown,
+  HelpCircle,
 } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { SiteLayout } from "@/components/site/SiteLayout";
-import { SectionProvider, useSectionValue } from "@/cms/SectionContext";
+import { SectionProvider, useSection, useSectionValue } from "@/cms/SectionContext";
 import { CmsImage, CmsList, CmsText } from "@/cms/Editable";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import { useEditor } from "@/editor/EditorProvider";
 import { useI18n } from "@/i18n/I18nProvider";
 
