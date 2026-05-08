@@ -43,6 +43,10 @@ export function TournamentsPage() {
         <GallerySection />
       </SectionProvider>
 
+      <SectionProvider sectionKey="tournaments.faq">
+        <FaqSection />
+      </SectionProvider>
+
       <SectionProvider sectionKey="tournaments.cta">
         <CtaSection />
       </SectionProvider>
