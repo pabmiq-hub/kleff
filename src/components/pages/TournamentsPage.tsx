@@ -450,6 +450,103 @@ function GallerySection() {
   );
 }
 
+/* -------------------- FAQ -------------------- */
+
+type FaqItem = { category?: string; question?: string; answer?: string };
+
+function FaqSection() {
+  const { editMode } = useEditor();
+  const { data } = useSection();
+  const items = (Array.isArray(data.items) ? (data.items as FaqItem[]) : []);
+
+  return (
+    <section className="py-20 md:py-28 bg-cream-deep/40 border-y-2 border-ink/10 relative overflow-hidden">
+      <div className="absolute -top-20 -right-20 size-72 bg-amber-300/20 rounded-full blur-3xl pointer-events-none" />
+      <div className="relative mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+        <div className="text-center mb-12">
+          <span className="inline-flex items-center gap-2 stamp-coral text-xs font-bold uppercase tracking-widest mb-4">
+            <HelpCircle className="h-3.5 w-3.5" />
+            <CmsText field="eyebrow" as="span" />
+          </span>
+          <CmsText
+            field="title"
+            as="h2"
+            className="text-4xl sm:text-5xl lg:text-6xl font-display font-semibold leading-tight"
+          />
+          <CmsText
+            field="subtitle"
+            multiline
+            as="p"
+            className="mt-4 text-lg text-foreground/75 max-w-2xl mx-auto"
+          />
+        </div>
+
+        {editMode ? (
+          /* In edit mode: inline editable cards (accordion would block contentEditable) */
+          <div className="space-y-4">
+            <CmsList
+              field="items"
+              addLabel="Añadir pregunta"
+              renderItem={({ index, prefix }) => (
+                <article
+                  key={index}
+                  className="bg-card border-2 border-ink rounded-2xl p-5 shadow-tactile-sm"
+                >
+                  <CmsText
+                    field={`${prefix}.category`}
+                    as="span"
+                    className="inline-block bg-coral/15 text-coral-deep text-[10px] font-bold uppercase tracking-widest rounded-full px-2.5 py-1 mb-3"
+                    placeholder="Categoría"
+                  />
+                  <CmsText
+                    field={`${prefix}.question`}
+                    as="h3"
+                    className="text-lg font-display font-semibold leading-tight"
+                    placeholder="Pregunta"
+                  />
+                  <CmsText
+                    field={`${prefix}.answer`}
+                    multiline
+                    as="p"
+                    className="mt-2 text-sm text-foreground/75 leading-relaxed"
+                    placeholder="Respuesta"
+                  />
+                </article>
+              )}
+            />
+          </div>
+        ) : (
+          <Accordion type="single" collapsible className="space-y-3">
+            {items.map((it, i) => (
+              <AccordionItem
+                key={i}
+                value={`faq-${i}`}
+                className="bg-card border-2 border-ink rounded-2xl shadow-tactile-sm overflow-hidden hover:shadow-tactile transition-shadow"
+              >
+                <AccordionTrigger className="px-5 py-4 hover:no-underline">
+                  <div className="flex flex-col items-start text-left gap-1.5 pr-4">
+                    {it.category ? (
+                      <span className="inline-block bg-coral/15 text-coral-deep text-[10px] font-bold uppercase tracking-widest rounded-full px-2.5 py-0.5">
+                        {it.category}
+                      </span>
+                    ) : null}
+                    <span className="text-base sm:text-lg font-display font-semibold leading-snug">
+                      {it.question}
+                    </span>
+                  </div>
+                </AccordionTrigger>
+                <AccordionContent className="px-5 pb-5 text-base text-foreground/75 leading-relaxed whitespace-pre-line">
+                  {it.answer}
+                </AccordionContent>
+              </AccordionItem>
+            ))}
+          </Accordion>
+        )}
+      </div>
+    </section>
+  );
+}
+
 /* -------------------- CTA -------------------- */
 
 function CtaSection() {
