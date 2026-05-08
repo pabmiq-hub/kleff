@@ -413,6 +413,8 @@ export function HowItWorksPage() {
               tag={t.how.community3Tag}
               icon={<Trophy className="h-7 w-7 text-cream" />}
               accent="coral"
+              href={locale === "en" ? "/en/tournaments" : locale === "ca" ? "/ca/tornejos" : "/torneos"}
+              ctaLabel={locale === "en" ? "View page" : locale === "ca" ? "Veure pàgina" : "Ver página"}
             />
             <CommunityCard
               title={t.how.community4Title}

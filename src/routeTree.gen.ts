@@ -29,6 +29,7 @@ import { Route as CaIndexRouteImport } from './routes/ca.index'
 import { Route as AppIndexRouteImport } from './routes/app.index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as InviteTokenRouteImport } from './routes/invite.$token'
+import { Route as EnTournamentsRouteImport } from './routes/en.tournaments'
 import { Route as EnMediaRouteImport } from './routes/en.media'
 import { Route as EnLudotecaRouteImport } from './routes/en.ludoteca'
 import { Route as EnHowItWorksRouteImport } from './routes/en.how-it-works'
@@ -164,6 +165,11 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
 const InviteTokenRoute = InviteTokenRouteImport.update({
   id: '/invite/$token',
   path: '/invite/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EnTournamentsRoute = EnTournamentsRouteImport.update({
+  id: '/en/tournaments',
+  path: '/en/tournaments',
   getParentRoute: () => rootRouteImport,
 } as any)
 const EnMediaRoute = EnMediaRouteImport.update({
@@ -388,6 +394,7 @@ export interface FileRoutesByFullPath {
   '/en/how-it-works': typeof EnHowItWorksRoute
   '/en/ludoteca': typeof EnLudotecaRoute
   '/en/media': typeof EnMediaRoute
+  '/en/tournaments': typeof EnTournamentsRoute
   '/invite/$token': typeof InviteTokenRoute
   '/admin/': typeof AdminIndexRoute
   '/app/': typeof AppIndexRoute
@@ -442,6 +449,7 @@ export interface FileRoutesByTo {
   '/en/how-it-works': typeof EnHowItWorksRoute
   '/en/ludoteca': typeof EnLudotecaRoute
   '/en/media': typeof EnMediaRoute
+  '/en/tournaments': typeof EnTournamentsRoute
   '/invite/$token': typeof InviteTokenRoute
   '/admin': typeof AdminIndexRoute
   '/app': typeof AppIndexRoute
@@ -501,6 +509,7 @@ export interface FileRoutesById {
   '/en/how-it-works': typeof EnHowItWorksRoute
   '/en/ludoteca': typeof EnLudotecaRoute
   '/en/media': typeof EnMediaRoute
+  '/en/tournaments': typeof EnTournamentsRoute
   '/invite/$token': typeof InviteTokenRoute
   '/admin/': typeof AdminIndexRoute
   '/app/': typeof AppIndexRoute
@@ -561,6 +570,7 @@ export interface FileRouteTypes {
     | '/en/how-it-works'
     | '/en/ludoteca'
     | '/en/media'
+    | '/en/tournaments'
     | '/invite/$token'
     | '/admin/'
     | '/app/'
@@ -615,6 +625,7 @@ export interface FileRouteTypes {
     | '/en/how-it-works'
     | '/en/ludoteca'
     | '/en/media'
+    | '/en/tournaments'
     | '/invite/$token'
     | '/admin'
     | '/app'
@@ -673,6 +684,7 @@ export interface FileRouteTypes {
     | '/en/how-it-works'
     | '/en/ludoteca'
     | '/en/media'
+    | '/en/tournaments'
     | '/invite/$token'
     | '/admin/'
     | '/app/'
@@ -725,6 +737,7 @@ export interface RootRouteChildren {
   EnHowItWorksRoute: typeof EnHowItWorksRoute
   EnLudotecaRoute: typeof EnLudotecaRoute
   EnMediaRoute: typeof EnMediaRoute
+  EnTournamentsRoute: typeof EnTournamentsRoute
   InviteTokenRoute: typeof InviteTokenRoute
   CaIndexRoute: typeof CaIndexRoute
   EnIndexRoute: typeof EnIndexRoute
@@ -873,6 +886,13 @@ declare module '@tanstack/react-router' {
       path: '/invite/$token'
       fullPath: '/invite/$token'
       preLoaderRoute: typeof InviteTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/en/tournaments': {
+      id: '/en/tournaments'
+      path: '/en/tournaments'
+      fullPath: '/en/tournaments'
+      preLoaderRoute: typeof EnTournamentsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/en/media': {
@@ -1245,6 +1265,7 @@ const rootRouteChildren: RootRouteChildren = {
   EnHowItWorksRoute: EnHowItWorksRoute,
   EnLudotecaRoute: EnLudotecaRoute,
   EnMediaRoute: EnMediaRoute,
+  EnTournamentsRoute: EnTournamentsRoute,
   InviteTokenRoute: InviteTokenRoute,
   CaIndexRoute: CaIndexRoute,
   EnIndexRoute: EnIndexRoute,
