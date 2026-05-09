@@ -222,26 +222,6 @@ function Stat({
   );
 }
 
-function FloatingMask() {
-  return (
-    <div className="relative size-[300px] sm:size-[380px] flex items-center justify-center animate-[hrFloat_6s_ease-in-out_infinite]">
-      <div className="absolute inset-0 rounded-full bg-fuchsia-500/30 blur-3xl scale-90" aria-hidden />
-      <div className="absolute inset-0 rounded-full border-2 border-dashed border-fuchsia-300/40 animate-[spin_22s_linear_infinite]" aria-hidden />
-      <div className="relative z-10 size-48 sm:size-60 rounded-full bg-gradient-to-br from-fuchsia-500 to-purple-800 border-4 border-cream shadow-tactile-lg flex items-center justify-center">
-        <SafeMask className="h-24 w-24 sm:h-32 sm:w-32 text-cream drop-shadow-lg" strokeWidth={1.4} />
-      </div>
-      <EyeOff className="absolute top-4 right-6 h-8 w-8 text-fuchsia-300 animate-[bounce_3s_ease-in-out_infinite]" />
-      <Sparkles className="absolute bottom-8 left-2 h-7 w-7 text-fuchsia-200 animate-[bounce_4s_ease-in-out_infinite_1s]" />
-      <Star className="absolute top-12 left-0 h-7 w-7 text-fuchsia-400 animate-[bounce_3.5s_ease-in-out_infinite_0.5s]" />
-      <style>{`
-        @keyframes hrFloat {
-          0%, 100% { transform: translateY(0); }
-          50% { transform: translateY(-12px); }
-        }
-      `}</style>
-    </div>
-  );
-}
 
 /* -------------------- INTRO -------------------- */
 
