@@ -86,51 +86,113 @@ function MysteryBackdrop() {
 function HeroSection() {
   const whatsappUrl = useSectionValue<string>("whatsappUrl", "");
   return (
-    <section className="relative overflow-hidden bg-gradient-to-br from-[#1a1230] via-ink to-[#3a1230] text-cream border-b-2 border-ink/15">
+    <section className="relative overflow-hidden bg-[#0e0820] text-cream border-b-2 border-ink/15">
+      {/* Atmospheric layered backdrop */}
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_rgba(217,70,239,0.25),_transparent_60%),radial-gradient(ellipse_at_bottom_left,_rgba(244,63,94,0.18),_transparent_55%)]" aria-hidden />
+      <div className="absolute inset-0 opacity-[0.08] [background-image:linear-gradient(rgba(255,255,255,0.6)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.6)_1px,transparent_1px)] [background-size:40px_40px]" aria-hidden />
       <MysteryBackdrop />
 
-      <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-12 md:pt-20 pb-20 grid lg:grid-cols-12 gap-10 items-center">
-        <div className="lg:col-span-7">
-          <span className="inline-flex items-center gap-2 bg-fuchsia-500 text-cream border-2 border-cream rounded-full px-3 py-1.5 text-xs font-bold uppercase tracking-widest shadow-tactile-sm">
+      {/* Floating question marks */}
+      <span className="pointer-events-none absolute top-[12%] left-[8%] text-fuchsia-300/30 font-display text-7xl select-none animate-[hrFloat_7s_ease-in-out_infinite]" aria-hidden>?</span>
+      <span className="pointer-events-none absolute top-[60%] left-[3%] text-rose-300/25 font-display text-5xl select-none animate-[hrFloat_5s_ease-in-out_infinite_1s]" aria-hidden>?</span>
+      <span className="pointer-events-none absolute top-[20%] right-[6%] text-amber-200/25 font-display text-6xl select-none animate-[hrFloat_6s_ease-in-out_infinite_0.5s]" aria-hidden>?</span>
+
+      <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-16 md:pt-24 pb-20 lg:pb-28">
+        {/* Centered eyebrow + title block */}
+        <div className="text-center max-w-4xl mx-auto">
+          <span className="inline-flex items-center gap-2 bg-cream/10 backdrop-blur-sm border-2 border-fuchsia-300/40 rounded-full px-4 py-1.5 text-xs font-bold uppercase tracking-[0.25em] text-fuchsia-200">
             <EyeOff className="h-3.5 w-3.5" />
             <CmsText field="eyebrow" as="span" />
           </span>
           <CmsText
             field="title"
             as="h1"
-            className="mt-6 font-display font-semibold text-4xl sm:text-5xl md:text-6xl lg:text-7xl leading-[1.02] tracking-tight"
+            className="mt-7 font-display font-semibold text-5xl sm:text-6xl md:text-7xl lg:text-[5.5rem] leading-[0.98] tracking-tight bg-gradient-to-br from-cream via-fuchsia-100 to-rose-200 bg-clip-text text-transparent"
           />
           <CmsText
             field="subtitle"
             multiline
             as="p"
-            className="mt-6 text-lg sm:text-xl text-cream/80 max-w-2xl leading-relaxed"
+            className="mt-7 text-lg sm:text-xl text-cream/75 max-w-2xl mx-auto leading-relaxed"
           />
+        </div>
 
-          <div className="mt-8 flex flex-wrap items-center gap-3">
-            <a
-              href={whatsappUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 rounded-2xl bg-[#25D366] text-white border-2 border-cream px-6 py-3.5 text-sm font-bold shadow-tactile hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-tactile-sm transition-all"
-            >
-              <MessageCircle className="h-4 w-4" />
-              <CmsText field="whatsappLabel" as="span" />
-            </a>
-          </div>
+        {/* Fanned role cards */}
+        <div className="relative mt-14 mb-12 flex justify-center items-end h-[200px] sm:h-[240px]">
+          <HeroRoleCard rotate="-rotate-[18deg]" translate="-translate-x-32 sm:-translate-x-44 translate-y-4" tone="bg-fuchsia-100" icon={<Star className="h-7 w-7 text-fuchsia-700" />} label="LEAL" delay="0s" />
+          <HeroRoleCard rotate="-rotate-[8deg]" translate="-translate-x-16 sm:-translate-x-24 translate-y-1" tone="bg-amber-100" icon={<EyeOff className="h-7 w-7 text-amber-700" />} label="ESPÍA" delay="0.3s" />
+          <HeroRoleCard rotate="rotate-0" translate="translate-y-0 z-10" tone="bg-cream" icon={<SafeMask className="h-7 w-7 text-fuchsia-700" />} label="¿?" delay="0.6s" featured />
+          <HeroRoleCard rotate="rotate-[8deg]" translate="translate-x-16 sm:translate-x-24 translate-y-1" tone="bg-rose-100" icon={<Skull className="h-7 w-7 text-rose-700" />} label="TRAIDOR" delay="0.9s" />
+          <HeroRoleCard rotate="rotate-[18deg]" translate="translate-x-32 sm:translate-x-44 translate-y-4" tone="bg-purple-100" icon={<Crown className="h-7 w-7 text-purple-700" />} label="REY" delay="1.2s" />
+        </div>
 
-          <div className="mt-10 grid grid-cols-3 gap-4 max-w-md">
+        {/* CTA + stats */}
+        <div className="flex flex-col items-center gap-10">
+          <a
+            href={whatsappUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 rounded-2xl bg-[#25D366] text-white border-2 border-cream px-7 py-4 text-base font-bold shadow-tactile hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-tactile-sm transition-all"
+          >
+            <MessageCircle className="h-5 w-5" />
+            <CmsText field="whatsappLabel" as="span" />
+            <ArrowRight className="h-4 w-4" />
+          </a>
+
+          <div className="grid grid-cols-3 gap-3 sm:gap-5 w-full max-w-2xl">
             <Stat icon={<Users className="h-5 w-5" />} valueField="stat1Value" labelField="stat1Label" />
             <Stat icon={<Calendar className="h-5 w-5" />} valueField="stat2Value" labelField="stat2Label" />
             <Stat icon={<PartyPopper className="h-5 w-5" />} valueField="stat3Value" labelField="stat3Label" />
           </div>
         </div>
-
-        <div className="lg:col-span-5 flex justify-center">
-          <FloatingMask />
-        </div>
       </div>
+
+      <style>{`
+        @keyframes hrFloat {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(-14px); }
+        }
+        @keyframes hrCardIn {
+          0% { opacity: 0; transform: translateY(40px) scale(0.85); }
+          100% { opacity: 1; }
+        }
+      `}</style>
     </section>
+  );
+}
+
+function HeroRoleCard({
+  rotate,
+  translate,
+  tone,
+  icon,
+  label,
+  delay,
+  featured = false,
+}: {
+  rotate: string;
+  translate: string;
+  tone: string;
+  icon: React.ReactNode;
+  label: string;
+  delay: string;
+  featured?: boolean;
+}) {
+  return (
+    <div
+      className={`absolute ${translate} ${rotate} ${tone} ${featured ? "size-36 sm:size-44 shadow-tactile-lg ring-2 ring-fuchsia-300/60" : "size-28 sm:size-36 shadow-tactile"} border-2 border-ink rounded-2xl flex flex-col items-center justify-center transition-transform hover:-translate-y-2`}
+      style={{ animation: `hrCardIn 0.7s ease-out ${delay} both` }}
+    >
+      <div className="size-10 sm:size-12 rounded-xl bg-cream border-2 border-ink flex items-center justify-center">
+        {icon}
+      </div>
+      <span className="mt-2 font-display font-bold text-sm sm:text-base tracking-wider text-ink">
+        {label}
+      </span>
+      <span className="mt-0.5 text-[8px] font-bold uppercase tracking-widest text-ink/50">
+        Rol secreto
+      </span>
+    </div>
   );
 }
 
@@ -160,26 +222,6 @@ function Stat({
   );
 }
 
-function FloatingMask() {
-  return (
-    <div className="relative size-[300px] sm:size-[380px] flex items-center justify-center animate-[hrFloat_6s_ease-in-out_infinite]">
-      <div className="absolute inset-0 rounded-full bg-fuchsia-500/30 blur-3xl scale-90" aria-hidden />
-      <div className="absolute inset-0 rounded-full border-2 border-dashed border-fuchsia-300/40 animate-[spin_22s_linear_infinite]" aria-hidden />
-      <div className="relative z-10 size-48 sm:size-60 rounded-full bg-gradient-to-br from-fuchsia-500 to-purple-800 border-4 border-cream shadow-tactile-lg flex items-center justify-center">
-        <SafeMask className="h-24 w-24 sm:h-32 sm:w-32 text-cream drop-shadow-lg" strokeWidth={1.4} />
-      </div>
-      <EyeOff className="absolute top-4 right-6 h-8 w-8 text-fuchsia-300 animate-[bounce_3s_ease-in-out_infinite]" />
-      <Sparkles className="absolute bottom-8 left-2 h-7 w-7 text-fuchsia-200 animate-[bounce_4s_ease-in-out_infinite_1s]" />
-      <Star className="absolute top-12 left-0 h-7 w-7 text-fuchsia-400 animate-[bounce_3.5s_ease-in-out_infinite_0.5s]" />
-      <style>{`
-        @keyframes hrFloat {
-          0%, 100% { transform: translateY(0); }
-          50% { transform: translateY(-12px); }
-        }
-      `}</style>
-    </div>
-  );
-}
 
 /* -------------------- INTRO -------------------- */
 
