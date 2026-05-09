@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as TorneosRouteImport } from './routes/torneos'
 import { Route as SuperAdminRouteImport } from './routes/super-admin'
 import { Route as SobreNosotrosRouteImport } from './routes/sobre-nosotros'
+import { Route as RolesOcultosRouteImport } from './routes/roles-ocultos'
 import { Route as MediosRouteImport } from './routes/medios'
 import { Route as LudotecaRouteImport } from './routes/ludoteca'
 import { Route as LoginRouteImport } from './routes/login'
@@ -33,12 +34,14 @@ import { Route as EnTournamentsRouteImport } from './routes/en.tournaments'
 import { Route as EnMediaRouteImport } from './routes/en.media'
 import { Route as EnLudotecaRouteImport } from './routes/en.ludoteca'
 import { Route as EnHowItWorksRouteImport } from './routes/en.how-it-works'
+import { Route as EnHiddenRolesRouteImport } from './routes/en.hidden-roles'
 import { Route as EnContactRouteImport } from './routes/en.contact'
 import { Route as EnCatanRouteImport } from './routes/en.catan'
 import { Route as EnBloodOnTheClocktowerRouteImport } from './routes/en.blood-on-the-clocktower'
 import { Route as EnBlogRouteImport } from './routes/en.blog'
 import { Route as EnAboutRouteImport } from './routes/en.about'
 import { Route as CaTornejosRouteImport } from './routes/ca.tornejos'
+import { Route as CaRolsOcultsRouteImport } from './routes/ca.rols-ocults'
 import { Route as CaQuiSomRouteImport } from './routes/ca.qui-som'
 import { Route as CaMitjansRouteImport } from './routes/ca.mitjans'
 import { Route as CaLudotecaRouteImport } from './routes/ca.ludoteca'
@@ -80,6 +83,11 @@ const SuperAdminRoute = SuperAdminRouteImport.update({
 const SobreNosotrosRoute = SobreNosotrosRouteImport.update({
   id: '/sobre-nosotros',
   path: '/sobre-nosotros',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RolesOcultosRoute = RolesOcultosRouteImport.update({
+  id: '/roles-ocultos',
+  path: '/roles-ocultos',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MediosRoute = MediosRouteImport.update({
@@ -187,6 +195,11 @@ const EnHowItWorksRoute = EnHowItWorksRouteImport.update({
   path: '/en/how-it-works',
   getParentRoute: () => rootRouteImport,
 } as any)
+const EnHiddenRolesRoute = EnHiddenRolesRouteImport.update({
+  id: '/en/hidden-roles',
+  path: '/en/hidden-roles',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const EnContactRoute = EnContactRouteImport.update({
   id: '/en/contact',
   path: '/en/contact',
@@ -215,6 +228,11 @@ const EnAboutRoute = EnAboutRouteImport.update({
 const CaTornejosRoute = CaTornejosRouteImport.update({
   id: '/ca/tornejos',
   path: '/ca/tornejos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CaRolsOcultsRoute = CaRolsOcultsRouteImport.update({
+  id: '/ca/rols-ocults',
+  path: '/ca/rols-ocults',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CaQuiSomRoute = CaQuiSomRouteImport.update({
@@ -367,6 +385,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/ludoteca': typeof LudotecaRoute
   '/medios': typeof MediosRoute
+  '/roles-ocultos': typeof RolesOcultosRoute
   '/sobre-nosotros': typeof SobreNosotrosRoute
   '/super-admin': typeof SuperAdminRoute
   '/torneos': typeof TorneosRoute
@@ -385,12 +404,14 @@ export interface FileRoutesByFullPath {
   '/ca/ludoteca': typeof CaLudotecaRoute
   '/ca/mitjans': typeof CaMitjansRoute
   '/ca/qui-som': typeof CaQuiSomRoute
+  '/ca/rols-ocults': typeof CaRolsOcultsRoute
   '/ca/tornejos': typeof CaTornejosRoute
   '/en/about': typeof EnAboutRoute
   '/en/blog': typeof EnBlogRoute
   '/en/blood-on-the-clocktower': typeof EnBloodOnTheClocktowerRoute
   '/en/catan': typeof EnCatanRoute
   '/en/contact': typeof EnContactRoute
+  '/en/hidden-roles': typeof EnHiddenRolesRoute
   '/en/how-it-works': typeof EnHowItWorksRoute
   '/en/ludoteca': typeof EnLudotecaRoute
   '/en/media': typeof EnMediaRoute
@@ -424,6 +445,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/ludoteca': typeof LudotecaRoute
   '/medios': typeof MediosRoute
+  '/roles-ocultos': typeof RolesOcultosRoute
   '/sobre-nosotros': typeof SobreNosotrosRoute
   '/super-admin': typeof SuperAdminRoute
   '/torneos': typeof TorneosRoute
@@ -440,12 +462,14 @@ export interface FileRoutesByTo {
   '/ca/ludoteca': typeof CaLudotecaRoute
   '/ca/mitjans': typeof CaMitjansRoute
   '/ca/qui-som': typeof CaQuiSomRoute
+  '/ca/rols-ocults': typeof CaRolsOcultsRoute
   '/ca/tornejos': typeof CaTornejosRoute
   '/en/about': typeof EnAboutRoute
   '/en/blog': typeof EnBlogRoute
   '/en/blood-on-the-clocktower': typeof EnBloodOnTheClocktowerRoute
   '/en/catan': typeof EnCatanRoute
   '/en/contact': typeof EnContactRoute
+  '/en/hidden-roles': typeof EnHiddenRolesRoute
   '/en/how-it-works': typeof EnHowItWorksRoute
   '/en/ludoteca': typeof EnLudotecaRoute
   '/en/media': typeof EnMediaRoute
@@ -482,6 +506,7 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/ludoteca': typeof LudotecaRoute
   '/medios': typeof MediosRoute
+  '/roles-ocultos': typeof RolesOcultosRoute
   '/sobre-nosotros': typeof SobreNosotrosRoute
   '/super-admin': typeof SuperAdminRoute
   '/torneos': typeof TorneosRoute
@@ -500,12 +525,14 @@ export interface FileRoutesById {
   '/ca/ludoteca': typeof CaLudotecaRoute
   '/ca/mitjans': typeof CaMitjansRoute
   '/ca/qui-som': typeof CaQuiSomRoute
+  '/ca/rols-ocults': typeof CaRolsOcultsRoute
   '/ca/tornejos': typeof CaTornejosRoute
   '/en/about': typeof EnAboutRoute
   '/en/blog': typeof EnBlogRoute
   '/en/blood-on-the-clocktower': typeof EnBloodOnTheClocktowerRoute
   '/en/catan': typeof EnCatanRoute
   '/en/contact': typeof EnContactRoute
+  '/en/hidden-roles': typeof EnHiddenRolesRoute
   '/en/how-it-works': typeof EnHowItWorksRoute
   '/en/ludoteca': typeof EnLudotecaRoute
   '/en/media': typeof EnMediaRoute
@@ -543,6 +570,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/ludoteca'
     | '/medios'
+    | '/roles-ocultos'
     | '/sobre-nosotros'
     | '/super-admin'
     | '/torneos'
@@ -561,12 +589,14 @@ export interface FileRouteTypes {
     | '/ca/ludoteca'
     | '/ca/mitjans'
     | '/ca/qui-som'
+    | '/ca/rols-ocults'
     | '/ca/tornejos'
     | '/en/about'
     | '/en/blog'
     | '/en/blood-on-the-clocktower'
     | '/en/catan'
     | '/en/contact'
+    | '/en/hidden-roles'
     | '/en/how-it-works'
     | '/en/ludoteca'
     | '/en/media'
@@ -600,6 +630,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/ludoteca'
     | '/medios'
+    | '/roles-ocultos'
     | '/sobre-nosotros'
     | '/super-admin'
     | '/torneos'
@@ -616,12 +647,14 @@ export interface FileRouteTypes {
     | '/ca/ludoteca'
     | '/ca/mitjans'
     | '/ca/qui-som'
+    | '/ca/rols-ocults'
     | '/ca/tornejos'
     | '/en/about'
     | '/en/blog'
     | '/en/blood-on-the-clocktower'
     | '/en/catan'
     | '/en/contact'
+    | '/en/hidden-roles'
     | '/en/how-it-works'
     | '/en/ludoteca'
     | '/en/media'
@@ -657,6 +690,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/ludoteca'
     | '/medios'
+    | '/roles-ocultos'
     | '/sobre-nosotros'
     | '/super-admin'
     | '/torneos'
@@ -675,12 +709,14 @@ export interface FileRouteTypes {
     | '/ca/ludoteca'
     | '/ca/mitjans'
     | '/ca/qui-som'
+    | '/ca/rols-ocults'
     | '/ca/tornejos'
     | '/en/about'
     | '/en/blog'
     | '/en/blood-on-the-clocktower'
     | '/en/catan'
     | '/en/contact'
+    | '/en/hidden-roles'
     | '/en/how-it-works'
     | '/en/ludoteca'
     | '/en/media'
@@ -717,6 +753,7 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   LudotecaRoute: typeof LudotecaRoute
   MediosRoute: typeof MediosRoute
+  RolesOcultosRoute: typeof RolesOcultosRoute
   SobreNosotrosRoute: typeof SobreNosotrosRoute
   SuperAdminRoute: typeof SuperAdminRoute
   TorneosRoute: typeof TorneosRoute
@@ -728,12 +765,14 @@ export interface RootRouteChildren {
   CaLudotecaRoute: typeof CaLudotecaRoute
   CaMitjansRoute: typeof CaMitjansRoute
   CaQuiSomRoute: typeof CaQuiSomRoute
+  CaRolsOcultsRoute: typeof CaRolsOcultsRoute
   CaTornejosRoute: typeof CaTornejosRoute
   EnAboutRoute: typeof EnAboutRoute
   EnBlogRoute: typeof EnBlogRoute
   EnBloodOnTheClocktowerRoute: typeof EnBloodOnTheClocktowerRoute
   EnCatanRoute: typeof EnCatanRoute
   EnContactRoute: typeof EnContactRoute
+  EnHiddenRolesRoute: typeof EnHiddenRolesRoute
   EnHowItWorksRoute: typeof EnHowItWorksRoute
   EnLudotecaRoute: typeof EnLudotecaRoute
   EnMediaRoute: typeof EnMediaRoute
@@ -767,6 +806,13 @@ declare module '@tanstack/react-router' {
       path: '/sobre-nosotros'
       fullPath: '/sobre-nosotros'
       preLoaderRoute: typeof SobreNosotrosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/roles-ocultos': {
+      id: '/roles-ocultos'
+      path: '/roles-ocultos'
+      fullPath: '/roles-ocultos'
+      preLoaderRoute: typeof RolesOcultosRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/medios': {
@@ -916,6 +962,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EnHowItWorksRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/en/hidden-roles': {
+      id: '/en/hidden-roles'
+      path: '/en/hidden-roles'
+      fullPath: '/en/hidden-roles'
+      preLoaderRoute: typeof EnHiddenRolesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/en/contact': {
       id: '/en/contact'
       path: '/en/contact'
@@ -956,6 +1009,13 @@ declare module '@tanstack/react-router' {
       path: '/ca/tornejos'
       fullPath: '/ca/tornejos'
       preLoaderRoute: typeof CaTornejosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ca/rols-ocults': {
+      id: '/ca/rols-ocults'
+      path: '/ca/rols-ocults'
+      fullPath: '/ca/rols-ocults'
+      preLoaderRoute: typeof CaRolsOcultsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/ca/qui-som': {
@@ -1245,6 +1305,7 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   LudotecaRoute: LudotecaRoute,
   MediosRoute: MediosRoute,
+  RolesOcultosRoute: RolesOcultosRoute,
   SobreNosotrosRoute: SobreNosotrosRoute,
   SuperAdminRoute: SuperAdminRoute,
   TorneosRoute: TorneosRoute,
@@ -1256,12 +1317,14 @@ const rootRouteChildren: RootRouteChildren = {
   CaLudotecaRoute: CaLudotecaRoute,
   CaMitjansRoute: CaMitjansRoute,
   CaQuiSomRoute: CaQuiSomRoute,
+  CaRolsOcultsRoute: CaRolsOcultsRoute,
   CaTornejosRoute: CaTornejosRoute,
   EnAboutRoute: EnAboutRoute,
   EnBlogRoute: EnBlogRoute,
   EnBloodOnTheClocktowerRoute: EnBloodOnTheClocktowerRoute,
   EnCatanRoute: EnCatanRoute,
   EnContactRoute: EnContactRoute,
+  EnHiddenRolesRoute: EnHiddenRolesRoute,
   EnHowItWorksRoute: EnHowItWorksRoute,
   EnLudotecaRoute: EnLudotecaRoute,
   EnMediaRoute: EnMediaRoute,
