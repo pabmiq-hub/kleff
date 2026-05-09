@@ -9,7 +9,7 @@ import {
   Calendar,
   ArrowRight,
   Crown,
-  Mask,
+  VenetianMask,
   Star,
   PartyPopper,
   Library,
@@ -21,8 +21,7 @@ import { CmsImage, CmsList, CmsText } from "@/cms/Editable";
 import { useEditor } from "@/editor/EditorProvider";
 import { useI18n } from "@/i18n/I18nProvider";
 
-// `Mask` may not exist in lucide; fall back gracefully
-const SafeMask = (Mask ?? Skull) as typeof Skull;
+const SafeMask = VenetianMask;
 
 export function HiddenRolesPage() {
   return (
