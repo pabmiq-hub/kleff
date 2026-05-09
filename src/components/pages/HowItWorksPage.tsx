@@ -422,6 +422,8 @@ export function HowItWorksPage() {
               tag={t.how.community4Tag}
               icon={<EyeOff className="h-7 w-7 text-cream" />}
               accent="ink"
+              href={locale === "en" ? "/en/hidden-roles" : locale === "ca" ? "/ca/rols-ocults" : "/roles-ocultos"}
+              ctaLabel={locale === "en" ? "View page" : locale === "ca" ? "Veure pàgina" : "Ver página"}
             />
           </div>
         </div>
