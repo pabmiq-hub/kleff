@@ -1164,6 +1164,248 @@ const ludotecaSchema: PageSchema = {
   ],
 };
 
+// ---------------- HIDDEN ROLES ----------------
+
+const hiddenRolesSchema: PageSchema = {
+  key: "hiddenRoles",
+  label: "Roles ocultos",
+  path: "/roles-ocultos",
+  description:
+    "Comunidad de juegos de roles ocultos: deducción social, mentiras, identidades secretas, murder mysteries, Hidden Roles Fest y selección de juegos destacados.",
+  sections: [
+    {
+      key: "hiddenRoles.hero",
+      label: "Hero (cabecera)",
+      fields: {
+        eyebrow: { kind: "text", label: "Etiqueta superior" },
+        title: { kind: "text", label: "Título principal" },
+        subtitle: { kind: "textarea", label: "Subtítulo / intro", rows: 4 },
+        whatsappLabel: { kind: "text", label: "Texto del botón de WhatsApp" },
+        whatsappUrl: { kind: "url", label: "Enlace del grupo de WhatsApp" },
+        stat1Value: { kind: "text", label: "Stat 1 — valor" },
+        stat1Label: { kind: "text", label: "Stat 1 — etiqueta" },
+        stat2Value: { kind: "text", label: "Stat 2 — valor" },
+        stat2Label: { kind: "text", label: "Stat 2 — etiqueta" },
+        stat3Value: { kind: "text", label: "Stat 3 — valor" },
+        stat3Label: { kind: "text", label: "Stat 3 — etiqueta" },
+      },
+      defaults: {
+        eyebrow: "Comunidad · Partidas semanales",
+        title: "Roles Ocultos en KLEFF",
+        subtitle:
+          "Una comunidad enorme y muy activa unida por la pasión por los juegos de deducción social, mentiras y traiciones. Más de 200 miembros, partidas cada semana y eventos temáticos donde nadie sabe quién es de fiar… hasta que es demasiado tarde.",
+        whatsappLabel: "Únete al grupo de WhatsApp",
+        whatsappUrl: "https://chat.whatsapp.com/ILH8sNsRl3o6xlOn62zNA8",
+        stat1Value: "200+",
+        stat1Label: "Miembros",
+        stat2Value: "Semanal",
+        stat2Label: "Partidas",
+        stat3Value: "4",
+        stat3Label: "Hidden Roles Fest/año",
+      },
+    },
+    {
+      key: "hiddenRoles.intro",
+      label: "¿Qué son los juegos de roles ocultos?",
+      fields: {
+        eyebrow: { kind: "text", label: "Etiqueta" },
+        title: { kind: "text", label: "Título" },
+        body: { kind: "textarea", label: "Descripción", rows: 8 },
+      },
+      defaults: {
+        eyebrow: "El género",
+        title: "Mentiras, traiciones e identidades secretas.",
+        body:
+          "En los juegos de roles ocultos cada jugador recibe en secreto un rol —leal, traidor, asesino, líder, espía…— y debe usar la información que tiene (o que finge tener) para ganar a su bando. Algunos roles colaboran abiertamente, otros sabotean desde dentro y la mayoría no sabe en quién confiar.\n\nLa magia está en la mesa: lo importante no son las cartas, sino las conversaciones, las miradas, las acusaciones y las votaciones a vida o muerte. Es un género ideal para grupos grandes, perfecto para conocer gente nueva y absolutamente adictivo cuando empiezas a ver quién miente bien y quién muy mal.",
+      },
+    },
+    {
+      key: "hiddenRoles.types",
+      label: "Tipos de juegos",
+      description: "Subgéneros y características destacadas con tarjetas tipo polaroid.",
+      fields: {
+        eyebrow: { kind: "text", label: "Etiqueta" },
+        title: { kind: "text", label: "Título" },
+        subtitle: { kind: "textarea", label: "Subtítulo", rows: 2 },
+        items: {
+          kind: "list",
+          label: "Tipos",
+          itemLabel: "Tipo",
+          fields: {
+            tag: { kind: "text", label: "Etiqueta corta (esquina)" },
+            title: { kind: "text", label: "Título" },
+            body: { kind: "textarea", label: "Descripción", rows: 3 },
+            example: { kind: "text", label: "Ejemplo de juego" },
+          },
+        },
+      },
+      defaults: {
+        eyebrow: "Subgéneros",
+        title: "No todos los traidores juegan igual.",
+        subtitle: "Hay un juego de roles ocultos para cada tipo de mesa: desde la deducción más fría hasta el roleo más teatral.",
+        items: [
+          {
+            tag: "Deducción social",
+            title: "Mira, escucha, deduce",
+            body: "Lo importante es leer a la mesa: quién tarda en hablar, quién evita una pregunta, quién acusa demasiado pronto. Partidas tensas y muy parlanchinas.",
+            example: "Ej.: The Resistance: Avalon",
+          },
+          {
+            tag: "Lógica e información",
+            title: "Pistas que encajan",
+            body: "Cada turno revela información parcial. El bando bueno tiene que cruzarla; el malo, ensuciarla. Premia la atención y la paciencia.",
+            example: "Ej.: Deception: Murder in Hong Kong",
+          },
+          {
+            tag: "Engaños y faroles",
+            title: "Miente con cara de póker",
+            body: "Aquí ganan los que se atreven a marcarse un farol… y los que saben cuándo creer al de enfrente. Mucho ego, mucha risa.",
+            example: "Ej.: Coup, Mascarade",
+          },
+          {
+            tag: "Identidades secretas",
+            title: "¿Quién eres realmente?",
+            body: "Cada jugador esconde su rol. Algunos se conocen entre sí, otros van completamente a ciegas. La traición está garantizada.",
+            example: "Ej.: Secret Hitler, Salem 1692",
+          },
+          {
+            tag: "Roleplaying",
+            title: "Métete en el papel",
+            body: "Más allá de las mecánicas, lo que importa es interpretar. Acentos, coartadas, monólogos finales y mucha vergüenza superada.",
+            example: "Ej.: Murder Mystery, Blood on the Clocktower",
+          },
+          {
+            tag: "Equipos y traidores",
+            title: "Confía… hasta que no",
+            body: "Variantes en las que un equipo aparentemente unido descubre que tiene topos dentro. La cooperación se convierte en paranoia.",
+            example: "Ej.: Infiltraitors, Traitors Aboard",
+          },
+        ],
+      },
+    },
+    {
+      key: "hiddenRoles.clocktower",
+      label: "Mención a Blood on the Clocktower",
+      fields: {
+        eyebrow: { kind: "text", label: "Etiqueta" },
+        title: { kind: "text", label: "Título" },
+        body: { kind: "textarea", label: "Descripción", rows: 4 },
+        ctaLabel: { kind: "text", label: "Texto del botón" },
+      },
+      defaults: {
+        eyebrow: "Comunidad hermana",
+        title: "Blood on the Clocktower tiene su propia liga.",
+        body:
+          "Es el rey de los juegos de roles ocultos: tan grande, que tiene su propia comunidad dentro de KLEFF, con partidas semanales, distintos niveles y una Storyteller dedicada. Si te gustan los roles ocultos, esta es tu siguiente parada.",
+        ctaLabel: "Ir a la comunidad de Clocktower",
+      },
+    },
+    {
+      key: "hiddenRoles.murder",
+      label: "Murder Mystery",
+      fields: {
+        eyebrow: { kind: "text", label: "Etiqueta" },
+        title: { kind: "text", label: "Título" },
+        body: { kind: "textarea", label: "Descripción", rows: 6 },
+        feature1: { kind: "text", label: "Feature 1" },
+        feature2: { kind: "text", label: "Feature 2" },
+        feature3: { kind: "text", label: "Feature 3" },
+        image: { kind: "image", label: "Imagen ambiente (opcional)" },
+      },
+      defaults: {
+        eyebrow: "Eventos temáticos",
+        title: "Murder Mystery: una noche, un crimen, un asesino entre nosotros.",
+        body:
+          "Un Murder Mystery es una velada donde cada participante encarna un personaje con su propia historia, motivos y secretos. Uno de ellos es el asesino y el resto debe descubrirlo a base de interrogatorios, pistas y mucho roleo. En KLEFF los organizamos de forma periódica, con guion propio o con materiales licenciados.",
+        feature1: "Aptos para todos los niveles",
+        feature2: "En castellano, catalán e inglés",
+        feature3: "Plazas limitadas — reserva imprescindible",
+        image: "",
+      },
+    },
+    {
+      key: "hiddenRoles.fest",
+      label: "Hidden Roles Fest",
+      fields: {
+        eyebrow: { kind: "text", label: "Etiqueta" },
+        title: { kind: "text", label: "Título" },
+        body: { kind: "textarea", label: "Descripción", rows: 5 },
+        bullet1: { kind: "text", label: "Bullet 1" },
+        bullet2: { kind: "text", label: "Bullet 2" },
+        bullet3: { kind: "text", label: "Bullet 3" },
+        bullet4: { kind: "text", label: "Bullet 4" },
+      },
+      defaults: {
+        eyebrow: "Evento estrella",
+        title: "Hidden Roles Fest",
+        body:
+          "Cada trimestre organizamos el Hidden Roles Fest: una jornada entera dedicada a los juegos de roles ocultos. Mesas de los grandes clásicos, partidas relámpago, deducción social, murder mysteries especiales y partidas temáticas de Blood on the Clocktower. La fiesta del género.",
+        bullet1: "Múltiples mesas en paralelo",
+        bullet2: "Murder mysteries especiales",
+        bullet3: "Clocktower temático",
+        bullet4: "Premios y sorpresas",
+      },
+    },
+    {
+      key: "hiddenRoles.library",
+      label: "Ludoteca · Roles ocultos",
+      description:
+        "Selección de juegos de roles ocultos. Indica los slugs (de la API de Ludoya) que quieres priorizar; se mostrarán los 8 con mejor puntuación BGG.",
+      fields: {
+        eyebrow: { kind: "text", label: "Etiqueta" },
+        title: { kind: "text", label: "Título" },
+        subtitle: { kind: "textarea", label: "Subtítulo", rows: 2 },
+        ctaLabel: { kind: "text", label: "Texto del enlace a /ludoteca" },
+        slugs: {
+          kind: "list",
+          label: "Slugs candidatos (Ludoya)",
+          itemLabel: "Slug",
+          fields: {
+            slug: { kind: "text", label: "Slug del juego (ej: secret-hitler)" },
+          },
+        },
+      },
+      defaults: {
+        eyebrow: "Nuestra ludoteca",
+        title: "Algunos de nuestros favoritos",
+        subtitle: "Una selección con los 8 mejor puntuados en BoardGameGeek dentro de los roles ocultos. Tienes muchos más en el local.",
+        ctaLabel: "Ver toda la ludoteca",
+        slugs: [
+          { slug: "blood-on-the-clocktower" },
+          { slug: "the-resistance-avalon" },
+          { slug: "secret-hitler" },
+          { slug: "deception-murder-in-hong-kong" },
+          { slug: "coup-3" },
+          { slug: "mascarade-2" },
+          { slug: "salem-1692" },
+          { slug: "hidden-leaders" },
+          { slug: "infiltraitors" },
+          { slug: "traitors-aboard" },
+        ],
+      },
+    },
+    {
+      key: "hiddenRoles.cta",
+      label: "CTA final · Únete",
+      fields: {
+        eyebrow: { kind: "text", label: "Etiqueta" },
+        title: { kind: "text", label: "Título" },
+        subtitle: { kind: "textarea", label: "Subtítulo", rows: 2 },
+        whatsappLabel: { kind: "text", label: "Texto del botón" },
+        whatsappUrl: { kind: "url", label: "Enlace del grupo de WhatsApp" },
+      },
+      defaults: {
+        eyebrow: "Únete",
+        title: "¿Quién será el próximo traidor?",
+        subtitle:
+          "Entra al grupo de WhatsApp para enterarte de las próximas partidas, murder mysteries y del calendario del Hidden Roles Fest.",
+        whatsappLabel: "Unirme al WhatsApp",
+        whatsappUrl: "https://chat.whatsapp.com/ILH8sNsRl3o6xlOn62zNA8",
+      },
+    },
+  ],
+};
+
 // ---------------- REGISTRY ----------------
 
 export const PAGE_SCHEMAS: PageSchema[] = [
@@ -1171,6 +1413,7 @@ export const PAGE_SCHEMAS: PageSchema[] = [
   clocktowerSchema,
   catanSchema,
   tournamentsSchema,
+  hiddenRolesSchema,
   aboutSchema,
   howSchema,
   contactSchema,
