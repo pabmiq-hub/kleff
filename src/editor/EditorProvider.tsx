@@ -82,8 +82,33 @@ export function EditorProvider({ children }: { children: ReactNode }) {
     },
   });
 
+  // Read overrides pre-fetched by the page route loader (via getPageContent).
+  // Seeding from SSR loader data avoids a flash of the un-overridden content
+  // on first paint while we'd otherwise wait for a client-side fetch.
+  const loaderOverrides = useRouterState({
+    select: (s) => {
+      for (const m of s.matches) {
+        const ld = m.loaderData as
+          | {
+              pageContent?: {
+                pagePath?: string | null;
+                publishedOverrides?: Array<{ element_id: string; property: string; value: unknown }>;
+              };
+            }
+          | undefined;
+        const pc = ld?.pageContent;
+        if (pc?.pagePath && pc.pagePath === pagePath && Array.isArray(pc.publishedOverrides)) {
+          return pc.publishedOverrides;
+        }
+      }
+      return null;
+    },
+  });
+
   const [editMode, setEditMode] = useState(false);
-  const [overrides, setOverrides] = useState<OverrideMap>({});
+  const [overrides, setOverrides] = useState<OverrideMap>(() =>
+    loaderOverrides ? buildOverrideMap(loaderOverrides) : {},
+  );
   const [loading, setLoading] = useState(false);
   const [hasDrafts, setHasDrafts] = useState(false);
   const [selected, setSelected] = useState<SelectedElement | null>(null);
@@ -116,14 +141,21 @@ export function EditorProvider({ children }: { children: ReactNode }) {
     }
   }, [isSuperAdmin, pagePath, locale, getAll, getPublic]);
 
-  // Reload when route, locale or admin status changes
+  // Reload when route, locale or admin status changes.
+  // For non-admins, if the loader already provided overrides for this page+locale
+  // we skip the redundant fetch — the SSR data is authoritative for published.
   useEffect(() => {
     const key = `${pagePath}|${locale}|${isSuperAdmin ? "1" : "0"}`;
     if (lastLoadedKey.current === key) return;
     lastLoadedKey.current = key;
-    void reload();
+    if (!isSuperAdmin && loaderOverrides) {
+      setOverrides(buildOverrideMap(loaderOverrides));
+      setHasDrafts(false);
+    } else {
+      void reload();
+    }
     setSelected(null);
-  }, [pagePath, locale, isSuperAdmin, reload]);
+  }, [pagePath, locale, isSuperAdmin, reload, loaderOverrides]);
 
   // Disable edit mode for non-admins automatically
   useEffect(() => {
