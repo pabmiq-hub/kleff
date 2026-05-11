@@ -3,6 +3,7 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import type { Json } from "@/integrations/supabase/types";
+import { getPageSchema, withDefaults, type PageSchema, type SectionSchema } from "@/cms/schemas";
 
 const LOCALES = ["es", "ca", "en"] as const;
 type Locale = (typeof LOCALES)[number];
@@ -19,6 +20,15 @@ export const getPageContent = createServerFn({ method: "GET" })
     }),
   )
   .handler(async ({ data }) => {
+    const schema = getPageSchema(data.pageKey);
+    if (schema) {
+      try {
+        await ensurePageContent(schema, data.locale);
+      } catch (e) {
+        console.error("[content] ensurePageContent failed", data.pageKey, data.locale, e);
+      }
+    }
+
     const { data: rows, error } = await supabaseAdmin
       .from("content_sections")
       .select("section_key, content, schema_version, updated_at, locale")
@@ -63,6 +73,114 @@ function mergeLocale(base: unknown, loc: unknown): unknown {
     return out;
   }
   return loc;
+}
+
+async function ensurePageContent(pageSchema: PageSchema, locale: Locale) {
+  await ensureSpanishSections(pageSchema);
+
+  if (locale !== "es") {
+    await ensureLocaleSections(pageSchema, locale);
+  }
+}
+
+async function ensureSpanishSections(pageSchema: PageSchema) {
+  const sectionKeys = pageSchema.sections.map((section) => section.key);
+  if (sectionKeys.length === 0) return;
+
+  const { data: existingRows, error } = await supabaseAdmin
+    .from("content_sections")
+    .select("section_key")
+    .eq("locale", "es")
+    .in("section_key", sectionKeys);
+
+  if (error) throw new Error(error.message);
+
+  const existing = new Set((existingRows ?? []).map((row) => row.section_key));
+  const missing = pageSchema.sections.filter((section) => !existing.has(section.key));
+
+  if (missing.length === 0) return;
+
+  const payload = missing.map((section) => ({
+    section_key: section.key,
+    locale: "es" as const,
+    content: section.defaults as Json,
+    schema_version: 1,
+    updated_by: null,
+  }));
+
+  const { error: upsertError } = await supabaseAdmin
+    .from("content_sections")
+    .upsert(payload, { onConflict: "section_key,locale" });
+
+  if (upsertError) throw new Error(upsertError.message);
+}
+
+async function ensureLocaleSections(pageSchema: PageSchema, locale: Exclude<Locale, "es">) {
+  const target = TARGETS.find((item) => item.locale === locale);
+  if (!target) return;
+
+  const sectionKeys = pageSchema.sections.map((section) => section.key);
+  if (sectionKeys.length === 0) return;
+
+  const [{ data: esRows, error: esError }, { data: localeRows, error: localeError }] = await Promise.all([
+    supabaseAdmin
+      .from("content_sections")
+      .select("section_key, content")
+      .eq("locale", "es")
+      .in("section_key", sectionKeys),
+    supabaseAdmin
+      .from("content_sections")
+      .select("section_key")
+      .eq("locale", locale)
+      .in("section_key", sectionKeys),
+  ]);
+
+  if (esError) throw new Error(esError.message);
+  if (localeError) throw new Error(localeError.message);
+
+  const existingLocale = new Set((localeRows ?? []).map((row) => row.section_key));
+  const esMap = new Map((esRows ?? []).map((row) => [row.section_key, row.content as Record<string, unknown>]));
+  const payload: Array<{
+    section_key: string;
+    locale: Exclude<Locale, "es">;
+    content: Json;
+    schema_version: number;
+    updated_by: null;
+  }> = [];
+
+  for (const section of pageSchema.sections) {
+    if (existingLocale.has(section.key)) continue;
+
+    const source = withDefaults(section, esMap.get(section.key) ?? null);
+    const translated = await translateSectionDefaults(source, section, target.name);
+    if (!translated) continue;
+
+    payload.push({
+      section_key: section.key,
+      locale,
+      content: translated as Json,
+      schema_version: 1,
+      updated_by: null,
+    });
+  }
+
+  if (payload.length === 0) return;
+
+  const { error: upsertError } = await supabaseAdmin
+    .from("content_sections")
+    .upsert(payload, { onConflict: "section_key,locale" });
+
+  if (upsertError) throw new Error(upsertError.message);
+}
+
+async function translateSectionDefaults(
+  source: Record<string, unknown>,
+  section: SectionSchema,
+  targetLanguageName: string,
+) {
+  const translated = await translateContent(source, targetLanguageName);
+  if (!translated) return null;
+  return withDefaults(section, translated);
 }
 
 // ADMIN: read a single section (specific locale, or 'es' by default)
