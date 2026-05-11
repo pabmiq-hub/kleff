@@ -39,6 +39,8 @@ export const PAGE_SLUGS: Record<string, Record<Locale, string>> = {
     en: "blood-on-the-clocktower",
   },
   ludoteca: { es: "ludoteca", ca: "ludoteca", en: "ludoteca" },
+  tournaments: { es: "torneos", ca: "tornejos", en: "tournaments" },
+  hiddenRoles: { es: "roles-ocultos", ca: "rols-ocults", en: "hidden-roles" },
 };
 
 /** Reverse lookup: any localized slug -> logical page key. */
