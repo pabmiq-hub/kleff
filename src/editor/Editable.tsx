@@ -188,6 +188,8 @@ type EditableImageProps = CommonProps & {
   width?: number | string;
   height?: number | string;
   loading?: "lazy" | "eager";
+  fetchPriority?: "high" | "low" | "auto";
+  decoding?: "sync" | "async" | "auto";
 };
 
 export function EditableImage({
@@ -199,6 +201,8 @@ export function EditableImage({
   width,
   height,
   loading,
+  fetchPriority,
+  decoding,
 }: EditableImageProps) {
   const { editMode, overrides, selected, setSelected } = useEditor();
   const ref = useRef<HTMLImageElement | null>(null);
@@ -241,6 +245,8 @@ export function EditableImage({
       width={width}
       height={height}
       loading={loading}
+      fetchPriority={fetchPriority}
+      decoding={decoding}
       onClick={handleClick}
       className={`${className ?? ""} ${editorClasses} ${
         ov?.hidden ? "opacity-30" : ""
