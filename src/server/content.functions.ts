@@ -52,7 +52,34 @@ export const getPageContent = createServerFn({ method: "GET" })
     for (const [key, slot] of Object.entries(byKey)) {
       sections[key] = mergeLocale(slot.es ?? {}, slot.loc ?? {}) as Json;
     }
-    return { sections, locale: data.locale };
+
+    // Also fetch published overrides for this page's path so the client editor
+    // can render with overrides applied on the very first paint (avoids the
+    // flash of the un-overridden image/text while EditorProvider fetches).
+    let publishedOverrides: Array<{ element_id: string; property: string; value: Json | null }> = [];
+    if (schema?.path) {
+      const { data: ovRows, error: ovErr } = await supabaseAdmin
+        .from("content_overrides")
+        .select("element_id, property, value, locale")
+        .eq("page_path", schema.path)
+        .eq("status", "published")
+        .in("locale", data.locale === "es" ? ["es"] : ["es", data.locale]);
+      if (ovErr) {
+        console.error("getPageContent overrides error", ovErr);
+      } else {
+        const preferred = new Map<string, { element_id: string; property: string; value: Json | null }>();
+        for (const row of (ovRows ?? []) as Array<{ element_id: string; property: string; value: Json | null; locale: string }>) {
+          const key = `${row.element_id}::${row.property}`;
+          const existing = preferred.get(key);
+          if (!existing || row.locale === data.locale) {
+            preferred.set(key, { element_id: row.element_id, property: row.property, value: row.value });
+          }
+        }
+        publishedOverrides = Array.from(preferred.values());
+      }
+    }
+
+    return { sections, locale: data.locale, pagePath: schema?.path ?? null, publishedOverrides };
   });
 
 // Recursive merge: take the locale value when present and non-empty,
