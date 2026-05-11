@@ -121,15 +121,17 @@ export const adminSaveSection = createServerFn({ method: "POST" })
 
     if (error) throw new Error(error.message);
 
-    // Background: when Spanish source changes, translate to ca/en.
+    // When Spanish source changes, translate to ca/en.
+    // We MUST await this: in the Cloudflare Workers runtime, fire-and-forget
+    // promises get cancelled as soon as the handler returns, and `waitUntil`
+    // lives on the per-request ExecutionContext (not on globalThis), so the
+    // previous background pattern silently dropped every translation.
     if (data.locale === "es" && !data.skipTranslate) {
-      const work = translateAndSave(data.sectionKey, data.content, data.schemaVersion, userId);
-      const wu = (globalThis as { waitUntil?: (p: Promise<unknown>) => void }).waitUntil;
-      if (typeof wu === "function") {
-        try { wu(work); } catch { /* ignore */ }
-      } else {
-        // fire-and-forget
-        work.catch((e) => console.error("[content] translateAndSave failed", e));
+      try {
+        await translateAndSave(data.sectionKey, data.content, data.schemaVersion, userId);
+      } catch (e) {
+        // Don't fail the Spanish save if translation fails — log and continue.
+        console.error("[content] translateAndSave failed", e);
       }
     }
 
