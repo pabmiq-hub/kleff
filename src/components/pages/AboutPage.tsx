@@ -1,7 +1,9 @@
 import { Link } from "@tanstack/react-router";
 import { ArrowRight, Calendar, Globe2, Sparkles, Dice5, ExternalLink } from "lucide-react";
-import venueImg from "@/assets/about-venue.jpg";
 import { useI18n } from "@/i18n/I18nProvider";
+
+const HERO_IMAGE_DEFAULT =
+  "https://gyecpblbaovmprdvgmct.supabase.co/storage/v1/object/public/media/cms/kleff-estacio-espai-juegos-de-mesa-2-estacio-nk0knd.jpg";
 import { SiteLayout } from "@/components/site/SiteLayout";
 import { HistoryTimeline } from "@/components/about/HistoryTimeline";
 import { EditableText, EditableImage } from "@/editor/Editable";
@@ -168,11 +170,13 @@ export function AboutPage() {
             <div className="relative bg-card border-4 border-ink rounded-3xl shadow-tactile-lg overflow-hidden aspect-[4/3]">
               <EditableImage
                 id="about.hero.image"
-                src={or(hero.image, venueImg)}
+                src={or(hero.image, HERO_IMAGE_DEFAULT)}
                 alt="L'Estació de França — sede de KLEFF"
                 width={1600}
                 height={1200}
-                loading="lazy"
+                loading="eager"
+                fetchPriority="high"
+                decoding="async"
                 className="absolute inset-0 h-full w-full object-cover"
               />
             </div>
