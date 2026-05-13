@@ -1,11 +1,14 @@
 /**
  * CMS-aware editable primitives.
  *
- * These are different from `src/editor/Editable.tsx` (which writes to
- * `content_overrides` per-element). These write to the structured
- * `content_sections` JSON via SectionProvider/useSection.
+ * These write structured data to `content_sections` JSON (via
+ * SectionProvider) AND integrate with the global EditorProvider so the
+ * full property side-panel (typography, colors, spacing, visibility)
+ * works on them — exactly like the legacy <EditableText>.
  *
- * Use for any field declared in the schema (src/cms/schemas.ts).
+ * Interaction model (matches EditableText):
+ *   - single click  → select element (opens side panel)
+ *   - double click  → enter inline editing (text) / open file picker (image)
  */
 import {
   type CSSProperties,
@@ -18,9 +21,34 @@ import { useServerFn } from "@tanstack/react-start";
 import { Plus, Trash2, ArrowUp, ArrowDown, ImagePlus, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { useEditor } from "@/editor/EditorProvider";
+import type { StyleProps } from "@/editor/types";
 import { uploadMedia } from "@/server/media.functions";
 import { arrayBufferToBase64 } from "@/lib/base64";
 import { useSection, useSectionValue } from "./SectionContext";
+
+/* ----------------------------- helpers ----------------------------- */
+
+function styleToCss(s: StyleProps | undefined): CSSProperties {
+  if (!s) return {};
+  const css: CSSProperties = {};
+  if (s.color) css.color = s.color;
+  if (s.backgroundColor) css.backgroundColor = s.backgroundColor;
+  if (s.fontSize) css.fontSize = s.fontSize;
+  if (s.fontWeight) css.fontWeight = s.fontWeight;
+  if (s.textAlign) css.textAlign = s.textAlign;
+  if (s.paddingTop) css.paddingTop = s.paddingTop;
+  if (s.paddingBottom) css.paddingBottom = s.paddingBottom;
+  if (s.paddingLeft) css.paddingLeft = s.paddingLeft;
+  if (s.paddingRight) css.paddingRight = s.paddingRight;
+  if (s.marginTop) css.marginTop = s.marginTop;
+  if (s.marginBottom) css.marginBottom = s.marginBottom;
+  return css;
+}
+
+/** Build the stable element id used to key overrides for a CMS field. */
+function cmsId(sectionKey: string, field: string) {
+  return `cms:${sectionKey}:${field}`;
+}
 
 /* ----------------------------- Text ----------------------------- */
 
@@ -46,14 +74,31 @@ export function CmsText({
   multiline,
   placeholder,
 }: CmsTextProps) {
-  const { editMode } = useEditor();
-  const { setField } = useSection();
+  const { editMode, overrides, selected, setSelected } = useEditor();
+  const { sectionKey, setField } = useSection();
   const value = useSectionValue<string>(field, fallback);
   const ref = useRef<HTMLElement | null>(null);
   const [editing, setEditing] = useState(false);
 
+  const id = cmsId(sectionKey, field);
+  const ov = overrides[id];
+  const isSelected = editMode && selected?.id === id;
+  const mergedStyle: CSSProperties = { ...style, ...styleToCss(ov?.style) };
+
+  if (ov?.hidden && !editMode) return null;
+
   const onClick = (e: React.MouseEvent) => {
+    if (!editMode || editing) return;
+    e.preventDefault();
+    e.stopPropagation();
+    const el = ref.current;
+    if (!el) return;
+    setSelected({ id, kind: "text", rect: el.getBoundingClientRect() });
+  };
+
+  const onDoubleClick = (e: React.MouseEvent) => {
     if (!editMode) return;
+    e.preventDefault();
     e.stopPropagation();
     setEditing(true);
     requestAnimationFrame(() => {
@@ -90,19 +135,27 @@ export function CmsText({
 
   const editorClasses = editMode
     ? `relative cursor-text outline-offset-2 transition-all ${
-        editing
-          ? "outline outline-2 outline-coral bg-cream/40 rounded"
+        isSelected
+          ? "outline outline-2 outline-coral"
           : "hover:outline hover:outline-1 hover:outline-coral/60"
+      } ${editing ? "outline outline-2 outline-coral bg-cream/40 rounded" : ""} ${
+        ov?.hidden ? "opacity-30" : ""
       }`
     : "";
 
   const empty = !value;
   const placeholderText = empty && editMode ? placeholder ?? "(vacío — clic para editar)" : "";
 
+  const finalStyle: CSSProperties = editMode
+    ? { ...mergedStyle, position: "relative", zIndex: 5, pointerEvents: "auto" }
+    : mergedStyle;
+
   return (
     <Tag
       ref={ref as never}
+      data-edit-id={id}
       onClick={onClick}
+      onDoubleClick={onDoubleClick}
       onBlur={editing ? commit : undefined}
       onKeyDown={editing ? onKeyDown : undefined}
       contentEditable={editing}
@@ -110,7 +163,7 @@ export function CmsText({
       className={`${className ?? ""} ${editorClasses} ${
         empty && editMode ? "italic text-foreground/40" : ""
       }`.trim()}
-      style={editMode ? { ...style, position: "relative", zIndex: 5 } : style}
+      style={finalStyle}
     >
       {empty ? placeholderText : value}
     </Tag>
@@ -143,12 +196,20 @@ export function CmsImage({
   loading,
   emptyLabel = "Subir imagen",
 }: CmsImageProps) {
-  const { editMode } = useEditor();
-  const { setField } = useSection();
+  const { editMode, overrides, selected, setSelected } = useEditor();
+  const { sectionKey, setField } = useSection();
   const value = useSectionValue<string>(field, fallback);
   const upload = useServerFn(uploadMedia);
   const [uploading, setUploading] = useState(false);
   const inputRef = useRef<HTMLInputElement | null>(null);
+  const wrapperRef = useRef<HTMLDivElement | null>(null);
+
+  const id = cmsId(sectionKey, field);
+  const ov = overrides[id];
+  const isSelected = editMode && selected?.id === id;
+  const mergedStyle: CSSProperties = { ...style, ...styleToCss(ov?.style) };
+
+  if (ov?.hidden && !editMode) return null;
 
   const handleFile = useCallback(
     async (file: File) => {
@@ -178,19 +239,36 @@ export function CmsImage({
     [field, setField, upload]
   );
 
-  const onClick = () => {
+  const onClick = (e: React.MouseEvent) => {
     if (!editMode) return;
+    e.preventDefault();
+    e.stopPropagation();
+    const el = wrapperRef.current;
+    if (!el) return;
+    setSelected({ id, kind: "image", rect: el.getBoundingClientRect() });
+  };
+
+  const onDoubleClick = (e: React.MouseEvent) => {
+    if (!editMode) return;
+    e.preventDefault();
+    e.stopPropagation();
     inputRef.current?.click();
   };
 
-  // Render
   const showEmpty = !value;
 
   return (
     <div
-      className={`relative ${editMode ? "group cursor-pointer" : ""}`}
-      onClick={editMode ? onClick : undefined}
-      style={editMode ? { ...style } : style}
+      ref={wrapperRef}
+      data-edit-id={id}
+      className={`relative ${editMode ? `group cursor-pointer ${
+        isSelected
+          ? "outline outline-2 outline-coral outline-offset-2"
+          : "hover:outline hover:outline-1 hover:outline-coral/60 outline-offset-2"
+      } ${ov?.hidden ? "opacity-30" : ""}` : ""}`}
+      onClick={onClick}
+      onDoubleClick={onDoubleClick}
+      style={editMode ? { ...mergedStyle, position: "relative", zIndex: 5 } : mergedStyle}
     >
       {value ? (
         <img
@@ -212,7 +290,7 @@ export function CmsImage({
 
       {editMode && (
         <>
-          <div className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-[inherit]">
+          <div className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-[inherit] pointer-events-none">
             <span className="inline-flex items-center gap-2 bg-coral text-white px-4 py-2 rounded-lg text-sm font-bold shadow-xl">
               {uploading ? (
                 <>
@@ -220,7 +298,7 @@ export function CmsImage({
                 </>
               ) : (
                 <>
-                  <ImagePlus className="h-4 w-4" /> {value ? "Cambiar imagen" : emptyLabel}
+                  <ImagePlus className="h-4 w-4" /> Doble clic para {value ? "cambiar" : "subir"}
                 </>
               )}
             </span>

@@ -168,64 +168,88 @@ function PropertiesPanel({ onClose, hasSelection }: { onClose: () => void; hasSe
         </div>
       ) : (
         <div className="p-4 space-y-5">
-          {selected.kind === "text" && (
-            <Section icon={<Type className="h-4 w-4" />} title="Contenido">
-              <p className="text-[11px] text-neutral-500 mb-2 leading-snug">
-                <strong>Doble clic</strong> sobre el texto en la página para editarlo en línea.
-                Selecciona palabras y usa la barra flotante para <b>negrita</b>, <i>cursiva</i> o
-                enlaces.
-              </p>
-              <Textarea
-                value={ov.text ?? ""}
-                onChange={(e) => void setText(selected.id, e.target.value)}
-                placeholder="Texto (admite HTML básico: <b>, <i>, <u>, <a>)…"
-                rows={4}
-                className="bg-white border-neutral-300 text-neutral-900 font-mono text-xs"
-              />
-              {ov.text !== undefined && (
-                <button
-                  onClick={() => void clearProperty(selected.id, "text")}
-                  className="text-xs text-neutral-500 hover:text-neutral-900 mt-1 inline-flex items-center gap-1"
-                >
-                  <RotateCcw className="h-3 w-3" /> Restaurar texto original
-                </button>
-              )}
-            </Section>
-          )}
+          {(() => {
+            const isCms = selected.id.startsWith("cms:");
+            return (
+              <>
+                {selected.kind === "text" && !isCms && (
+                  <Section icon={<Type className="h-4 w-4" />} title="Contenido">
+                    <p className="text-[11px] text-neutral-500 mb-2 leading-snug">
+                      <strong>Doble clic</strong> sobre el texto en la página para editarlo en línea.
+                      Selecciona palabras y usa la barra flotante para <b>negrita</b>, <i>cursiva</i> o
+                      enlaces.
+                    </p>
+                    <Textarea
+                      value={ov.text ?? ""}
+                      onChange={(e) => void setText(selected.id, e.target.value)}
+                      placeholder="Texto (admite HTML básico: <b>, <i>, <u>, <a>)…"
+                      rows={4}
+                      className="bg-white border-neutral-300 text-neutral-900 font-mono text-xs"
+                    />
+                    {ov.text !== undefined && (
+                      <button
+                        onClick={() => void clearProperty(selected.id, "text")}
+                        className="text-xs text-neutral-500 hover:text-neutral-900 mt-1 inline-flex items-center gap-1"
+                      >
+                        <RotateCcw className="h-3 w-3" /> Restaurar texto original
+                      </button>
+                    )}
+                  </Section>
+                )}
 
-          {selected.kind === "image" && (
-            <Section icon={<ImagePlus className="h-4 w-4" />} title="Imagen">
-              <Input
-                value={ov.src ?? ""}
-                onChange={(e) => void setImage(selected.id, e.target.value)}
-                placeholder="URL de la imagen"
-                className="bg-white border-neutral-300"
-              />
-              <label className="mt-2 inline-flex items-center gap-2 px-3 py-2 bg-neutral-100 hover:bg-neutral-200 rounded-lg text-sm cursor-pointer text-neutral-800">
-                <ImagePlus className="h-4 w-4" />
-                {uploading ? "Subiendo…" : "Subir imagen"}
-                <input
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={(e) => {
-                    const f = e.target.files?.[0];
-                    if (f) void handleUpload(f);
-                    e.target.value = "";
-                  }}
-                />
-              </label>
-              <div className="mt-3">
-                <Label className="text-xs text-neutral-600">Texto alternativo</Label>
-                <Input
-                  value={ov.alt ?? ""}
-                  onChange={(e) => void setImage(selected.id, ov.src ?? "", e.target.value)}
-                  placeholder="Descripción de la imagen"
-                  className="mt-1 bg-white border-neutral-300"
-                />
-              </div>
-            </Section>
-          )}
+                {selected.kind === "text" && isCms && (
+                  <Section icon={<Type className="h-4 w-4" />} title="Contenido">
+                    <p className="text-[11px] text-neutral-500 leading-snug">
+                      <strong>Doble clic</strong> sobre el texto en la página para editarlo en línea.
+                      Los cambios se guardan automáticamente y se traducen.
+                    </p>
+                  </Section>
+                )}
+
+                {selected.kind === "image" && !isCms && (
+                  <Section icon={<ImagePlus className="h-4 w-4" />} title="Imagen">
+                    <Input
+                      value={ov.src ?? ""}
+                      onChange={(e) => void setImage(selected.id, e.target.value)}
+                      placeholder="URL de la imagen"
+                      className="bg-white border-neutral-300"
+                    />
+                    <label className="mt-2 inline-flex items-center gap-2 px-3 py-2 bg-neutral-100 hover:bg-neutral-200 rounded-lg text-sm cursor-pointer text-neutral-800">
+                      <ImagePlus className="h-4 w-4" />
+                      {uploading ? "Subiendo…" : "Subir imagen"}
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={(e) => {
+                          const f = e.target.files?.[0];
+                          if (f) void handleUpload(f);
+                          e.target.value = "";
+                        }}
+                      />
+                    </label>
+                    <div className="mt-3">
+                      <Label className="text-xs text-neutral-600">Texto alternativo</Label>
+                      <Input
+                        value={ov.alt ?? ""}
+                        onChange={(e) => void setImage(selected.id, ov.src ?? "", e.target.value)}
+                        placeholder="Descripción de la imagen"
+                        className="mt-1 bg-white border-neutral-300"
+                      />
+                    </div>
+                  </Section>
+                )}
+
+                {selected.kind === "image" && isCms && (
+                  <Section icon={<ImagePlus className="h-4 w-4" />} title="Imagen">
+                    <p className="text-[11px] text-neutral-500 leading-snug">
+                      <strong>Doble clic</strong> sobre la imagen en la página para subir o cambiarla.
+                    </p>
+                  </Section>
+                )}
+              </>
+            );
+          })()}
 
           {selected.kind === "text" && (
             <Section icon={<Type className="h-4 w-4" />} title="Tipografía">
