@@ -396,9 +396,18 @@ function PodiumStep({
 
 function GallerySection() {
   const { editMode } = useEditor();
+  const { data } = useSection();
+  const items = (Array.isArray(data.items) ? (data.items as Array<{ image?: string; caption?: string }>) : []);
+
+  // Rotaciones lúdicas, deterministas por índice (estilo polaroid esparcido).
+  const rotations = ["-rotate-3", "rotate-2", "-rotate-2", "rotate-3", "-rotate-1", "rotate-1"];
+  const tapeColors = ["bg-amber-300/80", "bg-coral/70", "bg-cream/80", "bg-amber-200/80"];
+
   return (
     <section className="py-20 md:py-28 bg-ink text-cream relative overflow-hidden">
       <div className="absolute -top-16 -right-16 size-80 rounded-full bg-amber-400/15 blur-3xl pointer-events-none" />
+      <div className="absolute -bottom-20 -left-20 size-96 rounded-full bg-coral/10 blur-3xl pointer-events-none" />
+
       <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="max-w-3xl mb-14">
           <CmsText
@@ -419,31 +428,89 @@ function GallerySection() {
           />
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          <CmsList
-            field="items"
-            addLabel="Añadir foto"
-            renderItem={({ index, prefix }) => (
-              <figure
-                key={index}
-                className="group relative aspect-square overflow-hidden rounded-2xl border-2 border-cream/20 hover:border-amber-400/60 transition-all hover:-translate-y-1"
-              >
-                <CmsImage
-                  field={`${prefix}.image`}
-                  alt=""
-                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                  emptyLabel={editMode ? "Foto" : ""}
-                />
-                <figcaption className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent p-3 text-xs font-bold text-cream opacity-0 group-hover:opacity-100 transition-opacity">
+        {/* Foto principal destacada (primer item) + collage de polaroids */}
+        <div className="grid lg:grid-cols-12 gap-8 lg:gap-12 items-start">
+          {/* FEATURED */}
+          {items.length > 0 && (
+            <div className="lg:col-span-7 relative">
+              {/* Cinta de premio decorativa */}
+              <div className="absolute -top-6 -left-3 z-20 rotate-[-8deg] hidden md:flex items-center gap-2 bg-amber-400 text-ink border-2 border-ink rounded-r-full pl-3 pr-5 py-1.5 shadow-tactile">
+                <Trophy className="h-4 w-4" />
+                <span className="text-[11px] font-bold uppercase tracking-widest">Campeones</span>
+              </div>
+              {/* Medalla flotante */}
+              <div className="absolute -top-5 -right-5 z-20 hidden md:flex size-16 rounded-full bg-amber-400 border-4 border-cream items-center justify-center shadow-tactile rotate-12 animate-[bounce_4s_ease-in-out_infinite]">
+                <Medal className="h-8 w-8 text-ink" />
+              </div>
+              {/* Marco "polaroid" grande */}
+              <figure className="relative bg-cream p-3 sm:p-4 pb-10 sm:pb-14 rounded-sm shadow-tactile-lg border-2 border-ink/10 -rotate-1 hover:rotate-0 transition-transform duration-500">
+                <span aria-hidden className="absolute -top-3 left-10 w-20 h-6 bg-amber-300/80 rotate-[-6deg] shadow-sm" />
+                <span aria-hidden className="absolute -top-3 right-12 w-16 h-5 bg-coral/70 rotate-[8deg] shadow-sm" />
+                <div className="aspect-[4/3] sm:aspect-[16/10] overflow-hidden bg-cream-deep rounded-sm">
+                  <CmsImage
+                    field="items.0.image"
+                    alt=""
+                    className="w-full h-full object-cover"
+                    emptyLabel={editMode ? "Foto destacada" : ""}
+                  />
+                </div>
+                <figcaption className="mt-3 sm:mt-4 px-2 text-center font-display text-ink text-base sm:text-lg italic">
                   <CmsText
-                    field={`${prefix}.caption`}
+                    field="items.0.caption"
                     as="span"
-                    placeholder="Pie de foto"
+                    placeholder="Pie de foto destacada"
                   />
                 </figcaption>
               </figure>
-            )}
-          />
+            </div>
+          )}
+
+          {/* COLLAGE (resto de fotos) */}
+          <div className="lg:col-span-5">
+            <div className="grid grid-cols-2 gap-5 sm:gap-7">
+              <CmsList
+                field="items"
+                addLabel="Añadir foto"
+                renderItem={({ index, prefix }) => {
+                  if (index === 0) {
+                    return editMode ? (
+                      <div className="col-span-2 text-[11px] uppercase tracking-widest text-cream/40 italic px-2 py-3 border border-dashed border-cream/15 rounded">
+                        Foto destacada (arriba) — los controles aparecen sobre ella
+                      </div>
+                    ) : null;
+                  }
+                  const rot = rotations[index % rotations.length];
+                  const tape = tapeColors[index % tapeColors.length];
+                  return (
+                    <figure
+                      key={index}
+                      className={`group relative bg-cream p-2 pb-7 rounded-sm shadow-tactile border-2 border-ink/10 ${rot} hover:rotate-0 hover:scale-[1.04] hover:z-10 transition-all duration-300`}
+                    >
+                      <span
+                        aria-hidden
+                        className={`absolute -top-2 left-1/2 -translate-x-1/2 w-14 h-4 ${tape} rotate-[-3deg] shadow-sm`}
+                      />
+                      <div className="aspect-[4/5] overflow-hidden bg-cream-deep rounded-sm">
+                        <CmsImage
+                          field={`${prefix}.image`}
+                          alt=""
+                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                          emptyLabel={editMode ? "Foto" : ""}
+                        />
+                      </div>
+                      <figcaption className="mt-2 px-1 text-center font-display italic text-ink text-xs sm:text-sm leading-tight">
+                        <CmsText
+                          field={`${prefix}.caption`}
+                          as="span"
+                          placeholder="Pie de foto"
+                        />
+                      </figcaption>
+                    </figure>
+                  );
+                }}
+              />
+            </div>
+          </div>
         </div>
       </div>
     </section>
