@@ -597,11 +597,6 @@ export function LudotecaPage() {
                 </article>
               ))}
             </div>
-          )}
-          <div className="mt-10 space-y-8">
-            <RecommendationsSection games={games} />
-            <LocationLegend />
-          </div>
         </div>
       </section>
     </SiteLayout>
