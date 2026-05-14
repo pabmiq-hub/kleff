@@ -35,7 +35,7 @@ function ShapeIcon({ shape, className }: { shape: ShelfShape; className?: string
 
 export function describeLocation(loc: LocationFields): string {
   if (!loc.shelf) return "Ubicación no definida";
-  if (loc.shelf === "on_demand") return "Bajo pedido — pídelo en barra";
+  if (loc.shelf === "on_demand") return "Bajo pedido — no está en la ludoteca fija, se puede pedir para próximos eventos";
   if (loc.shelf === "drawer") {
     const n = loc.drawer_number ?? "?";
     const l = loc.drawer_letter ?? "?";
