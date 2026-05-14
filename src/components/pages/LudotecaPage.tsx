@@ -382,8 +382,42 @@ export function LudotecaPage() {
               </span>
             )}
           </div>
+
+          <div className="mt-5 flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={() => setRecoOpen(true)}
+              className="inline-flex items-center gap-2 rounded-full border-2 border-ink bg-card px-4 py-2 text-xs font-bold uppercase tracking-wider shadow-tactile-sm hover:bg-coral hover:text-cream transition-colors"
+            >
+              <Sparkles className="h-3.5 w-3.5" />
+              {TT.reco}
+            </button>
+            <Popover>
+              <PopoverTrigger asChild>
+                <button
+                  type="button"
+                  className="inline-flex items-center gap-2 rounded-full border-2 border-ink bg-card px-4 py-2 text-xs font-bold uppercase tracking-wider shadow-tactile-sm hover:bg-cream-deep transition-colors"
+                >
+                  <MapPin className="h-3.5 w-3.5" />
+                  {TT.legend}
+                </button>
+              </PopoverTrigger>
+              <PopoverContent align="start" className="w-[min(28rem,90vw)] p-0 border-0 bg-transparent shadow-none">
+                <LocationLegend />
+              </PopoverContent>
+            </Popover>
+          </div>
         </div>
       </section>
+
+      <Dialog open={recoOpen} onOpenChange={setRecoOpen}>
+        <DialogContent className="max-w-3xl p-0 border-2 border-ink rounded-3xl bg-cream overflow-hidden">
+          <DialogTitle className="sr-only">{TT.reco}</DialogTitle>
+          <div className="max-h-[85vh] overflow-y-auto">
+            <RecommendationsSection games={games} />
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* FILTERS */}
       {showFilters && (
