@@ -227,6 +227,13 @@ export function LudotecaPage() {
   const [mechanic, setMechanic] = useState<string | null>(null);
   const [sort, setSort] = useState<"alpha" | "alpha-desc" | "rating" | "weight-asc" | "weight-desc">("alpha");
   const [showFilters, setShowFilters] = useState(true);
+  const [recoOpen, setRecoOpen] = useState(false);
+
+  const TT = {
+    es: { reco: "Recomiéndame un juego similar", legend: "Cómo encontrar un juego" },
+    en: { reco: "Recommend a similar game", legend: "How to find a game" },
+    ca: { reco: "Recomana'm un joc similar", legend: "Com trobar un joc" },
+  }[locale];
 
   useEffect(() => {
     let cancelled = false;
