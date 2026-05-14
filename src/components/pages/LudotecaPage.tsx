@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
-import { Search, Users, Clock, Brain, Star, ExternalLink, RefreshCw, Filter, X } from "lucide-react";
+import { Search, Users, Clock, Brain, Star, ExternalLink, RefreshCw, Filter, X, Sparkles, MapPin } from "lucide-react";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useI18n } from "@/i18n/I18nProvider";
 import { SiteLayout } from "@/components/site/SiteLayout";
 import { listLudoteca } from "@/server/ludoteca.functions";
@@ -225,6 +227,13 @@ export function LudotecaPage() {
   const [mechanic, setMechanic] = useState<string | null>(null);
   const [sort, setSort] = useState<"alpha" | "alpha-desc" | "rating" | "weight-asc" | "weight-desc">("alpha");
   const [showFilters, setShowFilters] = useState(true);
+  const [recoOpen, setRecoOpen] = useState(false);
+
+  const TT = {
+    es: { reco: "Recomiéndame un juego similar", legend: "Cómo encontrar un juego" },
+    en: { reco: "Recommend a similar game", legend: "How to find a game" },
+    ca: { reco: "Recomana'm un joc similar", legend: "Com trobar un joc" },
+  }[locale];
 
   useEffect(() => {
     let cancelled = false;
@@ -373,8 +382,42 @@ export function LudotecaPage() {
               </span>
             )}
           </div>
+
+          <div className="mt-5 flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={() => setRecoOpen(true)}
+              className="inline-flex items-center gap-2 rounded-full border-2 border-ink bg-card px-4 py-2 text-xs font-bold uppercase tracking-wider shadow-tactile-sm hover:bg-coral hover:text-cream transition-colors"
+            >
+              <Sparkles className="h-3.5 w-3.5" />
+              {TT.reco}
+            </button>
+            <Popover>
+              <PopoverTrigger asChild>
+                <button
+                  type="button"
+                  className="inline-flex items-center gap-2 rounded-full border-2 border-ink bg-card px-4 py-2 text-xs font-bold uppercase tracking-wider shadow-tactile-sm hover:bg-cream-deep transition-colors"
+                >
+                  <MapPin className="h-3.5 w-3.5" />
+                  {TT.legend}
+                </button>
+              </PopoverTrigger>
+              <PopoverContent align="start" className="w-[min(28rem,90vw)] p-0 border-0 bg-transparent shadow-none">
+                <LocationLegend />
+              </PopoverContent>
+            </Popover>
+          </div>
         </div>
       </section>
+
+      <Dialog open={recoOpen} onOpenChange={setRecoOpen}>
+        <DialogContent className="max-w-3xl p-0 border-2 border-ink rounded-3xl bg-cream overflow-hidden">
+          <DialogTitle className="sr-only">{TT.reco}</DialogTitle>
+          <div className="max-h-[85vh] overflow-y-auto">
+            <RecommendationsSection games={games} />
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* FILTERS */}
       {showFilters && (
@@ -555,10 +598,6 @@ export function LudotecaPage() {
               ))}
             </div>
           )}
-          <div className="mt-10 space-y-8">
-            <RecommendationsSection games={games} />
-            <LocationLegend />
-          </div>
         </div>
       </section>
     </SiteLayout>
