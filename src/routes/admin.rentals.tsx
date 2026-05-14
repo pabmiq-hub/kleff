@@ -16,6 +16,7 @@ function RentalsLayout() {
         <TabLink to="/admin/rentals/active" label="Activos" />
         <TabLink to="/admin/rentals/catalog" label="Catálogo" />
         <TabLink to="/admin/rentals/history" label="Histórico" />
+        <TabLink to="/admin/rentals/settings" label="Ajustes" />
       </nav>
       <Outlet />
     </div>

@@ -63,6 +63,7 @@ import { Route as AppRentalsMineRouteImport } from './routes/app.rentals.mine'
 import { Route as ApiPublicUploadInviteAvatarRouteImport } from './routes/api.public.upload-invite-avatar'
 import { Route as ApiPublicSyncBggRouteImport } from './routes/api.public.sync-bgg'
 import { Route as ApiPublicRefreshMediaOgRouteImport } from './routes/api.public.refresh-media-og'
+import { Route as AdminRentalsSettingsRouteImport } from './routes/admin.rentals.settings'
 import { Route as AdminRentalsHistoryRouteImport } from './routes/admin.rentals.history'
 import { Route as AdminRentalsCatalogRouteImport } from './routes/admin.rentals.catalog'
 import { Route as AdminRentalsActiveRouteImport } from './routes/admin.rentals.active'
@@ -341,6 +342,11 @@ const ApiPublicRefreshMediaOgRoute = ApiPublicRefreshMediaOgRouteImport.update({
   path: '/api/public/refresh-media-og',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminRentalsSettingsRoute = AdminRentalsSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => AdminRentalsRoute,
+} as any)
 const AdminRentalsHistoryRoute = AdminRentalsHistoryRouteImport.update({
   id: '/history',
   path: '/history',
@@ -427,6 +433,7 @@ export interface FileRoutesByFullPath {
   '/admin/rentals/active': typeof AdminRentalsActiveRoute
   '/admin/rentals/catalog': typeof AdminRentalsCatalogRoute
   '/admin/rentals/history': typeof AdminRentalsHistoryRoute
+  '/admin/rentals/settings': typeof AdminRentalsSettingsRoute
   '/api/public/refresh-media-og': typeof ApiPublicRefreshMediaOgRoute
   '/api/public/sync-bgg': typeof ApiPublicSyncBggRoute
   '/api/public/upload-invite-avatar': typeof ApiPublicUploadInviteAvatarRoute
@@ -485,6 +492,7 @@ export interface FileRoutesByTo {
   '/admin/rentals/active': typeof AdminRentalsActiveRoute
   '/admin/rentals/catalog': typeof AdminRentalsCatalogRoute
   '/admin/rentals/history': typeof AdminRentalsHistoryRoute
+  '/admin/rentals/settings': typeof AdminRentalsSettingsRoute
   '/api/public/refresh-media-og': typeof ApiPublicRefreshMediaOgRoute
   '/api/public/sync-bgg': typeof ApiPublicSyncBggRoute
   '/api/public/upload-invite-avatar': typeof ApiPublicUploadInviteAvatarRoute
@@ -548,6 +556,7 @@ export interface FileRoutesById {
   '/admin/rentals/active': typeof AdminRentalsActiveRoute
   '/admin/rentals/catalog': typeof AdminRentalsCatalogRoute
   '/admin/rentals/history': typeof AdminRentalsHistoryRoute
+  '/admin/rentals/settings': typeof AdminRentalsSettingsRoute
   '/api/public/refresh-media-og': typeof ApiPublicRefreshMediaOgRoute
   '/api/public/sync-bgg': typeof ApiPublicSyncBggRoute
   '/api/public/upload-invite-avatar': typeof ApiPublicUploadInviteAvatarRoute
@@ -612,6 +621,7 @@ export interface FileRouteTypes {
     | '/admin/rentals/active'
     | '/admin/rentals/catalog'
     | '/admin/rentals/history'
+    | '/admin/rentals/settings'
     | '/api/public/refresh-media-og'
     | '/api/public/sync-bgg'
     | '/api/public/upload-invite-avatar'
@@ -670,6 +680,7 @@ export interface FileRouteTypes {
     | '/admin/rentals/active'
     | '/admin/rentals/catalog'
     | '/admin/rentals/history'
+    | '/admin/rentals/settings'
     | '/api/public/refresh-media-og'
     | '/api/public/sync-bgg'
     | '/api/public/upload-invite-avatar'
@@ -732,6 +743,7 @@ export interface FileRouteTypes {
     | '/admin/rentals/active'
     | '/admin/rentals/catalog'
     | '/admin/rentals/history'
+    | '/admin/rentals/settings'
     | '/api/public/refresh-media-og'
     | '/api/public/sync-bgg'
     | '/api/public/upload-invite-avatar'
@@ -1165,6 +1177,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicRefreshMediaOgRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/rentals/settings': {
+      id: '/admin/rentals/settings'
+      path: '/settings'
+      fullPath: '/admin/rentals/settings'
+      preLoaderRoute: typeof AdminRentalsSettingsRouteImport
+      parentRoute: typeof AdminRentalsRoute
+    }
     '/admin/rentals/history': {
       id: '/admin/rentals/history'
       path: '/history'
@@ -1232,6 +1251,7 @@ interface AdminRentalsRouteChildren {
   AdminRentalsActiveRoute: typeof AdminRentalsActiveRoute
   AdminRentalsCatalogRoute: typeof AdminRentalsCatalogRoute
   AdminRentalsHistoryRoute: typeof AdminRentalsHistoryRoute
+  AdminRentalsSettingsRoute: typeof AdminRentalsSettingsRoute
   AdminRentalsIndexRoute: typeof AdminRentalsIndexRoute
 }
 
@@ -1239,6 +1259,7 @@ const AdminRentalsRouteChildren: AdminRentalsRouteChildren = {
   AdminRentalsActiveRoute: AdminRentalsActiveRoute,
   AdminRentalsCatalogRoute: AdminRentalsCatalogRoute,
   AdminRentalsHistoryRoute: AdminRentalsHistoryRoute,
+  AdminRentalsSettingsRoute: AdminRentalsSettingsRoute,
   AdminRentalsIndexRoute: AdminRentalsIndexRoute,
 }
 
