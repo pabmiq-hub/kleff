@@ -597,6 +597,7 @@ export function LudotecaPage() {
                 </article>
               ))}
             </div>
+          )}
         </div>
       </section>
     </SiteLayout>
