@@ -2,6 +2,8 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { createClient } from "@supabase/supabase-js";
+import { nextGameNight, gameNightAfter, toISODate } from "@/lib/gameNights";
 
 async function assertSuperAdmin(userId: string): Promise<void> {
   const { data, error } = await supabaseAdmin
@@ -16,18 +18,31 @@ async function assertSuperAdmin(userId: string): Promise<void> {
 
 // ---------------- Catalog ----------------
 
-const gameSchema = z.object({
-  title: z.string().min(2).max(200),
-  description: z.string().max(2000).nullable().optional(),
-  imageUrl: z.string().url().max(500).nullable().optional(),
-  bggId: z.number().int().positive().nullable().optional(),
-  minPlayers: z.number().int().min(1).max(99).nullable().optional(),
-  maxPlayers: z.number().int().min(1).max(99).nullable().optional(),
-  durationMinutes: z.number().int().min(1).max(2000).nullable().optional(),
-  maxRentalDays: z.number().int().min(1).max(180).default(14),
-  totalCopies: z.number().int().min(1).max(99).default(1),
-  isActive: z.boolean().default(true),
-});
+const locationSchema = z
+  .object({
+    shelf: z.enum(["1", "2", "3", "4", "on_demand", "drawer"]).nullable().optional(),
+    shape: z.enum(["triangle", "heart", "square"]).nullable().optional(),
+    slotNumber: z.number().int().min(1).max(5).nullable().optional(),
+    drawerNumber: z.number().int().min(1).max(4).nullable().optional(),
+    drawerLetter: z.enum(["a", "b", "c", "d"]).nullable().optional(),
+    notesAdmin: z.string().max(500).nullable().optional(),
+  })
+  .partial();
+
+const gameSchema = z
+  .object({
+    title: z.string().min(2).max(200),
+    description: z.string().max(2000).nullable().optional(),
+    imageUrl: z.string().url().max(500).nullable().optional(),
+    bggId: z.number().int().positive().nullable().optional(),
+    minPlayers: z.number().int().min(1).max(99).nullable().optional(),
+    maxPlayers: z.number().int().min(1).max(99).nullable().optional(),
+    durationMinutes: z.number().int().min(1).max(2000).nullable().optional(),
+    maxRentalDays: z.number().int().min(1).max(180).default(14),
+    totalCopies: z.number().int().min(1).max(99).default(1),
+    isActive: z.boolean().default(true),
+  })
+  .merge(locationSchema);
 
 export const listRentalGames = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -84,6 +99,12 @@ export const updateRentalGame = createServerFn({ method: "POST" })
     if (rest.maxRentalDays !== undefined) update.max_rental_days = rest.maxRentalDays;
     if (rest.totalCopies !== undefined) update.total_copies = rest.totalCopies;
     if (rest.isActive !== undefined) update.is_active = rest.isActive;
+    if (rest.shelf !== undefined) update.shelf = rest.shelf;
+    if (rest.shape !== undefined) update.shape = rest.shape;
+    if (rest.slotNumber !== undefined) update.slot_number = rest.slotNumber;
+    if (rest.drawerNumber !== undefined) update.drawer_number = rest.drawerNumber;
+    if (rest.drawerLetter !== undefined) update.drawer_letter = rest.drawerLetter;
+    if (rest.notesAdmin !== undefined) update.notes_admin = rest.notesAdmin;
     const { error } = await supabaseAdmin.from("bgg_games").update(update as never).eq("id", id);
     if (error) throw new Error(error.message);
     return { success: true };
@@ -99,29 +120,197 @@ export const deleteRentalGame = createServerFn({ method: "POST" })
     return { success: true };
   });
 
-// ---------------- Requests ----------------
+// ---------------- Rental settings ----------------
 
-export const createRentalRequest = createServerFn({ method: "POST" })
+const SETTINGS_DEFAULT = {
+  game_night_weekday: 3,
+  cooldown_weeks: 4,
+  monthly_quota: 2,
+  block_if_overdue: true,
+};
+
+async function loadSettings() {
+  const { data, error } = await supabaseAdmin
+    .from("rental_settings")
+    .select("game_night_weekday, cooldown_weeks, monthly_quota, block_if_overdue")
+    .eq("id", true)
+    .maybeSingle();
+  if (error) throw new Error(error.message);
+  return data ?? SETTINGS_DEFAULT;
+}
+
+export const getRentalSettings = createServerFn({ method: "GET" }).handler(async () => {
+  const supabase = createClient(
+    process.env.SUPABASE_URL ?? "",
+    process.env.SUPABASE_PUBLISHABLE_KEY ?? "",
+  );
+  const { data, error } = await supabase
+    .from("rental_settings")
+    .select("game_night_weekday, cooldown_weeks, monthly_quota, block_if_overdue")
+    .eq("id", true)
+    .maybeSingle();
+  if (error) throw new Error(error.message);
+  return { settings: data ?? SETTINGS_DEFAULT };
+});
+
+export const updateRentalSettings = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) =>
     z
       .object({
-        gameId: z.string().uuid(),
-        requestedDays: z.number().int().min(1).max(180).default(7),
-        message: z.string().max(500).nullable().optional(),
+        gameNightWeekday: z.number().int().min(0).max(6),
+        cooldownWeeks: z.number().int().min(0).max(52),
+        monthlyQuota: z.number().int().min(0).max(20),
+        blockIfOverdue: z.boolean(),
       })
       .parse(input),
   )
   .handler(async ({ data, context }) => {
-    const { error } = await context.supabase.from("rental_requests").insert({
-      user_id: context.userId,
-      game_id: data.gameId,
-      requested_days: data.requestedDays,
-      message: data.message ?? null,
-      status: "pending",
-    });
+    await assertSuperAdmin(context.userId);
+    const { error } = await supabaseAdmin
+      .from("rental_settings")
+      .update({
+        game_night_weekday: data.gameNightWeekday,
+        cooldown_weeks: data.cooldownWeeks,
+        monthly_quota: data.monthlyQuota,
+        block_if_overdue: data.blockIfOverdue,
+        updated_at: new Date().toISOString(),
+        updated_by: context.userId,
+      })
+      .eq("id", true);
     if (error) throw new Error(error.message);
     return { success: true };
+  });
+
+// ---------------- Requests ----------------
+
+const requestInputSchema = z.object({
+  gameId: z.string().uuid(),
+  pickupDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
+  message: z.string().max(500).nullable().optional(),
+  acceptWaitlist: z.boolean().default(false),
+});
+
+export const createRentalRequest = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) => requestInputSchema.parse(input))
+  .handler(async ({ data, context }) => {
+    const settings = await loadSettings();
+
+    // Compute pickup/return dates aligned with game nights
+    const pickup = data.pickupDate
+      ? new Date(`${data.pickupDate}T00:00:00`)
+      : nextGameNight(new Date(), settings.game_night_weekday);
+    if (pickup.getDay() !== settings.game_night_weekday) {
+      throw new Error("La fecha de recogida debe ser una noche de juego.");
+    }
+    const ret = gameNightAfter(pickup, settings.game_night_weekday);
+    const pickupISO = toISODate(pickup);
+    const returnISO = toISODate(ret);
+
+    // Anti-abuse 1: overdue rental blocks
+    if (settings.block_if_overdue) {
+      const { data: overdue } = await supabaseAdmin
+        .from("rentals")
+        .select("id")
+        .eq("user_id", context.userId)
+        .eq("status", "active")
+        .lt("due_at", new Date().toISOString())
+        .limit(1);
+      if (overdue && overdue.length > 0) {
+        throw new Error("Tienes una devolución atrasada. Devuelve antes de pedir otro juego.");
+      }
+    }
+
+    // Anti-abuse 2: cooldown on same game
+    if (settings.cooldown_weeks > 0) {
+      const since = new Date();
+      since.setDate(since.getDate() - settings.cooldown_weeks * 7);
+      const { data: recent } = await supabaseAdmin
+        .from("rental_requests")
+        .select("id")
+        .eq("user_id", context.userId)
+        .eq("game_id", data.gameId)
+        .in("status", ["pending", "approved", "waitlisted"])
+        .gte("created_at", since.toISOString())
+        .limit(1);
+      if (recent && recent.length > 0) {
+        throw new Error(`Ya pediste este juego en las últimas ${settings.cooldown_weeks} semanas.`);
+      }
+      const { data: recentR } = await supabaseAdmin
+        .from("rentals")
+        .select("id")
+        .eq("user_id", context.userId)
+        .eq("game_id", data.gameId)
+        .gte("started_at", since.toISOString())
+        .limit(1);
+      if (recentR && recentR.length > 0) {
+        throw new Error(`Ya alquilaste este juego en las últimas ${settings.cooldown_weeks} semanas.`);
+      }
+    }
+
+    // Anti-abuse 3: monthly quota
+    if (settings.monthly_quota > 0) {
+      const monthStart = new Date();
+      monthStart.setDate(1);
+      monthStart.setHours(0, 0, 0, 0);
+      const { count: monthCount } = await supabaseAdmin
+        .from("rental_requests")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", context.userId)
+        .in("status", ["pending", "approved", "waitlisted"])
+        .gte("created_at", monthStart.toISOString());
+      if ((monthCount ?? 0) >= settings.monthly_quota) {
+        throw new Error(`Has alcanzado tu cuota mensual de ${settings.monthly_quota} alquileres.`);
+      }
+    }
+
+    // Availability for that pickup date
+    const { data: game, error: gErr } = await supabaseAdmin
+      .from("bgg_games")
+      .select("total_copies")
+      .eq("id", data.gameId)
+      .maybeSingle();
+    if (gErr) throw new Error(gErr.message);
+    if (!game) throw new Error("Juego no encontrado");
+
+    const { count: heldCount } = await supabaseAdmin
+      .from("rental_requests")
+      .select("id", { count: "exact", head: true })
+      .eq("game_id", data.gameId)
+      .eq("pickup_date", pickupISO)
+      .in("status", ["pending", "approved"]);
+
+    const free = (game.total_copies ?? 1) - (heldCount ?? 0);
+    let status: "pending" | "waitlisted" = "pending";
+    let waitlistPos: number | null = null;
+    if (free <= 0) {
+      if (!data.acceptWaitlist) {
+        throw new Error("No hay copias libres para esa fecha. Activa la lista de espera para apuntarte.");
+      }
+      status = "waitlisted";
+      const { count: wlCount } = await supabaseAdmin
+        .from("rental_requests")
+        .select("id", { count: "exact", head: true })
+        .eq("game_id", data.gameId)
+        .eq("pickup_date", pickupISO)
+        .eq("status", "waitlisted");
+      waitlistPos = (wlCount ?? 0) + 1;
+    }
+
+    const requestedDays = Math.round((ret.getTime() - pickup.getTime()) / 86400000);
+    const { error } = await supabaseAdmin.from("rental_requests").insert({
+      user_id: context.userId,
+      game_id: data.gameId,
+      requested_days: requestedDays,
+      message: data.message ?? null,
+      status,
+      pickup_date: pickupISO,
+      return_date: returnISO,
+      waitlist_position: waitlistPos,
+    });
+    if (error) throw new Error(error.message);
+    return { success: true, status, pickupDate: pickupISO, returnDate: returnISO, waitlistPosition: waitlistPos };
   });
 
 export const cancelRentalRequest = createServerFn({ method: "POST" })
@@ -133,7 +322,7 @@ export const cancelRentalRequest = createServerFn({ method: "POST" })
       .update({ status: "cancelled" })
       .eq("id", data.id)
       .eq("user_id", context.userId)
-      .eq("status", "pending");
+      .in("status", ["pending", "waitlisted"]);
     if (error) throw new Error(error.message);
     return { success: true };
   });
@@ -155,7 +344,7 @@ export const listAllRentalRequests = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) =>
     z
       .object({
-        status: z.enum(["pending", "approved", "rejected", "cancelled"]).optional(),
+        status: z.enum(["pending", "approved", "rejected", "cancelled", "waitlisted"]).optional(),
       })
       .parse(input ?? {}),
   )
@@ -163,29 +352,21 @@ export const listAllRentalRequests = createServerFn({ method: "POST" })
     await assertSuperAdmin(context.userId);
     let q = supabaseAdmin
       .from("rental_requests")
-      .select("*, bgg_games(title, image_url), profiles!rental_requests_user_id_fkey(full_name, username, member_number)")
+      .select("*, bgg_games(title, image_url, total_copies)")
+      .order("pickup_date", { ascending: true, nullsFirst: false })
       .order("created_at", { ascending: false });
     if (data.status) q = q.eq("status", data.status);
     const { data: rows, error } = await q;
-    if (error) {
-      // Fallback if FK alias not present: do manual join
-      const { data: r2, error: e2 } = await supabaseAdmin
-        .from("rental_requests")
-        .select("*, bgg_games(title, image_url)")
-        .order("created_at", { ascending: false });
-      if (e2) throw new Error(e2.message);
-      const userIds = Array.from(new Set((r2 ?? []).map((r) => r.user_id)));
-      const { data: profs } = await supabaseAdmin
-        .from("profiles")
-        .select("id, full_name, username, member_number")
-        .in("id", userIds);
-      const map = new Map((profs ?? []).map((p) => [p.id, p]));
-      const filtered = data.status ? (r2 ?? []).filter((r) => r.status === data.status) : (r2 ?? []);
-      return {
-        requests: filtered.map((r) => ({ ...r, profile: map.get(r.user_id) ?? null })),
-      };
-    }
-    return { requests: rows ?? [] };
+    if (error) throw new Error(error.message);
+    const userIds = Array.from(new Set((rows ?? []).map((r) => r.user_id)));
+    const { data: profs } = await supabaseAdmin
+      .from("profiles")
+      .select("id, full_name, username, member_number")
+      .in("id", userIds);
+    const map = new Map((profs ?? []).map((p) => [p.id, p]));
+    return {
+      requests: (rows ?? []).map((r) => ({ ...r, profile: map.get(r.user_id) ?? null })),
+    };
   });
 
 export const decideRentalRequest = createServerFn({ method: "POST" })
@@ -196,22 +377,22 @@ export const decideRentalRequest = createServerFn({ method: "POST" })
         id: z.string().uuid(),
         decision: z.enum(["approved", "rejected"]),
         note: z.string().max(500).nullable().optional(),
-        rentalDays: z.number().int().min(1).max(180).optional(),
       })
       .parse(input),
   )
   .handler(async ({ data, context }) => {
     await assertSuperAdmin(context.userId);
 
-    // Load the request
     const { data: req, error: reqErr } = await supabaseAdmin
       .from("rental_requests")
-      .select("id, user_id, game_id, requested_days, status")
+      .select("id, user_id, game_id, requested_days, status, pickup_date, return_date")
       .eq("id", data.id)
       .maybeSingle();
     if (reqErr) throw new Error(reqErr.message);
     if (!req) throw new Error("Solicitud no encontrada");
-    if (req.status !== "pending") throw new Error("La solicitud ya está resuelta");
+    if (req.status !== "pending" && req.status !== "waitlisted") {
+      throw new Error("La solicitud ya está resuelta");
+    }
 
     const { error: updErr } = await supabaseAdmin
       .from("rental_requests")
@@ -224,15 +405,17 @@ export const decideRentalRequest = createServerFn({ method: "POST" })
       .eq("id", data.id);
     if (updErr) throw new Error(updErr.message);
 
-    // If approved, create the rental
     if (data.decision === "approved") {
-      const days = data.rentalDays ?? req.requested_days;
-      const due = new Date(Date.now() + days * 24 * 60 * 60 * 1000).toISOString();
+      const startedAt = req.pickup_date ? new Date(`${req.pickup_date}T18:00:00`) : new Date();
+      const dueAt = req.return_date
+        ? new Date(`${req.return_date}T23:59:00`)
+        : new Date(Date.now() + (req.requested_days ?? 7) * 86400000);
       const { error: rErr } = await supabaseAdmin.from("rentals").insert({
         user_id: req.user_id,
         game_id: req.game_id,
         request_id: req.id,
-        due_at: due,
+        started_at: startedAt.toISOString(),
+        due_at: dueAt.toISOString(),
         status: "active",
         created_by: context.userId,
       });
