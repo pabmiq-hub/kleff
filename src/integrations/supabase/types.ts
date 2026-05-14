@@ -28,6 +28,8 @@ export type Database = {
           created_at: string
           description: string | null
           designers: string[] | null
+          drawer_letter: Database["public"]["Enums"]["drawer_letter"] | null
+          drawer_number: number | null
           duration_minutes: number | null
           families: string[] | null
           id: string
@@ -41,7 +43,11 @@ export type Database = {
           min_age: number | null
           min_players: number | null
           min_playtime: number | null
+          notes_admin: string | null
           publishers: string[] | null
+          shape: Database["public"]["Enums"]["shelf_shape"] | null
+          shelf: Database["public"]["Enums"]["shelf_location"] | null
+          slot_number: number | null
           thumbnail_url: string | null
           title: string
           total_copies: number
@@ -61,6 +67,8 @@ export type Database = {
           created_at?: string
           description?: string | null
           designers?: string[] | null
+          drawer_letter?: Database["public"]["Enums"]["drawer_letter"] | null
+          drawer_number?: number | null
           duration_minutes?: number | null
           families?: string[] | null
           id?: string
@@ -74,7 +82,11 @@ export type Database = {
           min_age?: number | null
           min_players?: number | null
           min_playtime?: number | null
+          notes_admin?: string | null
           publishers?: string[] | null
+          shape?: Database["public"]["Enums"]["shelf_shape"] | null
+          shelf?: Database["public"]["Enums"]["shelf_location"] | null
+          slot_number?: number | null
           thumbnail_url?: string | null
           title: string
           total_copies?: number
@@ -94,6 +106,8 @@ export type Database = {
           created_at?: string
           description?: string | null
           designers?: string[] | null
+          drawer_letter?: Database["public"]["Enums"]["drawer_letter"] | null
+          drawer_number?: number | null
           duration_minutes?: number | null
           families?: string[] | null
           id?: string
@@ -107,7 +121,11 @@ export type Database = {
           min_age?: number | null
           min_players?: number | null
           min_playtime?: number | null
+          notes_admin?: string | null
           publishers?: string[] | null
+          shape?: Database["public"]["Enums"]["shelf_shape"] | null
+          shelf?: Database["public"]["Enums"]["shelf_location"] | null
+          slot_number?: number | null
           thumbnail_url?: string | null
           title?: string
           total_copies?: number
@@ -452,10 +470,13 @@ export type Database = {
           game_id: string
           id: string
           message: string | null
+          pickup_date: string | null
           requested_days: number
+          return_date: string | null
           status: Database["public"]["Enums"]["rental_request_status"]
           updated_at: string
           user_id: string
+          waitlist_position: number | null
         }
         Insert: {
           created_at?: string
@@ -465,10 +486,13 @@ export type Database = {
           game_id: string
           id?: string
           message?: string | null
+          pickup_date?: string | null
           requested_days?: number
+          return_date?: string | null
           status?: Database["public"]["Enums"]["rental_request_status"]
           updated_at?: string
           user_id: string
+          waitlist_position?: number | null
         }
         Update: {
           created_at?: string
@@ -478,10 +502,13 @@ export type Database = {
           game_id?: string
           id?: string
           message?: string | null
+          pickup_date?: string | null
           requested_days?: number
+          return_date?: string | null
           status?: Database["public"]["Enums"]["rental_request_status"]
           updated_at?: string
           user_id?: string
+          waitlist_position?: number | null
         }
         Relationships: [
           {
@@ -492,6 +519,36 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      rental_settings: {
+        Row: {
+          block_if_overdue: boolean
+          cooldown_weeks: number
+          game_night_weekday: number
+          id: boolean
+          monthly_quota: number
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          block_if_overdue?: boolean
+          cooldown_weeks?: number
+          game_night_weekday?: number
+          id?: boolean
+          monthly_quota?: number
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          block_if_overdue?: boolean
+          cooldown_weeks?: number
+          game_night_weekday?: number
+          id?: boolean
+          monthly_quota?: number
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
       }
       rentals: {
         Row: {
@@ -598,14 +655,22 @@ export type Database = {
     }
     Enums: {
       app_role: "super_admin" | "user"
+      drawer_letter: "a" | "b" | "c" | "d"
       gender_type:
         | "female"
         | "male"
         | "non_binary"
         | "other"
         | "prefer_not_to_say"
-      rental_request_status: "pending" | "approved" | "rejected" | "cancelled"
+      rental_request_status:
+        | "pending"
+        | "approved"
+        | "rejected"
+        | "cancelled"
+        | "waitlisted"
       rental_status: "active" | "returned" | "overdue" | "lost"
+      shelf_location: "1" | "2" | "3" | "4" | "on_demand" | "drawer"
+      shelf_shape: "triangle" | "heart" | "square"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -734,6 +799,7 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["super_admin", "user"],
+      drawer_letter: ["a", "b", "c", "d"],
       gender_type: [
         "female",
         "male",
@@ -741,8 +807,16 @@ export const Constants = {
         "other",
         "prefer_not_to_say",
       ],
-      rental_request_status: ["pending", "approved", "rejected", "cancelled"],
+      rental_request_status: [
+        "pending",
+        "approved",
+        "rejected",
+        "cancelled",
+        "waitlisted",
+      ],
       rental_status: ["active", "returned", "overdue", "lost"],
+      shelf_location: ["1", "2", "3", "4", "on_demand", "drawer"],
+      shelf_shape: ["triangle", "heart", "square"],
     },
   },
 } as const
