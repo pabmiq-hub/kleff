@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
-import { Search, Users, Clock, Brain, Star, ExternalLink, RefreshCw, Filter, X } from "lucide-react";
+import { Search, Users, Clock, Brain, Star, ExternalLink, RefreshCw, Filter, X, Sparkles, MapPin } from "lucide-react";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useI18n } from "@/i18n/I18nProvider";
 import { SiteLayout } from "@/components/site/SiteLayout";
 import { listLudoteca } from "@/server/ludoteca.functions";
