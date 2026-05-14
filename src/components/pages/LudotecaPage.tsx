@@ -10,6 +10,7 @@ import { useSectionContent } from "@/cms/useSectionContent";
 import { or } from "@/cms/or";
 
 import { LocationBadge, LocationLegend } from "@/components/ludoteca/LocationBadge";
+import { RecommendationsSection } from "@/components/ludoteca/RecommendationsSection";
 
 interface BggGame {
   id: string;
@@ -554,7 +555,8 @@ export function LudotecaPage() {
               ))}
             </div>
           )}
-          <div className="mt-10">
+          <div className="mt-10 space-y-8">
+            <RecommendationsSection games={games} />
             <LocationLegend />
           </div>
         </div>
