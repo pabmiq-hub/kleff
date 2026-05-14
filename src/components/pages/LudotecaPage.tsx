@@ -9,6 +9,8 @@ import { EditableText } from "@/editor/Editable";
 import { useSectionContent } from "@/cms/useSectionContent";
 import { or } from "@/cms/or";
 
+import { LocationBadge, LocationLegend } from "@/components/ludoteca/LocationBadge";
+
 interface BggGame {
   id: string;
   bgg_id: number | null;
@@ -31,6 +33,12 @@ interface BggGame {
   categories: string[];
   mechanics: string[];
   bgg_url: string | null;
+  total_copies: number | null;
+  shelf: "1" | "2" | "3" | "4" | "on_demand" | "drawer" | null;
+  shape: "triangle" | "heart" | "square" | null;
+  slot_number: number | null;
+  drawer_number: number | null;
+  drawer_letter: "a" | "b" | "c" | "d" | null;
 }
 
 const T = {
@@ -528,21 +536,27 @@ export function LudotecaPage() {
                         {g.mechanics.slice(0, 4).join(" · ")}
                       </p>
                     )}
-                    {g.bgg_url && (
-                      <a
-                        href={g.bgg_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="mt-auto text-[10px] font-bold uppercase tracking-wider text-coral-deep hover:text-coral inline-flex items-center gap-1"
-                      >
-                        {t.viewOnBgg} <ExternalLink className="h-2.5 w-2.5" />
-                      </a>
-                    )}
+                    <div className="flex items-center justify-between gap-2 mt-auto pt-1">
+                      <LocationBadge loc={g} />
+                      {g.bgg_url && (
+                        <a
+                          href={g.bgg_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-[10px] font-bold uppercase tracking-wider text-coral-deep hover:text-coral inline-flex items-center gap-1"
+                        >
+                          BGG <ExternalLink className="h-2.5 w-2.5" />
+                        </a>
+                      )}
+                    </div>
                   </div>
                 </article>
               ))}
             </div>
           )}
+          <div className="mt-10">
+            <LocationLegend />
+          </div>
         </div>
       </section>
     </SiteLayout>
