@@ -383,7 +383,7 @@ export function LudotecaPage() {
             )}
           </div>
 
-          <div className="mt-5 flex flex-wrap gap-2">
+          <div className="mt-5">
             <button
               type="button"
               onClick={() => setRecoOpen(true)}
@@ -392,20 +392,10 @@ export function LudotecaPage() {
               <Sparkles className="h-3.5 w-3.5" />
               {TT.reco}
             </button>
-            <Popover>
-              <PopoverTrigger asChild>
-                <button
-                  type="button"
-                  className="inline-flex items-center gap-2 rounded-full border-2 border-ink bg-card px-4 py-2 text-xs font-bold uppercase tracking-wider shadow-tactile-sm hover:bg-cream-deep transition-colors"
-                >
-                  <MapPin className="h-3.5 w-3.5" />
-                  {TT.legend}
-                </button>
-              </PopoverTrigger>
-              <PopoverContent align="start" className="w-[min(28rem,90vw)] p-0 border-0 bg-transparent shadow-none">
-                <LocationLegend />
-              </PopoverContent>
-            </Popover>
+          </div>
+
+          <div className="mt-5">
+            <LocationLegend />
           </div>
         </div>
       </section>
