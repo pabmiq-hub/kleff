@@ -10,17 +10,21 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TorneosRouteImport } from './routes/torneos'
+import { Route as TerminosRouteImport } from './routes/terminos'
 import { Route as SuperAdminRouteImport } from './routes/super-admin'
 import { Route as SobreNosotrosRouteImport } from './routes/sobre-nosotros'
 import { Route as RolesOcultosRouteImport } from './routes/roles-ocultos'
+import { Route as PrivacidadRouteImport } from './routes/privacidad'
 import { Route as MediosRouteImport } from './routes/medios'
 import { Route as LudotecaRouteImport } from './routes/ludoteca'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as CookiesRouteImport } from './routes/cookies'
 import { Route as ContactoRouteImport } from './routes/contacto'
 import { Route as ComoFuncionaRouteImport } from './routes/como-funciona'
 import { Route as CatanRouteImport } from './routes/catan'
 import { Route as BloodOnTheClocktowerRouteImport } from './routes/blood-on-the-clocktower'
 import { Route as BlogRouteImport } from './routes/blog'
+import { Route as AvisoLegalRouteImport } from './routes/aviso-legal'
 import { Route as AppRouteImport } from './routes/app'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as SplatRouteImport } from './routes/$'
@@ -31,25 +35,33 @@ import { Route as AppIndexRouteImport } from './routes/app.index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as InviteTokenRouteImport } from './routes/invite.$token'
 import { Route as EnTournamentsRouteImport } from './routes/en.tournaments'
+import { Route as EnTermsRouteImport } from './routes/en.terms'
+import { Route as EnPrivacyRouteImport } from './routes/en.privacy'
 import { Route as EnMediaRouteImport } from './routes/en.media'
 import { Route as EnLudotecaRouteImport } from './routes/en.ludoteca'
+import { Route as EnLegalNoticeRouteImport } from './routes/en.legal-notice'
 import { Route as EnHowItWorksRouteImport } from './routes/en.how-it-works'
 import { Route as EnHiddenRolesRouteImport } from './routes/en.hidden-roles'
+import { Route as EnCookiesRouteImport } from './routes/en.cookies'
 import { Route as EnContactRouteImport } from './routes/en.contact'
 import { Route as EnCatanRouteImport } from './routes/en.catan'
 import { Route as EnBloodOnTheClocktowerRouteImport } from './routes/en.blood-on-the-clocktower'
 import { Route as EnBlogRouteImport } from './routes/en.blog'
 import { Route as EnAboutRouteImport } from './routes/en.about'
 import { Route as CaTornejosRouteImport } from './routes/ca.tornejos'
+import { Route as CaTermesRouteImport } from './routes/ca.termes'
 import { Route as CaRolsOcultsRouteImport } from './routes/ca.rols-ocults'
 import { Route as CaQuiSomRouteImport } from './routes/ca.qui-som'
+import { Route as CaPrivacitatRouteImport } from './routes/ca.privacitat'
 import { Route as CaMitjansRouteImport } from './routes/ca.mitjans'
 import { Route as CaLudotecaRouteImport } from './routes/ca.ludoteca'
+import { Route as CaCookiesRouteImport } from './routes/ca.cookies'
 import { Route as CaContacteRouteImport } from './routes/ca.contacte'
 import { Route as CaComFuncionaRouteImport } from './routes/ca.com-funciona'
 import { Route as CaCatanRouteImport } from './routes/ca.catan'
 import { Route as CaBloodOnTheClocktowerRouteImport } from './routes/ca.blood-on-the-clocktower'
 import { Route as CaBlogRouteImport } from './routes/ca.blog'
+import { Route as CaAvisLegalRouteImport } from './routes/ca.avis-legal'
 import { Route as AppRentalsRouteImport } from './routes/app.rentals'
 import { Route as AppProfileRouteImport } from './routes/app.profile'
 import { Route as AppCarnetRouteImport } from './routes/app.carnet'
@@ -76,6 +88,11 @@ const TorneosRoute = TorneosRouteImport.update({
   path: '/torneos',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TerminosRoute = TerminosRouteImport.update({
+  id: '/terminos',
+  path: '/terminos',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SuperAdminRoute = SuperAdminRouteImport.update({
   id: '/super-admin',
   path: '/super-admin',
@@ -91,6 +108,11 @@ const RolesOcultosRoute = RolesOcultosRouteImport.update({
   path: '/roles-ocultos',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PrivacidadRoute = PrivacidadRouteImport.update({
+  id: '/privacidad',
+  path: '/privacidad',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const MediosRoute = MediosRouteImport.update({
   id: '/medios',
   path: '/medios',
@@ -104,6 +126,11 @@ const LudotecaRoute = LudotecaRouteImport.update({
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CookiesRoute = CookiesRouteImport.update({
+  id: '/cookies',
+  path: '/cookies',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ContactoRoute = ContactoRouteImport.update({
@@ -129,6 +156,11 @@ const BloodOnTheClocktowerRoute = BloodOnTheClocktowerRouteImport.update({
 const BlogRoute = BlogRouteImport.update({
   id: '/blog',
   path: '/blog',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AvisoLegalRoute = AvisoLegalRouteImport.update({
+  id: '/aviso-legal',
+  path: '/aviso-legal',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AppRoute = AppRouteImport.update({
@@ -181,6 +213,16 @@ const EnTournamentsRoute = EnTournamentsRouteImport.update({
   path: '/en/tournaments',
   getParentRoute: () => rootRouteImport,
 } as any)
+const EnTermsRoute = EnTermsRouteImport.update({
+  id: '/en/terms',
+  path: '/en/terms',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EnPrivacyRoute = EnPrivacyRouteImport.update({
+  id: '/en/privacy',
+  path: '/en/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const EnMediaRoute = EnMediaRouteImport.update({
   id: '/en/media',
   path: '/en/media',
@@ -191,6 +233,11 @@ const EnLudotecaRoute = EnLudotecaRouteImport.update({
   path: '/en/ludoteca',
   getParentRoute: () => rootRouteImport,
 } as any)
+const EnLegalNoticeRoute = EnLegalNoticeRouteImport.update({
+  id: '/en/legal-notice',
+  path: '/en/legal-notice',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const EnHowItWorksRoute = EnHowItWorksRouteImport.update({
   id: '/en/how-it-works',
   path: '/en/how-it-works',
@@ -199,6 +246,11 @@ const EnHowItWorksRoute = EnHowItWorksRouteImport.update({
 const EnHiddenRolesRoute = EnHiddenRolesRouteImport.update({
   id: '/en/hidden-roles',
   path: '/en/hidden-roles',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EnCookiesRoute = EnCookiesRouteImport.update({
+  id: '/en/cookies',
+  path: '/en/cookies',
   getParentRoute: () => rootRouteImport,
 } as any)
 const EnContactRoute = EnContactRouteImport.update({
@@ -231,6 +283,11 @@ const CaTornejosRoute = CaTornejosRouteImport.update({
   path: '/ca/tornejos',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CaTermesRoute = CaTermesRouteImport.update({
+  id: '/ca/termes',
+  path: '/ca/termes',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CaRolsOcultsRoute = CaRolsOcultsRouteImport.update({
   id: '/ca/rols-ocults',
   path: '/ca/rols-ocults',
@@ -241,6 +298,11 @@ const CaQuiSomRoute = CaQuiSomRouteImport.update({
   path: '/ca/qui-som',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CaPrivacitatRoute = CaPrivacitatRouteImport.update({
+  id: '/ca/privacitat',
+  path: '/ca/privacitat',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CaMitjansRoute = CaMitjansRouteImport.update({
   id: '/ca/mitjans',
   path: '/ca/mitjans',
@@ -249,6 +311,11 @@ const CaMitjansRoute = CaMitjansRouteImport.update({
 const CaLudotecaRoute = CaLudotecaRouteImport.update({
   id: '/ca/ludoteca',
   path: '/ca/ludoteca',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CaCookiesRoute = CaCookiesRouteImport.update({
+  id: '/ca/cookies',
+  path: '/ca/cookies',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CaContacteRoute = CaContacteRouteImport.update({
@@ -274,6 +341,11 @@ const CaBloodOnTheClocktowerRoute = CaBloodOnTheClocktowerRouteImport.update({
 const CaBlogRoute = CaBlogRouteImport.update({
   id: '/ca/blog',
   path: '/ca/blog',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CaAvisLegalRoute = CaAvisLegalRouteImport.update({
+  id: '/ca/avis-legal',
+  path: '/ca/avis-legal',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AppRentalsRoute = AppRentalsRouteImport.update({
@@ -383,17 +455,21 @@ export interface FileRoutesByFullPath {
   '/$': typeof SplatRoute
   '/admin': typeof AdminRouteWithChildren
   '/app': typeof AppRouteWithChildren
+  '/aviso-legal': typeof AvisoLegalRoute
   '/blog': typeof BlogRoute
   '/blood-on-the-clocktower': typeof BloodOnTheClocktowerRoute
   '/catan': typeof CatanRoute
   '/como-funciona': typeof ComoFuncionaRoute
   '/contacto': typeof ContactoRoute
+  '/cookies': typeof CookiesRoute
   '/login': typeof LoginRoute
   '/ludoteca': typeof LudotecaRoute
   '/medios': typeof MediosRoute
+  '/privacidad': typeof PrivacidadRoute
   '/roles-ocultos': typeof RolesOcultosRoute
   '/sobre-nosotros': typeof SobreNosotrosRoute
   '/super-admin': typeof SuperAdminRoute
+  '/terminos': typeof TerminosRoute
   '/torneos': typeof TorneosRoute
   '/admin/content': typeof AdminContentRouteWithChildren
   '/admin/invitations': typeof AdminInvitationsRoute
@@ -402,25 +478,33 @@ export interface FileRoutesByFullPath {
   '/app/carnet': typeof AppCarnetRoute
   '/app/profile': typeof AppProfileRoute
   '/app/rentals': typeof AppRentalsRouteWithChildren
+  '/ca/avis-legal': typeof CaAvisLegalRoute
   '/ca/blog': typeof CaBlogRoute
   '/ca/blood-on-the-clocktower': typeof CaBloodOnTheClocktowerRoute
   '/ca/catan': typeof CaCatanRoute
   '/ca/com-funciona': typeof CaComFuncionaRoute
   '/ca/contacte': typeof CaContacteRoute
+  '/ca/cookies': typeof CaCookiesRoute
   '/ca/ludoteca': typeof CaLudotecaRoute
   '/ca/mitjans': typeof CaMitjansRoute
+  '/ca/privacitat': typeof CaPrivacitatRoute
   '/ca/qui-som': typeof CaQuiSomRoute
   '/ca/rols-ocults': typeof CaRolsOcultsRoute
+  '/ca/termes': typeof CaTermesRoute
   '/ca/tornejos': typeof CaTornejosRoute
   '/en/about': typeof EnAboutRoute
   '/en/blog': typeof EnBlogRoute
   '/en/blood-on-the-clocktower': typeof EnBloodOnTheClocktowerRoute
   '/en/catan': typeof EnCatanRoute
   '/en/contact': typeof EnContactRoute
+  '/en/cookies': typeof EnCookiesRoute
   '/en/hidden-roles': typeof EnHiddenRolesRoute
   '/en/how-it-works': typeof EnHowItWorksRoute
+  '/en/legal-notice': typeof EnLegalNoticeRoute
   '/en/ludoteca': typeof EnLudotecaRoute
   '/en/media': typeof EnMediaRoute
+  '/en/privacy': typeof EnPrivacyRoute
+  '/en/terms': typeof EnTermsRoute
   '/en/tournaments': typeof EnTournamentsRoute
   '/invite/$token': typeof InviteTokenRoute
   '/admin/': typeof AdminIndexRoute
@@ -444,42 +528,54 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/$': typeof SplatRoute
+  '/aviso-legal': typeof AvisoLegalRoute
   '/blog': typeof BlogRoute
   '/blood-on-the-clocktower': typeof BloodOnTheClocktowerRoute
   '/catan': typeof CatanRoute
   '/como-funciona': typeof ComoFuncionaRoute
   '/contacto': typeof ContactoRoute
+  '/cookies': typeof CookiesRoute
   '/login': typeof LoginRoute
   '/ludoteca': typeof LudotecaRoute
   '/medios': typeof MediosRoute
+  '/privacidad': typeof PrivacidadRoute
   '/roles-ocultos': typeof RolesOcultosRoute
   '/sobre-nosotros': typeof SobreNosotrosRoute
   '/super-admin': typeof SuperAdminRoute
+  '/terminos': typeof TerminosRoute
   '/torneos': typeof TorneosRoute
   '/admin/invitations': typeof AdminInvitationsRoute
   '/admin/members': typeof AdminMembersRoute
   '/app/carnet': typeof AppCarnetRoute
   '/app/profile': typeof AppProfileRoute
   '/app/rentals': typeof AppRentalsRouteWithChildren
+  '/ca/avis-legal': typeof CaAvisLegalRoute
   '/ca/blog': typeof CaBlogRoute
   '/ca/blood-on-the-clocktower': typeof CaBloodOnTheClocktowerRoute
   '/ca/catan': typeof CaCatanRoute
   '/ca/com-funciona': typeof CaComFuncionaRoute
   '/ca/contacte': typeof CaContacteRoute
+  '/ca/cookies': typeof CaCookiesRoute
   '/ca/ludoteca': typeof CaLudotecaRoute
   '/ca/mitjans': typeof CaMitjansRoute
+  '/ca/privacitat': typeof CaPrivacitatRoute
   '/ca/qui-som': typeof CaQuiSomRoute
   '/ca/rols-ocults': typeof CaRolsOcultsRoute
+  '/ca/termes': typeof CaTermesRoute
   '/ca/tornejos': typeof CaTornejosRoute
   '/en/about': typeof EnAboutRoute
   '/en/blog': typeof EnBlogRoute
   '/en/blood-on-the-clocktower': typeof EnBloodOnTheClocktowerRoute
   '/en/catan': typeof EnCatanRoute
   '/en/contact': typeof EnContactRoute
+  '/en/cookies': typeof EnCookiesRoute
   '/en/hidden-roles': typeof EnHiddenRolesRoute
   '/en/how-it-works': typeof EnHowItWorksRoute
+  '/en/legal-notice': typeof EnLegalNoticeRoute
   '/en/ludoteca': typeof EnLudotecaRoute
   '/en/media': typeof EnMediaRoute
+  '/en/privacy': typeof EnPrivacyRoute
+  '/en/terms': typeof EnTermsRoute
   '/en/tournaments': typeof EnTournamentsRoute
   '/invite/$token': typeof InviteTokenRoute
   '/admin': typeof AdminIndexRoute
@@ -506,17 +602,21 @@ export interface FileRoutesById {
   '/$': typeof SplatRoute
   '/admin': typeof AdminRouteWithChildren
   '/app': typeof AppRouteWithChildren
+  '/aviso-legal': typeof AvisoLegalRoute
   '/blog': typeof BlogRoute
   '/blood-on-the-clocktower': typeof BloodOnTheClocktowerRoute
   '/catan': typeof CatanRoute
   '/como-funciona': typeof ComoFuncionaRoute
   '/contacto': typeof ContactoRoute
+  '/cookies': typeof CookiesRoute
   '/login': typeof LoginRoute
   '/ludoteca': typeof LudotecaRoute
   '/medios': typeof MediosRoute
+  '/privacidad': typeof PrivacidadRoute
   '/roles-ocultos': typeof RolesOcultosRoute
   '/sobre-nosotros': typeof SobreNosotrosRoute
   '/super-admin': typeof SuperAdminRoute
+  '/terminos': typeof TerminosRoute
   '/torneos': typeof TorneosRoute
   '/admin/content': typeof AdminContentRouteWithChildren
   '/admin/invitations': typeof AdminInvitationsRoute
@@ -525,25 +625,33 @@ export interface FileRoutesById {
   '/app/carnet': typeof AppCarnetRoute
   '/app/profile': typeof AppProfileRoute
   '/app/rentals': typeof AppRentalsRouteWithChildren
+  '/ca/avis-legal': typeof CaAvisLegalRoute
   '/ca/blog': typeof CaBlogRoute
   '/ca/blood-on-the-clocktower': typeof CaBloodOnTheClocktowerRoute
   '/ca/catan': typeof CaCatanRoute
   '/ca/com-funciona': typeof CaComFuncionaRoute
   '/ca/contacte': typeof CaContacteRoute
+  '/ca/cookies': typeof CaCookiesRoute
   '/ca/ludoteca': typeof CaLudotecaRoute
   '/ca/mitjans': typeof CaMitjansRoute
+  '/ca/privacitat': typeof CaPrivacitatRoute
   '/ca/qui-som': typeof CaQuiSomRoute
   '/ca/rols-ocults': typeof CaRolsOcultsRoute
+  '/ca/termes': typeof CaTermesRoute
   '/ca/tornejos': typeof CaTornejosRoute
   '/en/about': typeof EnAboutRoute
   '/en/blog': typeof EnBlogRoute
   '/en/blood-on-the-clocktower': typeof EnBloodOnTheClocktowerRoute
   '/en/catan': typeof EnCatanRoute
   '/en/contact': typeof EnContactRoute
+  '/en/cookies': typeof EnCookiesRoute
   '/en/hidden-roles': typeof EnHiddenRolesRoute
   '/en/how-it-works': typeof EnHowItWorksRoute
+  '/en/legal-notice': typeof EnLegalNoticeRoute
   '/en/ludoteca': typeof EnLudotecaRoute
   '/en/media': typeof EnMediaRoute
+  '/en/privacy': typeof EnPrivacyRoute
+  '/en/terms': typeof EnTermsRoute
   '/en/tournaments': typeof EnTournamentsRoute
   '/invite/$token': typeof InviteTokenRoute
   '/admin/': typeof AdminIndexRoute
@@ -571,17 +679,21 @@ export interface FileRouteTypes {
     | '/$'
     | '/admin'
     | '/app'
+    | '/aviso-legal'
     | '/blog'
     | '/blood-on-the-clocktower'
     | '/catan'
     | '/como-funciona'
     | '/contacto'
+    | '/cookies'
     | '/login'
     | '/ludoteca'
     | '/medios'
+    | '/privacidad'
     | '/roles-ocultos'
     | '/sobre-nosotros'
     | '/super-admin'
+    | '/terminos'
     | '/torneos'
     | '/admin/content'
     | '/admin/invitations'
@@ -590,25 +702,33 @@ export interface FileRouteTypes {
     | '/app/carnet'
     | '/app/profile'
     | '/app/rentals'
+    | '/ca/avis-legal'
     | '/ca/blog'
     | '/ca/blood-on-the-clocktower'
     | '/ca/catan'
     | '/ca/com-funciona'
     | '/ca/contacte'
+    | '/ca/cookies'
     | '/ca/ludoteca'
     | '/ca/mitjans'
+    | '/ca/privacitat'
     | '/ca/qui-som'
     | '/ca/rols-ocults'
+    | '/ca/termes'
     | '/ca/tornejos'
     | '/en/about'
     | '/en/blog'
     | '/en/blood-on-the-clocktower'
     | '/en/catan'
     | '/en/contact'
+    | '/en/cookies'
     | '/en/hidden-roles'
     | '/en/how-it-works'
+    | '/en/legal-notice'
     | '/en/ludoteca'
     | '/en/media'
+    | '/en/privacy'
+    | '/en/terms'
     | '/en/tournaments'
     | '/invite/$token'
     | '/admin/'
@@ -632,42 +752,54 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/$'
+    | '/aviso-legal'
     | '/blog'
     | '/blood-on-the-clocktower'
     | '/catan'
     | '/como-funciona'
     | '/contacto'
+    | '/cookies'
     | '/login'
     | '/ludoteca'
     | '/medios'
+    | '/privacidad'
     | '/roles-ocultos'
     | '/sobre-nosotros'
     | '/super-admin'
+    | '/terminos'
     | '/torneos'
     | '/admin/invitations'
     | '/admin/members'
     | '/app/carnet'
     | '/app/profile'
     | '/app/rentals'
+    | '/ca/avis-legal'
     | '/ca/blog'
     | '/ca/blood-on-the-clocktower'
     | '/ca/catan'
     | '/ca/com-funciona'
     | '/ca/contacte'
+    | '/ca/cookies'
     | '/ca/ludoteca'
     | '/ca/mitjans'
+    | '/ca/privacitat'
     | '/ca/qui-som'
     | '/ca/rols-ocults'
+    | '/ca/termes'
     | '/ca/tornejos'
     | '/en/about'
     | '/en/blog'
     | '/en/blood-on-the-clocktower'
     | '/en/catan'
     | '/en/contact'
+    | '/en/cookies'
     | '/en/hidden-roles'
     | '/en/how-it-works'
+    | '/en/legal-notice'
     | '/en/ludoteca'
     | '/en/media'
+    | '/en/privacy'
+    | '/en/terms'
     | '/en/tournaments'
     | '/invite/$token'
     | '/admin'
@@ -693,17 +825,21 @@ export interface FileRouteTypes {
     | '/$'
     | '/admin'
     | '/app'
+    | '/aviso-legal'
     | '/blog'
     | '/blood-on-the-clocktower'
     | '/catan'
     | '/como-funciona'
     | '/contacto'
+    | '/cookies'
     | '/login'
     | '/ludoteca'
     | '/medios'
+    | '/privacidad'
     | '/roles-ocultos'
     | '/sobre-nosotros'
     | '/super-admin'
+    | '/terminos'
     | '/torneos'
     | '/admin/content'
     | '/admin/invitations'
@@ -712,25 +848,33 @@ export interface FileRouteTypes {
     | '/app/carnet'
     | '/app/profile'
     | '/app/rentals'
+    | '/ca/avis-legal'
     | '/ca/blog'
     | '/ca/blood-on-the-clocktower'
     | '/ca/catan'
     | '/ca/com-funciona'
     | '/ca/contacte'
+    | '/ca/cookies'
     | '/ca/ludoteca'
     | '/ca/mitjans'
+    | '/ca/privacitat'
     | '/ca/qui-som'
     | '/ca/rols-ocults'
+    | '/ca/termes'
     | '/ca/tornejos'
     | '/en/about'
     | '/en/blog'
     | '/en/blood-on-the-clocktower'
     | '/en/catan'
     | '/en/contact'
+    | '/en/cookies'
     | '/en/hidden-roles'
     | '/en/how-it-works'
+    | '/en/legal-notice'
     | '/en/ludoteca'
     | '/en/media'
+    | '/en/privacy'
+    | '/en/terms'
     | '/en/tournaments'
     | '/invite/$token'
     | '/admin/'
@@ -757,37 +901,49 @@ export interface RootRouteChildren {
   SplatRoute: typeof SplatRoute
   AdminRoute: typeof AdminRouteWithChildren
   AppRoute: typeof AppRouteWithChildren
+  AvisoLegalRoute: typeof AvisoLegalRoute
   BlogRoute: typeof BlogRoute
   BloodOnTheClocktowerRoute: typeof BloodOnTheClocktowerRoute
   CatanRoute: typeof CatanRoute
   ComoFuncionaRoute: typeof ComoFuncionaRoute
   ContactoRoute: typeof ContactoRoute
+  CookiesRoute: typeof CookiesRoute
   LoginRoute: typeof LoginRoute
   LudotecaRoute: typeof LudotecaRoute
   MediosRoute: typeof MediosRoute
+  PrivacidadRoute: typeof PrivacidadRoute
   RolesOcultosRoute: typeof RolesOcultosRoute
   SobreNosotrosRoute: typeof SobreNosotrosRoute
   SuperAdminRoute: typeof SuperAdminRoute
+  TerminosRoute: typeof TerminosRoute
   TorneosRoute: typeof TorneosRoute
+  CaAvisLegalRoute: typeof CaAvisLegalRoute
   CaBlogRoute: typeof CaBlogRoute
   CaBloodOnTheClocktowerRoute: typeof CaBloodOnTheClocktowerRoute
   CaCatanRoute: typeof CaCatanRoute
   CaComFuncionaRoute: typeof CaComFuncionaRoute
   CaContacteRoute: typeof CaContacteRoute
+  CaCookiesRoute: typeof CaCookiesRoute
   CaLudotecaRoute: typeof CaLudotecaRoute
   CaMitjansRoute: typeof CaMitjansRoute
+  CaPrivacitatRoute: typeof CaPrivacitatRoute
   CaQuiSomRoute: typeof CaQuiSomRoute
   CaRolsOcultsRoute: typeof CaRolsOcultsRoute
+  CaTermesRoute: typeof CaTermesRoute
   CaTornejosRoute: typeof CaTornejosRoute
   EnAboutRoute: typeof EnAboutRoute
   EnBlogRoute: typeof EnBlogRoute
   EnBloodOnTheClocktowerRoute: typeof EnBloodOnTheClocktowerRoute
   EnCatanRoute: typeof EnCatanRoute
   EnContactRoute: typeof EnContactRoute
+  EnCookiesRoute: typeof EnCookiesRoute
   EnHiddenRolesRoute: typeof EnHiddenRolesRoute
   EnHowItWorksRoute: typeof EnHowItWorksRoute
+  EnLegalNoticeRoute: typeof EnLegalNoticeRoute
   EnLudotecaRoute: typeof EnLudotecaRoute
   EnMediaRoute: typeof EnMediaRoute
+  EnPrivacyRoute: typeof EnPrivacyRoute
+  EnTermsRoute: typeof EnTermsRoute
   EnTournamentsRoute: typeof EnTournamentsRoute
   InviteTokenRoute: typeof InviteTokenRoute
   CaIndexRoute: typeof CaIndexRoute
@@ -804,6 +960,13 @@ declare module '@tanstack/react-router' {
       path: '/torneos'
       fullPath: '/torneos'
       preLoaderRoute: typeof TorneosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/terminos': {
+      id: '/terminos'
+      path: '/terminos'
+      fullPath: '/terminos'
+      preLoaderRoute: typeof TerminosRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/super-admin': {
@@ -827,6 +990,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RolesOcultosRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/privacidad': {
+      id: '/privacidad'
+      path: '/privacidad'
+      fullPath: '/privacidad'
+      preLoaderRoute: typeof PrivacidadRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/medios': {
       id: '/medios'
       path: '/medios'
@@ -846,6 +1016,13 @@ declare module '@tanstack/react-router' {
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/cookies': {
+      id: '/cookies'
+      path: '/cookies'
+      fullPath: '/cookies'
+      preLoaderRoute: typeof CookiesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/contacto': {
@@ -881,6 +1058,13 @@ declare module '@tanstack/react-router' {
       path: '/blog'
       fullPath: '/blog'
       preLoaderRoute: typeof BlogRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/aviso-legal': {
+      id: '/aviso-legal'
+      path: '/aviso-legal'
+      fullPath: '/aviso-legal'
+      preLoaderRoute: typeof AvisoLegalRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/app': {
@@ -953,6 +1137,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EnTournamentsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/en/terms': {
+      id: '/en/terms'
+      path: '/en/terms'
+      fullPath: '/en/terms'
+      preLoaderRoute: typeof EnTermsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/en/privacy': {
+      id: '/en/privacy'
+      path: '/en/privacy'
+      fullPath: '/en/privacy'
+      preLoaderRoute: typeof EnPrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/en/media': {
       id: '/en/media'
       path: '/en/media'
@@ -967,6 +1165,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EnLudotecaRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/en/legal-notice': {
+      id: '/en/legal-notice'
+      path: '/en/legal-notice'
+      fullPath: '/en/legal-notice'
+      preLoaderRoute: typeof EnLegalNoticeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/en/how-it-works': {
       id: '/en/how-it-works'
       path: '/en/how-it-works'
@@ -979,6 +1184,13 @@ declare module '@tanstack/react-router' {
       path: '/en/hidden-roles'
       fullPath: '/en/hidden-roles'
       preLoaderRoute: typeof EnHiddenRolesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/en/cookies': {
+      id: '/en/cookies'
+      path: '/en/cookies'
+      fullPath: '/en/cookies'
+      preLoaderRoute: typeof EnCookiesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/en/contact': {
@@ -1023,6 +1235,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CaTornejosRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/ca/termes': {
+      id: '/ca/termes'
+      path: '/ca/termes'
+      fullPath: '/ca/termes'
+      preLoaderRoute: typeof CaTermesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/ca/rols-ocults': {
       id: '/ca/rols-ocults'
       path: '/ca/rols-ocults'
@@ -1037,6 +1256,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CaQuiSomRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/ca/privacitat': {
+      id: '/ca/privacitat'
+      path: '/ca/privacitat'
+      fullPath: '/ca/privacitat'
+      preLoaderRoute: typeof CaPrivacitatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/ca/mitjans': {
       id: '/ca/mitjans'
       path: '/ca/mitjans'
@@ -1049,6 +1275,13 @@ declare module '@tanstack/react-router' {
       path: '/ca/ludoteca'
       fullPath: '/ca/ludoteca'
       preLoaderRoute: typeof CaLudotecaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ca/cookies': {
+      id: '/ca/cookies'
+      path: '/ca/cookies'
+      fullPath: '/ca/cookies'
+      preLoaderRoute: typeof CaCookiesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/ca/contacte': {
@@ -1084,6 +1317,13 @@ declare module '@tanstack/react-router' {
       path: '/ca/blog'
       fullPath: '/ca/blog'
       preLoaderRoute: typeof CaBlogRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ca/avis-legal': {
+      id: '/ca/avis-legal'
+      path: '/ca/avis-legal'
+      fullPath: '/ca/avis-legal'
+      preLoaderRoute: typeof CaAvisLegalRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/app/rentals': {
@@ -1318,37 +1558,49 @@ const rootRouteChildren: RootRouteChildren = {
   SplatRoute: SplatRoute,
   AdminRoute: AdminRouteWithChildren,
   AppRoute: AppRouteWithChildren,
+  AvisoLegalRoute: AvisoLegalRoute,
   BlogRoute: BlogRoute,
   BloodOnTheClocktowerRoute: BloodOnTheClocktowerRoute,
   CatanRoute: CatanRoute,
   ComoFuncionaRoute: ComoFuncionaRoute,
   ContactoRoute: ContactoRoute,
+  CookiesRoute: CookiesRoute,
   LoginRoute: LoginRoute,
   LudotecaRoute: LudotecaRoute,
   MediosRoute: MediosRoute,
+  PrivacidadRoute: PrivacidadRoute,
   RolesOcultosRoute: RolesOcultosRoute,
   SobreNosotrosRoute: SobreNosotrosRoute,
   SuperAdminRoute: SuperAdminRoute,
+  TerminosRoute: TerminosRoute,
   TorneosRoute: TorneosRoute,
+  CaAvisLegalRoute: CaAvisLegalRoute,
   CaBlogRoute: CaBlogRoute,
   CaBloodOnTheClocktowerRoute: CaBloodOnTheClocktowerRoute,
   CaCatanRoute: CaCatanRoute,
   CaComFuncionaRoute: CaComFuncionaRoute,
   CaContacteRoute: CaContacteRoute,
+  CaCookiesRoute: CaCookiesRoute,
   CaLudotecaRoute: CaLudotecaRoute,
   CaMitjansRoute: CaMitjansRoute,
+  CaPrivacitatRoute: CaPrivacitatRoute,
   CaQuiSomRoute: CaQuiSomRoute,
   CaRolsOcultsRoute: CaRolsOcultsRoute,
+  CaTermesRoute: CaTermesRoute,
   CaTornejosRoute: CaTornejosRoute,
   EnAboutRoute: EnAboutRoute,
   EnBlogRoute: EnBlogRoute,
   EnBloodOnTheClocktowerRoute: EnBloodOnTheClocktowerRoute,
   EnCatanRoute: EnCatanRoute,
   EnContactRoute: EnContactRoute,
+  EnCookiesRoute: EnCookiesRoute,
   EnHiddenRolesRoute: EnHiddenRolesRoute,
   EnHowItWorksRoute: EnHowItWorksRoute,
+  EnLegalNoticeRoute: EnLegalNoticeRoute,
   EnLudotecaRoute: EnLudotecaRoute,
   EnMediaRoute: EnMediaRoute,
+  EnPrivacyRoute: EnPrivacyRoute,
+  EnTermsRoute: EnTermsRoute,
   EnTournamentsRoute: EnTournamentsRoute,
   InviteTokenRoute: InviteTokenRoute,
   CaIndexRoute: CaIndexRoute,

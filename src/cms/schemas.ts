@@ -1408,6 +1408,8 @@ const hiddenRolesSchema: PageSchema = {
 
 // ---------------- REGISTRY ----------------
 
+import { LEGAL_SCHEMAS } from "./legalSchemas";
+
 export const PAGE_SCHEMAS: PageSchema[] = [
   homeSchema,
   clocktowerSchema,
@@ -1420,6 +1422,7 @@ export const PAGE_SCHEMAS: PageSchema[] = [
   mediaSchema,
   blogSchema,
   ludotecaSchema,
+  ...LEGAL_SCHEMAS,
 ];
 
 export function getPageSchema(key: string): PageSchema | undefined {

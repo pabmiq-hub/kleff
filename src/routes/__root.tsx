@@ -6,6 +6,7 @@ import { AuthProvider } from "@/auth/AuthProvider";
 import { EditorProvider } from "@/editor/EditorProvider";
 import { EditorOverlay } from "@/editor/EditorOverlay";
 import { Toaster } from "@/components/ui/sonner";
+import { CookieConsent } from "@/components/site/CookieConsent";
 
 function NotFoundComponent() {
   return (
@@ -98,6 +99,7 @@ function RootComponent() {
             <Outlet />
           </EditorLayoutShift>
           <EditorOverlay />
+          <CookieConsent />
           <Toaster />
         </EditorProvider>
       </I18nProvider>

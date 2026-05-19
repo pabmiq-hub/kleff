@@ -1,0 +1,15 @@
+import { createFileRoute } from "@tanstack/react-router";
+import { getPageContent } from "@/server/content.functions";
+import { LegalPage } from "@/components/pages/LegalPage";
+
+export const Route = createFileRoute("/ca/privacitat")({
+  loader: () => getPageContent({ data: { pageKey: "privacy", locale: "ca" } }).then((pageContent) => ({ pageContent })),
+  head: () => ({
+    meta: [
+      { title: "Política de Privacitat — KLEFF" },
+      { name: "description", content: "Política de privacitat de KLEFF conforme al RGPD i la LOPDGDD." },
+      { name: "robots", content: "noindex,follow" },
+    ],
+  }),
+  component: () => <LegalPage kind="privacy" />,
+});

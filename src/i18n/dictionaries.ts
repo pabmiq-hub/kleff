@@ -140,6 +140,11 @@ type Dict = {
     contact: string;
     rights: string;
     location: string;
+    legalNotice: string;
+    privacy: string;
+    cookies: string;
+    terms: string;
+    cookieSettings: string;
   };
   about: {
     eyebrow: string;
@@ -248,6 +253,11 @@ const es: Dict = {
     contact: "Contacto",
     rights: "Todos los derechos reservados.",
     location: "L'Estació Espai Gastronòmic · Av. Marquès de l'Argentera 6-8, Barcelona",
+    legalNotice: "Aviso Legal",
+    privacy: "Privacidad",
+    cookies: "Cookies",
+    terms: "Términos",
+    cookieSettings: "Preferencias de cookies",
   },
   about: {
     eyebrow: "Quiénes somos",
@@ -469,6 +479,11 @@ const en: Dict = {
     contact: "Contact",
     rights: "All rights reserved.",
     location: "L'Estació Espai Gastronòmic · Av. Marquès de l'Argentera 6-8, Barcelona",
+    legalNotice: "Legal Notice",
+    privacy: "Privacy",
+    cookies: "Cookies",
+    terms: "Terms",
+    cookieSettings: "Cookie preferences",
   },
   about: {
     eyebrow: "About us",
@@ -690,6 +705,11 @@ const ca: Dict = {
     contact: "Contacte",
     rights: "Tots els drets reservats.",
     location: "L'Estació Espai Gastronòmic · Av. Marquès de l'Argentera 6-8, Barcelona",
+    legalNotice: "Avís Legal",
+    privacy: "Privacitat",
+    cookies: "Galetes",
+    terms: "Termes",
+    cookieSettings: "Preferències de galetes",
   },
   about: {
     eyebrow: "Qui som",

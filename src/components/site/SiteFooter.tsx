@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { Instagram, Mail, MapPin, MessageCircle } from "lucide-react";
 import logo from "@/assets/kleff-logo.png";
 import { useI18n } from "@/i18n/I18nProvider";
+import { openCookieSettings } from "@/components/site/CookieConsent";
 
 export function SiteFooter() {
   const { t, href } = useI18n();
@@ -107,9 +108,32 @@ export function SiteFooter() {
       </div>
 
       <div className="border-t border-cream/10 relative">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6 text-xs text-cream/50 flex flex-col sm:flex-row gap-2 justify-between font-mono uppercase tracking-wider">
-          <span>© {year} KLEFF · {t.footer.rights}</span>
-          <span>Made with 🎲 in Barcelona</span>
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6 flex flex-col gap-3 text-xs text-cream/60">
+          <div className="flex flex-wrap gap-x-5 gap-y-2 font-medium">
+            <Link to={href("/legal-notice")} className="hover:text-coral transition-colors">
+              {t.footer.legalNotice}
+            </Link>
+            <Link to={href("/privacy")} className="hover:text-coral transition-colors">
+              {t.footer.privacy}
+            </Link>
+            <Link to={href("/cookies")} className="hover:text-coral transition-colors">
+              {t.footer.cookies}
+            </Link>
+            <Link to={href("/terms")} className="hover:text-coral transition-colors">
+              {t.footer.terms}
+            </Link>
+            <button
+              type="button"
+              onClick={openCookieSettings}
+              className="hover:text-coral transition-colors cursor-pointer"
+            >
+              {t.footer.cookieSettings}
+            </button>
+          </div>
+          <div className="flex flex-col sm:flex-row gap-2 justify-between font-mono uppercase tracking-wider text-cream/50">
+            <span>© {year} KLEFF · {t.footer.rights}</span>
+            <span>Made with 🎲 in Barcelona</span>
+          </div>
         </div>
       </div>
     </footer>
