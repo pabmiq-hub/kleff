@@ -50,6 +50,11 @@ export function SiteFooter() {
               </Link>
             </li>
             <li>
+              <Link to={href("/activities")} className="hover:text-coral transition-colors font-medium">
+                {t.nav.activities}
+              </Link>
+            </li>
+            <li>
               <Link to={href("/media")} className="hover:text-coral transition-colors font-medium">
                 {t.nav.media}
               </Link>
