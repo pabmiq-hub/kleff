@@ -246,6 +246,18 @@ export const PRESS_LINKS: PressLink[] = [
       "La comunidad de juegos de mesa más grande de Europa está en Barcelona y participar es gratis.",
   },
 
+  // ~ enero 2025
+  {
+    url: "https://www.rtve.es/noticias/20250105/juegos-mesa-espanoles-toman-impulso-fuera-dentro-fronteras-cultura/16390736.shtml",
+    outlet: "RTVE · Noticias",
+    date: "ENE 2025",
+    year: 2025,
+    month: 1,
+    imageOverride: imgRtveJuegosEspanoles,
+    descriptionOverride:
+      "Los juegos de mesa españoles toman impulso dentro y fuera de nuestras fronteras, con KLEFF como referente de la escena en Barcelona.",
+  },
+
   // ~ febrero 2025
   {
     url: "https://www.instagram.com/sarapostcard/reel/DF3eMGEIn28/",
