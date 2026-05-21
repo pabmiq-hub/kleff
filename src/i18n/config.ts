@@ -30,6 +30,7 @@ export function isLocale(value: string | undefined): value is Locale {
 export const PAGE_SLUGS: Record<string, Record<Locale, string>> = {
   about: { es: "sobre-nosotros", ca: "qui-som", en: "about" },
   "how-it-works": { es: "como-funciona", ca: "com-funciona", en: "how-it-works" },
+  activities: { es: "actividades", ca: "activitats", en: "activities" },
   contact: { es: "contacto", ca: "contacte", en: "contact" },
   media: { es: "medios", ca: "mitjans", en: "media" },
   blog: { es: "blog", ca: "blog", en: "blog" },
