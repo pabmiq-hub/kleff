@@ -104,6 +104,17 @@ export const PRESS_LINKS: PressLink[] = [
       "Reportaje sobre bares y restaurantes temáticos de Barcelona, con KLEFF entre los espacios destacados.",
   },
 
+  // ~ agosto 2025
+  {
+    url: "https://www.elperiodico.com/es/que-hacer/planes/20250801/vacaciones-planes-disfrutar-barcelona-cercanias-120178857",
+    outlet: "El Periódico · Qué hacer",
+    date: "AGO 2025",
+    year: 2025,
+    month: 8,
+    descriptionOverride:
+      "Planes de vacaciones para disfrutar de Barcelona y alrededores, con KLEFF entre las recomendaciones.",
+  },
+
   // ~ junio 2025
   {
     url: "https://www.eldebate.com/espana/cataluna/barcelona/20250616/kleff-congrega-250-personas-cada-miercoles-barcelona-convierte-mayor-comunidad-juegos-mesa-europa_307188.html",
@@ -111,6 +122,7 @@ export const PRESS_LINKS: PressLink[] = [
     date: "JUN 2025",
     year: 2025,
     month: 6,
+    imageOverride: imgElDebate,
     descriptionOverride:
       "KLEFF congrega a 250 personas cada miércoles en Barcelona, convirtiéndose en la mayor comunidad de juegos de mesa de Europa.",
   },
