@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, type SyntheticEvent } from "react";
 import { useRouterState } from "@tanstack/react-router";
 import {
   Sparkles,
@@ -46,6 +46,13 @@ function hostnameOf(url: string) {
   }
 }
 
+function handleMediaImageError(event: SyntheticEvent<HTMLImageElement>) {
+  const img = event.currentTarget;
+  const fallback = img.nextElementSibling as HTMLElement | null;
+  img.style.display = "none";
+  if (fallback) fallback.style.display = "flex";
+}
+
 function MediaCard({ item, fallbackLabel }: { item: MediaItem; fallbackLabel: string }) {
   const title = item.titleOverride ?? item.ogTitle ?? item.outlet ?? hostnameOf(item.url);
   const desc =
@@ -62,15 +69,18 @@ function MediaCard({ item, fallbackLabel }: { item: MediaItem; fallbackLabel: st
     >
       <div className="relative aspect-[16/9] overflow-hidden border-b-2 border-ink bg-cream-deep">
         {image ? (
-          <img
-            src={image}
-            alt={title ?? ""}
-            loading="lazy"
-            className="absolute inset-0 h-full w-full object-cover group-hover:scale-105 transition-transform duration-500"
-            onError={(e) => {
-              (e.currentTarget as HTMLImageElement).style.display = "none";
-            }}
-          />
+          <>
+            <img
+              src={image}
+              alt={title ?? ""}
+              loading="lazy"
+              className="absolute inset-0 h-full w-full object-cover group-hover:scale-105 transition-transform duration-500"
+              onError={handleMediaImageError}
+            />
+            <div className="absolute inset-0 hidden items-center justify-center bg-gradient-coral text-cream">
+              <Newspaper className="h-16 w-16 opacity-80" />
+            </div>
+          </>
         ) : (
           <div className="absolute inset-0 flex items-center justify-center bg-gradient-coral text-cream">
             <Newspaper className="h-16 w-16 opacity-80" />
