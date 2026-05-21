@@ -38,19 +38,42 @@ export function InstagramEmbed({
   url,
   caption,
   className = "",
+  bare = false,
 }: {
   url: string;
   caption?: boolean;
   className?: string;
+  bare?: boolean;
 }) {
   const ref = useRef<HTMLQuoteElement | null>(null);
 
   useEffect(() => {
     ensureScript();
-    // re-process on URL changes
     const id = window.setTimeout(() => window.instgrm?.Embeds.process(), 300);
     return () => window.clearTimeout(id);
   }, [url]);
+
+  const framedStyle: React.CSSProperties = {
+    background: "#FFF",
+    border: 0,
+    borderRadius: 16,
+    boxShadow: "0 0 1px rgba(0,0,0,0.5),0 1px 10px rgba(0,0,0,0.15)",
+    margin: "0 auto",
+    maxWidth: 540,
+    minWidth: 280,
+    padding: 0,
+    width: "100%",
+  };
+  const bareStyle: React.CSSProperties = {
+    background: "transparent",
+    border: 0,
+    boxShadow: "none",
+    margin: "0 auto",
+    maxWidth: 540,
+    minWidth: 280,
+    padding: 0,
+    width: "100%",
+  };
 
   return (
     <blockquote
@@ -59,17 +82,7 @@ export function InstagramEmbed({
       data-instgrm-permalink={url}
       data-instgrm-version="14"
       data-instgrm-captioned={caption ? "" : undefined}
-      style={{
-        background: "#FFF",
-        border: 0,
-        borderRadius: 16,
-        boxShadow: "0 0 1px rgba(0,0,0,0.5),0 1px 10px rgba(0,0,0,0.15)",
-        margin: "0 auto",
-        maxWidth: 540,
-        minWidth: 280,
-        padding: 0,
-        width: "100%",
-      }}
+      style={bare ? bareStyle : framedStyle}
     >
       <a
         href={url}
@@ -82,3 +95,4 @@ export function InstagramEmbed({
     </blockquote>
   );
 }
+

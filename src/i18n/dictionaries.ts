@@ -478,9 +478,9 @@ const es: Dict = {
     mainEyebrow: "Cada miércoles",
     mainTitle: "La Noche de Juegos",
     mainBody1:
-      "Es nuestro corazón. Cada miércoles, de 19h a 23h, abrimos la ludoteca, montamos mesas, recomendamos juegos según tus ganas y te emparejamos con otra gente si vienes solo. Más de 300 juegos disponibles, partidas programadas de Blood on the Clocktower, Catan, Unmatched y muchos más.",
+      "La Noche de Juegos es tu punto de partida para formar parte de la comunidad KLEFF. Un afterwork lúdico cada miércoles donde puedes venir con amigos, compañeros de trabajo o tú solo para hacer nuevas amistades — siempre hay sitio en alguna mesa.",
     mainBody2:
-      "La actividad es gratis. Solo se pide una consumición mínima de 4€ en el local que nos cede el espacio. Vengas solo, en pareja o con amigos, el #TeamKLEFF está ahí para que en 10 minutos ya estés jugando.",
+      "Es el punto de encuentro semanal para socializar, romper con la rutina y descubrir que jugar entre adultos es la mejor excusa para conectar de verdad. Sin presión, sin agenda — solo gente con ganas de pasarlo bien.",
     mainCta: "Apúntate a la próxima Noche de Juegos",
     insideTitle: "Qué pasa dentro de la Noche de Juegos",
     insideSubtitle:
@@ -509,17 +509,16 @@ const es: Dict = {
       "Evento solidario de cierre de año. Recaudamos fondos para el Hospital Sant Joan de Déu, especializado en oncología infantil. Juegos, sorteos y la satisfacción de ayudar a una buena causa.",
     specialNote:
       "Son ediciones especiales de la Noche de Juegos: mismo formato, mismo local, mismo equipo — solo que con un toque extra.",
-    frequentEyebrow: "Eventos especiales recurrentes",
-    frequentTitle: "Colaboraciones con espacios aliados",
+    frequentEyebrow: "Colaboraciones",
+    frequentTitle: "Eventos con espacios y entidades aliadas",
     frequentBody:
-      "De vez en cuando salimos del local habitual para organizar eventos especiales en colaboración con otros espacios de Barcelona. Combinamos juegos con gastronomía, talleres o experiencias temáticas.",
-    frequentExampleTitle: "Tarde de juegos y gastronomía japonesa en Casa Hanaka",
-    frequentExampleBody:
-      "Un ejemplo reciente: una tarde de juegos combinada con cocina japonesa en Casa Hanaka. Ese es el tipo de evento puntual que nace de las ganas de mezclar nuestra comunidad con otros proyectos chulos de la ciudad.",
-    partnersEyebrow: "Comunidad ampliada",
-    partnersTitle: "Colaboramos con otras entidades",
+      "De vez en cuando salimos del local habitual para organizar eventos especiales en colaboración con otros espacios de Barcelona — combinando juegos con gastronomía, talleres o experiencias temáticas. Un ejemplo reciente es nuestra tarde de juegos con cocina japonesa en Casa Hanaka.",
+    frequentExampleTitle: "",
+    frequentExampleBody: "",
+    partnersEyebrow: "",
+    partnersTitle: "",
     partnersBody:
-      "Aunque la Noche de Juegos es nuestro evento estrella de los miércoles, colaboramos con otras asociaciones y colectivos que organizan partidas y actividades en otros días de la semana. Así, si te pierdes el miércoles, casi siempre hay un plan lúdico cerca.",
+      "Además, colaboramos con otras asociaciones y colectivos que organizan partidas y actividades otros días de la semana. Así, si te pierdes el miércoles, casi siempre hay un plan lúdico cerca.",
     teamBuildingEyebrow: "A medida",
     teamBuildingTitle: "¿Quieres un evento privado o team building?",
     teamBuildingBody:
@@ -776,9 +775,9 @@ const en: Dict = {
     mainEyebrow: "Every Wednesday",
     mainTitle: "Game Night",
     mainBody1:
-      "It's our heart. Every Wednesday, from 7pm to 11pm, we open the library, set up tables, recommend games based on your mood and pair you up with other people if you come alone. 300+ games available, scheduled rounds of Blood on the Clocktower, Catan, Unmatched and many more.",
+      "Game Night is your starting point to become part of the KLEFF community. A playful afterwork every Wednesday where you can come with friends, workmates or solo to make new friendships — there's always a seat at some table.",
     mainBody2:
-      "The activity itself is free. We just ask for a €4 minimum order at the venue that hosts us. Whether you come alone, as a couple or with friends, the #TeamKLEFF makes sure you're playing within 10 minutes.",
+      "It's the weekly meeting point to socialise, break the routine and discover that playing together is the best excuse to truly connect. No pressure, no agenda — just people up for a great time.",
     mainCta: "Join the next Game Night",
     insideTitle: "What happens inside Game Night",
     insideSubtitle:
@@ -807,17 +806,16 @@ const en: Dict = {
       "Charity end-of-year event. We raise funds for Hospital Sant Joan de Déu, specialised in childhood oncology. Games, raffles and the satisfaction of helping a great cause.",
     specialNote:
       "These are special editions of Game Night: same format, same venue, same team — just with an extra twist.",
-    frequentEyebrow: "Recurring specials",
-    frequentTitle: "Collaborations with allied spaces",
+    frequentEyebrow: "Collaborations",
+    frequentTitle: "Events with allied spaces and groups",
     frequentBody:
-      "From time to time we leave our usual venue to organise special events with other Barcelona spaces. We mix games with food, workshops or themed experiences.",
-    frequentExampleTitle: "Games & Japanese food afternoon at Casa Hanaka",
-    frequentExampleBody:
-      "A recent example: a games afternoon paired with Japanese food at Casa Hanaka. That's the kind of one-off event that's born from wanting to mix our community with other cool projects in the city.",
-    partnersEyebrow: "Wider community",
-    partnersTitle: "We partner with other groups",
+      "From time to time we leave our usual venue to organise special events with other Barcelona spaces — mixing games with food, workshops or themed experiences. A recent example is our games & Japanese food afternoon at Casa Hanaka.",
+    frequentExampleTitle: "",
+    frequentExampleBody: "",
+    partnersEyebrow: "",
+    partnersTitle: "",
     partnersBody:
-      "While Game Night is our flagship event on Wednesdays, we also collaborate with other associations and collectives running games and activities on other days. So if you miss Wednesday, there's almost always a board-game plan nearby.",
+      "We also partner with other associations and collectives running games and activities on other days of the week. So if you miss Wednesday, there's almost always a board-game plan nearby.",
     teamBuildingEyebrow: "Bespoke",
     teamBuildingTitle: "Looking for a private event or team building?",
     teamBuildingBody:
@@ -1074,9 +1072,9 @@ const ca: Dict = {
     mainEyebrow: "Cada dimecres",
     mainTitle: "La Nit de Jocs",
     mainBody1:
-      "És el nostre cor. Cada dimecres, de 19h a 23h, obrim la ludoteca, muntem taules, recomanem jocs segons les teves ganes i t'aparellem amb altra gent si véns sol. Més de 300 jocs disponibles, partides programades de Blood on the Clocktower, Catan, Unmatched i molts més.",
+      "La Nit de Jocs és el teu punt de partida per formar part de la comunitat KLEFF. Un afterwork lúdic cada dimecres on pots venir amb amics, companys de feina o tu sol per fer noves amistats — sempre hi ha lloc en alguna taula.",
     mainBody2:
-      "L'activitat és gratuïta. Només es demana una consumició mínima de 4€ al local que ens cedeix l'espai. Vinguis sol, en parella o amb amics, el #TeamKLEFF s'encarrega que en 10 minuts ja estiguis jugant.",
+      "És el punt de trobada setmanal per socialitzar, trencar amb la rutina i descobrir que jugar entre adults és la millor excusa per connectar de debò. Sense pressió, sense agenda — només gent amb ganes de passar-s'ho bé.",
     mainCta: "Apunta't a la pròxima Nit de Jocs",
     insideTitle: "Què passa dins de la Nit de Jocs",
     insideSubtitle:
@@ -1105,17 +1103,16 @@ const ca: Dict = {
       "Esdeveniment solidari de tancament d'any. Recaptem fons per a l'Hospital Sant Joan de Déu, especialitzat en oncologia infantil. Jocs, sortejos i la satisfacció d'ajudar una bona causa.",
     specialNote:
       "Són edicions especials de la Nit de Jocs: mateix format, mateix local, mateix equip — només amb un toc extra.",
-    frequentEyebrow: "Esdeveniments especials recurrents",
-    frequentTitle: "Col·laboracions amb espais aliats",
+    frequentEyebrow: "Col·laboracions",
+    frequentTitle: "Esdeveniments amb espais i entitats aliades",
     frequentBody:
-      "De tant en tant sortim del local habitual per organitzar esdeveniments especials en col·laboració amb altres espais de Barcelona. Combinem jocs amb gastronomia, tallers o experiències temàtiques.",
-    frequentExampleTitle: "Tarda de jocs i gastronomia japonesa a Casa Hanaka",
-    frequentExampleBody:
-      "Un exemple recent: una tarda de jocs combinada amb cuina japonesa a Casa Hanaka. Aquest és el tipus d'esdeveniment puntual que neix de les ganes de barrejar la nostra comunitat amb altres projectes guais de la ciutat.",
-    partnersEyebrow: "Comunitat ampliada",
-    partnersTitle: "Col·laborem amb altres entitats",
+      "De tant en tant sortim del local habitual per organitzar esdeveniments especials en col·laboració amb altres espais de Barcelona — combinant jocs amb gastronomia, tallers o experiències temàtiques. Un exemple recent és la tarda de jocs amb cuina japonesa a Casa Hanaka.",
+    frequentExampleTitle: "",
+    frequentExampleBody: "",
+    partnersEyebrow: "",
+    partnersTitle: "",
     partnersBody:
-      "Tot i que la Nit de Jocs és el nostre esdeveniment estrella dels dimecres, col·laborem amb altres associacions i col·lectius que organitzen partides i activitats altres dies de la setmana. Així, si et perds el dimecres, gairebé sempre hi ha un pla lúdic a prop.",
+      "A més, col·laborem amb altres associacions i col·lectius que organitzen partides i activitats altres dies de la setmana. Així, si et perds el dimecres, gairebé sempre hi ha un pla lúdic a prop.",
     teamBuildingEyebrow: "A mida",
     teamBuildingTitle: "Vols un esdeveniment privat o team building?",
     teamBuildingBody:
