@@ -19,17 +19,17 @@ export type PressLink = {
   descriptionOverride?: string;
 };
 
-// Imágenes de cabecera locales para medios sin OG image fiable
-import imgSaraPostcard from "@/assets/media-sara-postcard.jpg";
-import imgVidasInfinitas from "@/assets/media-vidas-infinitas.jpg";
-import img2d6 from "@/assets/media-2d6.jpg";
-import imgPuntsDeVista from "@/assets/media-punts-de-vista.jpg";
-import imgCulturas2 from "@/assets/media-culturas-2.jpg";
-import imgElDebate from "@/assets/media-el-debate.jpg";
-import imgOrgulloFriki2026 from "@/assets/media-orgullo-friki-2026.jpg";
-import imgAnalogicos2025 from "@/assets/media-analogicos-2025.jpg";
-import imgVacaciones2025 from "@/assets/media-vacaciones-2025.jpg";
-import imgRegio7_2025 from "@/assets/media-regio7-2025.jpg";
+// Imágenes públicas estables para medios sin OG image fiable
+const imgSaraPostcard = "/media/media-sara-postcard.jpg";
+const imgVidasInfinitas = "/media/media-vidas-infinitas.jpg";
+const img2d6 = "/media/media-2d6.jpg";
+const imgPuntsDeVista = "/media/media-punts-de-vista.jpg";
+const imgCulturas2 = "/media/media-culturas-2.jpg";
+const imgElDebate = "/media/media-el-debate.jpg";
+const imgOrgulloFriki2026 = "/media/media-orgullo-friki-2026.jpg";
+const imgAnalogicos2025 = "/media/media-analogicos-2025.jpg";
+const imgVacaciones2025 = "/media/media-vacaciones-2025.jpg";
+const imgRegio7_2025 = "/media/media-regio7-2025.jpg";
 
 // Lista cronológica (de más reciente a más antiguo)
 export const PRESS_LINKS: PressLink[] = [
