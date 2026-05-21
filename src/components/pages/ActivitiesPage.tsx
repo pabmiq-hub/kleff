@@ -84,8 +84,10 @@ export function ActivitiesPage() {
   const { t, locale } = useI18n();
   const a = t.activities;
 
-  const howHref =
-    locale === "en" ? "/en/how-it-works" : locale === "ca" ? "/ca/com-funciona" : "/como-funciona";
+  const contactHref =
+    locale === "en" ? "/en/contact" : locale === "ca" ? "/ca/contacte" : "/contacto";
+  // contactHref already declared below — keep only one
+
   const contactHref =
     locale === "en" ? "/en/contact" : locale === "ca" ? "/ca/contacte" : "/contacto";
   const clocktowerHref =
