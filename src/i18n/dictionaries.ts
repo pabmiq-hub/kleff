@@ -775,9 +775,9 @@ const en: Dict = {
     mainEyebrow: "Every Wednesday",
     mainTitle: "Game Night",
     mainBody1:
-      "It's our heart. Every Wednesday, from 7pm to 11pm, we open the library, set up tables, recommend games based on your mood and pair you up with other people if you come alone. 300+ games available, scheduled rounds of Blood on the Clocktower, Catan, Unmatched and many more.",
+      "Game Night is your starting point to become part of the KLEFF community. A playful afterwork every Wednesday where you can come with friends, workmates or solo to make new friendships — there's always a seat at some table.",
     mainBody2:
-      "The activity itself is free. We just ask for a €4 minimum order at the venue that hosts us. Whether you come alone, as a couple or with friends, the #TeamKLEFF makes sure you're playing within 10 minutes.",
+      "It's the weekly meeting point to socialise, break the routine and discover that playing together is the best excuse to truly connect. No pressure, no agenda — just people up for a great time.",
     mainCta: "Join the next Game Night",
     insideTitle: "What happens inside Game Night",
     insideSubtitle:
