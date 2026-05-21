@@ -370,6 +370,16 @@ export function HowItWorksPage() {
               />
             ))}
           </div>
+
+          <div className="mt-12 flex justify-center">
+            <Link
+              to={locale === "en" ? "/en/activities" : locale === "ca" ? "/ca/activitats" : "/actividades"}
+              className="group inline-flex items-center gap-2 rounded-xl bg-ink text-cream border-2 border-ink px-6 py-3.5 text-base font-bold shadow-tactile hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all"
+            >
+              {t.activities.learnMoreEvents}
+              <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
+            </Link>
+          </div>
         </div>
       </section>
 

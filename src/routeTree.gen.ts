@@ -27,6 +27,7 @@ import { Route as BlogRouteImport } from './routes/blog'
 import { Route as AvisoLegalRouteImport } from './routes/aviso-legal'
 import { Route as AppRouteImport } from './routes/app'
 import { Route as AdminRouteImport } from './routes/admin'
+import { Route as ActividadesRouteImport } from './routes/actividades'
 import { Route as SplatRouteImport } from './routes/$'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as EnIndexRouteImport } from './routes/en.index'
@@ -47,6 +48,7 @@ import { Route as EnContactRouteImport } from './routes/en.contact'
 import { Route as EnCatanRouteImport } from './routes/en.catan'
 import { Route as EnBloodOnTheClocktowerRouteImport } from './routes/en.blood-on-the-clocktower'
 import { Route as EnBlogRouteImport } from './routes/en.blog'
+import { Route as EnActivitiesRouteImport } from './routes/en.activities'
 import { Route as EnAboutRouteImport } from './routes/en.about'
 import { Route as CaTornejosRouteImport } from './routes/ca.tornejos'
 import { Route as CaTermesRouteImport } from './routes/ca.termes'
@@ -62,6 +64,7 @@ import { Route as CaCatanRouteImport } from './routes/ca.catan'
 import { Route as CaBloodOnTheClocktowerRouteImport } from './routes/ca.blood-on-the-clocktower'
 import { Route as CaBlogRouteImport } from './routes/ca.blog'
 import { Route as CaAvisLegalRouteImport } from './routes/ca.avis-legal'
+import { Route as CaActivitatsRouteImport } from './routes/ca.activitats'
 import { Route as AppRentalsRouteImport } from './routes/app.rentals'
 import { Route as AppProfileRouteImport } from './routes/app.profile'
 import { Route as AppCarnetRouteImport } from './routes/app.carnet'
@@ -173,6 +176,11 @@ const AdminRoute = AdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ActividadesRoute = ActividadesRouteImport.update({
+  id: '/actividades',
+  path: '/actividades',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SplatRoute = SplatRouteImport.update({
   id: '/$',
   path: '/$',
@@ -273,6 +281,11 @@ const EnBlogRoute = EnBlogRouteImport.update({
   path: '/en/blog',
   getParentRoute: () => rootRouteImport,
 } as any)
+const EnActivitiesRoute = EnActivitiesRouteImport.update({
+  id: '/en/activities',
+  path: '/en/activities',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const EnAboutRoute = EnAboutRouteImport.update({
   id: '/en/about',
   path: '/en/about',
@@ -346,6 +359,11 @@ const CaBlogRoute = CaBlogRouteImport.update({
 const CaAvisLegalRoute = CaAvisLegalRouteImport.update({
   id: '/ca/avis-legal',
   path: '/ca/avis-legal',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CaActivitatsRoute = CaActivitatsRouteImport.update({
+  id: '/ca/activitats',
+  path: '/ca/activitats',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AppRentalsRoute = AppRentalsRouteImport.update({
@@ -453,6 +471,7 @@ const AdminContentPageKeyRoute = AdminContentPageKeyRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/$': typeof SplatRoute
+  '/actividades': typeof ActividadesRoute
   '/admin': typeof AdminRouteWithChildren
   '/app': typeof AppRouteWithChildren
   '/aviso-legal': typeof AvisoLegalRoute
@@ -478,6 +497,7 @@ export interface FileRoutesByFullPath {
   '/app/carnet': typeof AppCarnetRoute
   '/app/profile': typeof AppProfileRoute
   '/app/rentals': typeof AppRentalsRouteWithChildren
+  '/ca/activitats': typeof CaActivitatsRoute
   '/ca/avis-legal': typeof CaAvisLegalRoute
   '/ca/blog': typeof CaBlogRoute
   '/ca/blood-on-the-clocktower': typeof CaBloodOnTheClocktowerRoute
@@ -493,6 +513,7 @@ export interface FileRoutesByFullPath {
   '/ca/termes': typeof CaTermesRoute
   '/ca/tornejos': typeof CaTornejosRoute
   '/en/about': typeof EnAboutRoute
+  '/en/activities': typeof EnActivitiesRoute
   '/en/blog': typeof EnBlogRoute
   '/en/blood-on-the-clocktower': typeof EnBloodOnTheClocktowerRoute
   '/en/catan': typeof EnCatanRoute
@@ -528,6 +549,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/$': typeof SplatRoute
+  '/actividades': typeof ActividadesRoute
   '/aviso-legal': typeof AvisoLegalRoute
   '/blog': typeof BlogRoute
   '/blood-on-the-clocktower': typeof BloodOnTheClocktowerRoute
@@ -549,6 +571,7 @@ export interface FileRoutesByTo {
   '/app/carnet': typeof AppCarnetRoute
   '/app/profile': typeof AppProfileRoute
   '/app/rentals': typeof AppRentalsRouteWithChildren
+  '/ca/activitats': typeof CaActivitatsRoute
   '/ca/avis-legal': typeof CaAvisLegalRoute
   '/ca/blog': typeof CaBlogRoute
   '/ca/blood-on-the-clocktower': typeof CaBloodOnTheClocktowerRoute
@@ -564,6 +587,7 @@ export interface FileRoutesByTo {
   '/ca/termes': typeof CaTermesRoute
   '/ca/tornejos': typeof CaTornejosRoute
   '/en/about': typeof EnAboutRoute
+  '/en/activities': typeof EnActivitiesRoute
   '/en/blog': typeof EnBlogRoute
   '/en/blood-on-the-clocktower': typeof EnBloodOnTheClocktowerRoute
   '/en/catan': typeof EnCatanRoute
@@ -600,6 +624,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/$': typeof SplatRoute
+  '/actividades': typeof ActividadesRoute
   '/admin': typeof AdminRouteWithChildren
   '/app': typeof AppRouteWithChildren
   '/aviso-legal': typeof AvisoLegalRoute
@@ -625,6 +650,7 @@ export interface FileRoutesById {
   '/app/carnet': typeof AppCarnetRoute
   '/app/profile': typeof AppProfileRoute
   '/app/rentals': typeof AppRentalsRouteWithChildren
+  '/ca/activitats': typeof CaActivitatsRoute
   '/ca/avis-legal': typeof CaAvisLegalRoute
   '/ca/blog': typeof CaBlogRoute
   '/ca/blood-on-the-clocktower': typeof CaBloodOnTheClocktowerRoute
@@ -640,6 +666,7 @@ export interface FileRoutesById {
   '/ca/termes': typeof CaTermesRoute
   '/ca/tornejos': typeof CaTornejosRoute
   '/en/about': typeof EnAboutRoute
+  '/en/activities': typeof EnActivitiesRoute
   '/en/blog': typeof EnBlogRoute
   '/en/blood-on-the-clocktower': typeof EnBloodOnTheClocktowerRoute
   '/en/catan': typeof EnCatanRoute
@@ -677,6 +704,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/$'
+    | '/actividades'
     | '/admin'
     | '/app'
     | '/aviso-legal'
@@ -702,6 +730,7 @@ export interface FileRouteTypes {
     | '/app/carnet'
     | '/app/profile'
     | '/app/rentals'
+    | '/ca/activitats'
     | '/ca/avis-legal'
     | '/ca/blog'
     | '/ca/blood-on-the-clocktower'
@@ -717,6 +746,7 @@ export interface FileRouteTypes {
     | '/ca/termes'
     | '/ca/tornejos'
     | '/en/about'
+    | '/en/activities'
     | '/en/blog'
     | '/en/blood-on-the-clocktower'
     | '/en/catan'
@@ -752,6 +782,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/$'
+    | '/actividades'
     | '/aviso-legal'
     | '/blog'
     | '/blood-on-the-clocktower'
@@ -773,6 +804,7 @@ export interface FileRouteTypes {
     | '/app/carnet'
     | '/app/profile'
     | '/app/rentals'
+    | '/ca/activitats'
     | '/ca/avis-legal'
     | '/ca/blog'
     | '/ca/blood-on-the-clocktower'
@@ -788,6 +820,7 @@ export interface FileRouteTypes {
     | '/ca/termes'
     | '/ca/tornejos'
     | '/en/about'
+    | '/en/activities'
     | '/en/blog'
     | '/en/blood-on-the-clocktower'
     | '/en/catan'
@@ -823,6 +856,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/$'
+    | '/actividades'
     | '/admin'
     | '/app'
     | '/aviso-legal'
@@ -848,6 +882,7 @@ export interface FileRouteTypes {
     | '/app/carnet'
     | '/app/profile'
     | '/app/rentals'
+    | '/ca/activitats'
     | '/ca/avis-legal'
     | '/ca/blog'
     | '/ca/blood-on-the-clocktower'
@@ -863,6 +898,7 @@ export interface FileRouteTypes {
     | '/ca/termes'
     | '/ca/tornejos'
     | '/en/about'
+    | '/en/activities'
     | '/en/blog'
     | '/en/blood-on-the-clocktower'
     | '/en/catan'
@@ -899,6 +935,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   SplatRoute: typeof SplatRoute
+  ActividadesRoute: typeof ActividadesRoute
   AdminRoute: typeof AdminRouteWithChildren
   AppRoute: typeof AppRouteWithChildren
   AvisoLegalRoute: typeof AvisoLegalRoute
@@ -917,6 +954,7 @@ export interface RootRouteChildren {
   SuperAdminRoute: typeof SuperAdminRoute
   TerminosRoute: typeof TerminosRoute
   TorneosRoute: typeof TorneosRoute
+  CaActivitatsRoute: typeof CaActivitatsRoute
   CaAvisLegalRoute: typeof CaAvisLegalRoute
   CaBlogRoute: typeof CaBlogRoute
   CaBloodOnTheClocktowerRoute: typeof CaBloodOnTheClocktowerRoute
@@ -932,6 +970,7 @@ export interface RootRouteChildren {
   CaTermesRoute: typeof CaTermesRoute
   CaTornejosRoute: typeof CaTornejosRoute
   EnAboutRoute: typeof EnAboutRoute
+  EnActivitiesRoute: typeof EnActivitiesRoute
   EnBlogRoute: typeof EnBlogRoute
   EnBloodOnTheClocktowerRoute: typeof EnBloodOnTheClocktowerRoute
   EnCatanRoute: typeof EnCatanRoute
@@ -1081,6 +1120,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/actividades': {
+      id: '/actividades'
+      path: '/actividades'
+      fullPath: '/actividades'
+      preLoaderRoute: typeof ActividadesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/$': {
       id: '/$'
       path: '/$'
@@ -1221,6 +1267,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EnBlogRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/en/activities': {
+      id: '/en/activities'
+      path: '/en/activities'
+      fullPath: '/en/activities'
+      preLoaderRoute: typeof EnActivitiesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/en/about': {
       id: '/en/about'
       path: '/en/about'
@@ -1324,6 +1377,13 @@ declare module '@tanstack/react-router' {
       path: '/ca/avis-legal'
       fullPath: '/ca/avis-legal'
       preLoaderRoute: typeof CaAvisLegalRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ca/activitats': {
+      id: '/ca/activitats'
+      path: '/ca/activitats'
+      fullPath: '/ca/activitats'
+      preLoaderRoute: typeof CaActivitatsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/app/rentals': {
@@ -1556,6 +1616,7 @@ const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   SplatRoute: SplatRoute,
+  ActividadesRoute: ActividadesRoute,
   AdminRoute: AdminRouteWithChildren,
   AppRoute: AppRouteWithChildren,
   AvisoLegalRoute: AvisoLegalRoute,
@@ -1574,6 +1635,7 @@ const rootRouteChildren: RootRouteChildren = {
   SuperAdminRoute: SuperAdminRoute,
   TerminosRoute: TerminosRoute,
   TorneosRoute: TorneosRoute,
+  CaActivitatsRoute: CaActivitatsRoute,
   CaAvisLegalRoute: CaAvisLegalRoute,
   CaBlogRoute: CaBlogRoute,
   CaBloodOnTheClocktowerRoute: CaBloodOnTheClocktowerRoute,
@@ -1589,6 +1651,7 @@ const rootRouteChildren: RootRouteChildren = {
   CaTermesRoute: CaTermesRoute,
   CaTornejosRoute: CaTornejosRoute,
   EnAboutRoute: EnAboutRoute,
+  EnActivitiesRoute: EnActivitiesRoute,
   EnBlogRoute: EnBlogRoute,
   EnBloodOnTheClocktowerRoute: EnBloodOnTheClocktowerRoute,
   EnCatanRoute: EnCatanRoute,
