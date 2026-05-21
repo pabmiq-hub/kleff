@@ -8,7 +8,6 @@ import {
   Handshake,
   HeartHandshake,
   MapPin,
-  PartyPopper,
   Sparkles,
   Trophy,
   Users,
@@ -17,7 +16,7 @@ import { Link } from "@tanstack/react-router";
 import { useI18n } from "@/i18n/I18nProvider";
 import { SiteLayout } from "@/components/site/SiteLayout";
 import { InstagramEmbed } from "@/components/site/InstagramEmbed";
-import heroImage from "@/assets/activities-hero.jpg";
+
 
 const MEETUP_EVENTS_URL =
   "https://www.meetup.com/es-ES/kleff-bcn/events/?type=upcoming";
