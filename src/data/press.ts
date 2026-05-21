@@ -35,6 +35,19 @@ const imgRtveFemenino = "/media/media-rtve-femenino.jpg";
 
 // Lista cronológica (de más reciente a más antiguo)
 export const PRESS_LINKS: PressLink[] = [
+  // ~ 2025 (reel RTVE)
+  {
+    url: "https://www.instagram.com/reels/DN_EUXNiNir/",
+    outlet: "RTVE · Instagram",
+    date: "2025",
+    year: 2025,
+    month: 11,
+    imageOverride: imgRtveFemenino,
+    titleOverride: "Crece la afición a los juegos de mesa entre el público femenino",
+    descriptionOverride:
+      "Reel de RTVE Noticias con Beatriz Blasco (miembro de KLEFF) sobre el auge de los juegos de mesa entre el público femenino.",
+  },
+
   // ~ mayo 2026
   {
     url: "https://www.elperiodico.com/es/que-hacer/planes/20260521/dia-orgullo-friki-planes-barcelona-festivales-tardeos-speed-dating-juegos-130447387",
