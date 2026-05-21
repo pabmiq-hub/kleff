@@ -806,17 +806,16 @@ const en: Dict = {
       "Charity end-of-year event. We raise funds for Hospital Sant Joan de Déu, specialised in childhood oncology. Games, raffles and the satisfaction of helping a great cause.",
     specialNote:
       "These are special editions of Game Night: same format, same venue, same team — just with an extra twist.",
-    frequentEyebrow: "Recurring specials",
-    frequentTitle: "Collaborations with allied spaces",
+    frequentEyebrow: "Collaborations",
+    frequentTitle: "Events with allied spaces and groups",
     frequentBody:
-      "From time to time we leave our usual venue to organise special events with other Barcelona spaces. We mix games with food, workshops or themed experiences.",
-    frequentExampleTitle: "Games & Japanese food afternoon at Casa Hanaka",
-    frequentExampleBody:
-      "A recent example: a games afternoon paired with Japanese food at Casa Hanaka. That's the kind of one-off event that's born from wanting to mix our community with other cool projects in the city.",
-    partnersEyebrow: "Wider community",
-    partnersTitle: "We partner with other groups",
+      "From time to time we leave our usual venue to organise special events with other Barcelona spaces — mixing games with food, workshops or themed experiences. A recent example is our games & Japanese food afternoon at Casa Hanaka.",
+    frequentExampleTitle: "",
+    frequentExampleBody: "",
+    partnersEyebrow: "",
+    partnersTitle: "",
     partnersBody:
-      "While Game Night is our flagship event on Wednesdays, we also collaborate with other associations and collectives running games and activities on other days. So if you miss Wednesday, there's almost always a board-game plan nearby.",
+      "We also partner with other associations and collectives running games and activities on other days of the week. So if you miss Wednesday, there's almost always a board-game plan nearby.",
     teamBuildingEyebrow: "Bespoke",
     teamBuildingTitle: "Looking for a private event or team building?",
     teamBuildingBody:
