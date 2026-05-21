@@ -470,7 +470,7 @@ const es: Dict = {
   },
   activities: {
     eyebrow: "Actividades",
-    title: "Vive KLEFF",
+    title: "Esto es KLEFF",
     intro:
       "Nuestra actividad principal es la Noche de Juegos, cada miércoles. Dentro suceden el resto de cosas: torneos, demostraciones, Slow Friending Lúdico y ediciones especiales temáticas. Aquí te lo contamos todo.",
     ctaMeetup: "Ver próximos eventos",
@@ -767,7 +767,7 @@ const en: Dict = {
   },
   activities: {
     eyebrow: "Activities",
-    title: "Live KLEFF",
+    title: "This is KLEFF",
     intro:
       "Our main activity is Game Night, every Wednesday. Everything else happens inside it: tournaments, publisher demos, Slow Friending and themed special editions. Here's the full picture.",
     ctaMeetup: "See upcoming events",
@@ -1064,7 +1064,7 @@ const ca: Dict = {
   },
   activities: {
     eyebrow: "Activitats",
-    title: "Viu KLEFF",
+    title: "Això és KLEFF",
     intro:
       "La nostra activitat principal és la Nit de Jocs, cada dimecres. A dins hi passen totes les altres coses: tornejos, demostracions, Slow Friending Lúdic i edicions especials temàtiques. Aquí t'ho expliquem tot.",
     ctaMeetup: "Veure pròxims esdeveniments",
