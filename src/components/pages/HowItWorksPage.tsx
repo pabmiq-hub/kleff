@@ -369,19 +369,28 @@ export function HowItWorksPage() {
                 emoji={a.emoji}
               />
             ))}
-          </div>
-
-          <div className="mt-12 flex justify-center">
             <Link
               to={locale === "en" ? "/en/activities" : locale === "ca" ? "/ca/activitats" : "/actividades"}
-              className="group inline-flex items-center gap-2 rounded-xl bg-ink text-cream border-2 border-ink px-6 py-3.5 text-base font-bold shadow-tactile hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all"
+              className="group relative bg-ink text-cream border-2 border-ink rounded-3xl p-6 shadow-tactile flex flex-col justify-between min-h-[200px] hover:-translate-x-[2px] hover:-translate-y-[2px] hover:shadow-tactile-lg transition-all overflow-hidden"
             >
-              {t.activities.learnMoreEvents}
-              <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
+              <div className="absolute -top-10 -right-10 size-32 bg-coral/30 rounded-full blur-2xl pointer-events-none" />
+              <span className="relative text-xs font-bold uppercase tracking-widest text-coral">
+                {locale === "en" ? "Discover more" : locale === "ca" ? "Descobreix-ne més" : "Descubre más"}
+              </span>
+              <div className="relative">
+                <h3 className="text-xl sm:text-2xl font-display font-semibold leading-tight">
+                  {t.activities.learnMoreEvents}
+                </h3>
+                <span className="mt-4 inline-flex items-center gap-2 text-sm font-bold text-coral group-hover:gap-3 transition-all">
+                  {locale === "en" ? "All activities" : locale === "ca" ? "Totes les activitats" : "Todas las actividades"}
+                  <ArrowRight className="h-4 w-4" />
+                </span>
+              </div>
             </Link>
           </div>
         </div>
       </section>
+
 
       {/* COMMUNITIES */}
       <section className="py-20 md:py-28 bg-ink text-cream relative overflow-hidden">
