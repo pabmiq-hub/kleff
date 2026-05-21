@@ -1064,7 +1064,7 @@ const ca: Dict = {
   },
   activities: {
     eyebrow: "Activitats",
-    title: "Viu KLEFF",
+    title: "Això és KLEFF",
     intro:
       "La nostra activitat principal és la Nit de Jocs, cada dimecres. A dins hi passen totes les altres coses: tornejos, demostracions, Slow Friending Lúdic i edicions especials temàtiques. Aquí t'ho expliquem tot.",
     ctaMeetup: "Veure pròxims esdeveniments",
