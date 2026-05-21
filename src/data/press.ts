@@ -23,9 +23,23 @@ export type PressLink = {
 import imgSaraPostcard from "@/assets/media-sara-postcard.jpg";
 import imgVidasInfinitas from "@/assets/media-vidas-infinitas.jpg";
 import img2d6 from "@/assets/media-2d6.jpg";
+import imgPuntsDeVista from "@/assets/media-punts-de-vista.jpg";
+import imgCulturas2 from "@/assets/media-culturas-2.jpg";
+import imgElDebate from "@/assets/media-el-debate.jpg";
 
 // Lista cronológica (de más reciente a más antiguo)
 export const PRESS_LINKS: PressLink[] = [
+  // ~ mayo 2026
+  {
+    url: "https://www.elperiodico.com/es/que-hacer/planes/20260521/dia-orgullo-friki-planes-barcelona-festivales-tardeos-speed-dating-juegos-130447387",
+    outlet: "El Periódico · Qué hacer",
+    date: "MAY 2026",
+    year: 2026,
+    month: 5,
+    descriptionOverride:
+      "Planes para el Día del Orgullo Friki en Barcelona: festivales, tardeos, speed dating y juegos de mesa con KLEFF.",
+  },
+
   // ~ febrero 2026
   {
     url: "https://www.elperiodico.com/es/que-hacer/planes/20260226/barcelona-festival-gratuito-juegos-mesa-gratis-cronomaster-127232263",
@@ -58,6 +72,15 @@ export const PRESS_LINKS: PressLink[] = [
     descriptionOverride:
       "Dónde hacer amigos en Barcelona: eventos para conocer gente, con KLEFF entre las recomendaciones.",
   },
+  {
+    url: "https://www.elperiodico.com/es/que-hacer/planes/20251218/planes-analogicos-amigos-barcelona-arcades-juegos-mesa-124856452",
+    outlet: "El Periódico · Qué hacer",
+    date: "DIC 2025",
+    year: 2025,
+    month: 12,
+    descriptionOverride:
+      "Planes analógicos con amigos en Barcelona: arcades, juegos de mesa y KLEFF entre las recomendaciones.",
+  },
 
   // ~ octubre 2025
   {
@@ -81,6 +104,17 @@ export const PRESS_LINKS: PressLink[] = [
       "Reportaje sobre bares y restaurantes temáticos de Barcelona, con KLEFF entre los espacios destacados.",
   },
 
+  // ~ agosto 2025
+  {
+    url: "https://www.elperiodico.com/es/que-hacer/planes/20250801/vacaciones-planes-disfrutar-barcelona-cercanias-120178857",
+    outlet: "El Periódico · Qué hacer",
+    date: "AGO 2025",
+    year: 2025,
+    month: 8,
+    descriptionOverride:
+      "Planes de vacaciones para disfrutar de Barcelona y alrededores, con KLEFF entre las recomendaciones.",
+  },
+
   // ~ junio 2025
   {
     url: "https://www.eldebate.com/espana/cataluna/barcelona/20250616/kleff-congrega-250-personas-cada-miercoles-barcelona-convierte-mayor-comunidad-juegos-mesa-europa_307188.html",
@@ -88,6 +122,7 @@ export const PRESS_LINKS: PressLink[] = [
     date: "JUN 2025",
     year: 2025,
     month: 6,
+    imageOverride: imgElDebate,
     descriptionOverride:
       "KLEFF congrega a 250 personas cada miércoles en Barcelona, convirtiéndose en la mayor comunidad de juegos de mesa de Europa.",
   },
@@ -135,6 +170,7 @@ export const PRESS_LINKS: PressLink[] = [
     date: "MAY 2025",
     year: 2025,
     month: 5,
+    imageOverride: imgPuntsDeVista,
     descriptionOverride:
       "Reportaje en Punts de Vista sobre KLEFF y el auge de los juegos de mesa en Barcelona.",
   },
@@ -144,6 +180,7 @@ export const PRESS_LINKS: PressLink[] = [
     date: "MAY 2025",
     year: 2025,
     month: 5,
+    imageOverride: imgCulturas2,
     descriptionOverride:
       "Reportaje en Culturas 2 sobre la mayor comunidad de juegos de mesa de Europa.",
   },
@@ -166,6 +203,15 @@ export const PRESS_LINKS: PressLink[] = [
     month: 3,
     descriptionOverride:
       "Los mejores sitios para hacer amigos siendo adulto en Barcelona, con KLEFF entre las recomendaciones.",
+  },
+  {
+    url: "https://www.regio7.cat/on-catalunya/que-fer/2025/03/16/els-millors-llocs-per-fer-115277963.html",
+    outlet: "Regió7",
+    date: "MAR 2025",
+    year: 2025,
+    month: 3,
+    descriptionOverride:
+      "Els millors llocs per fer activitats a Catalunya, amb KLEFF entre les recomanacions per a amants dels jocs de taula.",
   },
   {
     url: "https://www.timeout.es/barcelona/es/noticias/la-comunidad-de-juegos-de-mesa-mas-grande-de-europa-esta-en-barcelona-y-participar-es-gratis-030325",
@@ -209,6 +255,7 @@ export const PRESS_LINKS: PressLink[] = [
     year: 2020,
     month: 4,
     imageOverride: img2d6,
+    titleOverride: "Inicios de KLEFF en el Restaurante Navía",
     descriptionOverride:
       "Artículo en 2d6 Magazine #21 sobre los inicios de KLEFF como afterwork lúdico de Barcelona.",
   },
