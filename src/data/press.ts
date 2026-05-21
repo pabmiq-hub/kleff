@@ -30,6 +30,8 @@ const imgOrgulloFriki2026 = "/media/media-orgullo-friki-2026.jpg";
 const imgAnalogicos2025 = "/media/media-analogicos-2025.jpg";
 const imgVacaciones2025 = "/media/media-vacaciones-2025.jpg";
 const imgRegio7_2025 = "/media/media-regio7-2025.jpg";
+const imgRtveJuegosEspanoles = "/media/media-rtve-juegos-espanoles.jpg";
+const imgRtveFemenino = "/media/media-rtve-femenino.jpg";
 
 // Lista cronológica (de más reciente a más antiguo)
 export const PRESS_LINKS: PressLink[] = [
