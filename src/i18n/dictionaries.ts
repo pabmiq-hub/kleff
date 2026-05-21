@@ -229,7 +229,7 @@ const es: Dict = {
     reason2: "👭 Conoce gente nueva y haz amigos con tu misma afición",
     reason3: "🍺 Tapas y bebidas en un espacio único en Barcelona",
     reason4: "🗣 Practica idiomas mientras te diviertes",
-    reason5: "🏆 Torneos, slow dating lúdico y eventos especiales todo el año",
+    reason5: "🏆 Torneos, slow friending lúdico y eventos especiales todo el año",
     statsTitle: "KLEFF en números",
     statAttendees: "Asistentes por Game Night",
     statGames: "Juegos de mesa disponibles",
@@ -337,7 +337,7 @@ const es: Dict = {
     activityWeekly1Title: "Noche de Juegos",
     activityWeekly1Body:
       "Evento regular con ludoteca abierta y partidas programadas de Blood on the Clocktower, Catan y otros muchos.",
-    activityOccasional1Title: "Slow Dating Lúdico",
+    activityOccasional1Title: "Slow Friending Lúdico",
     activityOccasional1Body:
       "Concepto similar al speed dating, pero con juegos sociales como excusa para conectar a personas.",
     activityMonthly1Title: "Torneos",
@@ -455,7 +455,7 @@ const en: Dict = {
     reason2: "👭 Meet new people and make friends with the same hobby",
     reason3: "🍺 Tapas and drinks in a unique Barcelona venue",
     reason4: "🗣 Practice languages while having fun",
-    reason5: "🏆 Tournaments, slow dating and special events all year long",
+    reason5: "🏆 Tournaments, slow friending and special events all year long",
     statsTitle: "KLEFF in numbers",
     statAttendees: "Attendees per Game Night",
     statGames: "Board games available",
@@ -563,7 +563,7 @@ const en: Dict = {
     activityWeekly1Title: "Game Night",
     activityWeekly1Body:
       "Regular event with open game library and scheduled rounds of Blood on the Clocktower, Catan and many more.",
-    activityOccasional1Title: "Slow Gaming Dating",
+    activityOccasional1Title: "Slow Friending Dating",
     activityOccasional1Body:
       "Similar concept to speed dating but using social games as the excuse to connect people.",
     activityMonthly1Title: "Tournaments",
@@ -681,7 +681,7 @@ const ca: Dict = {
     reason2: "👭 Coneix gent nova i fes amics amb la mateixa afició",
     reason3: "🍺 Tapes i begudes en un espai únic de Barcelona",
     reason4: "🗣 Practica idiomes mentre et diverteixes",
-    reason5: "🏆 Tornejos, slow dating lúdic i esdeveniments especials tot l'any",
+    reason5: "🏆 Tornejos, slow friending lúdic i esdeveniments especials tot l'any",
     statsTitle: "KLEFF en xifres",
     statAttendees: "Assistents per Game Night",
     statGames: "Jocs de taula disponibles",
@@ -789,7 +789,7 @@ const ca: Dict = {
     activityWeekly1Title: "Nit de Jocs",
     activityWeekly1Body:
       "Esdeveniment regular amb ludoteca oberta i partides programades de Blood on the Clocktower, Catan i molts més.",
-    activityOccasional1Title: "Slow Dating Lúdic",
+    activityOccasional1Title: "Slow Friending Lúdic",
     activityOccasional1Body:
       "Concepte similar al speed dating però amb jocs socials com a excusa per connectar persones.",
     activityMonthly1Title: "Tornejos",
