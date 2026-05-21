@@ -509,17 +509,16 @@ const es: Dict = {
       "Evento solidario de cierre de año. Recaudamos fondos para el Hospital Sant Joan de Déu, especializado en oncología infantil. Juegos, sorteos y la satisfacción de ayudar a una buena causa.",
     specialNote:
       "Son ediciones especiales de la Noche de Juegos: mismo formato, mismo local, mismo equipo — solo que con un toque extra.",
-    frequentEyebrow: "Eventos especiales recurrentes",
-    frequentTitle: "Colaboraciones con espacios aliados",
+    frequentEyebrow: "Colaboraciones",
+    frequentTitle: "Eventos con espacios y entidades aliadas",
     frequentBody:
-      "De vez en cuando salimos del local habitual para organizar eventos especiales en colaboración con otros espacios de Barcelona. Combinamos juegos con gastronomía, talleres o experiencias temáticas.",
-    frequentExampleTitle: "Tarde de juegos y gastronomía japonesa en Casa Hanaka",
-    frequentExampleBody:
-      "Un ejemplo reciente: una tarde de juegos combinada con cocina japonesa en Casa Hanaka. Ese es el tipo de evento puntual que nace de las ganas de mezclar nuestra comunidad con otros proyectos chulos de la ciudad.",
-    partnersEyebrow: "Comunidad ampliada",
-    partnersTitle: "Colaboramos con otras entidades",
+      "De vez en cuando salimos del local habitual para organizar eventos especiales en colaboración con otros espacios de Barcelona — combinando juegos con gastronomía, talleres o experiencias temáticas. Un ejemplo reciente es nuestra tarde de juegos con cocina japonesa en Casa Hanaka.",
+    frequentExampleTitle: "",
+    frequentExampleBody: "",
+    partnersEyebrow: "",
+    partnersTitle: "",
     partnersBody:
-      "Aunque la Noche de Juegos es nuestro evento estrella de los miércoles, colaboramos con otras asociaciones y colectivos que organizan partidas y actividades en otros días de la semana. Así, si te pierdes el miércoles, casi siempre hay un plan lúdico cerca.",
+      "Además, colaboramos con otras asociaciones y colectivos que organizan partidas y actividades otros días de la semana. Así, si te pierdes el miércoles, casi siempre hay un plan lúdico cerca.",
     teamBuildingEyebrow: "A medida",
     teamBuildingTitle: "¿Quieres un evento privado o team building?",
     teamBuildingBody:
