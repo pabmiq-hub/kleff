@@ -43,42 +43,6 @@ function Badge({ kind, label }: { kind: BadgeKind; label: string }) {
   );
 }
 
-function DetailCard({
-  emoji,
-  badgeKind,
-  badgeLabel,
-  title,
-  body,
-  href,
-  ctaLabel,
-}: {
-  emoji: string;
-  badgeKind: BadgeKind;
-  badgeLabel: string;
-  title: string;
-  body: string;
-  href?: string;
-  ctaLabel?: string;
-}) {
-  return (
-    <article className="relative bg-card border-2 border-ink rounded-3xl p-7 shadow-tactile-sm hover:shadow-tactile hover:-translate-x-[2px] hover:-translate-y-[2px] transition-all duration-200 flex flex-col h-full">
-      <div className="text-5xl leading-none mb-5" aria-hidden>
-        {emoji}
-      </div>
-      <Badge kind={badgeKind} label={badgeLabel} />
-      <h3 className="mt-3 text-2xl font-display font-semibold leading-tight">{title}</h3>
-      <p className="mt-3 text-base text-foreground/75 leading-relaxed flex-1">{body}</p>
-      {href && ctaLabel && (
-        <Link
-          to={href}
-          className="mt-5 inline-flex items-center gap-1.5 text-sm font-bold text-coral-deep hover:gap-2.5 transition-all"
-        >
-          {ctaLabel} <ArrowRight className="h-4 w-4" />
-        </Link>
-      )}
-    </article>
-  );
-}
 
 export function ActivitiesPage() {
   const { t, locale } = useI18n();
