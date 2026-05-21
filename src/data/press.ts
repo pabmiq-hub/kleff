@@ -40,6 +40,7 @@ export const PRESS_LINKS: PressLink[] = [
     date: "MAY 2026",
     year: 2026,
     month: 5,
+    imageOverride: imgOrgulloFriki2026,
     descriptionOverride:
       "Planes para el Día del Orgullo Friki en Barcelona: festivales, tardeos, speed dating y juegos de mesa con KLEFF.",
   },
@@ -82,6 +83,7 @@ export const PRESS_LINKS: PressLink[] = [
     date: "DIC 2025",
     year: 2025,
     month: 12,
+    imageOverride: imgAnalogicos2025,
     descriptionOverride:
       "Planes analógicos con amigos en Barcelona: arcades, juegos de mesa y KLEFF entre las recomendaciones.",
   },
@@ -115,6 +117,7 @@ export const PRESS_LINKS: PressLink[] = [
     date: "AGO 2025",
     year: 2025,
     month: 8,
+    imageOverride: imgVacaciones2025,
     descriptionOverride:
       "Planes de vacaciones para disfrutar de Barcelona y alrededores, con KLEFF entre las recomendaciones.",
   },
