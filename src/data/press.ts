@@ -30,9 +30,24 @@ const imgOrgulloFriki2026 = "/media/media-orgullo-friki-2026.jpg";
 const imgAnalogicos2025 = "/media/media-analogicos-2025.jpg";
 const imgVacaciones2025 = "/media/media-vacaciones-2025.jpg";
 const imgRegio7_2025 = "/media/media-regio7-2025.jpg";
+const imgRtveJuegosEspanoles = "/media/media-rtve-juegos-espanoles.jpg";
+const imgRtveFemenino = "/media/media-rtve-femenino.jpg";
 
 // Lista cronológica (de más reciente a más antiguo)
 export const PRESS_LINKS: PressLink[] = [
+  // ~ 2025 (reel RTVE)
+  {
+    url: "https://www.instagram.com/reels/DN_EUXNiNir/",
+    outlet: "RTVE · Instagram",
+    date: "2025",
+    year: 2025,
+    month: 11,
+    imageOverride: imgRtveFemenino,
+    titleOverride: "Crece la afición a los juegos de mesa entre el público femenino",
+    descriptionOverride:
+      "Reel de RTVE Noticias con Beatriz Blasco (miembro de KLEFF) sobre el auge de los juegos de mesa entre el público femenino.",
+  },
+
   // ~ mayo 2026
   {
     url: "https://www.elperiodico.com/es/que-hacer/planes/20260521/dia-orgullo-friki-planes-barcelona-festivales-tardeos-speed-dating-juegos-130447387",
@@ -229,6 +244,18 @@ export const PRESS_LINKS: PressLink[] = [
     month: 3,
     descriptionOverride:
       "La comunidad de juegos de mesa más grande de Europa está en Barcelona y participar es gratis.",
+  },
+
+  // ~ enero 2025
+  {
+    url: "https://www.rtve.es/noticias/20250105/juegos-mesa-espanoles-toman-impulso-fuera-dentro-fronteras-cultura/16390736.shtml",
+    outlet: "RTVE · Noticias",
+    date: "ENE 2025",
+    year: 2025,
+    month: 1,
+    imageOverride: imgRtveJuegosEspanoles,
+    descriptionOverride:
+      "Los juegos de mesa españoles toman impulso dentro y fuera de nuestras fronteras, con KLEFF como referente de la escena en Barcelona.",
   },
 
   // ~ febrero 2025
