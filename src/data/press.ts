@@ -170,6 +170,7 @@ export const PRESS_LINKS: PressLink[] = [
     date: "MAY 2025",
     year: 2025,
     month: 5,
+    imageOverride: imgPuntsDeVista,
     descriptionOverride:
       "Reportaje en Punts de Vista sobre KLEFF y el auge de los juegos de mesa en Barcelona.",
   },
@@ -179,6 +180,7 @@ export const PRESS_LINKS: PressLink[] = [
     date: "MAY 2025",
     year: 2025,
     month: 5,
+    imageOverride: imgCulturas2,
     descriptionOverride:
       "Reportaje en Culturas 2 sobre la mayor comunidad de juegos de mesa de Europa.",
   },
