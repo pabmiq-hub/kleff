@@ -29,6 +29,17 @@ import imgElDebate from "@/assets/media-el-debate.jpg";
 
 // Lista cronológica (de más reciente a más antiguo)
 export const PRESS_LINKS: PressLink[] = [
+  // ~ mayo 2026
+  {
+    url: "https://www.elperiodico.com/es/que-hacer/planes/20260521/dia-orgullo-friki-planes-barcelona-festivales-tardeos-speed-dating-juegos-130447387",
+    outlet: "El Periódico · Qué hacer",
+    date: "MAY 2026",
+    year: 2026,
+    month: 5,
+    descriptionOverride:
+      "Planes para el Día del Orgullo Friki en Barcelona: festivales, tardeos, speed dating y juegos de mesa con KLEFF.",
+  },
+
   // ~ febrero 2026
   {
     url: "https://www.elperiodico.com/es/que-hacer/planes/20260226/barcelona-festival-gratuito-juegos-mesa-gratis-cronomaster-127232263",
