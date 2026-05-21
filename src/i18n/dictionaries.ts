@@ -1072,9 +1072,9 @@ const ca: Dict = {
     mainEyebrow: "Cada dimecres",
     mainTitle: "La Nit de Jocs",
     mainBody1:
-      "És el nostre cor. Cada dimecres, de 19h a 23h, obrim la ludoteca, muntem taules, recomanem jocs segons les teves ganes i t'aparellem amb altra gent si véns sol. Més de 300 jocs disponibles, partides programades de Blood on the Clocktower, Catan, Unmatched i molts més.",
+      "La Nit de Jocs és el teu punt de partida per formar part de la comunitat KLEFF. Un afterwork lúdic cada dimecres on pots venir amb amics, companys de feina o tu sol per fer noves amistats — sempre hi ha lloc en alguna taula.",
     mainBody2:
-      "L'activitat és gratuïta. Només es demana una consumició mínima de 4€ al local que ens cedeix l'espai. Vinguis sol, en parella o amb amics, el #TeamKLEFF s'encarrega que en 10 minuts ja estiguis jugant.",
+      "És el punt de trobada setmanal per socialitzar, trencar amb la rutina i descobrir que jugar entre adults és la millor excusa per connectar de debò. Sense pressió, sense agenda — només gent amb ganes de passar-s'ho bé.",
     mainCta: "Apunta't a la pròxima Nit de Jocs",
     insideTitle: "Què passa dins de la Nit de Jocs",
     insideSubtitle:
