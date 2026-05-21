@@ -470,7 +470,7 @@ const es: Dict = {
   },
   activities: {
     eyebrow: "Actividades",
-    title: "Vive KLEFF",
+    title: "Esto es KLEFF",
     intro:
       "Nuestra actividad principal es la Noche de Juegos, cada miércoles. Dentro suceden el resto de cosas: torneos, demostraciones, Slow Friending Lúdico y ediciones especiales temáticas. Aquí te lo contamos todo.",
     ctaMeetup: "Ver próximos eventos",
