@@ -478,9 +478,9 @@ const es: Dict = {
     mainEyebrow: "Cada miércoles",
     mainTitle: "La Noche de Juegos",
     mainBody1:
-      "Es nuestro corazón. Cada miércoles, de 19h a 23h, abrimos la ludoteca, montamos mesas, recomendamos juegos según tus ganas y te emparejamos con otra gente si vienes solo. Más de 300 juegos disponibles, partidas programadas de Blood on the Clocktower, Catan, Unmatched y muchos más.",
+      "La Noche de Juegos es tu punto de partida para formar parte de la comunidad KLEFF. Un afterwork lúdico cada miércoles donde puedes venir con amigos, compañeros de trabajo o tú solo para hacer nuevas amistades — siempre hay sitio en alguna mesa.",
     mainBody2:
-      "La actividad es gratis. Solo se pide una consumición mínima de 4€ en el local que nos cede el espacio. Vengas solo, en pareja o con amigos, el #TeamKLEFF está ahí para que en 10 minutos ya estés jugando.",
+      "Es el punto de encuentro semanal para socializar, romper con la rutina y descubrir que jugar entre adultos es la mejor excusa para conectar de verdad. Sin presión, sin agenda — solo gente con ganas de pasarlo bien.",
     mainCta: "Apúntate a la próxima Noche de Juegos",
     insideTitle: "Qué pasa dentro de la Noche de Juegos",
     insideSubtitle:
