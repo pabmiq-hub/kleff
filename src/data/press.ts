@@ -205,6 +205,15 @@ export const PRESS_LINKS: PressLink[] = [
       "Los mejores sitios para hacer amigos siendo adulto en Barcelona, con KLEFF entre las recomendaciones.",
   },
   {
+    url: "https://www.regio7.cat/on-catalunya/que-fer/2025/03/16/els-millors-llocs-per-fer-115277963.html",
+    outlet: "Regió7",
+    date: "MAR 2025",
+    year: 2025,
+    month: 3,
+    descriptionOverride:
+      "Els millors llocs per fer activitats a Catalunya, amb KLEFF entre les recomanacions per a amants dels jocs de taula.",
+  },
+  {
     url: "https://www.timeout.es/barcelona/es/noticias/la-comunidad-de-juegos-de-mesa-mas-grande-de-europa-esta-en-barcelona-y-participar-es-gratis-030325",
     outlet: "Time Out Barcelona",
     date: "MAR 2025",
@@ -246,6 +255,7 @@ export const PRESS_LINKS: PressLink[] = [
     year: 2020,
     month: 4,
     imageOverride: img2d6,
+    titleOverride: "Inicios de KLEFF en el Restaurante Navía",
     descriptionOverride:
       "Artículo en 2d6 Magazine #21 sobre los inicios de KLEFF como afterwork lúdico de Barcelona.",
   },
