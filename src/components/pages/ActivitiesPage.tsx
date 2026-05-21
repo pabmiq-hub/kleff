@@ -337,53 +337,29 @@ export function ActivitiesPage() {
         </div>
       </section>
 
-      {/* FREQUENT SPECIALS — INSTAGRAM EMBED */}
+      {/* COLLABORATIONS — unified: allied spaces + partner groups */}
       <section className="py-20 md:py-28 bg-cream">
-        <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 grid lg:grid-cols-2 gap-12 items-center">
-          <div>
-            <span className="inline-block stamp-ink text-xs font-bold uppercase tracking-widest mb-4">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 grid lg:grid-cols-2 gap-10 lg:gap-14 items-center">
+          <div className="flex flex-col justify-center">
+            <span className="inline-flex items-center gap-2 self-start rounded-full bg-coral/15 border-2 border-coral/40 px-3 py-1 text-xs font-bold uppercase tracking-widest text-coral-deep">
+              <Handshake className="h-3.5 w-3.5" />
               {a.frequentEyebrow}
             </span>
-            <h2 className="text-4xl sm:text-5xl font-display font-semibold leading-tight">
+            <h2 className="mt-5 text-4xl sm:text-5xl font-display font-semibold leading-tight">
               {a.frequentTitle}
             </h2>
             <p className="mt-5 text-lg text-foreground/75 leading-relaxed">{a.frequentBody}</p>
-            <div className="mt-7 bg-cream-deep/50 border-2 border-ink rounded-2xl p-5 shadow-tactile-sm">
-              <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-coral-deep">
-                <PartyPopper className="h-4 w-4" />
-                {a.badgeFrequent}
-              </div>
-              <h3 className="mt-2 text-xl font-display font-semibold leading-tight">
-                {a.frequentExampleTitle}
-              </h3>
-              <p className="mt-2 text-sm text-foreground/75 leading-relaxed">
-                {a.frequentExampleBody}
-              </p>
-            </div>
+            <p className="mt-4 text-lg text-foreground/75 leading-relaxed">{a.partnersBody}</p>
           </div>
-          <div>
-            <InstagramEmbed url={HANAKA_REEL} caption />
+          <div className="flex justify-center lg:justify-end">
+            <div className="w-full max-w-[500px]">
+              <InstagramEmbed url={HANAKA_REEL} bare />
+            </div>
           </div>
         </div>
       </section>
 
-      {/* PARTNERS */}
-      <section className="py-16 md:py-20 bg-cream-deep/40 border-y-2 border-ink/10">
-        <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 text-center">
-          <div className="inline-flex items-center justify-center size-14 rounded-2xl bg-coral text-cream border-2 border-ink shadow-tactile-sm mb-5">
-            <Handshake className="h-6 w-6" />
-          </div>
-          <span className="block text-xs font-bold uppercase tracking-widest text-coral-deep mb-3">
-            {a.partnersEyebrow}
-          </span>
-          <h2 className="text-3xl sm:text-4xl font-display font-semibold leading-tight">
-            {a.partnersTitle}
-          </h2>
-          <p className="mt-5 text-lg text-foreground/75 leading-relaxed max-w-3xl mx-auto">
-            {a.partnersBody}
-          </p>
-        </div>
-      </section>
+
 
       {/* TEAM BUILDING */}
       <section className="py-20 md:py-28 bg-cream">
