@@ -23,6 +23,9 @@ export type PressLink = {
 import imgSaraPostcard from "@/assets/media-sara-postcard.jpg";
 import imgVidasInfinitas from "@/assets/media-vidas-infinitas.jpg";
 import img2d6 from "@/assets/media-2d6.jpg";
+import imgPuntsDeVista from "@/assets/media-punts-de-vista.jpg";
+import imgCulturas2 from "@/assets/media-culturas-2.jpg";
+import imgElDebate from "@/assets/media-el-debate.jpg";
 
 // Lista cronológica (de más reciente a más antiguo)
 export const PRESS_LINKS: PressLink[] = [
