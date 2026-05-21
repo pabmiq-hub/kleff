@@ -26,6 +26,10 @@ import img2d6 from "@/assets/media-2d6.jpg";
 import imgPuntsDeVista from "@/assets/media-punts-de-vista.jpg";
 import imgCulturas2 from "@/assets/media-culturas-2.jpg";
 import imgElDebate from "@/assets/media-el-debate.jpg";
+import imgOrgulloFriki2026 from "@/assets/media-orgullo-friki-2026.jpg";
+import imgAnalogicos2025 from "@/assets/media-analogicos-2025.jpg";
+import imgVacaciones2025 from "@/assets/media-vacaciones-2025.jpg";
+import imgRegio7_2025 from "@/assets/media-regio7-2025.jpg";
 
 // Lista cronológica (de más reciente a más antiguo)
 export const PRESS_LINKS: PressLink[] = [
