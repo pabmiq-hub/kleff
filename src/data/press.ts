@@ -217,6 +217,7 @@ export const PRESS_LINKS: PressLink[] = [
     date: "MAR 2025",
     year: 2025,
     month: 3,
+    imageOverride: imgRegio7_2025,
     descriptionOverride:
       "Els millors llocs per fer activitats a Catalunya, amb KLEFF entre les recomanacions per a amants dels jocs de taula.",
   },
