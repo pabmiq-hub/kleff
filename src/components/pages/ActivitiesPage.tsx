@@ -223,45 +223,79 @@ export function ActivitiesPage() {
         </div>
       </section>
 
-      {/* INSIDE GAME NIGHT */}
-      <section className="py-20 md:py-28 bg-cream">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      {/* INSIDE GAME NIGHT — visual, asymmetric */}
+      <section className="py-20 md:py-28 bg-cream relative overflow-hidden">
+        <div className="absolute top-1/3 -left-32 size-80 rounded-full bg-coral/10 blur-3xl pointer-events-none" />
+        <div className="absolute bottom-0 -right-32 size-80 rounded-full bg-coral-deep/10 blur-3xl pointer-events-none" />
+        <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="max-w-3xl mb-14">
             <span className="inline-block stamp-coral text-xs font-bold uppercase tracking-widest mb-4">
-              {a.insideTitle}
+              {locale === "en" ? "Inside Game Night" : locale === "ca" ? "Dins de la Nit" : "Dentro de la Noche"}
             </span>
             <h2 className="text-4xl sm:text-5xl font-display font-semibold leading-tight">
               {a.insideTitle}
             </h2>
             <p className="mt-4 text-lg text-foreground/70">{a.insideSubtitle}</p>
           </div>
-          <div className="grid md:grid-cols-3 gap-6">
-            <DetailCard
-              emoji="🏆"
-              badgeKind="monthly"
-              badgeLabel={a.badgeMonthly}
-              title={a.inside1Title}
-              body={a.inside1Body}
-              href={tournamentsHref}
-              ctaLabel={locale === "en" ? "More about tournaments" : locale === "ca" ? "Més sobre tornejos" : "Más sobre torneos"}
-            />
-            <DetailCard
-              emoji="📦"
-              badgeKind="monthly"
-              badgeLabel={a.badgeMonthly}
-              title={a.inside2Title}
-              body={a.inside2Body}
-            />
-            <DetailCard
-              emoji="💘"
-              badgeKind="occasional"
-              badgeLabel={a.badgeOccasional}
-              title={a.inside3Title}
-              body={a.inside3Body}
-            />
+
+          <div className="grid md:grid-cols-12 gap-6">
+            {/* Tournaments — large feature card */}
+            <Link
+              to={tournamentsHref}
+              className="group relative md:col-span-7 md:row-span-2 bg-gradient-to-br from-coral via-coral to-coral-deep text-cream border-2 border-ink rounded-3xl p-8 sm:p-10 shadow-tactile-lg hover:-translate-x-[2px] hover:-translate-y-[2px] hover:shadow-tactile transition-all overflow-hidden flex flex-col justify-between min-h-[360px]"
+            >
+              <div className="absolute -top-10 -right-10 size-56 bg-cream/10 rounded-full blur-3xl pointer-events-none" />
+              <div className="absolute top-6 right-6 text-[140px] leading-none opacity-30 select-none" aria-hidden>🏆</div>
+              <div className="relative">
+                <span className="inline-flex items-center text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full border-2 border-cream/40 bg-cream/15 text-cream">
+                  {a.badgeMonthly}
+                </span>
+                <h3 className="mt-4 text-3xl sm:text-4xl font-display font-semibold leading-tight max-w-md">
+                  {a.inside1Title}
+                </h3>
+                <p className="mt-4 text-base sm:text-lg text-cream/90 leading-relaxed max-w-lg">
+                  {a.inside1Body}
+                </p>
+              </div>
+              <span className="relative mt-6 inline-flex items-center gap-2 text-sm font-bold group-hover:gap-3 transition-all">
+                {locale === "en" ? "More about tournaments" : locale === "ca" ? "Més sobre tornejos" : "Más sobre torneos"}
+                <ArrowRight className="h-4 w-4" />
+              </span>
+            </Link>
+
+            {/* Demos — top right */}
+            <article className="relative md:col-span-5 bg-ink text-cream border-2 border-ink rounded-3xl p-7 shadow-tactile hover:-translate-x-[2px] hover:-translate-y-[2px] hover:shadow-tactile-lg transition-all overflow-hidden">
+              <div className="absolute -bottom-6 -right-6 text-[110px] leading-none opacity-25 select-none" aria-hidden>📦</div>
+              <div className="relative">
+                <span className="inline-flex items-center text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full border-2 border-cream/30 bg-cream/10 text-cream">
+                  {a.badgeMonthly}
+                </span>
+                <h3 className="mt-4 text-2xl font-display font-semibold leading-tight">
+                  {a.inside2Title}
+                </h3>
+                <p className="mt-3 text-sm text-cream/85 leading-relaxed">
+                  {a.inside2Body}
+                </p>
+              </div>
+            </article>
+
+            {/* Slow Friending — bottom right */}
+            <article className="relative md:col-span-5 bg-card border-2 border-ink rounded-3xl p-7 shadow-tactile-sm hover:-translate-x-[2px] hover:-translate-y-[2px] hover:shadow-tactile transition-all overflow-hidden">
+              <div className="absolute -bottom-6 -right-6 text-[110px] leading-none opacity-20 select-none" aria-hidden>💘</div>
+              <div className="relative">
+                <Badge kind="occasional" label={a.badgeOccasional} />
+                <h3 className="mt-3 text-2xl font-display font-semibold leading-tight">
+                  {a.inside3Title}
+                </h3>
+                <p className="mt-3 text-sm text-foreground/75 leading-relaxed">
+                  {a.inside3Body}
+                </p>
+              </div>
+            </article>
           </div>
         </div>
       </section>
+
 
       {/* SPECIAL GAME NIGHTS */}
       <section className="py-20 md:py-28 bg-ink text-cream relative overflow-hidden">
