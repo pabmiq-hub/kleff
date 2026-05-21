@@ -5,6 +5,7 @@ type Dict = {
     home: string;
     about: string;
     how: string;
+    activities: string;
     media: string;
     blog: string;
     contact: string;
@@ -186,6 +187,60 @@ type Dict = {
     or: string;
     findUs: string;
   };
+  activities: {
+    eyebrow: string;
+    title: string;
+    intro: string;
+    ctaMeetup: string;
+    ctaHow: string;
+    mainEyebrow: string;
+    mainTitle: string;
+    mainBody1: string;
+    mainBody2: string;
+    mainCta: string;
+    insideTitle: string;
+    insideSubtitle: string;
+    inside1Title: string;
+    inside1Body: string;
+    inside2Title: string;
+    inside2Body: string;
+    inside3Title: string;
+    inside3Body: string;
+    specialEyebrow: string;
+    specialTitle: string;
+    specialSubtitle: string;
+    special1Title: string;
+    special1Body: string;
+    special2Title: string;
+    special2Body: string;
+    special3Title: string;
+    special3Body: string;
+    specialNote: string;
+    frequentEyebrow: string;
+    frequentTitle: string;
+    frequentBody: string;
+    frequentExampleTitle: string;
+    frequentExampleBody: string;
+    partnersEyebrow: string;
+    partnersTitle: string;
+    partnersBody: string;
+    teamBuildingEyebrow: string;
+    teamBuildingTitle: string;
+    teamBuildingBody: string;
+    teamBuildingCta: string;
+    calendarEyebrow: string;
+    calendarTitle: string;
+    calendarBody: string;
+    calendarCta: string;
+    calendarGroup: string;
+    badgeWeekly: string;
+    badgeMonthly: string;
+    badgeYearly: string;
+    badgeOccasional: string;
+    badgeFrequent: string;
+    badgeCustom: string;
+    learnMoreEvents: string;
+  };
 };
 
 const es: Dict = {
@@ -193,6 +248,7 @@ const es: Dict = {
     home: "Inicio",
     about: "Quiénes somos",
     how: "Cómo funciona",
+    activities: "Actividades",
     media: "Media",
     blog: "Blog",
     contact: "Contacto",
@@ -412,6 +468,77 @@ const es: Dict = {
     loading: "Cargando vista previa…",
     noPreview: "Vista previa no disponible — abre el enlace para verlo.",
   },
+  activities: {
+    eyebrow: "Actividades",
+    title: "Vive KLEFF",
+    intro:
+      "Nuestra actividad principal es la Noche de Juegos, cada miércoles. Dentro suceden el resto de cosas: torneos, demostraciones, Slow Friending Lúdico y ediciones especiales temáticas. Aquí te lo contamos todo.",
+    ctaMeetup: "Ver próximos eventos",
+    ctaHow: "Cómo funciona",
+    mainEyebrow: "Cada miércoles",
+    mainTitle: "La Noche de Juegos",
+    mainBody1:
+      "Es nuestro corazón. Cada miércoles, de 19h a 23h, abrimos la ludoteca, montamos mesas, recomendamos juegos según tus ganas y te emparejamos con otra gente si vienes solo. Más de 300 juegos disponibles, partidas programadas de Blood on the Clocktower, Catan, Unmatched y muchos más.",
+    mainBody2:
+      "La actividad es gratis. Solo se pide una consumición mínima de 4€ en el local que nos cede el espacio. Vengas solo, en pareja o con amigos, el #TeamKLEFF está ahí para que en 10 minutos ya estés jugando.",
+    mainCta: "Apúntate a la próxima Noche de Juegos",
+    insideTitle: "Qué pasa dentro de la Noche de Juegos",
+    insideSubtitle:
+      "Además del juego libre con la ludoteca abierta, cada noche puede pasar algo distinto.",
+    inside1Title: "Torneos",
+    inside1Body:
+      "Una vez al mes (a veces más) organizamos torneos competitivos de los juegos más populares de la comunidad: Catan, Unmatched, Magic, Hidden Roles, party games… Apuntarse es gratis y hay premios para los ganadores. Ideal si te gusta la chispa de la competición sin renunciar al buen ambiente.",
+    inside2Title: "Demostraciones de editoriales y autores",
+    inside2Body:
+      "Periódicamente invitamos a editoriales y autores a presentar sus juegos directamente en nuestras mesas. Aprendes el juego de la mano de quien lo ha creado, descubres novedades antes de que lleguen a las tiendas y puedes resolver dudas en vivo. Una forma única de ver cómo se piensa un juego desde dentro.",
+    inside3Title: "Slow Friending Lúdico",
+    inside3Body:
+      "Nuestra versión del speed dating, pero con juegos sociales como excusa para conectar. Mesas rotativas, dinámicas pensadas para romper el hielo y conocer gente nueva sin la presión incómoda de las citas tradicionales. Pensado para hacer amistades reales (o lo que surja).",
+    specialEyebrow: "Game Nights especiales",
+    specialTitle: "Ediciones únicas, una vez al año",
+    specialSubtitle:
+      "Son Noches de Juegos especiales con temática propia. Solo pasan una vez al año, así que vale la pena marcarlas en el calendario.",
+    special1Title: "Game Night: Carnival",
+    special1Body:
+      "Noche de juegos con concurso de disfraces de carnaval. La sala se llena de purpurina, máscaras y mucha gente jugando con vestuario imposible. Premios para los mejores disfraces.",
+    special2Title: "Game Night: Halloween",
+    special2Body:
+      "Edición de terror y misterio. Disfraces obligatorios (o casi), juegos temáticos de deducción social y un ambiente que solo pasa una vez al año. La favorita de muchos kleffers.",
+    special3Title: "X-Mas Game Night",
+    special3Body:
+      "Evento solidario de cierre de año. Recaudamos fondos para el Hospital Sant Joan de Déu, especializado en oncología infantil. Juegos, sorteos y la satisfacción de ayudar a una buena causa.",
+    specialNote:
+      "Son ediciones especiales de la Noche de Juegos: mismo formato, mismo local, mismo equipo — solo que con un toque extra.",
+    frequentEyebrow: "Eventos especiales recurrentes",
+    frequentTitle: "Colaboraciones con espacios aliados",
+    frequentBody:
+      "De vez en cuando salimos del local habitual para organizar eventos especiales en colaboración con otros espacios de Barcelona. Combinamos juegos con gastronomía, talleres o experiencias temáticas.",
+    frequentExampleTitle: "Tarde de juegos y gastronomía japonesa en Casa Hanaka",
+    frequentExampleBody:
+      "Un ejemplo reciente: una tarde de juegos combinada con cocina japonesa en Casa Hanaka. Ese es el tipo de evento puntual que nace de las ganas de mezclar nuestra comunidad con otros proyectos chulos de la ciudad.",
+    partnersEyebrow: "Comunidad ampliada",
+    partnersTitle: "Colaboramos con otras entidades",
+    partnersBody:
+      "Aunque la Noche de Juegos es nuestro evento estrella de los miércoles, colaboramos con otras asociaciones y colectivos que organizan partidas y actividades en otros días de la semana. Así, si te pierdes el miércoles, casi siempre hay un plan lúdico cerca.",
+    teamBuildingEyebrow: "A medida",
+    teamBuildingTitle: "¿Quieres un evento privado o team building?",
+    teamBuildingBody:
+      "Organizamos eventos a medida para empresas, equipos, despedidas, cumpleaños o cualquier grupo que quiera vivir una experiencia lúdica única. Diseñamos la dinámica, traemos los juegos y nos encargamos de que todo el mundo se lo pase bien — incluso quien dice que «no le gustan los juegos de mesa».",
+    teamBuildingCta: "Contáctanos",
+    calendarEyebrow: "Calendario",
+    calendarTitle: "¿Quieres saber más sobre los eventos?",
+    calendarBody:
+      "Todos los eventos, fechas, descripciones y RSVP están en nuestro Meetup. Es gratis apuntarse y la mejor forma de no perderte nada.",
+    calendarCta: "Ver calendario completo en Meetup",
+    calendarGroup: "O explora todo el grupo de KLEFF",
+    badgeWeekly: "Semanal",
+    badgeMonthly: "Mensual",
+    badgeYearly: "Anual",
+    badgeOccasional: "Puntual",
+    badgeFrequent: "Recurrente",
+    badgeCustom: "A medida",
+    learnMoreEvents: "¿Quieres saber más sobre los eventos? Descubre todas las actividades",
+  },
 };
 
 const en: Dict = {
@@ -419,6 +546,7 @@ const en: Dict = {
     home: "Home",
     about: "About",
     how: "How it works",
+    activities: "Activities",
     media: "Media",
     blog: "Blog",
     contact: "Contact",
@@ -638,6 +766,77 @@ const en: Dict = {
     loading: "Loading preview…",
     noPreview: "Preview not available — open the link to see it.",
   },
+  activities: {
+    eyebrow: "Activities",
+    title: "Live KLEFF",
+    intro:
+      "Our main activity is Game Night, every Wednesday. Everything else happens inside it: tournaments, publisher demos, Slow Friending and themed special editions. Here's the full picture.",
+    ctaMeetup: "See upcoming events",
+    ctaHow: "How it works",
+    mainEyebrow: "Every Wednesday",
+    mainTitle: "Game Night",
+    mainBody1:
+      "It's our heart. Every Wednesday, from 7pm to 11pm, we open the library, set up tables, recommend games based on your mood and pair you up with other people if you come alone. 300+ games available, scheduled rounds of Blood on the Clocktower, Catan, Unmatched and many more.",
+    mainBody2:
+      "The activity itself is free. We just ask for a €4 minimum order at the venue that hosts us. Whether you come alone, as a couple or with friends, the #TeamKLEFF makes sure you're playing within 10 minutes.",
+    mainCta: "Join the next Game Night",
+    insideTitle: "What happens inside Game Night",
+    insideSubtitle:
+      "Beyond free play with the open library, every night something different can happen.",
+    inside1Title: "Tournaments",
+    inside1Body:
+      "Once a month (sometimes more) we run competitive tournaments of the community's favourite games: Catan, Unmatched, Magic, Hidden Roles, party games… Free to join, with prizes for the winners. Perfect if you love the competitive spark without losing the friendly vibe.",
+    inside2Title: "Publisher & author demos",
+    inside2Body:
+      "We regularly invite publishers and authors to present their games directly at our tables. You learn the game from the people who created it, discover novelties before they hit the shops and can ask anything live. A unique way to peek behind the curtain of game design.",
+    inside3Title: "Slow Friending",
+    inside3Body:
+      "Our take on speed dating, but using social games as the excuse to connect. Rotating tables, dynamics designed to break the ice and meet new people without the awkward pressure of traditional dating. Made for real friendships (or whatever happens).",
+    specialEyebrow: "Special Game Nights",
+    specialTitle: "Unique editions, once a year",
+    specialSubtitle:
+      "These are themed Game Nights that only happen once a year, so they're worth marking on the calendar.",
+    special1Title: "Game Night: Carnival",
+    special1Body:
+      "Game night with a carnival costume contest. The room fills with glitter, masks and people playing in impossible outfits. Prizes for the best costumes.",
+    special2Title: "Game Night: Halloween",
+    special2Body:
+      "Horror and mystery edition. Costumes expected (or almost), themed social deduction games and an atmosphere that only happens once a year. A community favourite.",
+    special3Title: "X-Mas Game Night",
+    special3Body:
+      "Charity end-of-year event. We raise funds for Hospital Sant Joan de Déu, specialised in childhood oncology. Games, raffles and the satisfaction of helping a great cause.",
+    specialNote:
+      "These are special editions of Game Night: same format, same venue, same team — just with an extra twist.",
+    frequentEyebrow: "Recurring specials",
+    frequentTitle: "Collaborations with allied spaces",
+    frequentBody:
+      "From time to time we leave our usual venue to organise special events with other Barcelona spaces. We mix games with food, workshops or themed experiences.",
+    frequentExampleTitle: "Games & Japanese food afternoon at Casa Hanaka",
+    frequentExampleBody:
+      "A recent example: a games afternoon paired with Japanese food at Casa Hanaka. That's the kind of one-off event that's born from wanting to mix our community with other cool projects in the city.",
+    partnersEyebrow: "Wider community",
+    partnersTitle: "We partner with other groups",
+    partnersBody:
+      "While Game Night is our flagship event on Wednesdays, we also collaborate with other associations and collectives running games and activities on other days. So if you miss Wednesday, there's almost always a board-game plan nearby.",
+    teamBuildingEyebrow: "Bespoke",
+    teamBuildingTitle: "Looking for a private event or team building?",
+    teamBuildingBody:
+      "We design bespoke events for companies, teams, stag/hen parties, birthdays or any group wanting a unique playful experience. We design the dynamic, bring the games and make sure everyone has fun — even the «I don't like board games» people.",
+    teamBuildingCta: "Contact us",
+    calendarEyebrow: "Calendar",
+    calendarTitle: "Want to know more about the events?",
+    calendarBody:
+      "All events, dates, descriptions and RSVPs live on our Meetup. Joining is free and it's the best way not to miss anything.",
+    calendarCta: "See the full calendar on Meetup",
+    calendarGroup: "Or explore the whole KLEFF group",
+    badgeWeekly: "Weekly",
+    badgeMonthly: "Monthly",
+    badgeYearly: "Yearly",
+    badgeOccasional: "Occasional",
+    badgeFrequent: "Recurring",
+    badgeCustom: "Bespoke",
+    learnMoreEvents: "Want to know more about the events? Discover all our activities",
+  },
 };
 
 const ca: Dict = {
@@ -645,6 +844,7 @@ const ca: Dict = {
     home: "Inici",
     about: "Qui som",
     how: "Com funciona",
+    activities: "Activitats",
     media: "Media",
     blog: "Blog",
     contact: "Contacte",
@@ -863,6 +1063,77 @@ const ca: Dict = {
     instagramCta: "Obrir @kleff.bcn",
     loading: "Carregant vista prèvia…",
     noPreview: "Vista prèvia no disponible — obre l'enllaç per veure-ho.",
+  },
+  activities: {
+    eyebrow: "Activitats",
+    title: "Viu KLEFF",
+    intro:
+      "La nostra activitat principal és la Nit de Jocs, cada dimecres. A dins hi passen totes les altres coses: tornejos, demostracions, Slow Friending Lúdic i edicions especials temàtiques. Aquí t'ho expliquem tot.",
+    ctaMeetup: "Veure pròxims esdeveniments",
+    ctaHow: "Com funciona",
+    mainEyebrow: "Cada dimecres",
+    mainTitle: "La Nit de Jocs",
+    mainBody1:
+      "És el nostre cor. Cada dimecres, de 19h a 23h, obrim la ludoteca, muntem taules, recomanem jocs segons les teves ganes i t'aparellem amb altra gent si véns sol. Més de 300 jocs disponibles, partides programades de Blood on the Clocktower, Catan, Unmatched i molts més.",
+    mainBody2:
+      "L'activitat és gratuïta. Només es demana una consumició mínima de 4€ al local que ens cedeix l'espai. Vinguis sol, en parella o amb amics, el #TeamKLEFF s'encarrega que en 10 minuts ja estiguis jugant.",
+    mainCta: "Apunta't a la pròxima Nit de Jocs",
+    insideTitle: "Què passa dins de la Nit de Jocs",
+    insideSubtitle:
+      "A més del joc lliure amb la ludoteca oberta, cada nit hi pot passar alguna cosa diferent.",
+    inside1Title: "Tornejos",
+    inside1Body:
+      "Un cop al mes (de vegades més) organitzem tornejos competitius dels jocs més populars de la comunitat: Catan, Unmatched, Magic, Hidden Roles, party games… Apuntar-s'hi és gratis i hi ha premis per als guanyadors. Ideal si t'agrada l'espurna de la competició sense renunciar al bon ambient.",
+    inside2Title: "Demostracions d'editorials i autors",
+    inside2Body:
+      "Periòdicament convidem editorials i autors a presentar els seus jocs directament a les nostres taules. Aprens el joc de la mà de qui l'ha creat, descobreixes novetats abans que arribin a les botigues i pots resoldre dubtes en directe. Una manera única de veure com es pensa un joc des de dins.",
+    inside3Title: "Slow Friending Lúdic",
+    inside3Body:
+      "La nostra versió del speed dating, però amb jocs socials com a excusa per connectar. Taules rotatives, dinàmiques pensades per trencar el gel i conèixer gent nova sense la pressió incòmoda de les cites tradicionals. Pensat per fer amistats reals (o el que surti).",
+    specialEyebrow: "Game Nights especials",
+    specialTitle: "Edicions úniques, un cop l'any",
+    specialSubtitle:
+      "Són Nits de Jocs especials amb temàtica pròpia. Només passen un cop l'any, així que val la pena marcar-les al calendari.",
+    special1Title: "Game Night: Carnival",
+    special1Body:
+      "Nit de jocs amb concurs de disfresses de carnaval. La sala s'omple de purpurina, màscares i molta gent jugant amb vestuari impossible. Premis per a les millors disfresses.",
+    special2Title: "Game Night: Halloween",
+    special2Body:
+      "Edició de terror i misteri. Disfresses obligatòries (o gairebé), jocs temàtics de deducció social i un ambient que només passa un cop l'any. La favorita de molts kleffers.",
+    special3Title: "X-Mas Game Night",
+    special3Body:
+      "Esdeveniment solidari de tancament d'any. Recaptem fons per a l'Hospital Sant Joan de Déu, especialitzat en oncologia infantil. Jocs, sortejos i la satisfacció d'ajudar una bona causa.",
+    specialNote:
+      "Són edicions especials de la Nit de Jocs: mateix format, mateix local, mateix equip — només amb un toc extra.",
+    frequentEyebrow: "Esdeveniments especials recurrents",
+    frequentTitle: "Col·laboracions amb espais aliats",
+    frequentBody:
+      "De tant en tant sortim del local habitual per organitzar esdeveniments especials en col·laboració amb altres espais de Barcelona. Combinem jocs amb gastronomia, tallers o experiències temàtiques.",
+    frequentExampleTitle: "Tarda de jocs i gastronomia japonesa a Casa Hanaka",
+    frequentExampleBody:
+      "Un exemple recent: una tarda de jocs combinada amb cuina japonesa a Casa Hanaka. Aquest és el tipus d'esdeveniment puntual que neix de les ganes de barrejar la nostra comunitat amb altres projectes guais de la ciutat.",
+    partnersEyebrow: "Comunitat ampliada",
+    partnersTitle: "Col·laborem amb altres entitats",
+    partnersBody:
+      "Tot i que la Nit de Jocs és el nostre esdeveniment estrella dels dimecres, col·laborem amb altres associacions i col·lectius que organitzen partides i activitats altres dies de la setmana. Així, si et perds el dimecres, gairebé sempre hi ha un pla lúdic a prop.",
+    teamBuildingEyebrow: "A mida",
+    teamBuildingTitle: "Vols un esdeveniment privat o team building?",
+    teamBuildingBody:
+      "Organitzem esdeveniments a mida per a empreses, equips, comiats, aniversaris o qualsevol grup que vulgui viure una experiència lúdica única. Dissenyem la dinàmica, portem els jocs i ens encarreguem que tothom s'ho passi bé — fins i tot qui diu que «no li agraden els jocs de taula».",
+    teamBuildingCta: "Contacta amb nosaltres",
+    calendarEyebrow: "Calendari",
+    calendarTitle: "Vols saber més sobre els esdeveniments?",
+    calendarBody:
+      "Tots els esdeveniments, dates, descripcions i RSVP són al nostre Meetup. Apuntar-s'hi és gratis i és la millor manera de no perdre't res.",
+    calendarCta: "Veure el calendari complet a Meetup",
+    calendarGroup: "O explora tot el grup de KLEFF",
+    badgeWeekly: "Setmanal",
+    badgeMonthly: "Mensual",
+    badgeYearly: "Anual",
+    badgeOccasional: "Puntual",
+    badgeFrequent: "Recurrent",
+    badgeCustom: "A mida",
+    learnMoreEvents: "Vols saber més sobre els esdeveniments? Descobreix totes les activitats",
   },
 };
 

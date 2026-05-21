@@ -15,6 +15,7 @@ export function SiteHeader() {
     { label: t.nav.home, path: "/" },
     { label: t.nav.about, path: "/about" },
     { label: t.nav.how, path: "/how-it-works" },
+    { label: t.nav.activities, path: "/activities" },
     { label: t.nav.media, path: "/media" },
     { label: t.nav.blog, path: "/blog" },
     { label: t.nav.contact, path: "/contact" },

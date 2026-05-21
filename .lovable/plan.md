@@ -1,131 +1,79 @@
+## Nueva página: Actividades
 
-# Alquiler de juegos + mejoras Ludoteca
+Página dedicada que expande la sección "Qué puedes encontrar" de `/como-funciona`, orientada a conversión (nuevos asistentes).
 
-## 1. Modelo de datos (migraciones)
+### Rutas (file-based routing)
+- `src/routes/actividades.tsx` → `/actividades` (ES, nativo)
+- `src/routes/ca.activitats.tsx` → `/ca/activitats`
+- `src/routes/en.activities.tsx` → `/en/activities`
 
-### 1.1 Ampliar `bgg_games` (campos editables manualmente, no se sobrescriben en sync BGG)
-- `total_copies` (ya existe) — editable
-- `max_rental_days` (ya existe) — editable
-- `shelf` enum: `'1' | '2' | '3' | '4' | 'on_demand' | 'drawer'`
-- `shape` enum: `'triangle' | 'heart' | 'square'` (sólo si shelf 1-4)
-- `slot_number` smallint 1-5 (sólo si shelf 1-4)
-- `drawer_number` smallint 1-4 (sólo si shelf = drawer)
-- `drawer_letter` char 'a'|'b'|'c'|'d' (sólo si shelf = drawer)
-- `notes_admin` text
+Cada ruta con `head()` propio (title/description/og) y slug editable desde el CMS de URLs ya existente.
 
-→ El sync BGG hará `UPDATE` sólo de columnas BGG, nunca de estos campos manuales.
+### Componente
+`src/components/pages/ActivitiesPage.tsx` — recibe contenido vía `useSectionContent` (CMS) con textos por defecto en ES; CA/EN se auto-traducen vía diccionarios `src/i18n/dictionaries.ts` (siguiendo el patrón ya usado).
 
-### 1.2 Nueva `rental_settings` (singleton, super_admin only)
-- `game_night_weekday` smallint (0-6, domingo=0). Default = miércoles.
-- `cooldown_weeks` smallint default 4
-- `monthly_quota` smallint default 2
-- `block_if_overdue` boolean default true
+### Estructura visual
 
-### 1.3 `rental_requests` (refinar)
-- añadir `pickup_date` date, `return_date` date (calculadas: próxima/siguiente noche de juego)
-- añadir `status` extra: `waitlisted`
-- añadir `position` smallint (orden en cola por juego+fecha)
+1. **Hero**
+   - Eyebrow "ACTIVIDADES", H1 "Vive KLEFF", subtítulo enfatizando que **la Noche de Juegos (miércoles) es nuestra actividad principal** y que dentro suceden el resto.
+   - CTA primario "Ver próximos eventos en Meetup" → `https://www.meetup.com/es-ES/kleff-bcn/events/?type=upcoming`
+   - CTA secundario "Cómo funciona" → `/como-funciona`
 
-### 1.4 `rentals` (existente) — sin cambios estructurales mayores
+2. **La Noche de Juegos (sección destacada, ancla `#noche-de-juegos`)**
+   - Bloque grande explicando: miércoles, gratis, 4€ consumición, ludoteca abierta, #TeamKLEFF, partidas programadas.
+   - Mini-grid de "qué pasa dentro": Blood on the Clocktower, Catan, Unmatched, Hidden Roles… (enlaza a las páginas existentes `/blood-on-the-clocktower`, `/catan`, `/roles-ocultos`).
+   - CTA: "Apúntate a la próxima Noche de Juegos" → Meetup.
 
-### 1.5 RLS
-- `bgg_games`: ya OK
-- `rental_settings`: select público (anon), update/insert solo super_admin
-- `rental_requests`: socio ve/crea las suyas, admin ve todas
+3. **Actividades dentro de la Noche de Juegos**
+   Tarjetas detalladas (más extensas que las actuales) para:
+   - **Torneos** (mensual) — enlace a `/torneos`.
+   - **Demostraciones de editoriales y autores** (mensual) — texto ampliado.
+   - **Slow Friending Lúdico** (puntual) — explicación del formato.
 
-## 2. Lógica de noche de juego
+4. **Game Nights especiales (anuales)**
+   Carnival, Halloween, X-Mas (solidario Sant Joan de Déu). Tarjetas con icono, descripción ampliada y nota: "son ediciones especiales de la Noche de Juegos".
 
-Helper compartido (`src/lib/gameNights.ts`):
-- `nextGameNight(from: Date, weekday: number): Date`
-- `gameNightAfter(date: Date, weekday: number): Date`
+5. **Eventos frecuentes especiales**
+   Sección con **embed de Instagram reproducible** del reel `https://www.instagram.com/p/DXbPL40jG8p/` ("Tarde de juegos y gastronomía japonesa" en Casa Hanaka). Embed nativo de Instagram (`<blockquote class="instagram-media">` + script `//www.instagram.com/embed.js`) cargado vía `useEffect` para que se reproduzca dentro de la web.
+   Texto explicando que hacemos colaboraciones con espacios y entidades aliadas.
 
-Default: recoger = próxima noche desde hoy; devolver = la siguiente (7 días). Visible al socio antes de confirmar.
+6. **Colaboraciones con otras entidades**
+   Bloque breve: organizamos junto a otras asociaciones actividades en otros días de la semana. (Texto editable CMS, sin logos por ahora.)
 
-## 3. Reglas anti-abuso (validadas en server fn `requestRental`)
+7. **Eventos a medida / Team building**
+   Card destacada: organizamos eventos privados tipo team building, cumpleaños, despedidas, empresas. CTA "Contáctanos" → `/contacto`.
 
-Bloquea si:
-1. Tiene rental activo no devuelto **y** está vencido (`now > due_at`).
-2. Ya tiene 2 alquileres (request `pending|approved` + rental `active`) en el mes en curso.
-3. Mismo `game_id` alquilado/solicitado en las últimas 4 semanas.
-4. Sin copia libre **y** ya hay N personas en lista de espera para esa misma fecha → opcional permitir.
+8. **Calendario Meetup (CTA final)**
+   Banner full-width: "¿Quieres saber más sobre los eventos?" + botón grande "Ver calendario completo en Meetup" → `https://www.meetup.com/es-ES/kleff-bcn/events/?type=upcoming`.
+   Debajo, link secundario al grupo Meetup `https://www.meetup.com/es-es/kleff-bcn/`.
 
-Mensajes claros con motivo del bloqueo.
+### Enlace desde `/como-funciona`
+En la sección actual "Qué puedes encontrar" añadir al final un CTA: **"¿Quieres saber más sobre los eventos? → Ver todas las actividades"** que enlace a `/actividades` (con variante CA/EN según locale).
 
-## 4. Flujo de reserva (socio)
+### i18n
+- Añadir claves nuevas en `src/i18n/dictionaries.ts` (ES nativo + CA + EN) para todos los textos de la página.
+- `src/i18n/config.ts`: añadir paths localizados (`activitats`, `activities`).
 
-`/app/rentals` (existe, ampliar):
-- Buscador del catálogo (reusa data de ludoteca).
-- Selector "fecha de recogida" = próximas 4 noches de juego.
-- Si copia libre → crea `rental_request` `pending` (admin aprueba).
-- Si sin copia → propone "Apuntarme a lista de espera" → `waitlisted` + posición.
-- Tras aprobación admin: aparece en `/app/rentals/mine` con QR/recordatorio de fecha.
+### Navegación
+- `SiteHeader.tsx` y `SiteFooter.tsx`: añadir entrada "Actividades / Activitats / Activities" en el menú principal (cerca de "Cómo funciona").
 
-## 5. Panel super-admin
+### CMS
+- `src/cms/schemas.ts`: registrar sección `activities` con campos editables (hero, descripciones de cada actividad, textos de los bloques colaboraciones / team building / CTA final).
+- Imagen/iconos: reutilizar los emojis ya usados (🎲🏆📦💘🎭🎃🎄) + iconos lucide para los nuevos bloques.
 
-### 5.1 `/admin/rentals/catalog` (mejorar el actual)
-- Edición inline de `total_copies` (input numérico).
-- Nueva sección "Ubicación" con selectores condicionales (shelf → shape+slot ó drawer+letter), o "—" si on_demand/drawer.
-- Filtros: por estantería, sin ubicar, inactivos.
-- Búsqueda.
+### Elementos visuales
+- Gradientes y tarjetas con estilo coherente con `HowItWorksPage`.
+- Imagen hero: generar 1 imagen ambiente noche de juegos (`src/assets/activities-hero.jpg`) con `imagegen` standard.
+- Badges de frecuencia (SEMANAL/MENSUAL/PUNTUAL/ANUAL) como ya existen.
+- Embed Instagram con estilo card y fallback link.
 
-### 5.2 `/admin/rentals/index` (solicitudes)
-- Cola de pending agrupada por fecha de noche de juego.
-- Aprobar / rechazar / pasar a lista de espera con un click.
-- Ver disponibilidad: `total_copies − rentals_activos − pending_aprobados_para_esa_fecha`.
+### Archivos a tocar (resumen técnico)
+- **Crear**: `src/routes/actividades.tsx`, `src/routes/ca.activitats.tsx`, `src/routes/en.activities.tsx`, `src/components/pages/ActivitiesPage.tsx`, `src/components/site/InstagramEmbed.tsx`, `src/assets/activities-hero.jpg`.
+- **Editar**: `src/i18n/dictionaries.ts`, `src/i18n/config.ts`, `src/cms/schemas.ts`, `src/components/site/SiteHeader.tsx`, `src/components/site/SiteFooter.tsx`, `src/components/pages/HowItWorksPage.tsx` (CTA al final del bloque actividades).
+- `src/routeTree.gen.ts` se regenera automáticamente.
 
-### 5.3 `/admin/rentals/active` y `history` (existentes) — añadir vencidos destacados.
-
-### 5.4 Nueva `/admin/rentals/settings`
-- Editar día de noche de juego, cooldown, cuota mensual, bloqueo por retraso.
-
-## 6. Ludoteca pública — mejoras
-
-### 6.1 Badge de ubicación
-En cada card del juego un chip pequeño, siempre visible:
-- Estantería 1-4: `🔺 E2·3` (icono forma + nº estantería + nº slot). Color por estantería.
-- Cajón: `🗄 C2·a`
-- Bajo pedido: `📦 Bajo pedido`
-- Tooltip al hover: "Estantería 2 · forma triángulo · posición 3".
-
-Leyenda fija al final de la página explicando el sistema (1-2 líneas + iconos).
-
-### 6.2 Disponibilidad
-- `Disponibles: 2/3` con punto verde/ámbar/rojo.
-
-### 6.3 Recomendaciones
-Nueva sección "¿Te gustó X? Prueba…":
-- Selector con autocomplete del catálogo.
-- Algoritmo similitud (server fn, sin IA):
-  - Score = α·jaccard(mechanics) + β·jaccard(categories) + γ·(1 − |Δweight|/5) + δ·(1 − |Δduration|/120)
-  - Excluye el propio juego e inactivos. Top 6.
-- Cards con motivo: "Comparte: Worker Placement, Economic".
-
-## 7. Página dedicada socio
-
-- En `/app/rentals` añadir "Mis alquileres" (activos + historial), recordatorios de devolución, posición en lista de espera.
-
-## 8. Cron / recordatorios (opcional fase 2)
-
-`pg_cron` diario llama `/api/public/hooks/rental-reminders` para marcar overdue y (futuro) enviar email.
-
-## Detalles técnicos
-
-- Server fns nuevos en `src/server/rental.functions.ts`: `requestRental`, `cancelMyRequest`, `listMyRentals`, `joinWaitlist`, `adminApproveRequest`, `adminRejectRequest`, `adminUpdateLocation`, `adminUpdateCopies`, `adminUpdateSettings`, `getRentalSettings`, `recommendSimilar`.
-- Validación zod estricta (shelf+shape+slot coherentes; drawer+letter+number).
-- Reusar `listLudoteca` existente; ampliar SELECT con campos de ubicación y copias libres (subquery).
-- UI: nuevos componentes `LocationBadge`, `LocationPicker`, `RentalRequestForm`, `RecommendationsSection`, `GameNightPicker`.
-- Estilo: tokens existentes (`coral`, `cream`, `ink`). Iconos `lucide-react` (Triangle, Heart, Square, Archive, Package) + colores por estantería en `styles.css`.
-
-## Orden de entrega sugerido
-
-1. Migraciones + tipos
-2. Editor de ubicación + copias en `/admin/rentals/catalog`
-3. Badge de ubicación en ludoteca pública + leyenda
-4. `rental_settings` + helper noches de juego + form admin
-5. Flujo de reserva socio (sin lista de espera)
-6. Aprobación admin con disponibilidad por fecha
-7. Lista de espera + reserva por fecha futura
-8. Recomendaciones por similitud
-9. Cron de recordatorios (opcional)
-
-¿Te encaja así? Si quieres ajusto cualquier punto antes de implementar.
+### SEO
+- ES: "Actividades — Noches de juegos, torneos y eventos | KLEFF"
+- CA: "Activitats — Nits de jocs, tornejos i esdeveniments | KLEFF"
+- EN: "Activities — Game nights, tournaments and events | KLEFF"
+- og:image apuntando al hero generado.
