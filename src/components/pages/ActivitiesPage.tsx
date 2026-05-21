@@ -129,51 +129,44 @@ export function ActivitiesPage() {
 
   return (
     <SiteLayout>
-      {/* HERO */}
+      {/* HERO — illustrated, no photo */}
       <section className="relative bg-cream overflow-hidden border-b-2 border-ink/10">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-14 md:pt-20 pb-16 md:pb-24 grid lg:grid-cols-2 gap-12 items-center">
-          <div>
-            <span className="inline-flex items-center gap-2 rounded-full bg-coral/10 border-2 border-coral/30 px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-coral-deep">
-              <Sparkles className="h-3.5 w-3.5" />
-              {a.eyebrow}
-            </span>
-            <h1 className="mt-6 text-5xl sm:text-6xl md:text-7xl font-display font-semibold leading-[0.98] tracking-tight">
-              {a.title}
-            </h1>
-            <p className="mt-6 text-lg sm:text-xl text-foreground/75 leading-relaxed max-w-xl">
-              {a.intro}
-            </p>
-            <div className="mt-8 flex flex-wrap gap-3">
-              <a
-                href={MEETUP_EVENTS_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 rounded-xl bg-coral text-cream border-2 border-ink px-6 py-3 text-base font-bold shadow-tactile hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all"
-              >
-                <CalendarDays className="h-5 w-5" />
-                {a.ctaMeetup}
-              </a>
-              <Link
-                to={howHref}
-                className="inline-flex items-center gap-2 rounded-xl bg-card text-ink border-2 border-ink px-6 py-3 text-base font-bold shadow-tactile-sm hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all"
-              >
-                {a.ctaHow}
-              </Link>
-            </div>
-          </div>
-          <div className="relative">
-            <div className="hidden md:block absolute -top-4 -left-4 size-24 bg-coral/20 rounded-3xl rotate-6" aria-hidden />
-            <div className="hidden md:block absolute -bottom-6 -right-6 size-20 bg-ink/10 rounded-2xl -rotate-3" aria-hidden />
-            <img
-              src={heroImage}
-              alt=""
-              width={1600}
-              height={1024}
-              className="relative w-full aspect-[16/10] object-cover rounded-3xl border-2 border-ink shadow-tactile-lg"
-            />
+        {/* Decorative background illustration */}
+        <div className="absolute inset-0 pointer-events-none" aria-hidden>
+          <div className="absolute top-10 right-[8%] size-72 rounded-full bg-coral/20 blur-3xl" />
+          <div className="absolute bottom-0 left-[10%] size-80 rounded-full bg-coral-deep/15 blur-3xl" />
+          <div className="absolute top-24 left-[6%] text-7xl rotate-[-12deg] opacity-80 select-none">🎲</div>
+          <div className="absolute top-12 right-[18%] text-6xl rotate-[14deg] opacity-80 select-none">🃏</div>
+          <div className="absolute bottom-16 right-[10%] text-7xl rotate-[8deg] opacity-80 select-none">🏆</div>
+          <div className="absolute bottom-24 left-[22%] text-5xl rotate-[-6deg] opacity-75 select-none">♟️</div>
+          <div className="absolute top-1/2 right-[42%] text-4xl rotate-[20deg] opacity-60 select-none">✨</div>
+        </div>
+
+        <div className="relative mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 pt-20 md:pt-28 pb-20 md:pb-28 text-center">
+          <span className="inline-flex items-center gap-2 rounded-full bg-coral/15 border-2 border-coral/40 px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-coral-deep">
+            <Sparkles className="h-3.5 w-3.5" />
+            {a.eyebrow}
+          </span>
+          <h1 className="mt-6 text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-display font-semibold leading-[0.95] tracking-tight">
+            {a.title}
+          </h1>
+          <p className="mt-6 text-lg sm:text-xl text-foreground/75 leading-relaxed max-w-2xl mx-auto">
+            {a.intro}
+          </p>
+          <div className="mt-9 flex flex-wrap justify-center gap-3">
+            <a
+              href={MEETUP_EVENTS_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 rounded-xl bg-coral text-cream border-2 border-ink px-6 py-3 text-base font-bold shadow-tactile hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all"
+            >
+              <CalendarDays className="h-5 w-5" />
+              {a.ctaMeetup}
+            </a>
           </div>
         </div>
       </section>
+
 
       {/* MAIN: GAME NIGHT */}
       <section id="noche-de-juegos" className="py-20 md:py-28 bg-cream-deep/40 border-y-2 border-ink/10">
