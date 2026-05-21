@@ -26,6 +26,10 @@ import img2d6 from "@/assets/media-2d6.jpg";
 import imgPuntsDeVista from "@/assets/media-punts-de-vista.jpg";
 import imgCulturas2 from "@/assets/media-culturas-2.jpg";
 import imgElDebate from "@/assets/media-el-debate.jpg";
+import imgOrgulloFriki2026 from "@/assets/media-orgullo-friki-2026.jpg";
+import imgAnalogicos2025 from "@/assets/media-analogicos-2025.jpg";
+import imgVacaciones2025 from "@/assets/media-vacaciones-2025.jpg";
+import imgRegio7_2025 from "@/assets/media-regio7-2025.jpg";
 
 // Lista cronológica (de más reciente a más antiguo)
 export const PRESS_LINKS: PressLink[] = [
@@ -36,6 +40,7 @@ export const PRESS_LINKS: PressLink[] = [
     date: "MAY 2026",
     year: 2026,
     month: 5,
+    imageOverride: imgOrgulloFriki2026,
     descriptionOverride:
       "Planes para el Día del Orgullo Friki en Barcelona: festivales, tardeos, speed dating y juegos de mesa con KLEFF.",
   },
@@ -78,6 +83,7 @@ export const PRESS_LINKS: PressLink[] = [
     date: "DIC 2025",
     year: 2025,
     month: 12,
+    imageOverride: imgAnalogicos2025,
     descriptionOverride:
       "Planes analógicos con amigos en Barcelona: arcades, juegos de mesa y KLEFF entre las recomendaciones.",
   },
@@ -111,6 +117,7 @@ export const PRESS_LINKS: PressLink[] = [
     date: "AGO 2025",
     year: 2025,
     month: 8,
+    imageOverride: imgVacaciones2025,
     descriptionOverride:
       "Planes de vacaciones para disfrutar de Barcelona y alrededores, con KLEFF entre las recomendaciones.",
   },
@@ -210,6 +217,7 @@ export const PRESS_LINKS: PressLink[] = [
     date: "MAR 2025",
     year: 2025,
     month: 3,
+    imageOverride: imgRegio7_2025,
     descriptionOverride:
       "Els millors llocs per fer activitats a Catalunya, amb KLEFF entre les recomanacions per a amants dels jocs de taula.",
   },
