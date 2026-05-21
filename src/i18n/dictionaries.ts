@@ -767,7 +767,7 @@ const en: Dict = {
   },
   activities: {
     eyebrow: "Activities",
-    title: "Live KLEFF",
+    title: "This is KLEFF",
     intro:
       "Our main activity is Game Night, every Wednesday. Everything else happens inside it: tournaments, publisher demos, Slow Friending and themed special editions. Here's the full picture.",
     ctaMeetup: "See upcoming events",
