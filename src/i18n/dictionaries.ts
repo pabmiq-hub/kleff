@@ -1103,17 +1103,16 @@ const ca: Dict = {
       "Esdeveniment solidari de tancament d'any. Recaptem fons per a l'Hospital Sant Joan de Déu, especialitzat en oncologia infantil. Jocs, sortejos i la satisfacció d'ajudar una bona causa.",
     specialNote:
       "Són edicions especials de la Nit de Jocs: mateix format, mateix local, mateix equip — només amb un toc extra.",
-    frequentEyebrow: "Esdeveniments especials recurrents",
-    frequentTitle: "Col·laboracions amb espais aliats",
+    frequentEyebrow: "Col·laboracions",
+    frequentTitle: "Esdeveniments amb espais i entitats aliades",
     frequentBody:
-      "De tant en tant sortim del local habitual per organitzar esdeveniments especials en col·laboració amb altres espais de Barcelona. Combinem jocs amb gastronomia, tallers o experiències temàtiques.",
-    frequentExampleTitle: "Tarda de jocs i gastronomia japonesa a Casa Hanaka",
-    frequentExampleBody:
-      "Un exemple recent: una tarda de jocs combinada amb cuina japonesa a Casa Hanaka. Aquest és el tipus d'esdeveniment puntual que neix de les ganes de barrejar la nostra comunitat amb altres projectes guais de la ciutat.",
-    partnersEyebrow: "Comunitat ampliada",
-    partnersTitle: "Col·laborem amb altres entitats",
+      "De tant en tant sortim del local habitual per organitzar esdeveniments especials en col·laboració amb altres espais de Barcelona — combinant jocs amb gastronomia, tallers o experiències temàtiques. Un exemple recent és la tarda de jocs amb cuina japonesa a Casa Hanaka.",
+    frequentExampleTitle: "",
+    frequentExampleBody: "",
+    partnersEyebrow: "",
+    partnersTitle: "",
     partnersBody:
-      "Tot i que la Nit de Jocs és el nostre esdeveniment estrella dels dimecres, col·laborem amb altres associacions i col·lectius que organitzen partides i activitats altres dies de la setmana. Així, si et perds el dimecres, gairebé sempre hi ha un pla lúdic a prop.",
+      "A més, col·laborem amb altres associacions i col·lectius que organitzen partides i activitats altres dies de la setmana. Així, si et perds el dimecres, gairebé sempre hi ha un pla lúdic a prop.",
     teamBuildingEyebrow: "A mida",
     teamBuildingTitle: "Vols un esdeveniment privat o team building?",
     teamBuildingBody:
