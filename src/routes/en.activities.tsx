@@ -1,7 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { ActivitiesPage } from "@/components/pages/ActivitiesPage";
+import { getPageContent } from "@/server/content.functions";
 
 export const Route = createFileRoute("/en/activities")({
+  loader: () =>
+    getPageContent({ data: { pageKey: "activities", locale: "en" } }).then((pageContent) => ({
+      pageContent,
+    })),
   head: () => ({
     meta: [
       { title: "Activities — Game nights, tournaments and events | KLEFF" },
