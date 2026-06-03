@@ -1406,6 +1406,155 @@ const hiddenRolesSchema: PageSchema = {
   ],
 };
 
+// ---------------- ACTIVITIES ----------------
+
+const activitiesSchema: PageSchema = {
+  key: "activities",
+  label: "Actividades",
+  path: "/actividades",
+  description:
+    "Página de actividades: hero, Noche de Juegos, qué pasa dentro, Game Nights especiales, colaboraciones, team building y calendario.",
+  sections: [
+    {
+      key: "activities.hero",
+      label: "Hero",
+      fields: {
+        eyebrow: { kind: "text", label: "Etiqueta superior" },
+        title: { kind: "text", label: "Título" },
+        intro: { kind: "textarea", label: "Intro", rows: 3 },
+        ctaMeetup: { kind: "text", label: "CTA Meetup" },
+      },
+      defaults: {
+        eyebrow: "Actividades",
+        title: "Esto es KLEFF",
+        intro:
+          "Nuestra actividad principal es la Noche de Juegos, cada miércoles. Dentro suceden el resto de cosas: torneos, demostraciones, Slow Friending Lúdico y ediciones especiales temáticas. Aquí te lo contamos todo.",
+        ctaMeetup: "Ver próximos eventos",
+      },
+    },
+    {
+      key: "activities.main",
+      label: "Noche de Juegos (principal)",
+      fields: {
+        mainEyebrow: { kind: "text", label: "Etiqueta superior" },
+        mainTitle: { kind: "text", label: "Título" },
+        mainBody1: { kind: "textarea", label: "Párrafo 1", rows: 4 },
+        mainBody2: { kind: "textarea", label: "Párrafo 2", rows: 4 },
+        mainCta: { kind: "text", label: "CTA" },
+      },
+      defaults: {
+        mainEyebrow: "Cada miércoles",
+        mainTitle: "La Noche de Juegos",
+        mainBody1: "",
+        mainBody2: "",
+        mainCta: "Apúntate a la próxima Noche de Juegos",
+      },
+    },
+    {
+      key: "activities.inside",
+      label: "Qué pasa dentro",
+      fields: {
+        insideTitle: { kind: "text", label: "Título" },
+        insideSubtitle: { kind: "textarea", label: "Subtítulo", rows: 2 },
+        inside1Title: { kind: "text", label: "Torneos — título" },
+        inside1Body: { kind: "textarea", label: "Torneos — texto", rows: 4 },
+        inside2Title: { kind: "text", label: "Demos — título" },
+        inside2Body: { kind: "textarea", label: "Demos — texto", rows: 4 },
+        inside3Title: { kind: "text", label: "Slow Friending — título" },
+        inside3Body: { kind: "textarea", label: "Slow Friending — texto", rows: 4 },
+      },
+      defaults: {
+        insideTitle: "Qué pasa dentro de la Noche de Juegos",
+        insideSubtitle: "",
+        inside1Title: "Torneos",
+        inside1Body: "",
+        inside2Title: "Demostraciones de editoriales y autores",
+        inside2Body: "",
+        inside3Title: "Slow Friending Lúdico",
+        inside3Body: "",
+      },
+    },
+    {
+      key: "activities.special",
+      label: "Game Nights especiales",
+      fields: {
+        specialEyebrow: { kind: "text", label: "Etiqueta" },
+        specialTitle: { kind: "text", label: "Título" },
+        specialSubtitle: { kind: "textarea", label: "Subtítulo", rows: 2 },
+        special1Title: { kind: "text", label: "Carnival — título" },
+        special1Body: { kind: "textarea", label: "Carnival — texto", rows: 3 },
+        special2Title: { kind: "text", label: "Halloween — título" },
+        special2Body: { kind: "textarea", label: "Halloween — texto", rows: 3 },
+        special3Title: { kind: "text", label: "X-Mas — título" },
+        special3Body: { kind: "textarea", label: "X-Mas — texto", rows: 3 },
+        specialNote: { kind: "textarea", label: "Nota final", rows: 2 },
+      },
+      defaults: {
+        specialEyebrow: "Game Nights especiales",
+        specialTitle: "Ediciones únicas, una vez al año",
+        specialSubtitle: "",
+        special1Title: "Game Night: Carnival",
+        special1Body: "",
+        special2Title: "Game Night: Halloween",
+        special2Body: "",
+        special3Title: "X-Mas Game Night",
+        special3Body: "",
+        specialNote: "",
+      },
+    },
+    {
+      key: "activities.collabs",
+      label: "Colaboraciones",
+      fields: {
+        frequentEyebrow: { kind: "text", label: "Etiqueta" },
+        frequentTitle: { kind: "text", label: "Título" },
+        frequentBody: { kind: "textarea", label: "Párrafo 1", rows: 4 },
+        partnersBody: { kind: "textarea", label: "Párrafo 2", rows: 4 },
+      },
+      defaults: {
+        frequentEyebrow: "Colaboraciones",
+        frequentTitle: "Eventos con espacios y entidades aliadas",
+        frequentBody: "",
+        partnersBody: "",
+      },
+    },
+    {
+      key: "activities.teamBuilding",
+      label: "Team building",
+      fields: {
+        teamBuildingEyebrow: { kind: "text", label: "Etiqueta" },
+        teamBuildingTitle: { kind: "text", label: "Título" },
+        teamBuildingBody: { kind: "textarea", label: "Texto", rows: 4 },
+        teamBuildingCta: { kind: "text", label: "CTA" },
+      },
+      defaults: {
+        teamBuildingEyebrow: "A medida",
+        teamBuildingTitle: "¿Quieres un evento privado o team building?",
+        teamBuildingBody: "",
+        teamBuildingCta: "Contáctanos",
+      },
+    },
+    {
+      key: "activities.calendar",
+      label: "Calendario (CTA final)",
+      fields: {
+        calendarEyebrow: { kind: "text", label: "Etiqueta" },
+        calendarTitle: { kind: "text", label: "Título" },
+        calendarBody: { kind: "textarea", label: "Texto", rows: 3 },
+        calendarCta: { kind: "text", label: "CTA" },
+        calendarGroup: { kind: "text", label: "Enlace grupo" },
+      },
+      defaults: {
+        calendarEyebrow: "Calendario",
+        calendarTitle: "¿Quieres saber más sobre los eventos?",
+        calendarBody: "",
+        calendarCta: "Ver calendario completo en Meetup",
+        calendarGroup: "O explora todo el grupo de KLEFF",
+      },
+    },
+  ],
+};
+
 // ---------------- REGISTRY ----------------
 
 import { LEGAL_SCHEMAS } from "./legalSchemas";
@@ -1422,6 +1571,7 @@ export const PAGE_SCHEMAS: PageSchema[] = [
   mediaSchema,
   blogSchema,
   ludotecaSchema,
+  activitiesSchema,
   ...LEGAL_SCHEMAS,
 ];
 
