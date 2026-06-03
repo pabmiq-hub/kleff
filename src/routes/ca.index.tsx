@@ -1,9 +1,16 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { HomePage } from "@/components/pages/HomePage";
 import { getMeetupEvents } from "@/server/meetup.functions";
+import { getPageContent } from "@/server/content.functions";
 
 export const Route = createFileRoute("/ca/")({
-  loader: () => getMeetupEvents(),
+  loader: async () => {
+    const [meetup, pageContent] = await Promise.all([
+      getMeetupEvents(),
+      getPageContent({ data: { pageKey: "home", locale: "ca" } }),
+    ]);
+    return { ...meetup, pageContent };
+  },
   staleTime: 15 * 60 * 1000,
   head: () => ({
     meta: [

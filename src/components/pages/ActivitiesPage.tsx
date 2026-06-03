@@ -16,7 +16,7 @@ import { Link } from "@tanstack/react-router";
 import { useI18n } from "@/i18n/I18nProvider";
 import { SiteLayout } from "@/components/site/SiteLayout";
 import { InstagramEmbed } from "@/components/site/InstagramEmbed";
-
+import { EditableText } from "@/editor/Editable";
 
 const MEETUP_EVENTS_URL =
   "https://www.meetup.com/es-ES/kleff-bcn/events/?type=upcoming";
@@ -25,7 +25,7 @@ const HANAKA_REEL = "https://www.instagram.com/p/DXbPL40jG8p/";
 
 type BadgeKind = "weekly" | "monthly" | "yearly" | "occasional" | "frequent" | "custom";
 
-function Badge({ kind, label }: { kind: BadgeKind; label: string }) {
+function Badge({ kind, label, id }: { kind: BadgeKind; label: string; id?: string }) {
   const styles: Record<BadgeKind, string> = {
     weekly: "bg-coral text-cream border-ink",
     monthly: "bg-cream border-ink text-ink",
@@ -34,20 +34,20 @@ function Badge({ kind, label }: { kind: BadgeKind; label: string }) {
     frequent: "bg-cream-deep border-ink text-ink",
     custom: "bg-coral-deep text-cream border-ink",
   };
-  return (
-    <span
-      className={`inline-flex items-center text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full border-2 ${styles[kind]}`}
-    >
-      {label}
-    </span>
-  );
+  const className = `inline-flex items-center text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full border-2 ${styles[kind]}`;
+  if (id) {
+    return (
+      <EditableText id={id} as="span" className={className}>
+        {label}
+      </EditableText>
+    );
+  }
+  return <span className={className}>{label}</span>;
 }
-
 
 export function ActivitiesPage() {
   const { t, locale } = useI18n();
   const a = t.activities;
-
 
   const contactHref =
     locale === "en" ? "/en/contact" : locale === "ca" ? "/ca/contacte" : "/contacto";
@@ -68,16 +68,8 @@ export function ActivitiesPage() {
     locale === "en" ? "/en/tournaments" : locale === "ca" ? "/ca/tornejos" : "/torneos";
 
   const innerCommunities = [
-    {
-      title: "Blood on the Clocktower",
-      icon: <Sparkles className="h-5 w-5" />,
-      href: clocktowerHref,
-    },
-    {
-      title: "Catan",
-      icon: <Dice5 className="h-5 w-5" />,
-      href: catanHref,
-    },
+    { title: "Blood on the Clocktower", icon: <Sparkles className="h-5 w-5" />, href: clocktowerHref },
+    { title: "Catan", icon: <Dice5 className="h-5 w-5" />, href: catanHref },
     {
       title: locale === "en" ? "Hidden Roles" : locale === "ca" ? "Rols Ocults" : "Roles Ocultos",
       icon: <Users className="h-5 w-5" />,
@@ -92,9 +84,8 @@ export function ActivitiesPage() {
 
   return (
     <SiteLayout>
-      {/* HERO — illustrated, no photo */}
+      {/* HERO */}
       <section className="relative bg-cream overflow-hidden border-b-2 border-ink/10">
-        {/* Decorative background illustration */}
         <div className="absolute inset-0 pointer-events-none" aria-hidden>
           <div className="absolute top-10 right-[8%] size-72 rounded-full bg-coral/20 blur-3xl" />
           <div className="absolute bottom-0 left-[10%] size-80 rounded-full bg-coral-deep/15 blur-3xl" />
@@ -108,14 +99,22 @@ export function ActivitiesPage() {
         <div className="relative mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 pt-20 md:pt-28 pb-20 md:pb-28 text-center">
           <span className="inline-flex items-center gap-2 rounded-full bg-coral/15 border-2 border-coral/40 px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-coral-deep">
             <Sparkles className="h-3.5 w-3.5" />
-            {a.eyebrow}
+            <EditableText id="activities.hero.eyebrow" as="span">{a.eyebrow}</EditableText>
           </span>
-          <h1 className="mt-6 text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-display font-semibold leading-[0.95] tracking-tight">
+          <EditableText
+            id="activities.hero.title"
+            as="h1"
+            className="mt-6 text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-display font-semibold leading-[0.95] tracking-tight"
+          >
             {a.title}
-          </h1>
-          <p className="mt-6 text-lg sm:text-xl text-foreground/75 leading-relaxed max-w-2xl mx-auto">
+          </EditableText>
+          <EditableText
+            id="activities.hero.intro"
+            as="p"
+            className="mt-6 text-lg sm:text-xl text-foreground/75 leading-relaxed max-w-2xl mx-auto"
+          >
             {a.intro}
-          </p>
+          </EditableText>
           <div className="mt-9 flex flex-wrap justify-center gap-3">
             <a
               href={MEETUP_EVENTS_URL}
@@ -124,12 +123,11 @@ export function ActivitiesPage() {
               className="inline-flex items-center gap-2 rounded-xl bg-coral text-cream border-2 border-ink px-6 py-3 text-base font-bold shadow-tactile hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all"
             >
               <CalendarDays className="h-5 w-5" />
-              {a.ctaMeetup}
+              <EditableText id="activities.hero.ctaMeetup" as="span">{a.ctaMeetup}</EditableText>
             </a>
           </div>
         </div>
       </section>
-
 
       {/* MAIN: GAME NIGHT */}
       <section id="noche-de-juegos" className="py-20 md:py-28 bg-cream-deep/40 border-y-2 border-ink/10">
@@ -137,11 +135,16 @@ export function ActivitiesPage() {
           <div className="grid lg:grid-cols-12 gap-10">
             <div className="lg:col-span-5">
               <span className="inline-flex items-center gap-2 rounded-full bg-coral text-cream border-2 border-ink px-3 py-1 text-[11px] font-bold uppercase tracking-widest shadow-tactile-sm">
-                <Calendar className="h-3.5 w-3.5" /> {a.mainEyebrow}
+                <Calendar className="h-3.5 w-3.5" />{" "}
+                <EditableText id="activities.main.eyebrow" as="span">{a.mainEyebrow}</EditableText>
               </span>
-              <h2 className="mt-5 text-4xl sm:text-5xl lg:text-6xl font-display font-semibold leading-tight">
+              <EditableText
+                id="activities.main.title"
+                as="h2"
+                className="mt-5 text-4xl sm:text-5xl lg:text-6xl font-display font-semibold leading-tight"
+              >
                 {a.mainTitle}
-              </h2>
+              </EditableText>
               <div className="mt-6 flex flex-wrap gap-3">
                 <div className="inline-flex items-center gap-2 bg-card border-2 border-ink rounded-2xl px-3 py-2 shadow-tactile-sm text-sm font-bold">
                   <MapPin className="h-4 w-4 text-coral" /> L'Estació
@@ -155,8 +158,12 @@ export function ActivitiesPage() {
               </div>
             </div>
             <div className="lg:col-span-7 space-y-5">
-              <p className="text-lg text-foreground/80 leading-relaxed">{a.mainBody1}</p>
-              <p className="text-lg text-foreground/80 leading-relaxed">{a.mainBody2}</p>
+              <EditableText id="activities.main.body1" as="p" className="text-lg text-foreground/80 leading-relaxed">
+                {a.mainBody1}
+              </EditableText>
+              <EditableText id="activities.main.body2" as="p" className="text-lg text-foreground/80 leading-relaxed">
+                {a.mainBody2}
+              </EditableText>
               <div className="mt-6 grid sm:grid-cols-2 gap-3">
                 {innerCommunities.map((c) => (
                   <Link
@@ -179,14 +186,14 @@ export function ActivitiesPage() {
                 className="mt-4 inline-flex items-center gap-2 rounded-xl bg-ink text-cream border-2 border-ink px-6 py-3 text-base font-bold shadow-tactile hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all"
               >
                 <CalendarDays className="h-5 w-5" />
-                {a.mainCta}
+                <EditableText id="activities.main.cta" as="span">{a.mainCta}</EditableText>
               </a>
             </div>
           </div>
         </div>
       </section>
 
-      {/* INSIDE GAME NIGHT — visual, asymmetric */}
+      {/* INSIDE GAME NIGHT */}
       <section className="py-20 md:py-28 bg-cream relative overflow-hidden">
         <div className="absolute top-1/3 -left-32 size-80 rounded-full bg-coral/10 blur-3xl pointer-events-none" />
         <div className="absolute bottom-0 -right-32 size-80 rounded-full bg-coral-deep/10 blur-3xl pointer-events-none" />
@@ -195,14 +202,23 @@ export function ActivitiesPage() {
             <span className="inline-block stamp-coral text-xs font-bold uppercase tracking-widest mb-4">
               {locale === "en" ? "Inside Game Night" : locale === "ca" ? "Dins de la Nit" : "Dentro de la Noche"}
             </span>
-            <h2 className="text-4xl sm:text-5xl font-display font-semibold leading-tight">
+            <EditableText
+              id="activities.inside.title"
+              as="h2"
+              className="text-4xl sm:text-5xl font-display font-semibold leading-tight"
+            >
               {a.insideTitle}
-            </h2>
-            <p className="mt-4 text-lg text-foreground/70">{a.insideSubtitle}</p>
+            </EditableText>
+            <EditableText
+              id="activities.inside.subtitle"
+              as="p"
+              className="mt-4 text-lg text-foreground/70"
+            >
+              {a.insideSubtitle}
+            </EditableText>
           </div>
 
           <div className="grid md:grid-cols-12 gap-6">
-            {/* Tournaments — large feature card */}
             <Link
               to={tournamentsHref}
               className="group relative md:col-span-7 md:row-span-2 bg-gradient-to-br from-coral via-coral to-coral-deep text-cream border-2 border-ink rounded-3xl p-8 sm:p-10 shadow-tactile-lg hover:-translate-x-[2px] hover:-translate-y-[2px] hover:shadow-tactile transition-all overflow-hidden flex flex-col justify-between min-h-[360px]"
@@ -213,12 +229,20 @@ export function ActivitiesPage() {
                 <span className="inline-flex items-center text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full border-2 border-cream/40 bg-cream/15 text-cream">
                   {a.badgeMonthly}
                 </span>
-                <h3 className="mt-4 text-3xl sm:text-4xl font-display font-semibold leading-tight max-w-md">
+                <EditableText
+                  id="activities.inside.tournamentsTitle"
+                  as="h3"
+                  className="mt-4 text-3xl sm:text-4xl font-display font-semibold leading-tight max-w-md"
+                >
                   {a.inside1Title}
-                </h3>
-                <p className="mt-4 text-base sm:text-lg text-cream/90 leading-relaxed max-w-lg">
+                </EditableText>
+                <EditableText
+                  id="activities.inside.tournamentsBody"
+                  as="p"
+                  className="mt-4 text-base sm:text-lg text-cream/90 leading-relaxed max-w-lg"
+                >
                   {a.inside1Body}
-                </p>
+                </EditableText>
               </div>
               <span className="relative mt-6 inline-flex items-center gap-2 text-sm font-bold group-hover:gap-3 transition-all">
                 {locale === "en" ? "More about tournaments" : locale === "ca" ? "Més sobre tornejos" : "Más sobre torneos"}
@@ -226,39 +250,52 @@ export function ActivitiesPage() {
               </span>
             </Link>
 
-            {/* Demos — top right */}
             <article className="relative md:col-span-5 bg-ink text-cream border-2 border-ink rounded-3xl p-7 shadow-tactile hover:-translate-x-[2px] hover:-translate-y-[2px] hover:shadow-tactile-lg transition-all overflow-hidden">
               <div className="absolute -bottom-6 -right-6 text-[110px] leading-none opacity-25 select-none" aria-hidden>📦</div>
               <div className="relative">
                 <span className="inline-flex items-center text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full border-2 border-cream/30 bg-cream/10 text-cream">
                   {a.badgeMonthly}
                 </span>
-                <h3 className="mt-4 text-2xl font-display font-semibold leading-tight">
+                <EditableText
+                  id="activities.inside.demosTitle"
+                  as="h3"
+                  className="mt-4 text-2xl font-display font-semibold leading-tight"
+                >
                   {a.inside2Title}
-                </h3>
-                <p className="mt-3 text-sm text-cream/85 leading-relaxed">
+                </EditableText>
+                <EditableText
+                  id="activities.inside.demosBody"
+                  as="p"
+                  className="mt-3 text-sm text-cream/85 leading-relaxed"
+                >
                   {a.inside2Body}
-                </p>
+                </EditableText>
               </div>
             </article>
 
-            {/* Slow Friending — bottom right */}
             <article className="relative md:col-span-5 bg-card border-2 border-ink rounded-3xl p-7 shadow-tactile-sm hover:-translate-x-[2px] hover:-translate-y-[2px] hover:shadow-tactile transition-all overflow-hidden">
               <div className="absolute -bottom-6 -right-6 text-[110px] leading-none opacity-20 select-none" aria-hidden>💘</div>
               <div className="relative">
                 <Badge kind="occasional" label={a.badgeOccasional} />
-                <h3 className="mt-3 text-2xl font-display font-semibold leading-tight">
+                <EditableText
+                  id="activities.inside.slowTitle"
+                  as="h3"
+                  className="mt-3 text-2xl font-display font-semibold leading-tight"
+                >
                   {a.inside3Title}
-                </h3>
-                <p className="mt-3 text-sm text-foreground/75 leading-relaxed">
+                </EditableText>
+                <EditableText
+                  id="activities.inside.slowBody"
+                  as="p"
+                  className="mt-3 text-sm text-foreground/75 leading-relaxed"
+                >
                   {a.inside3Body}
-                </p>
+                </EditableText>
               </div>
             </article>
           </div>
         </div>
       </section>
-
 
       {/* SPECIAL GAME NIGHTS */}
       <section className="py-20 md:py-28 bg-ink text-cream relative overflow-hidden">
@@ -266,53 +303,97 @@ export function ActivitiesPage() {
         <div className="absolute -bottom-16 -left-16 size-80 rounded-full bg-coral/10 blur-3xl pointer-events-none" />
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative">
           <div className="max-w-3xl mb-14">
-            <span className="inline-block bg-coral text-cream text-xs font-bold uppercase tracking-widest px-3 py-1 rounded-full mb-4">
+            <EditableText
+              id="activities.special.eyebrow"
+              as="span"
+              className="inline-block bg-coral text-cream text-xs font-bold uppercase tracking-widest px-3 py-1 rounded-full mb-4"
+            >
               {a.specialEyebrow}
-            </span>
-            <h2 className="text-4xl sm:text-5xl font-display font-semibold leading-tight">
+            </EditableText>
+            <EditableText
+              id="activities.special.title"
+              as="h2"
+              className="text-4xl sm:text-5xl font-display font-semibold leading-tight"
+            >
               {a.specialTitle}
-            </h2>
-            <p className="mt-4 text-lg text-cream/80">{a.specialSubtitle}</p>
+            </EditableText>
+            <EditableText
+              id="activities.special.subtitle"
+              as="p"
+              className="mt-4 text-lg text-cream/80"
+            >
+              {a.specialSubtitle}
+            </EditableText>
           </div>
 
           <div className="grid md:grid-cols-3 gap-6">
             {[
-              { emoji: "🎭", title: a.special1Title, body: a.special1Body },
-              { emoji: "🎃", title: a.special2Title, body: a.special2Body },
-              { emoji: "🎄", title: a.special3Title, body: a.special3Body },
+              { key: "carnival", emoji: "🎭", title: a.special1Title, body: a.special1Body },
+              { key: "halloween", emoji: "🎃", title: a.special2Title, body: a.special2Body },
+              { key: "xmas", emoji: "🎄", title: a.special3Title, body: a.special3Body },
             ].map((s) => (
               <article
-                key={s.title}
+                key={s.key}
                 className="relative bg-cream/5 backdrop-blur border-2 border-cream/20 rounded-3xl p-7 hover:bg-cream/10 transition-colors"
               >
-                <div className="text-5xl mb-5" aria-hidden>
-                  {s.emoji}
-                </div>
+                <div className="text-5xl mb-5" aria-hidden>{s.emoji}</div>
                 <Badge kind="yearly" label={a.badgeYearly} />
-                <h3 className="mt-3 text-2xl font-display font-semibold leading-tight">{s.title}</h3>
-                <p className="mt-3 text-base text-cream/80 leading-relaxed">{s.body}</p>
+                <EditableText
+                  id={`activities.special.${s.key}.title`}
+                  as="h3"
+                  className="mt-3 text-2xl font-display font-semibold leading-tight"
+                >
+                  {s.title}
+                </EditableText>
+                <EditableText
+                  id={`activities.special.${s.key}.body`}
+                  as="p"
+                  className="mt-3 text-base text-cream/80 leading-relaxed"
+                >
+                  {s.body}
+                </EditableText>
               </article>
             ))}
           </div>
-          <p className="mt-10 max-w-3xl text-sm text-cream/70 italic border-l-2 border-coral pl-4">
+          <EditableText
+            id="activities.special.note"
+            as="p"
+            className="mt-10 max-w-3xl text-sm text-cream/70 italic border-l-2 border-coral pl-4"
+          >
             {a.specialNote}
-          </p>
+          </EditableText>
         </div>
       </section>
 
-      {/* COLLABORATIONS — unified: allied spaces + partner groups */}
+      {/* COLLABORATIONS */}
       <section className="py-20 md:py-28 bg-cream">
         <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 grid lg:grid-cols-2 gap-10 lg:gap-14 items-center">
           <div className="flex flex-col justify-center">
             <span className="inline-flex items-center gap-2 self-start rounded-full bg-coral/15 border-2 border-coral/40 px-3 py-1 text-xs font-bold uppercase tracking-widest text-coral-deep">
               <Handshake className="h-3.5 w-3.5" />
-              {a.frequentEyebrow}
+              <EditableText id="activities.collabs.eyebrow" as="span">{a.frequentEyebrow}</EditableText>
             </span>
-            <h2 className="mt-5 text-4xl sm:text-5xl font-display font-semibold leading-tight">
+            <EditableText
+              id="activities.collabs.title"
+              as="h2"
+              className="mt-5 text-4xl sm:text-5xl font-display font-semibold leading-tight"
+            >
               {a.frequentTitle}
-            </h2>
-            <p className="mt-5 text-lg text-foreground/75 leading-relaxed">{a.frequentBody}</p>
-            <p className="mt-4 text-lg text-foreground/75 leading-relaxed">{a.partnersBody}</p>
+            </EditableText>
+            <EditableText
+              id="activities.collabs.body1"
+              as="p"
+              className="mt-5 text-lg text-foreground/75 leading-relaxed"
+            >
+              {a.frequentBody}
+            </EditableText>
+            <EditableText
+              id="activities.collabs.body2"
+              as="p"
+              className="mt-4 text-lg text-foreground/75 leading-relaxed"
+            >
+              {a.partnersBody}
+            </EditableText>
           </div>
           <div className="flex justify-center lg:justify-end">
             <div className="w-full max-w-[500px]">
@@ -322,8 +403,6 @@ export function ActivitiesPage() {
         </div>
       </section>
 
-
-
       {/* TEAM BUILDING */}
       <section className="py-20 md:py-28 bg-cream">
         <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
@@ -332,19 +411,31 @@ export function ActivitiesPage() {
             <div className="relative grid md:grid-cols-3 gap-8 items-center">
               <div className="md:col-span-2">
                 <span className="inline-flex items-center gap-2 bg-cream text-ink text-xs font-bold uppercase tracking-widest px-3 py-1 rounded-full">
-                  <HeartHandshake className="h-3.5 w-3.5" /> {a.teamBuildingEyebrow}
+                  <HeartHandshake className="h-3.5 w-3.5" />{" "}
+                  <EditableText id="activities.teamBuilding.eyebrow" as="span">{a.teamBuildingEyebrow}</EditableText>
                 </span>
-                <h2 className="mt-4 text-3xl sm:text-4xl font-display font-semibold leading-tight">
+                <EditableText
+                  id="activities.teamBuilding.title"
+                  as="h2"
+                  className="mt-4 text-3xl sm:text-4xl font-display font-semibold leading-tight"
+                >
                   {a.teamBuildingTitle}
-                </h2>
-                <p className="mt-4 text-cream/90 leading-relaxed">{a.teamBuildingBody}</p>
+                </EditableText>
+                <EditableText
+                  id="activities.teamBuilding.body"
+                  as="p"
+                  className="mt-4 text-cream/90 leading-relaxed"
+                >
+                  {a.teamBuildingBody}
+                </EditableText>
               </div>
               <div className="flex md:justify-end">
                 <Link
                   to={contactHref}
                   className="inline-flex items-center gap-2 rounded-xl bg-ink text-cream border-2 border-ink px-6 py-3 text-base font-bold shadow-tactile hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all"
                 >
-                  {a.teamBuildingCta} <ArrowRight className="h-5 w-5" />
+                  <EditableText id="activities.teamBuilding.cta" as="span">{a.teamBuildingCta}</EditableText>{" "}
+                  <ArrowRight className="h-5 w-5" />
                 </Link>
               </div>
             </div>
@@ -362,15 +453,27 @@ export function ActivitiesPage() {
           <div className="inline-flex items-center justify-center size-16 rounded-2xl bg-coral text-cream border-2 border-cream/30 shadow-tactile mb-6">
             <CalendarDays className="h-7 w-7" />
           </div>
-          <span className="block text-xs font-bold uppercase tracking-widest text-coral mb-3">
+          <EditableText
+            id="activities.calendar.eyebrow"
+            as="span"
+            className="block text-xs font-bold uppercase tracking-widest text-coral mb-3"
+          >
             {a.calendarEyebrow}
-          </span>
-          <h2 className="text-4xl sm:text-5xl md:text-6xl font-display font-semibold leading-tight">
+          </EditableText>
+          <EditableText
+            id="activities.calendar.title"
+            as="h2"
+            className="text-4xl sm:text-5xl md:text-6xl font-display font-semibold leading-tight"
+          >
             {a.calendarTitle}
-          </h2>
-          <p className="mt-5 text-lg text-cream/80 leading-relaxed max-w-2xl mx-auto">
+          </EditableText>
+          <EditableText
+            id="activities.calendar.body"
+            as="p"
+            className="mt-5 text-lg text-cream/80 leading-relaxed max-w-2xl mx-auto"
+          >
             {a.calendarBody}
-          </p>
+          </EditableText>
           <div className="mt-9 flex flex-wrap justify-center gap-4">
             <a
               href={MEETUP_EVENTS_URL}
@@ -379,7 +482,7 @@ export function ActivitiesPage() {
               className="inline-flex items-center gap-2 rounded-xl bg-coral text-cream border-2 border-cream px-7 py-4 text-lg font-bold shadow-tactile-lg hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-tactile-sm transition-all"
             >
               <CalendarDays className="h-5 w-5" />
-              {a.calendarCta}
+              <EditableText id="activities.calendar.cta" as="span">{a.calendarCta}</EditableText>
             </a>
             <a
               href={MEETUP_GROUP_URL}
@@ -387,7 +490,8 @@ export function ActivitiesPage() {
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 rounded-xl bg-transparent text-cream border-2 border-cream/40 px-7 py-4 text-lg font-bold hover:bg-cream/10 transition-all"
             >
-              {a.calendarGroup} <ArrowRight className="h-5 w-5" />
+              <EditableText id="activities.calendar.group" as="span">{a.calendarGroup}</EditableText>{" "}
+              <ArrowRight className="h-5 w-5" />
             </a>
           </div>
         </div>
