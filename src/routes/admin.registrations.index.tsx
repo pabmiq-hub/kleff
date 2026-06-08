@@ -3,7 +3,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ClipboardList, Plus, ExternalLink, Trash2, Users, Loader2 } from "lucide-react";
+import { ClipboardList, Plus, ExternalLink, Trash2, Users, Loader2, Pencil, Settings } from "lucide-react";
 import { adminListForms, adminCreateForm, adminDeleteForm } from "@/lib/registrations.functions";
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
@@ -121,7 +121,7 @@ function AdminRegistrations() {
               <th className="px-4 py-3">Inscripción</th>
               <th className="px-4 py-3 text-center w-24">Estado</th>
               <th className="px-4 py-3 text-center w-32">Respuestas</th>
-              <th className="px-4 py-3 w-32">Acciones</th>
+              <th className="px-4 py-3 w-56">Acciones</th>
             </tr>
           </thead>
           <tbody>
@@ -142,9 +142,12 @@ function AdminRegistrations() {
                   <span className="inline-flex items-center gap-1 text-ink/80"><Users className="h-3.5 w-3.5" /> {f.responses}{f.max_responses ? ` / ${f.max_responses}` : ""}</span>
                 </td>
                 <td className="px-4 py-3">
-                  <div className="flex gap-1">
-                    {f.is_published && <a href={`/inscripcion/${f.slug}`} target="_blank" rel="noreferrer" className="inline-flex items-center justify-center h-8 w-8 rounded-md text-ink/80 hover:text-ink hover:bg-ink/10" title="Ver pública"><ExternalLink className="h-3.5 w-3.5" /></a>}
-                    <Button size="sm" variant="ghost" onClick={() => handleDelete(f.id, f.title_es || f.slug)} className="text-ink/80 hover:text-red-400 hover:bg-red-500/10 h-8 w-8 p-0"><Trash2 className="h-3.5 w-3.5" /></Button>
+                  <div className="flex gap-1 items-center">
+                    <Link to="/admin/registrations/$id" params={{ id: f.id }} className="inline-flex items-center gap-1 h-8 px-2.5 rounded-md bg-coral/10 text-coral hover:bg-coral/20 text-xs font-medium" title={f.is_published ? "Gestionar" : "Continuar borrador"}>
+                      {f.is_published ? <><Settings className="h-3.5 w-3.5" /> Gestionar</> : <><Pencil className="h-3.5 w-3.5" /> Editar</>}
+                    </Link>
+                    {f.is_published && <a href={`/inscripcion/${f.slug}`} target="_blank" rel="noreferrer" className="inline-flex items-center justify-center h-8 w-8 rounded-md text-ink/70 hover:text-ink hover:bg-ink/10" title="Ver pública"><ExternalLink className="h-3.5 w-3.5" /></a>}
+                    <Button size="sm" variant="ghost" onClick={() => handleDelete(f.id, f.title_es || f.slug)} className="text-ink/70 hover:text-red-500 hover:bg-red-500/10 h-8 w-8 p-0" title="Eliminar"><Trash2 className="h-3.5 w-3.5" /></Button>
                   </div>
                 </td>
               </tr>
