@@ -17,8 +17,8 @@ import { SectionProvider, useSectionValue } from "@/cms/SectionContext";
 import { CmsImage, CmsList, CmsText } from "@/cms/Editable";
 import { useEditor } from "@/editor/EditorProvider";
 import { useI18n } from "@/i18n/I18nProvider";
-import clocktowerLogo from "@/assets/clocktower-logo.png";
-import clocktowerHero from "@/assets/clocktower-hero.jpg";
+import clocktowerLogo from "@/assets/clocktower-logo.webp";
+import clocktowerHero from "@/assets/clocktower-hero.webp";
 
 /** Convert any Instagram reel URL to its `/embed` equivalent. */
 function reelToEmbed(url: string): string | null {
