@@ -1,6 +1,6 @@
 import { createFileRoute, redirect, Link } from "@tanstack/react-router";
 import { lookupRedirect } from "@/server/redirects.functions";
-import { getBlogPostBySlug, type BlogPostFull } from "@/lib/blog.functions";
+import { getBlogPostBySlug } from "@/lib/blog.functions";
 import { BlogPostPage } from "@/components/pages/BlogPostPage";
 
 type Locale = "es" | "ca" | "en";
