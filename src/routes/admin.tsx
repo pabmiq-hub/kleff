@@ -7,6 +7,7 @@ import {
   Mail,
   Dices,
   FileText,
+  Newspaper,
   LogOut,
   Shield,
   ExternalLink,
