@@ -224,6 +224,7 @@ export const adminCopyBlocksFromLocale = createServerFn({ method: "POST" })
     }),
   )
   .handler(async ({ data, context }) => {
+    await assertSuperAdmin(context.userId);
     if (data.from === data.to) throw new Error("Origen y destino son iguales");
     const { data: source, error } = await supabaseAdmin
       .from("content_page_blocks")
