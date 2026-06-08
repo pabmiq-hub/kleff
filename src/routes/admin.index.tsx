@@ -27,7 +27,7 @@ function AdminHome() {
     <div className="space-y-8">
       <header>
         <h1 className="font-display text-4xl font-bold">Resumen</h1>
-        <p className="text-cream/60 mt-1">Vista general del club.</p>
+        <p className="text-ink/60 mt-1">Vista general del club.</p>
       </header>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
@@ -59,10 +59,10 @@ function KpiCard({
       className={`block rounded-2xl border p-5 transition-colors ${
         highlight
           ? "border-coral bg-coral/15 hover:bg-coral/20"
-          : "border-cream/15 bg-cream/5 hover:bg-cream/10"
+          : "border-ink/15 bg-ink/5 hover:bg-ink/10"
       }`}
     >
-      <div className="flex items-center gap-2 text-cream/70 text-xs font-semibold uppercase tracking-wide">
+      <div className="flex items-center gap-2 text-ink/70 text-xs font-semibold uppercase tracking-wide">
         {icon} {label}
       </div>
       <p className="font-display text-4xl font-bold mt-2">{value ?? "—"}</p>

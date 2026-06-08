@@ -66,7 +66,7 @@ function ContentIndex() {
       <header className="flex items-start justify-between gap-4 flex-wrap">
         <div>
           <h1 className="font-display text-4xl font-bold">Contenido de la web</h1>
-          <p className="text-cream/60 mt-1 max-w-2xl">
+          <p className="text-ink/60 mt-1 max-w-2xl">
             Haz clic en cualquier página para abrirla con el editor visual: podrás cambiar
             textos, colores, tipografía, imágenes y espaciado directamente sobre la web real.
           </p>
@@ -82,7 +82,7 @@ function ContentIndex() {
 
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
-            <Button className="bg-coral hover:bg-coral-deep text-cream">
+            <Button className="bg-coral hover:bg-coral-deep text-ink">
               <Plus className="h-4 w-4 mr-1.5" /> Nueva página
             </Button>
           </DialogTrigger>
@@ -103,7 +103,7 @@ function ContentIndex() {
               <div>
                 <Label>Slug (URL)</Label>
                 <div className="mt-1.5 flex items-center gap-2">
-                  <span className="text-sm text-cream/50 font-mono">/p/</span>
+                  <span className="text-sm text-ink/50 font-mono">/p/</span>
                   <Input
                     value={slug}
                     onChange={(e) => setSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, "-"))}
@@ -117,7 +117,7 @@ function ContentIndex() {
               <Button
                 onClick={handleCreate}
                 disabled={creating || !slug || !title}
-                className="bg-coral hover:bg-coral-deep text-cream"
+                className="bg-coral hover:bg-coral-deep text-ink"
               >
                 {creating ? "Creando…" : "Crear y editar"}
               </Button>
@@ -130,7 +130,7 @@ function ContentIndex() {
         {pages.map((page) => (
           <div
             key={page.id}
-            className="bg-cream/5 border border-cream/15 rounded-2xl p-5 hover:border-coral/50 transition-colors"
+            className="bg-ink/5 border border-ink/15 rounded-2xl p-5 hover:border-coral/50 transition-colors"
           >
             <div className="flex items-center justify-between gap-4 flex-wrap">
               <div className="flex gap-4 items-start min-w-0 flex-1">
@@ -139,19 +139,19 @@ function ContentIndex() {
                 </div>
                 <div className="min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <h2 className="font-display text-xl font-semibold text-cream">{page.title}</h2>
+                    <h2 className="font-display text-xl font-semibold text-ink">{page.title}</h2>
                     {!page.is_builtin && (
                       <span className="text-[10px] uppercase tracking-wider bg-coral/15 text-coral px-2 py-0.5 rounded">
                         Personalizada
                       </span>
                     )}
                     {!page.is_published && (
-                      <span className="text-[10px] uppercase tracking-wider bg-cream/10 text-cream/60 px-2 py-0.5 rounded">
+                      <span className="text-[10px] uppercase tracking-wider bg-ink/10 text-ink/60 px-2 py-0.5 rounded">
                         Borrador
                       </span>
                     )}
                   </div>
-                  <p className="text-xs text-cream/50 font-mono mt-0.5">{page.path}</p>
+                  <p className="text-xs text-ink/50 font-mono mt-0.5">{page.path}</p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
@@ -159,14 +159,14 @@ function ContentIndex() {
                   href={page.path}
                   target="_blank"
                   rel="noreferrer"
-                  className="inline-flex items-center gap-1.5 px-3 py-2 bg-cream/5 hover:bg-cream/10 rounded-lg text-sm"
+                  className="inline-flex items-center gap-1.5 px-3 py-2 bg-ink/5 hover:bg-ink/10 rounded-lg text-sm"
                 >
                   Ver <ExternalLink className="h-3.5 w-3.5" />
                 </a>
                 {page.is_builtin ? (
                   <a
                     href={`${page.path}?edit=1`}
-                    className="inline-flex items-center gap-1.5 px-3 py-2 bg-coral hover:bg-coral-deep text-cream rounded-lg text-sm font-medium"
+                    className="inline-flex items-center gap-1.5 px-3 py-2 bg-coral hover:bg-coral-deep text-ink rounded-lg text-sm font-medium"
                   >
                     <Pencil className="h-3.5 w-3.5" /> Editar
                   </a>
@@ -174,7 +174,7 @@ function ContentIndex() {
                   <Link
                     to="/admin/pages/$pageId"
                     params={{ pageId: page.id }}
-                    className="inline-flex items-center gap-1.5 px-3 py-2 bg-coral hover:bg-coral-deep text-cream rounded-lg text-sm font-medium"
+                    className="inline-flex items-center gap-1.5 px-3 py-2 bg-coral hover:bg-coral-deep text-ink rounded-lg text-sm font-medium"
                   >
                     <Pencil className="h-3.5 w-3.5" /> Editar bloques
                   </Link>

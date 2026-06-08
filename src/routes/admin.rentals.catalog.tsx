@@ -101,7 +101,7 @@ function CatalogPage() {
     return g.shelf === shelfFilter;
   });
 
-  if (loading) return <p className="text-cream/60">Cargando…</p>;
+  if (loading) return <p className="text-ink/60">Cargando…</p>;
 
   return (
     <div className="space-y-4">
@@ -110,10 +110,10 @@ function CatalogPage() {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Buscar…"
-          className="bg-cream/10 border-cream/20 text-cream max-w-xs"
+          className="bg-ink/10 border-ink/20 text-ink max-w-xs"
         />
         <Select value={shelfFilter} onValueChange={setShelfFilter}>
-          <SelectTrigger className="bg-cream/10 border-cream/20 text-cream w-44">
+          <SelectTrigger className="bg-ink/10 border-ink/20 text-ink w-44">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -127,11 +127,11 @@ function CatalogPage() {
             <SelectItem value="on_demand">Bajo pedido</SelectItem>
           </SelectContent>
         </Select>
-        <span className="text-xs text-cream/60">{filtered.length} / {games.length}</span>
+        <span className="text-xs text-ink/60">{filtered.length} / {games.length}</span>
         <div className="ml-auto">
           <Button
             variant="outline"
-            className="border-cream/30 text-cream hover:bg-cream/10"
+            className="border-cream/30 text-ink hover:bg-ink/10"
             onClick={handleSync}
             disabled={syncing}
           >
@@ -143,18 +143,18 @@ function CatalogPage() {
 
       <div className="space-y-2">
         {filtered.map((g) => (
-          <div key={g.id} className="bg-cream/5 border border-cream/15 rounded-2xl p-3 flex flex-wrap items-center gap-3">
+          <div key={g.id} className="bg-ink/5 border border-ink/15 rounded-2xl p-3 flex flex-wrap items-center gap-3">
             {g.image_url ? (
-              <img src={g.image_url} alt="" className="h-12 w-12 rounded-lg object-cover border border-cream/20" />
+              <img src={g.image_url} alt="" className="h-12 w-12 rounded-lg object-cover border border-ink/20" />
             ) : (
-              <div className="h-12 w-12 rounded-lg bg-coral/30 flex items-center justify-center font-bold text-cream">🎲</div>
+              <div className="h-12 w-12 rounded-lg bg-coral/30 flex items-center justify-center font-bold text-ink">🎲</div>
             )}
             <div className="flex-1 min-w-0">
               <p className="font-semibold truncate">{g.title}</p>
-              <p className="text-xs text-cream/60">máx {g.max_rental_days} días</p>
+              <p className="text-xs text-ink/60">máx {g.max_rental_days} días</p>
             </div>
             <div className="flex items-center gap-1.5">
-              <Label className="text-[10px] uppercase tracking-wider text-cream/60">Copias</Label>
+              <Label className="text-[10px] uppercase tracking-wider text-ink/60">Copias</Label>
               <Input
                 type="number"
                 min={1}
@@ -165,17 +165,17 @@ function CatalogPage() {
                   setGames((arr) => arr.map((x) => (x.id === g.id ? { ...x, total_copies: n } : x)));
                 }}
                 onBlur={(e) => updateCopies(g, Math.max(1, Math.min(99, Number(e.target.value) || 1)))}
-                className="w-16 bg-cream/10 border-cream/20 text-cream"
+                className="w-16 bg-ink/10 border-ink/20 text-ink"
               />
             </div>
             <div className="flex items-center">
               <LocationBadge loc={g} />
             </div>
             <LocationDialog game={g} onSaved={refresh} updateFn={updateFn} />
-            <Button size="sm" variant="ghost" className="text-cream/70 hover:text-cream hover:bg-cream/10" onClick={() => toggleActive(g)}>
+            <Button size="sm" variant="ghost" className="text-ink/70 hover:text-ink hover:bg-ink/10" onClick={() => toggleActive(g)}>
               {g.is_active ? "Desactivar" : "Activar"}
             </Button>
-            <Button size="sm" variant="ghost" className="text-coral hover:text-cream hover:bg-coral/30" onClick={() => remove(g.id)}>
+            <Button size="sm" variant="ghost" className="text-coral hover:text-ink hover:bg-coral/30" onClick={() => remove(g.id)}>
               <Trash2 className="h-4 w-4" />
             </Button>
           </div>
@@ -227,7 +227,7 @@ function LocationDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button size="sm" variant="outline" className="border-cream/30 text-cream hover:bg-cream/10">
+        <Button size="sm" variant="outline" className="border-cream/30 text-ink hover:bg-ink/10">
           <MapPin className="h-3.5 w-3.5 mr-1" /> Ubicación
         </Button>
       </DialogTrigger>
@@ -292,7 +292,7 @@ function LocationDialog({
             </>
           )}
 
-          <Button onClick={save} className="w-full bg-coral hover:bg-coral-deep text-cream">Guardar</Button>
+          <Button onClick={save} className="w-full bg-coral hover:bg-coral-deep text-ink">Guardar</Button>
         </div>
       </DialogContent>
     </Dialog>

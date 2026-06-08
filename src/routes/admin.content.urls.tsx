@@ -37,12 +37,12 @@ function UrlsAdmin() {
       <header>
         <Link
           to="/admin/content"
-          className="text-cream/60 hover:text-cream text-sm inline-flex items-center gap-1"
+          className="text-ink/60 hover:text-ink text-sm inline-flex items-center gap-1"
         >
           <ChevronLeft className="h-4 w-4" /> Contenido
         </Link>
         <h1 className="font-display text-4xl font-bold mt-2">URLs por idioma</h1>
-        <p className="text-cream/60 mt-1 max-w-2xl">
+        <p className="text-ink/60 mt-1 max-w-2xl">
           Edita el slug de cada página en cada idioma. Cuando cambies un slug se creará
           automáticamente una redirección 301 desde la URL antigua.
         </p>
@@ -68,27 +68,27 @@ function UrlsAdmin() {
 function PageRow({ page, onSaved }: { page: PageSlugRow; onSaved: () => void | Promise<void> }) {
   const isHome = page.page_key === "home";
   return (
-    <div className="bg-cream/5 border border-cream/15 rounded-2xl p-5">
+    <div className="bg-ink/5 border border-ink/15 rounded-2xl p-5">
       <div className="flex items-center gap-3 mb-4">
         <div className="h-9 w-9 rounded-xl bg-coral/15 text-coral flex items-center justify-center">
           <Globe className="h-4 w-4" />
         </div>
         <div className="min-w-0 flex-1">
           <h2 className="font-display text-lg font-semibold">{page.title}</h2>
-          <p className="text-xs text-cream/40 font-mono">page_key: {page.page_key ?? "—"}</p>
+          <p className="text-xs text-ink/40 font-mono">page_key: {page.page_key ?? "—"}</p>
         </div>
         <a
           href={page.path}
           target="_blank"
           rel="noreferrer"
-          className="text-xs text-cream/60 hover:text-cream inline-flex items-center gap-1"
+          className="text-xs text-ink/60 hover:text-ink inline-flex items-center gap-1"
         >
           {page.path} <ExternalLink className="h-3 w-3" />
         </a>
       </div>
 
       {isHome ? (
-        <p className="text-sm text-cream/50 italic">
+        <p className="text-sm text-ink/50 italic">
           La página de inicio siempre vive en <code className="font-mono">/</code> (ES) y bajo
           el prefijo de cada idioma. No es editable.
         </p>
@@ -151,12 +151,12 @@ function SlugEditor({
   };
 
   return (
-    <div className="bg-ink/40 border border-cream/10 rounded-xl p-3">
-      <div className="flex items-center gap-1.5 mb-2 text-xs text-cream/60 font-medium">
+    <div className="bg-ink/40 border border-ink/10 rounded-xl p-3">
+      <div className="flex items-center gap-1.5 mb-2 text-xs text-ink/60 font-medium">
         <span>{flag}</span> <span>{label}</span>
       </div>
       <div className="flex items-center gap-1 mb-2">
-        <span className="text-xs font-mono text-cream/40 shrink-0">{prefix}/</span>
+        <span className="text-xs font-mono text-ink/40 shrink-0">{prefix}/</span>
         <Input
           value={slug}
           onChange={(e) =>
@@ -175,7 +175,7 @@ function SlugEditor({
         size="sm"
         onClick={handleSave}
         disabled={!dirty || saving || !slug}
-        className="w-full h-7 text-xs bg-coral hover:bg-coral-deep text-cream disabled:opacity-40"
+        className="w-full h-7 text-xs bg-coral hover:bg-coral-deep text-ink disabled:opacity-40"
       >
         <Save className="h-3 w-3 mr-1" /> {saving ? "Guardando…" : "Guardar"}
       </Button>

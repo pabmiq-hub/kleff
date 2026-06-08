@@ -69,40 +69,40 @@ function InvitationsPage() {
     <div className="space-y-6">
       <header>
         <h1 className="font-display text-4xl font-bold">Invitaciones</h1>
-        <p className="text-cream/60 mt-1">Invita a nuevos socios al club.</p>
+        <p className="text-ink/60 mt-1">Invita a nuevos socios al club.</p>
       </header>
 
-      <form onSubmit={handleCreate} className="bg-cream/5 border border-cream/15 rounded-2xl p-6 space-y-3">
+      <form onSubmit={handleCreate} className="bg-ink/5 border border-ink/15 rounded-2xl p-6 space-y-3">
         <h2 className="font-display font-bold text-xl">Invitar a alguien</h2>
         <div className="flex flex-wrap gap-2 items-end">
           <div className="flex-1 min-w-[240px] space-y-1">
-            <Label htmlFor="email" className="text-cream/80">Correo electrónico</Label>
+            <Label htmlFor="email" className="text-ink/80">Correo electrónico</Label>
             <Input
               id="email"
               type="email"
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="bg-cream/10 border-cream/20 text-cream placeholder:text-cream/40"
+              className="bg-ink/10 border-ink/20 text-ink placeholder:text-ink/40"
             />
           </div>
-          <Button type="submit" disabled={submitting} className="bg-coral hover:bg-coral-deep text-cream">
+          <Button type="submit" disabled={submitting} className="bg-coral hover:bg-coral-deep text-ink">
             {submitting ? "Enviando…" : "Crear invitación"}
           </Button>
         </div>
         {lastUrl && (
           <div className="bg-coral/15 border border-coral/40 rounded-lg p-3 text-sm">
             <p className="font-semibold mb-1">Enlace de invitación (cópialo y envíaselo):</p>
-            <code className="block break-all text-xs bg-ink/50 rounded px-2 py-1 text-cream">{lastUrl}</code>
-            <p className="text-xs text-cream/60 mt-1">En la próxima iteración este enlace se enviará por email automáticamente.</p>
+            <code className="block break-all text-xs bg-ink/50 rounded px-2 py-1 text-ink">{lastUrl}</code>
+            <p className="text-xs text-ink/60 mt-1">En la próxima iteración este enlace se enviará por email automáticamente.</p>
           </div>
         )}
       </form>
 
-      <div className="bg-cream/5 border border-cream/15 rounded-2xl p-6">
+      <div className="bg-ink/5 border border-ink/15 rounded-2xl p-6">
         <h2 className="font-display font-bold text-xl mb-4">Historial</h2>
         <div className="space-y-2">
-          {items.length === 0 && <p className="text-sm text-cream/50">Sin invitaciones todavía.</p>}
+          {items.length === 0 && <p className="text-sm text-ink/50">Sin invitaciones todavía.</p>}
           {items.map((inv) => {
             const status = inv.revoked_at
               ? "Revocada"
@@ -112,15 +112,15 @@ function InvitationsPage() {
                   ? "Caducada"
                   : "Pendiente";
             return (
-              <div key={inv.id} className="flex items-center justify-between border-b border-cream/10 py-2 last:border-0">
+              <div key={inv.id} className="flex items-center justify-between border-b border-ink/10 py-2 last:border-0">
                 <div>
                   <p className="font-medium text-sm">{inv.email}</p>
-                  <p className="text-xs text-cream/50">
+                  <p className="text-xs text-ink/50">
                     {status} · creada {new Date(inv.created_at).toLocaleDateString()}
                   </p>
                 </div>
                 {status === "Pendiente" && (
-                  <Button variant="ghost" size="sm" className="text-cream/70 hover:text-cream hover:bg-cream/10" onClick={() => handleRevoke(inv.id)}>
+                  <Button variant="ghost" size="sm" className="text-ink/70 hover:text-ink hover:bg-ink/10" onClick={() => handleRevoke(inv.id)}>
                     Revocar
                   </Button>
                 )}

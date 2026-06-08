@@ -44,7 +44,7 @@ function BlogPostEditor() {
   }, [id, getPost]);
 
   if (loadError) return <div className="rounded-lg border border-red-500/20 bg-red-500/10 p-4 text-sm text-red-200">{loadError}</div>;
-  if (!state) return <div className="p-6 text-cream/60 flex items-center gap-2"><Loader2 className="h-4 w-4 animate-spin" /> Cargando post…</div>;
+  if (!state) return <div className="p-6 text-ink/60 flex items-center gap-2"><Loader2 className="h-4 w-4 animate-spin" /> Cargando post…</div>;
 
   const get = (k: string) => (state[k] as string | null | undefined) ?? "";
   const set = (k: string, v: unknown) => setState((s) => ({ ...s, [k]: v }));
@@ -94,40 +94,40 @@ function BlogPostEditor() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between gap-3 flex-wrap">
-        <Link to="/admin/blog" className="inline-flex items-center gap-2 text-sm text-cream/70 hover:text-cream"><ArrowLeft className="h-4 w-4" /> Volver al blog</Link>
+        <Link to="/admin/blog" className="inline-flex items-center gap-2 text-sm text-ink/70 hover:text-ink"><ArrowLeft className="h-4 w-4" /> Volver al blog</Link>
         <div className="flex items-center gap-3">
-          <a href={`/${state.slug}`} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-sm text-cream/70 hover:text-cream"><ExternalLink className="h-3.5 w-3.5" /> Vista pública</a>
-          <Button size="sm" variant="ghost" onClick={handleDelete} className="text-cream/70 hover:text-red-400 hover:bg-red-500/10"><Trash2 className="h-3.5 w-3.5 mr-1" /> Eliminar</Button>
+          <a href={`/${state.slug}`} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-sm text-ink/70 hover:text-ink"><ExternalLink className="h-3.5 w-3.5" /> Vista pública</a>
+          <Button size="sm" variant="ghost" onClick={handleDelete} className="text-ink/70 hover:text-red-400 hover:bg-red-500/10"><Trash2 className="h-3.5 w-3.5 mr-1" /> Eliminar</Button>
         </div>
       </div>
 
-      <section className="rounded-lg border border-cream/10 bg-cream/[0.03] p-5 space-y-4">
+      <section className="rounded-lg border border-ink/10 bg-white p-5 space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           <div>
-            <Label className="text-cream text-xs uppercase tracking-wider">Slug</Label>
-            <Input value={get("slug")} onChange={(e) => set("slug", e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, "-"))} className="bg-ink/60 border-cream/15 text-cream mt-1" />
+            <Label className="text-ink text-xs uppercase tracking-wider">Slug</Label>
+            <Input value={get("slug")} onChange={(e) => set("slug", e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, "-"))} className="bg-white border-ink/15 text-ink mt-1" />
           </div>
           <div>
-            <Label className="text-cream text-xs uppercase tracking-wider">Autor</Label>
-            <Input value={get("author_name")} onChange={(e) => set("author_name", e.target.value)} className="bg-ink/60 border-cream/15 text-cream mt-1" />
+            <Label className="text-ink text-xs uppercase tracking-wider">Autor</Label>
+            <Input value={get("author_name")} onChange={(e) => set("author_name", e.target.value)} className="bg-white border-ink/15 text-ink mt-1" />
           </div>
           <div>
-            <Label className="text-cream text-xs uppercase tracking-wider">Imagen de cabecera (URL)</Label>
-            <Input value={get("cover_image_url")} onChange={(e) => set("cover_image_url", e.target.value)} className="bg-ink/60 border-cream/15 text-cream mt-1" placeholder="https://…" />
+            <Label className="text-ink text-xs uppercase tracking-wider">Imagen de cabecera (URL)</Label>
+            <Input value={get("cover_image_url")} onChange={(e) => set("cover_image_url", e.target.value)} className="bg-white border-ink/15 text-ink mt-1" placeholder="https://…" />
           </div>
           <div>
-            <Label className="text-cream text-xs uppercase tracking-wider">Fecha publicación</Label>
-            <Input type="datetime-local" value={(get("published_at") || "").slice(0, 16)} onChange={(e) => set("published_at", new Date(e.target.value).toISOString())} className="bg-ink/60 border-cream/15 text-cream mt-1" />
+            <Label className="text-ink text-xs uppercase tracking-wider">Fecha publicación</Label>
+            <Input type="datetime-local" value={(get("published_at") || "").slice(0, 16)} onChange={(e) => set("published_at", new Date(e.target.value).toISOString())} className="bg-white border-ink/15 text-ink mt-1" />
           </div>
         </div>
         <div className="flex items-center gap-3 pt-2">
           <Switch checked={isPublished} onCheckedChange={(v) => set("status", v ? "published" : "draft")} />
-          <Label className="text-cream">{isPublished ? "Publicado" : "Borrador"}</Label>
+          <Label className="text-ink">{isPublished ? "Publicado" : "Borrador"}</Label>
         </div>
       </section>
 
       <Tabs defaultValue="es" className="w-full">
-        <TabsList className="bg-cream/5 border border-cream/10">
+        <TabsList className="bg-ink/5 border border-ink/10">
           <TabsTrigger value="es">ES</TabsTrigger>
           <TabsTrigger value="ca">CA</TabsTrigger>
           <TabsTrigger value="en">EN</TabsTrigger>
@@ -135,15 +135,15 @@ function BlogPostEditor() {
         {(["es", "ca", "en"] as const).map((loc) => (
           <TabsContent key={loc} value={loc} className="space-y-4 mt-4">
             <div>
-              <Label className="text-cream text-xs uppercase tracking-wider">Título ({loc.toUpperCase()})</Label>
-              <Input value={get(`title_${loc}`)} onChange={(e) => set(`title_${loc}`, e.target.value)} className="bg-ink/60 border-cream/15 text-cream mt-1" />
+              <Label className="text-ink text-xs uppercase tracking-wider">Título ({loc.toUpperCase()})</Label>
+              <Input value={get(`title_${loc}`)} onChange={(e) => set(`title_${loc}`, e.target.value)} className="bg-white border-ink/15 text-ink mt-1" />
             </div>
             <div>
-              <Label className="text-cream text-xs uppercase tracking-wider">Extracto ({loc.toUpperCase()})</Label>
-              <Textarea rows={2} value={get(`excerpt_${loc}`)} onChange={(e) => set(`excerpt_${loc}`, e.target.value)} className="bg-ink/60 border-cream/15 text-cream mt-1" />
+              <Label className="text-ink text-xs uppercase tracking-wider">Extracto ({loc.toUpperCase()})</Label>
+              <Textarea rows={2} value={get(`excerpt_${loc}`)} onChange={(e) => set(`excerpt_${loc}`, e.target.value)} className="bg-white border-ink/15 text-ink mt-1" />
             </div>
             <div>
-              <Label className="text-cream text-xs uppercase tracking-wider mb-1 block">Contenido ({loc.toUpperCase()})</Label>
+              <Label className="text-ink text-xs uppercase tracking-wider mb-1 block">Contenido ({loc.toUpperCase()})</Label>
               <RichTextEditor
                 value={get(`content_${loc}`)}
                 onChange={(html) => set(`content_${loc}`, html)}

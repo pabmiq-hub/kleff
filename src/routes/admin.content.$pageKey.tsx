@@ -20,7 +20,7 @@ export const Route = createFileRoute("/admin/content/$pageKey")({
   },
   notFoundComponent: () => (
     <div className="p-8">
-      <p className="text-cream/70">Esta página no existe.</p>
+      <p className="text-ink/70">Esta página no existe.</p>
       <Link to="/admin/content" className="text-coral hover:underline mt-4 inline-block">
         ← Volver
       </Link>
@@ -37,19 +37,19 @@ function PageEditor() {
   return (
     <div className="space-y-6">
       <header>
-        <Link to="/admin/content" className="text-cream/60 hover:text-cream text-sm inline-flex items-center gap-1">
+        <Link to="/admin/content" className="text-ink/60 hover:text-ink text-sm inline-flex items-center gap-1">
           <ChevronLeft className="h-4 w-4" /> Contenido
         </Link>
         <div className="mt-2 flex items-start justify-between gap-4 flex-wrap">
           <div>
             <h1 className="font-display text-4xl font-bold">{schema.label}</h1>
-            <p className="text-cream/60 mt-1 font-mono text-sm">{schema.path}</p>
+            <p className="text-ink/60 mt-1 font-mono text-sm">{schema.path}</p>
           </div>
           <a
             href={schema.path}
             target="_blank"
             rel="noreferrer"
-            className="inline-flex items-center gap-2 px-4 py-2 bg-cream/10 hover:bg-cream/15 rounded-lg text-sm"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-ink/10 hover:bg-cream/15 rounded-lg text-sm"
           >
             Ver página <ExternalLink className="h-4 w-4" />
           </a>
@@ -58,7 +58,7 @@ function PageEditor() {
 
       <div className="grid lg:grid-cols-[260px_1fr] gap-6">
         <nav className="space-y-1">
-          <p className="text-xs uppercase tracking-wider text-cream/40 px-3 mb-2">Zonas editables</p>
+          <p className="text-xs uppercase tracking-wider text-ink/40 px-3 mb-2">Zonas editables</p>
           {schema.sections.map((s: SectionSchema) => (
             <button
               key={s.key}
@@ -66,7 +66,7 @@ function PageEditor() {
               className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors ${
                 activeKey === s.key
                   ? "bg-coral/20 text-coral"
-                  : "text-cream/70 hover:bg-cream/5 hover:text-cream"
+                  : "text-ink/70 hover:bg-ink/5 hover:text-ink"
               }`}
             >
               {s.label}
@@ -116,15 +116,15 @@ function SectionEditor({ section }: { section: SectionSchema }) {
   };
 
   if (loading) {
-    return <div className="text-cream/60">Cargando…</div>;
+    return <div className="text-ink/60">Cargando…</div>;
   }
 
   return (
-    <div className="bg-cream/5 border border-cream/15 rounded-2xl p-6 space-y-5">
+    <div className="bg-ink/5 border border-ink/15 rounded-2xl p-6 space-y-5">
       <div>
         <h2 className="font-display text-2xl font-semibold">{section.label}</h2>
-        {section.description && <p className="text-sm text-cream/60 mt-1">{section.description}</p>}
-        <p className="text-xs font-mono text-cream/30 mt-1">{section.key}</p>
+        {section.description && <p className="text-sm text-ink/60 mt-1">{section.description}</p>}
+        <p className="text-xs font-mono text-ink/30 mt-1">{section.key}</p>
       </div>
 
       <div className="space-y-5">
@@ -138,8 +138,8 @@ function SectionEditor({ section }: { section: SectionSchema }) {
         ))}
       </div>
 
-      <div className="flex justify-end pt-4 border-t border-cream/10">
-        <Button onClick={handleSave} disabled={saving} className="bg-coral hover:bg-coral-deep text-cream">
+      <div className="flex justify-end pt-4 border-t border-ink/10">
+        <Button onClick={handleSave} disabled={saving} className="bg-coral hover:bg-coral-deep text-ink">
           <Save className="h-4 w-4 mr-2" /> {saving ? "Guardando…" : "Guardar cambios"}
         </Button>
       </div>
@@ -196,9 +196,9 @@ function FieldInput({
         <Label>{field.label}</Label>
         <div className="mt-2 space-y-3">
           {items.map((item, idx) => (
-            <div key={idx} className="bg-cream/5 border border-cream/10 rounded-xl p-4">
+            <div key={idx} className="bg-ink/5 border border-ink/10 rounded-xl p-4">
               <div className="flex items-center justify-between mb-3">
-                <span className="text-xs font-bold uppercase tracking-wider text-cream/50">
+                <span className="text-xs font-bold uppercase tracking-wider text-ink/50">
                   {field.itemLabel} #{idx + 1}
                 </span>
                 <button
@@ -208,7 +208,7 @@ function FieldInput({
                     next.splice(idx, 1);
                     onChange(next);
                   }}
-                  className="p-1.5 text-cream/50 hover:text-red-300 hover:bg-red-500/10 rounded"
+                  className="p-1.5 text-ink/50 hover:text-red-300 hover:bg-red-500/10 rounded"
                 >
                   <Trash2 className="h-4 w-4" />
                 </button>
@@ -236,7 +236,7 @@ function FieldInput({
               for (const k of Object.keys(field.fields)) empty[k] = "";
               onChange([...items, empty]);
             }}
-            className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 border border-dashed border-cream/20 rounded-xl text-sm text-cream/60 hover:bg-cream/5 hover:text-cream"
+            className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 border border-dashed border-ink/20 rounded-xl text-sm text-ink/60 hover:bg-ink/5 hover:text-ink"
           >
             <Plus className="h-4 w-4" /> Añadir {field.itemLabel.toLowerCase()}
           </button>
@@ -288,13 +288,13 @@ function ImageField({
   return (
     <div>
       <Label>{field.label}</Label>
-      {field.help && <p className="text-xs text-cream/50 mt-0.5">{field.help}</p>}
+      {field.help && <p className="text-xs text-ink/50 mt-0.5">{field.help}</p>}
       <div className="mt-1.5 flex items-start gap-3">
         {value && (
           <img
             src={value}
             alt=""
-            className="h-24 w-24 object-cover rounded-lg border border-cream/15"
+            className="h-24 w-24 object-cover rounded-lg border border-ink/15"
           />
         )}
         <div className="flex-1 space-y-2">
@@ -303,7 +303,7 @@ function ImageField({
             onChange={(e) => onChange(e.target.value)}
             placeholder="URL de la imagen o sube una abajo"
           />
-          <label className="inline-flex items-center gap-2 px-3 py-2 bg-cream/10 hover:bg-cream/15 rounded-lg text-sm cursor-pointer">
+          <label className="inline-flex items-center gap-2 px-3 py-2 bg-ink/10 hover:bg-cream/15 rounded-lg text-sm cursor-pointer">
             <ImagePlus className="h-4 w-4" />
             {uploading ? "Subiendo…" : "Subir imagen"}
             <input

@@ -57,7 +57,7 @@ function PageBlocksEditor() {
       <Link to="/admin/content" className="text-coral hover:underline">← Volver</Link>
     </div>
   );
-  if (!page) return <div className="p-6 text-cream/60 flex items-center gap-2"><Loader2 className="h-4 w-4 animate-spin" /> Cargando…</div>;
+  if (!page) return <div className="p-6 text-ink/60 flex items-center gap-2"><Loader2 className="h-4 w-4 animate-spin" /> Cargando…</div>;
 
 
 
@@ -101,7 +101,7 @@ function PageBlocksEditor() {
   return (
     <div className="space-y-6">
       <header>
-        <Link to="/admin/content" className="text-cream/60 hover:text-cream text-sm inline-flex items-center gap-1">
+        <Link to="/admin/content" className="text-ink/60 hover:text-ink text-sm inline-flex items-center gap-1">
           <ChevronLeft className="h-4 w-4" /> Contenido
         </Link>
         <div className="mt-2 flex items-start justify-between gap-4 flex-wrap">
@@ -113,17 +113,17 @@ function PageBlocksEditor() {
                 onBlur={saveTitle}
                 className="font-display text-3xl font-bold bg-transparent border-0 px-0 focus-visible:ring-0 h-auto"
               />
-              <span className={`text-[10px] uppercase tracking-wider px-2 py-0.5 rounded shrink-0 ${isPublished ? "bg-emerald-500/15 text-emerald-300" : "bg-cream/10 text-cream/60"}`}>
+              <span className={`text-[10px] uppercase tracking-wider px-2 py-0.5 rounded shrink-0 ${isPublished ? "bg-emerald-500/15 text-emerald-300" : "bg-ink/10 text-ink/60"}`}>
                 {isPublished ? "Publicada" : "Borrador"}
               </span>
             </div>
-            <p className="text-cream/60 mt-1 font-mono text-sm">{page.path}</p>
+            <p className="text-ink/60 mt-1 font-mono text-sm">{page.path}</p>
           </div>
           <div className="flex items-center gap-2">
             <Button variant="outline" onClick={toggle}>
               {isPublished ? "Despublicar" : "Publicar"}
             </Button>
-            <a href={page.path ?? "#"} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 px-4 py-2 bg-cream/10 hover:bg-cream/15 rounded-lg text-sm">
+            <a href={page.path ?? "#"} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 px-4 py-2 bg-ink/10 hover:bg-cream/15 rounded-lg text-sm">
               Ver página <ExternalLink className="h-4 w-4" />
             </a>
           </div>
@@ -138,7 +138,7 @@ function PageBlocksEditor() {
             key={l}
             onClick={() => switchLocale(l)}
             className={`px-4 py-1.5 rounded-full text-sm font-medium transition ${
-              locale === l ? "bg-coral text-cream" : "bg-cream/5 text-cream/60 hover:text-cream"
+              locale === l ? "bg-coral text-ink" : "bg-ink/5 text-ink/60 hover:text-ink"
             }`}
           >
             {l === "es" ? "🇪🇸 Castellano" : l === "ca" ? "🏴 Català" : "🇬🇧 English"}
@@ -152,7 +152,7 @@ function PageBlocksEditor() {
       </div>
 
       {loading ? (
-        <div className="text-center py-12 text-cream/50">Cargando…</div>
+        <div className="text-center py-12 text-ink/50">Cargando…</div>
       ) : (
         <BlockEditor key={locale} pageId={page.id} locale={locale} initial={blocks} />
       )}
@@ -162,7 +162,7 @@ function PageBlocksEditor() {
 
 function SlugsRow({ page }: { page: { id: string; slug_es: string | null; slug_ca: string | null; slug_en: string | null } }) {
   return (
-    <div className="bg-cream/5 border border-cream/15 rounded-xl p-4 grid gap-3 md:grid-cols-3">
+    <div className="bg-ink/5 border border-ink/15 rounded-xl p-4 grid gap-3 md:grid-cols-3">
       {(["es", "ca", "en"] as const).map((l) => {
         const slugKey = `slug_${l}` as const;
         return <SlugField key={l} pageId={page.id} locale={l} initial={page[slugKey] ?? ""} />;
@@ -189,17 +189,17 @@ function SlugField({ pageId, locale, initial }: { pageId: string; locale: "es" |
 
   return (
     <div>
-      <div className="text-xs text-cream/60 mb-1 flex items-center gap-1.5">
+      <div className="text-xs text-ink/60 mb-1 flex items-center gap-1.5">
         <Globe className="h-3 w-3" /> {locale.toUpperCase()}
       </div>
       <div className="flex items-center gap-1">
-        <span className="font-mono text-xs text-cream/40">{prefix}</span>
+        <span className="font-mono text-xs text-ink/40">{prefix}</span>
         <Input
           value={slug}
           onChange={(e) => setSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ""))}
           className="h-8 text-sm font-mono"
         />
-        <Button size="sm" disabled={!dirty || saving} onClick={save} className="h-8 bg-coral hover:bg-coral-deep text-cream">
+        <Button size="sm" disabled={!dirty || saving} onClick={save} className="h-8 bg-coral hover:bg-coral-deep text-ink">
           {saving ? "…" : "✓"}
         </Button>
       </div>
