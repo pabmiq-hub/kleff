@@ -1,0 +1,52 @@
+import { createServerFn } from "@tanstack/react-start";
+import { z } from "zod";
+import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { supabaseAdmin } from "@/integrations/supabase/client.server";
+
+export const getCustomPageById = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator(z.object({ pageId: z.string().uuid() }))
+  .handler(async ({ data }) => {
+    const { data: page, error } = await supabaseAdmin
+      .from("content_pages")
+      .select("id, title, path, is_builtin, is_published, slug_es, slug_ca, slug_en")
+      .eq("id", data.pageId)
+      .maybeSingle();
+    if (error) throw new Error(error.message);
+    return { page };
+  });
+
+export const adminTogglePublishedPage = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator(z.object({ pageId: z.string().uuid(), isPublished: z.boolean() }))
+  .handler(async ({ data, context }) => {
+    const { error } = await supabaseAdmin
+      .from("content_pages")
+      .update({ is_published: data.isPublished, updated_by: context.userId } as never)
+      .eq("id", data.pageId);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+export const adminUpdatePageMeta = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator(z.object({
+    pageId: z.string().uuid(),
+    title: z.string().min(1).max(120).optional(),
+    locale: z.enum(["es", "ca", "en"]).optional(),
+    slug: z.string().min(1).max(80).regex(/^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/).optional(),
+  }))
+  .handler(async ({ data, context }) => {
+    const payload: Record<string, unknown> = { updated_by: context.userId };
+    if (data.title !== undefined) payload.title = data.title;
+    if (data.locale && data.slug) {
+      payload[`slug_${data.locale}`] = data.slug;
+      if (data.locale === "es") payload.path = `/${data.slug}`;
+    }
+    const { error } = await supabaseAdmin
+      .from("content_pages")
+      .update(payload as never)
+      .eq("id", data.pageId);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });

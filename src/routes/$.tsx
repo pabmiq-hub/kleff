@@ -2,6 +2,8 @@ import { createFileRoute, redirect, Link } from "@tanstack/react-router";
 import { lookupRedirect } from "@/lib/redirects.functions";
 import { getBlogPostBySlug } from "@/lib/blog.functions";
 import { BlogPostPage } from "@/components/pages/BlogPostPage";
+import { resolveCustomPage, getPageBlocks } from "@/lib/blocks.functions";
+import { CustomPage } from "@/components/pages/CustomPage";
 
 type Locale = "es" | "ca" | "en";
 
@@ -9,8 +11,9 @@ type Locale = "es" | "ca" | "en";
  * Catch-all route. Handles, in order:
  *  1. Locale-prefixed or root single-segment blog post slugs (matching the
  *     original WordPress URLs: /{slug}, /en/{slug}, /ca/{slug}).
- *  2. 301 redirects stored in `content_redirects`.
- *  3. 404 page.
+ *  2. CMS custom pages (content_pages with slug_es/ca/en).
+ *  3. 301 redirects stored in `content_redirects`.
+ *  4. 404 page.
  */
 export const Route = createFileRoute("/$")({
   loader: async ({ location }) => {
@@ -18,7 +21,7 @@ export const Route = createFileRoute("/$")({
     const trimmed = pathname.replace(/\/+$/, "");
     const segments = trimmed.split("/").filter(Boolean);
 
-    // Try to interpret as a blog post slug
+    // Try to interpret as a single-segment slug (blog post or custom page)
     let locale: Locale = "es";
     let slugCandidate: string | null = null;
 
@@ -30,6 +33,13 @@ export const Route = createFileRoute("/$")({
     }
 
     if (slugCandidate && isPlausibleSlug(slugCandidate)) {
+      // 1) Custom CMS page first (admin-created pages take priority over blog posts).
+      const { page } = await resolveCustomPage({ data: { slug: slugCandidate, locale } });
+      if (page && page.is_published) {
+        const { blocks } = await getPageBlocks({ data: { pageId: page.id, locale } });
+        return { kind: "custom" as const, page, blocks, locale };
+      }
+      // 2) Blog post (WordPress slug).
       const { post } = await getBlogPostBySlug({ data: { slug: slugCandidate, locale } });
       if (post) return { kind: "post" as const, post, locale };
     }
@@ -56,6 +66,14 @@ export const Route = createFileRoute("/$")({
         ],
       };
     }
+    if (loaderData?.kind === "custom") {
+      return {
+        meta: [
+          { title: `${loaderData.page.title} — KLEFF` },
+          { property: "og:title", content: loaderData.page.title },
+        ],
+      };
+    }
     return {
       meta: [
         { title: "Página no encontrada — KLEFF" },
@@ -69,11 +87,14 @@ export const Route = createFileRoute("/$")({
 function CatchAll() {
   const data = Route.useLoaderData();
   if (data.kind === "post") {
-    // I18nProvider detects locale from the URL automatically.
     return <BlogPostPage post={data.post} />;
+  }
+  if (data.kind === "custom") {
+    return <CustomPage title={data.page.title} blocks={data.blocks} />;
   }
   return <NotFound path={data.path} />;
 }
+
 
 function NotFound({ path }: { path: string }) {
   return (

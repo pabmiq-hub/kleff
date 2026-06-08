@@ -233,6 +233,56 @@ export type Database = {
         }
         Relationships: []
       }
+      content_page_blocks: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          data: Json
+          hidden: boolean
+          id: string
+          locale: string
+          page_id: string
+          position: number
+          type: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          data?: Json
+          hidden?: boolean
+          id?: string
+          locale: string
+          page_id: string
+          position?: number
+          type: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          data?: Json
+          hidden?: boolean
+          id?: string
+          locale?: string
+          page_id?: string
+          position?: number
+          type?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "content_page_blocks_page_id_fkey"
+            columns: ["page_id"]
+            isOneToOne: false
+            referencedRelation: "content_pages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       content_pages: {
         Row: {
           created_at: string

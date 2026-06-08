@@ -51,8 +51,9 @@ function ContentIndex() {
       setSlug("");
       setTitle("");
       await reload();
-      // open the new page in edit mode
-      window.open(`${(r.page as { path: string }).path}?edit=1`, "_blank");
+      // Open the new block editor in the same tab
+      const pageId = (r.page as { id: string }).id;
+      window.location.href = `/admin/pages/${pageId}`;
     } catch (e) {
       toast.error((e as Error).message);
     } finally {
@@ -162,12 +163,22 @@ function ContentIndex() {
                 >
                   Ver <ExternalLink className="h-3.5 w-3.5" />
                 </a>
-                <a
-                  href={`${page.path}?edit=1`}
-                  className="inline-flex items-center gap-1.5 px-3 py-2 bg-coral hover:bg-coral-deep text-cream rounded-lg text-sm font-medium"
-                >
-                  <Pencil className="h-3.5 w-3.5" /> Editar
-                </a>
+                {page.is_builtin ? (
+                  <a
+                    href={`${page.path}?edit=1`}
+                    className="inline-flex items-center gap-1.5 px-3 py-2 bg-coral hover:bg-coral-deep text-cream rounded-lg text-sm font-medium"
+                  >
+                    <Pencil className="h-3.5 w-3.5" /> Editar
+                  </a>
+                ) : (
+                  <Link
+                    to="/admin/pages/$pageId"
+                    params={{ pageId: page.id }}
+                    className="inline-flex items-center gap-1.5 px-3 py-2 bg-coral hover:bg-coral-deep text-cream rounded-lg text-sm font-medium"
+                  >
+                    <Pencil className="h-3.5 w-3.5" /> Editar bloques
+                  </Link>
+                )}
               </div>
             </div>
           </div>

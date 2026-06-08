@@ -1,89 +1,151 @@
-# Optimización global de imágenes
 
-## Diagnóstico
+# Plan: CMS avanzado, inscripciones y blog enriquecido
 
-He auditado todas las imágenes de la plataforma (no sólo el blog). Hay **5 causas reales** que se suman:
+Tres bloques de trabajo independientes que comparten infraestructura (editor de bloques, subida a `media`, traducción ES/CA/EN, panel admin).
 
-### 1. `/ludoteca` carga 642 imágenes en tamaño completo desde BoardGameGeek (el peor de todos)
-La página de la ludoteca renderiza **642 juegos**, y en cada tarjeta usa:
+---
 
-```tsx
-src={g.image_url ?? g.thumbnail_url}
+## 1. CMS visual libre (estilo Notion) por página
+
+### Modelo de datos
+Una nueva tabla `content_page_blocks` reemplaza el esquema fijo actual (`content_sections` con secciones predefinidas). Cada página tendrá una lista ordenada de **bloques** por idioma:
+
+- `id`, `page_id` (→ `content_pages`), `locale` (es/ca/en), `position` (int)
+- `type`: `heading` | `paragraph` | `image` | `gallery` | `video` | `embed` | `cta` | `columns` | `divider` | `quote` | `accordion` | `card_grid` | `form_embed`
+- `data` (jsonb): contenido + estilos del bloque
+- `created_at`, `updated_at`
+
+Conservamos `content_pages` (ya tiene slug por idioma). Las páginas builtin existentes (Inicio, Cómo funciona, etc.) seguirán con su componente React; el nuevo editor de bloques aplica a páginas **custom** creadas desde admin.
+
+### Editor `/admin/content/$pageKey/editor`
+- Lista vertical de bloques con drag&drop (`@dnd-kit/sortable` — ya compatible).
+- Botón "+" entre bloques que abre paleta de tipos.
+- Cada bloque tiene barra de acciones: mover, duplicar, borrar, ocultar.
+- Edición inline:
+  - Texto: editor rich-text (Tiptap) con negrita, cursiva, links, listas, H2/H3.
+  - Imagen: subida a bucket `media` (ya existe), alt text, ancho (full/contenido), pie de foto.
+  - Embed: URL (YouTube, Vimeo, Instagram, iframe genérico con allowlist).
+  - CTA: texto + URL + variante (primary/secondary).
+  - Columnas: 2 ó 3 sub-zonas que aceptan los mismos bloques.
+- Selector de idioma arriba (ES/CA/EN) con botón "copiar desde ES" para acelerar traducción.
+- Guardado por bloque (autoguardado tras 800 ms de inactividad) + indicador.
+
+### Renderizado público
+Nuevo componente `<BlockRenderer>` montado en la ruta dinámica de páginas custom. Resolución por slug-por-idioma con la lógica que ya existe en `urls.functions.ts`.
+
+### Slugs por idioma
+Ya existe (`/admin/content/urls`). Lo integraremos en la misma vista del editor: pestaña "URLs" dentro del editor de cada página, en vez de página aparte.
+
+---
+
+## 2. Inscripciones (Forms nativo + panel)
+
+Nuevo módulo independiente accesible desde el sidebar admin como **"Inscripciones"**.
+
+### Modelo de datos
+```text
+registration_forms
+  id, slug, title_es/ca/en, description_es/ca/en (rich text),
+  cover_image_url, status (draft/open/closed),
+  max_responses (nullable), opens_at, closes_at,
+  confirmation_message_es/ca/en (rich text),
+  notify_emails (text[]),          -- a quién avisar de cada inscripción
+  external_url (nullable),         -- modo "embed/redirect externo"
+  external_mode ('redirect'|'iframe'|null),
+  payment_required (bool), payment_amount_cents, payment_currency,
+  created_at, updated_at
+
+registration_questions
+  id, form_id, position, type, label_*, help_*, required, options (jsonb), validation (jsonb)
+
+  type ∈ short_text | long_text | single_choice | multi_choice | dropdown
+       | file_upload | linear_scale | rating | date | time | email | phone | number
+
+registration_responses
+  id, form_id, submitted_at, respondent_email, respondent_name,
+  answers (jsonb {question_id: value}),
+  payment_status ('pending'|'paid'|'refunded'|'waived'),
+  payment_marked_by, payment_marked_at, payment_notes,
+  internal_notes, status ('new'|'confirmed'|'cancelled')
+
+registration_files            -- referencias a archivos subidos en respuestas
+  id, response_id, question_id, storage_path, original_name, size, mime
 ```
 
-`image_url` apunta a `cf.geekdo-images.com` con la **box-art original**, que típicamente pesa **500 KB – 2 MB** por imagen. Mostrar el catálogo entero puede llegar a **>500 MB de imágenes solicitadas** al navegador. Lazy-loading ayuda al scroll, pero las primeras decenas siguen tardando muchísimo, y al filtrar/scrollear se nota brutal.
+Bucket Storage: nuevo `registration-uploads` (privado, RLS).
 
-Lo correcto en una grid pequeña (aspect-square) es **usar `thumbnail_url` primero** (~10–30 KB) y reservar `image_url` para vistas detalle.
+### Admin
+- `/admin/registrations` → lista de formularios (estado, nº inscritos, pagos pendientes).
+- `/admin/registrations/$id/edit` → editor estilo Google Forms:
+  - Cabecera: imagen, título, descripción rich-text.
+  - Lista de preguntas con drag&drop y los tipos de la imagen 4.
+  - Sidebar de configuración: idiomas, fechas apertura/cierre, max respuestas, mensaje de confirmación, emails de aviso, pago manual, **modo externo** (toggle "Esta inscripción se hace en una página externa" → URL + comportamiento redirect/iframe).
+- `/admin/registrations/$id/responses` → tabla con filtros (estado, pago, búsqueda), exportable a CSV, modal de detalle por respuesta con: respuestas completas, archivos descargables, toggle "Pago recibido" con nota, notas internas.
 
-### 2. Portadas del blog servidas desde WordPress (kleff.es / Hostinger)
-Los 37 posts importados guardan `cover_image_url` apuntando a `https://kleff.es/wp-content/uploads/...`. Origen lento, sin CDN, sin redimensionar (1-3 MB cada uno). Impacta `/blog`, `/en/blog`, `/ca/blog` y cada post.
+### Página pública
+- Ruta única `/inscripcion/$slug` (+ `/ca/inscripcio/$slug`, `/en/registration/$slug`).
+- Si `external_mode = redirect` → redirige al cargar.
+- Si `external_mode = iframe` → embebe la URL.
+- Si no, renderiza el formulario nativo con validación cliente+servidor (zod), respeta `max_responses` y ventana de fechas.
+- Tras enviar muestra el `confirmation_message` y dispara email.
 
-### 3. Logo de Blood on the Clocktower de **1.3 MB** en el bundle
-`src/assets/clocktower-logo.png` pesa 1.27 MB sin razón. Importado en `ClocktowerPage`, además infla el chunk JS.
+### Emails (Resend vía connector)
+- Email al usuario: confirmación con resumen + mensaje configurable.
+- Email a `notify_emails`: nueva inscripción con link al detalle en admin.
+- Plantillas React Email simples reutilizando paleta de la web.
+- Si Resend no está conectado todavía, el plan incluye el paso de conectarlo (`standard_connectors--connect resend`).
 
-### 4. Imágenes pesadas sin formato moderno (WebP/AVIF) ni variantes responsive
-- `public/media/*.jpg`: media-analogicos-2025 (244 KB), media-regio7-2025 (151 KB), etc.
-- `src/assets/hero-*.jpg`: 100-155 KB cada uno.
-- CMS uploads en bucket `media`: varias de 300-614 KB sin comprimir.
+### Bloque "Formulario embebido" en CMS
+Tipo de bloque `form_embed` que en cualquier página custom inserta un formulario por slug. Así una página CMS puede tener narrativa + formulario al final.
 
-Se sirven a tamaño completo en cualquier viewport, sin WebP.
+---
 
-### 5. Falta de hints de red y atributos básicos en `<img>`
-- No hay `<link rel="preconnect">` a `cf.geekdo-images.com` ni al storage de Lovable Cloud → handshake TLS por cada imagen.
-- La mayoría de `<img>` no llevan `width`/`height` → causa Cumulative Layout Shift y bloquea decodificación eficiente.
-- Faltan `decoding="async"` y `fetchpriority` en LCPs.
+## 3. Blog enriquecido
 
-## Plan de optimización
+Sustituimos los textareas planos por un editor rich-text **Tiptap** con extensiones:
+- Cabecera, párrafos, H2/H3, listas, citas, separadores, links.
+- **Imagen inline con pie de foto y alineación** (subida a bucket `media`).
+- Embeds (YouTube, Instagram, X).
+- Tabla simple.
 
-### Paso 1 — Arreglar el catálogo de ludoteca *(impacto máximo, cambio trivial)*
-En `LudotecaPage.tsx`, invertir prioridad en la grid:
-```tsx
-src={g.thumbnail_url ?? g.image_url}
-```
-Añadir `width`, `height`, `decoding="async"`. Esto pasa de cientos de MB a unos pocos MB en `/ludoteca`. La página detalle de un juego (si existiera) sigue pudiendo usar `image_url`.
+Cambios en `blog_posts`:
+- Mantener `content_es/ca/en` como TEXT pero pasar a guardar **HTML serializado** desde Tiptap (compatible con lo existente).
+- Añadir `reading_time_minutes`, `tags` (text[]) opcional.
 
-### Paso 2 — Rehospedar portadas del blog en nuestro storage
-Crear server function `adminMirrorBlogImages` que:
-- recorra los 37 posts,
-- descargue cada `cover_image_url` de kleff.es,
-- la suba al bucket público `media` reutilizando `uploadMedia`,
-- actualice `blog_posts.cover_image_url` con la nueva URL,
-- también rescribe `<img src="https://kleff.es/...">` dentro del `content_md`/HTML del post.
+Pantalla `/admin/blog/new` y `/admin/blog/$id/edit` con:
+- Imagen de cabecera (subida) + alt.
+- Título, slug (auto desde título, editable), excerpt por idioma.
+- Tabs ES/CA/EN con el editor Tiptap.
+- Fecha de publicación, estado borrador/publicado.
+- Botón "Copiar contenido desde ES".
 
-Botón **"Rehospedar imágenes"** en `/admin/blog` (sin coste IA, sólo I/O).
+El listado público y el render de `BlogPostPage` ya consumen HTML; sólo añadiremos estilos `prose` para imágenes con `<figure><figcaption>`.
 
-### Paso 3 — Comprimir y migrar assets pesados al CDN de Lovable Assets
-- Reemplazar `clocktower-logo.png` (1.3 MB) por versión optimizada (~80 KB).
-- Convertir a WebP (calidad 80) los heroes locales y `public/media/*.jpg` >100 KB.
-- Subir los assets >100 KB al CDN con `lovable-assets create` para sacarlos del bundle.
+---
 
-### Paso 4 — Atributos de imagen + preload del LCP
-- Añadir `width`/`height` y `decoding="async"` a todos los `<img>` (especialmente en grids: ludoteca, blog list, members, rentals).
-- En `BlogPostPage` (LCP es la portada): `fetchpriority="high"` + `<link rel="preload" as="image">` en `head().links` del route.
-- Mantener `loading="eager"` sólo en LCP por página; el resto `lazy`.
+## Detalles técnicos
 
-### Paso 5 — Preconnect en `__root.tsx`
-Añadir hints de conexión temprana:
-```tsx
-{ rel: "preconnect", href: "https://cf.geekdo-images.com", crossOrigin: "anonymous" },
-{ rel: "preconnect", href: "https://gyecpblbaovmprdvgmct.supabase.co" },
-```
-Reduce ~100–300 ms de TLS en la primera imagen de cada host.
+- **Tiptap** (`@tiptap/react`, `starter-kit`, `image`, `link`, `placeholder`) compartido entre CMS, formularios (descripciones) y blog.
+- **Drag & drop**: `@dnd-kit/core` + `@dnd-kit/sortable`.
+- Toda la lógica de servidor en `createServerFn` con `requireSupabaseAuth` y check `has_role(_, 'super_admin')` para escritura.
+- Lectura pública vía server fn que use `supabaseAdmin` (loaders SSR sin sesión).
+- Migraciones SQL con `GRANT` + RLS + policies (admin para escribir, anon para leer sólo formularios `status='open'` y respuestas: sólo admin).
+- Validación con `zod` tanto en cliente como en handler.
+- Sanitización del HTML de Tiptap antes de renderizar (DOMPurify en server fn de save).
 
-### Paso 6 *(opcional, segunda fase)* — Optimizar uploads del CMS
-Cuando alguien sube imagen vía editor en bucket `media`, comprimir en `uploadMedia` (max 1600 px de ancho, WebP calidad 82). Hoy se guardan tal cual (hasta 614 KB).
+## Fases sugeridas
 
-## Orden recomendado
+1. **Infraestructura común**: instalar Tiptap + dnd-kit, crear bucket `registration-uploads`, helpers de sanitización.
+2. **CMS de bloques** (modelo, editor, renderer, integración con páginas custom existentes).
+3. **Blog enriquecido** (Tiptap en `/admin/blog`).
+4. **Inscripciones** (modelo, editor, página pública, panel respuestas).
+5. **Resend + emails de inscripción**.
+6. Pulido: exportar respuestas CSV, bloque `form_embed`, modo externo (redirect/iframe).
 
-| # | Tarea | Impacto | Esfuerzo |
-|---|---|---|---|
-| 1 | Ludoteca: usar `thumbnail_url` | 🔥🔥🔥 | 1 línea |
-| 2 | Rehospedar imágenes blog | 🔥🔥 | medio |
-| 3 | Comprimir clocktower-logo + heros a WebP + assets al CDN | 🔥🔥 | medio |
-| 4 | Atributos `width/height/decoding` + preload LCP | 🔥 | bajo |
-| 5 | Preconnect en `__root` | 🔥 | trivial |
-| 6 | Optimización en subida CMS | 🔥 | medio |
+Cada fase es desplegable de forma independiente, así puedes ir validando sin esperar al final.
 
-## Pregunta
+## Fuera de alcance (lo dejo como fase posterior si lo confirmas)
 
-¿Aplico los **5 primeros pasos** en este turno (es lo que se nota de inmediato) y dejamos el Paso 6 como mejora posterior? ¿O prefieres empezar sólo por el Paso 1 (el cambio de 1 línea en ludoteca, que es donde más se nota)?
+- Pagos online (Stripe) — has elegido marcado manual.
+- Versionado/historial visual de bloques (la tabla `content_section_history` actual cubre lo esencial, pero el nuevo modelo de bloques arrancaría sin snapshots).
+- Permisos granulares de editor (todo admin = super_admin por ahora).

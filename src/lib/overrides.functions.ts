@@ -389,15 +389,16 @@ export const adminCreatePage = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
-    const path = `/p/${data.slug}`;
+    const path = `/${data.slug}`;
     const { data: row, error } = await supabase
       .from("content_pages" as never)
       .insert({
         path,
         title: data.title,
-        template: "blank",
+        template: "blocks",
         is_builtin: false,
         is_published: false,
+        slug_es: data.slug,
         created_by: userId,
         updated_by: userId,
       } as never)
