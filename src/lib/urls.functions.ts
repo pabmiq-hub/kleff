@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
+import { assertSuperAdmin } from "@/lib/assert-role.server";
 
 const RESERVED = new Set([
   "admin", "app", "api", "login", "super-admin", "p", "en", "ca", "es",
