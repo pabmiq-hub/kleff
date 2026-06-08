@@ -2,11 +2,13 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
+import { assertSuperAdmin } from "@/lib/assert-role.server";
 
 export const getCustomPageById = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator(z.object({ pageId: z.string().uuid() }))
-  .handler(async ({ data }) => {
+  .handler(async ({ data, context }) => {
+    await assertSuperAdmin(context.userId);
     const { data: page, error } = await supabaseAdmin
       .from("content_pages")
       .select("id, title, path, is_builtin, is_published, slug_es, slug_ca, slug_en")
@@ -20,6 +22,7 @@ export const adminTogglePublishedPage = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator(z.object({ pageId: z.string().uuid(), isPublished: z.boolean() }))
   .handler(async ({ data, context }) => {
+    await assertSuperAdmin(context.userId);
     const { error } = await supabaseAdmin
       .from("content_pages")
       .update({ is_published: data.isPublished, updated_by: context.userId } as never)
@@ -37,6 +40,7 @@ export const adminUpdatePageMeta = createServerFn({ method: "POST" })
     slug: z.string().min(1).max(80).regex(/^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/).optional(),
   }))
   .handler(async ({ data, context }) => {
+    await assertSuperAdmin(context.userId);
     const payload: Record<string, unknown> = { updated_by: context.userId };
     if (data.title !== undefined) payload.title = data.title;
     if (data.locale && data.slug) {

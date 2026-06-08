@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
+import { assertSuperAdmin } from "@/lib/assert-role.server";
 
 const localeSchema = z.enum(["es", "ca", "en"]);
 const questionTypeSchema = z.enum([
@@ -142,7 +143,8 @@ export const submitRegistration = createServerFn({ method: "POST" })
 
 export const adminListForms = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .handler(async () => {
+  .handler(async ({ context }) => {
+    await assertSuperAdmin(context.userId);
     const { data, error } = await supabaseAdmin
       .from("registration_forms")
       .select("id, slug, title_es, is_published, external_mode, created_at, max_responses, closes_at")
@@ -166,7 +168,8 @@ export const adminListForms = createServerFn({ method: "POST" })
 export const adminCreateForm = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator(z.object({ slug: z.string().min(1).max(120).regex(/^[a-z0-9-]+$/, "Solo minúsculas, números y guiones"), title_es: z.string().min(1).max(200) }))
-  .handler(async ({ data }) => {
+  .handler(async ({ data, context }) => {
+    await assertSuperAdmin(context.userId);
     const { data: row, error } = await supabaseAdmin
       .from("registration_forms")
       .insert({ slug: data.slug, title_es: data.title_es } as never)
@@ -179,7 +182,8 @@ export const adminCreateForm = createServerFn({ method: "POST" })
 export const adminGetForm = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator(z.object({ id: z.string().uuid() }))
-  .handler(async ({ data }) => {
+  .handler(async ({ data, context }) => {
+    await assertSuperAdmin(context.userId);
     const { data: form, error } = await supabaseAdmin
       .from("registration_forms").select("*").eq("id", data.id).single();
     if (error) throw new Error(error.message);
@@ -219,7 +223,8 @@ export const adminUpdateForm = createServerFn({ method: "POST" })
       notify_emails: z.array(z.string().email()).max(10).optional(),
     }),
   }))
-  .handler(async ({ data }) => {
+  .handler(async ({ data, context }) => {
+    await assertSuperAdmin(context.userId);
     const { error } = await supabaseAdmin
       .from("registration_forms").update(data.patch as never).eq("id", data.id);
     if (error) throw new Error(error.message);
@@ -229,7 +234,8 @@ export const adminUpdateForm = createServerFn({ method: "POST" })
 export const adminDeleteForm = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator(z.object({ id: z.string().uuid() }))
-  .handler(async ({ data }) => {
+  .handler(async ({ data, context }) => {
+    await assertSuperAdmin(context.userId);
     const { error } = await supabaseAdmin.from("registration_forms").delete().eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true };
@@ -256,7 +262,8 @@ export const adminUpsertQuestion = createServerFn({ method: "POST" })
       label_en: z.string().max(200),
     })).max(50).default([]),
   }))
-  .handler(async ({ data }) => {
+  .handler(async ({ data, context }) => {
+    await assertSuperAdmin(context.userId);
     if (data.id) {
       const { error } = await supabaseAdmin
         .from("registration_questions")
@@ -286,7 +293,8 @@ export const adminUpsertQuestion = createServerFn({ method: "POST" })
 export const adminDeleteQuestion = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator(z.object({ id: z.string().uuid() }))
-  .handler(async ({ data }) => {
+  .handler(async ({ data, context }) => {
+    await assertSuperAdmin(context.userId);
     const { error } = await supabaseAdmin.from("registration_questions").delete().eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true };
@@ -295,7 +303,8 @@ export const adminDeleteQuestion = createServerFn({ method: "POST" })
 export const adminReorderQuestions = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator(z.object({ form_id: z.string().uuid(), orderedIds: z.array(z.string().uuid()).max(100) }))
-  .handler(async ({ data }) => {
+  .handler(async ({ data, context }) => {
+    await assertSuperAdmin(context.userId);
     await Promise.all(data.orderedIds.map((id, idx) =>
       supabaseAdmin.from("registration_questions")
         .update({ position: idx } as never)
@@ -307,7 +316,8 @@ export const adminReorderQuestions = createServerFn({ method: "POST" })
 export const adminListResponses = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator(z.object({ form_id: z.string().uuid() }))
-  .handler(async ({ data }) => {
+  .handler(async ({ data, context }) => {
+    await assertSuperAdmin(context.userId);
     const { data: rows, error } = await supabaseAdmin
       .from("registration_responses")
       .select("*")
@@ -324,7 +334,8 @@ export const adminUpdateResponse = createServerFn({ method: "POST" })
     payment_status: z.enum(["pending", "paid", "refunded", "not_required"]).optional(),
     internal_notes: z.string().max(2000).nullable().optional(),
   }))
-  .handler(async ({ data }) => {
+  .handler(async ({ data, context }) => {
+    await assertSuperAdmin(context.userId);
     const patch: Record<string, unknown> = {};
     if (data.payment_status) patch.payment_status = data.payment_status;
     if (data.internal_notes !== undefined) patch.internal_notes = data.internal_notes;
@@ -336,7 +347,8 @@ export const adminUpdateResponse = createServerFn({ method: "POST" })
 export const adminDeleteResponse = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator(z.object({ id: z.string().uuid() }))
-  .handler(async ({ data }) => {
+  .handler(async ({ data, context }) => {
+    await assertSuperAdmin(context.userId);
     const { error } = await supabaseAdmin.from("registration_responses").delete().eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true };

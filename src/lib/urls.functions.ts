@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
+import { assertSuperAdmin } from "@/lib/assert-role.server";
 
 const RESERVED = new Set([
   "admin", "app", "api", "login", "super-admin", "p", "en", "ca", "es",
@@ -37,7 +38,8 @@ export type PageSlugRow = {
 
 export const listPageSlugs = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .handler(async () => {
+  .handler(async ({ context }) => {
+    await assertSuperAdmin(context.userId);
     const { data, error } = await supabaseAdmin
       .from("content_pages")
       .select("id, page_key, title, path, is_builtin, slug_es, slug_ca, slug_en")
@@ -58,7 +60,8 @@ export type RedirectRow = {
 
 export const listRedirects = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .handler(async () => {
+  .handler(async ({ context }) => {
+    await assertSuperAdmin(context.userId);
     const { data, error } = await supabaseAdmin
       .from("content_redirects")
       .select("id, from_path, to_path, locale, page_key, created_at")
@@ -70,7 +73,8 @@ export const listRedirects = createServerFn({ method: "GET" })
 export const adminDeleteRedirect = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator(z.object({ id: z.string().uuid() }))
-  .handler(async ({ data }) => {
+  .handler(async ({ data, context }) => {
+    await assertSuperAdmin(context.userId);
     const { error } = await supabaseAdmin
       .from("content_redirects")
       .delete()
@@ -89,6 +93,7 @@ export const adminUpdatePageSlug = createServerFn({ method: "POST" })
     })
   )
   .handler(async ({ data, context }) => {
+    await assertSuperAdmin(context.userId);
     const { userId } = context;
 
     const { data: page, error: pErr } = await supabaseAdmin

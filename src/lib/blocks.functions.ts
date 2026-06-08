@@ -2,7 +2,16 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
+import { assertSuperAdmin } from "@/lib/assert-role.server";
+import { sanitizeHtml } from "@/lib/sanitize.server";
 import type { Block, BlockType, Locale } from "@/cms/blockTypes";
+
+function sanitizeBlockData(data: Record<string, unknown> | undefined): Record<string, unknown> | undefined {
+  if (!data) return data;
+  const out: Record<string, unknown> = { ...data };
+  if (typeof out.html === "string") out.html = sanitizeHtml(out.html);
+  return out;
+}
 
 const localeSchema = z.enum(["es", "ca", "en"]);
 const blockTypeSchema = z.enum([
@@ -81,7 +90,8 @@ export const resolveCustomPage = createServerFn({ method: "GET" })
 export const adminListBlocks = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator(z.object({ pageId: z.string().uuid(), locale: localeSchema.default("es") }))
-  .handler(async ({ data }) => {
+  .handler(async ({ data, context }) => {
+    await assertSuperAdmin(context.userId);
     const { data: rows, error } = await supabaseAdmin
       .from("content_page_blocks")
       .select("*")
@@ -105,6 +115,7 @@ export const adminCreateBlock = createServerFn({ method: "POST" })
     }),
   )
   .handler(async ({ data, context }) => {
+    await assertSuperAdmin(context.userId);
     const { userId } = context;
     // Shift positions of blocks at or after `position`
     await supabaseAdmin.rpc; // noop — using raw update below
@@ -128,7 +139,7 @@ export const adminCreateBlock = createServerFn({ method: "POST" })
         locale: data.locale,
         type: data.type,
         position: data.position,
-        data: data.data as never,
+        data: sanitizeBlockData(data.data) as never,
         created_by: userId,
         updated_by: userId,
       } as never)
@@ -149,8 +160,9 @@ export const adminUpdateBlock = createServerFn({ method: "POST" })
     }),
   )
   .handler(async ({ data, context }) => {
+    await assertSuperAdmin(context.userId);
     const payload: Record<string, unknown> = { updated_by: context.userId };
-    if (data.data !== undefined) payload.data = data.data;
+    if (data.data !== undefined) payload.data = sanitizeBlockData(data.data);
     if (data.hidden !== undefined) payload.hidden = data.hidden;
     const { error } = await supabaseAdmin
       .from("content_page_blocks")
@@ -164,7 +176,8 @@ export const adminUpdateBlock = createServerFn({ method: "POST" })
 export const adminDeleteBlock = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator(z.object({ blockId: z.string().uuid() }))
-  .handler(async ({ data }) => {
+  .handler(async ({ data, context }) => {
+    await assertSuperAdmin(context.userId);
     const { error } = await supabaseAdmin
       .from("content_page_blocks")
       .delete()
@@ -183,7 +196,8 @@ export const adminReorderBlocks = createServerFn({ method: "POST" })
       orderedIds: z.array(z.string().uuid()).min(1).max(500),
     }),
   )
-  .handler(async ({ data }) => {
+  .handler(async ({ data, context }) => {
+    await assertSuperAdmin(context.userId);
     // Update positions one by one (small N expected, <100)
     await Promise.all(
       data.orderedIds.map((id, idx) =>
@@ -210,6 +224,7 @@ export const adminCopyBlocksFromLocale = createServerFn({ method: "POST" })
     }),
   )
   .handler(async ({ data, context }) => {
+    await assertSuperAdmin(context.userId);
     if (data.from === data.to) throw new Error("Origen y destino son iguales");
     const { data: source, error } = await supabaseAdmin
       .from("content_page_blocks")
