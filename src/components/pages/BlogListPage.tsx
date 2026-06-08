@@ -73,6 +73,9 @@ export function BlogListPage({ posts }: { posts: BlogPostSummary[] }) {
                       src={p.cover_image_url}
                       alt={p.title}
                       loading="lazy"
+                      decoding="async"
+                      width={640}
+                      height={400}
                       className="absolute inset-0 h-full w-full object-cover group-hover:scale-105 transition-transform duration-500"
                     />
                   </div>
