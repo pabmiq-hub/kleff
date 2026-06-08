@@ -139,7 +139,7 @@ export const adminCreateBlock = createServerFn({ method: "POST" })
         locale: data.locale,
         type: data.type,
         position: data.position,
-        data: data.data as never,
+        data: sanitizeBlockData(data.data) as never,
         created_by: userId,
         updated_by: userId,
       } as never)
