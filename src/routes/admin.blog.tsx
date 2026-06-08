@@ -97,7 +97,10 @@ function AdminBlog() {
           </p>
         </div>
         <div className="flex gap-2 flex-wrap">
-          <Button onClick={handleImport} disabled={importing} className="bg-coral hover:bg-coral/90 text-cream">
+          <Link to="/admin/blog/new" className="inline-flex items-center gap-2 bg-coral hover:bg-coral/90 text-cream rounded-md px-3 py-2 text-sm font-medium">
+            <Plus className="h-4 w-4" /> Nuevo post
+          </Link>
+          <Button onClick={handleImport} disabled={importing} variant="outline" className="border-cream/20 text-cream hover:bg-cream/10">
             {importing ? (
               <Loader2 className="h-4 w-4 mr-2 animate-spin" />
             ) : (
