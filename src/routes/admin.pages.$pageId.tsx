@@ -123,7 +123,7 @@ function PageBlocksEditor() {
             <Button variant="outline" onClick={toggle}>
               {isPublished ? "Despublicar" : "Publicar"}
             </Button>
-            <a href={page.path} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 px-4 py-2 bg-cream/10 hover:bg-cream/15 rounded-lg text-sm">
+            <a href={page.path ?? "#"} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 px-4 py-2 bg-cream/10 hover:bg-cream/15 rounded-lg text-sm">
               Ver página <ExternalLink className="h-4 w-4" />
             </a>
           </div>
