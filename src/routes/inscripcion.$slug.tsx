@@ -41,7 +41,7 @@ export const Route = createFileRoute("/inscripcion/$slug")({
 });
 
 function PublicRegistration() {
-  const { form, questions, responsesCount } = Route.useLoaderData();
+  const { form, questions, responsesCount } = Route.useLoaderData() as { form: NonNullable<Awaited<ReturnType<typeof getPublishedForm>>["form"]>; questions: RegistrationQuestion[]; responsesCount: number };
   const submitFn = useServerFn(submitRegistration);
   const [values, setValues] = useState<Record<string, unknown>>({});
   const [emailContact, setEmailContact] = useState("");
