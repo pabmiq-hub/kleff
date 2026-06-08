@@ -3,40 +3,11 @@ import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { ChevronLeft, ExternalLink, Copy, Globe } from "lucide-react";
 import { toast } from "sonner";
-import { supabaseAdmin } from "@/integrations/supabase/client.server";
-import { createServerFn } from "@tanstack/react-start";
-import { z } from "zod";
-import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { adminListBlocks, adminCopyBlocksFromLocale } from "@/lib/blocks.functions";
+import { getCustomPageById, adminTogglePublishedPage, adminUpdatePageMeta } from "@/lib/pages.functions";
 import { BlockEditor } from "@/components/cms/BlockEditor";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-
-// Local server fn (in a route file — only the page id needs lookup).
-const getCustomPageById = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator(z.object({ pageId: z.string().uuid() }))
-  .handler(async ({ data }) => {
-    const { data: page, error } = await supabaseAdmin
-      .from("content_pages")
-      .select("id, title, path, is_builtin, is_published, slug_es, slug_ca, slug_en")
-      .eq("id", data.pageId)
-      .maybeSingle();
-    if (error) throw new Error(error.message);
-    return { page };
-  });
-
-const adminTogglePublished = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator(z.object({ pageId: z.string().uuid(), isPublished: z.boolean() }))
-  .handler(async ({ data, context }) => {
-    const { error } = await supabaseAdmin
-      .from("content_pages")
-      .update({ is_published: data.isPublished, updated_by: context.userId } as never)
-      .eq("id", data.pageId);
-    if (error) throw new Error(error.message);
-    return { ok: true };
-  });
 
 export const Route = createFileRoute("/admin/pages/$pageId")({
   loader: async ({ params }) => {
@@ -51,6 +22,12 @@ export const Route = createFileRoute("/admin/pages/$pageId")({
       <Link to="/admin/content" className="text-coral hover:underline mt-4 inline-block">← Volver</Link>
     </div>
   ),
+  errorComponent: ({ error, reset }) => (
+    <div className="p-8 space-y-3">
+      <p className="text-red-400">Error: {error.message}</p>
+      <Button onClick={reset}>Reintentar</Button>
+    </div>
+  ),
   component: PageBlocksEditor,
 });
 
@@ -60,10 +37,12 @@ function PageBlocksEditor() {
   const [blocks, setBlocks] = useState(initialBlocks);
   const [loading, setLoading] = useState(false);
   const [isPublished, setIsPublished] = useState(page.is_published);
+  const [title, setTitle] = useState(page.title);
 
   const listBlocks = useServerFn(adminListBlocks);
   const copy = useServerFn(adminCopyBlocksFromLocale);
-  const togglePub = useServerFn(adminTogglePublished);
+  const togglePub = useServerFn(adminTogglePublishedPage);
+  const updateMeta = useServerFn(adminUpdatePageMeta);
 
   const switchLocale = async (next: "es" | "ca" | "en") => {
     setLoading(true);
@@ -94,6 +73,14 @@ function PageBlocksEditor() {
     } catch (e) { toast.error((e as Error).message); }
   };
 
+  const saveTitle = async () => {
+    if (title === page.title) return;
+    try {
+      await updateMeta({ data: { pageId: page.id, title } });
+      toast.success("Título guardado");
+    } catch (e) { toast.error((e as Error).message); }
+  };
+
   return (
     <div className="space-y-6">
       <header>
@@ -101,10 +88,15 @@ function PageBlocksEditor() {
           <ChevronLeft className="h-4 w-4" /> Contenido
         </Link>
         <div className="mt-2 flex items-start justify-between gap-4 flex-wrap">
-          <div>
+          <div className="flex-1 min-w-0">
             <div className="flex items-center gap-3">
-              <h1 className="font-display text-4xl font-bold">{page.title}</h1>
-              <span className={`text-[10px] uppercase tracking-wider px-2 py-0.5 rounded ${isPublished ? "bg-emerald-500/15 text-emerald-300" : "bg-cream/10 text-cream/60"}`}>
+              <Input
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                onBlur={saveTitle}
+                className="font-display text-3xl font-bold bg-transparent border-0 px-0 focus-visible:ring-0 h-auto"
+              />
+              <span className={`text-[10px] uppercase tracking-wider px-2 py-0.5 rounded shrink-0 ${isPublished ? "bg-emerald-500/15 text-emerald-300" : "bg-cream/10 text-cream/60"}`}>
                 {isPublished ? "Publicada" : "Borrador"}
               </span>
             </div>
@@ -162,29 +154,10 @@ function SlugsRow({ page }: { page: { id: string; slug_es: string | null; slug_c
   );
 }
 
-const adminUpdateSlug = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator(z.object({
-    pageId: z.string().uuid(),
-    locale: z.enum(["es", "ca", "en"]),
-    slug: z.string().min(1).max(80).regex(/^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/),
-  }))
-  .handler(async ({ data, context }) => {
-    const col = `slug_${data.locale}`;
-    const payload: Record<string, unknown> = { [col]: data.slug, updated_by: context.userId };
-    if (data.locale === "es") payload.path = `/${data.slug}`;
-    const { error } = await supabaseAdmin
-      .from("content_pages")
-      .update(payload as never)
-      .eq("id", data.pageId);
-    if (error) throw new Error(error.message);
-    return { ok: true };
-  });
-
 function SlugField({ pageId, locale, initial }: { pageId: string; locale: "es" | "ca" | "en"; initial: string }) {
   const [slug, setSlug] = useState(initial);
   const [saving, setSaving] = useState(false);
-  const update = useServerFn(adminUpdateSlug);
+  const update = useServerFn(adminUpdatePageMeta);
   const prefix = locale === "es" ? "/" : `/${locale}/`;
   const dirty = slug !== initial && slug.length > 0;
 
