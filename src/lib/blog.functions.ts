@@ -120,7 +120,8 @@ export interface AdminBlogPostRow {
 
 export const adminListBlogPosts = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .handler(async (): Promise<{ posts: AdminBlogPostRow[] }> => {
+  .handler(async ({ context }): Promise<{ posts: AdminBlogPostRow[] }> => {
+    await assertSuperAdmin(context.userId);
     const { data: rows, error } = await supabaseAdmin
       .from("blog_posts")
       .select(
