@@ -91,6 +91,8 @@ import { Route as AdminPagesPageIdRouteImport } from './routes/admin.pages.$page
 import { Route as AdminContentUrlsRouteImport } from './routes/admin.content.urls'
 import { Route as AdminContentRedirectsRouteImport } from './routes/admin.content.redirects'
 import { Route as AdminContentPageKeyRouteImport } from './routes/admin.content.$pageKey'
+import { Route as AdminBlogNewRouteImport } from './routes/admin.blog.new'
+import { Route as AdminBlogIdRouteImport } from './routes/admin.blog.$id'
 
 const TorneosRoute = TorneosRouteImport.update({
   id: '/torneos',
@@ -503,6 +505,16 @@ const AdminContentPageKeyRoute = AdminContentPageKeyRouteImport.update({
   path: '/$pageKey',
   getParentRoute: () => AdminContentRoute,
 } as any)
+const AdminBlogNewRoute = AdminBlogNewRouteImport.update({
+  id: '/new',
+  path: '/new',
+  getParentRoute: () => AdminBlogRoute,
+} as any)
+const AdminBlogIdRoute = AdminBlogIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => AdminBlogRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -527,7 +539,7 @@ export interface FileRoutesByFullPath {
   '/super-admin': typeof SuperAdminRoute
   '/terminos': typeof TerminosRoute
   '/torneos': typeof TorneosRoute
-  '/admin/blog': typeof AdminBlogRoute
+  '/admin/blog': typeof AdminBlogRouteWithChildren
   '/admin/content': typeof AdminContentRouteWithChildren
   '/admin/invitations': typeof AdminInvitationsRoute
   '/admin/members': typeof AdminMembersRoute
@@ -572,6 +584,8 @@ export interface FileRoutesByFullPath {
   '/app/': typeof AppIndexRoute
   '/ca/': typeof CaIndexRoute
   '/en/': typeof EnIndexRoute
+  '/admin/blog/$id': typeof AdminBlogIdRoute
+  '/admin/blog/new': typeof AdminBlogNewRoute
   '/admin/content/$pageKey': typeof AdminContentPageKeyRoute
   '/admin/content/redirects': typeof AdminContentRedirectsRoute
   '/admin/content/urls': typeof AdminContentUrlsRoute
@@ -609,7 +623,7 @@ export interface FileRoutesByTo {
   '/super-admin': typeof SuperAdminRoute
   '/terminos': typeof TerminosRoute
   '/torneos': typeof TorneosRoute
-  '/admin/blog': typeof AdminBlogRoute
+  '/admin/blog': typeof AdminBlogRouteWithChildren
   '/admin/invitations': typeof AdminInvitationsRoute
   '/admin/members': typeof AdminMembersRoute
   '/admin/registrations': typeof AdminRegistrationsRouteWithChildren
@@ -652,6 +666,8 @@ export interface FileRoutesByTo {
   '/app': typeof AppIndexRoute
   '/ca': typeof CaIndexRoute
   '/en': typeof EnIndexRoute
+  '/admin/blog/$id': typeof AdminBlogIdRoute
+  '/admin/blog/new': typeof AdminBlogNewRoute
   '/admin/content/$pageKey': typeof AdminContentPageKeyRoute
   '/admin/content/redirects': typeof AdminContentRedirectsRoute
   '/admin/content/urls': typeof AdminContentUrlsRoute
@@ -692,7 +708,7 @@ export interface FileRoutesById {
   '/super-admin': typeof SuperAdminRoute
   '/terminos': typeof TerminosRoute
   '/torneos': typeof TorneosRoute
-  '/admin/blog': typeof AdminBlogRoute
+  '/admin/blog': typeof AdminBlogRouteWithChildren
   '/admin/content': typeof AdminContentRouteWithChildren
   '/admin/invitations': typeof AdminInvitationsRoute
   '/admin/members': typeof AdminMembersRoute
@@ -737,6 +753,8 @@ export interface FileRoutesById {
   '/app/': typeof AppIndexRoute
   '/ca/': typeof CaIndexRoute
   '/en/': typeof EnIndexRoute
+  '/admin/blog/$id': typeof AdminBlogIdRoute
+  '/admin/blog/new': typeof AdminBlogNewRoute
   '/admin/content/$pageKey': typeof AdminContentPageKeyRoute
   '/admin/content/redirects': typeof AdminContentRedirectsRoute
   '/admin/content/urls': typeof AdminContentUrlsRoute
@@ -823,6 +841,8 @@ export interface FileRouteTypes {
     | '/app/'
     | '/ca/'
     | '/en/'
+    | '/admin/blog/$id'
+    | '/admin/blog/new'
     | '/admin/content/$pageKey'
     | '/admin/content/redirects'
     | '/admin/content/urls'
@@ -903,6 +923,8 @@ export interface FileRouteTypes {
     | '/app'
     | '/ca'
     | '/en'
+    | '/admin/blog/$id'
+    | '/admin/blog/new'
     | '/admin/content/$pageKey'
     | '/admin/content/redirects'
     | '/admin/content/urls'
@@ -987,6 +1009,8 @@ export interface FileRouteTypes {
     | '/app/'
     | '/ca/'
     | '/en/'
+    | '/admin/blog/$id'
+    | '/admin/blog/new'
     | '/admin/content/$pageKey'
     | '/admin/content/redirects'
     | '/admin/content/urls'
@@ -1642,8 +1666,36 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminContentPageKeyRouteImport
       parentRoute: typeof AdminContentRoute
     }
+    '/admin/blog/new': {
+      id: '/admin/blog/new'
+      path: '/new'
+      fullPath: '/admin/blog/new'
+      preLoaderRoute: typeof AdminBlogNewRouteImport
+      parentRoute: typeof AdminBlogRoute
+    }
+    '/admin/blog/$id': {
+      id: '/admin/blog/$id'
+      path: '/$id'
+      fullPath: '/admin/blog/$id'
+      preLoaderRoute: typeof AdminBlogIdRouteImport
+      parentRoute: typeof AdminBlogRoute
+    }
   }
 }
+
+interface AdminBlogRouteChildren {
+  AdminBlogIdRoute: typeof AdminBlogIdRoute
+  AdminBlogNewRoute: typeof AdminBlogNewRoute
+}
+
+const AdminBlogRouteChildren: AdminBlogRouteChildren = {
+  AdminBlogIdRoute: AdminBlogIdRoute,
+  AdminBlogNewRoute: AdminBlogNewRoute,
+}
+
+const AdminBlogRouteWithChildren = AdminBlogRoute._addFileChildren(
+  AdminBlogRouteChildren,
+)
 
 interface AdminContentRouteChildren {
   AdminContentPageKeyRoute: typeof AdminContentPageKeyRoute
@@ -1695,7 +1747,7 @@ const AdminRentalsRouteWithChildren = AdminRentalsRoute._addFileChildren(
 )
 
 interface AdminRouteChildren {
-  AdminBlogRoute: typeof AdminBlogRoute
+  AdminBlogRoute: typeof AdminBlogRouteWithChildren
   AdminContentRoute: typeof AdminContentRouteWithChildren
   AdminInvitationsRoute: typeof AdminInvitationsRoute
   AdminMembersRoute: typeof AdminMembersRoute
@@ -1706,7 +1758,7 @@ interface AdminRouteChildren {
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
-  AdminBlogRoute: AdminBlogRoute,
+  AdminBlogRoute: AdminBlogRouteWithChildren,
   AdminContentRoute: AdminContentRouteWithChildren,
   AdminInvitationsRoute: AdminInvitationsRoute,
   AdminMembersRoute: AdminMembersRoute,

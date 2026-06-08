@@ -1,8 +1,8 @@
-import { createFileRoute, useRouter } from "@tanstack/react-router";
+import { createFileRoute, useRouter, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Newspaper, Download, Languages, Loader2, CheckCircle2, AlertCircle, ExternalLink, Image as ImageIcon } from "lucide-react";
+import { Newspaper, Download, Languages, Loader2, CheckCircle2, AlertCircle, ExternalLink, Image as ImageIcon, Plus, Pencil } from "lucide-react";
 import { adminListBlogPosts, adminImportWordPress, adminTranslateBlogPost, adminMirrorBlogImages, type AdminBlogPostRow } from "@/lib/blog.functions";
 import { toast } from "sonner";
 
