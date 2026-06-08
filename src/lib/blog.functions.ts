@@ -229,7 +229,7 @@ async function upsertWordPressPost(p: WPPost) {
   // Sanitize: WP renders titles with HTML entities — decode them
   const titleEn = decodeEntities(stripTags(p.title.rendered)).trim();
   const excerptEn = decodeEntities(stripTags(p.excerpt.rendered)).trim().slice(0, 500);
-  const contentEn = p.content.rendered;
+  const contentEn = sanitizeHtml(p.content.rendered);
 
   const slug = p.slug;
 
