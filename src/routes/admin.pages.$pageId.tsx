@@ -1,7 +1,7 @@
-import { createFileRoute, Link, notFound } from "@tanstack/react-router";
-import { useState } from "react";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { ChevronLeft, ExternalLink, Copy, Globe } from "lucide-react";
+import { ChevronLeft, ExternalLink, Copy, Globe, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { adminListBlocks, adminCopyBlocksFromLocale } from "@/lib/blocks.functions";
 import { getCustomPageById, adminTogglePublishedPage, adminUpdatePageMeta } from "@/lib/pages.functions";
@@ -10,39 +10,56 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
 export const Route = createFileRoute("/admin/pages/$pageId")({
-  loader: async ({ params }) => {
-    const { page } = await getCustomPageById({ data: { pageId: params.pageId } });
-    if (!page) throw notFound();
-    const { blocks } = await adminListBlocks({ data: { pageId: page.id, locale: "es" } });
-    return { page, initialBlocks: blocks };
-  },
-  notFoundComponent: () => (
-    <div className="p-8">
-      <p className="text-cream/70">Esta página no existe.</p>
-      <Link to="/admin/content" className="text-coral hover:underline mt-4 inline-block">← Volver</Link>
-    </div>
-  ),
-  errorComponent: ({ error, reset }) => (
-    <div className="p-8 space-y-3">
-      <p className="text-red-400">Error: {error.message}</p>
-      <Button onClick={reset}>Reintentar</Button>
-    </div>
-  ),
   component: PageBlocksEditor,
 });
 
-function PageBlocksEditor() {
-  const { page, initialBlocks } = Route.useLoaderData();
-  const [locale, setLocale] = useState<"es" | "ca" | "en">("es");
-  const [blocks, setBlocks] = useState(initialBlocks);
-  const [loading, setLoading] = useState(false);
-  const [isPublished, setIsPublished] = useState(page.is_published);
-  const [title, setTitle] = useState(page.title);
+type PageData = { id: string; title: string; path: string | null; is_builtin: boolean; is_published: boolean; slug_es: string | null; slug_ca: string | null; slug_en: string | null };
 
+function PageBlocksEditor() {
+  const { pageId } = Route.useParams();
+  const getPage = useServerFn(getCustomPageById);
   const listBlocks = useServerFn(adminListBlocks);
   const copy = useServerFn(adminCopyBlocksFromLocale);
   const togglePub = useServerFn(adminTogglePublishedPage);
   const updateMeta = useServerFn(adminUpdatePageMeta);
+
+  const [page, setPage] = useState<PageData | null>(null);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [locale, setLocale] = useState<"es" | "ca" | "en">("es");
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [blocks, setBlocks] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [isPublished, setIsPublished] = useState(false);
+  const [title, setTitle] = useState("");
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const { page: p } = await getPage({ data: { pageId } });
+        if (!p) { if (!cancelled) setLoadError("Esta página no existe."); return; }
+        const { blocks: bs } = await listBlocks({ data: { pageId: p.id, locale: "es" } });
+        if (cancelled) return;
+        setPage(p as PageData);
+        setBlocks(bs);
+        setIsPublished(p.is_published);
+        setTitle(p.title);
+      } catch (e) {
+        if (!cancelled) setLoadError((e as Error).message);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [pageId, getPage, listBlocks]);
+
+  if (loadError) return (
+    <div className="p-8 space-y-3">
+      <p className="text-red-400">{loadError}</p>
+      <Link to="/admin/content" className="text-coral hover:underline">← Volver</Link>
+    </div>
+  );
+  if (!page) return <div className="p-6 text-cream/60 flex items-center gap-2"><Loader2 className="h-4 w-4 animate-spin" /> Cargando…</div>;
+
+
 
   const switchLocale = async (next: "es" | "ca" | "en") => {
     setLoading(true);
@@ -106,7 +123,7 @@ function PageBlocksEditor() {
             <Button variant="outline" onClick={toggle}>
               {isPublished ? "Despublicar" : "Publicar"}
             </Button>
-            <a href={page.path} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 px-4 py-2 bg-cream/10 hover:bg-cream/15 rounded-lg text-sm">
+            <a href={page.path ?? "#"} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 px-4 py-2 bg-cream/10 hover:bg-cream/15 rounded-lg text-sm">
               Ver página <ExternalLink className="h-4 w-4" />
             </a>
           </div>
