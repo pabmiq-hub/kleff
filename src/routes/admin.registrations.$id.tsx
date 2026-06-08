@@ -117,7 +117,7 @@ function RegistrationEditor() {
 
 // ----------------- Settings -----------------
 
-function FormSettings({ form, onSaved }: { form: RegistrationForm; onSaved: () => void }) {
+function FormSettings({ form, onSaved }: { form: RegistrationForm; onSaved: (patched: Partial<RegistrationForm>) => void }) {
   const updateFn = useServerFn(adminUpdateForm);
   const [state, setState] = useState(form);
   const [saving, setSaving] = useState(false);
