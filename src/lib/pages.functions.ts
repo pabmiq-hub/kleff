@@ -22,6 +22,7 @@ export const adminTogglePublishedPage = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator(z.object({ pageId: z.string().uuid(), isPublished: z.boolean() }))
   .handler(async ({ data, context }) => {
+    await assertSuperAdmin(context.userId);
     const { error } = await supabaseAdmin
       .from("content_pages")
       .update({ is_published: data.isPublished, updated_by: context.userId } as never)
