@@ -1,79 +1,89 @@
-## Nueva página: Actividades
+# Optimización global de imágenes
 
-Página dedicada que expande la sección "Qué puedes encontrar" de `/como-funciona`, orientada a conversión (nuevos asistentes).
+## Diagnóstico
 
-### Rutas (file-based routing)
-- `src/routes/actividades.tsx` → `/actividades` (ES, nativo)
-- `src/routes/ca.activitats.tsx` → `/ca/activitats`
-- `src/routes/en.activities.tsx` → `/en/activities`
+He auditado todas las imágenes de la plataforma (no sólo el blog). Hay **5 causas reales** que se suman:
 
-Cada ruta con `head()` propio (title/description/og) y slug editable desde el CMS de URLs ya existente.
+### 1. `/ludoteca` carga 642 imágenes en tamaño completo desde BoardGameGeek (el peor de todos)
+La página de la ludoteca renderiza **642 juegos**, y en cada tarjeta usa:
 
-### Componente
-`src/components/pages/ActivitiesPage.tsx` — recibe contenido vía `useSectionContent` (CMS) con textos por defecto en ES; CA/EN se auto-traducen vía diccionarios `src/i18n/dictionaries.ts` (siguiendo el patrón ya usado).
+```tsx
+src={g.image_url ?? g.thumbnail_url}
+```
 
-### Estructura visual
+`image_url` apunta a `cf.geekdo-images.com` con la **box-art original**, que típicamente pesa **500 KB – 2 MB** por imagen. Mostrar el catálogo entero puede llegar a **>500 MB de imágenes solicitadas** al navegador. Lazy-loading ayuda al scroll, pero las primeras decenas siguen tardando muchísimo, y al filtrar/scrollear se nota brutal.
 
-1. **Hero**
-   - Eyebrow "ACTIVIDADES", H1 "Vive KLEFF", subtítulo enfatizando que **la Noche de Juegos (miércoles) es nuestra actividad principal** y que dentro suceden el resto.
-   - CTA primario "Ver próximos eventos en Meetup" → `https://www.meetup.com/es-ES/kleff-bcn/events/?type=upcoming`
-   - CTA secundario "Cómo funciona" → `/como-funciona`
+Lo correcto en una grid pequeña (aspect-square) es **usar `thumbnail_url` primero** (~10–30 KB) y reservar `image_url` para vistas detalle.
 
-2. **La Noche de Juegos (sección destacada, ancla `#noche-de-juegos`)**
-   - Bloque grande explicando: miércoles, gratis, 4€ consumición, ludoteca abierta, #TeamKLEFF, partidas programadas.
-   - Mini-grid de "qué pasa dentro": Blood on the Clocktower, Catan, Unmatched, Hidden Roles… (enlaza a las páginas existentes `/blood-on-the-clocktower`, `/catan`, `/roles-ocultos`).
-   - CTA: "Apúntate a la próxima Noche de Juegos" → Meetup.
+### 2. Portadas del blog servidas desde WordPress (kleff.es / Hostinger)
+Los 37 posts importados guardan `cover_image_url` apuntando a `https://kleff.es/wp-content/uploads/...`. Origen lento, sin CDN, sin redimensionar (1-3 MB cada uno). Impacta `/blog`, `/en/blog`, `/ca/blog` y cada post.
 
-3. **Actividades dentro de la Noche de Juegos**
-   Tarjetas detalladas (más extensas que las actuales) para:
-   - **Torneos** (mensual) — enlace a `/torneos`.
-   - **Demostraciones de editoriales y autores** (mensual) — texto ampliado.
-   - **Slow Friending Lúdico** (puntual) — explicación del formato.
+### 3. Logo de Blood on the Clocktower de **1.3 MB** en el bundle
+`src/assets/clocktower-logo.png` pesa 1.27 MB sin razón. Importado en `ClocktowerPage`, además infla el chunk JS.
 
-4. **Game Nights especiales (anuales)**
-   Carnival, Halloween, X-Mas (solidario Sant Joan de Déu). Tarjetas con icono, descripción ampliada y nota: "son ediciones especiales de la Noche de Juegos".
+### 4. Imágenes pesadas sin formato moderno (WebP/AVIF) ni variantes responsive
+- `public/media/*.jpg`: media-analogicos-2025 (244 KB), media-regio7-2025 (151 KB), etc.
+- `src/assets/hero-*.jpg`: 100-155 KB cada uno.
+- CMS uploads en bucket `media`: varias de 300-614 KB sin comprimir.
 
-5. **Eventos frecuentes especiales**
-   Sección con **embed de Instagram reproducible** del reel `https://www.instagram.com/p/DXbPL40jG8p/` ("Tarde de juegos y gastronomía japonesa" en Casa Hanaka). Embed nativo de Instagram (`<blockquote class="instagram-media">` + script `//www.instagram.com/embed.js`) cargado vía `useEffect` para que se reproduzca dentro de la web.
-   Texto explicando que hacemos colaboraciones con espacios y entidades aliadas.
+Se sirven a tamaño completo en cualquier viewport, sin WebP.
 
-6. **Colaboraciones con otras entidades**
-   Bloque breve: organizamos junto a otras asociaciones actividades en otros días de la semana. (Texto editable CMS, sin logos por ahora.)
+### 5. Falta de hints de red y atributos básicos en `<img>`
+- No hay `<link rel="preconnect">` a `cf.geekdo-images.com` ni al storage de Lovable Cloud → handshake TLS por cada imagen.
+- La mayoría de `<img>` no llevan `width`/`height` → causa Cumulative Layout Shift y bloquea decodificación eficiente.
+- Faltan `decoding="async"` y `fetchpriority` en LCPs.
 
-7. **Eventos a medida / Team building**
-   Card destacada: organizamos eventos privados tipo team building, cumpleaños, despedidas, empresas. CTA "Contáctanos" → `/contacto`.
+## Plan de optimización
 
-8. **Calendario Meetup (CTA final)**
-   Banner full-width: "¿Quieres saber más sobre los eventos?" + botón grande "Ver calendario completo en Meetup" → `https://www.meetup.com/es-ES/kleff-bcn/events/?type=upcoming`.
-   Debajo, link secundario al grupo Meetup `https://www.meetup.com/es-es/kleff-bcn/`.
+### Paso 1 — Arreglar el catálogo de ludoteca *(impacto máximo, cambio trivial)*
+En `LudotecaPage.tsx`, invertir prioridad en la grid:
+```tsx
+src={g.thumbnail_url ?? g.image_url}
+```
+Añadir `width`, `height`, `decoding="async"`. Esto pasa de cientos de MB a unos pocos MB en `/ludoteca`. La página detalle de un juego (si existiera) sigue pudiendo usar `image_url`.
 
-### Enlace desde `/como-funciona`
-En la sección actual "Qué puedes encontrar" añadir al final un CTA: **"¿Quieres saber más sobre los eventos? → Ver todas las actividades"** que enlace a `/actividades` (con variante CA/EN según locale).
+### Paso 2 — Rehospedar portadas del blog en nuestro storage
+Crear server function `adminMirrorBlogImages` que:
+- recorra los 37 posts,
+- descargue cada `cover_image_url` de kleff.es,
+- la suba al bucket público `media` reutilizando `uploadMedia`,
+- actualice `blog_posts.cover_image_url` con la nueva URL,
+- también rescribe `<img src="https://kleff.es/...">` dentro del `content_md`/HTML del post.
 
-### i18n
-- Añadir claves nuevas en `src/i18n/dictionaries.ts` (ES nativo + CA + EN) para todos los textos de la página.
-- `src/i18n/config.ts`: añadir paths localizados (`activitats`, `activities`).
+Botón **"Rehospedar imágenes"** en `/admin/blog` (sin coste IA, sólo I/O).
 
-### Navegación
-- `SiteHeader.tsx` y `SiteFooter.tsx`: añadir entrada "Actividades / Activitats / Activities" en el menú principal (cerca de "Cómo funciona").
+### Paso 3 — Comprimir y migrar assets pesados al CDN de Lovable Assets
+- Reemplazar `clocktower-logo.png` (1.3 MB) por versión optimizada (~80 KB).
+- Convertir a WebP (calidad 80) los heroes locales y `public/media/*.jpg` >100 KB.
+- Subir los assets >100 KB al CDN con `lovable-assets create` para sacarlos del bundle.
 
-### CMS
-- `src/cms/schemas.ts`: registrar sección `activities` con campos editables (hero, descripciones de cada actividad, textos de los bloques colaboraciones / team building / CTA final).
-- Imagen/iconos: reutilizar los emojis ya usados (🎲🏆📦💘🎭🎃🎄) + iconos lucide para los nuevos bloques.
+### Paso 4 — Atributos de imagen + preload del LCP
+- Añadir `width`/`height` y `decoding="async"` a todos los `<img>` (especialmente en grids: ludoteca, blog list, members, rentals).
+- En `BlogPostPage` (LCP es la portada): `fetchpriority="high"` + `<link rel="preload" as="image">` en `head().links` del route.
+- Mantener `loading="eager"` sólo en LCP por página; el resto `lazy`.
 
-### Elementos visuales
-- Gradientes y tarjetas con estilo coherente con `HowItWorksPage`.
-- Imagen hero: generar 1 imagen ambiente noche de juegos (`src/assets/activities-hero.jpg`) con `imagegen` standard.
-- Badges de frecuencia (SEMANAL/MENSUAL/PUNTUAL/ANUAL) como ya existen.
-- Embed Instagram con estilo card y fallback link.
+### Paso 5 — Preconnect en `__root.tsx`
+Añadir hints de conexión temprana:
+```tsx
+{ rel: "preconnect", href: "https://cf.geekdo-images.com", crossOrigin: "anonymous" },
+{ rel: "preconnect", href: "https://gyecpblbaovmprdvgmct.supabase.co" },
+```
+Reduce ~100–300 ms de TLS en la primera imagen de cada host.
 
-### Archivos a tocar (resumen técnico)
-- **Crear**: `src/routes/actividades.tsx`, `src/routes/ca.activitats.tsx`, `src/routes/en.activities.tsx`, `src/components/pages/ActivitiesPage.tsx`, `src/components/site/InstagramEmbed.tsx`, `src/assets/activities-hero.jpg`.
-- **Editar**: `src/i18n/dictionaries.ts`, `src/i18n/config.ts`, `src/cms/schemas.ts`, `src/components/site/SiteHeader.tsx`, `src/components/site/SiteFooter.tsx`, `src/components/pages/HowItWorksPage.tsx` (CTA al final del bloque actividades).
-- `src/routeTree.gen.ts` se regenera automáticamente.
+### Paso 6 *(opcional, segunda fase)* — Optimizar uploads del CMS
+Cuando alguien sube imagen vía editor en bucket `media`, comprimir en `uploadMedia` (max 1600 px de ancho, WebP calidad 82). Hoy se guardan tal cual (hasta 614 KB).
 
-### SEO
-- ES: "Actividades — Noches de juegos, torneos y eventos | KLEFF"
-- CA: "Activitats — Nits de jocs, tornejos i esdeveniments | KLEFF"
-- EN: "Activities — Game nights, tournaments and events | KLEFF"
-- og:image apuntando al hero generado.
+## Orden recomendado
+
+| # | Tarea | Impacto | Esfuerzo |
+|---|---|---|---|
+| 1 | Ludoteca: usar `thumbnail_url` | 🔥🔥🔥 | 1 línea |
+| 2 | Rehospedar imágenes blog | 🔥🔥 | medio |
+| 3 | Comprimir clocktower-logo + heros a WebP + assets al CDN | 🔥🔥 | medio |
+| 4 | Atributos `width/height/decoding` + preload LCP | 🔥 | bajo |
+| 5 | Preconnect en `__root` | 🔥 | trivial |
+| 6 | Optimización en subida CMS | 🔥 | medio |
+
+## Pregunta
+
+¿Aplico los **5 primeros pasos** en este turno (es lo que se nota de inmediato) y dejamos el Paso 6 como mejora posterior? ¿O prefieres empezar sólo por el Paso 1 (el cambio de 1 línea en ludoteca, que es donde más se nota)?
