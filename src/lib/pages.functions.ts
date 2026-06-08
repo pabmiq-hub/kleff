@@ -40,6 +40,7 @@ export const adminUpdatePageMeta = createServerFn({ method: "POST" })
     slug: z.string().min(1).max(80).regex(/^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/).optional(),
   }))
   .handler(async ({ data, context }) => {
+    await assertSuperAdmin(context.userId);
     const payload: Record<string, unknown> = { updated_by: context.userId };
     if (data.title !== undefined) payload.title = data.title;
     if (data.locale && data.slug) {
