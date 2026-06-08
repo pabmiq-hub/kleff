@@ -18,7 +18,7 @@ export const Route = createFileRoute("/admin/blog")({
 });
 
 function AdminBlog() {
-  const { posts } = Route.useLoaderData();
+  const { posts } = Route.useLoaderData() as { posts: AdminBlogPostRow[] };
   const router = useRouter();
   const importFn = useServerFn(adminImportWordPress);
   const translateFn = useServerFn(adminTranslateBlogPost);
