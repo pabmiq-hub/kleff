@@ -278,7 +278,14 @@ export const adminTranslateBlogPost = createServerFn({ method: "POST" })
     if (!row) throw new Error("Post no encontrado");
     if (!row.title_en || !row.content_en) throw new Error("El post no tiene contenido en inglés para traducir");
 
-    const updates: Record<string, string> = {};
+    const updates: {
+      title_es?: string;
+      excerpt_es?: string;
+      content_es?: string;
+      title_ca?: string;
+      excerpt_ca?: string;
+      content_ca?: string;
+    } = {};
 
     if (data.force || !row.title_es || !row.content_es) {
       const es = await translatePost(
