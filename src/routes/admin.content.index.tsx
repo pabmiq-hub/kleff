@@ -51,8 +51,9 @@ function ContentIndex() {
       setSlug("");
       setTitle("");
       await reload();
-      // open the new page in edit mode
-      window.open(`${(r.page as { path: string }).path}?edit=1`, "_blank");
+      // Open the new block editor in the same tab
+      const pageId = (r.page as { id: string }).id;
+      window.location.href = `/admin/pages/${pageId}`;
     } catch (e) {
       toast.error((e as Error).message);
     } finally {
