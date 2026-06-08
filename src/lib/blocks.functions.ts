@@ -16,7 +16,8 @@ export type BlockRow = {
   position: number;
   type: BlockType;
   hidden: boolean;
-  data: Record<string, unknown>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  data: any;
 };
 
 // PUBLIC: fetch all blocks for a page id + locale (with es fallback when empty).
