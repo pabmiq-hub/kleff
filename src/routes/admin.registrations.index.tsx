@@ -3,7 +3,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ClipboardList, Plus, ExternalLink, Trash2, Users, Loader2 } from "lucide-react";
+import { ClipboardList, Plus, ExternalLink, Trash2, Users, Loader2, Pencil, Settings } from "lucide-react";
 import { adminListForms, adminCreateForm, adminDeleteForm } from "@/lib/registrations.functions";
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
