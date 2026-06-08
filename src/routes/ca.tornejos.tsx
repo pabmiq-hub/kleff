@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { TournamentsPage } from "@/components/pages/TournamentsPage";
-import { getPageContent } from "@/server/content.functions";
+import { getPageContent } from "@/lib/content.functions";
 
 export const Route = createFileRoute("/ca/tornejos")({
   loader: () => getPageContent({ data: { pageKey: "tournaments", locale: "ca" } }).then((pageContent) => ({ pageContent })),

@@ -4,7 +4,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { ChevronLeft, Save, ImagePlus, Plus, Trash2, ExternalLink, History } from "lucide-react";
 import { toast } from "sonner";
 import { getPageSchema, withDefaults, type FieldType, type SectionSchema } from "@/cms/schemas";
-import { adminGetSection, adminSaveSection } from "@/server/content.functions";
+import { adminGetSection, adminSaveSection } from "@/lib/content.functions";
 import { uploadMedia } from "@/server/media.functions";
 import { arrayBufferToBase64 } from "@/lib/base64";
 import { Button } from "@/components/ui/button";

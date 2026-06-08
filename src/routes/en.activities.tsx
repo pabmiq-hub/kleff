@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { ActivitiesPage } from "@/components/pages/ActivitiesPage";
-import { getPageContent } from "@/server/content.functions";
+import { getPageContent } from "@/lib/content.functions";
 
 export const Route = createFileRoute("/en/activities")({
   loader: () =>

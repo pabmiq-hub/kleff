@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { ClocktowerPage } from "@/components/pages/ClocktowerPage";
-import { getPageContent } from "@/server/content.functions";
+import { getPageContent } from "@/lib/content.functions";
 
 export const Route = createFileRoute("/ca/blood-on-the-clocktower")({
   loader: () => getPageContent({ data: { pageKey: "clocktower", locale: "ca" } }).then((pageContent) => ({ pageContent })),

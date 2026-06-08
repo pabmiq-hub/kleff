@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { getPageContent } from "@/server/content.functions";
+import { getPageContent } from "@/lib/content.functions";
 import { AboutPage } from "@/components/pages/AboutPage";
 
 export const Route = createFileRoute("/ca/qui-som")({
