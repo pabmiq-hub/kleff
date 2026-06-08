@@ -533,3 +533,76 @@ function pickLocaleStringStrict(
   const v = locale === "es" ? es : locale === "ca" ? ca : en;
   return v && v.trim() !== "" ? v : null;
 }
+
+// ---------------------------------------------------------------------------
+// ADMIN: create / update / get / delete posts (rich text editor)
+// ---------------------------------------------------------------------------
+
+export const adminGetBlogPost = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator(z.object({ id: z.string().uuid() }))
+  .handler(async ({ data }) => {
+    const { data: row, error } = await supabaseAdmin
+      .from("blog_posts").select("*").eq("id", data.id).single();
+    if (error) throw new Error(error.message);
+    return { post: row };
+  });
+
+export const adminCreateBlogPost = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator(z.object({
+    slug: z.string().min(1).max(255).regex(/^[a-z0-9-]+$/, "Solo minúsculas, números y guiones"),
+    title_es: z.string().min(1).max(300),
+  }))
+  .handler(async ({ data }) => {
+    const { data: row, error } = await supabaseAdmin
+      .from("blog_posts")
+      .insert({
+        slug: data.slug,
+        title_es: data.title_es,
+        status: "draft",
+        published_at: new Date().toISOString(),
+      } as never)
+      .select("id").single();
+    if (error) throw new Error(error.message);
+    return { id: (row as { id: string }).id };
+  });
+
+export const adminUpdateBlogPost = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator(z.object({
+    id: z.string().uuid(),
+    patch: z.object({
+      slug: z.string().min(1).max(255).regex(/^[a-z0-9-]+$/).optional(),
+      status: z.enum(["draft", "published"]).optional(),
+      published_at: z.string().optional(),
+      cover_image_url: z.string().url().nullable().optional(),
+      author_name: z.string().max(200).nullable().optional(),
+      title_es: z.string().max(300).nullable().optional(),
+      title_ca: z.string().max(300).nullable().optional(),
+      title_en: z.string().max(300).nullable().optional(),
+      excerpt_es: z.string().max(2000).nullable().optional(),
+      excerpt_ca: z.string().max(2000).nullable().optional(),
+      excerpt_en: z.string().max(2000).nullable().optional(),
+      content_es: z.string().max(200000).nullable().optional(),
+      content_ca: z.string().max(200000).nullable().optional(),
+      content_en: z.string().max(200000).nullable().optional(),
+      tags: z.array(z.string().max(50)).max(20).optional(),
+      reading_time_minutes: z.number().int().min(0).max(240).nullable().optional(),
+    }),
+  }))
+  .handler(async ({ data }) => {
+    const { error } = await supabaseAdmin
+      .from("blog_posts").update(data.patch as never).eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+export const adminDeleteBlogPost = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator(z.object({ id: z.string().uuid() }))
+  .handler(async ({ data }) => {
+    const { error } = await supabaseAdmin.from("blog_posts").delete().eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
