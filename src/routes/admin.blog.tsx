@@ -1,13 +1,12 @@
 import { createFileRoute, useRouter, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Newspaper, Download, Languages, Loader2, CheckCircle2, AlertCircle, ExternalLink, Image as ImageIcon, Plus, Pencil } from "lucide-react";
 import { adminListBlogPosts, adminImportWordPress, adminTranslateBlogPost, adminMirrorBlogImages, type AdminBlogPostRow } from "@/lib/blog.functions";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/admin/blog")({
-  loader: () => adminListBlogPosts(),
   head: () => ({
     meta: [
       { title: "Blog — Admin KLEFF" },
@@ -18,16 +17,36 @@ export const Route = createFileRoute("/admin/blog")({
 });
 
 function AdminBlog() {
-  const { posts } = Route.useLoaderData() as { posts: AdminBlogPostRow[] };
+  const listFn = useServerFn(adminListBlogPosts);
   const router = useRouter();
   const importFn = useServerFn(adminImportWordPress);
   const translateFn = useServerFn(adminTranslateBlogPost);
   const mirrorFn = useServerFn(adminMirrorBlogImages);
+  const [posts, setPosts] = useState<AdminBlogPostRow[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [importing, setImporting] = useState(false);
   const [translatingId, setTranslatingId] = useState<string | null>(null);
   const [bulkTranslating, setBulkTranslating] = useState(false);
   const [mirroring, setMirroring] = useState(false);
   const [progress, setProgress] = useState<{ done: number; total: number } | null>(null);
+
+  const reload = async () => {
+    setLoading(true);
+    setLoadError(null);
+    try {
+      const res = await listFn();
+      setPosts(res.posts);
+    } catch (e) {
+      setLoadError((e as Error).message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    void reload();
+  }, []);
 
   const handleImport = async () => {
     setImporting(true);
@@ -84,6 +103,14 @@ function AdminBlog() {
   const totalEs = posts.filter((p) => p.hasEs).length;
   const totalCa = posts.filter((p) => p.hasCa).length;
   const totalEn = posts.filter((p) => !!p.title_en).length;
+
+  if (loadError) {
+    return <div className="rounded-lg border border-red-500/20 bg-red-500/10 p-4 text-sm text-red-200">{loadError}</div>;
+  }
+
+  if (loading) {
+    return <div className="flex items-center gap-2 p-6 text-cream/60"><Loader2 className="h-4 w-4 animate-spin" /> Cargando blog…</div>;
+  }
 
   return (
     <div className="space-y-6">
