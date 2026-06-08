@@ -90,7 +90,8 @@ export const resolveCustomPage = createServerFn({ method: "GET" })
 export const adminListBlocks = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator(z.object({ pageId: z.string().uuid(), locale: localeSchema.default("es") }))
-  .handler(async ({ data }) => {
+  .handler(async ({ data, context }) => {
+    await assertSuperAdmin(context.userId);
     const { data: rows, error } = await supabaseAdmin
       .from("content_page_blocks")
       .select("*")
