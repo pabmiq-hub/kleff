@@ -29,7 +29,7 @@ function TabLink({ to, label, exact }: { to: string; label: string; exact?: bool
       to={to}
       activeOptions={{ exact }}
       activeProps={{ className: "border-coral text-ink" }}
-      className="px-4 py-2 text-sm font-semibold text-ink/60 border-b-2 border-transparent hover:text-ink hover:border-cream/30 -mb-px"
+      className="px-4 py-2 text-sm font-semibold text-ink/60 border-b-2 border-transparent hover:text-ink hover:border-ink/30 -mb-px"
     >
       {label}
     </Link>

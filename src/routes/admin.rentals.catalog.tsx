@@ -131,7 +131,7 @@ function CatalogPage() {
         <div className="ml-auto">
           <Button
             variant="outline"
-            className="border-cream/30 text-ink hover:bg-ink/10"
+            className="border-ink/30 text-ink hover:bg-ink/10"
             onClick={handleSync}
             disabled={syncing}
           >
@@ -227,7 +227,7 @@ function LocationDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button size="sm" variant="outline" className="border-cream/30 text-ink hover:bg-ink/10">
+        <Button size="sm" variant="outline" className="border-ink/30 text-ink hover:bg-ink/10">
           <MapPin className="h-3.5 w-3.5 mr-1" /> Ubicación
         </Button>
       </DialogTrigger>

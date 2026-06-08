@@ -49,7 +49,7 @@ function PageEditor() {
             href={schema.path}
             target="_blank"
             rel="noreferrer"
-            className="inline-flex items-center gap-2 px-4 py-2 bg-ink/10 hover:bg-cream/15 rounded-lg text-sm"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-ink/10 hover:bg-ink/15 rounded-lg text-sm"
           >
             Ver página <ExternalLink className="h-4 w-4" />
           </a>
@@ -303,7 +303,7 @@ function ImageField({
             onChange={(e) => onChange(e.target.value)}
             placeholder="URL de la imagen o sube una abajo"
           />
-          <label className="inline-flex items-center gap-2 px-3 py-2 bg-ink/10 hover:bg-cream/15 rounded-lg text-sm cursor-pointer">
+          <label className="inline-flex items-center gap-2 px-3 py-2 bg-ink/10 hover:bg-ink/15 rounded-lg text-sm cursor-pointer">
             <ImagePlus className="h-4 w-4" />
             {uploading ? "Subiendo…" : "Subir imagen"}
             <input
