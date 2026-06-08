@@ -73,7 +73,8 @@ export const listRedirects = createServerFn({ method: "GET" })
 export const adminDeleteRedirect = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator(z.object({ id: z.string().uuid() }))
-  .handler(async ({ data }) => {
+  .handler(async ({ data, context }) => {
+    await assertSuperAdmin(context.userId);
     const { error } = await supabaseAdmin
       .from("content_redirects")
       .delete()
