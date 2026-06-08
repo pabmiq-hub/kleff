@@ -66,6 +66,7 @@ function AdminLayout() {
           <AdminNavLink to="/admin/invitations" icon={<Mail className="h-4 w-4" />} label="Invitaciones" />
           <AdminNavLink to="/admin/rentals" icon={<Dices className="h-4 w-4" />} label="Alquiler" />
           <AdminNavLink to="/admin/content" icon={<FileText className="h-4 w-4" />} label="Contenido" />
+          <AdminNavLink to="/admin/registrations" icon={<ClipboardList className="h-4 w-4" />} label="Inscripciones" />
           <AdminNavLink to="/admin/blog" icon={<Newspaper className="h-4 w-4" />} label="Blog" />
         </nav>
         <div className="md:mt-auto space-y-1">
