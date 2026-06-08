@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { getPageContent } from "@/server/content.functions";
+import { getPageContent } from "@/lib/content.functions";
 import { HowItWorksPage } from "@/components/pages/HowItWorksPage";
 
 export const Route = createFileRoute("/en/how-it-works")({

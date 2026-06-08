@@ -10,7 +10,7 @@ import {
 } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { adminSaveSection } from "@/server/content.functions";
+import { adminSaveSection } from "@/lib/content.functions";
 import { useEditor } from "@/editor/EditorProvider";
 import { useI18n } from "@/i18n/I18nProvider";
 import { getSectionSchema, withDefaults } from "./schemas";

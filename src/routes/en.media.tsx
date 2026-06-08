@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { MediaPage } from "@/components/pages/MediaPage";
 import { getMediaItems, getInstagramFollowers } from "@/server/media.functions";
-import { getPageContent } from "@/server/content.functions";
+import { getPageContent } from "@/lib/content.functions";
 
 export const Route = createFileRoute("/en/media")({
   loader: async () => {

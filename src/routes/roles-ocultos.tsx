@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { HiddenRolesPage } from "@/components/pages/HiddenRolesPage";
-import { getPageContent } from "@/server/content.functions";
+import { getPageContent } from "@/lib/content.functions";
 
 export const Route = createFileRoute("/roles-ocultos")({
   loader: () => getPageContent({ data: { pageKey: "hiddenRoles" } }).then((pageContent) => ({ pageContent })),

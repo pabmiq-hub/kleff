@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { CatanPage } from "@/components/pages/CatanPage";
-import { getPageContent } from "@/server/content.functions";
+import { getPageContent } from "@/lib/content.functions";
 
 export const Route = createFileRoute("/ca/catan")({
   loader: () => getPageContent({ data: { pageKey: "catan", locale: "ca" } }).then((pageContent) => ({ pageContent })),
