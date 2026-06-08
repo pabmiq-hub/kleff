@@ -372,6 +372,7 @@ export const getInstagramFollowers = createServerFn({ method: "GET" }).handler(
 
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { assertSuperAdmin } from "@/lib/assert-role.server";
 
 export const uploadMedia = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -382,7 +383,8 @@ export const uploadMedia = createServerFn({ method: "POST" })
       base64: z.string().min(1),
     }),
   )
-  .handler(async ({ data }) => {
+  .handler(async ({ data, context }) => {
+    await assertSuperAdmin(context.userId);
     // Preserve the original filename for SEO ("blood-on-the-clocktower.jpg"
     // stays meaningful) but slugify minimally and append a short random suffix
     // so two uploads with the same name don't collide.
