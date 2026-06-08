@@ -544,7 +544,8 @@ function pickLocaleStringStrict(
 export const adminGetBlogPost = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator(z.object({ id: z.string().uuid() }))
-  .handler(async ({ data }) => {
+  .handler(async ({ data, context }) => {
+    await assertSuperAdmin(context.userId);
     const { data: row, error } = await supabaseAdmin
       .from("blog_posts").select("*").eq("id", data.id).single();
     if (error) throw new Error(error.message);
@@ -557,7 +558,8 @@ export const adminCreateBlogPost = createServerFn({ method: "POST" })
     slug: z.string().min(1).max(255).regex(/^[a-z0-9-]+$/, "Solo minúsculas, números y guiones"),
     title_es: z.string().min(1).max(300),
   }))
-  .handler(async ({ data }) => {
+  .handler(async ({ data, context }) => {
+    await assertSuperAdmin(context.userId);
     const { data: row, error } = await supabaseAdmin
       .from("blog_posts")
       .insert({
@@ -594,9 +596,15 @@ export const adminUpdateBlogPost = createServerFn({ method: "POST" })
       reading_time_minutes: z.number().int().min(0).max(240).nullable().optional(),
     }),
   }))
-  .handler(async ({ data }) => {
+  .handler(async ({ data, context }) => {
+    await assertSuperAdmin(context.userId);
+    const patch = { ...data.patch } as Record<string, unknown>;
+    for (const k of ["content_es", "content_ca", "content_en"] as const) {
+      const v = patch[k];
+      if (typeof v === "string") patch[k] = sanitizeHtml(v);
+    }
     const { error } = await supabaseAdmin
-      .from("blog_posts").update(data.patch as never).eq("id", data.id);
+      .from("blog_posts").update(patch as never).eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true };
   });
@@ -604,8 +612,10 @@ export const adminUpdateBlogPost = createServerFn({ method: "POST" })
 export const adminDeleteBlogPost = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator(z.object({ id: z.string().uuid() }))
-  .handler(async ({ data }) => {
+  .handler(async ({ data, context }) => {
+    await assertSuperAdmin(context.userId);
     const { error } = await supabaseAdmin.from("blog_posts").delete().eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true };
   });
+
