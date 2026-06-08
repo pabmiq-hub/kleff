@@ -36,6 +36,7 @@ import { Route as CaIndexRouteImport } from './routes/ca.index'
 import { Route as AppIndexRouteImport } from './routes/app.index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as InviteTokenRouteImport } from './routes/invite.$token'
+import { Route as InscripcionSlugRouteImport } from './routes/inscripcion.$slug'
 import { Route as EnTournamentsRouteImport } from './routes/en.tournaments'
 import { Route as EnTermsRouteImport } from './routes/en.terms'
 import { Route as EnPrivacyRouteImport } from './routes/en.privacy'
@@ -70,6 +71,7 @@ import { Route as AppRentalsRouteImport } from './routes/app.rentals'
 import { Route as AppProfileRouteImport } from './routes/app.profile'
 import { Route as AppCarnetRouteImport } from './routes/app.carnet'
 import { Route as AdminRentalsRouteImport } from './routes/admin.rentals'
+import { Route as AdminRegistrationsRouteImport } from './routes/admin.registrations'
 import { Route as AdminMembersRouteImport } from './routes/admin.members'
 import { Route as AdminInvitationsRouteImport } from './routes/admin.invitations'
 import { Route as AdminContentRouteImport } from './routes/admin.content'
@@ -84,10 +86,13 @@ import { Route as AdminRentalsSettingsRouteImport } from './routes/admin.rentals
 import { Route as AdminRentalsHistoryRouteImport } from './routes/admin.rentals.history'
 import { Route as AdminRentalsCatalogRouteImport } from './routes/admin.rentals.catalog'
 import { Route as AdminRentalsActiveRouteImport } from './routes/admin.rentals.active'
+import { Route as AdminRegistrationsIdRouteImport } from './routes/admin.registrations.$id'
 import { Route as AdminPagesPageIdRouteImport } from './routes/admin.pages.$pageId'
 import { Route as AdminContentUrlsRouteImport } from './routes/admin.content.urls'
 import { Route as AdminContentRedirectsRouteImport } from './routes/admin.content.redirects'
 import { Route as AdminContentPageKeyRouteImport } from './routes/admin.content.$pageKey'
+import { Route as AdminBlogNewRouteImport } from './routes/admin.blog.new'
+import { Route as AdminBlogIdRouteImport } from './routes/admin.blog.$id'
 
 const TorneosRoute = TorneosRouteImport.update({
   id: '/torneos',
@@ -222,6 +227,11 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
 const InviteTokenRoute = InviteTokenRouteImport.update({
   id: '/invite/$token',
   path: '/invite/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const InscripcionSlugRoute = InscripcionSlugRouteImport.update({
+  id: '/inscripcion/$slug',
+  path: '/inscripcion/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
 const EnTournamentsRoute = EnTournamentsRouteImport.update({
@@ -394,6 +404,11 @@ const AdminRentalsRoute = AdminRentalsRouteImport.update({
   path: '/rentals',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminRegistrationsRoute = AdminRegistrationsRouteImport.update({
+  id: '/registrations',
+  path: '/registrations',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminMembersRoute = AdminMembersRouteImport.update({
   id: '/members',
   path: '/members',
@@ -465,6 +480,11 @@ const AdminRentalsActiveRoute = AdminRentalsActiveRouteImport.update({
   path: '/active',
   getParentRoute: () => AdminRentalsRoute,
 } as any)
+const AdminRegistrationsIdRoute = AdminRegistrationsIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => AdminRegistrationsRoute,
+} as any)
 const AdminPagesPageIdRoute = AdminPagesPageIdRouteImport.update({
   id: '/pages/$pageId',
   path: '/pages/$pageId',
@@ -484,6 +504,16 @@ const AdminContentPageKeyRoute = AdminContentPageKeyRouteImport.update({
   id: '/$pageKey',
   path: '/$pageKey',
   getParentRoute: () => AdminContentRoute,
+} as any)
+const AdminBlogNewRoute = AdminBlogNewRouteImport.update({
+  id: '/new',
+  path: '/new',
+  getParentRoute: () => AdminBlogRoute,
+} as any)
+const AdminBlogIdRoute = AdminBlogIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => AdminBlogRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
@@ -509,10 +539,11 @@ export interface FileRoutesByFullPath {
   '/super-admin': typeof SuperAdminRoute
   '/terminos': typeof TerminosRoute
   '/torneos': typeof TorneosRoute
-  '/admin/blog': typeof AdminBlogRoute
+  '/admin/blog': typeof AdminBlogRouteWithChildren
   '/admin/content': typeof AdminContentRouteWithChildren
   '/admin/invitations': typeof AdminInvitationsRoute
   '/admin/members': typeof AdminMembersRoute
+  '/admin/registrations': typeof AdminRegistrationsRouteWithChildren
   '/admin/rentals': typeof AdminRentalsRouteWithChildren
   '/app/carnet': typeof AppCarnetRoute
   '/app/profile': typeof AppProfileRoute
@@ -547,15 +578,19 @@ export interface FileRoutesByFullPath {
   '/en/privacy': typeof EnPrivacyRoute
   '/en/terms': typeof EnTermsRoute
   '/en/tournaments': typeof EnTournamentsRoute
+  '/inscripcion/$slug': typeof InscripcionSlugRoute
   '/invite/$token': typeof InviteTokenRoute
   '/admin/': typeof AdminIndexRoute
   '/app/': typeof AppIndexRoute
   '/ca/': typeof CaIndexRoute
   '/en/': typeof EnIndexRoute
+  '/admin/blog/$id': typeof AdminBlogIdRoute
+  '/admin/blog/new': typeof AdminBlogNewRoute
   '/admin/content/$pageKey': typeof AdminContentPageKeyRoute
   '/admin/content/redirects': typeof AdminContentRedirectsRoute
   '/admin/content/urls': typeof AdminContentUrlsRoute
   '/admin/pages/$pageId': typeof AdminPagesPageIdRoute
+  '/admin/registrations/$id': typeof AdminRegistrationsIdRoute
   '/admin/rentals/active': typeof AdminRentalsActiveRoute
   '/admin/rentals/catalog': typeof AdminRentalsCatalogRoute
   '/admin/rentals/history': typeof AdminRentalsHistoryRoute
@@ -588,9 +623,10 @@ export interface FileRoutesByTo {
   '/super-admin': typeof SuperAdminRoute
   '/terminos': typeof TerminosRoute
   '/torneos': typeof TorneosRoute
-  '/admin/blog': typeof AdminBlogRoute
+  '/admin/blog': typeof AdminBlogRouteWithChildren
   '/admin/invitations': typeof AdminInvitationsRoute
   '/admin/members': typeof AdminMembersRoute
+  '/admin/registrations': typeof AdminRegistrationsRouteWithChildren
   '/app/carnet': typeof AppCarnetRoute
   '/app/profile': typeof AppProfileRoute
   '/app/rentals': typeof AppRentalsRouteWithChildren
@@ -624,15 +660,19 @@ export interface FileRoutesByTo {
   '/en/privacy': typeof EnPrivacyRoute
   '/en/terms': typeof EnTermsRoute
   '/en/tournaments': typeof EnTournamentsRoute
+  '/inscripcion/$slug': typeof InscripcionSlugRoute
   '/invite/$token': typeof InviteTokenRoute
   '/admin': typeof AdminIndexRoute
   '/app': typeof AppIndexRoute
   '/ca': typeof CaIndexRoute
   '/en': typeof EnIndexRoute
+  '/admin/blog/$id': typeof AdminBlogIdRoute
+  '/admin/blog/new': typeof AdminBlogNewRoute
   '/admin/content/$pageKey': typeof AdminContentPageKeyRoute
   '/admin/content/redirects': typeof AdminContentRedirectsRoute
   '/admin/content/urls': typeof AdminContentUrlsRoute
   '/admin/pages/$pageId': typeof AdminPagesPageIdRoute
+  '/admin/registrations/$id': typeof AdminRegistrationsIdRoute
   '/admin/rentals/active': typeof AdminRentalsActiveRoute
   '/admin/rentals/catalog': typeof AdminRentalsCatalogRoute
   '/admin/rentals/history': typeof AdminRentalsHistoryRoute
@@ -668,10 +708,11 @@ export interface FileRoutesById {
   '/super-admin': typeof SuperAdminRoute
   '/terminos': typeof TerminosRoute
   '/torneos': typeof TorneosRoute
-  '/admin/blog': typeof AdminBlogRoute
+  '/admin/blog': typeof AdminBlogRouteWithChildren
   '/admin/content': typeof AdminContentRouteWithChildren
   '/admin/invitations': typeof AdminInvitationsRoute
   '/admin/members': typeof AdminMembersRoute
+  '/admin/registrations': typeof AdminRegistrationsRouteWithChildren
   '/admin/rentals': typeof AdminRentalsRouteWithChildren
   '/app/carnet': typeof AppCarnetRoute
   '/app/profile': typeof AppProfileRoute
@@ -706,15 +747,19 @@ export interface FileRoutesById {
   '/en/privacy': typeof EnPrivacyRoute
   '/en/terms': typeof EnTermsRoute
   '/en/tournaments': typeof EnTournamentsRoute
+  '/inscripcion/$slug': typeof InscripcionSlugRoute
   '/invite/$token': typeof InviteTokenRoute
   '/admin/': typeof AdminIndexRoute
   '/app/': typeof AppIndexRoute
   '/ca/': typeof CaIndexRoute
   '/en/': typeof EnIndexRoute
+  '/admin/blog/$id': typeof AdminBlogIdRoute
+  '/admin/blog/new': typeof AdminBlogNewRoute
   '/admin/content/$pageKey': typeof AdminContentPageKeyRoute
   '/admin/content/redirects': typeof AdminContentRedirectsRoute
   '/admin/content/urls': typeof AdminContentUrlsRoute
   '/admin/pages/$pageId': typeof AdminPagesPageIdRoute
+  '/admin/registrations/$id': typeof AdminRegistrationsIdRoute
   '/admin/rentals/active': typeof AdminRentalsActiveRoute
   '/admin/rentals/catalog': typeof AdminRentalsCatalogRoute
   '/admin/rentals/history': typeof AdminRentalsHistoryRoute
@@ -755,6 +800,7 @@ export interface FileRouteTypes {
     | '/admin/content'
     | '/admin/invitations'
     | '/admin/members'
+    | '/admin/registrations'
     | '/admin/rentals'
     | '/app/carnet'
     | '/app/profile'
@@ -789,15 +835,19 @@ export interface FileRouteTypes {
     | '/en/privacy'
     | '/en/terms'
     | '/en/tournaments'
+    | '/inscripcion/$slug'
     | '/invite/$token'
     | '/admin/'
     | '/app/'
     | '/ca/'
     | '/en/'
+    | '/admin/blog/$id'
+    | '/admin/blog/new'
     | '/admin/content/$pageKey'
     | '/admin/content/redirects'
     | '/admin/content/urls'
     | '/admin/pages/$pageId'
+    | '/admin/registrations/$id'
     | '/admin/rentals/active'
     | '/admin/rentals/catalog'
     | '/admin/rentals/history'
@@ -833,6 +883,7 @@ export interface FileRouteTypes {
     | '/admin/blog'
     | '/admin/invitations'
     | '/admin/members'
+    | '/admin/registrations'
     | '/app/carnet'
     | '/app/profile'
     | '/app/rentals'
@@ -866,15 +917,19 @@ export interface FileRouteTypes {
     | '/en/privacy'
     | '/en/terms'
     | '/en/tournaments'
+    | '/inscripcion/$slug'
     | '/invite/$token'
     | '/admin'
     | '/app'
     | '/ca'
     | '/en'
+    | '/admin/blog/$id'
+    | '/admin/blog/new'
     | '/admin/content/$pageKey'
     | '/admin/content/redirects'
     | '/admin/content/urls'
     | '/admin/pages/$pageId'
+    | '/admin/registrations/$id'
     | '/admin/rentals/active'
     | '/admin/rentals/catalog'
     | '/admin/rentals/history'
@@ -913,6 +968,7 @@ export interface FileRouteTypes {
     | '/admin/content'
     | '/admin/invitations'
     | '/admin/members'
+    | '/admin/registrations'
     | '/admin/rentals'
     | '/app/carnet'
     | '/app/profile'
@@ -947,15 +1003,19 @@ export interface FileRouteTypes {
     | '/en/privacy'
     | '/en/terms'
     | '/en/tournaments'
+    | '/inscripcion/$slug'
     | '/invite/$token'
     | '/admin/'
     | '/app/'
     | '/ca/'
     | '/en/'
+    | '/admin/blog/$id'
+    | '/admin/blog/new'
     | '/admin/content/$pageKey'
     | '/admin/content/redirects'
     | '/admin/content/urls'
     | '/admin/pages/$pageId'
+    | '/admin/registrations/$id'
     | '/admin/rentals/active'
     | '/admin/rentals/catalog'
     | '/admin/rentals/history'
@@ -1021,6 +1081,7 @@ export interface RootRouteChildren {
   EnPrivacyRoute: typeof EnPrivacyRoute
   EnTermsRoute: typeof EnTermsRoute
   EnTournamentsRoute: typeof EnTournamentsRoute
+  InscripcionSlugRoute: typeof InscripcionSlugRoute
   InviteTokenRoute: typeof InviteTokenRoute
   CaIndexRoute: typeof CaIndexRoute
   EnIndexRoute: typeof EnIndexRoute
@@ -1218,6 +1279,13 @@ declare module '@tanstack/react-router' {
       path: '/invite/$token'
       fullPath: '/invite/$token'
       preLoaderRoute: typeof InviteTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/inscripcion/$slug': {
+      id: '/inscripcion/$slug'
+      path: '/inscripcion/$slug'
+      fullPath: '/inscripcion/$slug'
+      preLoaderRoute: typeof InscripcionSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/en/tournaments': {
@@ -1458,6 +1526,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminRentalsRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/registrations': {
+      id: '/admin/registrations'
+      path: '/registrations'
+      fullPath: '/admin/registrations'
+      preLoaderRoute: typeof AdminRegistrationsRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/members': {
       id: '/admin/members'
       path: '/members'
@@ -1556,6 +1631,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminRentalsActiveRouteImport
       parentRoute: typeof AdminRentalsRoute
     }
+    '/admin/registrations/$id': {
+      id: '/admin/registrations/$id'
+      path: '/$id'
+      fullPath: '/admin/registrations/$id'
+      preLoaderRoute: typeof AdminRegistrationsIdRouteImport
+      parentRoute: typeof AdminRegistrationsRoute
+    }
     '/admin/pages/$pageId': {
       id: '/admin/pages/$pageId'
       path: '/pages/$pageId'
@@ -1584,8 +1666,36 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminContentPageKeyRouteImport
       parentRoute: typeof AdminContentRoute
     }
+    '/admin/blog/new': {
+      id: '/admin/blog/new'
+      path: '/new'
+      fullPath: '/admin/blog/new'
+      preLoaderRoute: typeof AdminBlogNewRouteImport
+      parentRoute: typeof AdminBlogRoute
+    }
+    '/admin/blog/$id': {
+      id: '/admin/blog/$id'
+      path: '/$id'
+      fullPath: '/admin/blog/$id'
+      preLoaderRoute: typeof AdminBlogIdRouteImport
+      parentRoute: typeof AdminBlogRoute
+    }
   }
 }
+
+interface AdminBlogRouteChildren {
+  AdminBlogIdRoute: typeof AdminBlogIdRoute
+  AdminBlogNewRoute: typeof AdminBlogNewRoute
+}
+
+const AdminBlogRouteChildren: AdminBlogRouteChildren = {
+  AdminBlogIdRoute: AdminBlogIdRoute,
+  AdminBlogNewRoute: AdminBlogNewRoute,
+}
+
+const AdminBlogRouteWithChildren = AdminBlogRoute._addFileChildren(
+  AdminBlogRouteChildren,
+)
 
 interface AdminContentRouteChildren {
   AdminContentPageKeyRoute: typeof AdminContentPageKeyRoute
@@ -1604,6 +1714,17 @@ const AdminContentRouteChildren: AdminContentRouteChildren = {
 const AdminContentRouteWithChildren = AdminContentRoute._addFileChildren(
   AdminContentRouteChildren,
 )
+
+interface AdminRegistrationsRouteChildren {
+  AdminRegistrationsIdRoute: typeof AdminRegistrationsIdRoute
+}
+
+const AdminRegistrationsRouteChildren: AdminRegistrationsRouteChildren = {
+  AdminRegistrationsIdRoute: AdminRegistrationsIdRoute,
+}
+
+const AdminRegistrationsRouteWithChildren =
+  AdminRegistrationsRoute._addFileChildren(AdminRegistrationsRouteChildren)
 
 interface AdminRentalsRouteChildren {
   AdminRentalsActiveRoute: typeof AdminRentalsActiveRoute
@@ -1626,20 +1747,22 @@ const AdminRentalsRouteWithChildren = AdminRentalsRoute._addFileChildren(
 )
 
 interface AdminRouteChildren {
-  AdminBlogRoute: typeof AdminBlogRoute
+  AdminBlogRoute: typeof AdminBlogRouteWithChildren
   AdminContentRoute: typeof AdminContentRouteWithChildren
   AdminInvitationsRoute: typeof AdminInvitationsRoute
   AdminMembersRoute: typeof AdminMembersRoute
+  AdminRegistrationsRoute: typeof AdminRegistrationsRouteWithChildren
   AdminRentalsRoute: typeof AdminRentalsRouteWithChildren
   AdminIndexRoute: typeof AdminIndexRoute
   AdminPagesPageIdRoute: typeof AdminPagesPageIdRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
-  AdminBlogRoute: AdminBlogRoute,
+  AdminBlogRoute: AdminBlogRouteWithChildren,
   AdminContentRoute: AdminContentRouteWithChildren,
   AdminInvitationsRoute: AdminInvitationsRoute,
   AdminMembersRoute: AdminMembersRoute,
+  AdminRegistrationsRoute: AdminRegistrationsRouteWithChildren,
   AdminRentalsRoute: AdminRentalsRouteWithChildren,
   AdminIndexRoute: AdminIndexRoute,
   AdminPagesPageIdRoute: AdminPagesPageIdRoute,
@@ -1728,6 +1851,7 @@ const rootRouteChildren: RootRouteChildren = {
   EnPrivacyRoute: EnPrivacyRoute,
   EnTermsRoute: EnTermsRoute,
   EnTournamentsRoute: EnTournamentsRoute,
+  InscripcionSlugRoute: InscripcionSlugRoute,
   InviteTokenRoute: InviteTokenRoute,
   CaIndexRoute: CaIndexRoute,
   EnIndexRoute: EnIndexRoute,

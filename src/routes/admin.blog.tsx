@@ -1,8 +1,8 @@
-import { createFileRoute, useRouter } from "@tanstack/react-router";
+import { createFileRoute, useRouter, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Newspaper, Download, Languages, Loader2, CheckCircle2, AlertCircle, ExternalLink, Image as ImageIcon } from "lucide-react";
+import { Newspaper, Download, Languages, Loader2, CheckCircle2, AlertCircle, ExternalLink, Image as ImageIcon, Plus, Pencil } from "lucide-react";
 import { adminListBlogPosts, adminImportWordPress, adminTranslateBlogPost, adminMirrorBlogImages, type AdminBlogPostRow } from "@/lib/blog.functions";
 import { toast } from "sonner";
 
@@ -97,7 +97,10 @@ function AdminBlog() {
           </p>
         </div>
         <div className="flex gap-2 flex-wrap">
-          <Button onClick={handleImport} disabled={importing} className="bg-coral hover:bg-coral/90 text-cream">
+          <Link to="/admin/blog/new" className="inline-flex items-center gap-2 bg-coral hover:bg-coral/90 text-cream rounded-md px-3 py-2 text-sm font-medium">
+            <Plus className="h-4 w-4" /> Nuevo post
+          </Link>
+          <Button onClick={handleImport} disabled={importing} variant="outline" className="border-cream/20 text-cream hover:bg-cream/10">
             {importing ? (
               <Loader2 className="h-4 w-4 mr-2 animate-spin" />
             ) : (
@@ -188,7 +191,7 @@ function AdminBlog() {
               posts.map((p) => (
                 <tr key={p.id} className="border-t border-cream/10 hover:bg-cream/[0.02]">
                   <td className="px-4 py-3">
-                    <div className="font-medium text-cream">{p.title_en ?? p.slug}</div>
+                    <Link to="/admin/blog/$id" params={{ id: p.id }} className="font-medium text-cream hover:text-coral">{p.title_en ?? p.slug}</Link>
                     <div className="text-xs text-cream/50 mt-0.5">
                       /{p.slug} · {new Date(p.published_at).toLocaleDateString("es-ES")}
                     </div>
@@ -204,6 +207,9 @@ function AdminBlog() {
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex gap-1">
+                      <Link to="/admin/blog/$id" params={{ id: p.id }} className="inline-flex items-center justify-center h-8 w-8 rounded-md text-cream/80 hover:text-cream hover:bg-cream/10" title="Editar">
+                        <Pencil className="h-3.5 w-3.5" />
+                      </Link>
                       <Button
                         size="sm"
                         variant="ghost"

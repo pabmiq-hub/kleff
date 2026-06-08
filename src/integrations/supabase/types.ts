@@ -147,8 +147,10 @@ export type Database = {
           excerpt_es: string | null
           id: string
           published_at: string
+          reading_time_minutes: number | null
           slug: string
           status: string
+          tags: string[]
           title_ca: string | null
           title_en: string | null
           title_es: string | null
@@ -167,8 +169,10 @@ export type Database = {
           excerpt_es?: string | null
           id?: string
           published_at?: string
+          reading_time_minutes?: number | null
           slug: string
           status?: string
+          tags?: string[]
           title_ca?: string | null
           title_en?: string | null
           title_es?: string | null
@@ -187,8 +191,10 @@ export type Database = {
           excerpt_es?: string | null
           id?: string
           published_at?: string
+          reading_time_minutes?: number | null
           slug?: string
           status?: string
+          tags?: string[]
           title_ca?: string | null
           title_en?: string | null
           title_es?: string | null
@@ -573,6 +579,241 @@ export type Database = {
           username?: string
         }
         Relationships: []
+      }
+      registration_files: {
+        Row: {
+          created_at: string
+          file_name: string
+          id: string
+          mime_type: string | null
+          question_id: string | null
+          response_id: string
+          size_bytes: number | null
+          storage_path: string
+        }
+        Insert: {
+          created_at?: string
+          file_name: string
+          id?: string
+          mime_type?: string | null
+          question_id?: string | null
+          response_id: string
+          size_bytes?: number | null
+          storage_path: string
+        }
+        Update: {
+          created_at?: string
+          file_name?: string
+          id?: string
+          mime_type?: string | null
+          question_id?: string | null
+          response_id?: string
+          size_bytes?: number | null
+          storage_path?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "registration_files_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "registration_questions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "registration_files_response_id_fkey"
+            columns: ["response_id"]
+            isOneToOne: false
+            referencedRelation: "registration_responses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      registration_forms: {
+        Row: {
+          closes_at: string | null
+          confirmation_message_ca: string | null
+          confirmation_message_en: string | null
+          confirmation_message_es: string | null
+          cover_image_url: string | null
+          created_at: string
+          description_ca: string | null
+          description_en: string | null
+          description_es: string | null
+          external_mode: string | null
+          external_url: string | null
+          id: string
+          is_published: boolean
+          max_responses: number | null
+          notify_emails: string[]
+          payment_amount_cents: number | null
+          payment_currency: string
+          payment_instructions: string | null
+          payment_required: boolean
+          slug: string
+          title_ca: string
+          title_en: string
+          title_es: string
+          updated_at: string
+        }
+        Insert: {
+          closes_at?: string | null
+          confirmation_message_ca?: string | null
+          confirmation_message_en?: string | null
+          confirmation_message_es?: string | null
+          cover_image_url?: string | null
+          created_at?: string
+          description_ca?: string | null
+          description_en?: string | null
+          description_es?: string | null
+          external_mode?: string | null
+          external_url?: string | null
+          id?: string
+          is_published?: boolean
+          max_responses?: number | null
+          notify_emails?: string[]
+          payment_amount_cents?: number | null
+          payment_currency?: string
+          payment_instructions?: string | null
+          payment_required?: boolean
+          slug: string
+          title_ca?: string
+          title_en?: string
+          title_es?: string
+          updated_at?: string
+        }
+        Update: {
+          closes_at?: string | null
+          confirmation_message_ca?: string | null
+          confirmation_message_en?: string | null
+          confirmation_message_es?: string | null
+          cover_image_url?: string | null
+          created_at?: string
+          description_ca?: string | null
+          description_en?: string | null
+          description_es?: string | null
+          external_mode?: string | null
+          external_url?: string | null
+          id?: string
+          is_published?: boolean
+          max_responses?: number | null
+          notify_emails?: string[]
+          payment_amount_cents?: number | null
+          payment_currency?: string
+          payment_instructions?: string | null
+          payment_required?: boolean
+          slug?: string
+          title_ca?: string
+          title_en?: string
+          title_es?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      registration_questions: {
+        Row: {
+          created_at: string
+          form_id: string
+          help_ca: string | null
+          help_en: string | null
+          help_es: string | null
+          id: string
+          label_ca: string
+          label_en: string
+          label_es: string
+          options: Json
+          position: number
+          required: boolean
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          form_id: string
+          help_ca?: string | null
+          help_en?: string | null
+          help_es?: string | null
+          id?: string
+          label_ca?: string
+          label_en?: string
+          label_es?: string
+          options?: Json
+          position?: number
+          required?: boolean
+          type: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          form_id?: string
+          help_ca?: string | null
+          help_en?: string | null
+          help_es?: string | null
+          id?: string
+          label_ca?: string
+          label_en?: string
+          label_es?: string
+          options?: Json
+          position?: number
+          required?: boolean
+          type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "registration_questions_form_id_fkey"
+            columns: ["form_id"]
+            isOneToOne: false
+            referencedRelation: "registration_forms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      registration_responses: {
+        Row: {
+          created_at: string
+          data: Json
+          email_contact: string | null
+          form_id: string
+          id: string
+          internal_notes: string | null
+          ip_address: string | null
+          payment_status: string
+          updated_at: string
+          user_agent: string | null
+        }
+        Insert: {
+          created_at?: string
+          data?: Json
+          email_contact?: string | null
+          form_id: string
+          id?: string
+          internal_notes?: string | null
+          ip_address?: string | null
+          payment_status?: string
+          updated_at?: string
+          user_agent?: string | null
+        }
+        Update: {
+          created_at?: string
+          data?: Json
+          email_contact?: string | null
+          form_id?: string
+          id?: string
+          internal_notes?: string | null
+          ip_address?: string | null
+          payment_status?: string
+          updated_at?: string
+          user_agent?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "registration_responses_form_id_fkey"
+            columns: ["form_id"]
+            isOneToOne: false
+            referencedRelation: "registration_forms"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       rental_requests: {
         Row: {
