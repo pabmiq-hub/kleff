@@ -176,7 +176,8 @@ export const adminUpdateBlock = createServerFn({ method: "POST" })
 export const adminDeleteBlock = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator(z.object({ blockId: z.string().uuid() }))
-  .handler(async ({ data }) => {
+  .handler(async ({ data, context }) => {
+    await assertSuperAdmin(context.userId);
     const { error } = await supabaseAdmin
       .from("content_page_blocks")
       .delete()
