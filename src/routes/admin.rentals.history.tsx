@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { listAllRentals } from "@/server/rental.functions";
+import { listAllRentals } from "@/lib/rental.functions";
 
 export const Route = createFileRoute("/admin/rentals/history")({
   component: HistoryPage,

@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { MediaPage } from "@/components/pages/MediaPage";
-import { getMediaItems, getInstagramFollowers } from "@/server/media.functions";
+import { getMediaItems, getInstagramFollowers } from "@/lib/media.functions";
 import { getPageContent } from "@/lib/content.functions";
 
 export const Route = createFileRoute("/ca/mitjans")({

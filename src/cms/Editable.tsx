@@ -22,7 +22,7 @@ import { Plus, Trash2, ArrowUp, ArrowDown, ImagePlus, Loader2 } from "lucide-rea
 import { toast } from "sonner";
 import { useEditor } from "@/editor/EditorProvider";
 import type { StyleProps } from "@/editor/types";
-import { uploadMedia } from "@/server/media.functions";
+import { uploadMedia } from "@/lib/media.functions";
 import { arrayBufferToBase64 } from "@/lib/base64";
 import { useSection, useSectionValue } from "./SectionContext";
 

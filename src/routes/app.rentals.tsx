@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { listRentalGames, createRentalRequest, getRentalSettings } from "@/server/rental.functions";
+import { listRentalGames, createRentalRequest, getRentalSettings } from "@/lib/rental.functions";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";

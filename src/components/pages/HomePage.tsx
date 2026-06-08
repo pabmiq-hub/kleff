@@ -18,7 +18,7 @@ import { useI18n } from "@/i18n/I18nProvider";
 import { SiteLayout } from "@/components/site/SiteLayout";
 import { useSectionContent } from "@/cms/useSectionContent";
 import { EditableText, EditableImage } from "@/editor/Editable";
-import type { MeetupEvent, MeetupGroupStats, GoogleStats } from "@/server/meetup.functions";
+import type { MeetupEvent, MeetupGroupStats, GoogleStats } from "@/lib/meetup.functions";
 
 // Returns `value` if it's a non-empty string, otherwise `fallback`. Used to
 // overlay CMS-edited copy on top of the static i18n dictionaries.
