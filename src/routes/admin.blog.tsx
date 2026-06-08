@@ -2,8 +2,8 @@ import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Newspaper, Download, Languages, Loader2, CheckCircle2, AlertCircle, ExternalLink } from "lucide-react";
-import { adminListBlogPosts, adminImportWordPress, adminTranslateBlogPost, type AdminBlogPostRow } from "@/lib/blog.functions";
+import { Newspaper, Download, Languages, Loader2, CheckCircle2, AlertCircle, ExternalLink, Image as ImageIcon } from "lucide-react";
+import { adminListBlogPosts, adminImportWordPress, adminTranslateBlogPost, adminMirrorBlogImages, type AdminBlogPostRow } from "@/lib/blog.functions";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/admin/blog")({
@@ -22,9 +22,11 @@ function AdminBlog() {
   const router = useRouter();
   const importFn = useServerFn(adminImportWordPress);
   const translateFn = useServerFn(adminTranslateBlogPost);
+  const mirrorFn = useServerFn(adminMirrorBlogImages);
   const [importing, setImporting] = useState(false);
   const [translatingId, setTranslatingId] = useState<string | null>(null);
   const [bulkTranslating, setBulkTranslating] = useState(false);
+  const [mirroring, setMirroring] = useState(false);
   const [progress, setProgress] = useState<{ done: number; total: number } | null>(null);
 
   const handleImport = async () => {
@@ -115,6 +117,30 @@ function AdminBlog() {
               <Languages className="h-4 w-4 mr-2" />
             )}
             Traducir todos los pendientes
+          </Button>
+          <Button
+            onClick={async () => {
+              setMirroring(true);
+              try {
+                const res = await mirrorFn();
+                toast.success(`Imágenes rehospedadas: ${res.covers} portadas, ${res.inline} dentro del contenido${res.failed ? ` (${res.failed} fallidas)` : ""}`);
+                await router.invalidate();
+              } catch (e) {
+                toast.error(`Error: ${(e as Error).message}`);
+              } finally {
+                setMirroring(false);
+              }
+            }}
+            disabled={mirroring || posts.length === 0}
+            variant="outline"
+            className="border-cream/20 text-cream hover:bg-cream/10"
+          >
+            {mirroring ? (
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+            ) : (
+              <ImageIcon className="h-4 w-4 mr-2" />
+            )}
+            Rehospedar imágenes
           </Button>
         </div>
       </header>

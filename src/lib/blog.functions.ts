@@ -390,6 +390,133 @@ async function translatePost(
 }
 
 // ---------------------------------------------------------------------------
+// ADMIN: mirror external images (kleff.es) into our own storage bucket
+// ---------------------------------------------------------------------------
+
+export const adminMirrorBlogImages = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { data: roleRows } = await context.supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", context.userId);
+    if (!(roleRows ?? []).some((r) => r.role === "super_admin")) {
+      throw new Error("Solo super-administradores pueden rehospedar imágenes.");
+    }
+
+    const { data: rows, error } = await supabaseAdmin
+      .from("blog_posts")
+      .select("id, slug, cover_image_url, content_en, content_es, content_ca");
+    if (error) throw new Error(error.message);
+
+    const cache = new Map<string, string>(); // src URL -> new URL
+    let covers = 0;
+    let inline = 0;
+    let failed = 0;
+
+    const isExternal = (u: string | null) =>
+      !!u && /^https?:\/\/(www\.)?kleff\.es\//i.test(u);
+
+    const mirror = async (src: string, slugHint: string): Promise<string | null> => {
+      const cached = cache.get(src);
+      if (cached) return cached;
+      try {
+        const res = await fetch(src);
+        if (!res.ok) {
+          failed++;
+          return null;
+        }
+        const ct = res.headers.get("content-type") ?? "image/jpeg";
+        const ext = ct.includes("png") ? "png" : ct.includes("webp") ? "webp" : ct.includes("gif") ? "gif" : "jpg";
+        const buf = new Uint8Array(await res.arrayBuffer());
+        // derive a stable filename from the URL basename + slug
+        const baseName = src.split("/").pop()?.split("?")[0]?.replace(/\.[a-z0-9]+$/i, "") ?? "img";
+        const safe = baseName.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 60) || "img";
+        const suffix = Math.random().toString(36).slice(2, 8);
+        const path = `blog/${slugHint}/${safe}-${suffix}.${ext}`;
+        const { error: upErr } = await supabaseAdmin.storage
+          .from("media")
+          .upload(path, buf, { contentType: ct, upsert: false });
+        if (upErr) {
+          failed++;
+          return null;
+        }
+        const { data: pub } = supabaseAdmin.storage.from("media").getPublicUrl(path);
+        cache.set(src, pub.publicUrl);
+        return pub.publicUrl;
+      } catch {
+        failed++;
+        return null;
+      }
+    };
+
+    const rewriteHtml = async (html: string | null, slug: string): Promise<{ out: string | null; changed: boolean; count: number }> => {
+      if (!html) return { out: html, changed: false, count: 0 };
+      const matches = [...html.matchAll(/https?:\/\/(?:www\.)?kleff\.es\/[^\s"'<>)]+\.(?:jpe?g|png|gif|webp)/gi)];
+      if (matches.length === 0) return { out: html, changed: false, count: 0 };
+      let out = html;
+      let n = 0;
+      for (const m of matches) {
+        const orig = m[0];
+        // replace each unique URL once
+        if (!cache.has(orig)) {
+          const next = await mirror(orig, slug);
+          if (!next) continue;
+        }
+        const next = cache.get(orig);
+        if (!next) continue;
+        // global replace of this exact string
+        out = out.split(orig).join(next);
+        n++;
+      }
+      return { out, changed: n > 0, count: n };
+    };
+
+    for (const row of rows ?? []) {
+      const updates: {
+        cover_image_url?: string;
+        content_en?: string;
+        content_es?: string;
+        content_ca?: string;
+      } = {};
+
+      if (isExternal(row.cover_image_url)) {
+        const next = await mirror(row.cover_image_url as string, row.slug);
+        if (next) {
+          updates.cover_image_url = next;
+          covers++;
+        }
+      }
+
+      const en = await rewriteHtml(row.content_en, row.slug);
+      if (en.changed && en.out) {
+        updates.content_en = en.out;
+        inline += en.count;
+      }
+      const es = await rewriteHtml(row.content_es, row.slug);
+      if (es.changed && es.out) {
+        updates.content_es = es.out;
+        inline += es.count;
+      }
+      const ca = await rewriteHtml(row.content_ca, row.slug);
+      if (ca.changed && ca.out) {
+        updates.content_ca = ca.out;
+        inline += ca.count;
+      }
+
+      if (Object.keys(updates).length > 0) {
+        const { error: updErr } = await supabaseAdmin
+          .from("blog_posts")
+          .update(updates)
+          .eq("id", row.id);
+        if (updErr) console.error("[blog] mirror update failed", row.slug, updErr);
+      }
+    }
+
+    return { covers, inline, failed };
+  });
+
+// ---------------------------------------------------------------------------
 // helpers
 // ---------------------------------------------------------------------------
 
