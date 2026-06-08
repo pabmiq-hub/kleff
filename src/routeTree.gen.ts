@@ -77,7 +77,9 @@ import { Route as AdminInvitationsRouteImport } from './routes/admin.invitations
 import { Route as AdminContentRouteImport } from './routes/admin.content'
 import { Route as AdminBlogRouteImport } from './routes/admin.blog'
 import { Route as AdminRentalsIndexRouteImport } from './routes/admin.rentals.index'
+import { Route as AdminRegistrationsIndexRouteImport } from './routes/admin.registrations.index'
 import { Route as AdminContentIndexRouteImport } from './routes/admin.content.index'
+import { Route as AdminBlogIndexRouteImport } from './routes/admin.blog.index'
 import { Route as AppRentalsMineRouteImport } from './routes/app.rentals.mine'
 import { Route as ApiPublicUploadInviteAvatarRouteImport } from './routes/api.public.upload-invite-avatar'
 import { Route as ApiPublicSyncBggRouteImport } from './routes/api.public.sync-bgg'
@@ -434,10 +436,20 @@ const AdminRentalsIndexRoute = AdminRentalsIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AdminRentalsRoute,
 } as any)
+const AdminRegistrationsIndexRoute = AdminRegistrationsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminRegistrationsRoute,
+} as any)
 const AdminContentIndexRoute = AdminContentIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => AdminContentRoute,
+} as any)
+const AdminBlogIndexRoute = AdminBlogIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminBlogRoute,
 } as any)
 const AppRentalsMineRoute = AppRentalsMineRouteImport.update({
   id: '/mine',
@@ -599,7 +611,9 @@ export interface FileRoutesByFullPath {
   '/api/public/sync-bgg': typeof ApiPublicSyncBggRoute
   '/api/public/upload-invite-avatar': typeof ApiPublicUploadInviteAvatarRoute
   '/app/rentals/mine': typeof AppRentalsMineRoute
+  '/admin/blog/': typeof AdminBlogIndexRoute
   '/admin/content/': typeof AdminContentIndexRoute
+  '/admin/registrations/': typeof AdminRegistrationsIndexRoute
   '/admin/rentals/': typeof AdminRentalsIndexRoute
 }
 export interface FileRoutesByTo {
@@ -623,10 +637,8 @@ export interface FileRoutesByTo {
   '/super-admin': typeof SuperAdminRoute
   '/terminos': typeof TerminosRoute
   '/torneos': typeof TorneosRoute
-  '/admin/blog': typeof AdminBlogRouteWithChildren
   '/admin/invitations': typeof AdminInvitationsRoute
   '/admin/members': typeof AdminMembersRoute
-  '/admin/registrations': typeof AdminRegistrationsRouteWithChildren
   '/app/carnet': typeof AppCarnetRoute
   '/app/profile': typeof AppProfileRoute
   '/app/rentals': typeof AppRentalsRouteWithChildren
@@ -681,7 +693,9 @@ export interface FileRoutesByTo {
   '/api/public/sync-bgg': typeof ApiPublicSyncBggRoute
   '/api/public/upload-invite-avatar': typeof ApiPublicUploadInviteAvatarRoute
   '/app/rentals/mine': typeof AppRentalsMineRoute
+  '/admin/blog': typeof AdminBlogIndexRoute
   '/admin/content': typeof AdminContentIndexRoute
+  '/admin/registrations': typeof AdminRegistrationsIndexRoute
   '/admin/rentals': typeof AdminRentalsIndexRoute
 }
 export interface FileRoutesById {
@@ -768,7 +782,9 @@ export interface FileRoutesById {
   '/api/public/sync-bgg': typeof ApiPublicSyncBggRoute
   '/api/public/upload-invite-avatar': typeof ApiPublicUploadInviteAvatarRoute
   '/app/rentals/mine': typeof AppRentalsMineRoute
+  '/admin/blog/': typeof AdminBlogIndexRoute
   '/admin/content/': typeof AdminContentIndexRoute
+  '/admin/registrations/': typeof AdminRegistrationsIndexRoute
   '/admin/rentals/': typeof AdminRentalsIndexRoute
 }
 export interface FileRouteTypes {
@@ -856,7 +872,9 @@ export interface FileRouteTypes {
     | '/api/public/sync-bgg'
     | '/api/public/upload-invite-avatar'
     | '/app/rentals/mine'
+    | '/admin/blog/'
     | '/admin/content/'
+    | '/admin/registrations/'
     | '/admin/rentals/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -880,10 +898,8 @@ export interface FileRouteTypes {
     | '/super-admin'
     | '/terminos'
     | '/torneos'
-    | '/admin/blog'
     | '/admin/invitations'
     | '/admin/members'
-    | '/admin/registrations'
     | '/app/carnet'
     | '/app/profile'
     | '/app/rentals'
@@ -938,7 +954,9 @@ export interface FileRouteTypes {
     | '/api/public/sync-bgg'
     | '/api/public/upload-invite-avatar'
     | '/app/rentals/mine'
+    | '/admin/blog'
     | '/admin/content'
+    | '/admin/registrations'
     | '/admin/rentals'
   id:
     | '__root__'
@@ -1024,7 +1042,9 @@ export interface FileRouteTypes {
     | '/api/public/sync-bgg'
     | '/api/public/upload-invite-avatar'
     | '/app/rentals/mine'
+    | '/admin/blog/'
     | '/admin/content/'
+    | '/admin/registrations/'
     | '/admin/rentals/'
   fileRoutesById: FileRoutesById
 }
@@ -1568,12 +1588,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminRentalsIndexRouteImport
       parentRoute: typeof AdminRentalsRoute
     }
+    '/admin/registrations/': {
+      id: '/admin/registrations/'
+      path: '/'
+      fullPath: '/admin/registrations/'
+      preLoaderRoute: typeof AdminRegistrationsIndexRouteImport
+      parentRoute: typeof AdminRegistrationsRoute
+    }
     '/admin/content/': {
       id: '/admin/content/'
       path: '/'
       fullPath: '/admin/content/'
       preLoaderRoute: typeof AdminContentIndexRouteImport
       parentRoute: typeof AdminContentRoute
+    }
+    '/admin/blog/': {
+      id: '/admin/blog/'
+      path: '/'
+      fullPath: '/admin/blog/'
+      preLoaderRoute: typeof AdminBlogIndexRouteImport
+      parentRoute: typeof AdminBlogRoute
     }
     '/app/rentals/mine': {
       id: '/app/rentals/mine'
@@ -1686,11 +1720,13 @@ declare module '@tanstack/react-router' {
 interface AdminBlogRouteChildren {
   AdminBlogIdRoute: typeof AdminBlogIdRoute
   AdminBlogNewRoute: typeof AdminBlogNewRoute
+  AdminBlogIndexRoute: typeof AdminBlogIndexRoute
 }
 
 const AdminBlogRouteChildren: AdminBlogRouteChildren = {
   AdminBlogIdRoute: AdminBlogIdRoute,
   AdminBlogNewRoute: AdminBlogNewRoute,
+  AdminBlogIndexRoute: AdminBlogIndexRoute,
 }
 
 const AdminBlogRouteWithChildren = AdminBlogRoute._addFileChildren(
@@ -1717,10 +1753,12 @@ const AdminContentRouteWithChildren = AdminContentRoute._addFileChildren(
 
 interface AdminRegistrationsRouteChildren {
   AdminRegistrationsIdRoute: typeof AdminRegistrationsIdRoute
+  AdminRegistrationsIndexRoute: typeof AdminRegistrationsIndexRoute
 }
 
 const AdminRegistrationsRouteChildren: AdminRegistrationsRouteChildren = {
   AdminRegistrationsIdRoute: AdminRegistrationsIdRoute,
+  AdminRegistrationsIndexRoute: AdminRegistrationsIndexRoute,
 }
 
 const AdminRegistrationsRouteWithChildren =
@@ -1862,3 +1900,12 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
