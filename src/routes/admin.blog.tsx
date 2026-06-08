@@ -3,7 +3,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Newspaper, Download, Languages, Loader2, CheckCircle2, AlertCircle, ExternalLink } from "lucide-react";
-import { adminListBlogPosts, adminImportWordPress, adminTranslateBlogPost } from "@/lib/blog.functions";
+import { adminListBlogPosts, adminImportWordPress, adminTranslateBlogPost, type AdminBlogPostRow } from "@/lib/blog.functions";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/admin/blog")({
