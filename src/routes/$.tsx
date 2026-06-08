@@ -69,14 +69,10 @@ export const Route = createFileRoute("/$")({
 function CatchAll() {
   const data = Route.useLoaderData();
   if (data.kind === "post") {
-    return <BlogPostPageWithLocale post={data.post} locale={data.locale} />;
+    // I18nProvider detects locale from the URL automatically.
+    return <BlogPostPage post={data.post} />;
   }
   return <NotFound path={data.path} />;
-}
-
-function BlogPostPageWithLocale({ post }: { post: BlogPostFull; locale: Locale }) {
-  // The I18nProvider auto-detects locale from the URL, so we just render.
-  return <BlogPostPage post={post} />;
 }
 
 function NotFound({ path }: { path: string }) {
