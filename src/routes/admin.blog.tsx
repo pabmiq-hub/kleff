@@ -191,7 +191,7 @@ function AdminBlog() {
               posts.map((p) => (
                 <tr key={p.id} className="border-t border-cream/10 hover:bg-cream/[0.02]">
                   <td className="px-4 py-3">
-                    <div className="font-medium text-cream">{p.title_en ?? p.slug}</div>
+                    <Link to="/admin/blog/$id" params={{ id: p.id }} className="font-medium text-cream hover:text-coral">{p.title_en ?? p.slug}</Link>
                     <div className="text-xs text-cream/50 mt-0.5">
                       /{p.slug} · {new Date(p.published_at).toLocaleDateString("es-ES")}
                     </div>
