@@ -50,11 +50,12 @@ export type RegistrationQuestion = {
   options: Array<{ value: string; label_es: string; label_ca: string; label_en: string }>;
 };
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type RegistrationResponse = {
   id: string;
   form_id: string;
   email_contact: string | null;
-  data: Record<string, unknown>;
+  data: Record<string, any>;
   payment_status: "pending" | "paid" | "refunded" | "not_required";
   internal_notes: string | null;
   created_at: string;
