@@ -8,6 +8,7 @@ import {
   Dices,
   FileText,
   Newspaper,
+  ClipboardList,
   LogOut,
   Shield,
   ExternalLink,
