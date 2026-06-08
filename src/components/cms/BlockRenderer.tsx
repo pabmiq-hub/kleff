@@ -1,7 +1,9 @@
 // Public-facing renderer for CMS blocks.
 import type { BlockData, BlockType } from "@/cms/blockTypes";
+import { EmbeddedRegistrationForm } from "@/components/cms/EmbeddedRegistrationForm";
 
 type AnyBlock = { id: string; type: BlockType; data: unknown; hidden?: boolean };
+
 
 export function BlockRenderer({ blocks }: { blocks: AnyBlock[] }) {
   return (
@@ -88,11 +90,7 @@ function BlockView({ block }: { block: AnyBlock }) {
     case "form_embed": {
       const d = block.data as BlockData["form_embed"];
       if (!d.formSlug) return null;
-      return (
-        <div className="rounded-xl border border-dashed border-cream/30 p-6 text-center text-sm text-muted-foreground">
-          Formulario «{d.formSlug}» — disponible cuando se publique el módulo de inscripciones.
-        </div>
-      );
+      return <EmbeddedRegistrationForm slug={d.formSlug} />;
     }
     default:
       return null;
