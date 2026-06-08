@@ -38,7 +38,8 @@ export type PageSlugRow = {
 
 export const listPageSlugs = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .handler(async () => {
+  .handler(async ({ context }) => {
+    await assertSuperAdmin(context.userId);
     const { data, error } = await supabaseAdmin
       .from("content_pages")
       .select("id, page_key, title, path, is_builtin, slug_es, slug_ca, slug_en")
