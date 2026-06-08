@@ -196,7 +196,8 @@ export const adminReorderBlocks = createServerFn({ method: "POST" })
       orderedIds: z.array(z.string().uuid()).min(1).max(500),
     }),
   )
-  .handler(async ({ data }) => {
+  .handler(async ({ data, context }) => {
+    await assertSuperAdmin(context.userId);
     // Update positions one by one (small N expected, <100)
     await Promise.all(
       data.orderedIds.map((id, idx) =>
