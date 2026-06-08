@@ -93,6 +93,7 @@ export const adminUpdatePageSlug = createServerFn({ method: "POST" })
     })
   )
   .handler(async ({ data, context }) => {
+    await assertSuperAdmin(context.userId);
     const { userId } = context;
 
     const { data: page, error: pErr } = await supabaseAdmin
