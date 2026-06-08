@@ -115,6 +115,7 @@ export const adminCreateBlock = createServerFn({ method: "POST" })
     }),
   )
   .handler(async ({ data, context }) => {
+    await assertSuperAdmin(context.userId);
     const { userId } = context;
     // Shift positions of blocks at or after `position`
     await supabaseAdmin.rpc; // noop — using raw update below
