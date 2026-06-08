@@ -163,12 +163,22 @@ function ContentIndex() {
                 >
                   Ver <ExternalLink className="h-3.5 w-3.5" />
                 </a>
-                <a
-                  href={`${page.path}?edit=1`}
-                  className="inline-flex items-center gap-1.5 px-3 py-2 bg-coral hover:bg-coral-deep text-cream rounded-lg text-sm font-medium"
-                >
-                  <Pencil className="h-3.5 w-3.5" /> Editar
-                </a>
+                {page.is_builtin ? (
+                  <a
+                    href={`${page.path}?edit=1`}
+                    className="inline-flex items-center gap-1.5 px-3 py-2 bg-coral hover:bg-coral-deep text-cream rounded-lg text-sm font-medium"
+                  >
+                    <Pencil className="h-3.5 w-3.5" /> Editar
+                  </a>
+                ) : (
+                  <Link
+                    to="/admin/pages/$pageId"
+                    params={{ pageId: page.id }}
+                    className="inline-flex items-center gap-1.5 px-3 py-2 bg-coral hover:bg-coral-deep text-cream rounded-lg text-sm font-medium"
+                  >
+                    <Pencil className="h-3.5 w-3.5" /> Editar bloques
+                  </Link>
+                )}
               </div>
             </div>
           </div>
