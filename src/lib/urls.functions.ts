@@ -60,7 +60,8 @@ export type RedirectRow = {
 
 export const listRedirects = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .handler(async () => {
+  .handler(async ({ context }) => {
+    await assertSuperAdmin(context.userId);
     const { data, error } = await supabaseAdmin
       .from("content_redirects")
       .select("id, from_path, to_path, locale, page_key, created_at")
