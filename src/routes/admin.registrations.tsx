@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ClipboardList, Plus, ExternalLink, Trash2, Users, Loader2 } from "lucide-react";
@@ -11,20 +11,39 @@ import {
 } from "@/components/ui/dialog";
 
 export const Route = createFileRoute("/admin/registrations")({
-  loader: () => adminListForms(),
   head: () => ({ meta: [{ title: "Inscripciones — Admin KLEFF" }, { name: "robots", content: "noindex, nofollow" }] }),
   component: AdminRegistrations,
 });
 
 function AdminRegistrations() {
-  const { forms } = Route.useLoaderData() as { forms: Array<{ id: string; slug: string; title_es: string; is_published: boolean; external_mode: string | null; created_at: string; max_responses: number | null; closes_at: string | null; responses: number }> };
   const router = useRouter();
+  const listFn = useServerFn(adminListForms);
   const createFn = useServerFn(adminCreateForm);
   const deleteFn = useServerFn(adminDeleteForm);
+  const [forms, setForms] = useState<Array<{ id: string; slug: string; title_es: string; is_published: boolean; external_mode: string | null; created_at: string; max_responses: number | null; closes_at: string | null; responses: number }>>([]);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
   const [slug, setSlug] = useState("");
   const [title, setTitle] = useState("");
   const [creating, setCreating] = useState(false);
+
+  const reload = async () => {
+    setLoading(true);
+    setLoadError(null);
+    try {
+      const res = await listFn();
+      setForms(res.forms);
+    } catch (e) {
+      setLoadError((e as Error).message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    void reload();
+  }, []);
 
   const handleCreate = async () => {
     setCreating(true);
@@ -46,11 +65,15 @@ function AdminRegistrations() {
     try {
       await deleteFn({ data: { id } });
       toast.success("Inscripción eliminada");
-      await router.invalidate();
+      await reload();
     } catch (e) {
       toast.error((e as Error).message);
     }
   };
+
+  if (loadError) {
+    return <div className="rounded-lg border border-red-500/20 bg-red-500/10 p-4 text-sm text-red-200">{loadError}</div>;
+  }
 
   return (
     <div className="space-y-6">
@@ -103,7 +126,9 @@ function AdminRegistrations() {
             </tr>
           </thead>
           <tbody>
-            {forms.length === 0 ? (
+            {loading ? (
+              <tr><td colSpan={4} className="px-4 py-12 text-center text-cream/60"><span className="inline-flex items-center gap-2"><Loader2 className="h-4 w-4 animate-spin" /> Cargando inscripciones…</span></td></tr>
+            ) : forms.length === 0 ? (
               <tr><td colSpan={4} className="px-4 py-12 text-center text-cream/60">Aún no hay inscripciones.</td></tr>
             ) : forms.map((f) => (
               <tr key={f.id} className="border-t border-cream/10 hover:bg-cream/[0.02]">
