@@ -121,7 +121,7 @@ function AdminRegistrations() {
               <th className="px-4 py-3">Inscripción</th>
               <th className="px-4 py-3 text-center w-24">Estado</th>
               <th className="px-4 py-3 text-center w-32">Respuestas</th>
-              <th className="px-4 py-3 w-32">Acciones</th>
+              <th className="px-4 py-3 w-56">Acciones</th>
             </tr>
           </thead>
           <tbody>
