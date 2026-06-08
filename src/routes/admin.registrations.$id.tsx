@@ -137,7 +137,6 @@ function FormSettings({ form, onSaved }: { form: RegistrationForm; onSaved: (pat
             title_es: state.title_es, title_ca: state.title_ca, title_en: state.title_en,
             description_es: state.description_es, description_ca: state.description_ca, description_en: state.description_en,
             cover_image_url: state.cover_image_url,
-            is_published: state.is_published,
             external_mode: state.external_mode,
             external_url: state.external_url,
             payment_required: state.payment_required,
