@@ -103,9 +103,22 @@ export const listBlogSlugsForSitemap = createServerFn({ method: "GET" }).handler
 // ADMIN: list (includes drafts and translation status)
 // ---------------------------------------------------------------------------
 
+export interface AdminBlogPostRow {
+  id: string;
+  wp_id: number | null;
+  slug: string;
+  status: string;
+  published_at: string;
+  cover_image_url: string | null;
+  author_name: string | null;
+  title_en: string | null;
+  hasEs: boolean;
+  hasCa: boolean;
+}
+
 export const adminListBlogPosts = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .handler(async () => {
+  .handler(async (): Promise<{ posts: AdminBlogPostRow[] }> => {
     const { data: rows, error } = await supabaseAdmin
       .from("blog_posts")
       .select(
