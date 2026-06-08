@@ -2,7 +2,16 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
+import { assertSuperAdmin } from "@/lib/assert-role.server";
+import { sanitizeHtml } from "@/lib/sanitize.server";
 import type { Block, BlockType, Locale } from "@/cms/blockTypes";
+
+function sanitizeBlockData(data: Record<string, unknown> | undefined): Record<string, unknown> | undefined {
+  if (!data) return data;
+  const out: Record<string, unknown> = { ...data };
+  if (typeof out.html === "string") out.html = sanitizeHtml(out.html);
+  return out;
+}
 
 const localeSchema = z.enum(["es", "ca", "en"]);
 const blockTypeSchema = z.enum([
