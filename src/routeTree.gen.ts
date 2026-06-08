@@ -78,6 +78,7 @@ import { Route as AdminContentRouteImport } from './routes/admin.content'
 import { Route as AdminBlogRouteImport } from './routes/admin.blog'
 import { Route as AdminRentalsIndexRouteImport } from './routes/admin.rentals.index'
 import { Route as AdminContentIndexRouteImport } from './routes/admin.content.index'
+import { Route as AdminBlogIndexRouteImport } from './routes/admin.blog.index'
 import { Route as AppRentalsMineRouteImport } from './routes/app.rentals.mine'
 import { Route as ApiPublicUploadInviteAvatarRouteImport } from './routes/api.public.upload-invite-avatar'
 import { Route as ApiPublicSyncBggRouteImport } from './routes/api.public.sync-bgg'
@@ -439,6 +440,11 @@ const AdminContentIndexRoute = AdminContentIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AdminContentRoute,
 } as any)
+const AdminBlogIndexRoute = AdminBlogIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminBlogRoute,
+} as any)
 const AppRentalsMineRoute = AppRentalsMineRouteImport.update({
   id: '/mine',
   path: '/mine',
@@ -599,6 +605,7 @@ export interface FileRoutesByFullPath {
   '/api/public/sync-bgg': typeof ApiPublicSyncBggRoute
   '/api/public/upload-invite-avatar': typeof ApiPublicUploadInviteAvatarRoute
   '/app/rentals/mine': typeof AppRentalsMineRoute
+  '/admin/blog/': typeof AdminBlogIndexRoute
   '/admin/content/': typeof AdminContentIndexRoute
   '/admin/rentals/': typeof AdminRentalsIndexRoute
 }
@@ -623,7 +630,6 @@ export interface FileRoutesByTo {
   '/super-admin': typeof SuperAdminRoute
   '/terminos': typeof TerminosRoute
   '/torneos': typeof TorneosRoute
-  '/admin/blog': typeof AdminBlogRouteWithChildren
   '/admin/invitations': typeof AdminInvitationsRoute
   '/admin/members': typeof AdminMembersRoute
   '/admin/registrations': typeof AdminRegistrationsRouteWithChildren
@@ -681,6 +687,7 @@ export interface FileRoutesByTo {
   '/api/public/sync-bgg': typeof ApiPublicSyncBggRoute
   '/api/public/upload-invite-avatar': typeof ApiPublicUploadInviteAvatarRoute
   '/app/rentals/mine': typeof AppRentalsMineRoute
+  '/admin/blog': typeof AdminBlogIndexRoute
   '/admin/content': typeof AdminContentIndexRoute
   '/admin/rentals': typeof AdminRentalsIndexRoute
 }
@@ -768,6 +775,7 @@ export interface FileRoutesById {
   '/api/public/sync-bgg': typeof ApiPublicSyncBggRoute
   '/api/public/upload-invite-avatar': typeof ApiPublicUploadInviteAvatarRoute
   '/app/rentals/mine': typeof AppRentalsMineRoute
+  '/admin/blog/': typeof AdminBlogIndexRoute
   '/admin/content/': typeof AdminContentIndexRoute
   '/admin/rentals/': typeof AdminRentalsIndexRoute
 }
@@ -856,6 +864,7 @@ export interface FileRouteTypes {
     | '/api/public/sync-bgg'
     | '/api/public/upload-invite-avatar'
     | '/app/rentals/mine'
+    | '/admin/blog/'
     | '/admin/content/'
     | '/admin/rentals/'
   fileRoutesByTo: FileRoutesByTo
@@ -880,7 +889,6 @@ export interface FileRouteTypes {
     | '/super-admin'
     | '/terminos'
     | '/torneos'
-    | '/admin/blog'
     | '/admin/invitations'
     | '/admin/members'
     | '/admin/registrations'
@@ -938,6 +946,7 @@ export interface FileRouteTypes {
     | '/api/public/sync-bgg'
     | '/api/public/upload-invite-avatar'
     | '/app/rentals/mine'
+    | '/admin/blog'
     | '/admin/content'
     | '/admin/rentals'
   id:
@@ -1024,6 +1033,7 @@ export interface FileRouteTypes {
     | '/api/public/sync-bgg'
     | '/api/public/upload-invite-avatar'
     | '/app/rentals/mine'
+    | '/admin/blog/'
     | '/admin/content/'
     | '/admin/rentals/'
   fileRoutesById: FileRoutesById
@@ -1575,6 +1585,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminContentIndexRouteImport
       parentRoute: typeof AdminContentRoute
     }
+    '/admin/blog/': {
+      id: '/admin/blog/'
+      path: '/'
+      fullPath: '/admin/blog/'
+      preLoaderRoute: typeof AdminBlogIndexRouteImport
+      parentRoute: typeof AdminBlogRoute
+    }
     '/app/rentals/mine': {
       id: '/app/rentals/mine'
       path: '/mine'
@@ -1686,11 +1703,13 @@ declare module '@tanstack/react-router' {
 interface AdminBlogRouteChildren {
   AdminBlogIdRoute: typeof AdminBlogIdRoute
   AdminBlogNewRoute: typeof AdminBlogNewRoute
+  AdminBlogIndexRoute: typeof AdminBlogIndexRoute
 }
 
 const AdminBlogRouteChildren: AdminBlogRouteChildren = {
   AdminBlogIdRoute: AdminBlogIdRoute,
   AdminBlogNewRoute: AdminBlogNewRoute,
+  AdminBlogIndexRoute: AdminBlogIndexRoute,
 }
 
 const AdminBlogRouteWithChildren = AdminBlogRoute._addFileChildren(
