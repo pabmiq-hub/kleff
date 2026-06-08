@@ -25,14 +25,29 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 
 export const Route = createFileRoute("/admin/registrations/$id")({
-  loader: ({ params }) => adminGetForm({ data: { id: params.id } }),
   head: () => ({ meta: [{ title: "Editar inscripción — Admin KLEFF" }, { name: "robots", content: "noindex, nofollow" }] }),
   component: RegistrationEditor,
 });
 
 function RegistrationEditor() {
-  const { form: initialForm, questions: initialQuestions } = Route.useLoaderData() as { form: RegistrationForm; questions: RegistrationQuestion[] };
+  const { id } = Route.useParams();
+  const getForm = useServerFn(adminGetForm);
   const router = useRouter();
+  const [data, setData] = useState<{ form: RegistrationForm; questions: RegistrationQuestion[] } | null>(null);
+  const [loadError, setLoadError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    getForm({ data: { id } })
+      .then((res) => { if (!cancelled) setData(res as { form: RegistrationForm; questions: RegistrationQuestion[] }); })
+      .catch((e) => { if (!cancelled) setLoadError((e as Error).message); });
+    return () => { cancelled = true; };
+  }, [id, getForm]);
+
+  if (loadError) return <div className="text-red-400 p-6">Error: {loadError}</div>;
+  if (!data) return <div className="p-6 text-cream/60 flex items-center gap-2"><Loader2 className="h-4 w-4 animate-spin" /> Cargando…</div>;
+  const { form: initialForm, questions: initialQuestions } = data;
+
 
   return (
     <div className="space-y-6">
