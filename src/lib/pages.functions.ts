@@ -7,7 +7,8 @@ import { assertSuperAdmin } from "@/lib/assert-role.server";
 export const getCustomPageById = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator(z.object({ pageId: z.string().uuid() }))
-  .handler(async ({ data }) => {
+  .handler(async ({ data, context }) => {
+    await assertSuperAdmin(context.userId);
     const { data: page, error } = await supabaseAdmin
       .from("content_pages")
       .select("id, title, path, is_builtin, is_published, slug_es, slug_ca, slug_en")
