@@ -164,16 +164,10 @@ function FormSettings({ form, onSaved }: { form: RegistrationForm; onSaved: (pat
 
   return (
     <div className="space-y-6">
-      <Card title="Visibilidad">
-        <Row>
-          <div className="flex items-center gap-3">
-            <Switch checked={state.is_published} onCheckedChange={(v) => set("is_published", v)} />
-            <Label className="text-ink">Publicado</Label>
-          </div>
-        </Row>
-        <Row label="Slug (URL)">
+      <Card title="URL pública">
+        <Row label="Slug">
           <Input value={state.slug} onChange={(e) => set("slug", e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, "-"))} className="bg-white border-ink/15 text-ink" />
-          <p className="text-xs text-ink/50 mt-1">/inscripcion/{state.slug}</p>
+          <p className="text-xs text-ink/50 mt-1">La inscripción se publicará en <code className="text-coral">/inscripcion/{state.slug}</code></p>
         </Row>
       </Card>
 
