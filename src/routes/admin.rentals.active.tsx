@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { listAllRentals, markRentalReturned } from "@/server/rental.functions";
+import { listAllRentals, markRentalReturned } from "@/lib/rental.functions";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 

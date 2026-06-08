@@ -1,8 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { listRentalGames, updateRentalGame, deleteRentalGame } from "@/server/rental.functions";
-import { adminSyncBggCollection } from "@/server/bgg.functions";
+import { listRentalGames, updateRentalGame, deleteRentalGame } from "@/lib/rental.functions";
+import { adminSyncBggCollection } from "@/lib/bgg.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";

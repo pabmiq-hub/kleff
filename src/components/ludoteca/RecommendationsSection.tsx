@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { recommendSimilar } from "@/server/ludoteca.functions";
+import { recommendSimilar } from "@/lib/ludoteca.functions";
 import { Sparkles, Search, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";

@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { getAdminKpis } from "@/server/rental.functions";
+import { getAdminKpis } from "@/lib/rental.functions";
 import { Users, Mail, Inbox, Dices } from "lucide-react";
 
 export const Route = createFileRoute("/admin/")({

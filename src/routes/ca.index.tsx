@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { HomePage } from "@/components/pages/HomePage";
-import { getMeetupEvents } from "@/server/meetup.functions";
+import { getMeetupEvents } from "@/lib/meetup.functions";
 import { getPageContent } from "@/lib/content.functions";
 
 export const Route = createFileRoute("/ca/")({

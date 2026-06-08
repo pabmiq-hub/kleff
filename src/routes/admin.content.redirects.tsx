@@ -7,7 +7,7 @@ import {
   listRedirects,
   adminDeleteRedirect,
   type RedirectRow,
-} from "@/server/urls.functions";
+} from "@/lib/urls.functions";
 import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/admin/content/redirects")({

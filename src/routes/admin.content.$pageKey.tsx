@@ -5,7 +5,7 @@ import { ChevronLeft, Save, ImagePlus, Plus, Trash2, ExternalLink, History } fro
 import { toast } from "sonner";
 import { getPageSchema, withDefaults, type FieldType, type SectionSchema } from "@/cms/schemas";
 import { adminGetSection, adminSaveSection } from "@/lib/content.functions";
-import { uploadMedia } from "@/server/media.functions";
+import { uploadMedia } from "@/lib/media.functions";
 import { arrayBufferToBase64 } from "@/lib/base64";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";

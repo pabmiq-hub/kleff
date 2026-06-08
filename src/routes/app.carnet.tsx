@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { getMyProfile } from "@/server/profile.functions";
+import { getMyProfile } from "@/lib/profile.functions";
 
 export const Route = createFileRoute("/app/carnet")({
   component: CarnetPage,

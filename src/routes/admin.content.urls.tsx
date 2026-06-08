@@ -7,7 +7,7 @@ import {
   listPageSlugs,
   adminUpdatePageSlug,
   type PageSlugRow,
-} from "@/server/urls.functions";
+} from "@/lib/urls.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 

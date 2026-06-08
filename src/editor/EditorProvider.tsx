@@ -18,7 +18,7 @@ import {
   adminDiscardDrafts,
   adminPublishPage,
   getPublishedOverrides,
-} from "@/server/overrides.functions";
+} from "@/lib/overrides.functions";
 import { useAuth } from "@/auth/AuthProvider";
 import { useI18n } from "@/i18n/I18nProvider";
 import type { OverrideMap, StyleProps } from "./types";

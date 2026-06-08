@@ -1,5 +1,5 @@
 import { createFileRoute, redirect, Link } from "@tanstack/react-router";
-import { lookupRedirect } from "@/server/redirects.functions";
+import { lookupRedirect } from "@/lib/redirects.functions";
 import { getBlogPostBySlug } from "@/lib/blog.functions";
 import { BlogPostPage } from "@/components/pages/BlogPostPage";
 
