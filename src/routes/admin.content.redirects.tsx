@@ -47,19 +47,19 @@ function RedirectsAdmin() {
       <header>
         <Link
           to="/admin/content/urls"
-          className="text-cream/60 hover:text-cream text-sm inline-flex items-center gap-1"
+          className="text-ink/60 hover:text-ink text-sm inline-flex items-center gap-1"
         >
           <ChevronLeft className="h-4 w-4" /> URLs
         </Link>
         <h1 className="font-display text-4xl font-bold mt-2">Redirecciones 301</h1>
-        <p className="text-cream/60 mt-1 max-w-2xl">
+        <p className="text-ink/60 mt-1 max-w-2xl">
           Cada vez que cambias el slug de una página se crea aquí una redirección permanente
           para conservar el SEO de la URL antigua.
         </p>
       </header>
 
       {rows.length === 0 ? (
-        <div className="bg-cream/5 border border-cream/10 rounded-2xl p-8 text-center text-cream/60">
+        <div className="bg-ink/5 border border-ink/10 rounded-2xl p-8 text-center text-ink/60">
           Aún no hay redirecciones. Cambia un slug desde{" "}
           <Link to="/admin/content/urls" className="text-coral hover:underline">
             URLs por idioma
@@ -71,25 +71,25 @@ function RedirectsAdmin() {
           {rows.map((r) => (
             <div
               key={r.id}
-              className="bg-cream/5 border border-cream/10 rounded-xl p-4 flex items-center gap-3 flex-wrap"
+              className="bg-ink/5 border border-ink/10 rounded-xl p-4 flex items-center gap-3 flex-wrap"
             >
               <span className="text-[10px] uppercase tracking-wider bg-coral/15 text-coral px-2 py-0.5 rounded font-mono">
                 301
               </span>
               {r.locale && (
-                <span className="text-[10px] uppercase tracking-wider bg-cream/10 text-cream/60 px-2 py-0.5 rounded">
+                <span className="text-[10px] uppercase tracking-wider bg-ink/10 text-ink/60 px-2 py-0.5 rounded">
                   {r.locale}
                 </span>
               )}
-              <code className="text-sm font-mono text-cream/80">{r.from_path}</code>
-              <ArrowRight className="h-4 w-4 text-cream/40" />
+              <code className="text-sm font-mono text-ink/80">{r.from_path}</code>
+              <ArrowRight className="h-4 w-4 text-ink/40" />
               <code className="text-sm font-mono text-coral">{r.to_path}</code>
-              <span className="text-xs text-cream/40 ml-auto">
+              <span className="text-xs text-ink/40 ml-auto">
                 {new Date(r.created_at).toLocaleDateString()}
               </span>
               <button
                 onClick={() => handleDelete(r.id)}
-                className="p-1.5 text-cream/50 hover:text-red-300 hover:bg-red-500/10 rounded"
+                className="p-1.5 text-ink/50 hover:text-red-300 hover:bg-red-500/10 rounded"
                 title="Eliminar redirección"
               >
                 <Trash2 className="h-4 w-4" />
@@ -101,7 +101,7 @@ function RedirectsAdmin() {
 
       <div className="pt-4">
         <Link to="/admin/content/urls">
-          <Button variant="ghost" className="text-cream/70">
+          <Button variant="ghost" className="text-ink/70">
             ← Volver a URLs
           </Button>
         </Link>

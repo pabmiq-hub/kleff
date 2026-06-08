@@ -30,8 +30,8 @@ function AdminLayout() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-ink text-cream">
-        <p className="text-cream/70">Cargando…</p>
+      <div className="min-h-screen flex items-center justify-center bg-cream text-ink">
+        <p className="text-ink/70">Cargando…</p>
       </div>
     );
   }
@@ -52,9 +52,9 @@ function AdminLayout() {
   };
 
   return (
-    <div className="min-h-screen bg-ink text-cream flex flex-col md:flex-row">
-      <aside className="md:w-64 bg-ink-deep/80 border-b-2 md:border-b-0 md:border-r border-cream/10 p-4 md:p-6 flex md:flex-col gap-2 md:min-h-screen">
-        <Link to="/admin" className="font-display font-bold text-xl tracking-tight mb-0 md:mb-6 text-cream">
+    <div className="min-h-screen bg-cream text-ink flex flex-col md:flex-row">
+      <aside className="md:w-64 bg-cream-deep border-b-2 md:border-b-0 md:border-r border-ink/10 p-4 md:p-6 flex md:flex-col gap-2 md:min-h-screen">
+        <Link to="/admin" className="font-display font-bold text-xl tracking-tight mb-0 md:mb-6 text-ink">
           KLEFF{" "}
           <span className="text-coral text-xs font-sans font-semibold inline-flex items-center gap-1">
             <Shield className="h-3 w-3" /> ADMIN
@@ -72,15 +72,15 @@ function AdminLayout() {
         <div className="md:mt-auto space-y-1">
           <Link
             to="/app"
-            className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-cream/60 hover:text-cream hover:bg-cream/5 transition-colors"
+            className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-ink/60 hover:text-ink hover:bg-ink/5 transition-colors"
           >
             <ExternalLink className="h-3.5 w-3.5" />
             <span className="hidden md:inline">Ir a zona socio</span>
           </Link>
-          <div className="hidden md:block px-3 pt-2 text-xs text-cream/50 border-t border-cream/10">
+          <div className="hidden md:block px-3 pt-2 text-xs text-ink/50 border-t border-ink/10">
             {user?.email}
           </div>
-          <Button variant="ghost" size="sm" onClick={handleLogout} className="w-full text-cream hover:text-cream hover:bg-cream/10">
+          <Button variant="ghost" size="sm" onClick={handleLogout} className="w-full text-ink hover:text-ink hover:bg-ink/10">
             <LogOut className="h-4 w-4 mr-2" /> <span className="hidden md:inline">Salir</span>
           </Button>
         </div>
@@ -107,8 +107,8 @@ function AdminNavLink({
     <Link
       to={to}
       activeOptions={{ exact }}
-      activeProps={{ className: "bg-coral text-cream" }}
-      className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-cream/80 hover:bg-cream/10 transition-colors"
+      activeProps={{ className: "bg-coral text-ink" }}
+      className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-ink/80 hover:bg-ink/10 transition-colors"
     >
       {icon} <span className="hidden md:inline">{label}</span>
     </Link>

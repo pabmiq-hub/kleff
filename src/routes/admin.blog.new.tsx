@@ -33,17 +33,17 @@ function NewBlogPost() {
 
   return (
     <div className="max-w-xl space-y-6">
-      <Link to="/admin/blog" className="inline-flex items-center gap-2 text-sm text-cream/70 hover:text-cream"><ArrowLeft className="h-4 w-4" /> Volver</Link>
+      <Link to="/admin/blog" className="inline-flex items-center gap-2 text-sm text-ink/70 hover:text-ink"><ArrowLeft className="h-4 w-4" /> Volver</Link>
       <h1 className="text-2xl font-display font-semibold">Nuevo post de blog</h1>
-      <div className="space-y-3 rounded-lg border border-cream/10 bg-cream/[0.03] p-5">
+      <div className="space-y-3 rounded-lg border border-ink/10 bg-white p-5">
         <div>
-          <Label className="text-cream text-xs uppercase tracking-wider">Slug (URL)</Label>
-          <Input value={slug} onChange={(e) => setSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, "-"))} className="bg-ink/60 border-cream/15 text-cream mt-1" placeholder="mi-primer-post" />
-          <p className="text-xs text-cream/50 mt-1">URL: /{slug || "tu-slug"}</p>
+          <Label className="text-ink text-xs uppercase tracking-wider">Slug (URL)</Label>
+          <Input value={slug} onChange={(e) => setSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, "-"))} className="bg-white border-ink/15 text-ink mt-1" placeholder="mi-primer-post" />
+          <p className="text-xs text-ink/50 mt-1">URL: /{slug || "tu-slug"}</p>
         </div>
         <div>
-          <Label className="text-cream text-xs uppercase tracking-wider">Título (ES)</Label>
-          <Input value={title} onChange={(e) => setTitle(e.target.value)} className="bg-ink/60 border-cream/15 text-cream mt-1" placeholder="Título del post" />
+          <Label className="text-ink text-xs uppercase tracking-wider">Título (ES)</Label>
+          <Input value={title} onChange={(e) => setTitle(e.target.value)} className="bg-white border-ink/15 text-ink mt-1" placeholder="Título del post" />
         </div>
         <Button onClick={create} disabled={!slug || !title || creating} className="bg-coral hover:bg-coral/90">
           {creating && <Loader2 className="h-4 w-4 mr-2 animate-spin" />} Crear y editar
