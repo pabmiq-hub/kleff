@@ -69,6 +69,15 @@ export const Route = createRootRoute({
         href: "https://fonts.gstatic.com",
         crossOrigin: "anonymous",
       },
+      {
+        rel: "preconnect",
+        href: "https://cf.geekdo-images.com",
+        crossOrigin: "anonymous",
+      },
+      {
+        rel: "preconnect",
+        href: "https://gyecpblbaovmprdvgmct.supabase.co",
+      },
     ],
   }),
   shellComponent: RootShell,

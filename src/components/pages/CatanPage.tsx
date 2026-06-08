@@ -15,7 +15,7 @@ import { SiteLayout } from "@/components/site/SiteLayout";
 import { SectionProvider, useSectionValue } from "@/cms/SectionContext";
 import { CmsImage, CmsList, CmsText } from "@/cms/Editable";
 import { useEditor } from "@/editor/EditorProvider";
-import catanLogo from "@/assets/catan-logo.png";
+import catanLogo from "@/assets/catan-logo.webp";
 
 const RESOURCE_ICONS = [
   { icon: Trees, label: "Madera", color: "bg-emerald-700" },

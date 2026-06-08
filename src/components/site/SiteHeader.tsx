@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { Menu, X } from "lucide-react";
-import logo from "@/assets/kleff-logo.png";
+import logo from "@/assets/kleff-logo.webp";
 import { useI18n, stripLocaleFromPath } from "@/i18n/I18nProvider";
 import { LOCALES, LOCALE_SHORT, type Locale } from "@/i18n/config";
 import { useLocation } from "@tanstack/react-router";

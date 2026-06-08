@@ -24,6 +24,10 @@ export function BlogPostPage({ post }: { post: BlogPostFull }) {
               alt={post.title}
               className="absolute inset-0 h-full w-full object-cover"
               loading="eager"
+              fetchPriority="high"
+              decoding="async"
+              width={1600}
+              height={686}
             />
             <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-background/20 to-transparent" />
           </div>

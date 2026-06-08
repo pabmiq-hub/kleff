@@ -20,18 +20,18 @@ export type PressLink = {
 };
 
 // Imágenes públicas estables para medios sin OG image fiable
-const imgSaraPostcard = "/media/media-sara-postcard.jpg";
-const imgVidasInfinitas = "/media/media-vidas-infinitas.jpg";
-const img2d6 = "/media/media-2d6.jpg";
-const imgPuntsDeVista = "/media/media-punts-de-vista.jpg";
-const imgCulturas2 = "/media/media-culturas-2.jpg";
-const imgElDebate = "/media/media-el-debate.jpg";
-const imgOrgulloFriki2026 = "/media/media-orgullo-friki-2026.jpg";
-const imgAnalogicos2025 = "/media/media-analogicos-2025.jpg";
-const imgVacaciones2025 = "/media/media-vacaciones-2025.jpg";
-const imgRegio7_2025 = "/media/media-regio7-2025.jpg";
-const imgRtveJuegosEspanoles = "/media/media-rtve-juegos-espanoles.jpg";
-const imgRtveFemenino = "/media/media-rtve-femenino.jpg";
+const imgSaraPostcard = "/media/media-sara-postcard.webp";
+const imgVidasInfinitas = "/media/media-vidas-infinitas.webp";
+const img2d6 = "/media/media-2d6.webp";
+const imgPuntsDeVista = "/media/media-punts-de-vista.webp";
+const imgCulturas2 = "/media/media-culturas-2.webp";
+const imgElDebate = "/media/media-el-debate.webp";
+const imgOrgulloFriki2026 = "/media/media-orgullo-friki-2026.webp";
+const imgAnalogicos2025 = "/media/media-analogicos-2025.webp";
+const imgVacaciones2025 = "/media/media-vacaciones-2025.webp";
+const imgRegio7_2025 = "/media/media-regio7-2025.webp";
+const imgRtveJuegosEspanoles = "/media/media-rtve-juegos-espanoles.webp";
+const imgRtveFemenino = "/media/media-rtve-femenino.webp";
 
 // Lista cronológica (de más reciente a más antiguo)
 export const PRESS_LINKS: PressLink[] = [

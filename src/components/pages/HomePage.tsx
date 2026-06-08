@@ -12,8 +12,8 @@ import {
   Star,
   Quote,
 } from "lucide-react";
-import heroImg from "@/assets/hero-gamenight.jpg";
-import tableImg from "@/assets/hero-table.jpg";
+import heroImg from "@/assets/hero-gamenight.webp";
+import tableImg from "@/assets/hero-table.webp";
 import { useI18n } from "@/i18n/I18nProvider";
 import { SiteLayout } from "@/components/site/SiteLayout";
 import { useSectionContent } from "@/cms/useSectionContent";
