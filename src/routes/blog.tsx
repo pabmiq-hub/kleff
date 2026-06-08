@@ -1,16 +1,21 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { getPageContent } from "@/lib/content.functions";
-import { BlogPage } from "@/components/pages/BlogPage";
+import { listBlogPosts } from "@/lib/blog.functions";
+import { BlogListPage } from "@/components/pages/BlogListPage";
 
 export const Route = createFileRoute("/blog")({
-  loader: () => getPageContent({ data: { pageKey: "blog" } }).then((pageContent) => ({ pageContent })),
+  loader: () => listBlogPosts({ data: { locale: "es" } }),
   head: () => ({
     meta: [
       { title: "Blog — KLEFF" },
-      { name: "description", content: "Noticias, reseñas y artículos sobre juegos de mesa de la comunidad KLEFF." },
+      { name: "description", content: "Reseñas, recomendaciones y crónicas de las noches de juegos de KLEFF en Barcelona." },
       { property: "og:title", content: "Blog — KLEFF" },
-      { property: "og:description", content: "Noticias y artículos de la comunidad KLEFF." },
+      { property: "og:description", content: "Reseñas y artículos de la comunidad KLEFF." },
     ],
   }),
-  component: BlogPage,
+  component: BlogIndex,
 });
+
+function BlogIndex() {
+  const { posts } = Route.useLoaderData();
+  return <BlogListPage posts={posts} />;
+}

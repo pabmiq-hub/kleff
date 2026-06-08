@@ -483,3 +483,69 @@
 }
 
 
+
+/* ---------------------------------------------------------------------------
+ * Blog content (HTML imported from WordPress)
+ * --------------------------------------------------------------------------- */
+.blog-content {
+  color: var(--foreground);
+  font-size: 1.0625rem;
+  line-height: 1.75;
+  max-width: 100%;
+}
+.blog-content > * + * { margin-top: 1.25em; }
+.blog-content h1, .blog-content h2, .blog-content h3, .blog-content h4 {
+  font-family: var(--font-display);
+  color: var(--foreground);
+  font-weight: 600;
+  line-height: 1.25;
+}
+.blog-content h2 { font-size: 1.875rem; margin-top: 2.5em; }
+.blog-content h3 { font-size: 1.5rem; margin-top: 2em; }
+.blog-content h4 { font-size: 1.25rem; margin-top: 1.75em; }
+.blog-content p { color: color-mix(in oklab, var(--foreground) 85%, transparent); }
+.blog-content a { color: var(--coral, oklch(0.68 0.18 30)); text-decoration: none; font-weight: 500; }
+.blog-content a:hover { text-decoration: underline; }
+.blog-content strong { color: var(--foreground); font-weight: 600; }
+.blog-content em { font-style: italic; }
+.blog-content ul, .blog-content ol { padding-left: 1.5em; }
+.blog-content ul { list-style: disc; }
+.blog-content ol { list-style: decimal; }
+.blog-content li + li { margin-top: 0.5em; }
+.blog-content blockquote {
+  border-left: 4px solid var(--coral, oklch(0.68 0.18 30));
+  padding-left: 1.25em;
+  margin-left: 0;
+  color: color-mix(in oklab, var(--foreground) 75%, transparent);
+  font-style: italic;
+}
+.blog-content img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 0.75rem;
+  margin: 1.5em auto;
+  display: block;
+}
+.blog-content figure { margin: 1.5em 0; }
+.blog-content figure img { margin: 0 auto; }
+.blog-content figcaption {
+  text-align: center;
+  font-size: 0.875rem;
+  color: color-mix(in oklab, var(--foreground) 60%, transparent);
+  margin-top: 0.5em;
+}
+.blog-content iframe, .blog-content video {
+  max-width: 100%;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  height: auto;
+  border-radius: 0.75rem;
+  margin: 1.5em 0;
+}
+.blog-content hr { border: 0; border-top: 1px solid var(--border); margin: 2em 0; }
+.blog-content code {
+  background: var(--muted);
+  padding: 0.15em 0.4em;
+  border-radius: 0.25rem;
+  font-size: 0.9em;
+}

@@ -134,6 +134,69 @@ export type Database = {
         }
         Relationships: []
       }
+      blog_posts: {
+        Row: {
+          author_name: string | null
+          content_ca: string | null
+          content_en: string | null
+          content_es: string | null
+          cover_image_url: string | null
+          created_at: string
+          excerpt_ca: string | null
+          excerpt_en: string | null
+          excerpt_es: string | null
+          id: string
+          published_at: string
+          slug: string
+          status: string
+          title_ca: string | null
+          title_en: string | null
+          title_es: string | null
+          updated_at: string
+          wp_id: number | null
+        }
+        Insert: {
+          author_name?: string | null
+          content_ca?: string | null
+          content_en?: string | null
+          content_es?: string | null
+          cover_image_url?: string | null
+          created_at?: string
+          excerpt_ca?: string | null
+          excerpt_en?: string | null
+          excerpt_es?: string | null
+          id?: string
+          published_at?: string
+          slug: string
+          status?: string
+          title_ca?: string | null
+          title_en?: string | null
+          title_es?: string | null
+          updated_at?: string
+          wp_id?: number | null
+        }
+        Update: {
+          author_name?: string | null
+          content_ca?: string | null
+          content_en?: string | null
+          content_es?: string | null
+          cover_image_url?: string | null
+          created_at?: string
+          excerpt_ca?: string | null
+          excerpt_en?: string | null
+          excerpt_es?: string | null
+          id?: string
+          published_at?: string
+          slug?: string
+          status?: string
+          title_ca?: string | null
+          title_en?: string | null
+          title_es?: string | null
+          updated_at?: string
+          wp_id?: number | null
+        }
+        Relationships: []
+      }
       content_overrides: {
         Row: {
           element_id: string

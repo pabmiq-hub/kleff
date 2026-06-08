@@ -13,6 +13,7 @@ import { Route as TorneosRouteImport } from './routes/torneos'
 import { Route as TerminosRouteImport } from './routes/terminos'
 import { Route as SuperAdminRouteImport } from './routes/super-admin'
 import { Route as SobreNosotrosRouteImport } from './routes/sobre-nosotros'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as RolesOcultosRouteImport } from './routes/roles-ocultos'
 import { Route as PrivacidadRouteImport } from './routes/privacidad'
 import { Route as MediosRouteImport } from './routes/medios'
@@ -72,6 +73,7 @@ import { Route as AdminRentalsRouteImport } from './routes/admin.rentals'
 import { Route as AdminMembersRouteImport } from './routes/admin.members'
 import { Route as AdminInvitationsRouteImport } from './routes/admin.invitations'
 import { Route as AdminContentRouteImport } from './routes/admin.content'
+import { Route as AdminBlogRouteImport } from './routes/admin.blog'
 import { Route as AdminRentalsIndexRouteImport } from './routes/admin.rentals.index'
 import { Route as AdminContentIndexRouteImport } from './routes/admin.content.index'
 import { Route as AppRentalsMineRouteImport } from './routes/app.rentals.mine'
@@ -104,6 +106,11 @@ const SuperAdminRoute = SuperAdminRouteImport.update({
 const SobreNosotrosRoute = SobreNosotrosRouteImport.update({
   id: '/sobre-nosotros',
   path: '/sobre-nosotros',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RolesOcultosRoute = RolesOcultosRouteImport.update({
@@ -401,6 +408,11 @@ const AdminContentRoute = AdminContentRouteImport.update({
   path: '/content',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminBlogRoute = AdminBlogRouteImport.update({
+  id: '/blog',
+  path: '/blog',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminRentalsIndexRoute = AdminRentalsIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -486,10 +498,12 @@ export interface FileRoutesByFullPath {
   '/medios': typeof MediosRoute
   '/privacidad': typeof PrivacidadRoute
   '/roles-ocultos': typeof RolesOcultosRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/sobre-nosotros': typeof SobreNosotrosRoute
   '/super-admin': typeof SuperAdminRoute
   '/terminos': typeof TerminosRoute
   '/torneos': typeof TorneosRoute
+  '/admin/blog': typeof AdminBlogRoute
   '/admin/content': typeof AdminContentRouteWithChildren
   '/admin/invitations': typeof AdminInvitationsRoute
   '/admin/members': typeof AdminMembersRoute
@@ -562,10 +576,12 @@ export interface FileRoutesByTo {
   '/medios': typeof MediosRoute
   '/privacidad': typeof PrivacidadRoute
   '/roles-ocultos': typeof RolesOcultosRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/sobre-nosotros': typeof SobreNosotrosRoute
   '/super-admin': typeof SuperAdminRoute
   '/terminos': typeof TerminosRoute
   '/torneos': typeof TorneosRoute
+  '/admin/blog': typeof AdminBlogRoute
   '/admin/invitations': typeof AdminInvitationsRoute
   '/admin/members': typeof AdminMembersRoute
   '/app/carnet': typeof AppCarnetRoute
@@ -639,10 +655,12 @@ export interface FileRoutesById {
   '/medios': typeof MediosRoute
   '/privacidad': typeof PrivacidadRoute
   '/roles-ocultos': typeof RolesOcultosRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/sobre-nosotros': typeof SobreNosotrosRoute
   '/super-admin': typeof SuperAdminRoute
   '/terminos': typeof TerminosRoute
   '/torneos': typeof TorneosRoute
+  '/admin/blog': typeof AdminBlogRoute
   '/admin/content': typeof AdminContentRouteWithChildren
   '/admin/invitations': typeof AdminInvitationsRoute
   '/admin/members': typeof AdminMembersRoute
@@ -719,10 +737,12 @@ export interface FileRouteTypes {
     | '/medios'
     | '/privacidad'
     | '/roles-ocultos'
+    | '/sitemap.xml'
     | '/sobre-nosotros'
     | '/super-admin'
     | '/terminos'
     | '/torneos'
+    | '/admin/blog'
     | '/admin/content'
     | '/admin/invitations'
     | '/admin/members'
@@ -795,10 +815,12 @@ export interface FileRouteTypes {
     | '/medios'
     | '/privacidad'
     | '/roles-ocultos'
+    | '/sitemap.xml'
     | '/sobre-nosotros'
     | '/super-admin'
     | '/terminos'
     | '/torneos'
+    | '/admin/blog'
     | '/admin/invitations'
     | '/admin/members'
     | '/app/carnet'
@@ -871,10 +893,12 @@ export interface FileRouteTypes {
     | '/medios'
     | '/privacidad'
     | '/roles-ocultos'
+    | '/sitemap.xml'
     | '/sobre-nosotros'
     | '/super-admin'
     | '/terminos'
     | '/torneos'
+    | '/admin/blog'
     | '/admin/content'
     | '/admin/invitations'
     | '/admin/members'
@@ -950,6 +974,7 @@ export interface RootRouteChildren {
   MediosRoute: typeof MediosRoute
   PrivacidadRoute: typeof PrivacidadRoute
   RolesOcultosRoute: typeof RolesOcultosRoute
+  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   SobreNosotrosRoute: typeof SobreNosotrosRoute
   SuperAdminRoute: typeof SuperAdminRoute
   TerminosRoute: typeof TerminosRoute
@@ -1020,6 +1045,13 @@ declare module '@tanstack/react-router' {
       path: '/sobre-nosotros'
       fullPath: '/sobre-nosotros'
       preLoaderRoute: typeof SobreNosotrosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/roles-ocultos': {
@@ -1435,6 +1467,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminContentRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/blog': {
+      id: '/admin/blog'
+      path: '/blog'
+      fullPath: '/admin/blog'
+      preLoaderRoute: typeof AdminBlogRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/rentals/': {
       id: '/admin/rentals/'
       path: '/'
@@ -1568,6 +1607,7 @@ const AdminRentalsRouteWithChildren = AdminRentalsRoute._addFileChildren(
 )
 
 interface AdminRouteChildren {
+  AdminBlogRoute: typeof AdminBlogRoute
   AdminContentRoute: typeof AdminContentRouteWithChildren
   AdminInvitationsRoute: typeof AdminInvitationsRoute
   AdminMembersRoute: typeof AdminMembersRoute
@@ -1576,6 +1616,7 @@ interface AdminRouteChildren {
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
+  AdminBlogRoute: AdminBlogRoute,
   AdminContentRoute: AdminContentRouteWithChildren,
   AdminInvitationsRoute: AdminInvitationsRoute,
   AdminMembersRoute: AdminMembersRoute,
@@ -1631,6 +1672,7 @@ const rootRouteChildren: RootRouteChildren = {
   MediosRoute: MediosRoute,
   PrivacidadRoute: PrivacidadRoute,
   RolesOcultosRoute: RolesOcultosRoute,
+  SitemapDotxmlRoute: SitemapDotxmlRoute,
   SobreNosotrosRoute: SobreNosotrosRoute,
   SuperAdminRoute: SuperAdminRoute,
   TerminosRoute: TerminosRoute,
@@ -1675,12 +1717,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { createStart } from '@tanstack/react-start'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-  }
-}
