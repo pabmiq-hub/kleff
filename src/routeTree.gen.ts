@@ -77,6 +77,7 @@ import { Route as AdminInvitationsRouteImport } from './routes/admin.invitations
 import { Route as AdminContentRouteImport } from './routes/admin.content'
 import { Route as AdminBlogRouteImport } from './routes/admin.blog'
 import { Route as AdminRentalsIndexRouteImport } from './routes/admin.rentals.index'
+import { Route as AdminRegistrationsIndexRouteImport } from './routes/admin.registrations.index'
 import { Route as AdminContentIndexRouteImport } from './routes/admin.content.index'
 import { Route as AdminBlogIndexRouteImport } from './routes/admin.blog.index'
 import { Route as AppRentalsMineRouteImport } from './routes/app.rentals.mine'
@@ -435,6 +436,11 @@ const AdminRentalsIndexRoute = AdminRentalsIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AdminRentalsRoute,
 } as any)
+const AdminRegistrationsIndexRoute = AdminRegistrationsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminRegistrationsRoute,
+} as any)
 const AdminContentIndexRoute = AdminContentIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -607,6 +613,7 @@ export interface FileRoutesByFullPath {
   '/app/rentals/mine': typeof AppRentalsMineRoute
   '/admin/blog/': typeof AdminBlogIndexRoute
   '/admin/content/': typeof AdminContentIndexRoute
+  '/admin/registrations/': typeof AdminRegistrationsIndexRoute
   '/admin/rentals/': typeof AdminRentalsIndexRoute
 }
 export interface FileRoutesByTo {
@@ -632,7 +639,6 @@ export interface FileRoutesByTo {
   '/torneos': typeof TorneosRoute
   '/admin/invitations': typeof AdminInvitationsRoute
   '/admin/members': typeof AdminMembersRoute
-  '/admin/registrations': typeof AdminRegistrationsRouteWithChildren
   '/app/carnet': typeof AppCarnetRoute
   '/app/profile': typeof AppProfileRoute
   '/app/rentals': typeof AppRentalsRouteWithChildren
@@ -689,6 +695,7 @@ export interface FileRoutesByTo {
   '/app/rentals/mine': typeof AppRentalsMineRoute
   '/admin/blog': typeof AdminBlogIndexRoute
   '/admin/content': typeof AdminContentIndexRoute
+  '/admin/registrations': typeof AdminRegistrationsIndexRoute
   '/admin/rentals': typeof AdminRentalsIndexRoute
 }
 export interface FileRoutesById {
@@ -777,6 +784,7 @@ export interface FileRoutesById {
   '/app/rentals/mine': typeof AppRentalsMineRoute
   '/admin/blog/': typeof AdminBlogIndexRoute
   '/admin/content/': typeof AdminContentIndexRoute
+  '/admin/registrations/': typeof AdminRegistrationsIndexRoute
   '/admin/rentals/': typeof AdminRentalsIndexRoute
 }
 export interface FileRouteTypes {
@@ -866,6 +874,7 @@ export interface FileRouteTypes {
     | '/app/rentals/mine'
     | '/admin/blog/'
     | '/admin/content/'
+    | '/admin/registrations/'
     | '/admin/rentals/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -891,7 +900,6 @@ export interface FileRouteTypes {
     | '/torneos'
     | '/admin/invitations'
     | '/admin/members'
-    | '/admin/registrations'
     | '/app/carnet'
     | '/app/profile'
     | '/app/rentals'
@@ -948,6 +956,7 @@ export interface FileRouteTypes {
     | '/app/rentals/mine'
     | '/admin/blog'
     | '/admin/content'
+    | '/admin/registrations'
     | '/admin/rentals'
   id:
     | '__root__'
@@ -1035,6 +1044,7 @@ export interface FileRouteTypes {
     | '/app/rentals/mine'
     | '/admin/blog/'
     | '/admin/content/'
+    | '/admin/registrations/'
     | '/admin/rentals/'
   fileRoutesById: FileRoutesById
 }
@@ -1578,6 +1588,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminRentalsIndexRouteImport
       parentRoute: typeof AdminRentalsRoute
     }
+    '/admin/registrations/': {
+      id: '/admin/registrations/'
+      path: '/'
+      fullPath: '/admin/registrations/'
+      preLoaderRoute: typeof AdminRegistrationsIndexRouteImport
+      parentRoute: typeof AdminRegistrationsRoute
+    }
     '/admin/content/': {
       id: '/admin/content/'
       path: '/'
@@ -1736,10 +1753,12 @@ const AdminContentRouteWithChildren = AdminContentRoute._addFileChildren(
 
 interface AdminRegistrationsRouteChildren {
   AdminRegistrationsIdRoute: typeof AdminRegistrationsIdRoute
+  AdminRegistrationsIndexRoute: typeof AdminRegistrationsIndexRoute
 }
 
 const AdminRegistrationsRouteChildren: AdminRegistrationsRouteChildren = {
   AdminRegistrationsIdRoute: AdminRegistrationsIdRoute,
+  AdminRegistrationsIndexRoute: AdminRegistrationsIndexRoute,
 }
 
 const AdminRegistrationsRouteWithChildren =
