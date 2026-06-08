@@ -207,6 +207,9 @@ function AdminBlog() {
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex gap-1">
+                      <Link to="/admin/blog/$id" params={{ id: p.id }} className="inline-flex items-center justify-center h-8 w-8 rounded-md text-cream/80 hover:text-cream hover:bg-cream/10" title="Editar">
+                        <Pencil className="h-3.5 w-3.5" />
+                      </Link>
                       <Button
                         size="sm"
                         variant="ghost"
