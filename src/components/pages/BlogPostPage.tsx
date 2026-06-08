@@ -65,7 +65,7 @@ export function BlogPostPage({ post }: { post: BlogPostFull }) {
           )}
 
           <div
-            className="prose prose-lg max-w-none mt-10 mb-20 prose-headings:font-display prose-headings:text-foreground prose-p:text-foreground/80 prose-a:text-coral prose-a:no-underline hover:prose-a:underline prose-img:rounded-lg prose-strong:text-foreground"
+            className="blog-content mt-10 mb-20"
             // Content originates from our own WordPress and is preserved as HTML.
             dangerouslySetInnerHTML={{ __html: post.content }}
           />
