@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -13,18 +13,38 @@ import { adminGetBlogPost, adminUpdateBlogPost, adminDeleteBlogPost } from "@/li
 import { RichTextEditor } from "@/components/cms/RichTextEditor";
 
 export const Route = createFileRoute("/admin/blog/$id")({
-  loader: ({ params }) => adminGetBlogPost({ data: { id: params.id } }),
   head: () => ({ meta: [{ title: "Editar post — Admin KLEFF" }, { name: "robots", content: "noindex, nofollow" }] }),
   component: BlogPostEditor,
 });
 
 function BlogPostEditor() {
-  const { post } = Route.useLoaderData() as { post: Record<string, unknown> };
+  const { id } = Route.useParams();
+  const getPost = useServerFn(adminGetBlogPost);
   const router = useRouter();
   const updateFn = useServerFn(adminUpdateBlogPost);
   const deleteFn = useServerFn(adminDeleteBlogPost);
-  const [state, setState] = useState(post);
+  const [state, setState] = useState<Record<string, unknown> | null>(null);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    getPost({ data: { id } })
+      .then((res) => {
+        if (cancelled) return;
+        setState(res.post as Record<string, unknown>);
+      })
+      .catch((e) => {
+        if (cancelled) return;
+        setLoadError((e as Error).message);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [id, getPost]);
+
+  if (loadError) return <div className="rounded-lg border border-red-500/20 bg-red-500/10 p-4 text-sm text-red-200">{loadError}</div>;
+  if (!state) return <div className="p-6 text-cream/60 flex items-center gap-2"><Loader2 className="h-4 w-4 animate-spin" /> Cargando post…</div>;
 
   const get = (k: string) => (state[k] as string | null | undefined) ?? "";
   const set = (k: string, v: unknown) => setState((s) => ({ ...s, [k]: v }));
