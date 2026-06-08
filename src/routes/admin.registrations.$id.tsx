@@ -154,7 +154,7 @@ function FormSettings({ form, onSaved }: { form: RegistrationForm; onSaved: (pat
         },
       });
       toast.success("Cambios guardados");
-      onSaved();
+      onSaved({ ...state, notify_emails: emails });
     } catch (e) {
       toast.error((e as Error).message);
     } finally {
