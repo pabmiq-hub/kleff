@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TorneosRouteImport } from './routes/torneos'
 import { Route as TerminosRouteImport } from './routes/terminos'
+import { Route as TardaDeJocsICuinaJaponesaRouteImport } from './routes/tarda-de-jocs-i-cuina-japonesa'
 import { Route as SuperAdminRouteImport } from './routes/super-admin'
 import { Route as SobreNosotrosRouteImport } from './routes/sobre-nosotros'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
@@ -106,6 +107,12 @@ const TerminosRoute = TerminosRouteImport.update({
   path: '/terminos',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TardaDeJocsICuinaJaponesaRoute =
+  TardaDeJocsICuinaJaponesaRouteImport.update({
+    id: '/tarda-de-jocs-i-cuina-japonesa',
+    path: '/tarda-de-jocs-i-cuina-japonesa',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const SuperAdminRoute = SuperAdminRouteImport.update({
   id: '/super-admin',
   path: '/super-admin',
@@ -549,6 +556,7 @@ export interface FileRoutesByFullPath {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/sobre-nosotros': typeof SobreNosotrosRoute
   '/super-admin': typeof SuperAdminRoute
+  '/tarda-de-jocs-i-cuina-japonesa': typeof TardaDeJocsICuinaJaponesaRoute
   '/terminos': typeof TerminosRoute
   '/torneos': typeof TorneosRoute
   '/admin/blog': typeof AdminBlogRouteWithChildren
@@ -635,6 +643,7 @@ export interface FileRoutesByTo {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/sobre-nosotros': typeof SobreNosotrosRoute
   '/super-admin': typeof SuperAdminRoute
+  '/tarda-de-jocs-i-cuina-japonesa': typeof TardaDeJocsICuinaJaponesaRoute
   '/terminos': typeof TerminosRoute
   '/torneos': typeof TorneosRoute
   '/admin/invitations': typeof AdminInvitationsRoute
@@ -720,6 +729,7 @@ export interface FileRoutesById {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/sobre-nosotros': typeof SobreNosotrosRoute
   '/super-admin': typeof SuperAdminRoute
+  '/tarda-de-jocs-i-cuina-japonesa': typeof TardaDeJocsICuinaJaponesaRoute
   '/terminos': typeof TerminosRoute
   '/torneos': typeof TorneosRoute
   '/admin/blog': typeof AdminBlogRouteWithChildren
@@ -810,6 +820,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/sobre-nosotros'
     | '/super-admin'
+    | '/tarda-de-jocs-i-cuina-japonesa'
     | '/terminos'
     | '/torneos'
     | '/admin/blog'
@@ -896,6 +907,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/sobre-nosotros'
     | '/super-admin'
+    | '/tarda-de-jocs-i-cuina-japonesa'
     | '/terminos'
     | '/torneos'
     | '/admin/invitations'
@@ -980,6 +992,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/sobre-nosotros'
     | '/super-admin'
+    | '/tarda-de-jocs-i-cuina-japonesa'
     | '/terminos'
     | '/torneos'
     | '/admin/blog'
@@ -1069,6 +1082,7 @@ export interface RootRouteChildren {
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   SobreNosotrosRoute: typeof SobreNosotrosRoute
   SuperAdminRoute: typeof SuperAdminRoute
+  TardaDeJocsICuinaJaponesaRoute: typeof TardaDeJocsICuinaJaponesaRoute
   TerminosRoute: typeof TerminosRoute
   TorneosRoute: typeof TorneosRoute
   CaActivitatsRoute: typeof CaActivitatsRoute
@@ -1124,6 +1138,13 @@ declare module '@tanstack/react-router' {
       path: '/terminos'
       fullPath: '/terminos'
       preLoaderRoute: typeof TerminosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tarda-de-jocs-i-cuina-japonesa': {
+      id: '/tarda-de-jocs-i-cuina-japonesa'
+      path: '/tarda-de-jocs-i-cuina-japonesa'
+      fullPath: '/tarda-de-jocs-i-cuina-japonesa'
+      preLoaderRoute: typeof TardaDeJocsICuinaJaponesaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/super-admin': {
@@ -1857,6 +1878,7 @@ const rootRouteChildren: RootRouteChildren = {
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   SobreNosotrosRoute: SobreNosotrosRoute,
   SuperAdminRoute: SuperAdminRoute,
+  TardaDeJocsICuinaJaponesaRoute: TardaDeJocsICuinaJaponesaRoute,
   TerminosRoute: TerminosRoute,
   TorneosRoute: TorneosRoute,
   CaActivitatsRoute: CaActivitatsRoute,
