@@ -7,10 +7,12 @@ import {
   Newspaper,
   Calendar,
   ChevronDown,
+  Play,
+  Images,
 } from "lucide-react";
 import { useI18n } from "@/i18n/I18nProvider";
 import { SiteLayout } from "@/components/site/SiteLayout";
-import type { MediaItem } from "@/lib/media.functions";
+import type { MediaItem, InstagramPost } from "@/lib/media.functions";
 import { EditableText } from "@/editor/Editable";
 import { useSectionContent } from "@/cms/useSectionContent";
 import { or } from "@/cms/or";
@@ -18,6 +20,7 @@ import { or } from "@/cms/or";
 type LoaderData = {
   mediaItems: MediaItem[];
   followers: { count: number | null; updatedAt: string };
+  igPosts: InstagramPost[];
 };
 
 function useMediaData(): LoaderData {
@@ -34,6 +37,7 @@ function useMediaData(): LoaderData {
     data ?? {
       mediaItems: [],
       followers: { count: null, updatedAt: new Date().toISOString() },
+      igPosts: [],
     }
   );
 }
@@ -173,7 +177,7 @@ function formatFollowers(count: number | null, locale: string): string {
 
 export function MediaPage() {
   const { t, locale } = useI18n();
-  const { mediaItems: items, followers } = useMediaData();
+  const { mediaItems: items, followers, igPosts } = useMediaData();
   const hero = useSectionContent("media.hero");
   const ig = useSectionContent("media.instagram");
 
@@ -281,63 +285,90 @@ export function MediaPage() {
             </div>
 
             <div className="lg:col-span-7">
-              <a
-                href="https://www.instagram.com/kleff.bcn/"
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="Abrir Instagram @kleff.bcn"
-                className="group block"
-              >
-                <div className="relative bg-card border-4 border-ink rounded-3xl shadow-tactile-lg overflow-hidden p-5 sm:p-6">
-                  <div className="flex items-center gap-3 mb-5">
-                    <div className="h-11 w-11 rounded-full bg-gradient-coral border-2 border-ink flex items-center justify-center text-cream">
-                      <Instagram className="h-5 w-5" />
-                    </div>
-                    <div className="leading-tight">
-                      <p className="text-sm font-bold text-foreground">@kleff.bcn</p>
-                      <p className="text-[11px] text-foreground/60">
-                        {locale === "en"
-                          ? "Barcelona · Board games community"
-                          : locale === "ca"
-                            ? "Barcelona · Comunitat de jocs de taula"
-                            : "Barcelona · Comunidad de juegos de mesa"}
-                      </p>
-                    </div>
-                    <span className="ml-auto inline-flex items-center gap-1.5 text-xs font-bold text-coral-deep group-hover:gap-2.5 transition-all">
-                      <ExternalLink className="h-3.5 w-3.5" />
-                      {t.media.instagramCta}
-                    </span>
+              <div className="relative bg-card border-4 border-ink rounded-3xl shadow-tactile-lg overflow-hidden p-5 sm:p-6">
+                <a
+                  href="https://www.instagram.com/kleff.bcn/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Abrir Instagram @kleff.bcn"
+                  className="group flex items-center gap-3 mb-5"
+                >
+                  <div className="h-11 w-11 rounded-full bg-gradient-coral border-2 border-ink flex items-center justify-center text-cream">
+                    <Instagram className="h-5 w-5" />
                   </div>
+                  <div className="leading-tight">
+                    <p className="text-sm font-bold text-foreground">@kleff.bcn</p>
+                    <p className="text-[11px] text-foreground/60">
+                      {locale === "en"
+                        ? "Barcelona · Board games community"
+                        : locale === "ca"
+                          ? "Barcelona · Comunitat de jocs de taula"
+                          : "Barcelona · Comunidad de juegos de mesa"}
+                    </p>
+                  </div>
+                  <span className="ml-auto inline-flex items-center gap-1.5 text-xs font-bold text-coral-deep group-hover:gap-2.5 transition-all">
+                    <ExternalLink className="h-3.5 w-3.5" />
+                    {t.media.instagramCta}
+                  </span>
+                </a>
 
+                {igPosts.length > 0 ? (
                   <div className="grid grid-cols-3 gap-2 sm:gap-3">
-                    {[
-                      "from-coral via-coral-deep to-mustard",
-                      "from-mustard via-coral to-coral-deep",
-                      "from-ink via-coral-deep to-coral",
-                      "from-coral-deep via-mustard to-coral",
-                      "from-coral via-ink to-coral-deep",
-                      "from-mustard via-coral-deep to-ink",
-                    ].map((grad, i) => (
-                      <div
-                        key={i}
-                        className={`relative aspect-square rounded-xl border-2 border-ink overflow-hidden bg-gradient-to-br ${grad} flex items-center justify-center`}
+                    {igPosts.slice(0, 9).map((post) => (
+                      <a
+                        key={post.id}
+                        href={post.permalink}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label={post.caption.slice(0, 80) || "Ver en Instagram"}
+                        className="group relative aspect-square rounded-xl border-2 border-ink overflow-hidden bg-ink/5 block"
                       >
-                        <Instagram className="h-7 w-7 text-cream/90 opacity-90" />
-                        <span className="absolute bottom-1.5 right-2 text-[9px] font-mono uppercase tracking-widest text-cream/70">
-                          IG
+                        {post.thumbnailUrl ? (
+                          <img
+                            src={post.thumbnailUrl}
+                            alt={post.caption.slice(0, 120) || "@kleff.bcn"}
+                            loading="lazy"
+                            className="absolute inset-0 h-full w-full object-cover group-hover:scale-105 transition-transform duration-500"
+                          />
+                        ) : (
+                          <div className="absolute inset-0 flex items-center justify-center bg-gradient-coral text-cream">
+                            <Instagram className="h-7 w-7" />
+                          </div>
+                        )}
+                        {post.mediaType === "VIDEO" && (
+                          <span className="absolute top-1.5 right-1.5 inline-flex items-center justify-center h-6 w-6 rounded-full bg-ink/80 text-cream">
+                            <Play className="h-3.5 w-3.5" fill="currentColor" />
+                          </span>
+                        )}
+                        {post.mediaType === "CAROUSEL_ALBUM" && (
+                          <span className="absolute top-1.5 right-1.5 inline-flex items-center justify-center h-6 w-6 rounded-full bg-ink/80 text-cream">
+                            <Images className="h-3.5 w-3.5" />
+                          </span>
+                        )}
+                        <span className="absolute inset-0 bg-ink/0 group-hover:bg-ink/30 transition-colors flex items-center justify-center">
+                          <Instagram className="h-6 w-6 text-cream opacity-0 group-hover:opacity-100 transition-opacity" />
                         </span>
-                      </div>
+                      </a>
                     ))}
                   </div>
-                </div>
-              </a>
+                ) : (
+                  <div className="grid grid-cols-3 gap-2 sm:gap-3">
+                    {Array.from({ length: 9 }).map((_, i) => (
+                      <div
+                        key={i}
+                        className="relative aspect-square rounded-xl border-2 border-ink overflow-hidden bg-cream-deep animate-pulse"
+                      />
+                    ))}
+                  </div>
+                )}
+              </div>
               <p className="mt-3 text-center text-xs font-mono uppercase tracking-widest text-foreground/40">
                 @kleff.bcn ·{" "}
                 {locale === "en"
-                  ? "Tap to open Instagram"
+                  ? "Tap a post to open Instagram"
                   : locale === "ca"
-                    ? "Toca per obrir Instagram"
-                    : "Toca para abrir Instagram"}
+                    ? "Toca una publicació per obrir Instagram"
+                    : "Toca una publicación para abrir Instagram"}
               </p>
             </div>
           </div>
