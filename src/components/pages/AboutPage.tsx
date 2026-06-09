@@ -34,7 +34,7 @@ const TEAM: TeamMember[] = [
     color: { es: "Azul", en: "Blue", ca: "Blau" },
     luckyNumber: "7",
     emoji: "🎲",
-    photo: "https://kleff.es/wp-content/uploads/2025/08/Pau_kleff-225x300.jpg",
+    photo: "",
   },
   {
     name: "Pol",
@@ -48,7 +48,7 @@ const TEAM: TeamMember[] = [
     color: { es: "Azul", en: "Blue", ca: "Blau" },
     luckyNumber: "7",
     emoji: "🏗️",
-    photo: "https://kleff.es/wp-content/uploads/2025/08/Pol_kleff-225x300.jpg",
+    photo: "",
   },
   {
     name: "Beatriz",
@@ -62,7 +62,7 @@ const TEAM: TeamMember[] = [
     color: { es: "Me gusta variar", en: "Likes to mix it up", ca: "M'agrada variar" },
     luckyNumber: "2",
     emoji: "🎯",
-    photo: "https://kleff.es/wp-content/uploads/2025/09/Beatriz-225x300.jpg",
+    photo: "",
   },
   {
     name: "Jordi",
@@ -76,7 +76,7 @@ const TEAM: TeamMember[] = [
     color: { es: "—", en: "—", ca: "—" },
     luckyNumber: "—",
     emoji: "🎮",
-    photo: "https://kleff.es/wp-content/uploads/2025/09/Jordi-225x300.jpg",
+    photo: "",
   },
   {
     name: "Karen",
@@ -90,7 +90,7 @@ const TEAM: TeamMember[] = [
     color: { es: "—", en: "—", ca: "—" },
     luckyNumber: "—",
     emoji: "✨",
-    photo: "https://kleff.es/wp-content/uploads/2025/09/Karen-225x300.jpg",
+    photo: "",
   },
   {
     name: "Leiro",
@@ -104,7 +104,7 @@ const TEAM: TeamMember[] = [
     color: { es: "—", en: "—", ca: "—" },
     luckyNumber: "—",
     emoji: "🃏",
-    photo: "https://kleff.es/wp-content/uploads/2025/09/Leiro-225x300.jpg",
+    photo: "",
   },
   {
     name: "Eric",
@@ -118,9 +118,10 @@ const TEAM: TeamMember[] = [
     color: { es: "—", en: "—", ca: "—" },
     luckyNumber: "—",
     emoji: "🎲",
-    photo: "https://kleff.es/wp-content/uploads/2025/09/Eric-225x300.jpg",
+    photo: "",
   },
 ];
+
 
 export function AboutPage() {
   const { t, locale, href } = useI18n();
