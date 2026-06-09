@@ -513,9 +513,9 @@ export function LudotecaPage() {
                   className="group bg-card border-2 border-ink rounded-2xl overflow-hidden shadow-tactile-sm hover:shadow-tactile hover:-translate-x-[2px] hover:-translate-y-[2px] transition-all flex flex-col"
                 >
                   <div className="relative aspect-square bg-cream-deep overflow-hidden border-b-2 border-ink">
-                    {g.thumbnail_url || g.image_url ? (
+                    {g.image_url || g.thumbnail_url ? (
                       <img
-                        src={g.thumbnail_url ?? g.image_url ?? ""}
+                        src={g.image_url ?? g.thumbnail_url ?? ""}
                         alt={g.title}
                         loading="lazy"
                         decoding="async"
