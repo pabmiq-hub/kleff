@@ -366,9 +366,12 @@ export function ActivitiesPage() {
       </section>
 
       {/* COLLABORATIONS */}
-      <section className="py-20 md:py-28 bg-cream">
-        <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 grid lg:grid-cols-2 gap-10 lg:gap-14 items-center">
-          <div className="flex flex-col justify-center">
+      <section className="py-20 md:py-28 bg-cream-deep/40 relative overflow-hidden">
+        {/* Decorative tape / dots */}
+        <div className="absolute top-10 left-10 size-20 bg-coral/15 rounded-full blur-2xl pointer-events-none" />
+        <div className="absolute bottom-10 right-10 size-32 bg-ink/5 rounded-full blur-3xl pointer-events-none" />
+        <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 grid lg:grid-cols-[1fr_auto] gap-12 lg:gap-16 items-center">
+          <div className="flex flex-col justify-center order-2 lg:order-1">
             <span className="inline-flex items-center gap-2 self-start rounded-full bg-coral/15 border-2 border-coral/40 px-3 py-1 text-xs font-bold uppercase tracking-widest text-coral-deep">
               <Handshake className="h-3.5 w-3.5" />
               <EditableText id="activities.collabs.eyebrow" as="span">{a.frequentEyebrow}</EditableText>
@@ -395,13 +398,23 @@ export function ActivitiesPage() {
               {a.partnersBody}
             </EditableText>
           </div>
-          <div className="flex justify-center lg:justify-end">
-            <div className="w-full max-w-[500px]">
-              <InstagramEmbed url={HANAKA_REEL} bare />
+          <div className="flex justify-center lg:justify-end order-1 lg:order-2">
+            {/* Polaroid-style frame around the reel */}
+            <div className="relative">
+              <div className="absolute -top-4 left-1/2 -translate-x-1/2 w-28 h-6 bg-coral/70 rotate-[-2deg] rounded-sm shadow-tactile-sm border border-ink/20 z-10" />
+              <div className="bg-cream border-2 border-ink rounded-2xl shadow-tactile-lg p-3 sm:p-4 rotate-[-1.5deg] hover:rotate-0 transition-transform duration-500">
+                <div className="w-[300px] sm:w-[360px] overflow-hidden rounded-xl">
+                  <InstagramEmbed url={HANAKA_REEL} bare />
+                </div>
+                <div className="mt-3 px-2 pb-1 text-center font-display text-sm text-ink/70 tracking-wide">
+                  @kleff.bcn × @kasa_hanaka
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </section>
+
 
       {/* TEAM BUILDING */}
       <section className="py-20 md:py-28 bg-cream">
