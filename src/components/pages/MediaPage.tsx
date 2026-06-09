@@ -177,7 +177,7 @@ function formatFollowers(count: number | null, locale: string): string {
 
 export function MediaPage() {
   const { t, locale } = useI18n();
-  const { mediaItems: items, followers } = useMediaData();
+  const { mediaItems: items, followers, igPosts } = useMediaData();
   const hero = useSectionContent("media.hero");
   const ig = useSectionContent("media.instagram");
 
