@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { Menu, X } from "lucide-react";
-import logo from "@/assets/kleff-logo.webp";
+import logoAsset from "@/assets/kleff-logo-white.png.asset.json";
+const logo = logoAsset.url;
 import { useI18n, stripLocaleFromPath } from "@/i18n/I18nProvider";
 import { LOCALES, LOCALE_SHORT, type Locale } from "@/i18n/config";
 import { useLocation } from "@tanstack/react-router";
@@ -23,11 +24,11 @@ export function SiteHeader() {
   const logicalPath = stripLocaleFromPath(pathname);
 
   return (
-    <header className="sticky top-0 z-50 backdrop-blur-md bg-cream/85 border-b-2 border-ink/15">
+    <header className="fixed top-0 left-0 right-0 z-50 backdrop-blur-md bg-cream/85 border-b-2 border-ink/15">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex items-center justify-between h-16 md:h-20">
-        <Link to={href("/")} className="flex items-center gap-3 group">
+        <Link to={href("/")} aria-label="KLEFF — Inicio" className="flex items-center gap-3 group">
           <div className="size-10 bg-coral rounded-xl border-2 border-ink flex items-center justify-center font-display font-bold text-cream shadow-tactile-sm group-hover:scale-105 transition-transform overflow-hidden">
-            <img src={logo} alt="" className="h-9 w-9 object-contain" />
+            <img src={logo} alt="KLEFF" className="h-7 w-7 object-contain" />
           </div>
           <span className="font-display font-bold text-xl tracking-tight text-foreground">KLEFF</span>
         </Link>

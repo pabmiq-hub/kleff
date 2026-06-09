@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { Instagram, Mail, MapPin, MessageCircle } from "lucide-react";
-import logo from "@/assets/kleff-logo.webp";
+import logoAsset from "@/assets/kleff-logo-white.png.asset.json";
+const logo = logoAsset.url;
 import { useI18n } from "@/i18n/I18nProvider";
 import { openCookieSettings } from "@/components/site/CookieConsent";
 
@@ -18,7 +19,7 @@ export function SiteFooter() {
         <div className="md:col-span-2">
           <div className="flex items-center gap-3 mb-5">
             <div className="size-12 bg-coral rounded-xl border-2 border-cream/20 flex items-center justify-center overflow-hidden">
-              <img src={logo} alt="" className="h-10 w-10 object-contain" />
+              <img src={logo} alt="KLEFF" className="h-8 w-8 object-contain" />
             </div>
             <span className="font-display font-bold text-2xl tracking-tight">KLEFF</span>
           </div>
@@ -47,11 +48,6 @@ export function SiteFooter() {
             <li>
               <Link to={href("/how-it-works")} className="hover:text-coral transition-colors font-medium">
                 {t.nav.how}
-              </Link>
-            </li>
-            <li>
-              <Link to={href("/activities")} className="hover:text-coral transition-colors font-medium">
-                {t.nav.activities}
               </Link>
             </li>
             <li>
