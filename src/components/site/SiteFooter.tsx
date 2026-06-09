@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { Instagram, Mail, MapPin, MessageCircle } from "lucide-react";
-import logo from "@/assets/kleff-logo.webp";
+import logoAsset from "@/assets/kleff-logo-white.png.asset.json";
+const logo = logoAsset.url;
 import { useI18n } from "@/i18n/I18nProvider";
 import { openCookieSettings } from "@/components/site/CookieConsent";
 
