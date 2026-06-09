@@ -37,6 +37,7 @@ function useMediaData(): LoaderData {
     data ?? {
       mediaItems: [],
       followers: { count: null, updatedAt: new Date().toISOString() },
+      igPosts: [],
     }
   );
 }
