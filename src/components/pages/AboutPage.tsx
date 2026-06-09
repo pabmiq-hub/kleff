@@ -385,23 +385,30 @@ function TeamFlipCard({
       <div className="flip-card-inner">
         {/* FRONT */}
         <div className="flip-card-face bg-card border-2 border-ink shadow-tactile-sm rounded-3xl flex flex-col">
-          <div className="relative flex-1 bg-gradient-to-br from-coral/20 via-cream-deep/50 to-coral/30 overflow-hidden">
+          <div className="relative flex-1 bg-gradient-to-br from-coral/25 via-cream-deep/60 to-coral/35 overflow-hidden">
             {member.photo ? (
               <img
                 src={member.photo}
                 alt={member.name}
-                loading="lazy"
+                width="450"
+                height="600"
+                decoding="async"
                 className="absolute inset-0 h-full w-full object-cover"
               />
             ) : (
-              <div className="absolute inset-0 flex items-center justify-center text-7xl">
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="size-24 sm:size-28 bg-cream border-2 border-ink rounded-full flex items-center justify-center text-5xl sm:text-6xl shadow-tactile-sm">
+                  {member.emoji}
+                </div>
+              </div>
+            )}
+            {member.photo && (
+              <div className="absolute top-3 right-3 size-10 bg-cream border-2 border-ink rounded-full flex items-center justify-center text-xl shadow-tactile-sm">
                 {member.emoji}
               </div>
             )}
-            <div className="absolute top-3 right-3 size-10 bg-cream border-2 border-ink rounded-full flex items-center justify-center text-xl shadow-tactile-sm">
-              {member.emoji}
-            </div>
           </div>
+
           <div className="p-4 border-t-2 border-ink bg-cream">
             <div className="text-xl font-display font-bold text-foreground">{member.name}</div>
             <div className="text-xs font-bold uppercase tracking-wider text-coral-deep mt-0.5">
