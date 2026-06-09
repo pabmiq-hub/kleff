@@ -246,7 +246,7 @@ export function EditableImage({
       height={height}
       loading={loading}
       fetchPriority={fetchPriority}
-      decoding={decoding}
+      decoding={decoding ?? "async"}
       onClick={handleClick}
       className={`${className ?? ""} ${editorClasses} ${
         ov?.hidden ? "opacity-30" : ""
@@ -255,6 +255,7 @@ export function EditableImage({
     />
   );
 }
+
 
 /* ---------------- Section (visibility wrapper) ---------------- */
 type EditableSectionProps = CommonProps & {
