@@ -7,10 +7,12 @@ import {
   Newspaper,
   Calendar,
   ChevronDown,
+  Play,
+  Images,
 } from "lucide-react";
 import { useI18n } from "@/i18n/I18nProvider";
 import { SiteLayout } from "@/components/site/SiteLayout";
-import type { MediaItem } from "@/lib/media.functions";
+import type { MediaItem, InstagramPost } from "@/lib/media.functions";
 import { EditableText } from "@/editor/Editable";
 import { useSectionContent } from "@/cms/useSectionContent";
 import { or } from "@/cms/or";
@@ -18,6 +20,7 @@ import { or } from "@/cms/or";
 type LoaderData = {
   mediaItems: MediaItem[];
   followers: { count: number | null; updatedAt: string };
+  igPosts: InstagramPost[];
 };
 
 function useMediaData(): LoaderData {
