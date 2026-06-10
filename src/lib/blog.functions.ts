@@ -554,10 +554,10 @@ export const adminGetBlogPost = createServerFn({ method: "POST" })
 
 export const adminCreateBlogPost = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator(z.object({
+  .inputValidator((data: unknown) => z.object({
     slug: z.string().min(1).max(255).regex(/^[a-z0-9-]+$/, "Solo minúsculas, números y guiones"),
     title_es: z.string().min(1).max(300),
-  }))
+  }).parse(data))
   .handler(async ({ data, context }) => {
     await assertSuperAdmin(context.userId);
     const { data: row, error } = await supabaseAdmin
