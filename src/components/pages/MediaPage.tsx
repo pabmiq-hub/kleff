@@ -12,13 +12,14 @@ import {
 } from "lucide-react";
 import { useI18n } from "@/i18n/I18nProvider";
 import { SiteLayout } from "@/components/site/SiteLayout";
-import type { MediaItem, InstagramPost } from "@/lib/media.functions";
+import type { InstagramPost } from "@/lib/media.functions";
+import type { MediaAppearance } from "@/lib/media-appearances.functions";
 import { EditableText } from "@/editor/Editable";
 import { useSectionContent } from "@/cms/useSectionContent";
 import { or } from "@/cms/or";
 
 type LoaderData = {
-  mediaItems: MediaItem[];
+  mediaItems: MediaAppearance[];
   followers: { count: number | null; updatedAt: string };
   igPosts: InstagramPost[];
 };
@@ -57,12 +58,17 @@ function handleMediaImageError(event: SyntheticEvent<HTMLImageElement>) {
   if (fallback) fallback.style.display = "flex";
 }
 
-function MediaCard({ item, fallbackLabel }: { item: MediaItem; fallbackLabel: string }) {
-  const title = item.titleOverride ?? item.ogTitle ?? item.outlet ?? hostnameOf(item.url);
-  const desc =
-    item.descriptionOverride ?? item.ogDescription ?? `${item.outlet ?? hostnameOf(item.url)}`;
-  const image = item.imageOverride ?? item.ogImage;
-  const outlet = item.outlet ?? item.ogSiteName ?? hostnameOf(item.url);
+export function MediaCard({
+  item,
+  fallbackLabel,
+}: {
+  item: MediaAppearance;
+  fallbackLabel: string;
+}) {
+  const title = item.title || item.outlet || hostnameOf(item.url);
+  const desc = item.description ?? "";
+  const image = item.imageUrl;
+  const outlet = item.outlet || hostnameOf(item.url);
 
   return (
     <a
@@ -90,9 +96,9 @@ function MediaCard({ item, fallbackLabel }: { item: MediaItem; fallbackLabel: st
             <Newspaper className="h-16 w-16 opacity-80" />
           </div>
         )}
-        {item.date && (
+        {item.dateLabel && (
           <span className="absolute top-3 left-3 inline-flex items-center gap-1.5 bg-cream text-ink border-2 border-ink rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-widest shadow-tactile-sm">
-            <Calendar className="h-3 w-3" /> {item.date}
+            <Calendar className="h-3 w-3" /> {item.dateLabel}
           </span>
         )}
       </div>
@@ -125,7 +131,7 @@ function YearAccordion({
   appearancesLabel,
 }: {
   year: number;
-  items: MediaItem[];
+  items: MediaAppearance[];
   defaultOpen: boolean;
   fallbackLabel: string;
   appearancesLabel: string;
@@ -155,7 +161,7 @@ function YearAccordion({
         <div className="border-t-2 border-ink/15 bg-cream-deep/30 px-5 sm:px-7 py-7 sm:py-8">
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-7">
             {items.map((item) => (
-              <MediaCard key={item.url} item={item} fallbackLabel={fallbackLabel} />
+              <MediaCard key={item.id} item={item} fallbackLabel={fallbackLabel} />
             ))}
           </div>
         </div>
@@ -182,7 +188,7 @@ export function MediaPage() {
   const ig = useSectionContent("media.instagram");
 
   // Group items by year, newest first
-  const byYear = items.reduce<Record<number, MediaItem[]>>((acc, item) => {
+  const byYear = items.reduce<Record<number, MediaAppearance[]>>((acc, item) => {
     (acc[item.year] = acc[item.year] ?? []).push(item);
     return acc;
   }, {});
