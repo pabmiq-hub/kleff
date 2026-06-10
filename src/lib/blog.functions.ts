@@ -3,7 +3,10 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { assertSuperAdmin } from "@/lib/assert-role.server";
-import { sanitizeHtml } from "@/lib/sanitize.server";
+// sanitizeHtml is imported lazily inside admin handlers to avoid pulling
+// isomorphic-dompurify (and its jsdom dep) into the public blog read path,
+// which crashes SSR in the Worker runtime with
+// "Cannot read properties of undefined (reading 'bind')".
 
 const LOCALES = ["es", "ca", "en"] as const;
 type Locale = (typeof LOCALES)[number];
@@ -229,6 +232,7 @@ async function upsertWordPressPost(p: WPPost) {
   // Sanitize: WP renders titles with HTML entities — decode them
   const titleEn = decodeEntities(stripTags(p.title.rendered)).trim();
   const excerptEn = decodeEntities(stripTags(p.excerpt.rendered)).trim().slice(0, 500);
+  const { sanitizeHtml } = await import("@/lib/sanitize.server");
   const contentEn = sanitizeHtml(p.content.rendered);
 
   const slug = p.slug;
@@ -598,6 +602,7 @@ export const adminUpdateBlogPost = createServerFn({ method: "POST" })
   }).parse(data))
   .handler(async ({ data, context }) => {
     await assertSuperAdmin(context.userId);
+    const { sanitizeHtml } = await import("@/lib/sanitize.server");
     const patch = { ...data.patch } as Record<string, unknown>;
     for (const k of ["content_es", "content_ca", "content_en"] as const) {
       const v = patch[k];
