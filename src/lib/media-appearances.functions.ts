@@ -8,8 +8,16 @@ export type MediaAppearance = {
   id: string;
   url: string;
   outlet: string;
+  // Default (legacy) title/description — kept for backwards compatibility.
   title: string;
   description: string | null;
+  // Per-locale fields
+  titleEs: string | null;
+  titleCa: string | null;
+  titleEn: string | null;
+  descriptionEs: string | null;
+  descriptionCa: string | null;
+  descriptionEn: string | null;
   imageUrl: string | null;
   dateLabel: string | null;
   year: number;
@@ -27,6 +35,12 @@ function mapRow(row: any): MediaAppearance {
     outlet: row.outlet,
     title: row.title,
     description: row.description ?? null,
+    titleEs: row.title_es ?? null,
+    titleCa: row.title_ca ?? null,
+    titleEn: row.title_en ?? null,
+    descriptionEs: row.description_es ?? null,
+    descriptionCa: row.description_ca ?? null,
+    descriptionEn: row.description_en ?? null,
     imageUrl: row.image_url ?? null,
     dateLabel: row.date_label ?? null,
     year: row.year,
@@ -84,18 +98,54 @@ export const adminGetMediaAppearance = createServerFn({ method: "GET" })
     return row ? mapRow(row) : null;
   });
 
+const optionalText = (max: number) =>
+  z
+    .union([z.string().max(max), z.literal(""), z.null()])
+    .optional()
+    .transform((v) => (v == null || v === "" ? null : v));
+
 const upsertSchema = z.object({
   url: z.string().url().max(2048),
   outlet: z.string().min(1).max(200),
   title: z.string().min(1).max(500),
-  description: z.string().max(2000).nullable().optional(),
-  imageUrl: z.string().url().max(2048).nullable().optional().or(z.literal("")),
-  dateLabel: z.string().max(40).nullable().optional(),
+  description: optionalText(2000),
+  titleEs: optionalText(500),
+  titleCa: optionalText(500),
+  titleEn: optionalText(500),
+  descriptionEs: optionalText(2000),
+  descriptionCa: optionalText(2000),
+  descriptionEn: optionalText(2000),
+  imageUrl: z
+    .union([z.string().url().max(2048), z.literal(""), z.null()])
+    .optional()
+    .transform((v) => (v == null || v === "" ? null : v)),
+  dateLabel: optionalText(40),
   year: z.number().int().min(2000).max(2100),
   month: z.number().int().min(1).max(12),
   displayOrder: z.number().int().optional(),
   isPublished: z.boolean().optional(),
 });
+
+function toDbPayload(data: z.infer<typeof upsertSchema>) {
+  return {
+    url: data.url,
+    outlet: data.outlet,
+    title: data.title,
+    description: data.description,
+    title_es: data.titleEs ?? data.title,
+    title_ca: data.titleCa,
+    title_en: data.titleEn,
+    description_es: data.descriptionEs ?? data.description,
+    description_ca: data.descriptionCa,
+    description_en: data.descriptionEn,
+    image_url: data.imageUrl,
+    date_label: data.dateLabel,
+    year: data.year,
+    month: data.month,
+    display_order: data.displayOrder ?? 0,
+    is_published: data.isPublished ?? true,
+  };
+}
 
 export const adminCreateMediaAppearance = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -104,18 +154,7 @@ export const adminCreateMediaAppearance = createServerFn({ method: "POST" })
     await assertSuperAdmin(context.userId);
     const { data: row, error } = await supabaseAdmin
       .from("media_appearances")
-      .insert({
-        url: data.url,
-        outlet: data.outlet,
-        title: data.title,
-        description: data.description || null,
-        image_url: data.imageUrl || null,
-        date_label: data.dateLabel || null,
-        year: data.year,
-        month: data.month,
-        display_order: data.displayOrder ?? 0,
-        is_published: data.isPublished ?? true,
-      })
+      .insert(toDbPayload(data))
       .select("*")
       .single();
     if (error) throw new Error(error.message);
@@ -127,21 +166,11 @@ export const adminUpdateMediaAppearance = createServerFn({ method: "POST" })
   .inputValidator((data: unknown) => upsertSchema.extend({ id: z.string().uuid() }).parse(data))
   .handler(async ({ data, context }): Promise<MediaAppearance> => {
     await assertSuperAdmin(context.userId);
+    const { id, ...rest } = data;
     const { data: row, error } = await supabaseAdmin
       .from("media_appearances")
-      .update({
-        url: data.url,
-        outlet: data.outlet,
-        title: data.title,
-        description: data.description || null,
-        image_url: data.imageUrl || null,
-        date_label: data.dateLabel || null,
-        year: data.year,
-        month: data.month,
-        display_order: data.displayOrder ?? 0,
-        is_published: data.isPublished ?? true,
-      })
-      .eq("id", data.id)
+      .update(toDbPayload(rest))
+      .eq("id", id)
       .select("*")
       .single();
     if (error) throw new Error(error.message);
