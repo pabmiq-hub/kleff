@@ -61,12 +61,27 @@ function handleMediaImageError(event: SyntheticEvent<HTMLImageElement>) {
 export function MediaCard({
   item,
   fallbackLabel,
+  locale,
 }: {
   item: MediaAppearance;
   fallbackLabel: string;
+  locale?: "es" | "ca" | "en";
 }) {
-  const title = item.title || item.outlet || hostnameOf(item.url);
-  const desc = item.description ?? "";
+  const lc = locale ?? "es";
+  const localizedTitle =
+    lc === "ca"
+      ? item.titleCa || item.titleEs || item.title
+      : lc === "en"
+        ? item.titleEn || item.titleEs || item.title
+        : item.titleEs || item.title;
+  const localizedDesc =
+    lc === "ca"
+      ? item.descriptionCa || item.descriptionEs || item.description
+      : lc === "en"
+        ? item.descriptionEn || item.descriptionEs || item.description
+        : item.descriptionEs || item.description;
+  const title = localizedTitle || item.outlet || hostnameOf(item.url);
+  const desc = localizedDesc ?? "";
   const image = item.imageUrl;
   const outlet = item.outlet || hostnameOf(item.url);
 
