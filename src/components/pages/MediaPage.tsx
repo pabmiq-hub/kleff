@@ -144,12 +144,14 @@ function YearAccordion({
   defaultOpen,
   fallbackLabel,
   appearancesLabel,
+  locale,
 }: {
   year: number;
   items: MediaAppearance[];
   defaultOpen: boolean;
   fallbackLabel: string;
   appearancesLabel: string;
+  locale: "es" | "ca" | "en";
 }) {
   const [open, setOpen] = useState(defaultOpen);
   return (
@@ -176,7 +178,7 @@ function YearAccordion({
         <div className="border-t-2 border-ink/15 bg-cream-deep/30 px-5 sm:px-7 py-7 sm:py-8">
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-7">
             {items.map((item) => (
-              <MediaCard key={item.id} item={item} fallbackLabel={fallbackLabel} />
+              <MediaCard key={item.id} item={item} fallbackLabel={fallbackLabel} locale={locale} />
             ))}
           </div>
         </div>
@@ -269,6 +271,7 @@ export function MediaPage() {
                   defaultOpen={i === 0}
                   fallbackLabel={t.media.visitArticle}
                   appearancesLabel={appearancesLabel}
+                  locale={locale as "es" | "ca" | "en"}
                 />
               ))}
             </div>
