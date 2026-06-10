@@ -99,7 +99,7 @@ const upsertSchema = z.object({
 
 export const adminCreateMediaAppearance = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator(upsertSchema)
+  .inputValidator((data: unknown) => upsertSchema.parse(data))
   .handler(async ({ data, context }): Promise<MediaAppearance> => {
     await assertSuperAdmin(context.userId);
     const { data: row, error } = await supabaseAdmin
