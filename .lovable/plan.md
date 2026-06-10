@@ -1,109 +1,70 @@
-# Panel "Medios" en admin + eliminar Firecrawl de prensa
+## Diagnóstico
 
-## Objetivo
-Crear una sección **Medios** en el panel de super admin desde donde se gestionan a mano las apariciones en prensa (alta, edición, borrado, previsualización). La página pública `/medios` pasa a leer de esa tabla, eliminando el scraping con Firecrawl para las publicaciones. Los datos actuales (de `PRESS_LINKS` + caché OG en `media_og_cache`) se migran a la nueva tabla para no perder nada y poder editarlos después.
+El blog ha dejado de funcionar tanto en la web pública como en el panel de administrador. Las dos pantallas que ves provienen de la **misma causa raíz**:
 
-## Qué se mantiene igual
-- Diseño de la página pública `/medios` (`MediaPage`): hero, acordeones por año desc, tarjetas con fecha, medio, título, resumen, imagen y "Ver publicación".
-- Funcionamiento de Instagram (feed Behold + contador de seguidores). Esto **no** se toca todavía — sigue usando Firecrawl solo para el contador de seguidores. Si más adelante quieres, lo eliminamos también.
+- **`/blog` (público)** → SSR devuelve HTTP 500 con el error `Cannot read properties of undefined (reading 'bind')`. Esto se dispara dentro del `loader` de `src/routes/blog.tsx` cuando llama a `listBlogPosts({ data: { locale: "es" } })`.
+- **`/admin/blog` (admin)** → en cliente, `await listFn()` resuelve a `undefined`, y al hacer `setPosts(res.posts)` salta `Cannot read properties of undefined (reading 'posts')`.
+
+El denominador común es la definición del server function en `src/lib/blog.functions.ts`:
+
+```ts
+export const listBlogPosts = createServerFn({ method: "GET" })
+  .inputValidator(z.object({ locale: localeSchema.default("es") }))
+  .handler(...)
+```
+
+Se está pasando un **schema de Zod directamente** a `.inputValidator(...)`. El runtime actual de TanStack Start intenta invocar internamente un método (`.bind(...)`) sobre el validador asumiendo una determinada forma, y como el schema no la expone tal cual, falla con el mensaje `Cannot read properties of undefined (reading 'bind')`. El error se lanza **antes** de ejecutar el handler, por lo que el endpoint nunca devuelve datos y el cliente recibe `undefined`.
+
+`/medios` y `listMediaAppearances` no se ven afectados porque ese server function **no tiene `inputValidator`** y se llama sin argumentos.
 
 ## Cambios
 
-### 1. Nueva tabla `media_appearances`
-Campos:
-- `id` (uuid)
-- `url` (texto, único) — enlace al artículo
-- `outlet` (texto) — p. ej. "EL PERIÓDICO · Qué hacer"
-- `title` (texto) — titular que se muestra
-- `description` (texto) — resumen 3-4 líneas
-- `image_url` (texto) — imagen de cabecera (URL del bucket `media` ya existente o URL externa)
-- `date_label` (texto) — etiqueta visible ("MAY 2026")
-- `year` (int) y `month` (int 1-12) — para ordenar y agrupar por año
-- `display_order` (int, default 0) — desempate dentro del mismo mes
-- `is_published` (bool, default true) — para ocultar sin borrar
-- `created_at`, `updated_at`
+### 1. `src/lib/blog.functions.ts` — envolver todos los `inputValidator` en una función
 
-RLS: lectura pública sólo de filas `is_published = true`; escritura sólo super_admin (vía `has_role`). GRANTs estándar.
+Cambiar el patrón en TODOS los server functions del archivo:
 
-### 2. Migración de datos existentes
-Script de migración que, por cada entrada de `src/data/press.ts`, inserta una fila combinando:
-- `outlet`, `date_label` (date), `year`, `month`, `url` del array
-- `title` = `titleOverride` ?? `og_title` (de `media_og_cache`) ?? `outlet`
-- `description` = `descriptionOverride` ?? `og_description`
-- `image_url` = `imageOverride` ?? `og_image`
+```ts
+// Antes
+.inputValidator(z.object({ locale: localeSchema.default("es") }))
 
-Así arrancas con TODAS las publicaciones actuales ya cargadas y editables.
-
-### 3. Server functions nuevas (`src/lib/media-appearances.functions.ts`)
-- `listMediaAppearances({ includeDrafts })` — pública por defecto; admin pide drafts también.
-- `createMediaAppearance(data)` — super admin.
-- `updateMediaAppearance({ id, ...data })` — super admin.
-- `deleteMediaAppearance({ id })` — super admin.
-- `uploadMediaAppearanceImage(file)` — sube al bucket `media` existente y devuelve URL pública.
-
-Las tres mutaciones usan `requireSupabaseAuth` + `assertSuperAdmin`. Validación con Zod (URL válida, year 2000-2100, month 1-12, longitudes máximas).
-
-### 4. Página pública `/medios`, `/ca/mitjans`, `/en/media`
-- El loader pasa de `getMediaItems()` (que usa Firecrawl) a `listMediaAppearances()`.
-- `MediaPage` se adapta al nuevo tipo (campos directos, sin lógica `imageOverride ?? ogImage`).
-- Se mantiene el acordeón por año y orden cronológico desc.
-
-### 5. Nueva sección admin `/admin/media`
-- Enlace "Medios" en la sidebar (`src/routes/admin.tsx`) con icono Newspaper.
-- Ruta `admin.media.tsx`: tabla con todas las apariciones (orden por year/month desc), botón "Nueva publicación", buscador por outlet/título, badge de borrador.
-- Ruta `admin.media.$id.tsx` (y `admin.media.new.tsx`): formulario con campos:
-  - Mes (1-12) + Año (number) → genera automáticamente `date_label` "MAY 2026" según locale (editable).
-  - Medio (input)
-  - Título (input)
-  - Descripción (textarea, 3-4 líneas, contador de caracteres)
-  - Enlace URL (input)
-  - Imagen: dos modos — pegar URL externa **o** subir archivo (reutiliza bucket `media` y `uploadMediaAppearanceImage`). Preview en vivo.
-  - Toggle "Publicado".
-- Botón **"Previsualizar"** que muestra una `MediaCard` real (mismo componente que en la web pública) con los datos del formulario, en un panel lateral o modal — exactamente como se verá en `/medios`.
-- Guardar / Cancelar / Borrar (con confirmación).
-
-### 6. Eliminar uso de Firecrawl en prensa
-- `getMediaItems` y todo el flujo de `media_og_cache`/`scheduleBackgroundRefresh` se dejan de llamar desde la web y se eliminan del código (función + import en `media.functions.ts`, y la ruta `api.public.refresh-media-og.ts`).
-- La tabla `media_og_cache` se conserva en BD por seguridad, pero deja de leerse/escribirse. (Si confirmas, en una segunda migración la borramos.)
-- `src/data/press.ts` queda obsoleto — se elimina tras verificar la migración.
-- `FIRECRAWL_API_KEY` sigue existiendo porque la usa todavía Instagram followers (y otras como BGG fallback / Meetup). No la borramos.
-
-## Detalles técnicos
-
-### Tabla SQL (resumen)
-```sql
-CREATE TABLE public.media_appearances (
-  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  url text NOT NULL UNIQUE,
-  outlet text NOT NULL,
-  title text NOT NULL,
-  description text,
-  image_url text,
-  date_label text,
-  year int NOT NULL,
-  month int NOT NULL CHECK (month BETWEEN 1 AND 12),
-  display_order int NOT NULL DEFAULT 0,
-  is_published bool NOT NULL DEFAULT true,
-  created_at timestamptz NOT NULL DEFAULT now(),
-  updated_at timestamptz NOT NULL DEFAULT now()
-);
--- GRANTs + RLS:
--- anon/authenticated: SELECT donde is_published = true
--- super_admin: ALL
+// Después
+.inputValidator((data: unknown) =>
+  z.object({ locale: localeSchema.default("es") }).parse(data)
+)
 ```
 
-### Orden en la web
-`ORDER BY year DESC, month DESC, display_order DESC, created_at DESC`.
+Aplicar el mismo wrapping a:
+- `listBlogPosts`
+- `getBlogPostBySlug`
+- `adminImportWordPress`
+- `adminTranslateBlogPost`
+- `adminGetBlogPost`
+- `adminCreateBlogPost`
+- `adminUpdateBlogPost`
+- `adminDeleteBlogPost`
 
-### Locale del `date_label`
-Por defecto se genera en castellano ("MAY 2026"). El admin puede sobreescribirlo manualmente si quiere otra forma. La web pública lo muestra tal cual está guardado (igual que ahora con `date`).
+Esto es el patrón canónico recomendado por TanStack Start y es compatible en todas las versiones.
 
-### Imágenes
-- Se reutiliza el bucket público `media` ya creado para que las imágenes sean rápidas y propias (no dependientes de terceros).
-- Si el admin pega una URL externa, se acepta tal cual (mostraremos aviso de que puede dejar de funcionar).
+### 2. `src/lib/media-appearances.functions.ts` — mismo wrapping preventivo
 
-## Resultado
-- 0 llamadas a Firecrawl al cargar `/medios`.
-- Carga de la página instantánea (un único SELECT a Postgres).
-- Control total desde admin con previsualización fiel.
-- Cero pérdida de información: todas las publicaciones actuales aparecen ya cargadas y editables.
+Aunque por ahora ninguna llamada falla, aplicar el mismo patrón en:
+- `adminGetMediaAppearance`
+- `adminCreateMediaAppearance`
+- `adminUpdateMediaAppearance`
+- `adminDeleteMediaAppearance`
+
+Para evitar que el problema reaparezca al editar/borrar medios.
+
+### 3. Verificación
+
+- Recargar `/blog`, `/ca/blog`, `/en/blog`: deben renderizar la lista sin error 500.
+- Recargar `/admin/blog`: debe listar los posts existentes.
+- Abrir un post desde el admin (`/admin/blog/$id`) para confirmar que `adminGetBlogPost` también funciona.
+- Probar guardar un cambio en un post (`adminUpdateBlogPost`).
+- Confirmar en los Server Logs publicados que `/blog` deja de devolver 500.
+
+## Notas
+
+- No hace falta tocar la base de datos: los posts siguen intactos.
+- No hace falta tocar el `loader` de las rutas ni los componentes — el problema está exclusivamente en cómo se declaran los validadores de entrada.
+- El cambio es puramente defensivo y mantiene la misma validación con Zod.

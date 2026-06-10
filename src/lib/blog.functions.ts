@@ -29,7 +29,7 @@ export interface BlogPostFull extends BlogPostSummary {
 // ---------------------------------------------------------------------------
 
 export const listBlogPosts = createServerFn({ method: "GET" })
-  .inputValidator(z.object({ locale: localeSchema.default("es") }))
+  .inputValidator((data: unknown) => z.object({ locale: localeSchema.default("es") }).parse(data))
   .handler(async ({ data }): Promise<{ posts: BlogPostSummary[] }> => {
     const { data: rows, error } = await supabaseAdmin
       .from("blog_posts")
