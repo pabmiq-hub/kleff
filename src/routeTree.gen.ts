@@ -79,6 +79,7 @@ import { Route as AdminContentRouteImport } from './routes/admin.content'
 import { Route as AdminBlogRouteImport } from './routes/admin.blog'
 import { Route as AdminRentalsIndexRouteImport } from './routes/admin.rentals.index'
 import { Route as AdminRegistrationsIndexRouteImport } from './routes/admin.registrations.index'
+import { Route as AdminMediaIndexRouteImport } from './routes/admin.media.index'
 import { Route as AdminContentIndexRouteImport } from './routes/admin.content.index'
 import { Route as AdminBlogIndexRouteImport } from './routes/admin.blog.index'
 import { Route as AppRentalsMineRouteImport } from './routes/app.rentals.mine'
@@ -90,6 +91,8 @@ import { Route as AdminRentalsCatalogRouteImport } from './routes/admin.rentals.
 import { Route as AdminRentalsActiveRouteImport } from './routes/admin.rentals.active'
 import { Route as AdminRegistrationsIdRouteImport } from './routes/admin.registrations.$id'
 import { Route as AdminPagesPageIdRouteImport } from './routes/admin.pages.$pageId'
+import { Route as AdminMediaNewRouteImport } from './routes/admin.media.new'
+import { Route as AdminMediaIdRouteImport } from './routes/admin.media.$id'
 import { Route as AdminContentUrlsRouteImport } from './routes/admin.content.urls'
 import { Route as AdminContentRedirectsRouteImport } from './routes/admin.content.redirects'
 import { Route as AdminContentPageKeyRouteImport } from './routes/admin.content.$pageKey'
@@ -447,6 +450,11 @@ const AdminRegistrationsIndexRoute = AdminRegistrationsIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AdminRegistrationsRoute,
 } as any)
+const AdminMediaIndexRoute = AdminMediaIndexRouteImport.update({
+  id: '/media/',
+  path: '/media/',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminContentIndexRoute = AdminContentIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -501,6 +509,16 @@ const AdminRegistrationsIdRoute = AdminRegistrationsIdRouteImport.update({
 const AdminPagesPageIdRoute = AdminPagesPageIdRouteImport.update({
   id: '/pages/$pageId',
   path: '/pages/$pageId',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminMediaNewRoute = AdminMediaNewRouteImport.update({
+  id: '/media/new',
+  path: '/media/new',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminMediaIdRoute = AdminMediaIdRouteImport.update({
+  id: '/media/$id',
+  path: '/media/$id',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminContentUrlsRoute = AdminContentUrlsRouteImport.update({
@@ -603,6 +621,8 @@ export interface FileRoutesByFullPath {
   '/admin/content/$pageKey': typeof AdminContentPageKeyRoute
   '/admin/content/redirects': typeof AdminContentRedirectsRoute
   '/admin/content/urls': typeof AdminContentUrlsRoute
+  '/admin/media/$id': typeof AdminMediaIdRoute
+  '/admin/media/new': typeof AdminMediaNewRoute
   '/admin/pages/$pageId': typeof AdminPagesPageIdRoute
   '/admin/registrations/$id': typeof AdminRegistrationsIdRoute
   '/admin/rentals/active': typeof AdminRentalsActiveRoute
@@ -614,6 +634,7 @@ export interface FileRoutesByFullPath {
   '/app/rentals/mine': typeof AppRentalsMineRoute
   '/admin/blog/': typeof AdminBlogIndexRoute
   '/admin/content/': typeof AdminContentIndexRoute
+  '/admin/media/': typeof AdminMediaIndexRoute
   '/admin/registrations/': typeof AdminRegistrationsIndexRoute
   '/admin/rentals/': typeof AdminRentalsIndexRoute
 }
@@ -685,6 +706,8 @@ export interface FileRoutesByTo {
   '/admin/content/$pageKey': typeof AdminContentPageKeyRoute
   '/admin/content/redirects': typeof AdminContentRedirectsRoute
   '/admin/content/urls': typeof AdminContentUrlsRoute
+  '/admin/media/$id': typeof AdminMediaIdRoute
+  '/admin/media/new': typeof AdminMediaNewRoute
   '/admin/pages/$pageId': typeof AdminPagesPageIdRoute
   '/admin/registrations/$id': typeof AdminRegistrationsIdRoute
   '/admin/rentals/active': typeof AdminRentalsActiveRoute
@@ -696,6 +719,7 @@ export interface FileRoutesByTo {
   '/app/rentals/mine': typeof AppRentalsMineRoute
   '/admin/blog': typeof AdminBlogIndexRoute
   '/admin/content': typeof AdminContentIndexRoute
+  '/admin/media': typeof AdminMediaIndexRoute
   '/admin/registrations': typeof AdminRegistrationsIndexRoute
   '/admin/rentals': typeof AdminRentalsIndexRoute
 }
@@ -774,6 +798,8 @@ export interface FileRoutesById {
   '/admin/content/$pageKey': typeof AdminContentPageKeyRoute
   '/admin/content/redirects': typeof AdminContentRedirectsRoute
   '/admin/content/urls': typeof AdminContentUrlsRoute
+  '/admin/media/$id': typeof AdminMediaIdRoute
+  '/admin/media/new': typeof AdminMediaNewRoute
   '/admin/pages/$pageId': typeof AdminPagesPageIdRoute
   '/admin/registrations/$id': typeof AdminRegistrationsIdRoute
   '/admin/rentals/active': typeof AdminRentalsActiveRoute
@@ -785,6 +811,7 @@ export interface FileRoutesById {
   '/app/rentals/mine': typeof AppRentalsMineRoute
   '/admin/blog/': typeof AdminBlogIndexRoute
   '/admin/content/': typeof AdminContentIndexRoute
+  '/admin/media/': typeof AdminMediaIndexRoute
   '/admin/registrations/': typeof AdminRegistrationsIndexRoute
   '/admin/rentals/': typeof AdminRentalsIndexRoute
 }
@@ -864,6 +891,8 @@ export interface FileRouteTypes {
     | '/admin/content/$pageKey'
     | '/admin/content/redirects'
     | '/admin/content/urls'
+    | '/admin/media/$id'
+    | '/admin/media/new'
     | '/admin/pages/$pageId'
     | '/admin/registrations/$id'
     | '/admin/rentals/active'
@@ -875,6 +904,7 @@ export interface FileRouteTypes {
     | '/app/rentals/mine'
     | '/admin/blog/'
     | '/admin/content/'
+    | '/admin/media/'
     | '/admin/registrations/'
     | '/admin/rentals/'
   fileRoutesByTo: FileRoutesByTo
@@ -946,6 +976,8 @@ export interface FileRouteTypes {
     | '/admin/content/$pageKey'
     | '/admin/content/redirects'
     | '/admin/content/urls'
+    | '/admin/media/$id'
+    | '/admin/media/new'
     | '/admin/pages/$pageId'
     | '/admin/registrations/$id'
     | '/admin/rentals/active'
@@ -957,6 +989,7 @@ export interface FileRouteTypes {
     | '/app/rentals/mine'
     | '/admin/blog'
     | '/admin/content'
+    | '/admin/media'
     | '/admin/registrations'
     | '/admin/rentals'
   id:
@@ -1034,6 +1067,8 @@ export interface FileRouteTypes {
     | '/admin/content/$pageKey'
     | '/admin/content/redirects'
     | '/admin/content/urls'
+    | '/admin/media/$id'
+    | '/admin/media/new'
     | '/admin/pages/$pageId'
     | '/admin/registrations/$id'
     | '/admin/rentals/active'
@@ -1045,6 +1080,7 @@ export interface FileRouteTypes {
     | '/app/rentals/mine'
     | '/admin/blog/'
     | '/admin/content/'
+    | '/admin/media/'
     | '/admin/registrations/'
     | '/admin/rentals/'
   fileRoutesById: FileRoutesById
@@ -1603,6 +1639,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminRegistrationsIndexRouteImport
       parentRoute: typeof AdminRegistrationsRoute
     }
+    '/admin/media/': {
+      id: '/admin/media/'
+      path: '/media'
+      fullPath: '/admin/media/'
+      preLoaderRoute: typeof AdminMediaIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/content/': {
       id: '/admin/content/'
       path: '/'
@@ -1678,6 +1721,20 @@ declare module '@tanstack/react-router' {
       path: '/pages/$pageId'
       fullPath: '/admin/pages/$pageId'
       preLoaderRoute: typeof AdminPagesPageIdRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/media/new': {
+      id: '/admin/media/new'
+      path: '/media/new'
+      fullPath: '/admin/media/new'
+      preLoaderRoute: typeof AdminMediaNewRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/media/$id': {
+      id: '/admin/media/$id'
+      path: '/media/$id'
+      fullPath: '/admin/media/$id'
+      preLoaderRoute: typeof AdminMediaIdRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/content/urls': {
@@ -1793,7 +1850,10 @@ interface AdminRouteChildren {
   AdminRegistrationsRoute: typeof AdminRegistrationsRouteWithChildren
   AdminRentalsRoute: typeof AdminRentalsRouteWithChildren
   AdminIndexRoute: typeof AdminIndexRoute
+  AdminMediaIdRoute: typeof AdminMediaIdRoute
+  AdminMediaNewRoute: typeof AdminMediaNewRoute
   AdminPagesPageIdRoute: typeof AdminPagesPageIdRoute
+  AdminMediaIndexRoute: typeof AdminMediaIndexRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
@@ -1804,7 +1864,10 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminRegistrationsRoute: AdminRegistrationsRouteWithChildren,
   AdminRentalsRoute: AdminRentalsRouteWithChildren,
   AdminIndexRoute: AdminIndexRoute,
+  AdminMediaIdRoute: AdminMediaIdRoute,
+  AdminMediaNewRoute: AdminMediaNewRoute,
   AdminPagesPageIdRoute: AdminPagesPageIdRoute,
+  AdminMediaIndexRoute: AdminMediaIndexRoute,
 }
 
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
