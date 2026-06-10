@@ -32,21 +32,29 @@ export const Route = createFileRoute("/$")({
       slugCandidate = segments[1];
     }
 
-    if (slugCandidate && isPlausibleSlug(slugCandidate)) {
-      // 1) Custom CMS page first (admin-created pages take priority over blog posts).
-      const { page } = await resolveCustomPage({ data: { slug: slugCandidate, locale } });
-      if (page && page.is_published) {
-        const { blocks } = await getPageBlocks({ data: { pageId: page.id, locale } });
-        return { kind: "custom" as const, page, blocks, locale };
+    // Wrap backend lookups so a transient DB / SSR error never bubbles up as
+    // a hard 500 on the catch-all — fall through to a friendly 404 instead.
+    try {
+      if (slugCandidate && isPlausibleSlug(slugCandidate)) {
+        // 1) Custom CMS page first (admin-created pages take priority over blog posts).
+        const { page } = await resolveCustomPage({ data: { slug: slugCandidate, locale } });
+        if (page && page.is_published) {
+          const { blocks } = await getPageBlocks({ data: { pageId: page.id, locale } });
+          return { kind: "custom" as const, page, blocks, locale };
+        }
+        // 2) Blog post (WordPress slug).
+        const { post } = await getBlogPostBySlug({ data: { slug: slugCandidate, locale } });
+        if (post) return { kind: "post" as const, post, locale };
       }
-      // 2) Blog post (WordPress slug).
-      const { post } = await getBlogPostBySlug({ data: { slug: slugCandidate, locale } });
-      if (post) return { kind: "post" as const, post, locale };
-    }
 
-    // Fall back to redirect lookup
-    const { to } = await lookupRedirect({ data: { path: pathname } });
-    if (to) throw redirect({ href: to, statusCode: 301, reloadDocument: true });
+      // Fall back to redirect lookup
+      const { to } = await lookupRedirect({ data: { path: pathname } });
+      if (to) throw redirect({ href: to, statusCode: 301, reloadDocument: true });
+    } catch (e) {
+      // Re-throw redirects so TanStack handles them.
+      if (e && typeof e === "object" && "isRedirect" in (e as object)) throw e;
+      console.error("[$.tsx] catch-all loader failed", e);
+    }
 
     return { kind: "not-found" as const, path: pathname };
   },
