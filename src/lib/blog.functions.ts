@@ -575,7 +575,7 @@ export const adminCreateBlogPost = createServerFn({ method: "POST" })
 
 export const adminUpdateBlogPost = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator(z.object({
+  .inputValidator((data: unknown) => z.object({
     id: z.string().uuid(),
     patch: z.object({
       slug: z.string().min(1).max(255).regex(/^[a-z0-9-]+$/).optional(),
@@ -595,7 +595,7 @@ export const adminUpdateBlogPost = createServerFn({ method: "POST" })
       tags: z.array(z.string().max(50)).max(20).optional(),
       reading_time_minutes: z.number().int().min(0).max(240).nullable().optional(),
     }),
-  }))
+  }).parse(data))
   .handler(async ({ data, context }) => {
     await assertSuperAdmin(context.userId);
     const patch = { ...data.patch } as Record<string, unknown>;
