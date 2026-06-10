@@ -124,7 +124,7 @@ export const adminCreateMediaAppearance = createServerFn({ method: "POST" })
 
 export const adminUpdateMediaAppearance = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator(upsertSchema.extend({ id: z.string().uuid() }))
+  .inputValidator((data: unknown) => upsertSchema.extend({ id: z.string().uuid() }).parse(data))
   .handler(async ({ data, context }): Promise<MediaAppearance> => {
     await assertSuperAdmin(context.userId);
     const { data: row, error } = await supabaseAdmin
