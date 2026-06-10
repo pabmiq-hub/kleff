@@ -611,7 +611,7 @@ export const adminUpdateBlogPost = createServerFn({ method: "POST" })
 
 export const adminDeleteBlogPost = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator(z.object({ id: z.string().uuid() }))
+  .inputValidator((data: unknown) => z.object({ id: z.string().uuid() }).parse(data))
   .handler(async ({ data, context }) => {
     await assertSuperAdmin(context.userId);
     const { error } = await supabaseAdmin.from("blog_posts").delete().eq("id", data.id);
