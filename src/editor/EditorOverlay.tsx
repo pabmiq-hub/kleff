@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useRouterState } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import {
   X,
@@ -43,8 +44,14 @@ const PRESET_COLORS = [
 export function EditorOverlay() {
   const { isSuperAdmin, editMode, toggleEditMode, hasDrafts, discardDrafts, publish, selected, setSelected } =
     useEditor();
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
 
   if (!isSuperAdmin) return null;
+  // Hide the visual editor inside the admin panel and the members area —
+  // those screens have their own UIs and don't need the page-edit overlay.
+  if (pathname.startsWith("/admin") || pathname.startsWith("/app") || pathname.startsWith("/login")) {
+    return null;
+  }
 
   return (
     <>
