@@ -1012,21 +1012,6 @@ export type Database = {
           },
         ]
       }
-      url_migration_map: {
-        Row: {
-          new_url: string
-          old_url: string
-        }
-        Insert: {
-          new_url: string
-          old_url: string
-        }
-        Update: {
-          new_url?: string
-          old_url?: string
-        }
-        Relationships: []
-      }
       user_roles: {
         Row: {
           created_at: string
@@ -1060,7 +1045,6 @@ export type Database = {
           nonce: string
         }[]
       }
-      fn_apply_url_map: { Args: { t: string }; Returns: string }
       get_id_document: { Args: { _target_user_id: string }; Returns: string }
       has_role: {
         Args: {
