@@ -61,12 +61,27 @@ function handleMediaImageError(event: SyntheticEvent<HTMLImageElement>) {
 export function MediaCard({
   item,
   fallbackLabel,
+  locale,
 }: {
   item: MediaAppearance;
   fallbackLabel: string;
+  locale?: "es" | "ca" | "en";
 }) {
-  const title = item.title || item.outlet || hostnameOf(item.url);
-  const desc = item.description ?? "";
+  const lc = locale ?? "es";
+  const localizedTitle =
+    lc === "ca"
+      ? item.titleCa || item.titleEs || item.title
+      : lc === "en"
+        ? item.titleEn || item.titleEs || item.title
+        : item.titleEs || item.title;
+  const localizedDesc =
+    lc === "ca"
+      ? item.descriptionCa || item.descriptionEs || item.description
+      : lc === "en"
+        ? item.descriptionEn || item.descriptionEs || item.description
+        : item.descriptionEs || item.description;
+  const title = localizedTitle || item.outlet || hostnameOf(item.url);
+  const desc = localizedDesc ?? "";
   const image = item.imageUrl;
   const outlet = item.outlet || hostnameOf(item.url);
 
@@ -129,12 +144,14 @@ function YearAccordion({
   defaultOpen,
   fallbackLabel,
   appearancesLabel,
+  locale,
 }: {
   year: number;
   items: MediaAppearance[];
   defaultOpen: boolean;
   fallbackLabel: string;
   appearancesLabel: string;
+  locale: "es" | "ca" | "en";
 }) {
   const [open, setOpen] = useState(defaultOpen);
   return (
@@ -161,7 +178,7 @@ function YearAccordion({
         <div className="border-t-2 border-ink/15 bg-cream-deep/30 px-5 sm:px-7 py-7 sm:py-8">
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-7">
             {items.map((item) => (
-              <MediaCard key={item.id} item={item} fallbackLabel={fallbackLabel} />
+              <MediaCard key={item.id} item={item} fallbackLabel={fallbackLabel} locale={locale} />
             ))}
           </div>
         </div>
@@ -254,6 +271,7 @@ export function MediaPage() {
                   defaultOpen={i === 0}
                   fallbackLabel={t.media.visitArticle}
                   appearancesLabel={appearancesLabel}
+                  locale={locale as "es" | "ca" | "en"}
                 />
               ))}
             </div>

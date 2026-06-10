@@ -117,9 +117,13 @@ function RootComponent() {
 }
 
 import { useEditor } from "@/editor/EditorProvider";
+import { useRouterState } from "@tanstack/react-router";
 function EditorLayoutShift({ children }: { children: React.ReactNode }) {
   const { editMode, isSuperAdmin } = useEditor();
-  const active = editMode && isSuperAdmin;
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const isAdminArea =
+    pathname.startsWith("/admin") || pathname.startsWith("/app") || pathname.startsWith("/login");
+  const active = editMode && isSuperAdmin && !isAdminArea;
   return (
     <div
       style={{

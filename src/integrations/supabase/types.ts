@@ -513,6 +513,9 @@ export type Database = {
           created_at: string
           date_label: string | null
           description: string | null
+          description_ca: string | null
+          description_en: string | null
+          description_es: string | null
           display_order: number
           id: string
           image_url: string | null
@@ -520,6 +523,9 @@ export type Database = {
           month: number
           outlet: string
           title: string
+          title_ca: string | null
+          title_en: string | null
+          title_es: string | null
           updated_at: string
           url: string
           year: number
@@ -528,6 +534,9 @@ export type Database = {
           created_at?: string
           date_label?: string | null
           description?: string | null
+          description_ca?: string | null
+          description_en?: string | null
+          description_es?: string | null
           display_order?: number
           id?: string
           image_url?: string | null
@@ -535,6 +544,9 @@ export type Database = {
           month: number
           outlet: string
           title: string
+          title_ca?: string | null
+          title_en?: string | null
+          title_es?: string | null
           updated_at?: string
           url: string
           year: number
@@ -543,6 +555,9 @@ export type Database = {
           created_at?: string
           date_label?: string | null
           description?: string | null
+          description_ca?: string | null
+          description_en?: string | null
+          description_es?: string | null
           display_order?: number
           id?: string
           image_url?: string | null
@@ -550,6 +565,9 @@ export type Database = {
           month?: number
           outlet?: string
           title?: string
+          title_ca?: string | null
+          title_en?: string | null
+          title_es?: string | null
           updated_at?: string
           url?: string
           year?: number
