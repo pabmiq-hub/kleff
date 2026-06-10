@@ -57,7 +57,7 @@ export const listBlogPosts = createServerFn({ method: "GET" })
   });
 
 export const getBlogPostBySlug = createServerFn({ method: "GET" })
-  .inputValidator(z.object({ slug: z.string().min(1).max(255), locale: localeSchema.default("es") }))
+  .inputValidator((data: unknown) => z.object({ slug: z.string().min(1).max(255), locale: localeSchema.default("es") }).parse(data))
   .handler(async ({ data }): Promise<{ post: BlogPostFull | null }> => {
     const { data: row, error } = await supabaseAdmin
       .from("blog_posts")
