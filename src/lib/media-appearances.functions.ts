@@ -72,7 +72,7 @@ export const adminListMediaAppearances = createServerFn({ method: "GET" })
 
 export const adminGetMediaAppearance = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .inputValidator(z.object({ id: z.string().uuid() }))
+  .inputValidator((data: unknown) => z.object({ id: z.string().uuid() }).parse(data))
   .handler(async ({ data, context }): Promise<MediaAppearance | null> => {
     await assertSuperAdmin(context.userId);
     const { data: row, error } = await supabaseAdmin
