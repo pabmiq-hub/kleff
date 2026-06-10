@@ -153,11 +153,11 @@ const DEFAULT_WP = "https://kleff.es";
 
 export const adminImportWordPress = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator(
+  .inputValidator((data: unknown) =>
     z.object({
       baseUrl: z.string().url().default(DEFAULT_WP),
       perPage: z.number().int().min(1).max(100).default(100),
-    }),
+    }).parse(data),
   )
   .handler(async ({ data, context }) => {
     if (!context.claims?.email) {
