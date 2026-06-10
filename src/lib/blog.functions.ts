@@ -3,7 +3,10 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { assertSuperAdmin } from "@/lib/assert-role.server";
-import { sanitizeHtml } from "@/lib/sanitize.server";
+// sanitizeHtml is imported lazily inside admin handlers to avoid pulling
+// isomorphic-dompurify (and its jsdom dep) into the public blog read path,
+// which crashes SSR in the Worker runtime with
+// "Cannot read properties of undefined (reading 'bind')".
 
 const LOCALES = ["es", "ca", "en"] as const;
 type Locale = (typeof LOCALES)[number];
