@@ -602,6 +602,7 @@ export const adminUpdateBlogPost = createServerFn({ method: "POST" })
   }).parse(data))
   .handler(async ({ data, context }) => {
     await assertSuperAdmin(context.userId);
+    const { sanitizeHtml } = await import("@/lib/sanitize.server");
     const patch = { ...data.patch } as Record<string, unknown>;
     for (const k of ["content_es", "content_ca", "content_en"] as const) {
       const v = patch[k];
