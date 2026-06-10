@@ -508,6 +508,54 @@ export type Database = {
         }
         Relationships: []
       }
+      media_appearances: {
+        Row: {
+          created_at: string
+          date_label: string | null
+          description: string | null
+          display_order: number
+          id: string
+          image_url: string | null
+          is_published: boolean
+          month: number
+          outlet: string
+          title: string
+          updated_at: string
+          url: string
+          year: number
+        }
+        Insert: {
+          created_at?: string
+          date_label?: string | null
+          description?: string | null
+          display_order?: number
+          id?: string
+          image_url?: string | null
+          is_published?: boolean
+          month: number
+          outlet: string
+          title: string
+          updated_at?: string
+          url: string
+          year: number
+        }
+        Update: {
+          created_at?: string
+          date_label?: string | null
+          description?: string | null
+          display_order?: number
+          id?: string
+          image_url?: string | null
+          is_published?: boolean
+          month?: number
+          outlet?: string
+          title?: string
+          updated_at?: string
+          url?: string
+          year?: number
+        }
+        Relationships: []
+      }
       media_og_cache: {
         Row: {
           error: string | null

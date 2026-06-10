@@ -79,18 +79,20 @@ import { Route as AdminContentRouteImport } from './routes/admin.content'
 import { Route as AdminBlogRouteImport } from './routes/admin.blog'
 import { Route as AdminRentalsIndexRouteImport } from './routes/admin.rentals.index'
 import { Route as AdminRegistrationsIndexRouteImport } from './routes/admin.registrations.index'
+import { Route as AdminMediaIndexRouteImport } from './routes/admin.media.index'
 import { Route as AdminContentIndexRouteImport } from './routes/admin.content.index'
 import { Route as AdminBlogIndexRouteImport } from './routes/admin.blog.index'
 import { Route as AppRentalsMineRouteImport } from './routes/app.rentals.mine'
 import { Route as ApiPublicUploadInviteAvatarRouteImport } from './routes/api.public.upload-invite-avatar'
 import { Route as ApiPublicSyncBggRouteImport } from './routes/api.public.sync-bgg'
-import { Route as ApiPublicRefreshMediaOgRouteImport } from './routes/api.public.refresh-media-og'
 import { Route as AdminRentalsSettingsRouteImport } from './routes/admin.rentals.settings'
 import { Route as AdminRentalsHistoryRouteImport } from './routes/admin.rentals.history'
 import { Route as AdminRentalsCatalogRouteImport } from './routes/admin.rentals.catalog'
 import { Route as AdminRentalsActiveRouteImport } from './routes/admin.rentals.active'
 import { Route as AdminRegistrationsIdRouteImport } from './routes/admin.registrations.$id'
 import { Route as AdminPagesPageIdRouteImport } from './routes/admin.pages.$pageId'
+import { Route as AdminMediaNewRouteImport } from './routes/admin.media.new'
+import { Route as AdminMediaIdRouteImport } from './routes/admin.media.$id'
 import { Route as AdminContentUrlsRouteImport } from './routes/admin.content.urls'
 import { Route as AdminContentRedirectsRouteImport } from './routes/admin.content.redirects'
 import { Route as AdminContentPageKeyRouteImport } from './routes/admin.content.$pageKey'
@@ -448,6 +450,11 @@ const AdminRegistrationsIndexRoute = AdminRegistrationsIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AdminRegistrationsRoute,
 } as any)
+const AdminMediaIndexRoute = AdminMediaIndexRouteImport.update({
+  id: '/media/',
+  path: '/media/',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminContentIndexRoute = AdminContentIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -472,11 +479,6 @@ const ApiPublicUploadInviteAvatarRoute =
 const ApiPublicSyncBggRoute = ApiPublicSyncBggRouteImport.update({
   id: '/api/public/sync-bgg',
   path: '/api/public/sync-bgg',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiPublicRefreshMediaOgRoute = ApiPublicRefreshMediaOgRouteImport.update({
-  id: '/api/public/refresh-media-og',
-  path: '/api/public/refresh-media-og',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminRentalsSettingsRoute = AdminRentalsSettingsRouteImport.update({
@@ -507,6 +509,16 @@ const AdminRegistrationsIdRoute = AdminRegistrationsIdRouteImport.update({
 const AdminPagesPageIdRoute = AdminPagesPageIdRouteImport.update({
   id: '/pages/$pageId',
   path: '/pages/$pageId',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminMediaNewRoute = AdminMediaNewRouteImport.update({
+  id: '/media/new',
+  path: '/media/new',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminMediaIdRoute = AdminMediaIdRouteImport.update({
+  id: '/media/$id',
+  path: '/media/$id',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminContentUrlsRoute = AdminContentUrlsRouteImport.update({
@@ -609,18 +621,20 @@ export interface FileRoutesByFullPath {
   '/admin/content/$pageKey': typeof AdminContentPageKeyRoute
   '/admin/content/redirects': typeof AdminContentRedirectsRoute
   '/admin/content/urls': typeof AdminContentUrlsRoute
+  '/admin/media/$id': typeof AdminMediaIdRoute
+  '/admin/media/new': typeof AdminMediaNewRoute
   '/admin/pages/$pageId': typeof AdminPagesPageIdRoute
   '/admin/registrations/$id': typeof AdminRegistrationsIdRoute
   '/admin/rentals/active': typeof AdminRentalsActiveRoute
   '/admin/rentals/catalog': typeof AdminRentalsCatalogRoute
   '/admin/rentals/history': typeof AdminRentalsHistoryRoute
   '/admin/rentals/settings': typeof AdminRentalsSettingsRoute
-  '/api/public/refresh-media-og': typeof ApiPublicRefreshMediaOgRoute
   '/api/public/sync-bgg': typeof ApiPublicSyncBggRoute
   '/api/public/upload-invite-avatar': typeof ApiPublicUploadInviteAvatarRoute
   '/app/rentals/mine': typeof AppRentalsMineRoute
   '/admin/blog/': typeof AdminBlogIndexRoute
   '/admin/content/': typeof AdminContentIndexRoute
+  '/admin/media/': typeof AdminMediaIndexRoute
   '/admin/registrations/': typeof AdminRegistrationsIndexRoute
   '/admin/rentals/': typeof AdminRentalsIndexRoute
 }
@@ -692,18 +706,20 @@ export interface FileRoutesByTo {
   '/admin/content/$pageKey': typeof AdminContentPageKeyRoute
   '/admin/content/redirects': typeof AdminContentRedirectsRoute
   '/admin/content/urls': typeof AdminContentUrlsRoute
+  '/admin/media/$id': typeof AdminMediaIdRoute
+  '/admin/media/new': typeof AdminMediaNewRoute
   '/admin/pages/$pageId': typeof AdminPagesPageIdRoute
   '/admin/registrations/$id': typeof AdminRegistrationsIdRoute
   '/admin/rentals/active': typeof AdminRentalsActiveRoute
   '/admin/rentals/catalog': typeof AdminRentalsCatalogRoute
   '/admin/rentals/history': typeof AdminRentalsHistoryRoute
   '/admin/rentals/settings': typeof AdminRentalsSettingsRoute
-  '/api/public/refresh-media-og': typeof ApiPublicRefreshMediaOgRoute
   '/api/public/sync-bgg': typeof ApiPublicSyncBggRoute
   '/api/public/upload-invite-avatar': typeof ApiPublicUploadInviteAvatarRoute
   '/app/rentals/mine': typeof AppRentalsMineRoute
   '/admin/blog': typeof AdminBlogIndexRoute
   '/admin/content': typeof AdminContentIndexRoute
+  '/admin/media': typeof AdminMediaIndexRoute
   '/admin/registrations': typeof AdminRegistrationsIndexRoute
   '/admin/rentals': typeof AdminRentalsIndexRoute
 }
@@ -782,18 +798,20 @@ export interface FileRoutesById {
   '/admin/content/$pageKey': typeof AdminContentPageKeyRoute
   '/admin/content/redirects': typeof AdminContentRedirectsRoute
   '/admin/content/urls': typeof AdminContentUrlsRoute
+  '/admin/media/$id': typeof AdminMediaIdRoute
+  '/admin/media/new': typeof AdminMediaNewRoute
   '/admin/pages/$pageId': typeof AdminPagesPageIdRoute
   '/admin/registrations/$id': typeof AdminRegistrationsIdRoute
   '/admin/rentals/active': typeof AdminRentalsActiveRoute
   '/admin/rentals/catalog': typeof AdminRentalsCatalogRoute
   '/admin/rentals/history': typeof AdminRentalsHistoryRoute
   '/admin/rentals/settings': typeof AdminRentalsSettingsRoute
-  '/api/public/refresh-media-og': typeof ApiPublicRefreshMediaOgRoute
   '/api/public/sync-bgg': typeof ApiPublicSyncBggRoute
   '/api/public/upload-invite-avatar': typeof ApiPublicUploadInviteAvatarRoute
   '/app/rentals/mine': typeof AppRentalsMineRoute
   '/admin/blog/': typeof AdminBlogIndexRoute
   '/admin/content/': typeof AdminContentIndexRoute
+  '/admin/media/': typeof AdminMediaIndexRoute
   '/admin/registrations/': typeof AdminRegistrationsIndexRoute
   '/admin/rentals/': typeof AdminRentalsIndexRoute
 }
@@ -873,18 +891,20 @@ export interface FileRouteTypes {
     | '/admin/content/$pageKey'
     | '/admin/content/redirects'
     | '/admin/content/urls'
+    | '/admin/media/$id'
+    | '/admin/media/new'
     | '/admin/pages/$pageId'
     | '/admin/registrations/$id'
     | '/admin/rentals/active'
     | '/admin/rentals/catalog'
     | '/admin/rentals/history'
     | '/admin/rentals/settings'
-    | '/api/public/refresh-media-og'
     | '/api/public/sync-bgg'
     | '/api/public/upload-invite-avatar'
     | '/app/rentals/mine'
     | '/admin/blog/'
     | '/admin/content/'
+    | '/admin/media/'
     | '/admin/registrations/'
     | '/admin/rentals/'
   fileRoutesByTo: FileRoutesByTo
@@ -956,18 +976,20 @@ export interface FileRouteTypes {
     | '/admin/content/$pageKey'
     | '/admin/content/redirects'
     | '/admin/content/urls'
+    | '/admin/media/$id'
+    | '/admin/media/new'
     | '/admin/pages/$pageId'
     | '/admin/registrations/$id'
     | '/admin/rentals/active'
     | '/admin/rentals/catalog'
     | '/admin/rentals/history'
     | '/admin/rentals/settings'
-    | '/api/public/refresh-media-og'
     | '/api/public/sync-bgg'
     | '/api/public/upload-invite-avatar'
     | '/app/rentals/mine'
     | '/admin/blog'
     | '/admin/content'
+    | '/admin/media'
     | '/admin/registrations'
     | '/admin/rentals'
   id:
@@ -1045,18 +1067,20 @@ export interface FileRouteTypes {
     | '/admin/content/$pageKey'
     | '/admin/content/redirects'
     | '/admin/content/urls'
+    | '/admin/media/$id'
+    | '/admin/media/new'
     | '/admin/pages/$pageId'
     | '/admin/registrations/$id'
     | '/admin/rentals/active'
     | '/admin/rentals/catalog'
     | '/admin/rentals/history'
     | '/admin/rentals/settings'
-    | '/api/public/refresh-media-og'
     | '/api/public/sync-bgg'
     | '/api/public/upload-invite-avatar'
     | '/app/rentals/mine'
     | '/admin/blog/'
     | '/admin/content/'
+    | '/admin/media/'
     | '/admin/registrations/'
     | '/admin/rentals/'
   fileRoutesById: FileRoutesById
@@ -1119,7 +1143,6 @@ export interface RootRouteChildren {
   InviteTokenRoute: typeof InviteTokenRoute
   CaIndexRoute: typeof CaIndexRoute
   EnIndexRoute: typeof EnIndexRoute
-  ApiPublicRefreshMediaOgRoute: typeof ApiPublicRefreshMediaOgRoute
   ApiPublicSyncBggRoute: typeof ApiPublicSyncBggRoute
   ApiPublicUploadInviteAvatarRoute: typeof ApiPublicUploadInviteAvatarRoute
 }
@@ -1616,6 +1639,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminRegistrationsIndexRouteImport
       parentRoute: typeof AdminRegistrationsRoute
     }
+    '/admin/media/': {
+      id: '/admin/media/'
+      path: '/media'
+      fullPath: '/admin/media/'
+      preLoaderRoute: typeof AdminMediaIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/content/': {
       id: '/admin/content/'
       path: '/'
@@ -1649,13 +1679,6 @@ declare module '@tanstack/react-router' {
       path: '/api/public/sync-bgg'
       fullPath: '/api/public/sync-bgg'
       preLoaderRoute: typeof ApiPublicSyncBggRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/refresh-media-og': {
-      id: '/api/public/refresh-media-og'
-      path: '/api/public/refresh-media-og'
-      fullPath: '/api/public/refresh-media-og'
-      preLoaderRoute: typeof ApiPublicRefreshMediaOgRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/rentals/settings': {
@@ -1698,6 +1721,20 @@ declare module '@tanstack/react-router' {
       path: '/pages/$pageId'
       fullPath: '/admin/pages/$pageId'
       preLoaderRoute: typeof AdminPagesPageIdRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/media/new': {
+      id: '/admin/media/new'
+      path: '/media/new'
+      fullPath: '/admin/media/new'
+      preLoaderRoute: typeof AdminMediaNewRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/media/$id': {
+      id: '/admin/media/$id'
+      path: '/media/$id'
+      fullPath: '/admin/media/$id'
+      preLoaderRoute: typeof AdminMediaIdRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/content/urls': {
@@ -1813,7 +1850,10 @@ interface AdminRouteChildren {
   AdminRegistrationsRoute: typeof AdminRegistrationsRouteWithChildren
   AdminRentalsRoute: typeof AdminRentalsRouteWithChildren
   AdminIndexRoute: typeof AdminIndexRoute
+  AdminMediaIdRoute: typeof AdminMediaIdRoute
+  AdminMediaNewRoute: typeof AdminMediaNewRoute
   AdminPagesPageIdRoute: typeof AdminPagesPageIdRoute
+  AdminMediaIndexRoute: typeof AdminMediaIndexRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
@@ -1824,7 +1864,10 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminRegistrationsRoute: AdminRegistrationsRouteWithChildren,
   AdminRentalsRoute: AdminRentalsRouteWithChildren,
   AdminIndexRoute: AdminIndexRoute,
+  AdminMediaIdRoute: AdminMediaIdRoute,
+  AdminMediaNewRoute: AdminMediaNewRoute,
   AdminPagesPageIdRoute: AdminPagesPageIdRoute,
+  AdminMediaIndexRoute: AdminMediaIndexRoute,
 }
 
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
@@ -1915,19 +1958,9 @@ const rootRouteChildren: RootRouteChildren = {
   InviteTokenRoute: InviteTokenRoute,
   CaIndexRoute: CaIndexRoute,
   EnIndexRoute: EnIndexRoute,
-  ApiPublicRefreshMediaOgRoute: ApiPublicRefreshMediaOgRoute,
   ApiPublicSyncBggRoute: ApiPublicSyncBggRoute,
   ApiPublicUploadInviteAvatarRoute: ApiPublicUploadInviteAvatarRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { createStart } from '@tanstack/react-start'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-  }
-}
