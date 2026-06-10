@@ -1,70 +1,43 @@
-## Diagnóstico
+# Plan de implementación (en orden)
 
-El blog ha dejado de funcionar tanto en la web pública como en el panel de administrador. Las dos pantallas que ves provienen de la **misma causa raíz**:
+Voy a ejecutar los 4 bloques pendientes, uno tras otro, en este orden. Cada bloque se entregará por separado para que puedas probarlo antes de avanzar al siguiente.
 
-- **`/blog` (público)** → SSR devuelve HTTP 500 con el error `Cannot read properties of undefined (reading 'bind')`. Esto se dispara dentro del `loader` de `src/routes/blog.tsx` cuando llama a `listBlogPosts({ data: { locale: "es" } })`.
-- **`/admin/blog` (admin)** → en cliente, `await listFn()` resuelve a `undefined`, y al hacer `setPosts(res.posts)` salta `Cannot read properties of undefined (reading 'posts')`.
+## 1. Modo edición global (todas las páginas públicas)
 
-El denominador común es la definición del server function en `src/lib/blog.functions.ts`:
+- Botón "Modo edición" en el header, visible sólo para super admins, en todas las rutas públicas (Home, Sobre, Actividades, Ludoteca, Blog, Medios, Contacto, legales, páginas personalizadas). Oculto en `/admin`, `/app`, `/login`, `/auth`.
+- Al activarlo: overlays sobre cada bloque editable (hero, secciones, tarjetas, textos enriquecidos, imágenes) con lápiz/ojo/eliminar.
+- Estado del modo edición en `localStorage` + provider React, persistente entre navegaciones.
+- Reutilizar `EditorOverlay` existente; añadir un `EditModeToggle` y un `EditModeProvider`.
 
-```ts
-export const listBlogPosts = createServerFn({ method: "GET" })
-  .inputValidator(z.object({ locale: localeSchema.default("es") }))
-  .handler(...)
-```
+## 2. CMS avanzado de páginas ("Contenido")
 
-Se está pasando un **schema de Zod directamente** a `.inputValidator(...)`. El runtime actual de TanStack Start intenta invocar internamente un método (`.bind(...)`) sobre el validador asumiendo una determinada forma, y como el schema no la expone tal cual, falla con el mensaje `Cannot read properties of undefined (reading 'bind')`. El error se lanza **antes** de ejecutar el handler, por lo que el endpoint nunca devuelve datos y el cliente recibe `undefined`.
+- Arreglar el error 500 actual al publicar páginas (revisar serverFn `publishContentPage`).
+- Lista de páginas con acciones: ✏️ editar, 👁️ previsualizar (abre en nueva pestaña con `?preview=1`), 🗑️ eliminar (con confirmación).
+- Editor de bloques con tipos: **Hero, Texto enriquecido, Imagen, Galería, Columnas, CTA, FAQ, Embed, Cards, Animaciones**.
+- Drag & drop para reordenar bloques, multi-idioma (es/ca/en), borrador vs publicado.
+- Render público en `/$slug` usando `content_pages` + `content_page_blocks`.
 
-`/medios` y `listMediaAppearances` no se ven afectados porque ese server function **no tiene `inputValidator`** y se llama sin argumentos.
+## 3. Inscripciones v2
 
-## Cambios
+- Al crear: diálogo "¿formulario propio o enlace externo (embed)?".
+- Multi-idioma: `title_es/ca/en`, `description_es/ca/en`, preguntas traducibles.
+- Subida de imagen de cabecera desde el dispositivo (bucket `media`).
+- Slug raíz: las URLs públicas pasan de `/inscripciones/<slug>` a `/<slug>` (ruta dinámica `$slug` con prioridad después de rutas estáticas). Redirect 301 desde `/inscripciones/<slug>` para no romper enlaces.
+- Validación de colisión de slugs contra rutas reservadas (`admin`, `app`, `blog`, etc.).
 
-### 1. `src/lib/blog.functions.ts` — envolver todos los `inputValidator` en una función
+## 4. Lovable Mail con `hola@kleff.es`
 
-Cambiar el patrón en TODOS los server functions del archivo:
+Como `kleff.es` ya está en Google Workspace, no podemos delegar el dominio raíz a Lovable sin romper tu correo. Propongo:
 
-```ts
-// Antes
-.inputValidator(z.object({ locale: localeSchema.default("es") }))
+- Delegar subdominio técnico `notify.kleff.es` (registros NS → `ns3.lovable.cloud` / `ns4.lovable.cloud`).
+- Lovable gestiona SPF/DKIM/DMARC ahí.
+- Remitente visible: **`hola@kleff.es`** (gracias a `display_from_root`), envío real desde `notify.kleff.es`. Las respuestas llegan a tu buzón de Google como hasta ahora.
+- Tras verificar dominio: scaffolding de **auth emails** (recuperación contraseña, verificación, invitaciones) y **app emails** (confirmación contacto, confirmación de inscripción).
 
-// Después
-.inputValidator((data: unknown) =>
-  z.object({ locale: localeSchema.default("es") }).parse(data)
-)
-```
+## Notas técnicas
 
-Aplicar el mismo wrapping a:
-- `listBlogPosts`
-- `getBlogPostBySlug`
-- `adminImportWordPress`
-- `adminTranslateBlogPost`
-- `adminGetBlogPost`
-- `adminCreateBlogPost`
-- `adminUpdateBlogPost`
-- `adminDeleteBlogPost`
+- Stack: TanStack Start + Lovable Cloud (Supabase). Server functions con `requireSupabaseAuth`.
+- No tocaré `/admin`, `/app`, `/login` con overlays ni con el shift de layout.
+- Cada bloque incluye migración SQL si requiere cambios de esquema (CMS y Inscripciones sí; Modo edición no).
 
-Esto es el patrón canónico recomendado por TanStack Start y es compatible en todas las versiones.
-
-### 2. `src/lib/media-appearances.functions.ts` — mismo wrapping preventivo
-
-Aunque por ahora ninguna llamada falla, aplicar el mismo patrón en:
-- `adminGetMediaAppearance`
-- `adminCreateMediaAppearance`
-- `adminUpdateMediaAppearance`
-- `adminDeleteMediaAppearance`
-
-Para evitar que el problema reaparezca al editar/borrar medios.
-
-### 3. Verificación
-
-- Recargar `/blog`, `/ca/blog`, `/en/blog`: deben renderizar la lista sin error 500.
-- Recargar `/admin/blog`: debe listar los posts existentes.
-- Abrir un post desde el admin (`/admin/blog/$id`) para confirmar que `adminGetBlogPost` también funciona.
-- Probar guardar un cambio en un post (`adminUpdateBlogPost`).
-- Confirmar en los Server Logs publicados que `/blog` deja de devolver 500.
-
-## Notas
-
-- No hace falta tocar la base de datos: los posts siguen intactos.
-- No hace falta tocar el `loader` de las rutas ni los componentes — el problema está exclusivamente en cómo se declaran los validadores de entrada.
-- El cambio es puramente defensivo y mantiene la misma validación con Zod.
+¿Empiezo con el **bloque 1 (Modo edición global)**?
