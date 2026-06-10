@@ -274,7 +274,7 @@ function decodeEntities(s: string) {
 
 export const adminTranslateBlogPost = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator(z.object({ id: z.string().uuid(), force: z.boolean().default(false) }))
+  .inputValidator((data: unknown) => z.object({ id: z.string().uuid(), force: z.boolean().default(false) }).parse(data))
   .handler(async ({ data, context }) => {
     // super_admin check
     const { data: roleRows } = await context.supabase
