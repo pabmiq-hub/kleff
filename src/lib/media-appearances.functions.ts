@@ -72,7 +72,7 @@ export const adminListMediaAppearances = createServerFn({ method: "GET" })
 
 export const adminGetMediaAppearance = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .inputValidator(z.object({ id: z.string().uuid() }))
+  .inputValidator((data: unknown) => z.object({ id: z.string().uuid() }).parse(data))
   .handler(async ({ data, context }): Promise<MediaAppearance | null> => {
     await assertSuperAdmin(context.userId);
     const { data: row, error } = await supabaseAdmin
@@ -99,7 +99,7 @@ const upsertSchema = z.object({
 
 export const adminCreateMediaAppearance = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator(upsertSchema)
+  .inputValidator((data: unknown) => upsertSchema.parse(data))
   .handler(async ({ data, context }): Promise<MediaAppearance> => {
     await assertSuperAdmin(context.userId);
     const { data: row, error } = await supabaseAdmin
@@ -124,7 +124,7 @@ export const adminCreateMediaAppearance = createServerFn({ method: "POST" })
 
 export const adminUpdateMediaAppearance = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator(upsertSchema.extend({ id: z.string().uuid() }))
+  .inputValidator((data: unknown) => upsertSchema.extend({ id: z.string().uuid() }).parse(data))
   .handler(async ({ data, context }): Promise<MediaAppearance> => {
     await assertSuperAdmin(context.userId);
     const { data: row, error } = await supabaseAdmin
@@ -150,7 +150,7 @@ export const adminUpdateMediaAppearance = createServerFn({ method: "POST" })
 
 export const adminDeleteMediaAppearance = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator(z.object({ id: z.string().uuid() }))
+  .inputValidator((data: unknown) => z.object({ id: z.string().uuid() }).parse(data))
   .handler(async ({ data, context }) => {
     await assertSuperAdmin(context.userId);
     const { error } = await supabaseAdmin

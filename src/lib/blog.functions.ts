@@ -29,7 +29,7 @@ export interface BlogPostFull extends BlogPostSummary {
 // ---------------------------------------------------------------------------
 
 export const listBlogPosts = createServerFn({ method: "GET" })
-  .inputValidator(z.object({ locale: localeSchema.default("es") }))
+  .inputValidator((data: unknown) => z.object({ locale: localeSchema.default("es") }).parse(data))
   .handler(async ({ data }): Promise<{ posts: BlogPostSummary[] }> => {
     const { data: rows, error } = await supabaseAdmin
       .from("blog_posts")
@@ -57,7 +57,7 @@ export const listBlogPosts = createServerFn({ method: "GET" })
   });
 
 export const getBlogPostBySlug = createServerFn({ method: "GET" })
-  .inputValidator(z.object({ slug: z.string().min(1).max(255), locale: localeSchema.default("es") }))
+  .inputValidator((data: unknown) => z.object({ slug: z.string().min(1).max(255), locale: localeSchema.default("es") }).parse(data))
   .handler(async ({ data }): Promise<{ post: BlogPostFull | null }> => {
     const { data: row, error } = await supabaseAdmin
       .from("blog_posts")
@@ -153,11 +153,11 @@ const DEFAULT_WP = "https://kleff.es";
 
 export const adminImportWordPress = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator(
+  .inputValidator((data: unknown) =>
     z.object({
       baseUrl: z.string().url().default(DEFAULT_WP),
       perPage: z.number().int().min(1).max(100).default(100),
-    }),
+    }).parse(data),
   )
   .handler(async ({ data, context }) => {
     if (!context.claims?.email) {
@@ -274,7 +274,7 @@ function decodeEntities(s: string) {
 
 export const adminTranslateBlogPost = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator(z.object({ id: z.string().uuid(), force: z.boolean().default(false) }))
+  .inputValidator((data: unknown) => z.object({ id: z.string().uuid(), force: z.boolean().default(false) }).parse(data))
   .handler(async ({ data, context }) => {
     // super_admin check
     const { data: roleRows } = await context.supabase
@@ -543,7 +543,7 @@ function pickLocaleStringStrict(
 
 export const adminGetBlogPost = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator(z.object({ id: z.string().uuid() }))
+  .inputValidator((data: unknown) => z.object({ id: z.string().uuid() }).parse(data))
   .handler(async ({ data, context }) => {
     await assertSuperAdmin(context.userId);
     const { data: row, error } = await supabaseAdmin
@@ -554,10 +554,10 @@ export const adminGetBlogPost = createServerFn({ method: "POST" })
 
 export const adminCreateBlogPost = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator(z.object({
+  .inputValidator((data: unknown) => z.object({
     slug: z.string().min(1).max(255).regex(/^[a-z0-9-]+$/, "Solo minúsculas, números y guiones"),
     title_es: z.string().min(1).max(300),
-  }))
+  }).parse(data))
   .handler(async ({ data, context }) => {
     await assertSuperAdmin(context.userId);
     const { data: row, error } = await supabaseAdmin
@@ -575,7 +575,7 @@ export const adminCreateBlogPost = createServerFn({ method: "POST" })
 
 export const adminUpdateBlogPost = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator(z.object({
+  .inputValidator((data: unknown) => z.object({
     id: z.string().uuid(),
     patch: z.object({
       slug: z.string().min(1).max(255).regex(/^[a-z0-9-]+$/).optional(),
@@ -595,7 +595,7 @@ export const adminUpdateBlogPost = createServerFn({ method: "POST" })
       tags: z.array(z.string().max(50)).max(20).optional(),
       reading_time_minutes: z.number().int().min(0).max(240).nullable().optional(),
     }),
-  }))
+  }).parse(data))
   .handler(async ({ data, context }) => {
     await assertSuperAdmin(context.userId);
     const patch = { ...data.patch } as Record<string, unknown>;
@@ -611,7 +611,7 @@ export const adminUpdateBlogPost = createServerFn({ method: "POST" })
 
 export const adminDeleteBlogPost = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator(z.object({ id: z.string().uuid() }))
+  .inputValidator((data: unknown) => z.object({ id: z.string().uuid() }).parse(data))
   .handler(async ({ data, context }) => {
     await assertSuperAdmin(context.userId);
     const { error } = await supabaseAdmin.from("blog_posts").delete().eq("id", data.id);
