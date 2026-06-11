@@ -362,14 +362,11 @@ function parseGoogleStats(html: string): GoogleStats {
 // Combined fetch
 // ----------------------------------------------------------------------------
 
-async function fetchAll(): Promise<CacheData> {
-  // Meetup events (events page) + group home (better stats) in parallel
-  const [eventsHtml, homeHtml, googleHtml] = await Promise.all([
-    fetchHtml(GROUP_URL),
-    fetchHtml(GROUP_HOME_URL),
-    fetchHtml(GOOGLE_SEARCH_URL),
-  ]);
-
+function combineHtml(
+  eventsHtml: string | null,
+  homeHtml: string | null,
+  googleHtml: string | null,
+): CacheData {
   let events: MeetupEvent[] = [];
   let stats: MeetupGroupStats = {
     memberCount: null,
@@ -377,7 +374,6 @@ async function fetchAll(): Promise<CacheData> {
     rating: null,
     ratingCount: null,
   };
-
   if (eventsHtml) {
     const parsed = parseMeetupGroup(eventsHtml);
     events = parsed.events;
@@ -385,18 +381,20 @@ async function fetchAll(): Promise<CacheData> {
   }
   if (homeHtml) {
     const parsed = parseMeetupGroup(homeHtml);
-    // Prefer home page stats when available (richer)
     if (parsed.stats.memberCount != null) stats.memberCount = parsed.stats.memberCount;
     if (parsed.stats.rating != null) stats.rating = parsed.stats.rating;
     if (parsed.stats.ratingCount != null) stats.ratingCount = parsed.stats.ratingCount;
     if (events.length === 0) events = parsed.events;
   }
-
   const google: GoogleStats = googleHtml
     ? parseGoogleStats(googleHtml)
     : { rating: null, ratingCount: null };
-
   return { events, stats, google };
+}
+
+function hasUsefulData(d: CacheData): boolean {
+  // Consider direct fetch successful when we got at least 1 event OR member count.
+  return d.events.length > 0 || d.stats.memberCount != null;
 }
 
 // ----------------------------------------------------------------------------
@@ -412,35 +410,63 @@ export const getMeetupEvents = createServerFn({ method: "GET" }).handler(
     cachedAt: number;
   }> => {
     const now = Date.now();
-    if (cache && now - cache.at < CACHE_TTL_MS) {
-      return {
-        events: cache.data.events,
-        stats: cache.data.stats,
-        google: cache.data.google,
-        error: null,
-        cachedAt: cache.at,
-      };
+    const cached = await loadKvCache();
+
+    // 1. Fresh cache (<1h) → return immediately.
+    if (cached && now - cached.at < CACHE_TTL_MS) {
+      return { ...cached.data, error: null, cachedAt: cached.at };
     }
-    try {
-      const data = await fetchAll();
-      cache = { at: now, data };
+
+    // 2. Try direct fetch (free, no Firecrawl).
+    const [eventsHtml, homeHtml, googleHtml] = await Promise.all([
+      fetchHtmlDirectOk(GROUP_URL),
+      fetchHtmlDirectOk(GROUP_HOME_URL),
+      fetchHtmlDirectOk(GOOGLE_SEARCH_URL),
+    ]);
+    const direct = combineHtml(eventsHtml, homeHtml, googleHtml);
+    if (hasUsefulData(direct)) {
+      await saveKvCache(direct);
+      return { ...direct, error: null, cachedAt: now };
+    }
+
+    // 3. Direct failed. Check Firecrawl cooldown (10 days).
+    const lockAt = await loadFirecrawlLockAt();
+    const cooldownActive = now - lockAt < FIRECRAWL_COOLDOWN_MS;
+
+    if (cooldownActive) {
+      if (cached) {
+        return { ...cached.data, error: "stale", cachedAt: cached.at };
+      }
       return {
-        events: data.events,
-        stats: data.stats,
-        google: data.google,
-        error: null,
+        events: [],
+        stats: { memberCount: null, upcomingEventCount: null, rating: null, ratingCount: null },
+        google: { rating: null, ratingCount: null },
+        error: "unavailable",
         cachedAt: now,
       };
+    }
+
+    // 4. Cooldown elapsed → fallback to Firecrawl. Mark lock first so we never burst.
+    await bumpFirecrawlLock();
+    try {
+      const [evFc, homeFc, ggFc] = await Promise.all([
+        eventsHtml ? Promise.resolve(eventsHtml) : fetchHtmlFirecrawl(GROUP_URL),
+        homeHtml ? Promise.resolve(homeHtml) : fetchHtmlFirecrawl(GROUP_HOME_URL),
+        googleHtml ? Promise.resolve(googleHtml) : fetchHtmlFirecrawl(GOOGLE_SEARCH_URL),
+      ]);
+      const data = combineHtml(evFc, homeFc, ggFc);
+      if (hasUsefulData(data)) {
+        await saveKvCache(data);
+        return { ...data, error: null, cachedAt: now };
+      }
+      if (cached) {
+        return { ...cached.data, error: "stale", cachedAt: cached.at };
+      }
+      return { ...data, error: "empty", cachedAt: now };
     } catch (err) {
-      console.error("[meetup] fetch failed:", err);
-      if (cache) {
-        return {
-          events: cache.data.events,
-          stats: cache.data.stats,
-          google: cache.data.google,
-          error: "stale",
-          cachedAt: cache.at,
-        };
+      console.error("[meetup] firecrawl fallback failed:", err);
+      if (cached) {
+        return { ...cached.data, error: "stale", cachedAt: cached.at };
       }
       return {
         events: [],
@@ -452,3 +478,4 @@ export const getMeetupEvents = createServerFn({ method: "GET" }).handler(
     }
   },
 );
+
