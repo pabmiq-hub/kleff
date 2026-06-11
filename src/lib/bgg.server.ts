@@ -224,7 +224,8 @@ function parseGeekdoItem(item: GeekdoItem): BggThingExtras {
 
 async function fetchGeekdoItem(id: number): Promise<GeekdoItem | null> {
   const url = `${GEEKDO_BASE}?objectid=${id}&objecttype=thing&showcount=10`;
-  // 1) Try direct fetch with a realistic browser UA.
+  // Direct fetch only. If BGG blocks our egress IP we just skip enrichment;
+  // existing values in `bgg_games` are preserved by buildRecord/merge logic.
   let directStatus: number | string = "no-resp";
   for (let attempt = 1; attempt <= 3; attempt++) {
     try {
@@ -252,45 +253,10 @@ async function fetchGeekdoItem(id: number): Promise<GeekdoItem | null> {
       await sleep(800 * attempt);
     }
   }
-  // 2) Firecrawl fallback (BGG often blocks Workers' egress IPs).
-  const fcKey = process.env.FIRECRAWL_API_KEY;
-  if (!fcKey) {
-    console.log(`[bgg-enrich] direct=${directStatus}, no FIRECRAWL_API_KEY`);
-    return null;
-  }
-  try {
-    const fc = await fetch("https://api.firecrawl.dev/v1/scrape", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${fcKey}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        url,
-        formats: ["rawHtml"],
-        onlyMainContent: false,
-      }),
-    });
-    if (!fc.ok) {
-      console.log(`[bgg-enrich] direct=${directStatus}, firecrawl=${fc.status}`);
-      return null;
-    }
-    const fcData = (await fc.json()) as {
-      data?: { rawHtml?: string };
-    };
-    const raw = fcData.data?.rawHtml ?? "";
-    const match = raw.match(/\{[\s\S]*\}/);
-    if (!match) {
-      console.log(`[bgg-enrich] direct=${directStatus}, firecrawl-ok but no json (len=${raw.length})`);
-      return null;
-    }
-    const parsed = JSON.parse(match[0]) as { item?: GeekdoItem };
-    return parsed.item ?? null;
-  } catch (e) {
-    console.log(`[bgg-enrich] direct=${directStatus}, firecrawl error: ${e instanceof Error ? e.message : String(e)}`);
-    return null;
-  }
+  console.log(`[bgg-enrich] direct=${directStatus} → skip (no Firecrawl fallback)`);
+  return null;
 }
+
 
 async function enrichWithBgg(
   ids: number[],
