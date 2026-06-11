@@ -20,7 +20,6 @@ import { or } from "@/cms/or";
 
 type LoaderData = {
   mediaItems: MediaAppearance[];
-  followers: { count: number | null; updatedAt: string };
   igPosts: InstagramPost[];
 };
 
@@ -37,7 +36,6 @@ function useMediaData(): LoaderData {
   return (
     data ?? {
       mediaItems: [],
-      followers: { count: null, updatedAt: new Date().toISOString() },
       igPosts: [],
     }
   );
@@ -187,20 +185,10 @@ function YearAccordion({
   );
 }
 
-function formatFollowers(count: number | null, locale: string): string {
-  if (count == null) return "—";
-  if (count >= 1000) {
-    const k = count / 1000;
-    const formatted =
-      locale === "en" ? k.toFixed(1).replace(/\.0$/, "") : k.toFixed(1).replace(".", ",").replace(/,0$/, "");
-    return `${formatted}K`;
-  }
-  return count.toLocaleString(locale === "en" ? "en-US" : "es-ES");
-}
 
 export function MediaPage() {
   const { t, locale } = useI18n();
-  const { mediaItems: items, followers, igPosts } = useMediaData();
+  const { mediaItems: items, igPosts } = useMediaData();
   const hero = useSectionContent("media.hero");
   const ig = useSectionContent("media.instagram");
 
@@ -215,12 +203,6 @@ export function MediaPage() {
 
   const appearancesLabel =
     locale === "en" ? "appearances" : locale === "ca" ? "aparicions" : "apariciones";
-  const followersLabel =
-    locale === "en"
-      ? "followers on Instagram"
-      : locale === "ca"
-        ? "seguidors a Instagram"
-        : "seguidores en Instagram";
 
   return (
     <SiteLayout>
@@ -302,10 +284,6 @@ export function MediaPage() {
                 <Instagram className="h-5 w-5" />
                 {or(ig.ctaLabel, t.media.instagramCta)}
               </a>
-              <p className="mt-4 text-sm text-foreground/60 tabular-nums">
-                <strong className="text-foreground">{formatFollowers(followers.count, locale)}</strong>{" "}
-                {followersLabel}
-              </p>
             </div>
 
             <div className="lg:col-span-7">
