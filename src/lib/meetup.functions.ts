@@ -1,4 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
+import { supabaseAdmin } from "@/integrations/supabase/client.server";
+
 
 export type MeetupEvent = {
   id: string;
@@ -30,9 +32,64 @@ type CacheData = {
   stats: MeetupGroupStats;
   google: GoogleStats;
 };
-type CacheEntry = { at: number; data: CacheData };
-const CACHE_TTL_MS = 60 * 60 * 1000; // 1h
-let cache: CacheEntry | null = null;
+const CACHE_TTL_MS = 60 * 60 * 1000; // 1h — serve from kv_cache without re-fetching
+const FIRECRAWL_COOLDOWN_MS = 10 * 24 * 60 * 60 * 1000; // 10 days
+const CACHE_KEY = "meetup_data";
+const FIRECRAWL_LOCK_KEY = "meetup_firecrawl_lock";
+
+async function loadKvCache(): Promise<{ data: CacheData; at: number } | null> {
+  try {
+    const { data, error } = await supabaseAdmin
+      .from("kv_cache" as any)
+      .select("value, fetched_at")
+      .eq("key", CACHE_KEY)
+      .maybeSingle();
+    if (error || !data) return null;
+    return {
+      data: (data as any).value as CacheData,
+      at: new Date((data as any).fetched_at).getTime(),
+    };
+  } catch {
+    return null;
+  }
+}
+
+async function saveKvCache(data: CacheData): Promise<void> {
+  try {
+    await supabaseAdmin.from("kv_cache" as any).upsert(
+      { key: CACHE_KEY, value: data as any, fetched_at: new Date().toISOString() },
+      { onConflict: "key" },
+    );
+  } catch (err) {
+    console.error("[meetup] saveKvCache error", err);
+  }
+}
+
+async function loadFirecrawlLockAt(): Promise<number> {
+  try {
+    const { data } = await supabaseAdmin
+      .from("kv_cache" as any)
+      .select("fetched_at")
+      .eq("key", FIRECRAWL_LOCK_KEY)
+      .maybeSingle();
+    if (!data) return 0;
+    return new Date((data as any).fetched_at).getTime();
+  } catch {
+    return 0;
+  }
+}
+
+async function bumpFirecrawlLock(): Promise<void> {
+  try {
+    await supabaseAdmin.from("kv_cache" as any).upsert(
+      { key: FIRECRAWL_LOCK_KEY, value: {} as any, fetched_at: new Date().toISOString() },
+      { onConflict: "key" },
+    );
+  } catch {
+    // ignore
+  }
+}
+
 
 const GROUP_URL = "https://www.meetup.com/es-es/kleff-bcn/events/";
 const GROUP_HOME_URL = "https://www.meetup.com/es-es/kleff-bcn/";
