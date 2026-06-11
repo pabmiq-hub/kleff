@@ -194,12 +194,12 @@ async function fetchHtmlFirecrawl(url: string): Promise<string | null> {
   }
 }
 
-async function fetchHtml(url: string): Promise<string | null> {
-  // Direct fetch first (fast & free), fall back to Firecrawl if blocked.
+async function fetchHtmlDirectOk(url: string): Promise<string | null> {
   const direct = await fetchHtmlDirect(url);
   if (direct && direct.length > 5000) return direct;
-  return fetchHtmlFirecrawl(url);
+  return null;
 }
+
 
 // ----------------------------------------------------------------------------
 // Parse Meetup
