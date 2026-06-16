@@ -53,4 +53,30 @@ export const adminUpdatePageMeta = createServerFn({ method: "POST" })
       .eq("id", data.pageId);
     if (error) throw new Error(error.message);
     return { ok: true };
+
+export const adminDeletePage = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator(z.object({ pageId: z.string().uuid() }))
+  .handler(async ({ data, context }) => {
+    await assertSuperAdmin(context.userId);
+    // Don't allow deleting builtin pages
+    const { data: page, error: e1 } = await supabaseAdmin
+      .from("content_pages")
+      .select("id, is_builtin")
+      .eq("id", data.pageId)
+      .maybeSingle();
+    if (e1) throw new Error(e1.message);
+    if (!page) throw new Error("La página no existe");
+    if ((page as { is_builtin: boolean }).is_builtin) {
+      throw new Error("Las páginas built-in no se pueden eliminar");
+    }
+    // Remove blocks first (no FK cascade guaranteed) then the page.
+    await supabaseAdmin.from("content_page_blocks").delete().eq("page_id", data.pageId);
+    const { error } = await supabaseAdmin
+      .from("content_pages")
+      .delete()
+      .eq("id", data.pageId);
+    if (error) throw new Error(error.message);
+    return { ok: true };
   });
+
