@@ -14,7 +14,9 @@ export const Route = createFileRoute("/ludoteca")({
       },
       { property: "og:title", content: "Ludoteca KLEFF" },
       { property: "og:description", content: "Más de cien juegos para jugar en KLEFF Barcelona." },
+      { property: "og:url", content: "https://kleff.es/ludoteca" },
     ],
+    links: [{ rel: "canonical", href: "https://kleff.es/ludoteca" }],
   }),
   component: LudotecaPage,
 });

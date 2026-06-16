@@ -26,7 +26,9 @@ export const Route = createFileRoute("/medios")({
         property: "og:description",
         content: "Han hablado de nosotros. Mira todas las apariciones en prensa y nuestro Instagram.",
       },
+      { property: "og:url", content: "https://kleff.es/medios" },
     ],
+    links: [{ rel: "canonical", href: "https://kleff.es/medios" }],
   }),
   component: MediaPage,
 });

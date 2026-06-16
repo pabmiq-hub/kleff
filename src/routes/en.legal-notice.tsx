@@ -9,7 +9,9 @@ export const Route = createFileRoute("/en/legal-notice")({
       { title: "Legal Notice — KLEFF" },
       { name: "description", content: "Legal information about the owner of kleff.es under Spanish LSSI-CE law." },
       { name: "robots", content: "noindex,follow" },
+      { property: "og:url", content: "https://kleff.es/en/legal-notice" },
     ],
+    links: [{ rel: "canonical", href: "https://kleff.es/en/legal-notice" }],
   }),
   component: () => <LegalPage kind="legal-notice" />,
 });

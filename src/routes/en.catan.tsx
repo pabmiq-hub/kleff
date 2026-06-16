@@ -19,7 +19,9 @@ export const Route = createFileRoute("/en/catan")({
         content:
           "250+ players, monthly tournaments and weekly games of the modern classic. Join the Catan community at KLEFF.",
       },
+      { property: "og:url", content: "https://kleff.es/en/catan" },
     ],
+    links: [{ rel: "canonical", href: "https://kleff.es/en/catan" }],
   }),
   component: CatanPage,
 });

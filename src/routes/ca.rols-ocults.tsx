@@ -18,7 +18,9 @@ export const Route = createFileRoute("/ca/rols-ocults")({
         property: "og:description",
         content: "Més de 200 membres, partides setmanals, murder mysteries i Hidden Roles Fest. Uneix-te al WhatsApp.",
       },
+      { property: "og:url", content: "https://kleff.es/ca/rols-ocults" },
     ],
+    links: [{ rel: "canonical", href: "https://kleff.es/ca/rols-ocults" }],
   }),
   component: HiddenRolesPage,
 });

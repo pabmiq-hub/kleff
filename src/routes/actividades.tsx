@@ -19,7 +19,9 @@ export const Route = createFileRoute("/actividades")({
         content:
           "Noche de Juegos cada miércoles + torneos, Slow Friending, ediciones especiales y eventos a medida. Apúntate al próximo en Meetup.",
       },
+      { property: "og:url", content: "https://kleff.es/actividades" },
     ],
+    links: [{ rel: "canonical", href: "https://kleff.es/actividades" }],
   }),
   component: ActivitiesPage,
 });

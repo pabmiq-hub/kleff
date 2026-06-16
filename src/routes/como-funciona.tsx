@@ -18,7 +18,9 @@ export const Route = createFileRoute("/como-funciona")({
         content:
           "Vienes solo o acompañado, el #TeamKLEFF te ayuda a encontrar mesa. Más de 300 juegos te esperan cada semana.",
       },
+      { property: "og:url", content: "https://kleff.es/como-funciona" },
     ],
+    links: [{ rel: "canonical", href: "https://kleff.es/como-funciona" }],
   }),
   component: HowItWorksPage,
 });

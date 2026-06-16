@@ -10,7 +10,9 @@ export const Route = createFileRoute("/en/about")({
       { name: "description", content: "The KLEFF story: from a personal crisis in 2018 to Barcelona's biggest board game community." },
       { property: "og:title", content: "About — KLEFF" },
       { property: "og:description", content: "Six years, one purpose: turning tables into meeting points." },
+      { property: "og:url", content: "https://kleff.es/en/about" },
     ],
+    links: [{ rel: "canonical", href: "https://kleff.es/en/about" }],
   }),
   component: AboutPage,
 });

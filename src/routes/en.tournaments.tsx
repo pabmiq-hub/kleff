@@ -19,7 +19,9 @@ export const Route = createFileRoute("/en/tournaments")({
         content:
           "Multiple monthly tournaments at KLEFF: free or with entry fee that goes straight to prizes. Join our WhatsApp group.",
       },
+      { property: "og:url", content: "https://kleff.es/en/tournaments" },
     ],
+    links: [{ rel: "canonical", href: "https://kleff.es/en/tournaments" }],
   }),
   component: TournamentsPage,
 });

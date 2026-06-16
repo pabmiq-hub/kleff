@@ -7,7 +7,9 @@ export const Route = createFileRoute("/tarda-de-jocs-i-cuina-japonesa")({
       { name: "description", content: "Inscripció a la tarda de jocs i cuina japonesa amb KLEFF i Kasa Hanaka." },
       { property: "og:title", content: "Tarda de jocs i cuina japonesa — KLEFF" },
       { property: "og:description", content: "Inscripció a la tarda de jocs i cuina japonesa amb KLEFF i Kasa Hanaka." },
+      { property: "og:url", content: "https://kleff.es/tarda-de-jocs-i-cuina-japonesa" },
     ],
+    links: [{ rel: "canonical", href: "https://kleff.es/tarda-de-jocs-i-cuina-japonesa" }],
   }),
   component: TardaJocsCuinaPage,
 });

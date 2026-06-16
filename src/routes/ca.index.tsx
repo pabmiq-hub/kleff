@@ -22,7 +22,9 @@ export const Route = createFileRoute("/ca/")({
       },
       { property: "og:title", content: "KLEFF — Jocs de taula a Barcelona" },
       { property: "og:description", content: "La comunitat de jocs de taula més gran d'Europa." },
+      { property: "og:url", content: "https://kleff.es/ca/" },
     ],
+    links: [{ rel: "canonical", href: "https://kleff.es/ca/" }],
   }),
   component: HomePage,
 });

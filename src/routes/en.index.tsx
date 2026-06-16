@@ -22,7 +22,9 @@ export const Route = createFileRoute("/en/")({
       },
       { property: "og:title", content: "KLEFF — Board games in Barcelona" },
       { property: "og:description", content: "Europe's largest board game community. Join our weekly Game Nights." },
+      { property: "og:url", content: "https://kleff.es/en/" },
     ],
+    links: [{ rel: "canonical", href: "https://kleff.es/en/" }],
   }),
   component: HomePage,
 });

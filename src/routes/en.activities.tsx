@@ -21,7 +21,9 @@ export const Route = createFileRoute("/en/activities")({
         content:
           "Game Night every Wednesday + tournaments, Slow Friending, special editions and bespoke events. RSVP to the next one on Meetup.",
       },
+      { property: "og:url", content: "https://kleff.es/en/activities" },
     ],
+    links: [{ rel: "canonical", href: "https://kleff.es/en/activities" }],
   }),
   component: ActivitiesPage,
 });

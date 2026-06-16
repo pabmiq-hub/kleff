@@ -10,7 +10,9 @@ export const Route = createFileRoute("/en/blog")({
       { name: "description", content: "Reviews, recommendations and stories from KLEFF's board game nights in Barcelona." },
       { property: "og:title", content: "Blog — KLEFF" },
       { property: "og:description", content: "Reviews and articles from the KLEFF community." },
+      { property: "og:url", content: "https://kleff.es/en/blog" },
     ],
+    links: [{ rel: "canonical", href: "https://kleff.es/en/blog" }],
   }),
   component: BlogIndex,
 });

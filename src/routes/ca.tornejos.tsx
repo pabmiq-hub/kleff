@@ -19,7 +19,9 @@ export const Route = createFileRoute("/ca/tornejos")({
         content:
           "Diversos tornejos al mes a KLEFF: gratuïts o amb quota destinada a premis. Uneix-te al grup de WhatsApp.",
       },
+      { property: "og:url", content: "https://kleff.es/ca/tornejos" },
     ],
+    links: [{ rel: "canonical", href: "https://kleff.es/ca/tornejos" }],
   }),
   component: TournamentsPage,
 });

@@ -49,11 +49,40 @@ export const Route = createRootRoute({
       { name: "twitter:site", content: "@kleff.bcn" },
       { property: "og:title", content: "KLEFF — Comunidad de juegos de mesa en Barcelona" },
       { name: "twitter:title", content: "KLEFF — Comunidad de juegos de mesa en Barcelona" },
-      { name: "description", content: "Comunidad de aficionados a los juegos de mesa en Barcelona. Ven sólo o acompañado para disfrutar de las mejores noches de juegos." },
       { property: "og:description", content: "Comunidad de aficionados a los juegos de mesa en Barcelona. Ven sólo o acompañado para disfrutar de las mejores noches de juegos." },
       { name: "twitter:description", content: "Comunidad de aficionados a los juegos de mesa en Barcelona. Ven sólo o acompañado para disfrutar de las mejores noches de juegos." },
       { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/bAnIbqAHB3bI0vZgvtW7HqSDclV2/social-images/social-1777293925502-board-games-juegos-de-mesa-kleff-barcelona.webp" },
       { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/bAnIbqAHB3bI0vZgvtW7HqSDclV2/social-images/social-1777293925502-board-games-juegos-de-mesa-kleff-barcelona.webp" },
+    ],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@graph": [
+            {
+              "@type": "Organization",
+              "@id": "https://kleff.es/#organization",
+              name: "KLEFF",
+              url: "https://kleff.es",
+              logo: "https://kleff.es/favicon.ico",
+              description: "Comunidad de juegos de mesa en Barcelona.",
+              sameAs: [
+                "https://www.instagram.com/kleff.bcn",
+                "https://www.meetup.com/kleff-bcn/",
+              ],
+            },
+            {
+              "@type": "WebSite",
+              "@id": "https://kleff.es/#website",
+              url: "https://kleff.es",
+              name: "KLEFF",
+              publisher: { "@id": "https://kleff.es/#organization" },
+              inLanguage: ["es", "ca", "en"],
+            },
+          ],
+        }),
+      },
     ],
     links: [
       {

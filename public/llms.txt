@@ -1,0 +1,47 @@
+# KLEFF
+
+> Comunidad de juegos de mesa en Barcelona. Game Nights cada semana, más de 300 juegos y ambiente inclusivo y multilingüe en l'Estació de França.
+
+KLEFF organiza encuentros semanales de juegos de mesa en Barcelona, ofrece una ludoteca sincronizada con BoardGameGeek y eventos especiales como torneos de Catan, Blood on the Clocktower y juegos de roles ocultos. El sitio está disponible en español, catalán e inglés.
+
+## Pages
+
+- [Inicio](/): Comunidad KLEFF y próximas Game Nights.
+- [Actividades](/actividades): Calendario semanal y eventos especiales.
+- [Cómo funciona](/como-funciona): Guía para participar en una Game Night.
+- [Ludoteca](/ludoteca): Catálogo de más de 300 juegos disponibles.
+- [Sobre nosotros](/sobre-nosotros): Quiénes somos y nuestra historia.
+- [Contacto](/contacto): Cómo encontrarnos y escribirnos.
+- [Medios](/medios): Apariciones en prensa y redes.
+- [Torneos](/torneos): Torneos abiertos y ligas.
+- [Catan](/catan): Liga y eventos de Catan.
+- [Blood on the Clocktower](/blood-on-the-clocktower): Partidas de Clocktower.
+- [Roles ocultos](/roles-ocultos): Sesiones de Werewolf, Avalon y similares.
+- [Blog](/blog): Artículos sobre juegos de mesa y la comunidad.
+
+## English
+
+- [Home](/en): KLEFF community and upcoming Game Nights.
+- [Activities](/en/activities): Weekly schedule and special events.
+- [How it works](/en/how-it-works): How to join a Game Night.
+- [Library](/en/ludoteca): Catalog of 300+ board games.
+- [About](/en/about): Who we are.
+- [Contact](/en/contact): How to reach us.
+- [Blog](/en/blog): Articles about board games and the community.
+
+## Català
+
+- [Inici](/ca): Comunitat KLEFF i properes Game Nights.
+- [Activitats](/ca/activitats): Calendari setmanal i esdeveniments especials.
+- [Com funciona](/ca/com-funciona): Com participar en una Game Night.
+- [Ludoteca](/ca/ludoteca): Catàleg de més de 300 jocs.
+- [Qui som](/ca/qui-som): Qui som i la nostra història.
+- [Contacte](/ca/contacte): Com trobar-nos.
+- [Blog](/ca/blog): Articles sobre jocs de taula.
+
+## Optional
+
+- [Aviso legal](/aviso-legal)
+- [Privacidad](/privacidad)
+- [Cookies](/cookies)
+- [Términos](/terminos)

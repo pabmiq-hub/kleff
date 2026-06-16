@@ -18,7 +18,9 @@ export const Route = createFileRoute("/en/hidden-roles")({
         property: "og:description",
         content: "200+ members, weekly games, murder mysteries and Hidden Roles Fest. Join the WhatsApp group.",
       },
+      { property: "og:url", content: "https://kleff.es/en/hidden-roles" },
     ],
+    links: [{ rel: "canonical", href: "https://kleff.es/en/hidden-roles" }],
   }),
   component: HiddenRolesPage,
 });
