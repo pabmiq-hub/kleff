@@ -3,20 +3,20 @@ import { useServerFn } from "@tanstack/react-start";
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, type DragEndEvent } from "@dnd-kit/core";
 import { SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy, useSortable, arrayMove } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { GripVertical, Plus, Trash2, Eye, EyeOff, Heading2, Type, Image as ImageIcon, Youtube, MousePointerClick, Minus, Quote as QuoteIcon, ClipboardList } from "lucide-react";
+import { GripVertical, Plus, Trash2, Eye, EyeOff, Heading2, Type, Image as ImageIcon, Youtube, MousePointerClick, Minus, Quote as QuoteIcon, ClipboardList, Sparkles, Columns3, Images, LayoutGrid, Square } from "lucide-react";
 import { toast } from "sonner";
-import { BLOCK_LIBRARY, defaultDataFor, type Block, type BlockType, type BlockData } from "@/cms/blockTypes";
+import { BLOCK_LIBRARY, defaultDataFor, type BlockType, type BlockData } from "@/cms/blockTypes";
 import { adminCreateBlock, adminDeleteBlock, adminReorderBlocks, adminUpdateBlock, type BlockRow } from "@/lib/blocks.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { RichTextEditor } from "@/components/cms/RichTextEditor";
-import { uploadMedia } from "@/lib/media.functions";
-import { arrayBufferToBase64 } from "@/lib/base64";
+import { ImagePicker } from "@/components/cms/ImagePicker";
 
 const ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
   Heading2, Type, Image: ImageIcon, Youtube, MousePointerClick, Minus, Quote: QuoteIcon, ClipboardList,
+  Sparkles, Columns3, Images, LayoutGrid, Square,
 };
 
 type Props = {
