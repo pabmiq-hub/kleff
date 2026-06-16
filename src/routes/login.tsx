@@ -32,7 +32,8 @@ function LoginPage() {
   const [password, setPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
-  if (!loading && session) {
+  // Persisted session (cookie) — react once roles are resolved.
+  if (!loading && session && !submitting) {
     const dest = redirect || (isSuperAdmin ? "/admin" : "/app");
     void navigate({ to: dest });
   }
@@ -40,17 +41,24 @@ function LoginPage() {
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
-    const { error } = await supabase.auth.signInWithPassword({
+    const { data, error } = await supabase.auth.signInWithPassword({
       email: email.trim().toLowerCase(),
       password,
     });
-    setSubmitting(false);
-    if (error) {
+    if (error || !data.user) {
+      setSubmitting(false);
       toast.error("Email o contraseña incorrectos");
       return;
     }
+    // Resolve role synchronously so we don't depend on the context effect
+    // (which runs after this navigate and would race to /app).
+    const { data: roles } = await supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", data.user.id);
+    const isAdmin = (roles ?? []).some((r) => r.role === "super_admin");
     toast.success("Bienvenido");
-    // Navigation will happen automatically via the effect above once session updates
+    void navigate({ to: redirect || (isAdmin ? "/admin" : "/app") });
   };
 
   return (
