@@ -27,6 +27,7 @@ function ContentIndex() {
   const [pages, setPages] = useState<PageRow[]>(initial.pages);
   const list = useServerFn(listContentPages);
   const create = useServerFn(adminCreatePage);
+  const del = useServerFn(adminDeletePage);
 
   const [open, setOpen] = useState(false);
   const [slug, setSlug] = useState("");
