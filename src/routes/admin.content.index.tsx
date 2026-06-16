@@ -1,9 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { FileText, ExternalLink, Plus, Pencil } from "lucide-react";
+import { FileText, Plus, Pencil, Trash2, Eye } from "lucide-react";
 import { toast } from "sonner";
 import { listContentPages, adminCreatePage, type PageRow } from "@/lib/overrides.functions";
+import { adminDeletePage } from "@/lib/pages.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -26,6 +27,7 @@ function ContentIndex() {
   const [pages, setPages] = useState<PageRow[]>(initial.pages);
   const list = useServerFn(listContentPages);
   const create = useServerFn(adminCreatePage);
+  const del = useServerFn(adminDeletePage);
 
   const [open, setOpen] = useState(false);
   const [slug, setSlug] = useState("");
@@ -159,25 +161,44 @@ function ContentIndex() {
                   href={page.path}
                   target="_blank"
                   rel="noreferrer"
-                  className="inline-flex items-center gap-1.5 px-3 py-2 bg-ink/5 hover:bg-ink/10 rounded-lg text-sm"
+                  title="Ver"
+                  className="inline-flex items-center justify-center h-9 w-9 rounded-lg bg-ink/5 hover:bg-ink/10 text-ink"
                 >
-                  Ver <ExternalLink className="h-3.5 w-3.5" />
+                  <Eye className="h-4 w-4" />
                 </a>
                 {page.is_builtin ? (
                   <a
                     href={`${page.path}?edit=1`}
-                    className="inline-flex items-center gap-1.5 px-3 py-2 bg-coral hover:bg-coral-deep text-ink rounded-lg text-sm font-medium"
+                    title="Editar"
+                    className="inline-flex items-center justify-center h-9 w-9 rounded-lg bg-coral hover:bg-coral-deep text-ink"
                   >
-                    <Pencil className="h-3.5 w-3.5" /> Editar
+                    <Pencil className="h-4 w-4" />
                   </a>
                 ) : (
-                  <Link
-                    to="/admin/pages/$pageId"
-                    params={{ pageId: page.id }}
-                    className="inline-flex items-center gap-1.5 px-3 py-2 bg-coral hover:bg-coral-deep text-ink rounded-lg text-sm font-medium"
-                  >
-                    <Pencil className="h-3.5 w-3.5" /> Editar bloques
-                  </Link>
+                  <>
+                    <Link
+                      to="/admin/pages/$pageId"
+                      params={{ pageId: page.id }}
+                      title="Editar bloques"
+                      className="inline-flex items-center justify-center h-9 w-9 rounded-lg bg-coral hover:bg-coral-deep text-ink"
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </Link>
+                    <button
+                      onClick={async () => {
+                        if (!window.confirm(`¿Eliminar la página «${page.title}»? Esta acción no se puede deshacer.`)) return;
+                        try {
+                          await del({ data: { pageId: page.id } });
+                          toast.success("Página eliminada");
+                          await reload();
+                        } catch (e) { toast.error((e as Error).message); }
+                      }}
+                      title="Eliminar"
+                      className="inline-flex items-center justify-center h-9 w-9 rounded-lg bg-ink/5 hover:bg-red-500/15 text-ink/70 hover:text-red-500"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </>
                 )}
               </div>
             </div>

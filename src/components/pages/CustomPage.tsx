@@ -14,7 +14,13 @@ export function CustomPage({ title, blocks }: { title: string; blocks: BlockRow[
           </h1>
         </div>
       </section>
-      <BlockRenderer blocks={blocks} />
+      {blocks.length > 0 ? (
+        <BlockRenderer blocks={blocks} />
+      ) : (
+        <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 py-16 text-center text-muted-foreground">
+          <p className="text-sm italic">Esta página aún no tiene contenido publicado.</p>
+        </div>
+      )}
     </SiteLayout>
   );
 }

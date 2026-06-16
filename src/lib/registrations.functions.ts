@@ -4,7 +4,6 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { assertSuperAdmin } from "@/lib/assert-role.server";
 
-const localeSchema = z.enum(["es", "ca", "en"]);
 const questionTypeSchema = z.enum([
   "text", "textarea", "email", "phone", "number", "select", "checkbox", "radio", "date", "file",
 ]);
@@ -12,12 +11,9 @@ const questionTypeSchema = z.enum([
 export type RegistrationForm = {
   id: string;
   slug: string;
-  title_es: string;
-  title_ca: string;
-  title_en: string;
-  description_es: string | null;
-  description_ca: string | null;
-  description_en: string | null;
+  kind: "form" | "external";
+  title: string;
+  description: string | null;
   cover_image_url: string | null;
   is_published: boolean;
   external_mode: "redirect" | "iframe" | null;
@@ -28,9 +24,7 @@ export type RegistrationForm = {
   payment_instructions: string | null;
   max_responses: number | null;
   closes_at: string | null;
-  confirmation_message_es: string | null;
-  confirmation_message_ca: string | null;
-  confirmation_message_en: string | null;
+  confirmation_message: string | null;
   notify_emails: string[];
   created_at: string;
   updated_at: string;
@@ -42,13 +36,9 @@ export type RegistrationQuestion = {
   position: number;
   type: z.infer<typeof questionTypeSchema>;
   required: boolean;
-  label_es: string;
-  label_ca: string;
-  label_en: string;
-  help_es: string | null;
-  help_ca: string | null;
-  help_en: string | null;
-  options: Array<{ value: string; label_es: string; label_ca: string; label_en: string }>;
+  label: string;
+  help: string | null;
+  options: Array<{ value: string; label: string }>;
 };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -65,7 +55,7 @@ export type RegistrationResponse = {
 // ---------------- PUBLIC ----------------
 
 export const getPublishedForm = createServerFn({ method: "GET" })
-  .inputValidator(z.object({ slug: z.string().min(1).max(120), locale: localeSchema.default("es") }))
+  .inputValidator(z.object({ slug: z.string().min(1).max(120) }))
   .handler(async ({ data }) => {
     const { data: form } = await supabaseAdmin
       .from("registration_forms")
@@ -74,17 +64,18 @@ export const getPublishedForm = createServerFn({ method: "GET" })
       .eq("is_published", true)
       .maybeSingle();
     if (!form) return { form: null, questions: [], responsesCount: 0 };
+    const f = form as unknown as RegistrationForm;
     const { data: questions } = await supabaseAdmin
       .from("registration_questions")
       .select("*")
-      .eq("form_id", form.id)
+      .eq("form_id", f.id)
       .order("position", { ascending: true });
     const { count } = await supabaseAdmin
       .from("registration_responses")
       .select("id", { count: "exact", head: true })
-      .eq("form_id", form.id);
+      .eq("form_id", f.id);
     return {
-      form: form as unknown as RegistrationForm,
+      form: f,
       questions: (questions ?? []) as unknown as RegistrationQuestion[],
       responsesCount: count ?? 0,
     };
@@ -104,26 +95,27 @@ export const submitRegistration = createServerFn({ method: "POST" })
       .eq("is_published", true)
       .maybeSingle();
     if (!form) throw new Error("Formulario no disponible");
-    if (form.external_mode) throw new Error("Este formulario es externo");
-    if (form.closes_at && new Date(form.closes_at) < new Date()) {
+    const f = form as unknown as RegistrationForm;
+    if (f.kind === "external" || f.external_mode) throw new Error("Este formulario es externo");
+    if (f.closes_at && new Date(f.closes_at) < new Date()) {
       throw new Error("El plazo de inscripción ha finalizado");
     }
-    if (form.max_responses) {
+    if (f.max_responses) {
       const { count } = await supabaseAdmin
         .from("registration_responses")
         .select("id", { count: "exact", head: true })
-        .eq("form_id", form.id);
-      if ((count ?? 0) >= form.max_responses) {
+        .eq("form_id", f.id);
+      if ((count ?? 0) >= f.max_responses) {
         throw new Error("No quedan plazas disponibles");
       }
     }
     const { data: inserted, error } = await supabaseAdmin
       .from("registration_responses")
       .insert({
-        form_id: form.id,
+        form_id: f.id,
         email_contact: data.emailContact ?? null,
         data: data.data as never,
-        payment_status: form.payment_required ? "pending" : "not_required",
+        payment_status: f.payment_required ? "pending" : "not_required",
       } as never)
       .select("id")
       .single();
@@ -131,11 +123,7 @@ export const submitRegistration = createServerFn({ method: "POST" })
     return {
       ok: true,
       responseId: (inserted as { id: string }).id,
-      confirmation: {
-        es: form.confirmation_message_es,
-        ca: form.confirmation_message_ca,
-        en: form.confirmation_message_en,
-      },
+      confirmation: f.confirmation_message,
     };
   });
 
@@ -147,32 +135,70 @@ export const adminListForms = createServerFn({ method: "POST" })
     await assertSuperAdmin(context.userId);
     const { data, error } = await supabaseAdmin
       .from("registration_forms")
-      .select("id, slug, title_es, is_published, external_mode, created_at, max_responses, closes_at")
+      .select("id, slug, title, kind, is_published, external_mode, created_at, max_responses, closes_at")
       .order("created_at", { ascending: false });
     if (error) throw new Error(error.message);
-    const ids = (data ?? []).map((d) => d.id);
+    const rows = (data ?? []) as unknown as Array<{ id: string; slug: string; title: string; kind: "form" | "external"; is_published: boolean; external_mode: string | null; created_at: string; max_responses: number | null; closes_at: string | null }>;
+    const ids = rows.map((d) => d.id);
     let counts: Record<string, number> = {};
     if (ids.length) {
       const { data: rs } = await supabaseAdmin
         .from("registration_responses")
         .select("form_id")
         .in("form_id", ids);
-      counts = (rs ?? []).reduce<Record<string, number>>((acc, r) => {
+      counts = ((rs ?? []) as Array<{ form_id: string }>).reduce<Record<string, number>>((acc, r) => {
         acc[r.form_id] = (acc[r.form_id] ?? 0) + 1;
         return acc;
       }, {});
     }
-    return { forms: (data ?? []).map((f) => ({ ...f, responses: counts[f.id] ?? 0 })) };
+    return { forms: rows.map((f) => ({ ...f, responses: counts[f.id] ?? 0 })) };
   });
 
 export const adminCreateForm = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator(z.object({ slug: z.string().min(1).max(120).regex(/^[a-z0-9-]+$/, "Solo minúsculas, números y guiones"), title_es: z.string().min(1).max(200) }))
+  .inputValidator(z.object({
+    slug: z.string().min(1).max(120).regex(/^[a-z0-9-]+$/, "Solo minúsculas, números y guiones"),
+    title: z.string().min(1).max(200),
+    kind: z.enum(["form", "external"]).default("form"),
+    external_mode: z.enum(["redirect", "iframe"]).nullable().optional(),
+    external_url: z.string().url().max(2000).nullable().optional(),
+  }))
   .handler(async ({ data, context }) => {
     await assertSuperAdmin(context.userId);
+    // Validate slug doesn't collide with reserved built-in routes
+    const reserved = new Set([
+      "admin", "app", "login", "super-admin", "blog", "medios", "ludoteca",
+      "contacto", "contacte", "contact", "about", "sobre-nosotros", "qui-som",
+      "actividades", "activitats", "activities", "como-funciona", "com-funciona",
+      "how-it-works", "catan", "torneos", "tornejos", "tournaments",
+      "blood-on-the-clocktower", "roles-ocultos", "rols-ocults", "hidden-roles",
+      "cookies", "privacidad", "privacitat", "privacy", "aviso-legal", "avis-legal",
+      "legal-notice", "terminos", "termes", "terms", "inscripcion", "invite",
+      "api", "ca", "en", "sitemap.xml", "robots.txt",
+    ]);
+    if (reserved.has(data.slug)) {
+      throw new Error(`El slug «${data.slug}» está reservado por el sistema. Usa otro nombre.`);
+    }
+    // Check collision with other forms / pages
+    const { data: existingForm } = await supabaseAdmin
+      .from("registration_forms").select("id").eq("slug", data.slug).maybeSingle();
+    if (existingForm) throw new Error(`Ya existe una inscripción con el slug «${data.slug}».`);
+    const { data: existingPage } = await supabaseAdmin
+      .from("content_pages").select("id").or(`slug_es.eq.${data.slug},slug_ca.eq.${data.slug},slug_en.eq.${data.slug}`).maybeSingle();
+    if (existingPage) throw new Error(`Ya existe una página con el slug «${data.slug}».`);
+
+    const insertData: Record<string, unknown> = {
+      slug: data.slug,
+      title: data.title,
+      kind: data.kind,
+    };
+    if (data.kind === "external") {
+      insertData.external_mode = data.external_mode ?? "redirect";
+      insertData.external_url = data.external_url ?? null;
+    }
     const { data: row, error } = await supabaseAdmin
       .from("registration_forms")
-      .insert({ slug: data.slug, title_es: data.title_es } as never)
+      .insert(insertData as never)
       .select("id")
       .single();
     if (error) throw new Error(error.message);
@@ -201,14 +227,11 @@ export const adminUpdateForm = createServerFn({ method: "POST" })
     id: z.string().uuid(),
     patch: z.object({
       slug: z.string().min(1).max(120).regex(/^[a-z0-9-]+$/).optional(),
-      title_es: z.string().max(200).optional(),
-      title_ca: z.string().max(200).optional(),
-      title_en: z.string().max(200).optional(),
-      description_es: z.string().max(5000).nullable().optional(),
-      description_ca: z.string().max(5000).nullable().optional(),
-      description_en: z.string().max(5000).nullable().optional(),
+      title: z.string().max(200).optional(),
+      description: z.string().max(5000).nullable().optional(),
       cover_image_url: z.string().url().nullable().optional(),
       is_published: z.boolean().optional(),
+      kind: z.enum(["form", "external"]).optional(),
       external_mode: z.enum(["redirect", "iframe"]).nullable().optional(),
       external_url: z.string().url().max(2000).nullable().optional(),
       payment_required: z.boolean().optional(),
@@ -217,9 +240,7 @@ export const adminUpdateForm = createServerFn({ method: "POST" })
       payment_instructions: z.string().max(2000).nullable().optional(),
       max_responses: z.number().int().min(1).nullable().optional(),
       closes_at: z.string().nullable().optional(),
-      confirmation_message_es: z.string().max(2000).nullable().optional(),
-      confirmation_message_ca: z.string().max(2000).nullable().optional(),
-      confirmation_message_en: z.string().max(2000).nullable().optional(),
+      confirmation_message: z.string().max(2000).nullable().optional(),
       notify_emails: z.array(z.string().email()).max(10).optional(),
     }),
   }))
@@ -249,17 +270,11 @@ export const adminUpsertQuestion = createServerFn({ method: "POST" })
     position: z.number().int().min(0).max(1000),
     type: questionTypeSchema,
     required: z.boolean(),
-    label_es: z.string().max(300),
-    label_ca: z.string().max(300),
-    label_en: z.string().max(300),
-    help_es: z.string().max(1000).nullable().optional(),
-    help_ca: z.string().max(1000).nullable().optional(),
-    help_en: z.string().max(1000).nullable().optional(),
+    label: z.string().max(300),
+    help: z.string().max(1000).nullable().optional(),
     options: z.array(z.object({
       value: z.string().min(1).max(120),
-      label_es: z.string().max(200),
-      label_ca: z.string().max(200),
-      label_en: z.string().max(200),
+      label: z.string().max(200),
     })).max(50).default([]),
   }))
   .handler(async ({ data, context }) => {
@@ -269,8 +284,7 @@ export const adminUpsertQuestion = createServerFn({ method: "POST" })
         .from("registration_questions")
         .update({
           position: data.position, type: data.type, required: data.required,
-          label_es: data.label_es, label_ca: data.label_ca, label_en: data.label_en,
-          help_es: data.help_es, help_ca: data.help_ca, help_en: data.help_en,
+          label: data.label, help: data.help,
           options: data.options as never,
         } as never)
         .eq("id", data.id);
@@ -281,8 +295,7 @@ export const adminUpsertQuestion = createServerFn({ method: "POST" })
       .from("registration_questions")
       .insert({
         form_id: data.form_id, position: data.position, type: data.type, required: data.required,
-        label_es: data.label_es, label_ca: data.label_ca, label_en: data.label_en,
-        help_es: data.help_es, help_ca: data.help_ca, help_en: data.help_en,
+        label: data.label, help: data.help,
         options: data.options as never,
       } as never)
       .select("id").single();
