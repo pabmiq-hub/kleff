@@ -22,6 +22,7 @@ async function sanitizeBlockData(data: Record<string, unknown> | undefined): Pro
 const localeSchema = z.enum(["es", "ca", "en"]);
 const blockTypeSchema = z.enum([
   "heading", "paragraph", "image", "embed", "cta", "divider", "quote", "form_embed",
+  "hero", "columns", "gallery", "cards", "button",
 ]);
 
 export type BlockRow = {
