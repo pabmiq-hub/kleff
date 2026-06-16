@@ -1,9 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { FileText, ExternalLink, Plus, Pencil } from "lucide-react";
+import { FileText, ExternalLink, Plus, Pencil, Trash2, Eye } from "lucide-react";
 import { toast } from "sonner";
 import { listContentPages, adminCreatePage, type PageRow } from "@/lib/overrides.functions";
+import { adminDeletePage } from "@/lib/pages.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
