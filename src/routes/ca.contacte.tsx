@@ -10,7 +10,9 @@ export const Route = createFileRoute("/ca/contacte")({
       { name: "description", content: "Posa't en contacte amb KLEFF per col·laboracions, esdeveniments privats o consultes." },
       { property: "og:title", content: "Contacte — KLEFF" },
       { property: "og:description", content: "Parlem. Som a l'Estació de França, Barcelona." },
+      { property: "og:url", content: "https://kleff.es/ca/contacte" },
     ],
+    links: [{ rel: "canonical", href: "https://kleff.es/ca/contacte" }],
   }),
   component: ContactPage,
 });

@@ -25,7 +25,9 @@ export const Route = createFileRoute("/")({
         property: "og:description",
         content: "La comunidad de juegos de mesa más grande de Europa. Únete a nuestras Game Nights cada semana.",
       },
+      { property: "og:url", content: "https://kleff.es/" },
     ],
+    links: [{ rel: "canonical", href: "https://kleff.es/" }],
   }),
   component: HomePage,
 });

@@ -19,7 +19,9 @@ export const Route = createFileRoute("/catan")({
         content:
           "Más de 250 jugadores, torneos cada mes y partidas semanales del clásico moderno. Únete a la comunidad de Catan en KLEFF.",
       },
+      { property: "og:url", content: "https://kleff.es/catan" },
     ],
+    links: [{ rel: "canonical", href: "https://kleff.es/catan" }],
   }),
   component: CatanPage,
 });

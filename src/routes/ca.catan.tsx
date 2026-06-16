@@ -19,7 +19,9 @@ export const Route = createFileRoute("/ca/catan")({
         content:
           "Més de 250 jugadors, tornejos cada mes i partides setmanals. Uneix-te a la comunitat de Catan a KLEFF.",
       },
+      { property: "og:url", content: "https://kleff.es/ca/catan" },
     ],
+    links: [{ rel: "canonical", href: "https://kleff.es/ca/catan" }],
   }),
   component: CatanPage,
 });

@@ -18,7 +18,9 @@ export const Route = createFileRoute("/en/how-it-works")({
         content:
           "Come alone or with friends — the #TeamKLEFF helps you find a table. 300+ games waiting for you every week.",
       },
+      { property: "og:url", content: "https://kleff.es/en/how-it-works" },
     ],
+    links: [{ rel: "canonical", href: "https://kleff.es/en/how-it-works" }],
   }),
   component: HowItWorksPage,
 });

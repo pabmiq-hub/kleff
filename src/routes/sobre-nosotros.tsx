@@ -17,7 +17,9 @@ export const Route = createFileRoute("/sobre-nosotros")({
         property: "og:description",
         content: "Seis años, un propósito: convertir mesas en puntos de encuentro.",
       },
+      { property: "og:url", content: "https://kleff.es/sobre-nosotros" },
     ],
+    links: [{ rel: "canonical", href: "https://kleff.es/sobre-nosotros" }],
   }),
   component: AboutPage,
 });

@@ -9,7 +9,9 @@ export const Route = createFileRoute("/aviso-legal")({
       { title: "Aviso Legal — KLEFF" },
       { name: "description", content: "Información legal del titular del sitio web kleff.es conforme a la LSSI-CE." },
       { name: "robots", content: "noindex,follow" },
+      { property: "og:url", content: "https://kleff.es/aviso-legal" },
     ],
+    links: [{ rel: "canonical", href: "https://kleff.es/aviso-legal" }],
   }),
   component: () => <LegalPage kind="legal-notice" />,
 });

@@ -19,7 +19,9 @@ export const Route = createFileRoute("/en/blood-on-the-clocktower")({
         content:
           "Weekly games of the most addictive social deduction game, at KLEFF Barcelona. All levels, active community.",
       },
+      { property: "og:url", content: "https://kleff.es/en/blood-on-the-clocktower" },
     ],
+    links: [{ rel: "canonical", href: "https://kleff.es/en/blood-on-the-clocktower" }],
   }),
   component: ClocktowerPage,
 });

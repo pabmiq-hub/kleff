@@ -9,7 +9,9 @@ export const Route = createFileRoute("/privacidad")({
       { title: "Política de Privacidad — KLEFF" },
       { name: "description", content: "Política de privacidad de KLEFF conforme al RGPD y la LOPDGDD." },
       { name: "robots", content: "noindex,follow" },
+      { property: "og:url", content: "https://kleff.es/privacidad" },
     ],
+    links: [{ rel: "canonical", href: "https://kleff.es/privacidad" }],
   }),
   component: () => <LegalPage kind="privacy" />,
 });

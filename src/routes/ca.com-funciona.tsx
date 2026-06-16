@@ -18,7 +18,9 @@ export const Route = createFileRoute("/ca/com-funciona")({
         content:
           "Vens sol o acompanyat, el #TeamKLEFF t'ajuda a trobar taula. Més de 300 jocs t'esperen cada setmana.",
       },
+      { property: "og:url", content: "https://kleff.es/ca/com-funciona" },
     ],
+    links: [{ rel: "canonical", href: "https://kleff.es/ca/com-funciona" }],
   }),
   component: HowItWorksPage,
 });

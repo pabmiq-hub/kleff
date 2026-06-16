@@ -9,7 +9,9 @@ export const Route = createFileRoute("/terminos")({
       { title: "Términos y Condiciones — KLEFF" },
       { name: "description", content: "Términos y condiciones de uso del sitio web y los servicios de KLEFF." },
       { name: "robots", content: "noindex,follow" },
+      { property: "og:url", content: "https://kleff.es/terminos" },
     ],
+    links: [{ rel: "canonical", href: "https://kleff.es/terminos" }],
   }),
   component: () => <LegalPage kind="terms" />,
 });

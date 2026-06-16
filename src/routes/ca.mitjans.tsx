@@ -26,7 +26,9 @@ export const Route = createFileRoute("/ca/mitjans")({
         property: "og:description",
         content: "N'han parlat. Mira totes les aparicions a premsa i el nostre Instagram.",
       },
+      { property: "og:url", content: "https://kleff.es/ca/mitjans" },
     ],
+    links: [{ rel: "canonical", href: "https://kleff.es/ca/mitjans" }],
   }),
   component: MediaPage,
 });

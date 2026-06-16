@@ -9,7 +9,9 @@ export const Route = createFileRoute("/ca/cookies")({
       { title: "Política de Galetes — KLEFF" },
       { name: "description", content: "Política de galetes de KLEFF: tipus, finalitat i com configurar-les." },
       { name: "robots", content: "noindex,follow" },
+      { property: "og:url", content: "https://kleff.es/ca/cookies" },
     ],
+    links: [{ rel: "canonical", href: "https://kleff.es/ca/cookies" }],
   }),
   component: () => <LegalPage kind="cookies" />,
 });

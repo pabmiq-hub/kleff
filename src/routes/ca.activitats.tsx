@@ -21,7 +21,9 @@ export const Route = createFileRoute("/ca/activitats")({
         content:
           "Nit de Jocs cada dimecres + tornejos, Slow Friending, edicions especials i esdeveniments a mida. Apunta't al pròxim a Meetup.",
       },
+      { property: "og:url", content: "https://kleff.es/ca/activitats" },
     ],
+    links: [{ rel: "canonical", href: "https://kleff.es/ca/activitats" }],
   }),
   component: ActivitiesPage,
 });

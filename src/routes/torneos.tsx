@@ -19,7 +19,9 @@ export const Route = createFileRoute("/torneos")({
         content:
           "Varios torneos al mes en KLEFF: gratis o con cuota destinada a premios. Únete al grupo de WhatsApp.",
       },
+      { property: "og:url", content: "https://kleff.es/torneos" },
     ],
+    links: [{ rel: "canonical", href: "https://kleff.es/torneos" }],
   }),
   component: TournamentsPage,
 });
