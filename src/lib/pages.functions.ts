@@ -53,6 +53,9 @@ export const adminUpdatePageMeta = createServerFn({ method: "POST" })
       .eq("id", data.pageId);
     if (error) throw new Error(error.message);
     return { ok: true };
+  });
+
+
 
 export const adminDeletePage = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
