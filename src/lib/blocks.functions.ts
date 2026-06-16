@@ -168,7 +168,7 @@ export const adminUpdateBlock = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     await assertSuperAdmin(context.userId);
     const payload: Record<string, unknown> = { updated_by: context.userId };
-    if (data.data !== undefined) payload.data = sanitizeBlockData(data.data);
+    if (data.data !== undefined) payload.data = await sanitizeBlockData(data.data);
     if (data.hidden !== undefined) payload.hidden = data.hidden;
     const { error } = await supabaseAdmin
       .from("content_page_blocks")
