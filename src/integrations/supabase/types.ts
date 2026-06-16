@@ -784,18 +784,15 @@ export type Database = {
       registration_forms: {
         Row: {
           closes_at: string | null
-          confirmation_message_ca: string | null
-          confirmation_message_en: string | null
-          confirmation_message_es: string | null
+          confirmation_message: string | null
           cover_image_url: string | null
           created_at: string
-          description_ca: string | null
-          description_en: string | null
-          description_es: string | null
+          description: string | null
           external_mode: string | null
           external_url: string | null
           id: string
           is_published: boolean
+          kind: string
           max_responses: number | null
           notify_emails: string[]
           payment_amount_cents: number | null
@@ -803,25 +800,20 @@ export type Database = {
           payment_instructions: string | null
           payment_required: boolean
           slug: string
-          title_ca: string
-          title_en: string
-          title_es: string
+          title: string
           updated_at: string
         }
         Insert: {
           closes_at?: string | null
-          confirmation_message_ca?: string | null
-          confirmation_message_en?: string | null
-          confirmation_message_es?: string | null
+          confirmation_message?: string | null
           cover_image_url?: string | null
           created_at?: string
-          description_ca?: string | null
-          description_en?: string | null
-          description_es?: string | null
+          description?: string | null
           external_mode?: string | null
           external_url?: string | null
           id?: string
           is_published?: boolean
+          kind?: string
           max_responses?: number | null
           notify_emails?: string[]
           payment_amount_cents?: number | null
@@ -829,25 +821,20 @@ export type Database = {
           payment_instructions?: string | null
           payment_required?: boolean
           slug: string
-          title_ca?: string
-          title_en?: string
-          title_es?: string
+          title?: string
           updated_at?: string
         }
         Update: {
           closes_at?: string | null
-          confirmation_message_ca?: string | null
-          confirmation_message_en?: string | null
-          confirmation_message_es?: string | null
+          confirmation_message?: string | null
           cover_image_url?: string | null
           created_at?: string
-          description_ca?: string | null
-          description_en?: string | null
-          description_es?: string | null
+          description?: string | null
           external_mode?: string | null
           external_url?: string | null
           id?: string
           is_published?: boolean
+          kind?: string
           max_responses?: number | null
           notify_emails?: string[]
           payment_amount_cents?: number | null
@@ -855,9 +842,7 @@ export type Database = {
           payment_instructions?: string | null
           payment_required?: boolean
           slug?: string
-          title_ca?: string
-          title_en?: string
-          title_es?: string
+          title?: string
           updated_at?: string
         }
         Relationships: []
@@ -866,13 +851,9 @@ export type Database = {
         Row: {
           created_at: string
           form_id: string
-          help_ca: string | null
-          help_en: string | null
-          help_es: string | null
+          help: string | null
           id: string
-          label_ca: string
-          label_en: string
-          label_es: string
+          label: string
           options: Json
           position: number
           required: boolean
@@ -882,13 +863,9 @@ export type Database = {
         Insert: {
           created_at?: string
           form_id: string
-          help_ca?: string | null
-          help_en?: string | null
-          help_es?: string | null
+          help?: string | null
           id?: string
-          label_ca?: string
-          label_en?: string
-          label_es?: string
+          label?: string
           options?: Json
           position?: number
           required?: boolean
@@ -898,13 +875,9 @@ export type Database = {
         Update: {
           created_at?: string
           form_id?: string
-          help_ca?: string | null
-          help_en?: string | null
-          help_es?: string | null
+          help?: string | null
           id?: string
-          label_ca?: string
-          label_en?: string
-          label_es?: string
+          label?: string
           options?: Json
           position?: number
           required?: boolean
