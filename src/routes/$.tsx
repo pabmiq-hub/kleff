@@ -4,16 +4,18 @@ import { getBlogPostBySlug } from "@/lib/blog.functions";
 import { BlogPostPage } from "@/components/pages/BlogPostPage";
 import { resolveCustomPage, getPageBlocks } from "@/lib/blocks.functions";
 import { CustomPage } from "@/components/pages/CustomPage";
+import { getPublishedForm } from "@/lib/registrations.functions";
+import { PublicRegistrationPage } from "@/components/pages/PublicRegistrationPage";
 
 type Locale = "es" | "ca" | "en";
 
 /**
  * Catch-all route. Handles, in order:
- *  1. Locale-prefixed or root single-segment blog post slugs (matching the
- *     original WordPress URLs: /{slug}, /en/{slug}, /ca/{slug}).
+ *  1. Registration form at root (kleff.es/<slug>).
  *  2. CMS custom pages (content_pages with slug_es/ca/en).
- *  3. 301 redirects stored in `content_redirects`.
- *  4. 404 page.
+ *  3. Locale-prefixed or root single-segment blog post slugs (legacy WP URLs).
+ *  4. 301 redirects stored in `content_redirects`.
+ *  5. 404 page.
  */
 export const Route = createFileRoute("/$")({
   loader: async ({ location }) => {
@@ -21,7 +23,7 @@ export const Route = createFileRoute("/$")({
     const trimmed = pathname.replace(/\/+$/, "");
     const segments = trimmed.split("/").filter(Boolean);
 
-    // Try to interpret as a single-segment slug (blog post or custom page)
+    // Try to interpret as a single-segment slug.
     let locale: Locale = "es";
     let slugCandidate: string | null = null;
 
@@ -32,17 +34,28 @@ export const Route = createFileRoute("/$")({
       slugCandidate = segments[1];
     }
 
-    // Wrap backend lookups so a transient DB / SSR error never bubbles up as
-    // a hard 500 on the catch-all — fall through to a friendly 404 instead.
     try {
       if (slugCandidate && isPlausibleSlug(slugCandidate)) {
-        // 1) Custom CMS page first (admin-created pages take priority over blog posts).
+        // 1) Registration form (highest priority — slug-in-root).
+        // Only check on root locale (es) — registrations are monolingual.
+        if (locale === "es") {
+          const reg = await getPublishedForm({ data: { slug: slugCandidate } });
+          if (reg.form) {
+            // External redirect: 302 to external URL
+            if (reg.form.kind === "external" && reg.form.external_mode === "redirect" && reg.form.external_url) {
+              throw redirect({ href: reg.form.external_url, statusCode: 302, reloadDocument: true });
+            }
+            return { kind: "registration" as const, form: reg.form, questions: reg.questions, responsesCount: reg.responsesCount };
+          }
+        }
+
+        // 2) Custom CMS page.
         const { page } = await resolveCustomPage({ data: { slug: slugCandidate, locale } });
         if (page && page.is_published) {
           const { blocks } = await getPageBlocks({ data: { pageId: page.id, locale } });
           return { kind: "custom" as const, page, blocks, locale };
         }
-        // 2) Blog post (WordPress slug).
+        // 3) Blog post (WordPress slug).
         const { post } = await getBlogPostBySlug({ data: { slug: slugCandidate, locale } });
         if (post) return { kind: "post" as const, post, locale };
       }
@@ -82,6 +95,19 @@ export const Route = createFileRoute("/$")({
         ],
       };
     }
+    if (loaderData?.kind === "registration") {
+      const f = loaderData.form;
+      const desc = (f.description ?? "Inscripción KLEFF").slice(0, 160);
+      return {
+        meta: [
+          { title: `${f.title} — KLEFF` },
+          { name: "description", content: desc },
+          { property: "og:title", content: f.title },
+          { property: "og:description", content: desc },
+          ...(f.cover_image_url ? [{ property: "og:image", content: f.cover_image_url }] : []),
+        ],
+      };
+    }
     return {
       meta: [
         { title: "Página no encontrada — KLEFF" },
@@ -99,6 +125,9 @@ function CatchAll() {
   }
   if (data.kind === "custom") {
     return <CustomPage title={data.page.title} blocks={data.blocks} />;
+  }
+  if (data.kind === "registration") {
+    return <PublicRegistrationPage form={data.form} questions={data.questions} responsesCount={data.responsesCount} />;
   }
   return <NotFound path={data.path} />;
 }
