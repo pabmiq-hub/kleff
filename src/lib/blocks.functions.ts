@@ -9,7 +9,9 @@ import { assertSuperAdmin } from "@/lib/assert-role.server";
 // "Cannot read properties of undefined (reading 'bind')".
 import type { Block, BlockType, Locale } from "@/cms/blockTypes";
 
-async function sanitizeBlockData(data: Record<string, unknown> | undefined): Promise<Record<string, unknown> | undefined> {
+async function sanitizeBlockData(
+  data: Record<string, unknown> | undefined,
+): Promise<Record<string, unknown> | undefined> {
   if (!data) return data;
   const out: Record<string, unknown> = { ...data };
   if (typeof out.html === "string") {
@@ -21,8 +23,19 @@ async function sanitizeBlockData(data: Record<string, unknown> | undefined): Pro
 
 const localeSchema = z.enum(["es", "ca", "en"]);
 const blockTypeSchema = z.enum([
-  "heading", "paragraph", "image", "embed", "cta", "divider", "quote", "form_embed",
-  "hero", "columns", "gallery", "cards", "button",
+  "heading",
+  "paragraph",
+  "image",
+  "embed",
+  "cta",
+  "divider",
+  "quote",
+  "form_embed",
+  "hero",
+  "columns",
+  "gallery",
+  "cards",
+  "button",
 ]);
 
 export type BlockRow = {
@@ -267,6 +280,150 @@ export const adminCopyBlocksFromLocale = createServerFn({ method: "POST" })
     if (insErr) throw new Error(insErr.message);
     return { copied: payload.length };
   });
+
+export const adminTranslatePageBlocks = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator(z.object({ pageId: z.string().uuid() }))
+  .handler(async ({ data, context }) => {
+    await assertSuperAdmin(context.userId);
+    return translateAndReplacePageBlocks(data.pageId, context.userId);
+  });
+
+const TRANSLATION_TARGETS: { locale: Exclude<Locale, "es">; name: string }[] = [
+  { locale: "ca", name: "Catalan" },
+  { locale: "en", name: "English" },
+];
+
+async function translateAndReplacePageBlocks(pageId: string, userId: string) {
+  const { data: source, error } = await supabaseAdmin
+    .from("content_page_blocks")
+    .select("*")
+    .eq("page_id", pageId)
+    .eq("locale", "es")
+    .order("position", { ascending: true });
+  if (error) throw new Error(error.message);
+
+  const rows = (source ?? []) as unknown as BlockRow[];
+  let translatedLocales = 0;
+  for (const target of TRANSLATION_TARGETS) {
+    const translated = rows.length > 0 ? await translateBlockRows(rows, target.name) : [];
+    const { error: deleteError } = await supabaseAdmin
+      .from("content_page_blocks")
+      .delete()
+      .eq("page_id", pageId)
+      .eq("locale", target.locale);
+    if (deleteError) throw new Error(deleteError.message);
+
+    if (rows.length === 0) {
+      translatedLocales += 1;
+      continue;
+    }
+
+    const payload = rows.map((row, idx) => ({
+      page_id: pageId,
+      locale: target.locale,
+      position: row.position,
+      type: row.type,
+      hidden: row.hidden,
+      data: (translated[idx] ?? row.data) as never,
+      created_by: userId,
+      updated_by: userId,
+    }));
+
+    const { error: insertError } = await supabaseAdmin
+      .from("content_page_blocks")
+      .insert(payload as never);
+    if (insertError) throw new Error(insertError.message);
+    translatedLocales += 1;
+  }
+
+  return { ok: true, translatedLocales, blocks: rows.length };
+}
+
+async function translateBlockRows(
+  rows: BlockRow[],
+  targetLanguageName: string,
+): Promise<Record<string, unknown>[]> {
+  const translated = await translateJsonForBlocks(
+    {
+      blocks: rows.map((row) => ({ type: row.type, data: row.data })),
+    },
+    targetLanguageName,
+  );
+  const blocks = Array.isArray(translated?.blocks) ? translated.blocks : [];
+  return rows.map((row, idx) => {
+    const translatedBlock = blocks[idx];
+    if (translatedBlock && typeof translatedBlock === "object" && !Array.isArray(translatedBlock)) {
+      const candidate = (translatedBlock as { data?: unknown }).data;
+      if (candidate && typeof candidate === "object" && !Array.isArray(candidate)) {
+        return candidate as Record<string, unknown>;
+      }
+    }
+    return row.data as Record<string, unknown>;
+  });
+}
+
+async function translateJsonForBlocks(
+  esContent: Record<string, unknown>,
+  targetLanguageName: string,
+): Promise<Record<string, unknown> | null> {
+  const apiKey = process.env.LOVABLE_API_KEY;
+  if (!apiKey) {
+    console.warn("[blocks] LOVABLE_API_KEY missing — skipping block translation");
+    return null;
+  }
+
+  const system =
+    `You are a professional translator for KLEFF, a Barcelona-based community of board game enthusiasts. ` +
+    `Translate user-facing text fields from Spanish to ${targetLanguageName}. ` +
+    `Rules: ` +
+    `1) Preserve the JSON structure EXACTLY — same keys, same nesting, same array order and length. ` +
+    `2) Translate only natural-language text values: titles, subtitles, paragraphs, rich text HTML, button labels, captions, alt text, descriptions and quotes. ` +
+    `3) DO NOT translate URLs, image paths, form slugs, ids, block types, hex colors, identifiers, numbers, booleans, or empty strings. ` +
+    `4) DO NOT translate brand names, product names or game names (e.g. "KLEFF", "Blood on the Clocktower", "Meetup", "WhatsApp", "L'Estació", "El Convento", "#TeamKLEFF"). ` +
+    `5) Preserve valid HTML tags and attributes while translating only the visible text inside HTML. ` +
+    `6) Keep the same warm, energetic, community-driven tone. ` +
+    `Respond with ONE JSON object only, no markdown, no explanation.`;
+
+  const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      model: "google/gemini-2.5-flash",
+      messages: [
+        { role: "system", content: system },
+        {
+          role: "user",
+          content: `Translate this JSON from Spanish to ${targetLanguageName}:\n\n${JSON.stringify(esContent)}`,
+        },
+      ],
+      response_format: { type: "json_object" },
+    }),
+  });
+
+  if (!res.ok) {
+    const txt = await res.text().catch(() => "");
+    console.error(`[blocks] AI gateway ${res.status}: ${txt.slice(0, 300)}`);
+    return null;
+  }
+
+  const json = (await res.json()) as { choices?: { message?: { content?: string } }[] };
+  const content = json.choices?.[0]?.message?.content;
+  if (!content) return null;
+
+  try {
+    const parsed = JSON.parse(content);
+    return parsed && typeof parsed === "object" && !Array.isArray(parsed)
+      ? (parsed as Record<string, unknown>)
+      : null;
+  } catch (e) {
+    console.error("[blocks] AI returned invalid JSON", e, content.slice(0, 300));
+    return null;
+  }
+}
 
 // PUBLIC: read by page-id (used for SSR loaders); also accepts an explicit list for forms embed
 export type PublicPageBlocks = { blocks: BlockRow[] };
