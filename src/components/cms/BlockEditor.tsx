@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, type DragEndEvent } from "@dnd-kit/core";
 import { SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy, useSortable, arrayMove } from "@dnd-kit/sortable";
@@ -6,7 +6,7 @@ import { CSS } from "@dnd-kit/utilities";
 import { GripVertical, Plus, Trash2, Eye, EyeOff, Heading2, Type, Image as ImageIcon, Youtube, MousePointerClick, Minus, Quote as QuoteIcon, ClipboardList, Sparkles, Columns3, Images, LayoutGrid, Square } from "lucide-react";
 import { toast } from "sonner";
 import { BLOCK_LIBRARY, defaultDataFor, type BlockType, type BlockData } from "@/cms/blockTypes";
-import { adminCreateBlock, adminDeleteBlock, adminReorderBlocks, adminUpdateBlock, type BlockRow } from "@/lib/blocks.functions";
+import { adminCreateBlock, adminDeleteBlock, adminReorderBlocks, adminTranslatePageBlocks, adminUpdateBlock, type BlockRow } from "@/lib/blocks.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -31,6 +31,25 @@ export function BlockEditor({ pageId, locale, initial }: Props) {
   const update = useServerFn(adminUpdateBlock);
   const del = useServerFn(adminDeleteBlock);
   const reorder = useServerFn(adminReorderBlocks);
+  const translatePage = useServerFn(adminTranslatePageBlocks);
+  const translateTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [translating, setTranslating] = useState(false);
+
+  useEffect(() => () => {
+    if (translateTimer.current) clearTimeout(translateTimer.current);
+  }, []);
+
+  const scheduleTranslation = () => {
+    if (locale !== "es") return;
+    if (translateTimer.current) clearTimeout(translateTimer.current);
+    translateTimer.current = setTimeout(() => {
+      setTranslating(true);
+      translatePage({ data: { pageId } })
+        .then(() => toast.success("Traducciones actualizadas"))
+        .catch((e) => toast.error(`No se han podido traducir los cambios: ${(e as Error).message}`))
+        .finally(() => setTranslating(false));
+    }, 1200);
+  };
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
@@ -45,6 +64,7 @@ export function BlockEditor({ pageId, locale, initial }: Props) {
     setBlocks(next);
     try {
       await reorder({ data: { pageId, locale, orderedIds: next.map((b) => b.id) } });
+      scheduleTranslation();
     } catch (err) {
       toast.error((err as Error).message);
     }
@@ -58,6 +78,7 @@ export function BlockEditor({ pageId, locale, initial }: Props) {
       const next = [...blocks];
       next.splice(position, 0, block as BlockRow);
       setBlocks(next.map((b, i) => ({ ...b, position: i })));
+      scheduleTranslation();
     } catch (e) {
       toast.error((e as Error).message);
     }
@@ -67,6 +88,7 @@ export function BlockEditor({ pageId, locale, initial }: Props) {
     setBlocks((prev) => prev.map((b) => (b.id === id ? { ...b, data } : b)));
     try {
       await update({ data: { blockId: id, data: data as Record<string, unknown> } });
+      scheduleTranslation();
     } catch (e) {
       toast.error((e as Error).message);
     }
@@ -74,14 +96,14 @@ export function BlockEditor({ pageId, locale, initial }: Props) {
 
   const toggleHidden = async (id: string, hidden: boolean) => {
     setBlocks((prev) => prev.map((b) => (b.id === id ? { ...b, hidden } : b)));
-    try { await update({ data: { blockId: id, hidden } }); }
+    try { await update({ data: { blockId: id, hidden } }); scheduleTranslation(); }
     catch (e) { toast.error((e as Error).message); }
   };
 
   const removeBlock = async (id: string) => {
     if (!window.confirm("¿Borrar este bloque?")) return;
     setBlocks((prev) => prev.filter((b) => b.id !== id));
-    try { await del({ data: { blockId: id } }); }
+    try { await del({ data: { blockId: id } }); scheduleTranslation(); }
     catch (e) { toast.error((e as Error).message); }
   };
 
@@ -108,6 +130,7 @@ export function BlockEditor({ pageId, locale, initial }: Props) {
           Esta página aún no tiene bloques. Empieza añadiendo uno arriba.
         </div>
       )}
+      {translating && <p className="text-right text-xs text-ink/50">Traduciendo cambios…</p>}
     </div>
   );
 }
