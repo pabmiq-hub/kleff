@@ -9,7 +9,9 @@ import { assertSuperAdmin } from "@/lib/assert-role.server";
 // "Cannot read properties of undefined (reading 'bind')".
 import type { Block, BlockType, Locale } from "@/cms/blockTypes";
 
-async function sanitizeBlockData(data: Record<string, unknown> | undefined): Promise<Record<string, unknown> | undefined> {
+async function sanitizeBlockData(
+  data: Record<string, unknown> | undefined,
+): Promise<Record<string, unknown> | undefined> {
   if (!data) return data;
   const out: Record<string, unknown> = { ...data };
   if (typeof out.html === "string") {
@@ -21,8 +23,19 @@ async function sanitizeBlockData(data: Record<string, unknown> | undefined): Pro
 
 const localeSchema = z.enum(["es", "ca", "en"]);
 const blockTypeSchema = z.enum([
-  "heading", "paragraph", "image", "embed", "cta", "divider", "quote", "form_embed",
-  "hero", "columns", "gallery", "cards", "button",
+  "heading",
+  "paragraph",
+  "image",
+  "embed",
+  "cta",
+  "divider",
+  "quote",
+  "form_embed",
+  "hero",
+  "columns",
+  "gallery",
+  "cards",
+  "button",
 ]);
 
 export type BlockRow = {
@@ -327,7 +340,10 @@ async function translateAndReplacePageBlocks(pageId: string, userId: string) {
   return { ok: true, translatedLocales, blocks: rows.length };
 }
 
-async function translateBlockRows(rows: BlockRow[], targetLanguageName: string): Promise<Record<string, unknown>[]> {
+async function translateBlockRows(
+  rows: BlockRow[],
+  targetLanguageName: string,
+): Promise<Record<string, unknown>[]> {
   const translated = await translateJsonForBlocks(
     {
       blocks: rows.map((row) => ({ type: row.type, data: row.data })),
@@ -379,7 +395,10 @@ async function translateJsonForBlocks(
       model: "google/gemini-2.5-flash",
       messages: [
         { role: "system", content: system },
-        { role: "user", content: `Translate this JSON from Spanish to ${targetLanguageName}:\n\n${JSON.stringify(esContent)}` },
+        {
+          role: "user",
+          content: `Translate this JSON from Spanish to ${targetLanguageName}:\n\n${JSON.stringify(esContent)}`,
+        },
       ],
       response_format: { type: "json_object" },
     }),

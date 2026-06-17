@@ -25,10 +25,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return;
     }
     try {
-      const { data } = await supabase
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", userId);
+      const { data } = await supabase.from("user_roles").select("role").eq("user_id", userId);
       setIsSuperAdmin((data ?? []).some((r) => r.role === "super_admin"));
     } catch {
       setIsSuperAdmin(false);
