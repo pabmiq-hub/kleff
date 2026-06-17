@@ -15,7 +15,8 @@ const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [authReady, setAuthReady] = useState(false);
+  const [rolesLoading, setRolesLoading] = useState(false);
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
 
   const loadRoles = async (userId: string | undefined) => {
@@ -23,11 +24,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setIsSuperAdmin(false);
       return;
     }
-    const { data } = await supabase
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", userId);
-    setIsSuperAdmin((data ?? []).some((r) => r.role === "super_admin"));
+    try {
+      const { data } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", userId);
+      setIsSuperAdmin((data ?? []).some((r) => r.role === "super_admin"));
+    } catch {
+      setIsSuperAdmin(false);
+    }
   };
 
   // Install a fetch interceptor that injects the Supabase access token
@@ -79,28 +84,38 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setSession(newSession);
       // Defer role loading to avoid recursive auth calls
       if (newSession?.user) {
+        setRolesLoading(true);
         setTimeout(() => {
-          void loadRoles(newSession.user.id);
+          void loadRoles(newSession.user.id).finally(() => {
+            setRolesLoading(false);
+            setAuthReady(true);
+          });
         }, 0);
       } else {
         setIsSuperAdmin(false);
+        setRolesLoading(false);
+        setAuthReady(true);
       }
     });
 
     // Then check existing session
-    void supabase.auth.getSession().then(({ data: { session: existing } }) => {
+    void supabase.auth.getSession().then(async ({ data: { session: existing } }) => {
       setSession(existing);
       if (existing?.user) {
-        void loadRoles(existing.user.id);
+        setRolesLoading(true);
+        await loadRoles(existing.user.id).finally(() => setRolesLoading(false));
+      } else {
+        setIsSuperAdmin(false);
       }
-      setLoading(false);
+      setAuthReady(true);
     });
 
     return () => subscription.unsubscribe();
   }, []);
 
   const refreshRoles = async () => {
-    await loadRoles(session?.user?.id);
+    setRolesLoading(true);
+    await loadRoles(session?.user?.id).finally(() => setRolesLoading(false));
   };
 
   const signOut = async () => {
@@ -114,7 +129,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       value={{
         session,
         user: session?.user ?? null,
-        loading,
+        loading: !authReady || rolesLoading,
         isSuperAdmin,
         refreshRoles,
         signOut,
