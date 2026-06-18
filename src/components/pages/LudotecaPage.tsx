@@ -37,11 +37,13 @@ interface BggGame {
   mechanics: string[];
   bgg_url: string | null;
   total_copies: number | null;
-  shelf: "1" | "2" | "3" | "4" | "on_demand" | "drawer" | null;
+  shelf: "A" | "B" | "C" | "D" | "1" | "2" | "3" | "4" | "on_demand" | "drawer" | null;
   shape: "triangle" | "heart" | "square" | null;
   slot_number: number | null;
   drawer_number: number | null;
   drawer_letter: "a" | "b" | "c" | "d" | null;
+  shelf_color: "green" | "pink" | "red" | "yellow" | "blue" | null;
+
 }
 
 const T = {
