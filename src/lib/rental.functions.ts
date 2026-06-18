@@ -106,10 +106,12 @@ export const updateRentalGame = createServerFn({ method: "POST" })
     if (rest.isActive !== undefined) update.is_active = rest.isActive;
     if (rest.shelf !== undefined) update.shelf = rest.shelf;
     if (rest.shape !== undefined) update.shape = rest.shape;
+    if (rest.shelfColor !== undefined) update.shelf_color = rest.shelfColor;
     if (rest.slotNumber !== undefined) update.slot_number = rest.slotNumber;
     if (rest.drawerNumber !== undefined) update.drawer_number = rest.drawerNumber;
     if (rest.drawerLetter !== undefined) update.drawer_letter = rest.drawerLetter;
     if (rest.notesAdmin !== undefined) update.notes_admin = rest.notesAdmin;
+
     const { error } = await supabaseAdmin.from("bgg_games").update(update as never).eq("id", id);
     if (error) throw new Error(error.message);
     return { success: true };
