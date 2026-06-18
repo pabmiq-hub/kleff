@@ -47,6 +47,7 @@ export type Database = {
           publishers: string[] | null
           shape: Database["public"]["Enums"]["shelf_shape"] | null
           shelf: Database["public"]["Enums"]["shelf_location"] | null
+          shelf_color: Database["public"]["Enums"]["shelf_color"] | null
           slot_number: number | null
           thumbnail_url: string | null
           title: string
@@ -86,6 +87,7 @@ export type Database = {
           publishers?: string[] | null
           shape?: Database["public"]["Enums"]["shelf_shape"] | null
           shelf?: Database["public"]["Enums"]["shelf_location"] | null
+          shelf_color?: Database["public"]["Enums"]["shelf_color"] | null
           slot_number?: number | null
           thumbnail_url?: string | null
           title: string
@@ -125,6 +127,7 @@ export type Database = {
           publishers?: string[] | null
           shape?: Database["public"]["Enums"]["shelf_shape"] | null
           shelf?: Database["public"]["Enums"]["shelf_location"] | null
+          shelf_color?: Database["public"]["Enums"]["shelf_color"] | null
           slot_number?: number | null
           thumbnail_url?: string | null
           title?: string
@@ -1198,7 +1201,18 @@ export type Database = {
         | "cancelled"
         | "waitlisted"
       rental_status: "active" | "returned" | "overdue" | "lost"
-      shelf_location: "1" | "2" | "3" | "4" | "on_demand" | "drawer"
+      shelf_color: "green" | "pink" | "red" | "yellow" | "blue"
+      shelf_location:
+        | "1"
+        | "2"
+        | "3"
+        | "4"
+        | "on_demand"
+        | "drawer"
+        | "A"
+        | "B"
+        | "C"
+        | "D"
       shelf_shape: "triangle" | "heart" | "square"
     }
     CompositeTypes: {
@@ -1344,7 +1358,19 @@ export const Constants = {
         "waitlisted",
       ],
       rental_status: ["active", "returned", "overdue", "lost"],
-      shelf_location: ["1", "2", "3", "4", "on_demand", "drawer"],
+      shelf_color: ["green", "pink", "red", "yellow", "blue"],
+      shelf_location: [
+        "1",
+        "2",
+        "3",
+        "4",
+        "on_demand",
+        "drawer",
+        "A",
+        "B",
+        "C",
+        "D",
+      ],
       shelf_shape: ["triangle", "heart", "square"],
     },
   },
