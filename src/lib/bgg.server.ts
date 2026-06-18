@@ -292,6 +292,7 @@ async function enrichWithBgg(
 type ExistingRow = {
   id: string;
   bgg_id: number | null;
+  title: string;
   bgg_type: string | null;
   categories: string[] | null;
   mechanics: string[] | null;
@@ -308,6 +309,7 @@ type ExistingRow = {
   thumbnail_url: string | null;
   last_synced_at: string | null;
 };
+
 
 function buildRecord(
   g: LudoyaGame,
