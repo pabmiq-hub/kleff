@@ -314,16 +314,20 @@ function buildRecord(
   bggId: number | null,
   extra: BggThingExtras | undefined,
   prev: ExistingRow | undefined,
+  bggPrimaryName: string | null,
 ): BggGameRecord {
   const minP = g.minPlayerCount ?? null;
   const maxP = g.maxPlayerCount ?? null;
   const minT = g.minPlayTimeMinutes ?? null;
   const maxT = g.maxPlayTimeMinutes ?? null;
   const rating = g.bggRating && g.bggRating > 0 ? g.bggRating : null;
+  // Prefer BGG primary name (English/original) over Ludoya's version-specific
+  // name (which may be in Korean/Japanese/etc for that particular edition).
+  const title = bggPrimaryName ?? prev?.title ?? g.name;
   // Preserve previously-enriched values when this run did not enrich.
   return {
     bgg_id: bggId,
-    title: g.name,
+    title,
     image_url: extra?.image_url ?? prev?.image_url ?? g.image?.url ?? null,
     thumbnail_url:
       extra?.thumbnail_url ?? prev?.thumbnail_url ?? g.image?.thumbnailUrl ?? g.image?.previewUrl ?? null,
@@ -350,6 +354,7 @@ function buildRecord(
     last_synced_at: new Date().toISOString(),
   };
 }
+
 
 const ENRICH_TTL_MS = 30 * 24 * 60 * 60 * 1000; // 30 days
 
