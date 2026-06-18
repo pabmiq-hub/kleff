@@ -116,7 +116,9 @@ interface BggThingExtras {
   bgg_type: string | null;
   image_url: string | null;
   thumbnail_url: string | null;
+  bgg_primary_name: string | null;
 }
+
 
 interface GeekdoLink {
   name?: string;
