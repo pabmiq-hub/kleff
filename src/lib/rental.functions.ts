@@ -20,14 +20,19 @@ async function assertSuperAdmin(userId: string): Promise<void> {
 
 const locationSchema = z
   .object({
-    shelf: z.enum(["1", "2", "3", "4", "on_demand", "drawer"]).nullable().optional(),
+    shelf: z
+      .enum(["A", "B", "C", "D", "1", "2", "3", "4", "on_demand", "drawer"])
+      .nullable()
+      .optional(),
     shape: z.enum(["triangle", "heart", "square"]).nullable().optional(),
+    shelfColor: z.enum(["green", "pink", "red", "yellow", "blue"]).nullable().optional(),
     slotNumber: z.number().int().min(1).max(5).nullable().optional(),
     drawerNumber: z.number().int().min(1).max(4).nullable().optional(),
     drawerLetter: z.enum(["a", "b", "c", "d"]).nullable().optional(),
     notesAdmin: z.string().max(500).nullable().optional(),
   })
   .partial();
+
 
 const gameSchema = z
   .object({
