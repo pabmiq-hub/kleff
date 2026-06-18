@@ -121,13 +121,14 @@ function CatalogPage() {
           <SelectContent>
             <SelectItem value="all">Todas las ubicaciones</SelectItem>
             <SelectItem value="unset">Sin ubicar</SelectItem>
-            <SelectItem value="1">Estantería 1</SelectItem>
-            <SelectItem value="2">Estantería 2</SelectItem>
-            <SelectItem value="3">Estantería 3</SelectItem>
-            <SelectItem value="4">Estantería 4</SelectItem>
+            <SelectItem value="A">Estantería A</SelectItem>
+            <SelectItem value="B">Estantería B</SelectItem>
+            <SelectItem value="C">Estantería C</SelectItem>
+            <SelectItem value="D">Estantería D</SelectItem>
             <SelectItem value="drawer">Cajón</SelectItem>
             <SelectItem value="on_demand">Bajo pedido</SelectItem>
           </SelectContent>
+
         </Select>
         <span className="text-xs text-ink/60">{filtered.length} / {games.length}</span>
         <div className="ml-auto">
