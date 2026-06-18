@@ -20,14 +20,19 @@ async function assertSuperAdmin(userId: string): Promise<void> {
 
 const locationSchema = z
   .object({
-    shelf: z.enum(["1", "2", "3", "4", "on_demand", "drawer"]).nullable().optional(),
+    shelf: z
+      .enum(["A", "B", "C", "D", "1", "2", "3", "4", "on_demand", "drawer"])
+      .nullable()
+      .optional(),
     shape: z.enum(["triangle", "heart", "square"]).nullable().optional(),
+    shelfColor: z.enum(["green", "pink", "red", "yellow", "blue"]).nullable().optional(),
     slotNumber: z.number().int().min(1).max(5).nullable().optional(),
     drawerNumber: z.number().int().min(1).max(4).nullable().optional(),
     drawerLetter: z.enum(["a", "b", "c", "d"]).nullable().optional(),
     notesAdmin: z.string().max(500).nullable().optional(),
   })
   .partial();
+
 
 const gameSchema = z
   .object({
@@ -101,10 +106,12 @@ export const updateRentalGame = createServerFn({ method: "POST" })
     if (rest.isActive !== undefined) update.is_active = rest.isActive;
     if (rest.shelf !== undefined) update.shelf = rest.shelf;
     if (rest.shape !== undefined) update.shape = rest.shape;
+    if (rest.shelfColor !== undefined) update.shelf_color = rest.shelfColor;
     if (rest.slotNumber !== undefined) update.slot_number = rest.slotNumber;
     if (rest.drawerNumber !== undefined) update.drawer_number = rest.drawerNumber;
     if (rest.drawerLetter !== undefined) update.drawer_letter = rest.drawerLetter;
     if (rest.notesAdmin !== undefined) update.notes_admin = rest.notesAdmin;
+
     const { error } = await supabaseAdmin.from("bgg_games").update(update as never).eq("id", id);
     if (error) throw new Error(error.message);
     return { success: true };

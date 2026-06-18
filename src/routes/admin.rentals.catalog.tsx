@@ -23,12 +23,14 @@ interface Game {
   max_rental_days: number;
   total_copies: number;
   is_active: boolean;
-  shelf: "1" | "2" | "3" | "4" | "on_demand" | "drawer" | null;
+  shelf: "A" | "B" | "C" | "D" | "1" | "2" | "3" | "4" | "on_demand" | "drawer" | null;
   shape: "triangle" | "heart" | "square" | null;
   slot_number: number | null;
   drawer_number: number | null;
   drawer_letter: "a" | "b" | "c" | "d" | null;
+  shelf_color: "green" | "pink" | "red" | "yellow" | "blue" | null;
 }
+
 
 function CatalogPage() {
   const listFn = useServerFn(listRentalGames);
@@ -119,13 +121,14 @@ function CatalogPage() {
           <SelectContent>
             <SelectItem value="all">Todas las ubicaciones</SelectItem>
             <SelectItem value="unset">Sin ubicar</SelectItem>
-            <SelectItem value="1">Estantería 1</SelectItem>
-            <SelectItem value="2">Estantería 2</SelectItem>
-            <SelectItem value="3">Estantería 3</SelectItem>
-            <SelectItem value="4">Estantería 4</SelectItem>
+            <SelectItem value="A">Estantería A</SelectItem>
+            <SelectItem value="B">Estantería B</SelectItem>
+            <SelectItem value="C">Estantería C</SelectItem>
+            <SelectItem value="D">Estantería D</SelectItem>
             <SelectItem value="drawer">Cajón</SelectItem>
             <SelectItem value="on_demand">Bajo pedido</SelectItem>
           </SelectContent>
+
         </Select>
         <span className="text-xs text-ink/60">{filtered.length} / {games.length}</span>
         <div className="ml-auto">
@@ -197,11 +200,14 @@ function LocationDialog({
   const [open, setOpen] = useState(false);
   const [shelf, setShelf] = useState<Game["shelf"]>(game.shelf);
   const [shape, setShape] = useState<Game["shape"]>(game.shape);
+  const [color, setColor] = useState<Game["shelf_color"]>(game.shelf_color);
   const [slot, setSlot] = useState<number | null>(game.slot_number);
   const [drawerNum, setDrawerNum] = useState<number | null>(game.drawer_number);
   const [drawerLet, setDrawerLet] = useState<Game["drawer_letter"]>(game.drawer_letter);
 
-  const isShelf14 = shelf === "1" || shelf === "2" || shelf === "3" || shelf === "4";
+  const isShelfAD =
+    shelf === "A" || shelf === "B" || shelf === "C" || shelf === "D" ||
+    shelf === "1" || shelf === "2" || shelf === "3" || shelf === "4";
   const isDrawer = shelf === "drawer";
 
   const save = async () => {
@@ -210,8 +216,9 @@ function LocationDialog({
         data: {
           id: game.id,
           shelf: shelf ?? null,
-          shape: isShelf14 ? shape ?? null : null,
-          slotNumber: isShelf14 ? slot ?? null : null,
+          shape: isShelfAD ? shape ?? null : null,
+          shelfColor: isShelfAD ? color ?? null : null,
+          slotNumber: isShelfAD ? slot ?? null : null,
           drawerNumber: isDrawer ? drawerNum ?? null : null,
           drawerLetter: isDrawer ? drawerLet ?? null : null,
         },
@@ -241,17 +248,17 @@ function LocationDialog({
             <Select value={shelf ?? ""} onValueChange={(v) => setShelf((v || null) as Game["shelf"])}>
               <SelectTrigger><SelectValue placeholder="Seleccionar…" /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="1">Estantería 1</SelectItem>
-                <SelectItem value="2">Estantería 2</SelectItem>
-                <SelectItem value="3">Estantería 3</SelectItem>
-                <SelectItem value="4">Estantería 4</SelectItem>
+                <SelectItem value="A">Estantería A</SelectItem>
+                <SelectItem value="B">Estantería B</SelectItem>
+                <SelectItem value="C">Estantería C</SelectItem>
+                <SelectItem value="D">Estantería D</SelectItem>
                 <SelectItem value="drawer">Cajón</SelectItem>
                 <SelectItem value="on_demand">Bajo pedido</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
-          {isShelf14 && (
+          {isShelfAD && (
             <>
               <div className="space-y-1">
                 <Label>Forma</Label>
@@ -261,6 +268,19 @@ function LocationDialog({
                     <SelectItem value="triangle">Triángulo</SelectItem>
                     <SelectItem value="heart">Corazón</SelectItem>
                     <SelectItem value="square">Cuadrado</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-1">
+                <Label>Color</Label>
+                <Select value={color ?? ""} onValueChange={(v) => setColor((v || null) as Game["shelf_color"])}>
+                  <SelectTrigger><SelectValue placeholder="Seleccionar…" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="green">Verde</SelectItem>
+                    <SelectItem value="pink">Rosa</SelectItem>
+                    <SelectItem value="red">Rojo</SelectItem>
+                    <SelectItem value="yellow">Amarillo</SelectItem>
+                    <SelectItem value="blue">Azul</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -298,3 +318,4 @@ function LocationDialog({
     </Dialog>
   );
 }
+

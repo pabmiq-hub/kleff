@@ -116,7 +116,9 @@ interface BggThingExtras {
   bgg_type: string | null;
   image_url: string | null;
   thumbnail_url: string | null;
+  bgg_primary_name: string | null;
 }
+
 
 interface GeekdoLink {
   name?: string;
@@ -219,8 +221,10 @@ function parseGeekdoItem(item: GeekdoItem): BggThingExtras {
       mapSubdomainToType(subdomains) ?? inferTypeFallback(families, categories),
     image_url: item.imageurl ?? null,
     thumbnail_url: null,
+    bgg_primary_name: item.name ? String(item.name).trim() : null,
   };
 }
+
 
 async function fetchGeekdoItem(id: number): Promise<GeekdoItem | null> {
   const url = `${GEEKDO_BASE}?objectid=${id}&objecttype=thing&showcount=10`;
@@ -292,6 +296,7 @@ async function enrichWithBgg(
 type ExistingRow = {
   id: string;
   bgg_id: number | null;
+  title: string;
   bgg_type: string | null;
   categories: string[] | null;
   mechanics: string[] | null;
@@ -309,21 +314,26 @@ type ExistingRow = {
   last_synced_at: string | null;
 };
 
+
 function buildRecord(
   g: LudoyaGame,
   bggId: number | null,
   extra: BggThingExtras | undefined,
   prev: ExistingRow | undefined,
+  bggPrimaryName: string | null,
 ): BggGameRecord {
   const minP = g.minPlayerCount ?? null;
   const maxP = g.maxPlayerCount ?? null;
   const minT = g.minPlayTimeMinutes ?? null;
   const maxT = g.maxPlayTimeMinutes ?? null;
   const rating = g.bggRating && g.bggRating > 0 ? g.bggRating : null;
+  // Prefer BGG primary name (English/original) over Ludoya's version-specific
+  // name (which may be in Korean/Japanese/etc for that particular edition).
+  const title = bggPrimaryName ?? prev?.title ?? g.name;
   // Preserve previously-enriched values when this run did not enrich.
   return {
     bgg_id: bggId,
-    title: g.name,
+    title,
     image_url: extra?.image_url ?? prev?.image_url ?? g.image?.url ?? null,
     thumbnail_url:
       extra?.thumbnail_url ?? prev?.thumbnail_url ?? g.image?.thumbnailUrl ?? g.image?.previewUrl ?? null,
@@ -350,6 +360,7 @@ function buildRecord(
     last_synced_at: new Date().toISOString(),
   };
 }
+
 
 const ENRICH_TTL_MS = 30 * 24 * 60 * 60 * 1000; // 30 days
 
@@ -382,9 +393,12 @@ export async function syncBggCollection(): Promise<{
     );
   if (exErr) throw new Error(exErr.message);
 
+  const existingRows: ExistingRow[] = (existing ?? []) as ExistingRow[];
   const existingByTitle = new Map<string, ExistingRow>();
-  for (const e of (existing ?? []) as ExistingRow[]) {
-    existingByTitle.set((e as any).title.toLowerCase(), e);
+  const existingByBggId = new Map<number, ExistingRow>();
+  for (const e of existingRows) {
+    existingByTitle.set(e.title.toLowerCase(), e);
+    if (e.bgg_id != null) existingByBggId.set(e.bgg_id, e);
   }
 
   // Resolve bgg_id per game (use cached value when possible).
@@ -410,26 +424,30 @@ export async function syncBggCollection(): Promise<{
   for (const g of ludoyaGames) {
     const bggId = bggIdByGame.get(g.id) ?? null;
     if (bggId == null) continue;
-    const prev = existingByTitle.get(g.name.toLowerCase());
+    const prev =
+      existingByBggId.get(bggId) ?? existingByTitle.get(g.name.toLowerCase());
     if (alreadyEnriched(prev)) continue;
     idsToEnrich.push(bggId);
   }
   const extras = await enrichWithBgg(idsToEnrich);
 
-  const records: Array<{ ludoyaName: string; rec: BggGameRecord }> = [];
+  // Build records, matching existing rows by bgg_id first (handles renamed
+  // titles) and only falling back to lowercase title.
+  const matchedIds = new Set<string>();
+  const toInsert: Array<Record<string, unknown>> = [];
+  const toUpdate: Array<{ id: string; patch: Record<string, unknown> }> = [];
+
   for (const g of ludoyaGames) {
     const bggId = bggIdByGame.get(g.id) ?? null;
     const extra = bggId ? extras.get(bggId) : undefined;
-    const prev = existingByTitle.get(g.name.toLowerCase());
-    records.push({ ludoyaName: g.name, rec: buildRecord(g, bggId, extra, prev) });
-  }
-
-  const toInsert: Array<Record<string, unknown>> = [];
-  const toUpdate: Array<{ id: string; patch: Record<string, unknown> }> = [];
-  for (const { ludoyaName, rec } of records) {
-    const cached = existingByTitle.get(ludoyaName.toLowerCase());
-    if (cached) {
-      toUpdate.push({ id: cached.id, patch: { ...rec, is_active: true } });
+    const prev =
+      (bggId != null ? existingByBggId.get(bggId) : undefined) ??
+      existingByTitle.get(g.name.toLowerCase());
+    const bggPrimaryName = extra?.bgg_primary_name ?? null;
+    const rec = buildRecord(g, bggId, extra, prev, bggPrimaryName);
+    if (prev) {
+      matchedIds.add(prev.id);
+      toUpdate.push({ id: prev.id, patch: { ...rec, is_active: true } });
     } else {
       toInsert.push({
         ...rec,
@@ -458,26 +476,25 @@ export async function syncBggCollection(): Promise<{
     if (error) throw new Error(`update ${u.id}: ${error.message}`);
   }
 
-  // Mark missing games inactive
-  const seenTitles = new Set(records.map((r) => r.ludoyaName.toLowerCase()));
+  // Mark missing games inactive (anything not matched this run).
   let removedInactive = 0;
-  for (const [title, info] of existingByTitle) {
-    if (!seenTitles.has(title)) {
-      const { error } = await supabaseAdmin
-        .from("bgg_games")
-        .update({ is_active: false } as never)
-        .eq("id", info.id);
-      if (!error) removedInactive++;
-    }
+  for (const row of existingRows) {
+    if (matchedIds.has(row.id)) continue;
+    const { error } = await supabaseAdmin
+      .from("bgg_games")
+      .update({ is_active: false } as never)
+      .eq("id", row.id);
+    if (!error) removedInactive++;
   }
 
   return {
-    fetched: records.length,
+    fetched: ludoyaGames.length,
     upserted: toInsert.length + toUpdate.length,
     removedInactive,
     enriched: extras.size,
   };
 }
+
 
 
 export async function assertSuperAdminBgg(userId: string): Promise<void> {
