@@ -221,8 +221,10 @@ function parseGeekdoItem(item: GeekdoItem): BggThingExtras {
       mapSubdomainToType(subdomains) ?? inferTypeFallback(families, categories),
     image_url: item.imageurl ?? null,
     thumbnail_url: null,
+    bgg_primary_name: item.name ? String(item.name).trim() : null,
   };
 }
+
 
 async function fetchGeekdoItem(id: number): Promise<GeekdoItem | null> {
   const url = `${GEEKDO_BASE}?objectid=${id}&objecttype=thing&showcount=10`;
