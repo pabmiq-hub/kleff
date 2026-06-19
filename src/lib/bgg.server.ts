@@ -388,18 +388,22 @@ function buildRecord(
   extra: BggThingExtras | undefined,
   prev: ExistingRow | undefined,
   bggPrimaryName: string | null,
+  bggDisplayName: string | null,
 ): BggGameRecord {
   const minP = g.minPlayerCount ?? null;
   const maxP = g.maxPlayerCount ?? null;
   const minT = g.minPlayTimeMinutes ?? null;
   const maxT = g.maxPlayTimeMinutes ?? null;
   const rating = g.bggRating && g.bggRating > 0 ? g.bggRating : null;
-  // Use the name from the BGG user collection (what the owner sees on
-  // boardgamegeek.com/collection/user/kleff_bcn). Ludoya mirrors that name,
-  // which is the edition/version title the shop actually owns (e.g.
-  // "Chao Pescao!" instead of the BGG primary "Sounds Fishy"). Fall back to
-  // the BGG primary name only if Ludoya didn't return one.
-  const title = g.name?.trim() || bggPrimaryName || prev?.title || "Untitled";
+  // Prefer the title the owner sees on their BGG collection page (edition
+  // name, e.g. "Chao Pescao!"). Fall back to Ludoya's name, then BGG's
+  // primary name, then whatever was stored previously.
+  const title =
+    bggDisplayName ||
+    g.name?.trim() ||
+    bggPrimaryName ||
+    prev?.title ||
+    "Untitled";
   // Preserve previously-enriched values when this run did not enrich.
   return {
     bgg_id: bggId,
