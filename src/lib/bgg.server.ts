@@ -13,8 +13,73 @@ import { supabaseAdmin } from "@/integrations/supabase/client.server";
 
 const LUDOYA_URL = "https://api.ludoya.com/users/kleff/boardgames";
 const GEEKDO_BASE = "https://api.geekdo.com/api/geekitems";
+const BGG_COLLECTION_USER = "kleff_bcn";
+const BGG_COLLECTION_URL = `https://boardgamegeek.com/collection/user/${BGG_COLLECTION_USER}`;
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+// ---------- BGG collection display names (via Firecrawl) ----------
+//
+// BGG's XML API returns 401 for this user's collection from our egress IPs,
+// and Ludoya stores only BGG's primary game name (e.g. "Sounds Fishy")
+// instead of the edition title the owner sees on
+// boardgamegeek.com/collection/user/kleff_bcn (e.g. "Chao Pescao!").
+// We scrape the public HTML collection page through Firecrawl to recover
+// the user-collection display name per bgg_id.
+
+async function fetchBggDisplayNames(): Promise<Map<number, string>> {
+  const apiKey = process.env.FIRECRAWL_API_KEY;
+  const map = new Map<number, string>();
+  if (!apiKey) {
+    console.warn("[bgg-names] FIRECRAWL_API_KEY missing → skip");
+    return map;
+  }
+  for (let page = 1; page <= 10; page++) {
+    const url = `${BGG_COLLECTION_URL}?pageID=${page}`;
+    try {
+      const res = await fetch("https://api.firecrawl.dev/v1/scrape", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify({
+          url,
+          formats: ["markdown"],
+          onlyMainContent: true,
+        }),
+      });
+      if (!res.ok) {
+        console.warn(`[bgg-names] page ${page} → ${res.status}`);
+        break;
+      }
+      const json = (await res.json()) as { data?: { markdown?: string } };
+      const md = json.data?.markdown ?? "";
+      const re =
+        /\[([^\]]+)\]\(https:\/\/boardgamegeek\.com\/boardgame(?:expansion)?\/(\d+)/g;
+      let count = 0;
+      let m: RegExpExecArray | null;
+      while ((m = re.exec(md))) {
+        const name = m[1].trim();
+        const id = parseInt(m[2], 10);
+        if (!Number.isFinite(id) || !name) continue;
+        if (!map.has(id)) map.set(id, name);
+        count++;
+      }
+      console.log(`[bgg-names] page ${page}: ${count} matches`);
+      if (count < 300) break;
+      await sleep(400);
+    } catch (e) {
+      console.warn(
+        `[bgg-names] page ${page} failed:`,
+        e instanceof Error ? e.message : String(e),
+      );
+      break;
+    }
+  }
+  console.log(`[bgg-names] total ${map.size} display names`);
+  return map;
+}
 
 // ---------- record shape ----------
 
@@ -323,18 +388,22 @@ function buildRecord(
   extra: BggThingExtras | undefined,
   prev: ExistingRow | undefined,
   bggPrimaryName: string | null,
+  bggDisplayName: string | null,
 ): BggGameRecord {
   const minP = g.minPlayerCount ?? null;
   const maxP = g.maxPlayerCount ?? null;
   const minT = g.minPlayTimeMinutes ?? null;
   const maxT = g.maxPlayTimeMinutes ?? null;
   const rating = g.bggRating && g.bggRating > 0 ? g.bggRating : null;
-  // Use the name from the BGG user collection (what the owner sees on
-  // boardgamegeek.com/collection/user/kleff_bcn). Ludoya mirrors that name,
-  // which is the edition/version title the shop actually owns (e.g.
-  // "Chao Pescao!" instead of the BGG primary "Sounds Fishy"). Fall back to
-  // the BGG primary name only if Ludoya didn't return one.
-  const title = g.name?.trim() || bggPrimaryName || prev?.title || "Untitled";
+  // Prefer the title the owner sees on their BGG collection page (edition
+  // name, e.g. "Chao Pescao!"). Fall back to Ludoya's name, then BGG's
+  // primary name, then whatever was stored previously.
+  const title =
+    bggDisplayName ||
+    g.name?.trim() ||
+    bggPrimaryName ||
+    prev?.title ||
+    "Untitled";
   // Preserve previously-enriched values when this run did not enrich.
   return {
     bgg_id: bggId,
@@ -436,6 +505,10 @@ export async function syncBggCollection(): Promise<{
   }
   const extras = await enrichWithBgg(idsToEnrich);
 
+  // Pull edition titles from the BGG user collection page (Firecrawl). Best
+  // effort — if it fails we fall back to Ludoya / BGG primary names.
+  const displayNames = await fetchBggDisplayNames();
+
   // Build records, matching existing rows by bgg_id first (handles renamed
   // titles) and only falling back to lowercase title.
   const matchedIds = new Set<string>();
@@ -449,7 +522,8 @@ export async function syncBggCollection(): Promise<{
       (bggId != null ? existingByBggId.get(bggId) : undefined) ??
       existingByTitle.get(g.name.toLowerCase());
     const bggPrimaryName = extra?.bgg_primary_name ?? null;
-    const rec = buildRecord(g, bggId, extra, prev, bggPrimaryName);
+    const bggDisplayName = bggId ? displayNames.get(bggId) ?? null : null;
+    const rec = buildRecord(g, bggId, extra, prev, bggPrimaryName, bggDisplayName);
     if (prev) {
       matchedIds.add(prev.id);
       toUpdate.push({ id: prev.id, patch: { ...rec, is_active: true } });
