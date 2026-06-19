@@ -505,6 +505,10 @@ export async function syncBggCollection(): Promise<{
   }
   const extras = await enrichWithBgg(idsToEnrich);
 
+  // Pull edition titles from the BGG user collection page (Firecrawl). Best
+  // effort — if it fails we fall back to Ludoya / BGG primary names.
+  const displayNames = await fetchBggDisplayNames();
+
   // Build records, matching existing rows by bgg_id first (handles renamed
   // titles) and only falling back to lowercase title.
   const matchedIds = new Set<string>();
@@ -518,7 +522,8 @@ export async function syncBggCollection(): Promise<{
       (bggId != null ? existingByBggId.get(bggId) : undefined) ??
       existingByTitle.get(g.name.toLowerCase());
     const bggPrimaryName = extra?.bgg_primary_name ?? null;
-    const rec = buildRecord(g, bggId, extra, prev, bggPrimaryName);
+    const bggDisplayName = bggId ? displayNames.get(bggId) ?? null : null;
+    const rec = buildRecord(g, bggId, extra, prev, bggPrimaryName, bggDisplayName);
     if (prev) {
       matchedIds.add(prev.id);
       toUpdate.push({ id: prev.id, patch: { ...rec, is_active: true } });
