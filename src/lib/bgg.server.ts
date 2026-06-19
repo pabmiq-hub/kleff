@@ -81,7 +81,9 @@ async function fetchLudoyaCollection(): Promise<LudoyaGame[]> {
     throw new Error(`Ludoya ${LUDOYA_URL} -> ${res.status}`);
   }
   const data = (await res.json()) as { games?: LudoyaGame[] };
-  return (data.games ?? []).filter((g) => !g.isExpansion);
+  // Include expansions too — the catalogue should list everything the
+  // collection on BGG contains.
+  return data.games ?? [];
 }
 
 async function fetchLudoyaBggId(slug: string): Promise<number | null> {
