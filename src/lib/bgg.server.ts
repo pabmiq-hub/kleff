@@ -329,9 +329,12 @@ function buildRecord(
   const minT = g.minPlayTimeMinutes ?? null;
   const maxT = g.maxPlayTimeMinutes ?? null;
   const rating = g.bggRating && g.bggRating > 0 ? g.bggRating : null;
-  // Prefer BGG primary name (English/original) over Ludoya's version-specific
-  // name (which may be in Korean/Japanese/etc for that particular edition).
-  const title = bggPrimaryName ?? prev?.title ?? g.name;
+  // Use the name from the BGG user collection (what the owner sees on
+  // boardgamegeek.com/collection/user/kleff_bcn). Ludoya mirrors that name,
+  // which is the edition/version title the shop actually owns (e.g.
+  // "Chao Pescao!" instead of the BGG primary "Sounds Fishy"). Fall back to
+  // the BGG primary name only if Ludoya didn't return one.
+  const title = g.name?.trim() || bggPrimaryName || prev?.title || "Untitled";
   // Preserve previously-enriched values when this run did not enrich.
   return {
     bgg_id: bggId,
