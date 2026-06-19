@@ -13,8 +13,73 @@ import { supabaseAdmin } from "@/integrations/supabase/client.server";
 
 const LUDOYA_URL = "https://api.ludoya.com/users/kleff/boardgames";
 const GEEKDO_BASE = "https://api.geekdo.com/api/geekitems";
+const BGG_COLLECTION_USER = "kleff_bcn";
+const BGG_COLLECTION_URL = `https://boardgamegeek.com/collection/user/${BGG_COLLECTION_USER}`;
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+// ---------- BGG collection display names (via Firecrawl) ----------
+//
+// BGG's XML API returns 401 for this user's collection from our egress IPs,
+// and Ludoya stores only BGG's primary game name (e.g. "Sounds Fishy")
+// instead of the edition title the owner sees on
+// boardgamegeek.com/collection/user/kleff_bcn (e.g. "Chao Pescao!").
+// We scrape the public HTML collection page through Firecrawl to recover
+// the user-collection display name per bgg_id.
+
+async function fetchBggDisplayNames(): Promise<Map<number, string>> {
+  const apiKey = process.env.FIRECRAWL_API_KEY;
+  const map = new Map<number, string>();
+  if (!apiKey) {
+    console.warn("[bgg-names] FIRECRAWL_API_KEY missing → skip");
+    return map;
+  }
+  for (let page = 1; page <= 10; page++) {
+    const url = `${BGG_COLLECTION_URL}?pageID=${page}`;
+    try {
+      const res = await fetch("https://api.firecrawl.dev/v1/scrape", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify({
+          url,
+          formats: ["markdown"],
+          onlyMainContent: true,
+        }),
+      });
+      if (!res.ok) {
+        console.warn(`[bgg-names] page ${page} → ${res.status}`);
+        break;
+      }
+      const json = (await res.json()) as { data?: { markdown?: string } };
+      const md = json.data?.markdown ?? "";
+      const re =
+        /\[([^\]]+)\]\(https:\/\/boardgamegeek\.com\/boardgame(?:expansion)?\/(\d+)/g;
+      let count = 0;
+      let m: RegExpExecArray | null;
+      while ((m = re.exec(md))) {
+        const name = m[1].trim();
+        const id = parseInt(m[2], 10);
+        if (!Number.isFinite(id) || !name) continue;
+        if (!map.has(id)) map.set(id, name);
+        count++;
+      }
+      console.log(`[bgg-names] page ${page}: ${count} matches`);
+      if (count < 300) break;
+      await sleep(400);
+    } catch (e) {
+      console.warn(
+        `[bgg-names] page ${page} failed:`,
+        e instanceof Error ? e.message : String(e),
+      );
+      break;
+    }
+  }
+  console.log(`[bgg-names] total ${map.size} display names`);
+  return map;
+}
 
 // ---------- record shape ----------
 
