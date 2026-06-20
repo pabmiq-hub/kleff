@@ -414,8 +414,8 @@ export function HowItWorksPage() {
               tag={t.how.community1Tag}
               icon={<Skull className="h-7 w-7 text-cream" />}
               accent="coral"
-              href="/clocktower"
-              ctaLabel="Ver página"
+              href={locale === "en" ? "/en/blood-on-the-clocktower" : locale === "ca" ? "/ca/blood-on-the-clocktower" : "/blood-on-the-clocktower"}
+              ctaLabel={locale === "en" ? "View page" : locale === "ca" ? "Veure pàgina" : "Ver página"}
             />
             <CommunityCard
               title={t.how.community2Title}
