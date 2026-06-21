@@ -57,14 +57,26 @@ export function PublicRegistrationPage({ form, questions, responsesCount }: Prop
   return (
     <SiteLayout>
       {form.cover_image_url && (
-        <div className="w-full h-64 md:h-80 bg-cover bg-center" style={{ backgroundImage: `url(${form.cover_image_url})` }} />
+        <div
+          className="w-full h-64 md:h-80 bg-cover"
+          style={{
+            backgroundImage: `url(${form.cover_image_url})`,
+            backgroundPosition: form.cover_position || "center center",
+          }}
+        />
       )}
       <div className="max-w-2xl mx-auto px-6 py-12">
         <h1 className="font-display text-3xl md:text-4xl mb-3 text-foreground">{form.title}</h1>
         {form.description && <p className="text-muted-foreground whitespace-pre-line mb-6">{form.description}</p>}
 
         {form.external_mode === "iframe" && form.external_url ? (
-          <iframe src={form.external_url} className="w-full h-[800px] rounded-lg border border-border bg-white" title={form.title} />
+          <iframe
+            src={form.external_url}
+            style={{ height: `${form.external_iframe_height ?? 2400}px` }}
+            className="w-full rounded-lg border border-border bg-white"
+            title={form.title}
+            scrolling="no"
+          />
         ) : done ? (
           <div className="rounded-lg border border-coral/30 bg-coral/5 p-6 text-center">
             <CheckCircle2 className="h-12 w-12 text-coral mx-auto mb-3" />

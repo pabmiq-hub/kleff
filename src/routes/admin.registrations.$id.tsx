@@ -143,6 +143,8 @@ function FormSettings({ form, onSaved }: { form: RegistrationForm; onSaved: (pat
             title: state.title,
             description: state.description,
             cover_image_url: state.cover_image_url,
+            cover_position: state.cover_position,
+            external_iframe_height: state.external_iframe_height,
             external_mode: state.external_mode,
             external_url: state.external_url,
             payment_required: state.payment_required,
@@ -189,6 +191,16 @@ function FormSettings({ form, onSaved }: { form: RegistrationForm; onSaved: (pat
             height="h-40"
             label="Subir cabecera"
           />
+          <p className="text-xs text-ink/50 mt-2">
+            Tamaño recomendado: <strong>1920 × 640 px</strong> (ratio 3:1, mínimo 1200 px de ancho, &lt; 500 KB).
+          </p>
+          {state.cover_image_url && (
+            <CoverFocusPicker
+              url={state.cover_image_url}
+              position={state.cover_position || "center center"}
+              onChange={(pos) => set("cover_position", pos)}
+            />
+          )}
         </Row>
       </Card>
 
@@ -204,6 +216,20 @@ function FormSettings({ form, onSaved }: { form: RegistrationForm; onSaved: (pat
             </Select>
           </Row>
           <Row label="URL externa"><Input value={state.external_url ?? ""} onChange={(e) => set("external_url", e.target.value || null)} placeholder="https://…" className="bg-white border-ink/15 text-ink" /></Row>
+          {state.external_mode === "iframe" && (
+            <Row label="Altura del iframe (px)">
+              <Input
+                type="number"
+                min={400}
+                max={8000}
+                step={100}
+                value={state.external_iframe_height ?? 2400}
+                onChange={(e) => set("external_iframe_height", e.target.value ? Number(e.target.value) : 2400)}
+                className="bg-white border-ink/15 text-ink"
+              />
+              <p className="text-xs text-ink/50 mt-1">Aumenta este valor si el formulario se corta. Así el scroll lo hará la página de KLEFF y no el propio iframe. Valor típico: 2400–3200 px para Google Forms.</p>
+            </Row>
+          )}
         </Card>
       )}
 
@@ -508,4 +534,42 @@ function ResponseCard({ response, questions, onUpdate, onDelete }: { response: R
       </div>
     </div>
   );
+}
+
+function CoverFocusPicker({ url, position, onChange }: { url: string; position: string; onChange: (pos: string) => void }) {
+  const parsed = parsePosition(position);
+  const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = Math.max(0, Math.min(100, ((e.clientX - rect.left) / rect.width) * 100));
+    const y = Math.max(0, Math.min(100, ((e.clientY - rect.top) / rect.height) * 100));
+    onChange(`${x.toFixed(0)}% ${y.toFixed(0)}%`);
+  };
+  return (
+    <div className="mt-3 space-y-2">
+      <p className="text-xs font-medium text-ink/70">Foco visible (haz clic en la zona que quieres que se vea siempre)</p>
+      <div
+        onClick={handleClick}
+        className="relative w-full h-48 rounded-lg border border-ink/15 bg-cover cursor-crosshair overflow-hidden"
+        style={{ backgroundImage: `url(${url})`, backgroundPosition: position }}
+        title="Haz clic para fijar el foco"
+      >
+        <div
+          className="absolute w-6 h-6 -ml-3 -mt-3 rounded-full border-2 border-white shadow-lg pointer-events-none"
+          style={{ left: `${parsed.x}%`, top: `${parsed.y}%`, background: "rgba(225,90,80,0.7)" }}
+        />
+        <div className="absolute inset-0 ring-1 ring-inset ring-black/10" />
+      </div>
+      <div className="flex items-center gap-2 text-xs text-ink/60">
+        <span>Posición: <code className="text-coral">{position}</code></span>
+        <button type="button" onClick={() => onChange("center center")} className="ml-auto underline hover:text-ink">Centrar</button>
+      </div>
+    </div>
+  );
+}
+
+function parsePosition(pos: string): { x: number; y: number } {
+  if (!pos || pos === "center center" || pos === "center") return { x: 50, y: 50 };
+  const m = pos.match(/(\d+(?:\.\d+)?)%\s+(\d+(?:\.\d+)?)%/);
+  if (m) return { x: Number(m[1]), y: Number(m[2]) };
+  return { x: 50, y: 50 };
 }

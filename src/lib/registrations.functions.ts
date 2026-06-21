@@ -15,6 +15,8 @@ export type RegistrationForm = {
   title: string;
   description: string | null;
   cover_image_url: string | null;
+  cover_position: string;
+  external_iframe_height: number;
   is_published: boolean;
   external_mode: "redirect" | "iframe" | null;
   external_url: string | null;
@@ -230,6 +232,8 @@ export const adminUpdateForm = createServerFn({ method: "POST" })
       title: z.string().max(200).optional(),
       description: z.string().max(5000).nullable().optional(),
       cover_image_url: z.string().url().nullable().optional(),
+      cover_position: z.string().max(50).optional(),
+      external_iframe_height: z.number().int().min(400).max(8000).optional(),
       is_published: z.boolean().optional(),
       kind: z.enum(["form", "external"]).optional(),
       external_mode: z.enum(["redirect", "iframe"]).nullable().optional(),

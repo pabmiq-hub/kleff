@@ -789,8 +789,10 @@ export type Database = {
           closes_at: string | null
           confirmation_message: string | null
           cover_image_url: string | null
+          cover_position: string
           created_at: string
           description: string | null
+          external_iframe_height: number
           external_mode: string | null
           external_url: string | null
           id: string
@@ -810,8 +812,10 @@ export type Database = {
           closes_at?: string | null
           confirmation_message?: string | null
           cover_image_url?: string | null
+          cover_position?: string
           created_at?: string
           description?: string | null
+          external_iframe_height?: number
           external_mode?: string | null
           external_url?: string | null
           id?: string
@@ -831,8 +835,10 @@ export type Database = {
           closes_at?: string | null
           confirmation_message?: string | null
           cover_image_url?: string | null
+          cover_position?: string
           created_at?: string
           description?: string | null
+          external_iframe_height?: number
           external_mode?: string | null
           external_url?: string | null
           id?: string
