@@ -47,7 +47,15 @@ export function EmbeddedRegistrationForm({ slug }: { slug: string }) {
     );
   }
   if (form.external_mode === "iframe" && form.external_url) {
-    return <iframe src={form.external_url} className="w-full h-[800px] rounded-xl border border-cream/15 bg-white" title={form.title} />;
+    return (
+      <iframe
+        src={form.external_url}
+        style={{ height: `${form.external_iframe_height ?? 2400}px` }}
+        className="w-full rounded-xl border border-cream/15 bg-white"
+        title={form.title}
+        scrolling="no"
+      />
+    );
   }
 
   const closed = form.closes_at && new Date(form.closes_at) < new Date();
