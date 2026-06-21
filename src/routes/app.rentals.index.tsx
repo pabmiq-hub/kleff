@@ -18,7 +18,7 @@ import { toast } from "sonner";
 import { LocationBadge, type LocationFields } from "@/components/ludoteca/LocationBadge";
 import { upcomingGameNights, toISODate, weekdayLabel } from "@/lib/gameNights";
 
-export const Route = createFileRoute("/app/rentals")({
+export const Route = createFileRoute("/app/rentals/")({
   component: RentalsCatalog,
 });
 

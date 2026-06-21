@@ -68,7 +68,6 @@ import { Route as CaBloodOnTheClocktowerRouteImport } from './routes/ca.blood-on
 import { Route as CaBlogRouteImport } from './routes/ca.blog'
 import { Route as CaAvisLegalRouteImport } from './routes/ca.avis-legal'
 import { Route as CaActivitatsRouteImport } from './routes/ca.activitats'
-import { Route as AppRentalsRouteImport } from './routes/app.rentals'
 import { Route as AppProfileRouteImport } from './routes/app.profile'
 import { Route as AppCarnetRouteImport } from './routes/app.carnet'
 import { Route as AdminRentalsRouteImport } from './routes/admin.rentals'
@@ -77,6 +76,7 @@ import { Route as AdminMembersRouteImport } from './routes/admin.members'
 import { Route as AdminInvitationsRouteImport } from './routes/admin.invitations'
 import { Route as AdminContentRouteImport } from './routes/admin.content'
 import { Route as AdminBlogRouteImport } from './routes/admin.blog'
+import { Route as AppRentalsIndexRouteImport } from './routes/app.rentals.index'
 import { Route as AdminRentalsIndexRouteImport } from './routes/admin.rentals.index'
 import { Route as AdminRegistrationsIndexRouteImport } from './routes/admin.registrations.index'
 import { Route as AdminMediaIndexRouteImport } from './routes/admin.media.index'
@@ -396,11 +396,6 @@ const CaActivitatsRoute = CaActivitatsRouteImport.update({
   path: '/ca/activitats',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AppRentalsRoute = AppRentalsRouteImport.update({
-  id: '/rentals',
-  path: '/rentals',
-  getParentRoute: () => AppRoute,
-} as any)
 const AppProfileRoute = AppProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
@@ -441,6 +436,11 @@ const AdminBlogRoute = AdminBlogRouteImport.update({
   path: '/blog',
   getParentRoute: () => AdminRoute,
 } as any)
+const AppRentalsIndexRoute = AppRentalsIndexRouteImport.update({
+  id: '/rentals/',
+  path: '/rentals/',
+  getParentRoute: () => AppRoute,
+} as any)
 const AdminRentalsIndexRoute = AdminRentalsIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -467,9 +467,9 @@ const AdminBlogIndexRoute = AdminBlogIndexRouteImport.update({
   getParentRoute: () => AdminBlogRoute,
 } as any)
 const AppRentalsMineRoute = AppRentalsMineRouteImport.update({
-  id: '/mine',
-  path: '/mine',
-  getParentRoute: () => AppRentalsRoute,
+  id: '/rentals/mine',
+  path: '/rentals/mine',
+  getParentRoute: () => AppRoute,
 } as any)
 const ApiPublicUploadInviteAvatarRoute =
   ApiPublicUploadInviteAvatarRouteImport.update({
@@ -586,7 +586,6 @@ export interface FileRoutesByFullPath {
   '/admin/rentals': typeof AdminRentalsRouteWithChildren
   '/app/carnet': typeof AppCarnetRoute
   '/app/profile': typeof AppProfileRoute
-  '/app/rentals': typeof AppRentalsRouteWithChildren
   '/ca/activitats': typeof CaActivitatsRoute
   '/ca/avis-legal': typeof CaAvisLegalRoute
   '/ca/blog': typeof CaBlogRoute
@@ -644,6 +643,7 @@ export interface FileRoutesByFullPath {
   '/admin/media/': typeof AdminMediaIndexRoute
   '/admin/registrations/': typeof AdminRegistrationsIndexRoute
   '/admin/rentals/': typeof AdminRentalsIndexRoute
+  '/app/rentals/': typeof AppRentalsIndexRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
 }
 export interface FileRoutesByTo {
@@ -672,7 +672,6 @@ export interface FileRoutesByTo {
   '/admin/members': typeof AdminMembersRoute
   '/app/carnet': typeof AppCarnetRoute
   '/app/profile': typeof AppProfileRoute
-  '/app/rentals': typeof AppRentalsRouteWithChildren
   '/ca/activitats': typeof CaActivitatsRoute
   '/ca/avis-legal': typeof CaAvisLegalRoute
   '/ca/blog': typeof CaBlogRoute
@@ -730,6 +729,7 @@ export interface FileRoutesByTo {
   '/admin/media': typeof AdminMediaIndexRoute
   '/admin/registrations': typeof AdminRegistrationsIndexRoute
   '/admin/rentals': typeof AdminRentalsIndexRoute
+  '/app/rentals': typeof AppRentalsIndexRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
 }
 export interface FileRoutesById {
@@ -765,7 +765,6 @@ export interface FileRoutesById {
   '/admin/rentals': typeof AdminRentalsRouteWithChildren
   '/app/carnet': typeof AppCarnetRoute
   '/app/profile': typeof AppProfileRoute
-  '/app/rentals': typeof AppRentalsRouteWithChildren
   '/ca/activitats': typeof CaActivitatsRoute
   '/ca/avis-legal': typeof CaAvisLegalRoute
   '/ca/blog': typeof CaBlogRoute
@@ -823,6 +822,7 @@ export interface FileRoutesById {
   '/admin/media/': typeof AdminMediaIndexRoute
   '/admin/registrations/': typeof AdminRegistrationsIndexRoute
   '/admin/rentals/': typeof AdminRentalsIndexRoute
+  '/app/rentals/': typeof AppRentalsIndexRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
 }
 export interface FileRouteTypes {
@@ -859,7 +859,6 @@ export interface FileRouteTypes {
     | '/admin/rentals'
     | '/app/carnet'
     | '/app/profile'
-    | '/app/rentals'
     | '/ca/activitats'
     | '/ca/avis-legal'
     | '/ca/blog'
@@ -917,6 +916,7 @@ export interface FileRouteTypes {
     | '/admin/media/'
     | '/admin/registrations/'
     | '/admin/rentals/'
+    | '/app/rentals/'
     | '/lovable/email/queue/process'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -945,7 +945,6 @@ export interface FileRouteTypes {
     | '/admin/members'
     | '/app/carnet'
     | '/app/profile'
-    | '/app/rentals'
     | '/ca/activitats'
     | '/ca/avis-legal'
     | '/ca/blog'
@@ -1003,6 +1002,7 @@ export interface FileRouteTypes {
     | '/admin/media'
     | '/admin/registrations'
     | '/admin/rentals'
+    | '/app/rentals'
     | '/lovable/email/queue/process'
   id:
     | '__root__'
@@ -1037,7 +1037,6 @@ export interface FileRouteTypes {
     | '/admin/rentals'
     | '/app/carnet'
     | '/app/profile'
-    | '/app/rentals'
     | '/ca/activitats'
     | '/ca/avis-legal'
     | '/ca/blog'
@@ -1095,6 +1094,7 @@ export interface FileRouteTypes {
     | '/admin/media/'
     | '/admin/registrations/'
     | '/admin/rentals/'
+    | '/app/rentals/'
     | '/lovable/email/queue/process'
   fileRoutesById: FileRoutesById
 }
@@ -1576,13 +1576,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CaActivitatsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/app/rentals': {
-      id: '/app/rentals'
-      path: '/rentals'
-      fullPath: '/app/rentals'
-      preLoaderRoute: typeof AppRentalsRouteImport
-      parentRoute: typeof AppRoute
-    }
     '/app/profile': {
       id: '/app/profile'
       path: '/profile'
@@ -1639,6 +1632,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminBlogRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/app/rentals/': {
+      id: '/app/rentals/'
+      path: '/rentals'
+      fullPath: '/app/rentals/'
+      preLoaderRoute: typeof AppRentalsIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/admin/rentals/': {
       id: '/admin/rentals/'
       path: '/'
@@ -1676,10 +1676,10 @@ declare module '@tanstack/react-router' {
     }
     '/app/rentals/mine': {
       id: '/app/rentals/mine'
-      path: '/mine'
+      path: '/rentals/mine'
       fullPath: '/app/rentals/mine'
       preLoaderRoute: typeof AppRentalsMineRouteImport
-      parentRoute: typeof AppRentalsRoute
+      parentRoute: typeof AppRoute
     }
     '/api/public/upload-invite-avatar': {
       id: '/api/public/upload-invite-avatar'
@@ -1893,30 +1893,20 @@ const AdminRouteChildren: AdminRouteChildren = {
 
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
-interface AppRentalsRouteChildren {
-  AppRentalsMineRoute: typeof AppRentalsMineRoute
-}
-
-const AppRentalsRouteChildren: AppRentalsRouteChildren = {
-  AppRentalsMineRoute: AppRentalsMineRoute,
-}
-
-const AppRentalsRouteWithChildren = AppRentalsRoute._addFileChildren(
-  AppRentalsRouteChildren,
-)
-
 interface AppRouteChildren {
   AppCarnetRoute: typeof AppCarnetRoute
   AppProfileRoute: typeof AppProfileRoute
-  AppRentalsRoute: typeof AppRentalsRouteWithChildren
   AppIndexRoute: typeof AppIndexRoute
+  AppRentalsMineRoute: typeof AppRentalsMineRoute
+  AppRentalsIndexRoute: typeof AppRentalsIndexRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
   AppCarnetRoute: AppCarnetRoute,
   AppProfileRoute: AppProfileRoute,
-  AppRentalsRoute: AppRentalsRouteWithChildren,
   AppIndexRoute: AppIndexRoute,
+  AppRentalsMineRoute: AppRentalsMineRoute,
+  AppRentalsIndexRoute: AppRentalsIndexRoute,
 }
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
