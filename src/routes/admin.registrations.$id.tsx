@@ -191,6 +191,16 @@ function FormSettings({ form, onSaved }: { form: RegistrationForm; onSaved: (pat
             height="h-40"
             label="Subir cabecera"
           />
+          <p className="text-xs text-ink/50 mt-2">
+            Tamaño recomendado: <strong>1920 × 640 px</strong> (ratio 3:1, mínimo 1200 px de ancho, &lt; 500 KB).
+          </p>
+          {state.cover_image_url && (
+            <CoverFocusPicker
+              url={state.cover_image_url}
+              position={state.cover_position || "center center"}
+              onChange={(pos) => set("cover_position", pos)}
+            />
+          )}
         </Row>
       </Card>
 
