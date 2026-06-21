@@ -535,3 +535,41 @@ function ResponseCard({ response, questions, onUpdate, onDelete }: { response: R
     </div>
   );
 }
+
+function CoverFocusPicker({ url, position, onChange }: { url: string; position: string; onChange: (pos: string) => void }) {
+  const parsed = parsePosition(position);
+  const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = Math.max(0, Math.min(100, ((e.clientX - rect.left) / rect.width) * 100));
+    const y = Math.max(0, Math.min(100, ((e.clientY - rect.top) / rect.height) * 100));
+    onChange(`${x.toFixed(0)}% ${y.toFixed(0)}%`);
+  };
+  return (
+    <div className="mt-3 space-y-2">
+      <p className="text-xs font-medium text-ink/70">Foco visible (haz clic en la zona que quieres que se vea siempre)</p>
+      <div
+        onClick={handleClick}
+        className="relative w-full h-48 rounded-lg border border-ink/15 bg-cover cursor-crosshair overflow-hidden"
+        style={{ backgroundImage: `url(${url})`, backgroundPosition: position }}
+        title="Haz clic para fijar el foco"
+      >
+        <div
+          className="absolute w-6 h-6 -ml-3 -mt-3 rounded-full border-2 border-white shadow-lg pointer-events-none"
+          style={{ left: `${parsed.x}%`, top: `${parsed.y}%`, background: "rgba(225,90,80,0.7)" }}
+        />
+        <div className="absolute inset-0 ring-1 ring-inset ring-black/10" />
+      </div>
+      <div className="flex items-center gap-2 text-xs text-ink/60">
+        <span>Posición: <code className="text-coral">{position}</code></span>
+        <button type="button" onClick={() => onChange("center center")} className="ml-auto underline hover:text-ink">Centrar</button>
+      </div>
+    </div>
+  );
+}
+
+function parsePosition(pos: string): { x: number; y: number } {
+  if (!pos || pos === "center center" || pos === "center") return { x: 50, y: 50 };
+  const m = pos.match(/(\d+(?:\.\d+)?)%\s+(\d+(?:\.\d+)?)%/);
+  if (m) return { x: Number(m[1]), y: Number(m[2]) };
+  return { x: 50, y: 50 };
+}
