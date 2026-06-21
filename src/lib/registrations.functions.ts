@@ -15,6 +15,8 @@ export type RegistrationForm = {
   title: string;
   description: string | null;
   cover_image_url: string | null;
+  cover_position: string;
+  external_iframe_height: number;
   is_published: boolean;
   external_mode: "redirect" | "iframe" | null;
   external_url: string | null;
