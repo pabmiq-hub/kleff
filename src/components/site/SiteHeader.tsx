@@ -33,7 +33,7 @@ export function SiteHeader() {
           <span className="font-display font-bold text-xl tracking-tight text-foreground">KLEFF</span>
         </Link>
 
-        <nav className="hidden md:flex items-center gap-1">
+        <nav className="hidden lg:flex items-center gap-1">
           {navItems.map((item) => (
             <Link
               key={item.path}
@@ -47,7 +47,7 @@ export function SiteHeader() {
           ))}
         </nav>
 
-        <div className="hidden md:flex items-center gap-4">
+        <div className="hidden lg:flex items-center gap-4">
           <LanguageSwitcher current={locale} buildHref={(l) => hrefFor(logicalPath, l)} />
           <a
             href="https://www.meetup.com/es-es/kleff-bcn/"
@@ -61,7 +61,7 @@ export function SiteHeader() {
 
         <button
           onClick={() => setOpen((v) => !v)}
-          className="md:hidden p-2 -mr-2 text-foreground"
+          className="lg:hidden p-2 -mr-2 text-foreground"
           aria-label="Menu"
         >
           {open ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
@@ -69,7 +69,7 @@ export function SiteHeader() {
       </div>
 
       {open && (
-        <div className="md:hidden border-t border-border/60 bg-cream">
+        <div className="lg:hidden border-t border-border/60 bg-cream">
           <nav className="px-4 py-4 flex flex-col gap-1">
             {navItems.map((item) => (
               <Link
