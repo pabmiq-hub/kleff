@@ -319,9 +319,16 @@ export function HomePage() {
       <section className="relative bg-cream overflow-x-clip">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-12 md:pt-20 pb-24 md:pb-32 grid lg:grid-cols-12 gap-12 lg:gap-16 items-center">
           <div className="lg:col-span-7 relative z-10 min-w-0">
-            <span className="inline-flex items-center gap-2 rounded-full bg-coral/10 border-2 border-coral/30 px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-coral-deep">
-              <Sparkles className="h-3.5 w-3.5" />
-              <EditableText id="home.hero.eyebrow" as="span">{or(hero.eyebrow, t.home.eyebrow)}</EditableText>
+            <span className="relative inline-flex max-w-full">
+              <span aria-hidden className="absolute inset-0 translate-x-[3px] translate-y-[3px] rounded-sm border-2 border-ink bg-coral" />
+              <span className="relative inline-flex items-center gap-2.5 rounded-sm border-2 border-ink bg-cream px-3 py-1.5">
+                <span aria-hidden className="absolute -left-[5px] top-1/2 -translate-y-1/2 h-3 w-2 rounded-full border-r-2 border-ink bg-cream" />
+                <span aria-hidden className="absolute -right-[5px] top-1/2 -translate-y-1/2 h-3 w-2 rounded-full border-l-2 border-ink bg-cream" />
+                <span aria-hidden className="h-2 w-2 shrink-0 rounded-full bg-coral ring-1 ring-ink" />
+                <EditableText id="home.hero.eyebrow" as="span" className="text-[10px] sm:text-xs font-bold uppercase tracking-wider leading-none text-ink">
+                  {or(hero.eyebrow, t.home.eyebrow)}
+                </EditableText>
+              </span>
             </span>
             <EditableText
               id="home.hero.title"
