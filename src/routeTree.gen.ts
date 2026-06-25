@@ -14,6 +14,7 @@ import { Route as TerminosRouteImport } from './routes/terminos'
 import { Route as TardaDeJocsICuinaJaponesaRouteImport } from './routes/tarda-de-jocs-i-cuina-japonesa'
 import { Route as SuperAdminRouteImport } from './routes/super-admin'
 import { Route as SobreNosotrosRouteImport } from './routes/sobre-nosotros'
+import { Route as SlowFriendingLudicoRouteImport } from './routes/slow-friending-ludico'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as RolesOcultosRouteImport } from './routes/roles-ocultos'
 import { Route as PrivacidadRouteImport } from './routes/privacidad'
@@ -40,6 +41,7 @@ import { Route as InviteTokenRouteImport } from './routes/invite.$token'
 import { Route as InscripcionSlugRouteImport } from './routes/inscripcion.$slug'
 import { Route as EnTournamentsRouteImport } from './routes/en.tournaments'
 import { Route as EnTermsRouteImport } from './routes/en.terms'
+import { Route as EnSlowFriendingRouteImport } from './routes/en.slow-friending'
 import { Route as EnPrivacyRouteImport } from './routes/en.privacy'
 import { Route as EnMediaRouteImport } from './routes/en.media'
 import { Route as EnLudotecaRouteImport } from './routes/en.ludoteca'
@@ -55,6 +57,7 @@ import { Route as EnActivitiesRouteImport } from './routes/en.activities'
 import { Route as EnAboutRouteImport } from './routes/en.about'
 import { Route as CaTornejosRouteImport } from './routes/ca.tornejos'
 import { Route as CaTermesRouteImport } from './routes/ca.termes'
+import { Route as CaSlowFriendingLudicRouteImport } from './routes/ca.slow-friending-ludic'
 import { Route as CaRolsOcultsRouteImport } from './routes/ca.rols-ocults'
 import { Route as CaQuiSomRouteImport } from './routes/ca.qui-som'
 import { Route as CaPrivacitatRouteImport } from './routes/ca.privacitat'
@@ -124,6 +127,11 @@ const SuperAdminRoute = SuperAdminRouteImport.update({
 const SobreNosotrosRoute = SobreNosotrosRouteImport.update({
   id: '/sobre-nosotros',
   path: '/sobre-nosotros',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SlowFriendingLudicoRoute = SlowFriendingLudicoRouteImport.update({
+  id: '/slow-friending-ludico',
+  path: '/slow-friending-ludico',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
@@ -256,6 +264,11 @@ const EnTermsRoute = EnTermsRouteImport.update({
   path: '/en/terms',
   getParentRoute: () => rootRouteImport,
 } as any)
+const EnSlowFriendingRoute = EnSlowFriendingRouteImport.update({
+  id: '/en/slow-friending',
+  path: '/en/slow-friending',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const EnPrivacyRoute = EnPrivacyRouteImport.update({
   id: '/en/privacy',
   path: '/en/privacy',
@@ -329,6 +342,11 @@ const CaTornejosRoute = CaTornejosRouteImport.update({
 const CaTermesRoute = CaTermesRouteImport.update({
   id: '/ca/termes',
   path: '/ca/termes',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CaSlowFriendingLudicRoute = CaSlowFriendingLudicRouteImport.update({
+  id: '/ca/slow-friending-ludic',
+  path: '/ca/slow-friending-ludic',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CaRolsOcultsRoute = CaRolsOcultsRouteImport.update({
@@ -573,6 +591,7 @@ export interface FileRoutesByFullPath {
   '/privacidad': typeof PrivacidadRoute
   '/roles-ocultos': typeof RolesOcultosRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/slow-friending-ludico': typeof SlowFriendingLudicoRoute
   '/sobre-nosotros': typeof SobreNosotrosRoute
   '/super-admin': typeof SuperAdminRoute
   '/tarda-de-jocs-i-cuina-japonesa': typeof TardaDeJocsICuinaJaponesaRoute
@@ -599,6 +618,7 @@ export interface FileRoutesByFullPath {
   '/ca/privacitat': typeof CaPrivacitatRoute
   '/ca/qui-som': typeof CaQuiSomRoute
   '/ca/rols-ocults': typeof CaRolsOcultsRoute
+  '/ca/slow-friending-ludic': typeof CaSlowFriendingLudicRoute
   '/ca/termes': typeof CaTermesRoute
   '/ca/tornejos': typeof CaTornejosRoute
   '/en/about': typeof EnAboutRoute
@@ -614,6 +634,7 @@ export interface FileRoutesByFullPath {
   '/en/ludoteca': typeof EnLudotecaRoute
   '/en/media': typeof EnMediaRoute
   '/en/privacy': typeof EnPrivacyRoute
+  '/en/slow-friending': typeof EnSlowFriendingRoute
   '/en/terms': typeof EnTermsRoute
   '/en/tournaments': typeof EnTournamentsRoute
   '/inscripcion/$slug': typeof InscripcionSlugRoute
@@ -663,6 +684,7 @@ export interface FileRoutesByTo {
   '/privacidad': typeof PrivacidadRoute
   '/roles-ocultos': typeof RolesOcultosRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/slow-friending-ludico': typeof SlowFriendingLudicoRoute
   '/sobre-nosotros': typeof SobreNosotrosRoute
   '/super-admin': typeof SuperAdminRoute
   '/tarda-de-jocs-i-cuina-japonesa': typeof TardaDeJocsICuinaJaponesaRoute
@@ -685,6 +707,7 @@ export interface FileRoutesByTo {
   '/ca/privacitat': typeof CaPrivacitatRoute
   '/ca/qui-som': typeof CaQuiSomRoute
   '/ca/rols-ocults': typeof CaRolsOcultsRoute
+  '/ca/slow-friending-ludic': typeof CaSlowFriendingLudicRoute
   '/ca/termes': typeof CaTermesRoute
   '/ca/tornejos': typeof CaTornejosRoute
   '/en/about': typeof EnAboutRoute
@@ -700,6 +723,7 @@ export interface FileRoutesByTo {
   '/en/ludoteca': typeof EnLudotecaRoute
   '/en/media': typeof EnMediaRoute
   '/en/privacy': typeof EnPrivacyRoute
+  '/en/slow-friending': typeof EnSlowFriendingRoute
   '/en/terms': typeof EnTermsRoute
   '/en/tournaments': typeof EnTournamentsRoute
   '/inscripcion/$slug': typeof InscripcionSlugRoute
@@ -752,6 +776,7 @@ export interface FileRoutesById {
   '/privacidad': typeof PrivacidadRoute
   '/roles-ocultos': typeof RolesOcultosRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/slow-friending-ludico': typeof SlowFriendingLudicoRoute
   '/sobre-nosotros': typeof SobreNosotrosRoute
   '/super-admin': typeof SuperAdminRoute
   '/tarda-de-jocs-i-cuina-japonesa': typeof TardaDeJocsICuinaJaponesaRoute
@@ -778,6 +803,7 @@ export interface FileRoutesById {
   '/ca/privacitat': typeof CaPrivacitatRoute
   '/ca/qui-som': typeof CaQuiSomRoute
   '/ca/rols-ocults': typeof CaRolsOcultsRoute
+  '/ca/slow-friending-ludic': typeof CaSlowFriendingLudicRoute
   '/ca/termes': typeof CaTermesRoute
   '/ca/tornejos': typeof CaTornejosRoute
   '/en/about': typeof EnAboutRoute
@@ -793,6 +819,7 @@ export interface FileRoutesById {
   '/en/ludoteca': typeof EnLudotecaRoute
   '/en/media': typeof EnMediaRoute
   '/en/privacy': typeof EnPrivacyRoute
+  '/en/slow-friending': typeof EnSlowFriendingRoute
   '/en/terms': typeof EnTermsRoute
   '/en/tournaments': typeof EnTournamentsRoute
   '/inscripcion/$slug': typeof InscripcionSlugRoute
@@ -846,6 +873,7 @@ export interface FileRouteTypes {
     | '/privacidad'
     | '/roles-ocultos'
     | '/sitemap.xml'
+    | '/slow-friending-ludico'
     | '/sobre-nosotros'
     | '/super-admin'
     | '/tarda-de-jocs-i-cuina-japonesa'
@@ -872,6 +900,7 @@ export interface FileRouteTypes {
     | '/ca/privacitat'
     | '/ca/qui-som'
     | '/ca/rols-ocults'
+    | '/ca/slow-friending-ludic'
     | '/ca/termes'
     | '/ca/tornejos'
     | '/en/about'
@@ -887,6 +916,7 @@ export interface FileRouteTypes {
     | '/en/ludoteca'
     | '/en/media'
     | '/en/privacy'
+    | '/en/slow-friending'
     | '/en/terms'
     | '/en/tournaments'
     | '/inscripcion/$slug'
@@ -936,6 +966,7 @@ export interface FileRouteTypes {
     | '/privacidad'
     | '/roles-ocultos'
     | '/sitemap.xml'
+    | '/slow-friending-ludico'
     | '/sobre-nosotros'
     | '/super-admin'
     | '/tarda-de-jocs-i-cuina-japonesa'
@@ -958,6 +989,7 @@ export interface FileRouteTypes {
     | '/ca/privacitat'
     | '/ca/qui-som'
     | '/ca/rols-ocults'
+    | '/ca/slow-friending-ludic'
     | '/ca/termes'
     | '/ca/tornejos'
     | '/en/about'
@@ -973,6 +1005,7 @@ export interface FileRouteTypes {
     | '/en/ludoteca'
     | '/en/media'
     | '/en/privacy'
+    | '/en/slow-friending'
     | '/en/terms'
     | '/en/tournaments'
     | '/inscripcion/$slug'
@@ -1024,6 +1057,7 @@ export interface FileRouteTypes {
     | '/privacidad'
     | '/roles-ocultos'
     | '/sitemap.xml'
+    | '/slow-friending-ludico'
     | '/sobre-nosotros'
     | '/super-admin'
     | '/tarda-de-jocs-i-cuina-japonesa'
@@ -1050,6 +1084,7 @@ export interface FileRouteTypes {
     | '/ca/privacitat'
     | '/ca/qui-som'
     | '/ca/rols-ocults'
+    | '/ca/slow-friending-ludic'
     | '/ca/termes'
     | '/ca/tornejos'
     | '/en/about'
@@ -1065,6 +1100,7 @@ export interface FileRouteTypes {
     | '/en/ludoteca'
     | '/en/media'
     | '/en/privacy'
+    | '/en/slow-friending'
     | '/en/terms'
     | '/en/tournaments'
     | '/inscripcion/$slug'
@@ -1117,6 +1153,7 @@ export interface RootRouteChildren {
   PrivacidadRoute: typeof PrivacidadRoute
   RolesOcultosRoute: typeof RolesOcultosRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  SlowFriendingLudicoRoute: typeof SlowFriendingLudicoRoute
   SobreNosotrosRoute: typeof SobreNosotrosRoute
   SuperAdminRoute: typeof SuperAdminRoute
   TardaDeJocsICuinaJaponesaRoute: typeof TardaDeJocsICuinaJaponesaRoute
@@ -1135,6 +1172,7 @@ export interface RootRouteChildren {
   CaPrivacitatRoute: typeof CaPrivacitatRoute
   CaQuiSomRoute: typeof CaQuiSomRoute
   CaRolsOcultsRoute: typeof CaRolsOcultsRoute
+  CaSlowFriendingLudicRoute: typeof CaSlowFriendingLudicRoute
   CaTermesRoute: typeof CaTermesRoute
   CaTornejosRoute: typeof CaTornejosRoute
   EnAboutRoute: typeof EnAboutRoute
@@ -1150,6 +1188,7 @@ export interface RootRouteChildren {
   EnLudotecaRoute: typeof EnLudotecaRoute
   EnMediaRoute: typeof EnMediaRoute
   EnPrivacyRoute: typeof EnPrivacyRoute
+  EnSlowFriendingRoute: typeof EnSlowFriendingRoute
   EnTermsRoute: typeof EnTermsRoute
   EnTournamentsRoute: typeof EnTournamentsRoute
   InscripcionSlugRoute: typeof InscripcionSlugRoute
@@ -1196,6 +1235,13 @@ declare module '@tanstack/react-router' {
       path: '/sobre-nosotros'
       fullPath: '/sobre-nosotros'
       preLoaderRoute: typeof SobreNosotrosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/slow-friending-ludico': {
+      id: '/slow-friending-ludico'
+      path: '/slow-friending-ludico'
+      fullPath: '/slow-friending-ludico'
+      preLoaderRoute: typeof SlowFriendingLudicoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/sitemap.xml': {
@@ -1380,6 +1426,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EnTermsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/en/slow-friending': {
+      id: '/en/slow-friending'
+      path: '/en/slow-friending'
+      fullPath: '/en/slow-friending'
+      preLoaderRoute: typeof EnSlowFriendingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/en/privacy': {
       id: '/en/privacy'
       path: '/en/privacy'
@@ -1483,6 +1536,13 @@ declare module '@tanstack/react-router' {
       path: '/ca/termes'
       fullPath: '/ca/termes'
       preLoaderRoute: typeof CaTermesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ca/slow-friending-ludic': {
+      id: '/ca/slow-friending-ludic'
+      path: '/ca/slow-friending-ludic'
+      fullPath: '/ca/slow-friending-ludic'
+      preLoaderRoute: typeof CaSlowFriendingLudicRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/ca/rols-ocults': {
@@ -1930,6 +1990,7 @@ const rootRouteChildren: RootRouteChildren = {
   PrivacidadRoute: PrivacidadRoute,
   RolesOcultosRoute: RolesOcultosRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
+  SlowFriendingLudicoRoute: SlowFriendingLudicoRoute,
   SobreNosotrosRoute: SobreNosotrosRoute,
   SuperAdminRoute: SuperAdminRoute,
   TardaDeJocsICuinaJaponesaRoute: TardaDeJocsICuinaJaponesaRoute,
@@ -1948,6 +2009,7 @@ const rootRouteChildren: RootRouteChildren = {
   CaPrivacitatRoute: CaPrivacitatRoute,
   CaQuiSomRoute: CaQuiSomRoute,
   CaRolsOcultsRoute: CaRolsOcultsRoute,
+  CaSlowFriendingLudicRoute: CaSlowFriendingLudicRoute,
   CaTermesRoute: CaTermesRoute,
   CaTornejosRoute: CaTornejosRoute,
   EnAboutRoute: EnAboutRoute,
@@ -1963,6 +2025,7 @@ const rootRouteChildren: RootRouteChildren = {
   EnLudotecaRoute: EnLudotecaRoute,
   EnMediaRoute: EnMediaRoute,
   EnPrivacyRoute: EnPrivacyRoute,
+  EnSlowFriendingRoute: EnSlowFriendingRoute,
   EnTermsRoute: EnTermsRoute,
   EnTournamentsRoute: EnTournamentsRoute,
   InscripcionSlugRoute: InscripcionSlugRoute,
