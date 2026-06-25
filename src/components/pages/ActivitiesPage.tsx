@@ -273,9 +273,18 @@ export function ActivitiesPage() {
               </div>
             </article>
 
-            <article className="relative md:col-span-5 bg-card border-2 border-ink rounded-3xl p-7 shadow-tactile-sm hover:-translate-x-[2px] hover:-translate-y-[2px] hover:shadow-tactile transition-all overflow-hidden">
+            <Link
+              to={
+                locale === "en"
+                  ? "/en/slow-friending"
+                  : locale === "ca"
+                    ? "/ca/slow-friending-ludic"
+                    : "/slow-friending-ludico"
+              }
+              className="group relative md:col-span-5 bg-card border-2 border-ink rounded-3xl p-7 shadow-tactile-sm hover:-translate-x-[2px] hover:-translate-y-[2px] hover:shadow-tactile transition-all overflow-hidden flex flex-col"
+            >
               <div className="absolute -bottom-6 -right-6 text-[110px] leading-none opacity-20 select-none" aria-hidden>💘</div>
-              <div className="relative">
+              <div className="relative flex-1">
                 <Badge kind="occasional" label={a.badgeOccasional} />
                 <EditableText
                   id="activities.inside.slowTitle"
@@ -292,7 +301,11 @@ export function ActivitiesPage() {
                   {a.inside3Body}
                 </EditableText>
               </div>
-            </article>
+              <span className="relative mt-5 inline-flex items-center gap-2 text-sm font-bold text-coral-deep group-hover:gap-3 transition-all">
+                {locale === "en" ? "Discover Slow Friending" : locale === "ca" ? "Descobreix Slow Friending" : "Descubre Slow Friending"}
+                <ArrowRight className="h-4 w-4" />
+              </span>
+            </Link>
           </div>
         </div>
       </section>
