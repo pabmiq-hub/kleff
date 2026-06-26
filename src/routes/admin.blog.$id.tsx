@@ -24,9 +24,11 @@ function BlogPostEditor() {
   const router = useRouter();
   const updateFn = useServerFn(adminUpdateBlogPost);
   const deleteFn = useServerFn(adminDeleteBlogPost);
+  const translateFn = useServerFn(adminTranslateBlogPostFromEs);
   const [state, setState] = useState<Record<string, unknown> | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [translating, setTranslating] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
