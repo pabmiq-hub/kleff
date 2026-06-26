@@ -92,6 +92,30 @@ export function RichTextEditor({ value, onChange, placeholder, minimal, allowIma
     input.click();
   };
 
+  const insertImageWithCaption = async () => {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = "image/*";
+    input.onchange = async () => {
+      const file = input.files?.[0];
+      if (!file) return;
+      try {
+        const buf = await file.arrayBuffer();
+        const base64 = arrayBufferToBase64(buf);
+        const { url } = await upload({
+          data: { fileName: file.name, contentType: file.type || "image/jpeg", base64 },
+        });
+        const caption = window.prompt("Pie de foto (descripción de la imagen)", "") ?? "";
+        const safe = caption.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        const html = `<figure><img src="${url}" alt="${safe || file.name}" class="rounded-lg max-w-full h-auto" /><figcaption class="text-sm text-center italic text-ink/60 mt-2">${safe}</figcaption></figure><p></p>`;
+        editor.chain().focus().insertContent(html).run();
+      } catch (e) {
+        toast.error((e as Error).message);
+      }
+    };
+    input.click();
+  };
+
   return (
     <div className="border border-cream/15 rounded-lg bg-ink/40 overflow-hidden">
       <Toolbar
@@ -100,6 +124,7 @@ export function RichTextEditor({ value, onChange, placeholder, minimal, allowIma
         allowImages={allowImages}
         onLink={insertLink}
         onImage={insertImage}
+        onImageCaption={insertImageWithCaption}
       />
       <EditorContent editor={editor} />
     </div>
