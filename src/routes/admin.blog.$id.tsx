@@ -7,10 +7,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, Save, Loader2, Trash2, ExternalLink } from "lucide-react";
+import { ArrowLeft, Save, Loader2, Trash2, ExternalLink, Languages } from "lucide-react";
 import { toast } from "sonner";
-import { adminGetBlogPost, adminUpdateBlogPost, adminDeleteBlogPost } from "@/lib/blog.functions";
+import { adminGetBlogPost, adminUpdateBlogPost, adminDeleteBlogPost, adminTranslateBlogPostFromEs } from "@/lib/blog.functions";
 import { RichTextEditor } from "@/components/cms/RichTextEditor";
+import { ImagePicker } from "@/components/cms/ImagePicker";
 
 export const Route = createFileRoute("/admin/blog/$id")({
   head: () => ({ meta: [{ title: "Editar post — Admin KLEFF" }, { name: "robots", content: "noindex, nofollow" }] }),
