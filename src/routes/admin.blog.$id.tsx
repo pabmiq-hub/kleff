@@ -52,7 +52,7 @@ function BlogPostEditor() {
   const get = (k: string) => (state[k] as string | null | undefined) ?? "";
   const set = (k: string, v: unknown) => setState((s) => ({ ...s, [k]: v }));
 
-  const save = async () => {
+  const save = async (opts: { autoTranslate?: boolean } = {}) => {
     setSaving(true);
     try {
       await updateFn({
@@ -78,6 +78,18 @@ function BlogPostEditor() {
         },
       });
       toast.success("Post guardado");
+      if (opts.autoTranslate) {
+        setTranslating(true);
+        try {
+          const res = await translateFn({ data: { id: state.id as string, force: false } });
+          if (res.ok && (res.fieldsUpdated ?? 0) > 0) {
+            toast.success("Traducciones generadas (CA / EN)");
+            const fresh = await getPost({ data: { id: state.id as string } });
+            setState(fresh.post as Record<string, unknown>);
+          }
+        } catch (e) { toast.error("Traducción: " + (e as Error).message); }
+        finally { setTranslating(false); }
+      }
       await router.invalidate();
     } catch (e) { toast.error((e as Error).message); }
     finally { setSaving(false); }
