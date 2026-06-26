@@ -4,7 +4,7 @@ import Link from "@tiptap/extension-link";
 import Image from "@tiptap/extension-image";
 import Placeholder from "@tiptap/extension-placeholder";
 import { useEffect, useRef } from "react";
-import { Bold, Italic, List, ListOrdered, Quote, Link as LinkIcon, Heading2, Heading3, Image as ImageIcon, Undo2, Redo2 } from "lucide-react";
+import { Bold, Italic, List, ListOrdered, Quote, Link as LinkIcon, Heading2, Heading3, Image as ImageIcon, ImagePlus, Undo2, Redo2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useServerFn } from "@tanstack/react-start";
 import { uploadMedia } from "@/lib/media.functions";
@@ -27,12 +27,17 @@ export function RichTextEditor({ value, onChange, placeholder, minimal, allowIma
 
   const editor = useEditor({
     extensions: [
-      StarterKit,
+      // Tiptap v3 StarterKit ships its own Link extension. We use the
+      // standalone Link extension to configure rel/target, so disable the
+      // one inside StarterKit to avoid the "Cannot read properties of
+      // undefined (reading 'bind')" duplicate-extension crash.
+      StarterKit.configure({ link: false }),
       Link.configure({ openOnClick: false, HTMLAttributes: { rel: "noopener noreferrer", target: "_blank" } }),
       Image.configure({ HTMLAttributes: { class: "rounded-lg max-w-full h-auto my-3" } }),
       Placeholder.configure({ placeholder: placeholder ?? "Escribe aquí…" }),
     ],
     content: value || "",
+    immediatelyRender: false,
     editorProps: {
       attributes: {
         class: "prose prose-invert max-w-none focus:outline-none min-h-[120px] px-4 py-3",
@@ -87,6 +92,30 @@ export function RichTextEditor({ value, onChange, placeholder, minimal, allowIma
     input.click();
   };
 
+  const insertImageWithCaption = async () => {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = "image/*";
+    input.onchange = async () => {
+      const file = input.files?.[0];
+      if (!file) return;
+      try {
+        const buf = await file.arrayBuffer();
+        const base64 = arrayBufferToBase64(buf);
+        const { url } = await upload({
+          data: { fileName: file.name, contentType: file.type || "image/jpeg", base64 },
+        });
+        const caption = window.prompt("Pie de foto (descripción de la imagen)", "") ?? "";
+        const safe = caption.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        const html = `<figure><img src="${url}" alt="${safe || file.name}" class="rounded-lg max-w-full h-auto" /><figcaption class="text-sm text-center italic text-ink/60 mt-2">${safe}</figcaption></figure><p></p>`;
+        editor.chain().focus().insertContent(html).run();
+      } catch (e) {
+        toast.error((e as Error).message);
+      }
+    };
+    input.click();
+  };
+
   return (
     <div className="border border-cream/15 rounded-lg bg-ink/40 overflow-hidden">
       <Toolbar
@@ -95,6 +124,7 @@ export function RichTextEditor({ value, onChange, placeholder, minimal, allowIma
         allowImages={allowImages}
         onLink={insertLink}
         onImage={insertImage}
+        onImageCaption={insertImageWithCaption}
       />
       <EditorContent editor={editor} />
     </div>
@@ -102,10 +132,10 @@ export function RichTextEditor({ value, onChange, placeholder, minimal, allowIma
 }
 
 function Toolbar({
-  editor, minimal, allowImages, onLink, onImage,
+  editor, minimal, allowImages, onLink, onImage, onImageCaption,
 }: {
   editor: Editor; minimal?: boolean; allowImages?: boolean;
-  onLink: () => void; onImage: () => void;
+  onLink: () => void; onImage: () => void; onImageCaption: () => void;
 }) {
   const btn = (active: boolean) =>
     `h-8 w-8 p-0 ${active ? "bg-coral/20 text-coral" : "text-cream/70 hover:text-cream"}`;
@@ -125,7 +155,10 @@ function Toolbar({
       )}
       <Button type="button" variant="ghost" size="sm" className={btn(editor.isActive("link"))} onClick={onLink}><LinkIcon className="h-3.5 w-3.5" /></Button>
       {allowImages && (
-        <Button type="button" variant="ghost" size="sm" className={btn(false)} onClick={onImage}><ImageIcon className="h-3.5 w-3.5" /></Button>
+        <>
+          <Button type="button" variant="ghost" size="sm" className={btn(false)} onClick={onImage} title="Insertar imagen"><ImageIcon className="h-3.5 w-3.5" /></Button>
+          <Button type="button" variant="ghost" size="sm" className="h-8 px-2 text-xs text-cream/70 hover:text-cream" onClick={onImageCaption} title="Insertar imagen con pie de foto"><ImagePlus className="h-3.5 w-3.5 mr-1" />+ pie</Button>
+        </>
       )}
       <span className="flex-1" />
       <Button type="button" variant="ghost" size="sm" className={btn(false)} onClick={() => editor.chain().focus().undo().run()}><Undo2 className="h-3.5 w-3.5" /></Button>

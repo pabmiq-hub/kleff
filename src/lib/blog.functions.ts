@@ -585,7 +585,7 @@ export const adminUpdateBlogPost = createServerFn({ method: "POST" })
       slug: z.string().min(1).max(255).regex(/^[a-z0-9-]+$/).optional(),
       status: z.enum(["draft", "published"]).optional(),
       published_at: z.string().optional(),
-      cover_image_url: z.string().url().nullable().optional(),
+      cover_image_url: z.string().max(2000).nullable().optional(),
       author_name: z.string().max(200).nullable().optional(),
       title_es: z.string().max(300).nullable().optional(),
       title_ca: z.string().max(300).nullable().optional(),
@@ -612,6 +612,45 @@ export const adminUpdateBlogPost = createServerFn({ method: "POST" })
       .from("blog_posts").update(patch as never).eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true };
+  });
+
+export const adminTranslateBlogPostFromEs = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: unknown) => z.object({ id: z.string().uuid(), force: z.boolean().default(false) }).parse(data))
+  .handler(async ({ data, context }) => {
+    await assertSuperAdmin(context.userId);
+    const { data: row, error } = await supabaseAdmin
+      .from("blog_posts").select("*").eq("id", data.id).maybeSingle();
+    if (error) throw new Error(error.message);
+    if (!row) throw new Error("Post no encontrado");
+    if (!row.title_es || !row.content_es) {
+      return { ok: false, reason: "missing-es" };
+    }
+
+    const updates: Record<string, string> = {};
+    const targets: { lang: string; key: "ca" | "en"; existing: { t: string | null; c: string | null } }[] = [
+      { lang: "Catalan (Català)", key: "ca", existing: { t: row.title_ca, c: row.content_ca } },
+      { lang: "English", key: "en", existing: { t: row.title_en, c: row.content_en } },
+    ];
+
+    for (const t of targets) {
+      if (!data.force && t.existing.t && t.existing.c) continue;
+      const out = await translatePost(
+        { title: row.title_es, excerpt: row.excerpt_es ?? "", content: row.content_es },
+        t.lang,
+      );
+      if (out) {
+        updates[`title_${t.key}`] = out.title;
+        updates[`excerpt_${t.key}`] = out.excerpt;
+        updates[`content_${t.key}`] = out.content;
+      }
+    }
+
+    if (Object.keys(updates).length > 0) {
+      const { error: updErr } = await supabaseAdmin.from("blog_posts").update(updates as never).eq("id", data.id);
+      if (updErr) throw new Error(updErr.message);
+    }
+    return { ok: true, fieldsUpdated: Object.keys(updates).length };
   });
 
 export const adminDeleteBlogPost = createServerFn({ method: "POST" })

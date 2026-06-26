@@ -7,10 +7,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, Save, Loader2, Trash2, ExternalLink } from "lucide-react";
+import { ArrowLeft, Save, Loader2, Trash2, ExternalLink, Languages } from "lucide-react";
 import { toast } from "sonner";
-import { adminGetBlogPost, adminUpdateBlogPost, adminDeleteBlogPost } from "@/lib/blog.functions";
+import { adminGetBlogPost, adminUpdateBlogPost, adminDeleteBlogPost, adminTranslateBlogPostFromEs } from "@/lib/blog.functions";
 import { RichTextEditor } from "@/components/cms/RichTextEditor";
+import { ImagePicker } from "@/components/cms/ImagePicker";
 
 export const Route = createFileRoute("/admin/blog/$id")({
   head: () => ({ meta: [{ title: "Editar post — Admin KLEFF" }, { name: "robots", content: "noindex, nofollow" }] }),
@@ -23,9 +24,11 @@ function BlogPostEditor() {
   const router = useRouter();
   const updateFn = useServerFn(adminUpdateBlogPost);
   const deleteFn = useServerFn(adminDeleteBlogPost);
+  const translateFn = useServerFn(adminTranslateBlogPostFromEs);
   const [state, setState] = useState<Record<string, unknown> | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [translating, setTranslating] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -49,7 +52,7 @@ function BlogPostEditor() {
   const get = (k: string) => (state[k] as string | null | undefined) ?? "";
   const set = (k: string, v: unknown) => setState((s) => ({ ...s, [k]: v }));
 
-  const save = async () => {
+  const save = async (opts: { autoTranslate?: boolean } = {}) => {
     setSaving(true);
     try {
       await updateFn({
@@ -75,6 +78,18 @@ function BlogPostEditor() {
         },
       });
       toast.success("Post guardado");
+      if (opts.autoTranslate) {
+        setTranslating(true);
+        try {
+          const res = await translateFn({ data: { id: state.id as string, force: false } });
+          if (res.ok && (res.fieldsUpdated ?? 0) > 0) {
+            toast.success("Traducciones generadas (CA / EN)");
+            const fresh = await getPost({ data: { id: state.id as string } });
+            setState(fresh.post as Record<string, unknown>);
+          }
+        } catch (e) { toast.error("Traducción: " + (e as Error).message); }
+        finally { setTranslating(false); }
+      }
       await router.invalidate();
     } catch (e) { toast.error((e as Error).message); }
     finally { setSaving(false); }
@@ -111,9 +126,13 @@ function BlogPostEditor() {
             <Label className="text-ink text-xs uppercase tracking-wider">Autor</Label>
             <Input value={get("author_name")} onChange={(e) => set("author_name", e.target.value)} className="bg-white border-ink/15 text-ink mt-1" />
           </div>
-          <div>
-            <Label className="text-ink text-xs uppercase tracking-wider">Imagen de cabecera (URL)</Label>
-            <Input value={get("cover_image_url")} onChange={(e) => set("cover_image_url", e.target.value)} className="bg-white border-ink/15 text-ink mt-1" placeholder="https://…" />
+          <div className="md:col-span-2">
+            <Label className="text-ink text-xs uppercase tracking-wider mb-1 block">Imagen de cabecera</Label>
+            <ImagePicker
+              url={get("cover_image_url") || undefined}
+              onChange={(url) => set("cover_image_url", url)}
+              label="Subir imagen de cabecera (1920 × 640 px recomendado)"
+            />
           </div>
           <div>
             <Label className="text-ink text-xs uppercase tracking-wider">Fecha publicación</Label>
@@ -155,8 +174,17 @@ function BlogPostEditor() {
         ))}
       </Tabs>
 
-      <div className="sticky bottom-4 flex justify-end">
-        <Button onClick={save} disabled={saving} className="bg-coral hover:bg-coral/90">
+      <div className="sticky bottom-4 flex justify-end gap-2">
+        <Button
+          variant="outline"
+          onClick={() => save({ autoTranslate: true })}
+          disabled={saving || translating}
+          className="bg-white border-ink/20 text-ink hover:bg-ink/5"
+          title="Guarda y traduce automáticamente del español a catalán e inglés"
+        >
+          {translating ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Languages className="h-4 w-4 mr-2" />} Guardar + traducir
+        </Button>
+        <Button onClick={() => save()} disabled={saving} className="bg-coral hover:bg-coral/90">
           {saving ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Save className="h-4 w-4 mr-2" />} Guardar cambios
         </Button>
       </div>
