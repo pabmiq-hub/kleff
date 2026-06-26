@@ -126,9 +126,13 @@ function BlogPostEditor() {
             <Label className="text-ink text-xs uppercase tracking-wider">Autor</Label>
             <Input value={get("author_name")} onChange={(e) => set("author_name", e.target.value)} className="bg-white border-ink/15 text-ink mt-1" />
           </div>
-          <div>
-            <Label className="text-ink text-xs uppercase tracking-wider">Imagen de cabecera (URL)</Label>
-            <Input value={get("cover_image_url")} onChange={(e) => set("cover_image_url", e.target.value)} className="bg-white border-ink/15 text-ink mt-1" placeholder="https://…" />
+          <div className="md:col-span-2">
+            <Label className="text-ink text-xs uppercase tracking-wider mb-1 block">Imagen de cabecera</Label>
+            <ImagePicker
+              value={get("cover_image_url")}
+              onChange={(url) => set("cover_image_url", url)}
+              recommendedSize="1920 × 640 px (3:1)"
+            />
           </div>
           <div>
             <Label className="text-ink text-xs uppercase tracking-wider">Fecha publicación</Label>
