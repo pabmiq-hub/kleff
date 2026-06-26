@@ -132,10 +132,10 @@ export function RichTextEditor({ value, onChange, placeholder, minimal, allowIma
 }
 
 function Toolbar({
-  editor, minimal, allowImages, onLink, onImage,
+  editor, minimal, allowImages, onLink, onImage, onImageCaption,
 }: {
   editor: Editor; minimal?: boolean; allowImages?: boolean;
-  onLink: () => void; onImage: () => void;
+  onLink: () => void; onImage: () => void; onImageCaption: () => void;
 }) {
   const btn = (active: boolean) =>
     `h-8 w-8 p-0 ${active ? "bg-coral/20 text-coral" : "text-cream/70 hover:text-cream"}`;
@@ -155,7 +155,10 @@ function Toolbar({
       )}
       <Button type="button" variant="ghost" size="sm" className={btn(editor.isActive("link"))} onClick={onLink}><LinkIcon className="h-3.5 w-3.5" /></Button>
       {allowImages && (
-        <Button type="button" variant="ghost" size="sm" className={btn(false)} onClick={onImage}><ImageIcon className="h-3.5 w-3.5" /></Button>
+        <>
+          <Button type="button" variant="ghost" size="sm" className={btn(false)} onClick={onImage} title="Insertar imagen"><ImageIcon className="h-3.5 w-3.5" /></Button>
+          <Button type="button" variant="ghost" size="sm" className="h-8 px-2 text-xs text-cream/70 hover:text-cream" onClick={onImageCaption} title="Insertar imagen con pie de foto"><ImagePlus className="h-3.5 w-3.5 mr-1" />+ pie</Button>
+        </>
       )}
       <span className="flex-1" />
       <Button type="button" variant="ghost" size="sm" className={btn(false)} onClick={() => editor.chain().focus().undo().run()}><Undo2 className="h-3.5 w-3.5" /></Button>
