@@ -647,7 +647,7 @@ export const adminTranslateBlogPostFromEs = createServerFn({ method: "POST" })
     }
 
     if (Object.keys(updates).length > 0) {
-      const { error: updErr } = await supabaseAdmin.from("blog_posts").update(updates).eq("id", data.id);
+      const { error: updErr } = await supabaseAdmin.from("blog_posts").update(updates as never).eq("id", data.id);
       if (updErr) throw new Error(updErr.message);
     }
     return { ok: true, fieldsUpdated: Object.keys(updates).length };
