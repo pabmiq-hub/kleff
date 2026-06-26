@@ -4,7 +4,7 @@ import Link from "@tiptap/extension-link";
 import Image from "@tiptap/extension-image";
 import Placeholder from "@tiptap/extension-placeholder";
 import { useEffect, useRef } from "react";
-import { Bold, Italic, List, ListOrdered, Quote, Link as LinkIcon, Heading2, Heading3, Image as ImageIcon, Undo2, Redo2 } from "lucide-react";
+import { Bold, Italic, List, ListOrdered, Quote, Link as LinkIcon, Heading2, Heading3, Image as ImageIcon, ImagePlus, Undo2, Redo2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useServerFn } from "@tanstack/react-start";
 import { uploadMedia } from "@/lib/media.functions";
