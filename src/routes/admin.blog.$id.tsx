@@ -129,9 +129,9 @@ function BlogPostEditor() {
           <div className="md:col-span-2">
             <Label className="text-ink text-xs uppercase tracking-wider mb-1 block">Imagen de cabecera</Label>
             <ImagePicker
-              value={get("cover_image_url")}
+              url={get("cover_image_url") || undefined}
               onChange={(url) => set("cover_image_url", url)}
-              recommendedSize="1920 × 640 px (3:1)"
+              label="Subir imagen de cabecera (1920 × 640 px recomendado)"
             />
           </div>
           <div>
