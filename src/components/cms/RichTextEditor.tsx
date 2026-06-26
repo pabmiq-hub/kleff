@@ -27,12 +27,17 @@ export function RichTextEditor({ value, onChange, placeholder, minimal, allowIma
 
   const editor = useEditor({
     extensions: [
-      StarterKit,
+      // Tiptap v3 StarterKit ships its own Link extension. We use the
+      // standalone Link extension to configure rel/target, so disable the
+      // one inside StarterKit to avoid the "Cannot read properties of
+      // undefined (reading 'bind')" duplicate-extension crash.
+      StarterKit.configure({ link: false }),
       Link.configure({ openOnClick: false, HTMLAttributes: { rel: "noopener noreferrer", target: "_blank" } }),
       Image.configure({ HTMLAttributes: { class: "rounded-lg max-w-full h-auto my-3" } }),
       Placeholder.configure({ placeholder: placeholder ?? "Escribe aquí…" }),
     ],
     content: value || "",
+    immediatelyRender: false,
     editorProps: {
       attributes: {
         class: "prose prose-invert max-w-none focus:outline-none min-h-[120px] px-4 py-3",
