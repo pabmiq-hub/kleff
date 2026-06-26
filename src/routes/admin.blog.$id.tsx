@@ -174,8 +174,17 @@ function BlogPostEditor() {
         ))}
       </Tabs>
 
-      <div className="sticky bottom-4 flex justify-end">
-        <Button onClick={save} disabled={saving} className="bg-coral hover:bg-coral/90">
+      <div className="sticky bottom-4 flex justify-end gap-2">
+        <Button
+          variant="outline"
+          onClick={() => save({ autoTranslate: true })}
+          disabled={saving || translating}
+          className="bg-white border-ink/20 text-ink hover:bg-ink/5"
+          title="Guarda y traduce automáticamente del español a catalán e inglés"
+        >
+          {translating ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Languages className="h-4 w-4 mr-2" />} Guardar + traducir
+        </Button>
+        <Button onClick={() => save()} disabled={saving} className="bg-coral hover:bg-coral/90">
           {saving ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Save className="h-4 w-4 mr-2" />} Guardar cambios
         </Button>
       </div>
