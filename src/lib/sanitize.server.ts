@@ -43,9 +43,9 @@ function stripDangerousBlocks(html: string): string {
   return html
     .replace(/\u0000/g, "")
     .replace(/<!--[\s\S]*?-->/g, "")
-    .replace(/<\/?(?:script|style|object|embed|link|meta|base|template)\b[^>]*>/gi, "")
     .replace(/<script\b[\s\S]*?<\/script>/gi, "")
-    .replace(/<style\b[\s\S]*?<\/style>/gi, "");
+    .replace(/<style\b[\s\S]*?<\/style>/gi, "")
+    .replace(/<\/?(?:script|style|object|embed|link|meta|base|template)\b[^>]*>/gi, "");
 }
 
 function stripUnsafeIframes(html: string): string {
