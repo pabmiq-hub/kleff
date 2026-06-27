@@ -3,10 +3,8 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { assertSuperAdmin } from "@/lib/assert-role.server";
-// sanitizeHtml is imported lazily inside admin handlers to avoid pulling
-// isomorphic-dompurify (and its jsdom dep) into the public blog read path,
-// which crashes SSR in the Worker runtime with
-// "Cannot read properties of undefined (reading 'bind')".
+// sanitizeHtml is imported lazily inside admin handlers so public blog reads
+// do not load CMS-only sanitizing code.
 
 const LOCALES = ["es", "ca", "en"] as const;
 type Locale = (typeof LOCALES)[number];
@@ -364,7 +362,11 @@ async function translatePost(
 
   const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
     method: "POST",
-    headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
+    headers: {
+      "Lovable-API-Key": apiKey,
+      "X-Lovable-AIG-SDK": "vercel-ai-sdk",
+      "Content-Type": "application/json",
+    },
     body: JSON.stringify({
       model: "google/gemini-2.5-flash",
       messages: [
