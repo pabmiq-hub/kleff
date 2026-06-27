@@ -3,10 +3,8 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { assertSuperAdmin } from "@/lib/assert-role.server";
-// sanitizeHtml is imported lazily inside admin handlers to avoid pulling
-// isomorphic-dompurify (and its jsdom dep) into the public read path,
-// which crashes SSR in the Worker runtime with
-// "Cannot read properties of undefined (reading 'bind')".
+// sanitizeHtml is imported lazily inside admin handlers so public reads do not
+// load CMS-only sanitizing code.
 import type { Block, BlockType, Locale } from "@/cms/blockTypes";
 
 async function sanitizeBlockData(

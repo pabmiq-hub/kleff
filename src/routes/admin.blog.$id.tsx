@@ -84,12 +84,14 @@ function BlogPostEditor() {
           const res = await translateFn({ data: { id: state.id as string, force: false } });
           if (res.ok && (res.fieldsUpdated ?? 0) > 0) {
             toast.success("Traducciones generadas (CA / EN)");
-            const fresh = await getPost({ data: { id: state.id as string } });
-            setState(fresh.post as Record<string, unknown>);
+          } else if (!res.ok && res.reason === "missing-es") {
+            toast.error("Completa primero el título y contenido en ES para traducir.");
           }
         } catch (e) { toast.error("Traducción: " + (e as Error).message); }
         finally { setTranslating(false); }
       }
+      const fresh = await getPost({ data: { id: state.id as string } });
+      setState(fresh.post as Record<string, unknown>);
       await router.invalidate();
     } catch (e) { toast.error((e as Error).message); }
     finally { setSaving(false); }
