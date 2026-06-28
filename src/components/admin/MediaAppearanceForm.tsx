@@ -309,7 +309,7 @@ export function MediaAppearanceForm({ initial }: Props) {
           <Input
             id="dateLabel"
             value={dateLabel}
-            onChange={(e) => setDateLabel(e.target.value)}
+              onChange={(e) => remember(setDateLabel)(e.target.value)}
             placeholder={autoDateLabel}
             className="mt-1"
           />
@@ -324,7 +324,7 @@ export function MediaAppearanceForm({ initial }: Props) {
           <Input
             id="outlet"
             value={outlet}
-            onChange={(e) => setOutlet(e.target.value)}
+            onChange={(e) => remember(setOutlet)(e.target.value)}
             placeholder="El Periódico · Qué hacer"
             className="mt-1"
             required
@@ -348,7 +348,7 @@ export function MediaAppearanceForm({ initial }: Props) {
                 <Input
                   id="title_es"
                   value={titleEs}
-                  onChange={(e) => setTitleEs(e.target.value)}
+                  onChange={(e) => remember(setTitleEs)(e.target.value)}
                   placeholder="Titular destacado"
                   required
                 />
@@ -358,7 +358,7 @@ export function MediaAppearanceForm({ initial }: Props) {
                 <Textarea
                   id="desc_es"
                   value={descEs}
-                  onChange={(e) => setDescEs(e.target.value)}
+                  onChange={(e) => remember(setDescEs)(e.target.value)}
                   rows={4}
                   maxLength={600}
                 />
@@ -370,7 +370,7 @@ export function MediaAppearanceForm({ initial }: Props) {
                 <Input
                   id="title_ca"
                   value={titleCa}
-                  onChange={(e) => setTitleCa(e.target.value)}
+                  onChange={(e) => remember(setTitleCa)(e.target.value)}
                   placeholder="Si es deixa buit, es mostrarà el títol en castellà."
                 />
               </div>
@@ -379,7 +379,7 @@ export function MediaAppearanceForm({ initial }: Props) {
                 <Textarea
                   id="desc_ca"
                   value={descCa}
-                  onChange={(e) => setDescCa(e.target.value)}
+                  onChange={(e) => remember(setDescCa)(e.target.value)}
                   rows={4}
                   maxLength={600}
                 />
@@ -391,7 +391,7 @@ export function MediaAppearanceForm({ initial }: Props) {
                 <Input
                   id="title_en"
                   value={titleEn}
-                  onChange={(e) => setTitleEn(e.target.value)}
+                  onChange={(e) => remember(setTitleEn)(e.target.value)}
                   placeholder="If left blank, the Spanish title will be shown."
                 />
               </div>
@@ -400,7 +400,7 @@ export function MediaAppearanceForm({ initial }: Props) {
                 <Textarea
                   id="desc_en"
                   value={descEn}
-                  onChange={(e) => setDescEn(e.target.value)}
+                  onChange={(e) => remember(setDescEn)(e.target.value)}
                   rows={4}
                   maxLength={600}
                 />
@@ -415,7 +415,7 @@ export function MediaAppearanceForm({ initial }: Props) {
             id="url"
             type="url"
             value={url}
-            onChange={(e) => setUrl(e.target.value)}
+            onChange={(e) => remember(setUrl)(e.target.value)}
             placeholder="https://www.elperiodico.com/…"
             className="mt-1"
             required
@@ -428,7 +428,7 @@ export function MediaAppearanceForm({ initial }: Props) {
             <Input
               type="url"
               value={imageUrl}
-              onChange={(e) => setImageUrl(e.target.value)}
+              onChange={(e) => remember(setImageUrl)(e.target.value)}
               placeholder="https://… o sube una imagen"
             />
             <label className="inline-flex items-center gap-2 cursor-pointer rounded-md border border-ink/20 bg-white px-3 py-2 text-sm hover:bg-ink/5">
@@ -458,7 +458,7 @@ export function MediaAppearanceForm({ initial }: Props) {
         </div>
 
         <div className="flex items-center gap-3 pt-2">
-          <Switch id="published" checked={isPublished} onCheckedChange={setIsPublished} />
+          <Switch id="published" checked={isPublished} onCheckedChange={remember(setIsPublished)} />
           <Label htmlFor="published" className="cursor-pointer">
             Publicado (visible en /medios)
           </Label>
@@ -516,4 +516,29 @@ export function MediaAppearanceForm({ initial }: Props) {
       </aside>
     </div>
   );
+}
+
+type MediaDraft = {
+  url?: string;
+  outlet?: string;
+  titleEs?: string;
+  titleCa?: string;
+  titleEn?: string;
+  descEs?: string;
+  descCa?: string;
+  descEn?: string;
+  imageUrl?: string;
+  dateLabel?: string;
+  year?: number;
+  month?: number;
+  isPublished?: boolean;
+};
+
+function readMediaDraft(key: string): MediaDraft | null {
+  try {
+    const raw = window.localStorage.getItem(key);
+    return raw ? (JSON.parse(raw) as MediaDraft) : null;
+  } catch {
+    return null;
+  }
 }
