@@ -1,4 +1,4 @@
-import { useState, useMemo, type ChangeEvent } from "react";
+import { useEffect, useState, useMemo, useRef, type ChangeEvent } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
@@ -64,9 +64,57 @@ export function MediaAppearanceForm({ initial }: Props) {
   const [uploading, setUploading] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [previewLocale, setPreviewLocale] = useState<"es" | "ca" | "en">("es");
+  const hasLocalChangesRef = useRef(false);
+  const draftKey = `kleff:media-draft:${initial?.id ?? "new"}`;
 
   const autoDateLabel = `${MONTH_LABELS[month - 1]} ${year}`;
   const effectiveDateLabel = dateLabel || autoDateLabel;
+
+  useEffect(() => {
+    const draft = readMediaDraft(draftKey);
+    if (!draft) return;
+    hasLocalChangesRef.current = true;
+    setUrl(draft.url ?? "");
+    setOutlet(draft.outlet ?? "");
+    setTitleEs(draft.titleEs ?? "");
+    setTitleCa(draft.titleCa ?? "");
+    setTitleEn(draft.titleEn ?? "");
+    setDescEs(draft.descEs ?? "");
+    setDescCa(draft.descCa ?? "");
+    setDescEn(draft.descEn ?? "");
+    setImageUrl(draft.imageUrl ?? "");
+    setDateLabel(draft.dateLabel ?? "");
+    setYear(draft.year ?? now.getFullYear());
+    setMonth(draft.month ?? now.getMonth() + 1);
+    setIsPublished(draft.isPublished ?? true);
+  }, [draftKey]);
+
+  useEffect(() => {
+    if (!hasLocalChangesRef.current) return;
+    window.localStorage.setItem(
+      draftKey,
+      JSON.stringify({
+        url,
+        outlet,
+        titleEs,
+        titleCa,
+        titleEn,
+        descEs,
+        descCa,
+        descEn,
+        imageUrl,
+        month,
+        year,
+        dateLabel,
+        isPublished,
+      }),
+    );
+  }, [dateLabel, descCa, descEn, descEs, draftKey, imageUrl, isPublished, month, outlet, titleCa, titleEn, titleEs, url, year]);
+
+  const remember = <T,>(setter: (value: T) => void) => (value: T) => {
+    hasLocalChangesRef.current = true;
+    setter(value);
+  };
 
   const previewItem: MediaAppearance = useMemo(() => {
     const t =
@@ -137,6 +185,7 @@ export function MediaAppearanceForm({ initial }: Props) {
       const res = await uploadFn({
         data: { fileName: file.name, contentType: file.type || "image/jpeg", base64 },
       });
+      hasLocalChangesRef.current = true;
       setImageUrl(res.url);
       toast.success("Imagen subida");
     } catch (err) {
@@ -189,9 +238,13 @@ export function MediaAppearanceForm({ initial }: Props) {
         setYear(updated.year);
         setMonth(updated.month);
         setIsPublished(updated.isPublished);
+        hasLocalChangesRef.current = false;
+        window.localStorage.removeItem(draftKey);
         toast.success("Publicación actualizada");
       } else {
         const created = await createFn({ data: payload });
+        hasLocalChangesRef.current = false;
+        window.localStorage.removeItem(draftKey);
         toast.success("Publicación creada");
         void navigate({ to: "/admin/media/$id", params: { id: created.id } });
         return;
@@ -227,7 +280,7 @@ export function MediaAppearanceForm({ initial }: Props) {
             <select
               id="month"
               value={month}
-              onChange={(e) => setMonth(Number(e.target.value))}
+              onChange={(e) => remember(setMonth)(Number(e.target.value))}
               className="mt-1 w-full rounded-md border border-ink/15 bg-white px-3 py-2 text-sm"
             >
               {MONTH_LABELS.map((m, i) => (
@@ -245,7 +298,7 @@ export function MediaAppearanceForm({ initial }: Props) {
               min={2000}
               max={2100}
               value={year}
-              onChange={(e) => setYear(Number(e.target.value))}
+              onChange={(e) => remember(setYear)(Number(e.target.value))}
               className="mt-1"
             />
           </div>
@@ -256,7 +309,7 @@ export function MediaAppearanceForm({ initial }: Props) {
           <Input
             id="dateLabel"
             value={dateLabel}
-            onChange={(e) => setDateLabel(e.target.value)}
+              onChange={(e) => remember(setDateLabel)(e.target.value)}
             placeholder={autoDateLabel}
             className="mt-1"
           />
@@ -271,7 +324,7 @@ export function MediaAppearanceForm({ initial }: Props) {
           <Input
             id="outlet"
             value={outlet}
-            onChange={(e) => setOutlet(e.target.value)}
+            onChange={(e) => remember(setOutlet)(e.target.value)}
             placeholder="El Periódico · Qué hacer"
             className="mt-1"
             required
@@ -295,7 +348,7 @@ export function MediaAppearanceForm({ initial }: Props) {
                 <Input
                   id="title_es"
                   value={titleEs}
-                  onChange={(e) => setTitleEs(e.target.value)}
+                  onChange={(e) => remember(setTitleEs)(e.target.value)}
                   placeholder="Titular destacado"
                   required
                 />
@@ -305,7 +358,7 @@ export function MediaAppearanceForm({ initial }: Props) {
                 <Textarea
                   id="desc_es"
                   value={descEs}
-                  onChange={(e) => setDescEs(e.target.value)}
+                  onChange={(e) => remember(setDescEs)(e.target.value)}
                   rows={4}
                   maxLength={600}
                 />
@@ -317,7 +370,7 @@ export function MediaAppearanceForm({ initial }: Props) {
                 <Input
                   id="title_ca"
                   value={titleCa}
-                  onChange={(e) => setTitleCa(e.target.value)}
+                  onChange={(e) => remember(setTitleCa)(e.target.value)}
                   placeholder="Si es deixa buit, es mostrarà el títol en castellà."
                 />
               </div>
@@ -326,7 +379,7 @@ export function MediaAppearanceForm({ initial }: Props) {
                 <Textarea
                   id="desc_ca"
                   value={descCa}
-                  onChange={(e) => setDescCa(e.target.value)}
+                  onChange={(e) => remember(setDescCa)(e.target.value)}
                   rows={4}
                   maxLength={600}
                 />
@@ -338,7 +391,7 @@ export function MediaAppearanceForm({ initial }: Props) {
                 <Input
                   id="title_en"
                   value={titleEn}
-                  onChange={(e) => setTitleEn(e.target.value)}
+                  onChange={(e) => remember(setTitleEn)(e.target.value)}
                   placeholder="If left blank, the Spanish title will be shown."
                 />
               </div>
@@ -347,7 +400,7 @@ export function MediaAppearanceForm({ initial }: Props) {
                 <Textarea
                   id="desc_en"
                   value={descEn}
-                  onChange={(e) => setDescEn(e.target.value)}
+                  onChange={(e) => remember(setDescEn)(e.target.value)}
                   rows={4}
                   maxLength={600}
                 />
@@ -362,7 +415,7 @@ export function MediaAppearanceForm({ initial }: Props) {
             id="url"
             type="url"
             value={url}
-            onChange={(e) => setUrl(e.target.value)}
+            onChange={(e) => remember(setUrl)(e.target.value)}
             placeholder="https://www.elperiodico.com/…"
             className="mt-1"
             required
@@ -375,7 +428,7 @@ export function MediaAppearanceForm({ initial }: Props) {
             <Input
               type="url"
               value={imageUrl}
-              onChange={(e) => setImageUrl(e.target.value)}
+              onChange={(e) => remember(setImageUrl)(e.target.value)}
               placeholder="https://… o sube una imagen"
             />
             <label className="inline-flex items-center gap-2 cursor-pointer rounded-md border border-ink/20 bg-white px-3 py-2 text-sm hover:bg-ink/5">
@@ -405,7 +458,7 @@ export function MediaAppearanceForm({ initial }: Props) {
         </div>
 
         <div className="flex items-center gap-3 pt-2">
-          <Switch id="published" checked={isPublished} onCheckedChange={setIsPublished} />
+          <Switch id="published" checked={isPublished} onCheckedChange={remember(setIsPublished)} />
           <Label htmlFor="published" className="cursor-pointer">
             Publicado (visible en /medios)
           </Label>
@@ -463,4 +516,29 @@ export function MediaAppearanceForm({ initial }: Props) {
       </aside>
     </div>
   );
+}
+
+type MediaDraft = {
+  url?: string;
+  outlet?: string;
+  titleEs?: string;
+  titleCa?: string;
+  titleEn?: string;
+  descEs?: string;
+  descCa?: string;
+  descEn?: string;
+  imageUrl?: string;
+  dateLabel?: string;
+  year?: number;
+  month?: number;
+  isPublished?: boolean;
+};
+
+function readMediaDraft(key: string): MediaDraft | null {
+  try {
+    const raw = window.localStorage.getItem(key);
+    return raw ? (JSON.parse(raw) as MediaDraft) : null;
+  } catch {
+    return null;
+  }
 }
