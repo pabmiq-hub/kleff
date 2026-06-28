@@ -25,15 +25,21 @@ function EditMediaPage() {
   const [err, setErr] = useState<string | null>(null);
 
   useEffect(() => {
+    let cancelled = false;
     (async () => {
       try {
         const res = await getFn({ data: { id } });
+        if (cancelled) return;
         setItem(res);
       } catch (e) {
+        if (cancelled) return;
         setErr((e as Error).message);
       }
     })();
-  }, [getFn, id]);
+    return () => {
+      cancelled = true;
+    };
+  }, [id]);
 
   return (
     <div className="space-y-6">

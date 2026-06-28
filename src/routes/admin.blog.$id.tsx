@@ -1,13 +1,13 @@
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, Save, Loader2, Trash2, ExternalLink, Languages } from "lucide-react";
+import { ArrowLeft, Save, Loader2, Trash2, ExternalLink, Languages, Send } from "lucide-react";
 import { toast } from "sonner";
 import { adminGetBlogPost, adminUpdateBlogPost, adminDeleteBlogPost, adminTranslateBlogPostFromEs } from "@/lib/blog.functions";
 import { RichTextEditor } from "@/components/cms/RichTextEditor";
@@ -29,13 +29,17 @@ function BlogPostEditor() {
   const [loadError, setLoadError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [translating, setTranslating] = useState(false);
+  const [publishMode, setPublishMode] = useState(false);
+  const hasLoadedRef = useRef(false);
 
   useEffect(() => {
     let cancelled = false;
+    hasLoadedRef.current = false;
     getPost({ data: { id } })
       .then((res) => {
         if (cancelled) return;
         setState(res.post as Record<string, unknown>);
+        hasLoadedRef.current = true;
       })
       .catch((e) => {
         if (cancelled) return;
@@ -44,23 +48,38 @@ function BlogPostEditor() {
     return () => {
       cancelled = true;
     };
-  }, [id, getPost]);
+  }, [id]);
 
   if (loadError) return <div className="rounded-lg border border-red-500/20 bg-red-500/10 p-4 text-sm text-red-200">{loadError}</div>;
   if (!state) return <div className="p-6 text-ink/60 flex items-center gap-2"><Loader2 className="h-4 w-4 animate-spin" /> Cargando post…</div>;
 
   const get = (k: string) => (state[k] as string | null | undefined) ?? "";
-  const set = (k: string, v: unknown) => setState((s) => ({ ...s, [k]: v }));
+  const set = (k: string, v: unknown) => setState((s) => (s && hasLoadedRef.current ? { ...s, [k]: v } : s));
 
-  const save = async (opts: { autoTranslate?: boolean } = {}) => {
+  const hasPublishableSpanishContent = () => {
+    const title = get("title_es").trim();
+    const text = get("content_es")
+      .replace(/<[^>]+>/g, "")
+      .replace(/&nbsp;/g, " ")
+      .trim();
+    return title.length > 0 && text.length > 0;
+  };
+
+  const save = async (opts: { autoTranslate?: boolean; publish?: boolean } = {}) => {
+    if (opts.publish && !hasPublishableSpanishContent()) {
+      toast.error("Completa el título y el contenido en ES antes de publicar.");
+      return;
+    }
     setSaving(true);
+    setPublishMode(!!opts.publish);
     try {
+      const nextStatus = opts.publish ? "published" : (state.status as "draft" | "published");
       await updateFn({
         data: {
           id: state.id as string,
           patch: {
             slug: state.slug as string,
-            status: state.status as "draft" | "published",
+            status: nextStatus,
             published_at: state.published_at as string,
             cover_image_url: (state.cover_image_url as string) || null,
             author_name: (state.author_name as string) || null,
@@ -77,7 +96,7 @@ function BlogPostEditor() {
           },
         },
       });
-      toast.success("Post guardado");
+      toast.success(opts.publish ? "Post publicado en /blog" : "Post guardado");
       if (opts.autoTranslate) {
         setTranslating(true);
         try {
@@ -94,7 +113,10 @@ function BlogPostEditor() {
       setState(fresh.post as Record<string, unknown>);
       await router.invalidate();
     } catch (e) { toast.error((e as Error).message); }
-    finally { setSaving(false); }
+    finally {
+      setSaving(false);
+      setPublishMode(false);
+    }
   };
 
   const handleDelete = async () => {
@@ -185,6 +207,15 @@ function BlogPostEditor() {
           title="Guarda y traduce automáticamente del español a catalán e inglés"
         >
           {translating ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Languages className="h-4 w-4 mr-2" />} Guardar + traducir
+        </Button>
+        <Button
+          variant="outline"
+          onClick={() => save({ publish: true })}
+          disabled={saving || translating || !hasPublishableSpanishContent()}
+          className="bg-white border-coral/40 text-ink hover:bg-coral/10"
+          title="Publica el post y lo hace visible en /blog"
+        >
+          {saving && publishMode ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Send className="h-4 w-4 mr-2" />} Publicar en /blog
         </Button>
         <Button onClick={() => save()} disabled={saving} className="bg-coral hover:bg-coral/90">
           {saving ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Save className="h-4 w-4 mr-2" />} Guardar cambios
