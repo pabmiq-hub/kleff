@@ -31,6 +31,8 @@ function BlogPostEditor() {
   const [translating, setTranslating] = useState(false);
   const [publishMode, setPublishMode] = useState(false);
   const hasLoadedRef = useRef(false);
+  const hasLocalChangesRef = useRef(false);
+  const draftKey = `kleff:blog-draft:${id}`;
 
   useEffect(() => {
     let cancelled = false;
@@ -38,7 +40,10 @@ function BlogPostEditor() {
     getPost({ data: { id } })
       .then((res) => {
         if (cancelled) return;
-        setState(res.post as Record<string, unknown>);
+        const serverPost = res.post as Record<string, unknown>;
+        const localDraft = readLocalDraft(draftKey);
+        if (localDraft) hasLocalChangesRef.current = true;
+        setState(localDraft ? { ...serverPost, ...localDraft } : serverPost);
         hasLoadedRef.current = true;
       })
       .catch((e) => {
@@ -50,11 +55,19 @@ function BlogPostEditor() {
     };
   }, [id]);
 
+  useEffect(() => {
+    if (!state || !hasLoadedRef.current || !hasLocalChangesRef.current) return;
+    window.localStorage.setItem(draftKey, JSON.stringify(state));
+  }, [draftKey, state]);
+
   if (loadError) return <div className="rounded-lg border border-red-500/20 bg-red-500/10 p-4 text-sm text-red-200">{loadError}</div>;
   if (!state) return <div className="p-6 text-ink/60 flex items-center gap-2"><Loader2 className="h-4 w-4 animate-spin" /> Cargando post…</div>;
 
   const get = (k: string) => (state[k] as string | null | undefined) ?? "";
-  const set = (k: string, v: unknown) => setState((s) => (s && hasLoadedRef.current ? { ...s, [k]: v } : s));
+  const set = (k: string, v: unknown) => {
+    hasLocalChangesRef.current = true;
+    setState((s) => (s && hasLoadedRef.current ? { ...s, [k]: v } : s));
+  };
 
   const hasPublishableSpanishContent = () => {
     const title = get("title_es").trim();
@@ -110,6 +123,8 @@ function BlogPostEditor() {
         finally { setTranslating(false); }
       }
       const fresh = await getPost({ data: { id: state.id as string } });
+      hasLocalChangesRef.current = false;
+      window.localStorage.removeItem(draftKey);
       setState(fresh.post as Record<string, unknown>);
       await router.invalidate();
     } catch (e) { toast.error((e as Error).message); }
@@ -223,4 +238,13 @@ function BlogPostEditor() {
       </div>
     </div>
   );
+}
+
+function readLocalDraft(key: string): Record<string, unknown> | null {
+  try {
+    const raw = window.localStorage.getItem(key);
+    return raw ? (JSON.parse(raw) as Record<string, unknown>) : null;
+  } catch {
+    return null;
+  }
 }

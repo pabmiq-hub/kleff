@@ -1,4 +1,4 @@
-import { useState, useMemo, type ChangeEvent } from "react";
+import { useEffect, useState, useMemo, useRef, type ChangeEvent } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
@@ -64,9 +64,57 @@ export function MediaAppearanceForm({ initial }: Props) {
   const [uploading, setUploading] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [previewLocale, setPreviewLocale] = useState<"es" | "ca" | "en">("es");
+  const hasLocalChangesRef = useRef(false);
+  const draftKey = `kleff:media-draft:${initial?.id ?? "new"}`;
 
   const autoDateLabel = `${MONTH_LABELS[month - 1]} ${year}`;
   const effectiveDateLabel = dateLabel || autoDateLabel;
+
+  useEffect(() => {
+    const draft = readMediaDraft(draftKey);
+    if (!draft) return;
+    hasLocalChangesRef.current = true;
+    setUrl(draft.url ?? "");
+    setOutlet(draft.outlet ?? "");
+    setTitleEs(draft.titleEs ?? "");
+    setTitleCa(draft.titleCa ?? "");
+    setTitleEn(draft.titleEn ?? "");
+    setDescEs(draft.descEs ?? "");
+    setDescCa(draft.descCa ?? "");
+    setDescEn(draft.descEn ?? "");
+    setImageUrl(draft.imageUrl ?? "");
+    setDateLabel(draft.dateLabel ?? "");
+    setYear(draft.year ?? now.getFullYear());
+    setMonth(draft.month ?? now.getMonth() + 1);
+    setIsPublished(draft.isPublished ?? true);
+  }, [draftKey]);
+
+  useEffect(() => {
+    if (!hasLocalChangesRef.current) return;
+    window.localStorage.setItem(
+      draftKey,
+      JSON.stringify({
+        url,
+        outlet,
+        titleEs,
+        titleCa,
+        titleEn,
+        descEs,
+        descCa,
+        descEn,
+        imageUrl,
+        month,
+        year,
+        dateLabel,
+        isPublished,
+      }),
+    );
+  }, [dateLabel, descCa, descEn, descEs, draftKey, imageUrl, isPublished, month, outlet, titleCa, titleEn, titleEs, url, year]);
+
+  const remember = <T,>(setter: (value: T) => void) => (value: T) => {
+    hasLocalChangesRef.current = true;
+    setter(value);
+  };
 
   const previewItem: MediaAppearance = useMemo(() => {
     const t =
@@ -137,6 +185,7 @@ export function MediaAppearanceForm({ initial }: Props) {
       const res = await uploadFn({
         data: { fileName: file.name, contentType: file.type || "image/jpeg", base64 },
       });
+      hasLocalChangesRef.current = true;
       setImageUrl(res.url);
       toast.success("Imagen subida");
     } catch (err) {
@@ -189,9 +238,13 @@ export function MediaAppearanceForm({ initial }: Props) {
         setYear(updated.year);
         setMonth(updated.month);
         setIsPublished(updated.isPublished);
+        hasLocalChangesRef.current = false;
+        window.localStorage.removeItem(draftKey);
         toast.success("Publicación actualizada");
       } else {
         const created = await createFn({ data: payload });
+        hasLocalChangesRef.current = false;
+        window.localStorage.removeItem(draftKey);
         toast.success("Publicación creada");
         void navigate({ to: "/admin/media/$id", params: { id: created.id } });
         return;
@@ -227,7 +280,7 @@ export function MediaAppearanceForm({ initial }: Props) {
             <select
               id="month"
               value={month}
-              onChange={(e) => setMonth(Number(e.target.value))}
+              onChange={(e) => remember(setMonth)(Number(e.target.value))}
               className="mt-1 w-full rounded-md border border-ink/15 bg-white px-3 py-2 text-sm"
             >
               {MONTH_LABELS.map((m, i) => (
@@ -245,7 +298,7 @@ export function MediaAppearanceForm({ initial }: Props) {
               min={2000}
               max={2100}
               value={year}
-              onChange={(e) => setYear(Number(e.target.value))}
+              onChange={(e) => remember(setYear)(Number(e.target.value))}
               className="mt-1"
             />
           </div>
