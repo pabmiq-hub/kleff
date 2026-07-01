@@ -46,6 +46,11 @@ export const PAGE_SLUGS: Record<string, Record<Locale, string>> = {
   privacy: { es: "privacidad", ca: "privacitat", en: "privacy" },
   cookies: { es: "cookies", ca: "cookies", en: "cookies" },
   terms: { es: "terminos", ca: "termes", en: "terms" },
+  slowfriending: {
+    es: "slow-friending-ludico",
+    ca: "slow-friending-ludic",
+    en: "slow-friending",
+  },
 };
 
 /** Reverse lookup: any localized slug -> logical page key. */

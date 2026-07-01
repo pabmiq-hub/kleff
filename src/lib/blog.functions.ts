@@ -23,6 +23,9 @@ export interface BlogPostSummary {
 export interface BlogPostFull extends BlogPostSummary {
   content: string;
   translationMissing: boolean;
+  seo_title: string | null;
+  meta_description: string | null;
+  keywords: string[];
 }
 
 // ---------------------------------------------------------------------------
@@ -78,6 +81,20 @@ export const getBlogPostBySlug = createServerFn({ method: "GET" })
     const contentInLocale = pickLocaleStringStrict(data.locale, row.content_es, row.content_ca, row.content_en);
     const translationMissing = !titleInLocale || !contentInLocale;
 
+    const extra = row as unknown as Record<string, unknown>;
+    const seoTitle = pickLocaleStringStrict(
+      data.locale,
+      (extra.seo_title_es as string | null) ?? null,
+      (extra.seo_title_ca as string | null) ?? null,
+      (extra.seo_title_en as string | null) ?? null,
+    );
+    const metaDesc = pickLocaleStringStrict(
+      data.locale,
+      (extra.meta_description_es as string | null) ?? null,
+      (extra.meta_description_ca as string | null) ?? null,
+      (extra.meta_description_en as string | null) ?? null,
+    );
+
     return {
       post: {
         id: row.id,
@@ -89,6 +106,9 @@ export const getBlogPostBySlug = createServerFn({ method: "GET" })
         excerpt: excerptInLocale ?? row.excerpt_en ?? row.excerpt_es ?? row.excerpt_ca ?? "",
         content: contentInLocale ?? row.content_en ?? row.content_es ?? row.content_ca ?? "",
         translationMissing,
+        seo_title: seoTitle,
+        meta_description: metaDesc,
+        keywords: (extra.keywords as string[] | null) ?? [],
       },
     };
   });
@@ -599,6 +619,13 @@ export const adminUpdateBlogPost = createServerFn({ method: "POST" })
       content_ca: z.string().max(200000).nullable().optional(),
       content_en: z.string().max(200000).nullable().optional(),
       tags: z.array(z.string().max(50)).max(20).optional(),
+      keywords: z.array(z.string().max(80)).max(30).optional(),
+      seo_title_es: z.string().max(160).nullable().optional(),
+      seo_title_ca: z.string().max(160).nullable().optional(),
+      seo_title_en: z.string().max(160).nullable().optional(),
+      meta_description_es: z.string().max(320).nullable().optional(),
+      meta_description_ca: z.string().max(320).nullable().optional(),
+      meta_description_en: z.string().max(320).nullable().optional(),
       reading_time_minutes: z.number().int().min(0).max(240).nullable().optional(),
     }),
   }).parse(data))

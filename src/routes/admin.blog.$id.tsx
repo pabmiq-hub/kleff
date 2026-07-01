@@ -106,6 +106,13 @@ function BlogPostEditor() {
             content_ca: (state.content_ca as string) || null,
             content_en: (state.content_en as string) || null,
             tags: (state.tags as string[]) ?? [],
+            keywords: (state.keywords as string[]) ?? [],
+            seo_title_es: (state.seo_title_es as string) || null,
+            seo_title_ca: (state.seo_title_ca as string) || null,
+            seo_title_en: (state.seo_title_en as string) || null,
+            meta_description_es: (state.meta_description_es as string) || null,
+            meta_description_ca: (state.meta_description_ca as string) || null,
+            meta_description_en: (state.meta_description_en as string) || null,
           },
         },
       });
@@ -208,6 +215,52 @@ function BlogPostEditor() {
                 placeholder="Escribe el contenido del post…"
                 allowImages
               />
+            </div>
+            <div className="rounded-lg border border-ink/10 bg-ink/[0.02] p-4 space-y-3">
+              <div className="text-xs uppercase tracking-wider font-semibold text-ink/70">SEO ({loc.toUpperCase()})</div>
+              <div>
+                <Label className="text-ink text-xs">Título SEO <span className="text-ink/40">(opcional, máx. 60 car.)</span></Label>
+                <Input
+                  value={get(`seo_title_${loc}`)}
+                  onChange={(e) => set(`seo_title_${loc}`, e.target.value)}
+                  placeholder={get(`title_${loc}`) || "Se usará el título del post si se deja en blanco"}
+                  maxLength={160}
+                  className="bg-white border-ink/15 text-ink mt-1"
+                />
+                <div className="text-[11px] text-ink/50 mt-1">{get(`seo_title_${loc}`).length}/60 recomendado</div>
+              </div>
+              <div>
+                <Label className="text-ink text-xs">Meta description <span className="text-ink/40">(máx. 160 car.)</span></Label>
+                <Textarea
+                  rows={2}
+                  value={get(`meta_description_${loc}`)}
+                  onChange={(e) => set(`meta_description_${loc}`, e.target.value)}
+                  placeholder="Descripción que aparecerá en Google y al compartir."
+                  maxLength={320}
+                  className="bg-white border-ink/15 text-ink mt-1"
+                />
+                <div className="text-[11px] text-ink/50 mt-1">{get(`meta_description_${loc}`).length}/160 recomendado</div>
+              </div>
+              {loc === "es" && (
+                <div>
+                  <Label className="text-ink text-xs">Palabras clave (keywords) <span className="text-ink/40">separadas por comas</span></Label>
+                  <Input
+                    value={((state.keywords as string[]) ?? []).join(", ")}
+                    onChange={(e) =>
+                      set(
+                        "keywords",
+                        e.target.value
+                          .split(",")
+                          .map((k) => k.trim())
+                          .filter(Boolean)
+                          .slice(0, 30),
+                      )
+                    }
+                    placeholder="juegos de mesa, barcelona, comunidad"
+                    className="bg-white border-ink/15 text-ink mt-1"
+                  />
+                </div>
+              )}
             </div>
           </TabsContent>
         ))}

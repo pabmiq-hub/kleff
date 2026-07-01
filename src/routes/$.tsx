@@ -74,12 +74,14 @@ export const Route = createFileRoute("/$")({
   head: ({ loaderData }) => {
     if (loaderData?.kind === "post") {
       const p = loaderData.post;
-      const desc = (p.excerpt || stripTagsForMeta(p.content)).slice(0, 160);
+      const title = p.seo_title || p.title;
+      const desc = (p.meta_description || p.excerpt || stripTagsForMeta(p.content)).slice(0, 160);
       return {
         meta: [
-          { title: `${p.title} — KLEFF` },
+          { title: `${title} — KLEFF` },
           { name: "description", content: desc },
-          { property: "og:title", content: p.title },
+          ...(p.keywords && p.keywords.length ? [{ name: "keywords", content: p.keywords.join(", ") }] : []),
+          { property: "og:title", content: title },
           { property: "og:description", content: desc },
           { property: "og:type", content: "article" },
           ...(p.cover_image_url ? [{ property: "og:image", content: p.cover_image_url }] : []),
