@@ -23,6 +23,9 @@ export interface BlogPostSummary {
 export interface BlogPostFull extends BlogPostSummary {
   content: string;
   translationMissing: boolean;
+  seo_title: string | null;
+  meta_description: string | null;
+  keywords: string[];
 }
 
 // ---------------------------------------------------------------------------
