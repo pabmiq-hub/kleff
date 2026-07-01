@@ -81,17 +81,18 @@ export const getBlogPostBySlug = createServerFn({ method: "GET" })
     const contentInLocale = pickLocaleStringStrict(data.locale, row.content_es, row.content_ca, row.content_en);
     const translationMissing = !titleInLocale || !contentInLocale;
 
+    const extra = row as unknown as Record<string, unknown>;
     const seoTitle = pickLocaleStringStrict(
       data.locale,
-      (row as Record<string, string | null>).seo_title_es ?? null,
-      (row as Record<string, string | null>).seo_title_ca ?? null,
-      (row as Record<string, string | null>).seo_title_en ?? null,
+      (extra.seo_title_es as string | null) ?? null,
+      (extra.seo_title_ca as string | null) ?? null,
+      (extra.seo_title_en as string | null) ?? null,
     );
     const metaDesc = pickLocaleStringStrict(
       data.locale,
-      (row as Record<string, string | null>).meta_description_es ?? null,
-      (row as Record<string, string | null>).meta_description_ca ?? null,
-      (row as Record<string, string | null>).meta_description_en ?? null,
+      (extra.meta_description_es as string | null) ?? null,
+      (extra.meta_description_ca as string | null) ?? null,
+      (extra.meta_description_en as string | null) ?? null,
     );
 
     return {
@@ -107,7 +108,7 @@ export const getBlogPostBySlug = createServerFn({ method: "GET" })
         translationMissing,
         seo_title: seoTitle,
         meta_description: metaDesc,
-        keywords: ((row as Record<string, unknown>).keywords as string[] | null) ?? [],
+        keywords: (extra.keywords as string[] | null) ?? [],
       },
     };
   });
