@@ -81,6 +81,19 @@ export const getBlogPostBySlug = createServerFn({ method: "GET" })
     const contentInLocale = pickLocaleStringStrict(data.locale, row.content_es, row.content_ca, row.content_en);
     const translationMissing = !titleInLocale || !contentInLocale;
 
+    const seoTitle = pickLocaleStringStrict(
+      data.locale,
+      (row as Record<string, string | null>).seo_title_es ?? null,
+      (row as Record<string, string | null>).seo_title_ca ?? null,
+      (row as Record<string, string | null>).seo_title_en ?? null,
+    );
+    const metaDesc = pickLocaleStringStrict(
+      data.locale,
+      (row as Record<string, string | null>).meta_description_es ?? null,
+      (row as Record<string, string | null>).meta_description_ca ?? null,
+      (row as Record<string, string | null>).meta_description_en ?? null,
+    );
+
     return {
       post: {
         id: row.id,
@@ -92,6 +105,9 @@ export const getBlogPostBySlug = createServerFn({ method: "GET" })
         excerpt: excerptInLocale ?? row.excerpt_en ?? row.excerpt_es ?? row.excerpt_ca ?? "",
         content: contentInLocale ?? row.content_en ?? row.content_es ?? row.content_ca ?? "",
         translationMissing,
+        seo_title: seoTitle,
+        meta_description: metaDesc,
+        keywords: ((row as Record<string, unknown>).keywords as string[] | null) ?? [],
       },
     };
   });
