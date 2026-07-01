@@ -106,6 +106,13 @@ function BlogPostEditor() {
             content_ca: (state.content_ca as string) || null,
             content_en: (state.content_en as string) || null,
             tags: (state.tags as string[]) ?? [],
+            keywords: (state.keywords as string[]) ?? [],
+            seo_title_es: (state.seo_title_es as string) || null,
+            seo_title_ca: (state.seo_title_ca as string) || null,
+            seo_title_en: (state.seo_title_en as string) || null,
+            meta_description_es: (state.meta_description_es as string) || null,
+            meta_description_ca: (state.meta_description_ca as string) || null,
+            meta_description_en: (state.meta_description_en as string) || null,
           },
         },
       });
