@@ -619,6 +619,13 @@ export const adminUpdateBlogPost = createServerFn({ method: "POST" })
       content_ca: z.string().max(200000).nullable().optional(),
       content_en: z.string().max(200000).nullable().optional(),
       tags: z.array(z.string().max(50)).max(20).optional(),
+      keywords: z.array(z.string().max(80)).max(30).optional(),
+      seo_title_es: z.string().max(160).nullable().optional(),
+      seo_title_ca: z.string().max(160).nullable().optional(),
+      seo_title_en: z.string().max(160).nullable().optional(),
+      meta_description_es: z.string().max(320).nullable().optional(),
+      meta_description_ca: z.string().max(320).nullable().optional(),
+      meta_description_en: z.string().max(320).nullable().optional(),
       reading_time_minutes: z.number().int().min(0).max(240).nullable().optional(),
     }),
   }).parse(data))
