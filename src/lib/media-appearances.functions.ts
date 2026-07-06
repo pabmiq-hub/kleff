@@ -104,6 +104,18 @@ const optionalText = (max: number) =>
     .optional()
     .transform((v) => (v == null || v === "" ? null : v));
 
+// Accepts absolute URLs (https://…) or site-relative paths (/media/foo.webp)
+// so legacy scraped rows with relative image paths remain editable.
+const imageRefSchema = z
+  .union([
+    z.string().url().max(2048),
+    z.string().regex(/^\/[^\s]{0,2047}$/u, "Must be an absolute URL or a path starting with /"),
+    z.literal(""),
+    z.null(),
+  ])
+  .optional()
+  .transform((v) => (v == null || v === "" ? null : v));
+
 const upsertSchema = z.object({
   url: z.string().url().max(2048),
   outlet: z.string().min(1).max(200),
@@ -115,10 +127,7 @@ const upsertSchema = z.object({
   descriptionEs: optionalText(2000),
   descriptionCa: optionalText(2000),
   descriptionEn: optionalText(2000),
-  imageUrl: z
-    .union([z.string().url().max(2048), z.literal(""), z.null()])
-    .optional()
-    .transform((v) => (v == null || v === "" ? null : v)),
+  imageUrl: imageRefSchema,
   dateLabel: optionalText(40),
   year: z.number().int().min(2000).max(2100),
   month: z.number().int().min(1).max(12),
