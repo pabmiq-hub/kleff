@@ -126,7 +126,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       value={{
         session,
         user: session?.user ?? null,
-        loading: !authReady || rolesLoading,
+        // Only expose `loading` for the initial auth bootstrap. Subsequent
+        // token refreshes (e.g. when the browser tab regains focus) also
+        // toggle `rolesLoading`, and if that bubbled up here the admin
+        // layout would unmount `<Outlet />` and wipe the blog editor's
+        // in-memory state on every tab switch.
+        loading: !authReady,
         isSuperAdmin,
         refreshRoles,
         signOut,
