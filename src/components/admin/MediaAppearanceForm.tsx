@@ -426,10 +426,10 @@ export function MediaAppearanceForm({ initial }: Props) {
           <Label>Imagen de cabecera</Label>
           <div className="mt-1 flex items-center gap-3">
             <Input
-              type="url"
+              type="text"
               value={imageUrl}
               onChange={(e) => remember(setImageUrl)(e.target.value)}
-              placeholder="https://… o sube una imagen"
+              placeholder="https://… o /media/archivo.webp"
             />
             <label className="inline-flex items-center gap-2 cursor-pointer rounded-md border border-ink/20 bg-white px-3 py-2 text-sm hover:bg-ink/5">
               {uploading ? (
