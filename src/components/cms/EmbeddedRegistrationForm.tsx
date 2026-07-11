@@ -10,6 +10,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { CheckCircle2, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { AutoResizeIframe } from "@/components/cms/AutoResizeIframe";
 
 export function EmbeddedRegistrationForm({ slug }: { slug: string }) {
   const getFn = useServerFn(getPublishedForm);
