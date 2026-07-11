@@ -1,4 +1,5 @@
 import { useServerFn } from "@tanstack/react-start";
+import { AutoResizeIframe } from "@/components/cms/AutoResizeIframe";
 import { useState } from "react";
 import { submitRegistration, type RegistrationForm, type RegistrationQuestion } from "@/lib/registrations.functions";
 import { Button } from "@/components/ui/button";
@@ -70,12 +71,11 @@ export function PublicRegistrationPage({ form, questions, responsesCount }: Prop
         {form.description && <p className="text-muted-foreground whitespace-pre-line mb-6">{form.description}</p>}
 
         {form.external_mode === "iframe" && form.external_url ? (
-          <iframe
+          <AutoResizeIframe
             src={form.external_url}
-            style={{ height: `${form.external_iframe_height ?? 2400}px` }}
-            className="w-full rounded-lg border border-border bg-white"
             title={form.title}
-            scrolling="no"
+            fallbackHeight={form.external_iframe_height ?? 2400}
+            className="w-full rounded-lg border border-border bg-white"
           />
         ) : done ? (
           <div className="rounded-lg border border-coral/30 bg-coral/5 p-6 text-center">

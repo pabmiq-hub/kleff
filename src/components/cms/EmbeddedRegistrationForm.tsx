@@ -10,6 +10,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { CheckCircle2, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { AutoResizeIframe } from "@/components/cms/AutoResizeIframe";
 
 export function EmbeddedRegistrationForm({ slug }: { slug: string }) {
   const getFn = useServerFn(getPublishedForm);
@@ -48,12 +49,11 @@ export function EmbeddedRegistrationForm({ slug }: { slug: string }) {
   }
   if (form.external_mode === "iframe" && form.external_url) {
     return (
-      <iframe
+      <AutoResizeIframe
         src={form.external_url}
-        style={{ height: `${form.external_iframe_height ?? 2400}px` }}
-        className="w-full rounded-xl border border-cream/15 bg-white"
         title={form.title}
-        scrolling="no"
+        fallbackHeight={form.external_iframe_height ?? 2400}
+        className="w-full rounded-xl border border-cream/15 bg-white"
       />
     );
   }
