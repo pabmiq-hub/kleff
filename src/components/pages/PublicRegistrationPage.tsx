@@ -1,4 +1,5 @@
 import { useServerFn } from "@tanstack/react-start";
+import { AutoResizeIframe } from "@/components/cms/AutoResizeIframe";
 import { useState } from "react";
 import { submitRegistration, type RegistrationForm, type RegistrationQuestion } from "@/lib/registrations.functions";
 import { Button } from "@/components/ui/button";
