@@ -74,7 +74,7 @@ export function PublicRegistrationPage({ form, questions, responsesCount }: Prop
           <AutoResizeIframe
             src={form.external_url}
             title={form.title}
-            fallbackHeight={form.external_iframe_height ?? 2400}
+            fallbackHeight={form.external_iframe_height ?? 3200}
             className="w-full rounded-lg border border-border bg-white"
           />
         ) : done ? (

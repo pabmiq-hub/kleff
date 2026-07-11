@@ -52,7 +52,7 @@ export function EmbeddedRegistrationForm({ slug }: { slug: string }) {
       <AutoResizeIframe
         src={form.external_url}
         title={form.title}
-        fallbackHeight={form.external_iframe_height ?? 2400}
+        fallbackHeight={form.external_iframe_height ?? 3200}
         className="w-full rounded-xl border border-cream/15 bg-white"
       />
     );

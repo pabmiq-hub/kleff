@@ -217,17 +217,17 @@ function FormSettings({ form, onSaved }: { form: RegistrationForm; onSaved: (pat
           </Row>
           <Row label="URL externa"><Input value={state.external_url ?? ""} onChange={(e) => set("external_url", e.target.value || null)} placeholder="https://…" className="bg-white border-ink/15 text-ink" /></Row>
           {state.external_mode === "iframe" && (
-            <Row label="Altura del iframe (px)">
+            <Row label="Altura inicial del iframe (px)">
               <Input
                 type="number"
                 min={400}
-                max={8000}
+                max={20000}
                 step={100}
-                value={state.external_iframe_height ?? 2400}
-                onChange={(e) => set("external_iframe_height", e.target.value ? Number(e.target.value) : 2400)}
+                value={state.external_iframe_height ?? 3200}
+                onChange={(e) => set("external_iframe_height", e.target.value ? Number(e.target.value) : 3200)}
                 className="bg-white border-ink/15 text-ink"
               />
-              <p className="text-xs text-ink/50 mt-1">Aumenta este valor si el formulario se corta. Así el scroll lo hará la página de KLEFF y no el propio iframe. Valor típico: 2400–3200 px para Google Forms.</p>
+              <p className="text-xs text-ink/50 mt-1">Altura inicial del iframe. El iframe crece automáticamente en formularios multi-paso al pasar de paso. Si aun así se corta, sube este valor (ej. 5000–8000). Valor típico Google Forms: 3200–4500 px.</p>
             </Row>
           )}
         </Card>
