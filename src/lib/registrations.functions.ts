@@ -122,9 +122,57 @@ export const submitRegistration = createServerFn({ method: "POST" })
       .select("id")
       .single();
     if (error) throw new Error(error.message);
+    const responseId = (inserted as { id: string }).id;
+
+    // Fire-and-forget emails (never block the response)
+    try {
+      const { sendEmailSafe, TEAM_INBOX } = await import("@/lib/email/send.server");
+      const {
+        registrationConfirmationEmail,
+        registrationTeamNotificationEmail,
+      } = await import("@/lib/email/templates.server");
+
+      const userName =
+        typeof data.data.name === "string"
+          ? data.data.name
+          : typeof data.data.nombre === "string"
+            ? data.data.nombre
+            : undefined;
+
+      if (data.emailContact) {
+        const tpl = registrationConfirmationEmail({
+          formTitle: f.title,
+          userName,
+          confirmationMessage: f.confirmation_message,
+        });
+        void sendEmailSafe({
+          to: data.emailContact,
+          subject: tpl.subject,
+          html: tpl.html,
+          tags: [{ name: "type", value: "registration_confirmation" }],
+        });
+      }
+
+      const alert = registrationTeamNotificationEmail({
+        formTitle: f.title,
+        responseId,
+        emailContact: data.emailContact ?? null,
+        data: data.data as Record<string, unknown>,
+      });
+      void sendEmailSafe({
+        to: TEAM_INBOX,
+        subject: alert.subject,
+        html: alert.html,
+        replyTo: data.emailContact ?? undefined,
+        tags: [{ name: "type", value: "registration_team_alert" }],
+      });
+    } catch (err) {
+      console.error("[registrations] email dispatch error:", err);
+    }
+
     return {
       ok: true,
-      responseId: (inserted as { id: string }).id,
+      responseId,
       confirmation: f.confirmation_message,
     };
   });
