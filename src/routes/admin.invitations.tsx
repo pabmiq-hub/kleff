@@ -47,7 +47,11 @@ function InvitationsPage() {
       setLastUrl(r.inviteUrl);
       setEmail("");
       await refresh();
-      toast.success("Invitación creada");
+      if (r.emailSent) {
+        toast.success("Invitación enviada por email");
+      } else {
+        toast.warning("Invitación creada, pero el email no se pudo enviar. Copia el enlace manualmente.");
+      }
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Error");
     } finally {
