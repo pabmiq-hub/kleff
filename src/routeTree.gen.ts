@@ -88,6 +88,7 @@ import { Route as AdminBlogIndexRouteImport } from './routes/admin.blog.index'
 import { Route as AppRentalsMineRouteImport } from './routes/app.rentals.mine'
 import { Route as ApiPublicUploadInviteAvatarRouteImport } from './routes/api.public.upload-invite-avatar'
 import { Route as ApiPublicSyncBggRouteImport } from './routes/api.public.sync-bgg'
+import { Route as ApiPublicContactRouteImport } from './routes/api.public.contact'
 import { Route as AdminRentalsSettingsRouteImport } from './routes/admin.rentals.settings'
 import { Route as AdminRentalsHistoryRouteImport } from './routes/admin.rentals.history'
 import { Route as AdminRentalsCatalogRouteImport } from './routes/admin.rentals.catalog'
@@ -500,6 +501,11 @@ const ApiPublicSyncBggRoute = ApiPublicSyncBggRouteImport.update({
   path: '/api/public/sync-bgg',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicContactRoute = ApiPublicContactRouteImport.update({
+  id: '/api/public/contact',
+  path: '/api/public/contact',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminRentalsSettingsRoute = AdminRentalsSettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
@@ -656,6 +662,7 @@ export interface FileRoutesByFullPath {
   '/admin/rentals/catalog': typeof AdminRentalsCatalogRoute
   '/admin/rentals/history': typeof AdminRentalsHistoryRoute
   '/admin/rentals/settings': typeof AdminRentalsSettingsRoute
+  '/api/public/contact': typeof ApiPublicContactRoute
   '/api/public/sync-bgg': typeof ApiPublicSyncBggRoute
   '/api/public/upload-invite-avatar': typeof ApiPublicUploadInviteAvatarRoute
   '/app/rentals/mine': typeof AppRentalsMineRoute
@@ -745,6 +752,7 @@ export interface FileRoutesByTo {
   '/admin/rentals/catalog': typeof AdminRentalsCatalogRoute
   '/admin/rentals/history': typeof AdminRentalsHistoryRoute
   '/admin/rentals/settings': typeof AdminRentalsSettingsRoute
+  '/api/public/contact': typeof ApiPublicContactRoute
   '/api/public/sync-bgg': typeof ApiPublicSyncBggRoute
   '/api/public/upload-invite-avatar': typeof ApiPublicUploadInviteAvatarRoute
   '/app/rentals/mine': typeof AppRentalsMineRoute
@@ -841,6 +849,7 @@ export interface FileRoutesById {
   '/admin/rentals/catalog': typeof AdminRentalsCatalogRoute
   '/admin/rentals/history': typeof AdminRentalsHistoryRoute
   '/admin/rentals/settings': typeof AdminRentalsSettingsRoute
+  '/api/public/contact': typeof ApiPublicContactRoute
   '/api/public/sync-bgg': typeof ApiPublicSyncBggRoute
   '/api/public/upload-invite-avatar': typeof ApiPublicUploadInviteAvatarRoute
   '/app/rentals/mine': typeof AppRentalsMineRoute
@@ -938,6 +947,7 @@ export interface FileRouteTypes {
     | '/admin/rentals/catalog'
     | '/admin/rentals/history'
     | '/admin/rentals/settings'
+    | '/api/public/contact'
     | '/api/public/sync-bgg'
     | '/api/public/upload-invite-avatar'
     | '/app/rentals/mine'
@@ -1027,6 +1037,7 @@ export interface FileRouteTypes {
     | '/admin/rentals/catalog'
     | '/admin/rentals/history'
     | '/admin/rentals/settings'
+    | '/api/public/contact'
     | '/api/public/sync-bgg'
     | '/api/public/upload-invite-avatar'
     | '/app/rentals/mine'
@@ -1122,6 +1133,7 @@ export interface FileRouteTypes {
     | '/admin/rentals/catalog'
     | '/admin/rentals/history'
     | '/admin/rentals/settings'
+    | '/api/public/contact'
     | '/api/public/sync-bgg'
     | '/api/public/upload-invite-avatar'
     | '/app/rentals/mine'
@@ -1195,6 +1207,7 @@ export interface RootRouteChildren {
   InviteTokenRoute: typeof InviteTokenRoute
   CaIndexRoute: typeof CaIndexRoute
   EnIndexRoute: typeof EnIndexRoute
+  ApiPublicContactRoute: typeof ApiPublicContactRoute
   ApiPublicSyncBggRoute: typeof ApiPublicSyncBggRoute
   ApiPublicUploadInviteAvatarRoute: typeof ApiPublicUploadInviteAvatarRoute
   LovableEmailQueueProcessRoute: typeof LovableEmailQueueProcessRoute
@@ -1755,6 +1768,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicSyncBggRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/contact': {
+      id: '/api/public/contact'
+      path: '/api/public/contact'
+      fullPath: '/api/public/contact'
+      preLoaderRoute: typeof ApiPublicContactRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/rentals/settings': {
       id: '/admin/rentals/settings'
       path: '/settings'
@@ -2032,6 +2052,7 @@ const rootRouteChildren: RootRouteChildren = {
   InviteTokenRoute: InviteTokenRoute,
   CaIndexRoute: CaIndexRoute,
   EnIndexRoute: EnIndexRoute,
+  ApiPublicContactRoute: ApiPublicContactRoute,
   ApiPublicSyncBggRoute: ApiPublicSyncBggRoute,
   ApiPublicUploadInviteAvatarRoute: ApiPublicUploadInviteAvatarRoute,
   LovableEmailQueueProcessRoute: LovableEmailQueueProcessRoute,
