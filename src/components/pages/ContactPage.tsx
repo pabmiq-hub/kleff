@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { toast } from "sonner";
 import { Mail, MapPin, Phone, Instagram, Send, CheckCircle2 } from "lucide-react";
 import { useI18n } from "@/i18n/I18nProvider";
 import { SiteLayout } from "@/components/site/SiteLayout";
@@ -17,6 +18,33 @@ export function ContactPage() {
     address: string;
   }>("contact.info");
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const fd = new FormData(e.currentTarget);
+    const payload = {
+      name: String(fd.get("name") ?? "").trim(),
+      email: String(fd.get("email") ?? "").trim(),
+      message: String(fd.get("message") ?? "").trim(),
+      website: String(fd.get("website") ?? ""),
+    };
+    if (!payload.name || !payload.email || !payload.message) return;
+    setSubmitting(true);
+    try {
+      const res = await fetch("/api/public/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) throw new Error("send failed");
+      setSubmitted(true);
+    } catch {
+      toast.error("No se pudo enviar. Inténtalo de nuevo.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   return (
     <SiteLayout>
@@ -47,13 +75,7 @@ export function ContactPage() {
                   </p>
                 </div>
               ) : (
-                <form
-                  onSubmit={(e) => {
-                    e.preventDefault();
-                    setSubmitted(true);
-                  }}
-                  className="space-y-5"
-                >
+                <form onSubmit={handleSubmit} className="space-y-5">
                   <Field label={t.contact.nameLabel} name="name" type="text" required />
                   <Field label={t.contact.emailLabel} name="email" type="email" required />
                   <div>
@@ -67,11 +89,21 @@ export function ContactPage() {
                       className="w-full rounded-2xl border border-border bg-background px-4 py-3 text-base text-foreground placeholder:text-muted-foreground focus:border-coral focus:outline-none focus:ring-2 focus:ring-coral/30 transition-all resize-none"
                     />
                   </div>
+                  {/* Honeypot */}
+                  <input
+                    type="text"
+                    name="website"
+                    tabIndex={-1}
+                    autoComplete="off"
+                    aria-hidden="true"
+                    style={{ position: "absolute", left: "-10000px", width: 1, height: 1, opacity: 0 }}
+                  />
                   <button
                     type="submit"
-                    className="inline-flex items-center gap-2 rounded-full bg-coral text-primary-foreground px-6 py-3.5 text-sm font-semibold shadow-glow hover:shadow-warm hover:-translate-y-0.5 transition-all"
+                    disabled={submitting}
+                    className="inline-flex items-center gap-2 rounded-full bg-coral text-primary-foreground px-6 py-3.5 text-sm font-semibold shadow-glow hover:shadow-warm hover:-translate-y-0.5 transition-all disabled:opacity-60"
                   >
-                    {t.contact.submit}
+                    {submitting ? "Enviando…" : t.contact.submit}
                     <Send className="h-4 w-4" />
                   </button>
                 </form>
