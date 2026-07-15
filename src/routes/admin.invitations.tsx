@@ -96,9 +96,9 @@ function InvitationsPage() {
         </div>
         {lastUrl && (
           <div className="bg-coral/15 border border-coral/40 rounded-lg p-3 text-sm">
-            <p className="font-semibold mb-1">Enlace de invitación (cópialo y envíaselo):</p>
+            <p className="font-semibold mb-1">Enlace de invitación (por si necesitas reenviarlo):</p>
             <code className="block break-all text-xs bg-ink/50 rounded px-2 py-1 text-ink">{lastUrl}</code>
-            <p className="text-xs text-ink/60 mt-1">En la próxima iteración este enlace se enviará por email automáticamente.</p>
+            <p className="text-xs text-ink/60 mt-1">Ya se ha enviado automáticamente al correo indicado.</p>
           </div>
         )}
       </form>
