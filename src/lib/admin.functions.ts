@@ -3,6 +3,9 @@ import { z } from "zod";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { createHash, randomBytes } from "crypto";
+import { sendEmailSafe } from "@/lib/email/send.server";
+import { invitationEmail } from "@/lib/email/templates.server";
+
 
 // ---------------- Helpers ----------------
 
