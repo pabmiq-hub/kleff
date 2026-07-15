@@ -3,6 +3,9 @@ import { z } from "zod";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { createHash, randomBytes } from "crypto";
+import { sendEmailSafe } from "@/lib/email/send.server";
+import { invitationEmail } from "@/lib/email/templates.server";
+
 
 // ---------------- Helpers ----------------
 
@@ -184,14 +187,20 @@ export const createInvitation = createServerFn({ method: "POST" })
     });
     if (insertErr) throw new Error(insertErr.message);
 
-    // Build invitation URL
-    const origin =
-      process.env.SITE_URL ||
-      process.env.PUBLIC_SITE_URL ||
-      "https://kleff.lovable.app";
+    // Build invitation URL — always use production kleff.es domain
+    const origin = process.env.SITE_URL || "https://www.kleff.es";
     const inviteUrl = `${origin}/invite/${raw}`;
 
-    return { success: true, inviteUrl, email: data.email };
+    // Send invitation email via Resend (fire-and-forget)
+    const { subject, html } = invitationEmail({ inviteUrl, expiresAt });
+    const emailResult = await sendEmailSafe({
+      to: data.email,
+      subject,
+      html,
+      tags: [{ name: "type", value: "invitation" }],
+    });
+
+    return { success: true, inviteUrl, email: data.email, emailSent: !!emailResult };
   });
 
 // ---------------- Admin: list invitations ----------------
