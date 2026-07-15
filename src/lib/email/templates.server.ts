@@ -141,6 +141,30 @@ export function contactUserConfirmationEmail(opts: {
   return { subject: "Hemos recibido tu mensaje — KLEFF", html };
 }
 
+// ---------- Invitation ----------
+export function invitationEmail(opts: {
+  inviteUrl: string;
+  expiresAt: string;
+}): { subject: string; html: string } {
+  const expires = new Date(opts.expiresAt).toLocaleDateString("es-ES", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
+  const html = layout({
+    title: "Te invitamos a KLEFF",
+    preview: "Tu invitación al club KLEFF está lista.",
+    bodyHtml: `
+      <h1 style="font-family:Georgia,serif;font-size:26px;margin:0 0 12px;">¡Bienvenido/a a KLEFF! 🎲</h1>
+      <p style="margin:0 0 12px;">Te hemos invitado a formar parte del club. Haz clic en el botón para crear tu cuenta y acceder a tu carnet de socio/a.</p>
+      <p style="margin:12px 0;font-size:13px;color:#666;">La invitación caduca el <strong>${escape(expires)}</strong>.</p>
+    `,
+    ctaLabel: "Aceptar invitación",
+    ctaUrl: opts.inviteUrl,
+  });
+  return { subject: "Tu invitación a KLEFF", html };
+}
+
 // ---------- Contact form: alert to team ----------
 export function contactTeamAlertEmail(opts: {
   name: string;
