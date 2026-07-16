@@ -1,0 +1,2 @@
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS ludoya_username text;
+CREATE UNIQUE INDEX IF NOT EXISTS profiles_ludoya_username_key ON public.profiles (lower(ludoya_username)) WHERE ludoya_username IS NOT NULL;

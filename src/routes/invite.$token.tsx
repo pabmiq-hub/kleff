@@ -44,6 +44,7 @@ function InvitePage() {
     dateOfBirth: "",
     gender: "" as "" | "female" | "male" | "non_binary" | "other" | "prefer_not_to_say",
     idDocument: "",
+    ludoyaUsername: "",
   });
 
   if (!invitation.valid) {
@@ -109,6 +110,7 @@ function InvitePage() {
           dateOfBirth: form.dateOfBirth,
           gender: form.gender,
           idDocument: form.idDocument.trim().toUpperCase(),
+          ludoyaUsername: form.ludoyaUsername.trim() || null,
         },
       });
       // Auto-login
@@ -225,6 +227,22 @@ function InvitePage() {
               {avatarUrl && (
                 <img src={avatarUrl} alt="" className="mt-2 h-20 w-20 rounded-full object-cover border-2 border-ink" />
               )}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="ludoyaUsername">Usuario de Ludoya (opcional)</Label>
+              <Input
+                id="ludoyaUsername"
+                minLength={2}
+                maxLength={60}
+                pattern="[a-zA-Z0-9_.\-]+"
+                value={form.ludoyaUsername}
+                onChange={(e) => setForm({ ...form, ludoyaUsername: e.target.value })}
+                placeholder="tu_usuario_en_ludoya"
+              />
+              <p className="text-xs text-muted-foreground">
+                Si tienes cuenta en <a href="https://app.ludoya.com" target="_blank" rel="noreferrer" className="underline">Ludoya</a>, la vinculamos con tu perfil y te enviamos una invitación al grupo de KLEFF automáticamente.
+              </p>
             </div>
 
             <div className="space-y-2">

@@ -67,6 +67,13 @@ const profileSchema = z.object({
     .min(5)
     .max(40)
     .regex(/^[A-Za-z0-9-]+$/, "Formato no válido"),
+  ludoyaUsername: z
+    .string()
+    .min(2)
+    .max(60)
+    .regex(/^[a-zA-Z0-9_.-]+$/)
+    .nullable()
+    .optional(),
 });
 
 export const acceptInvitation = createServerFn({ method: "POST" })
@@ -113,6 +120,22 @@ export const acceptInvitation = createServerFn({ method: "POST" })
     if (createErr || !created.user) throw new Error(createErr?.message ?? "Error creando el usuario");
     const userId = created.user.id;
 
+    // Optional Ludoya link: validate username against Ludoya before inserting
+    let ludoyaUsername: string | null = null;
+    if (data.ludoyaUsername) {
+      try {
+        const { findLudoyaUserByUsername } = await import("@/lib/ludoya.server");
+        const ludoyaUser = await findLudoyaUserByUsername(data.ludoyaUsername);
+        if (!ludoyaUser) {
+          await supabaseAdmin.auth.admin.deleteUser(userId);
+          throw new Error("El usuario de Ludoya indicado no existe");
+        }
+        ludoyaUsername = ludoyaUser.username;
+      } catch (err) {
+        console.warn("Ludoya validation failed:", err instanceof Error ? err.message : err);
+      }
+    }
+
     // Insert profile (admin client bypasses RLS)
     const { error: profileErr } = await supabaseAdmin.from("profiles").insert({
       id: userId,
@@ -123,6 +146,7 @@ export const acceptInvitation = createServerFn({ method: "POST" })
       gender: data.gender,
       id_document_encrypted: ciphertext,
       id_document_nonce: nonce,
+      ludoya_username: ludoyaUsername,
     });
     if (profileErr) {
       await supabaseAdmin.auth.admin.deleteUser(userId);
@@ -137,13 +161,25 @@ export const acceptInvitation = createServerFn({ method: "POST" })
       console.error("Error asignando rol:", roleErr.message);
     }
 
+    // Fire-and-forget: invite the Ludoya user to the KLEFF group
+    let ludoyaInvite: { status: string; httpStatus: number } | null = null;
+    if (ludoyaUsername) {
+      try {
+        const { inviteToKleffGroup } = await import("@/lib/ludoya.server");
+        const r = await inviteToKleffGroup(ludoyaUsername);
+        ludoyaInvite = { status: r.status, httpStatus: r.httpStatus };
+      } catch (err) {
+        console.warn("Ludoya invite failed:", err instanceof Error ? err.message : err);
+      }
+    }
+
     // Mark invitation accepted
     await supabaseAdmin
       .from("invitations")
       .update({ accepted_at: new Date().toISOString(), accepted_by: userId })
       .eq("id", invite.id);
 
-    return { success: true, email: invite.email };
+    return { success: true, email: invite.email, ludoyaLinked: !!ludoyaUsername, ludoyaInvite };
   });
 
 // ---------------- Admin: send invitation ----------------
