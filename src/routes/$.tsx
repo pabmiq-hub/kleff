@@ -74,8 +74,23 @@ export const Route = createFileRoute("/$")({
   head: ({ loaderData }) => {
     if (loaderData?.kind === "post") {
       const p = loaderData.post;
+      const loc = loaderData.locale;
       const title = p.seo_title || p.title;
       const desc = (p.meta_description || p.excerpt || stripTagsForMeta(p.content)).slice(0, 160);
+      const path = loc === "es" ? `/${p.slug}` : `/${loc}/${p.slug}`;
+      const url = `https://kleff.es${path}`;
+      const jsonLd = {
+        "@context": "https://schema.org",
+        "@type": "BlogPosting",
+        headline: title,
+        description: desc,
+        image: p.cover_image_url ? [p.cover_image_url] : undefined,
+        datePublished: p.published_at,
+        author: p.author_name ? { "@type": "Person", name: p.author_name } : { "@type": "Organization", name: "KLEFF" },
+        publisher: { "@type": "Organization", name: "KLEFF", logo: { "@type": "ImageObject", url: "https://kleff.es/favicon.ico" } },
+        mainEntityOfPage: { "@type": "WebPage", "@id": url },
+        inLanguage: loc === "es" ? "es-ES" : loc === "ca" ? "ca-ES" : "en-GB",
+      };
       return {
         meta: [
           { title: `${title} — KLEFF` },
@@ -84,11 +99,16 @@ export const Route = createFileRoute("/$")({
           { property: "og:title", content: title },
           { property: "og:description", content: desc },
           { property: "og:type", content: "article" },
+          { property: "og:url", content: url },
           ...(p.cover_image_url ? [{ property: "og:image", content: p.cover_image_url }] : []),
+          { name: "twitter:card", content: p.cover_image_url ? "summary_large_image" : "summary" },
           { property: "article:published_time", content: p.published_at },
         ],
+        links: [{ rel: "canonical", href: url }],
+        scripts: [{ type: "application/ld+json", children: JSON.stringify(jsonLd) }],
       };
     }
+
     if (loaderData?.kind === "custom") {
       return {
         meta: [

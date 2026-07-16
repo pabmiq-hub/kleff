@@ -3,8 +3,16 @@ import StarterKit from "@tiptap/starter-kit";
 import Link from "@tiptap/extension-link";
 import Image from "@tiptap/extension-image";
 import Placeholder from "@tiptap/extension-placeholder";
+import { Table } from "@tiptap/extension-table";
+import { TableRow } from "@tiptap/extension-table-row";
+import { TableCell } from "@tiptap/extension-table-cell";
+import { TableHeader } from "@tiptap/extension-table-header";
 import { useEffect, useRef } from "react";
-import { Bold, Italic, List, ListOrdered, Quote, Link as LinkIcon, Heading2, Heading3, Image as ImageIcon, ImagePlus, Undo2, Redo2 } from "lucide-react";
+import {
+  Bold, Italic, List, ListOrdered, Quote, Link as LinkIcon,
+  Heading1, Heading2, Heading3, Image as ImageIcon, ImagePlus,
+  Undo2, Redo2, Table as TableIcon, Trash2, Rows3, Columns3,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useServerFn } from "@tanstack/react-start";
 import { uploadMedia } from "@/lib/media.functions";
@@ -34,12 +42,19 @@ export function RichTextEditor({ value, onChange, placeholder, minimal, allowIma
       Link.configure({ openOnClick: false, HTMLAttributes: { rel: "noopener noreferrer", target: "_blank" } }),
       Image.configure({ HTMLAttributes: { class: "rounded-lg max-w-full h-auto my-3" } }),
       Placeholder.configure({ placeholder: placeholder ?? "Escribe aquí…" }),
+      Table.configure({ resizable: true, HTMLAttributes: { class: "kleff-editor-table" } }),
+      TableRow,
+      TableHeader,
+      TableCell,
     ],
     content: value || "",
     immediatelyRender: false,
     editorProps: {
       attributes: {
-        class: "prose prose-invert max-w-none focus:outline-none min-h-[120px] px-4 py-3",
+        // .blog-content mirrors the front-end article styling so what you see
+        // here matches the published post (spacing, list bullets, link colour,
+        // headings). min-h keeps it usable when empty.
+        class: "blog-content focus:outline-none min-h-[240px] px-5 py-4",
       },
       // Clean HTML pasted from Word / Google Docs before it hits the schema
       // so paragraphs, bold, italic and lists all survive.
@@ -119,7 +134,7 @@ export function RichTextEditor({ value, onChange, placeholder, minimal, allowIma
   };
 
   return (
-    <div className="border border-cream/15 rounded-lg bg-ink/40 overflow-hidden">
+    <div className="rounded-lg border border-ink/15 bg-background overflow-hidden shadow-sm">
       <Toolbar
         editor={editor}
         minimal={minimal}
@@ -128,7 +143,9 @@ export function RichTextEditor({ value, onChange, placeholder, minimal, allowIma
         onImage={insertImage}
         onImageCaption={insertImageWithCaption}
       />
-      <EditorContent editor={editor} />
+      <div className="max-h-[60vh] overflow-y-auto bg-background">
+        <EditorContent editor={editor} />
+      </div>
     </div>
   );
 }
@@ -140,36 +157,56 @@ function Toolbar({
   onLink: () => void; onImage: () => void; onImageCaption: () => void;
 }) {
   const btn = (active: boolean) =>
-    `h-8 w-8 p-0 ${active ? "bg-coral/20 text-coral" : "text-cream/70 hover:text-cream"}`;
+    `h-8 w-8 p-0 shrink-0 ${active ? "bg-coral/20 text-coral" : "text-ink/70 hover:text-ink hover:bg-ink/5"}`;
 
   // preventDefault on mousedown keeps the editor selection alive so the
   // list / heading toggles apply to the current paragraph instead of losing
   // focus (which is why bullet/ordered list buttons appeared to "do nothing").
   const stop = (e: React.MouseEvent) => e.preventDefault();
 
+  const insertTable = () => editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run();
+  const inTable = editor.isActive("table");
+
   return (
-    <div className="flex items-center gap-0.5 flex-wrap border-b border-cream/10 bg-cream/5 px-2 py-1.5">
-      <Button type="button" onMouseDown={stop} variant="ghost" size="sm" className={btn(editor.isActive("bold"))} onClick={() => editor.chain().focus().toggleBold().run()}><Bold className="h-3.5 w-3.5" /></Button>
-      <Button type="button" onMouseDown={stop} variant="ghost" size="sm" className={btn(editor.isActive("italic"))} onClick={() => editor.chain().focus().toggleItalic().run()}><Italic className="h-3.5 w-3.5" /></Button>
+    <div className="sticky top-0 z-10 flex items-center gap-0.5 flex-wrap border-b border-ink/10 bg-cream/95 backdrop-blur px-2 py-1.5">
+      <Button type="button" onMouseDown={stop} variant="ghost" size="sm" className={btn(editor.isActive("bold"))} onClick={() => editor.chain().focus().toggleBold().run()} title="Negrita (⌘B)"><Bold className="h-3.5 w-3.5" /></Button>
+      <Button type="button" onMouseDown={stop} variant="ghost" size="sm" className={btn(editor.isActive("italic"))} onClick={() => editor.chain().focus().toggleItalic().run()} title="Cursiva (⌘I)"><Italic className="h-3.5 w-3.5" /></Button>
       {!minimal && (
         <>
-          <Button type="button" onMouseDown={stop} variant="ghost" size="sm" className={btn(editor.isActive("heading", { level: 2 }))} onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}><Heading2 className="h-3.5 w-3.5" /></Button>
-          <Button type="button" onMouseDown={stop} variant="ghost" size="sm" className={btn(editor.isActive("heading", { level: 3 }))} onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}><Heading3 className="h-3.5 w-3.5" /></Button>
-          <Button type="button" onMouseDown={stop} variant="ghost" size="sm" className={btn(editor.isActive("bulletList"))} onClick={() => editor.chain().focus().toggleBulletList().run()}><List className="h-3.5 w-3.5" /></Button>
-          <Button type="button" onMouseDown={stop} variant="ghost" size="sm" className={btn(editor.isActive("orderedList"))} onClick={() => editor.chain().focus().toggleOrderedList().run()}><ListOrdered className="h-3.5 w-3.5" /></Button>
-          <Button type="button" onMouseDown={stop} variant="ghost" size="sm" className={btn(editor.isActive("blockquote"))} onClick={() => editor.chain().focus().toggleBlockquote().run()}><Quote className="h-3.5 w-3.5" /></Button>
+          <span className="mx-1 h-5 w-px bg-ink/10" />
+          <Button type="button" onMouseDown={stop} variant="ghost" size="sm" className={btn(editor.isActive("heading", { level: 1 }))} onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()} title="Título 1"><Heading1 className="h-3.5 w-3.5" /></Button>
+          <Button type="button" onMouseDown={stop} variant="ghost" size="sm" className={btn(editor.isActive("heading", { level: 2 }))} onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()} title="Título 2"><Heading2 className="h-3.5 w-3.5" /></Button>
+          <Button type="button" onMouseDown={stop} variant="ghost" size="sm" className={btn(editor.isActive("heading", { level: 3 }))} onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()} title="Título 3"><Heading3 className="h-3.5 w-3.5" /></Button>
+          <span className="mx-1 h-5 w-px bg-ink/10" />
+          <Button type="button" onMouseDown={stop} variant="ghost" size="sm" className={btn(editor.isActive("bulletList"))} onClick={() => editor.chain().focus().toggleBulletList().run()} title="Lista con viñetas"><List className="h-3.5 w-3.5" /></Button>
+          <Button type="button" onMouseDown={stop} variant="ghost" size="sm" className={btn(editor.isActive("orderedList"))} onClick={() => editor.chain().focus().toggleOrderedList().run()} title="Lista numerada"><ListOrdered className="h-3.5 w-3.5" /></Button>
+          <Button type="button" onMouseDown={stop} variant="ghost" size="sm" className={btn(editor.isActive("blockquote"))} onClick={() => editor.chain().focus().toggleBlockquote().run()} title="Cita"><Quote className="h-3.5 w-3.5" /></Button>
         </>
       )}
-      <Button type="button" onMouseDown={stop} variant="ghost" size="sm" className={btn(editor.isActive("link"))} onClick={onLink}><LinkIcon className="h-3.5 w-3.5" /></Button>
+      <span className="mx-1 h-5 w-px bg-ink/10" />
+      <Button type="button" onMouseDown={stop} variant="ghost" size="sm" className={btn(editor.isActive("link"))} onClick={onLink} title="Enlace"><LinkIcon className="h-3.5 w-3.5" /></Button>
       {allowImages && (
         <>
           <Button type="button" onMouseDown={stop} variant="ghost" size="sm" className={btn(false)} onClick={onImage} title="Insertar imagen"><ImageIcon className="h-3.5 w-3.5" /></Button>
-          <Button type="button" onMouseDown={stop} variant="ghost" size="sm" className="h-8 px-2 text-xs text-cream/70 hover:text-cream" onClick={onImageCaption} title="Insertar imagen con pie de foto"><ImagePlus className="h-3.5 w-3.5 mr-1" />+ pie</Button>
+          <Button type="button" onMouseDown={stop} variant="ghost" size="sm" className="h-8 px-2 text-xs text-ink/70 hover:text-ink hover:bg-ink/5 shrink-0" onClick={onImageCaption} title="Insertar imagen con pie de foto"><ImagePlus className="h-3.5 w-3.5 mr-1" />+ pie</Button>
+        </>
+      )}
+      {!minimal && (
+        <>
+          <span className="mx-1 h-5 w-px bg-ink/10" />
+          <Button type="button" onMouseDown={stop} variant="ghost" size="sm" className={btn(inTable)} onClick={insertTable} title="Insertar tabla 3×3"><TableIcon className="h-3.5 w-3.5" /></Button>
+          {inTable && (
+            <>
+              <Button type="button" onMouseDown={stop} variant="ghost" size="sm" className={btn(false)} onClick={() => editor.chain().focus().addRowAfter().run()} title="Añadir fila"><Rows3 className="h-3.5 w-3.5" /></Button>
+              <Button type="button" onMouseDown={stop} variant="ghost" size="sm" className={btn(false)} onClick={() => editor.chain().focus().addColumnAfter().run()} title="Añadir columna"><Columns3 className="h-3.5 w-3.5" /></Button>
+              <Button type="button" onMouseDown={stop} variant="ghost" size="sm" className="h-8 w-8 p-0 shrink-0 text-red-600/70 hover:text-red-600 hover:bg-red-500/10" onClick={() => editor.chain().focus().deleteTable().run()} title="Eliminar tabla"><Trash2 className="h-3.5 w-3.5" /></Button>
+            </>
+          )}
         </>
       )}
       <span className="flex-1" />
-      <Button type="button" onMouseDown={stop} variant="ghost" size="sm" className={btn(false)} onClick={() => editor.chain().focus().undo().run()}><Undo2 className="h-3.5 w-3.5" /></Button>
-      <Button type="button" onMouseDown={stop} variant="ghost" size="sm" className={btn(false)} onClick={() => editor.chain().focus().redo().run()}><Redo2 className="h-3.5 w-3.5" /></Button>
+      <Button type="button" onMouseDown={stop} variant="ghost" size="sm" className={btn(false)} onClick={() => editor.chain().focus().undo().run()} title="Deshacer"><Undo2 className="h-3.5 w-3.5" /></Button>
+      <Button type="button" onMouseDown={stop} variant="ghost" size="sm" className={btn(false)} onClick={() => editor.chain().focus().redo().run()} title="Rehacer"><Redo2 className="h-3.5 w-3.5" /></Button>
     </div>
   );
 }
@@ -208,9 +245,9 @@ function cleanPastedHtml(html: string): string {
 
   // 4) Remove class/style/lang/id attributes — they carry mso-*, color and
   //    font-family declarations that make the paste look like an image of
-  //    Word instead of like editable content.
-  out = out.replace(/\s(?:class|style|lang|id|align|dir|face|color|start)="[^"]*"/gi, "");
-  out = out.replace(/\s(?:class|style|lang|id|align|dir|face|color|start)='[^']*'/gi, "");
+  //    Word instead of like editable content. Keep colspan/rowspan for tables.
+  out = out.replace(/\s(?:class|style|lang|id|align|dir|face|color|start|width|height|cellspacing|cellpadding|border|bgcolor|valign)="[^"]*"/gi, "");
+  out = out.replace(/\s(?:class|style|lang|id|align|dir|face|color|start|width|height|cellspacing|cellpadding|border|bgcolor|valign)='[^']*'/gi, "");
 
   // 5) Google Docs wraps everything in a <b id="docs-internal-guid-…"> that
   //    has font-weight:normal — turns whole paste bold. Unwrap it.
@@ -223,6 +260,7 @@ function cleanPastedHtml(html: string): string {
   out = out.replace(/&nbsp;/g, " ");
 
   // 7) Turn <div> paragraphs into <p> so Tiptap keeps the paragraph split.
+  //    Skip inside tables — Word wraps cell content in <div>.
   out = out.replace(/<div(\s[^>]*)?>/gi, "<p>").replace(/<\/div>/gi, "</p>");
 
   // 8) Collapse empty paragraphs that Word emits between real ones.
