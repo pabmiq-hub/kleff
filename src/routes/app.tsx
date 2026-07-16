@@ -45,6 +45,7 @@ function AppLayout() {
           <NavLink to="/app" icon={<Home className="h-4 w-4" />} label="Inicio" exact />
           <NavLink to="/app/profile" icon={<User className="h-4 w-4" />} label="Mi perfil" />
           <NavLink to="/app/carnet" icon={<IdCard className="h-4 w-4" />} label="Mi carnet" />
+          <NavLink to="/app/partidas" icon={<Gamepad2 className="h-4 w-4" />} label="Partidas" />
           <NavLink to="/app/rentals" icon={<Dices className="h-4 w-4" />} label="Alquilar" />
           <NavLink to="/app/rentals/mine" icon={<Dices className="h-4 w-4" />} label="Mis alquileres" />
         </nav>
