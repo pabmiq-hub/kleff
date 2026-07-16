@@ -74,13 +74,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
+    let currentUserId: string | undefined;
+
     // Subscribe FIRST
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, newSession) => {
       setSession(newSession);
+      const newUserId = newSession?.user?.id;
       // Defer role loading to avoid recursive auth calls
       if (newSession?.user) {
+        // Only block rendering while roles resolve when the user identity
+        // actually changed (login/logout/switch). Token refreshes keep the
+        // same userId and must not unmount authed routes.
+        if (newUserId !== currentUserId) {
+          setAuthReady(false);
+        }
+        currentUserId = newUserId;
         setRolesLoading(true);
         setTimeout(() => {
           void loadRoles(newSession.user.id).finally(() => {
@@ -89,6 +99,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           });
         }, 0);
       } else {
+        currentUserId = undefined;
         setIsSuperAdmin(false);
         setRolesLoading(false);
         setAuthReady(true);
@@ -99,6 +110,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     void supabase.auth.getSession().then(async ({ data: { session: existing } }) => {
       setSession(existing);
       if (existing?.user) {
+        currentUserId = existing.user.id;
         setRolesLoading(true);
         await loadRoles(existing.user.id).finally(() => setRolesLoading(false));
       } else {
@@ -109,6 +121,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     return () => subscription.unsubscribe();
   }, []);
+
 
   const refreshRoles = async () => {
     setRolesLoading(true);
