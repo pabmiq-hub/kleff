@@ -18,12 +18,6 @@ import {
   DialogTrigger,
   DialogFooter,
 } from "@/components/ui/dialog";
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-  DialogFooter,
-} from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { CalendarDays, MapPin, Plus, Users, ExternalLink, RefreshCw, Search, Layers } from "lucide-react";
 
