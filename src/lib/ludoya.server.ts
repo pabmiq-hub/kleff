@@ -103,13 +103,41 @@ const EVENT_TYPE = "PLANNED_PLAY";
 
 export async function listLudoyaMatches(): Promise<{ matches: LudoyaMatch[]; endpointOk: boolean; lastError?: string }> {
   try {
-    const q = new URLSearchParams({ type: EVENT_TYPE, pagination: "50,0" });
+    const q = new URLSearchParams({ pagination: "50,0" });
     const res = await ludoyaFetch(`/events?${q.toString()}`);
     if (res.ok) {
       const json = (await res.json()) as any;
-      const els: any[] =
-        json?.events?.elements ?? json?.elements ?? json?.data ?? (Array.isArray(json) ? json : []);
-      return { matches: els as LudoyaMatch[], endpointOk: true };
+      const raw: any[] =
+        json?.futureEvents?.elements
+        ?? json?.events?.elements
+        ?? json?.elements
+        ?? (Array.isArray(json) ? json : []);
+      const matches: LudoyaMatch[] = raw.map((e) => ({
+        id: e.id,
+        title: e.title ?? null,
+        scheduledAt: e.startsAt ?? e.scheduledAt ?? null,
+        location: e.location ?? e.venue?.name ?? null,
+        notes: e.description ?? e.notes ?? null,
+        minPlayers: e.minPlayerCount ?? e.minPlayers ?? null,
+        maxPlayers: e.maxPlayerCount ?? e.capacity ?? e.maxPlayers ?? null,
+        boardgame: e.boardgame
+          ? {
+              id: e.boardgame.id,
+              slug: e.boardgame.slug,
+              name: e.boardgame.name,
+              imageUrl: e.boardgame.imageUrl ?? null,
+            }
+          : e.imageUrl
+            ? { name: e.title, imageUrl: e.imageUrl }
+            : null,
+        participants: Array.isArray(e.participants)
+          ? e.participants
+          : typeof e.participantCount === "number"
+            ? new Array(e.participantCount).fill({})
+            : null,
+        url: e.url ?? (e.id ? `https://app.ludoya.com/events/${e.id}` : null),
+      }));
+      return { matches, endpointOk: true };
     }
     let msg = `HTTP ${res.status}`;
     try { msg = ((await res.json()) as { message?: string }).message ?? msg; } catch { /* ignore */ }
@@ -118,6 +146,7 @@ export async function listLudoyaMatches(): Promise<{ matches: LudoyaMatch[]; end
     return { matches: [], endpointOk: false, lastError: e instanceof Error ? e.message : String(e) };
   }
 }
+
 
 export interface CreateLudoyaMatchInput {
   title: string;
