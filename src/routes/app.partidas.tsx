@@ -10,7 +10,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Dialog,
   DialogContent,
@@ -61,6 +60,7 @@ function PartidasPage() {
   const [items, setItems] = useState<UiMatch[]>([]);
   const [warning, setWarning] = useState<string | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [filter, setFilter] = useState<"todos" | "partida" | "torneo" | "evento">("todos");
 
   const load = async () => {
     setRefreshing(true);
@@ -80,9 +80,35 @@ function PartidasPage() {
     void load();
   }, []);
 
-  const partidas = useMemo(() => items.filter((m) => classify(m.type) === "partida"), [items]);
-  const torneos = useMemo(() => items.filter((m) => classify(m.type) === "torneo"), [items]);
-  const eventos = useMemo(() => items.filter((m) => classify(m.type) === "evento"), [items]);
+  const sorted = useMemo(
+    () =>
+      [...items].sort((a, b) => {
+        const ta = a.scheduledAt ? new Date(a.scheduledAt).getTime() : Number.POSITIVE_INFINITY;
+        const tb = b.scheduledAt ? new Date(b.scheduledAt).getTime() : Number.POSITIVE_INFINITY;
+        return ta - tb;
+      }),
+    [items],
+  );
+  const counts = useMemo(
+    () => ({
+      todos: sorted.length,
+      partida: sorted.filter((m) => classify(m.type) === "partida").length,
+      torneo: sorted.filter((m) => classify(m.type) === "torneo").length,
+      evento: sorted.filter((m) => classify(m.type) === "evento").length,
+    }),
+    [sorted],
+  );
+  const visible = useMemo(
+    () => (filter === "todos" ? sorted : sorted.filter((m) => classify(m.type) === filter)),
+    [sorted, filter],
+  );
+
+  const filterOptions: { key: typeof filter; label: string }[] = [
+    { key: "todos", label: "Todos" },
+    { key: "partida", label: "Partidas" },
+    { key: "torneo", label: "Torneos" },
+    { key: "evento", label: "Eventos" },
+  ];
 
   return (
     <div className="space-y-6">
@@ -122,46 +148,50 @@ function PartidasPage() {
         </div>
       )}
 
+      <div className="flex flex-wrap gap-2">
+        {filterOptions.map((opt) => {
+          const active = filter === opt.key;
+          return (
+            <button
+              key={opt.key}
+              type="button"
+              onClick={() => setFilter(opt.key)}
+              className={`inline-flex items-center gap-2 rounded-full border-2 px-3 py-1 text-sm font-semibold transition-colors ${
+                active
+                  ? "border-ink bg-ink text-cream"
+                  : "border-ink/20 bg-card text-ink hover:border-ink/50"
+              }`}
+            >
+              {opt.label}
+              <span className={`text-xs rounded-full px-1.5 py-0.5 ${active ? "bg-cream/20" : "bg-ink/10"}`}>
+                {counts[opt.key]}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+
       {loading ? (
         <p className="text-muted-foreground">Cargando…</p>
+      ) : visible.length === 0 ? (
+        <div className="bg-card border-2 border-ink rounded-2xl p-8 shadow-tactile-sm text-center">
+          <p className="text-muted-foreground text-sm">
+            {counts.todos === 0
+              ? "Aún no hay actividad programada en el grupo de KLEFF."
+              : "No hay elementos en este filtro."}
+          </p>
+        </div>
       ) : (
-        <Tabs defaultValue="partidas" className="w-full">
-          <TabsList>
-            <TabsTrigger value="partidas">Partidas ({partidas.length})</TabsTrigger>
-            <TabsTrigger value="torneos">Torneos ({torneos.length})</TabsTrigger>
-            <TabsTrigger value="eventos">Eventos ({eventos.length})</TabsTrigger>
-          </TabsList>
-          <TabsContent value="partidas" className="mt-4">
-            <ItemGrid items={partidas} emptyText="Aún no hay partidas programadas. ¡Crea la primera!" />
-          </TabsContent>
-          <TabsContent value="torneos" className="mt-4">
-            <ItemGrid items={torneos} emptyText="No hay torneos programados." />
-          </TabsContent>
-          <TabsContent value="eventos" className="mt-4">
-            <ItemGrid items={eventos} emptyText="No hay eventos próximos." />
-          </TabsContent>
-        </Tabs>
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {visible.map((m) => (
+            <MatchCard key={m.id} match={m} />
+          ))}
+        </div>
       )}
     </div>
   );
 }
 
-function ItemGrid({ items, emptyText }: { items: UiMatch[]; emptyText: string }) {
-  if (items.length === 0) {
-    return (
-      <div className="bg-card border-2 border-ink rounded-2xl p-8 shadow-tactile-sm text-center">
-        <p className="text-muted-foreground text-sm">{emptyText}</p>
-      </div>
-    );
-  }
-  return (
-    <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-      {items.map((m) => (
-        <MatchCard key={m.id} match={m} />
-      ))}
-    </div>
-  );
-}
 
 function MatchCard({ match }: { match: UiMatch }) {
   const when = match.scheduledAt ? new Date(match.scheduledAt) : null;

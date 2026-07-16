@@ -109,53 +109,95 @@ export interface LudoyaMatch {
 
 const EVENT_TYPE = "PLANNED_PLAY";
 
+function mapRawEvent(e: any, parent?: { id: string; title?: string | null } | null): LudoyaMatch {
+  const p = parent ?? (e.parentEvent
+    ? { id: e.parentEvent.id, title: e.parentEvent.title ?? null }
+    : e.parentEventId
+      ? { id: e.parentEventId, title: null }
+      : null);
+  const game = e.boardgame ?? e.game ?? null;
+  const loc = typeof e.location === "string"
+    ? e.location
+    : (e.location?.name ?? e.venue?.name ?? null);
+  return {
+    id: e.id,
+    type: (e.type ?? "MEETUP") as LudoyaEventType,
+    title: e.title ?? null,
+    scheduledAt: e.startsAt ?? e.scheduledAt ?? null,
+    endsAt: e.endsAt ?? null,
+    location: loc,
+    notes: e.description ?? e.notes ?? null,
+    minPlayers: e.minPlayerCount ?? e.minPlayers ?? e.minParticipants ?? null,
+    maxPlayers: e.maxPlayerCount ?? e.maxPlayers ?? null,
+    capacity: typeof e.capacity === "number" ? e.capacity : null,
+    participantCount: typeof e.participantCount === "number" ? e.participantCount : null,
+    imageUrl: e.imageUrl ?? e.image?.url ?? null,
+    boardgame: game
+      ? {
+          id: game.id,
+          slug: game.slug,
+          name: game.name,
+          imageUrl: game.imageUrl ?? null,
+        }
+      : null,
+    participants: Array.isArray(e.participants) ? e.participants : null,
+    parentEvent: p,
+    url: e.url ?? (e.id ? `https://app.ludoya.com/events/${e.id}` : null),
+  };
+}
+
+async function fetchEventChildren(eventId: string): Promise<any[]> {
+  // The /public/v1/events/{id}/children endpoint isn't exposed, but the
+  // internal /events/{id}/children accepts the group API key and returns
+  // TOURNAMENT + PLANNED_PLAY items scheduled inside a parent event.
+  try {
+    const res = await fetch(`https://api.ludoya.com/events/${eventId}/children`, {
+      headers: { "X-Api-Key": apiKey() },
+    });
+    if (!res.ok) return [];
+    const json = (await res.json()) as any;
+    const list: any[] = json?.list ?? json?.elements ?? (Array.isArray(json) ? json : []);
+    return list;
+  } catch {
+    return [];
+  }
+}
+
 export async function listLudoyaMatches(): Promise<{ matches: LudoyaMatch[]; endpointOk: boolean; lastError?: string }> {
   try {
     const q = new URLSearchParams({ pagination: "50,0" });
     const res = await ludoyaFetch(`/events?${q.toString()}`);
-    if (res.ok) {
-      const json = (await res.json()) as any;
-      const raw: any[] =
-        json?.futureEvents?.elements
-        ?? json?.events?.elements
-        ?? json?.elements
-        ?? (Array.isArray(json) ? json : []);
-      const parentRef = (e: any) => {
-        const p = e.parentEvent ?? e.parent ?? null;
-        const pid = e.parentEventId ?? p?.id ?? null;
-        if (!pid) return null;
-        return { id: pid, title: p?.title ?? null };
-      };
-      const matches: LudoyaMatch[] = raw.map((e) => ({
-        id: e.id,
-        type: (e.type ?? "MEETUP") as LudoyaEventType,
-        title: e.title ?? null,
-        scheduledAt: e.startsAt ?? e.scheduledAt ?? null,
-        endsAt: e.endsAt ?? null,
-        location: e.location ?? e.venue?.name ?? null,
-        notes: e.description ?? e.notes ?? null,
-        minPlayers: e.minPlayerCount ?? e.minPlayers ?? null,
-        maxPlayers: e.maxPlayerCount ?? e.maxPlayers ?? null,
-        capacity: typeof e.capacity === "number" ? e.capacity : null,
-        participantCount: typeof e.participantCount === "number" ? e.participantCount : null,
-        imageUrl: e.imageUrl ?? null,
-        boardgame: e.boardgame
-          ? {
-              id: e.boardgame.id,
-              slug: e.boardgame.slug,
-              name: e.boardgame.name,
-              imageUrl: e.boardgame.imageUrl ?? null,
-            }
-          : null,
-        participants: Array.isArray(e.participants) ? e.participants : null,
-        parentEvent: parentRef(e),
-        url: e.url ?? (e.id ? `https://app.ludoya.com/events/${e.id}` : null),
-      }));
-      return { matches, endpointOk: true };
+    if (!res.ok) {
+      let msg = `HTTP ${res.status}`;
+      try { msg = ((await res.json()) as { message?: string }).message ?? msg; } catch { /* ignore */ }
+      return { matches: [], endpointOk: false, lastError: `/events: ${msg}` };
     }
-    let msg = `HTTP ${res.status}`;
-    try { msg = ((await res.json()) as { message?: string }).message ?? msg; } catch { /* ignore */ }
-    return { matches: [], endpointOk: false, lastError: `/events: ${msg}` };
+    const json = (await res.json()) as any;
+    const raw: any[] =
+      json?.futureEvents?.elements
+      ?? json?.events?.elements
+      ?? json?.elements
+      ?? (Array.isArray(json) ? json : []);
+
+    const parents = raw.map((e) => mapRawEvent(e));
+
+    // For each parent event, fetch its partidas + torneos in parallel.
+    const childLists = await Promise.all(
+      raw.map(async (e) => {
+        const items = await fetchEventChildren(e.id);
+        const parentRef = { id: e.id, title: e.title ?? null };
+        return items.map((c) => mapRawEvent(c, parentRef));
+      }),
+    );
+
+    const seen = new Set<string>();
+    const matches: LudoyaMatch[] = [];
+    for (const m of [...parents, ...childLists.flat()]) {
+      if (!m.id || seen.has(m.id)) continue;
+      seen.add(m.id);
+      matches.push(m);
+    }
+    return { matches, endpointOk: true };
   } catch (e) {
     return { matches: [], endpointOk: false, lastError: e instanceof Error ? e.message : String(e) };
   }
