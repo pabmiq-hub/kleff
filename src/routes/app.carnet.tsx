@@ -16,11 +16,6 @@ interface ProfileData {
   avatar_url: string | null;
   created_at: string;
 }
-  full_name: string;
-  username: string;
-  avatar_url: string | null;
-  created_at: string;
-}
 
 function CarnetPage() {
   const fn = useServerFn(getMyProfile);
