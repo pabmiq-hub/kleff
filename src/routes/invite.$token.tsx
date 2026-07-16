@@ -44,6 +44,7 @@ function InvitePage() {
     dateOfBirth: "",
     gender: "" as "" | "female" | "male" | "non_binary" | "other" | "prefer_not_to_say",
     idDocument: "",
+    ludoyaUsername: "",
   });
 
   if (!invitation.valid) {
@@ -109,6 +110,7 @@ function InvitePage() {
           dateOfBirth: form.dateOfBirth,
           gender: form.gender,
           idDocument: form.idDocument.trim().toUpperCase(),
+          ludoyaUsername: form.ludoyaUsername.trim() || null,
         },
       });
       // Auto-login
