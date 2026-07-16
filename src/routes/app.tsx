@@ -1,7 +1,7 @@
 import { createFileRoute, Outlet, Link, useNavigate } from "@tanstack/react-router";
 import { useAuth } from "@/auth/AuthProvider";
 import { Button } from "@/components/ui/button";
-import { Home, User, IdCard, Dices, LogOut, Shield } from "lucide-react";
+import { Home, User, IdCard, Dices, LogOut, Shield, Gamepad2 } from "lucide-react";
 
 export const Route = createFileRoute("/app")({
   head: () => ({
