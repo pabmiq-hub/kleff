@@ -549,3 +549,48 @@
   border-radius: 0.25rem;
   font-size: 0.9em;
 }
+
+/* Tables (blog + editor) */
+.blog-content table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.5em 0;
+  font-size: 0.95em;
+  overflow: hidden;
+  border-radius: 0.5rem;
+}
+.blog-content table th,
+.blog-content table td {
+  border: 1px solid var(--border);
+  padding: 0.55em 0.75em;
+  text-align: left;
+  vertical-align: top;
+}
+.blog-content table th {
+  background: color-mix(in oklab, var(--muted) 60%, transparent);
+  font-weight: 600;
+}
+.blog-content table tr:nth-child(even) td {
+  background: color-mix(in oklab, var(--muted) 30%, transparent);
+}
+
+/* Tiptap: visible placeholder + selected-cell highlight for tables */
+.blog-content p.is-editor-empty:first-child::before {
+  color: color-mix(in oklab, var(--foreground) 40%, transparent);
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  pointer-events: none;
+}
+.blog-content .selectedCell:after {
+  background: color-mix(in oklab, var(--coral, oklch(0.68 0.18 30)) 15%, transparent);
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 2;
+}
+.blog-content .tableWrapper { overflow-x: auto; }
+.blog-content table { position: relative; }
+.blog-content table td, .blog-content table th { position: relative; }
+
