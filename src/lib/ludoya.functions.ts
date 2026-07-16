@@ -104,9 +104,3 @@ export const searchLudoyaBoardgamesFn = createServerFn({ method: "POST" })
     return { results };
   });
 
-// -------- Public read of a profile's Ludoya link (used by profile page) --------
-// (Not needed as separate function — profile.functions already returns profile.)
-export const _noop = createServerFn({ method: "GET" }).handler(async () => {
-  const c = createClient(process.env.SUPABASE_URL ?? "", process.env.SUPABASE_PUBLISHABLE_KEY ?? "");
-  return { ok: !!c };
-});
