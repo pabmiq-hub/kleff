@@ -75,3 +75,91 @@ export async function searchLudoyaBoardgames(query: string, size = 30, page = 0)
   const json = (await res.json()) as { games?: { elements?: LudoyaBoardgame[] } };
   return json.games?.elements ?? [];
 }
+
+// -------- Matches (partidas) --------
+// NOTE: Endpoint paths are best-effort until Ludoya publishes the official docs.
+// We try a few candidates and fall back gracefully so the UI keeps working.
+
+export interface LudoyaMatch {
+  id: string;
+  title?: string | null;
+  scheduledAt?: string | null; // ISO date
+  location?: string | null;
+  notes?: string | null;
+  minPlayers?: number | null;
+  maxPlayers?: number | null;
+  boardgame?: {
+    id?: string;
+    slug?: string;
+    name?: string;
+    imageUrl?: string | null;
+  } | null;
+  createdBy?: { id?: string; username?: string; name?: string } | null;
+  participants?: Array<{ id?: string; username?: string; name?: string }> | null;
+  url?: string | null;
+}
+
+const MATCH_LIST_PATHS = ["/matches", "/group/matches", "/members/matches"];
+const MATCH_CREATE_PATHS = ["/matches", "/group/matches"];
+
+export async function listLudoyaMatches(): Promise<{ matches: LudoyaMatch[]; endpointOk: boolean; lastError?: string }> {
+  for (const path of MATCH_LIST_PATHS) {
+    try {
+      const res = await ludoyaFetch(path);
+      if (res.ok) {
+        const json = (await res.json()) as any;
+        const els: any[] =
+          json?.matches?.elements ?? json?.elements ?? json?.data ?? (Array.isArray(json) ? json : []);
+        return { matches: els as LudoyaMatch[], endpointOk: true };
+      }
+      if (res.status !== 404) {
+        let msg = `HTTP ${res.status}`;
+        try { msg = ((await res.json()) as { message?: string }).message ?? msg; } catch { /* ignore */ }
+        return { matches: [], endpointOk: false, lastError: `${path}: ${msg}` };
+      }
+    } catch (e) {
+      return { matches: [], endpointOk: false, lastError: e instanceof Error ? e.message : String(e) };
+    }
+  }
+  return { matches: [], endpointOk: false, lastError: "No matches endpoint available yet" };
+}
+
+export interface CreateLudoyaMatchInput {
+  title: string;
+  scheduledAt: string; // ISO
+  boardgameId?: string | null;
+  boardgameSlug?: string | null;
+  minPlayers?: number | null;
+  maxPlayers?: number | null;
+  location?: string | null;
+  notes?: string | null;
+  hostUsername?: string | null;
+}
+
+export async function createLudoyaMatch(input: CreateLudoyaMatchInput): Promise<{ ok: boolean; match?: LudoyaMatch; httpStatus: number; message?: string }> {
+  const body = {
+    title: input.title,
+    scheduledAt: input.scheduledAt,
+    boardgameId: input.boardgameId ?? undefined,
+    boardgameSlug: input.boardgameSlug ?? undefined,
+    minPlayers: input.minPlayers ?? undefined,
+    maxPlayers: input.maxPlayers ?? undefined,
+    location: input.location ?? undefined,
+    notes: input.notes ?? undefined,
+    hostUsername: input.hostUsername ?? undefined,
+  };
+  let lastStatus = 0;
+  let lastMsg: string | undefined;
+  for (const path of MATCH_CREATE_PATHS) {
+    const res = await ludoyaFetch(path, { method: "POST", body: JSON.stringify(body) });
+    if (res.ok || res.status === 201) {
+      let match: LudoyaMatch | undefined;
+      try { match = (await res.json()) as LudoyaMatch; } catch { /* ignore */ }
+      return { ok: true, match, httpStatus: res.status };
+    }
+    lastStatus = res.status;
+    try { lastMsg = ((await res.json()) as { message?: string }).message; } catch { /* ignore */ }
+    if (res.status !== 404) break;
+  }
+  return { ok: false, httpStatus: lastStatus, message: lastMsg ?? "No se pudo crear la partida en Ludoya" };
+}

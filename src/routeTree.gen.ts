@@ -73,6 +73,7 @@ import { Route as CaBlogRouteImport } from './routes/ca.blog'
 import { Route as CaAvisLegalRouteImport } from './routes/ca.avis-legal'
 import { Route as CaActivitatsRouteImport } from './routes/ca.activitats'
 import { Route as AppProfileRouteImport } from './routes/app.profile'
+import { Route as AppPartidasRouteImport } from './routes/app.partidas'
 import { Route as AppCarnetRouteImport } from './routes/app.carnet'
 import { Route as AdminRentalsRouteImport } from './routes/admin.rentals'
 import { Route as AdminRegistrationsRouteImport } from './routes/admin.registrations'
@@ -426,6 +427,11 @@ const AppProfileRoute = AppProfileRouteImport.update({
   path: '/profile',
   getParentRoute: () => AppRoute,
 } as any)
+const AppPartidasRoute = AppPartidasRouteImport.update({
+  id: '/partidas',
+  path: '/partidas',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppCarnetRoute = AppCarnetRouteImport.update({
   id: '/carnet',
   path: '/carnet',
@@ -616,6 +622,7 @@ export interface FileRoutesByFullPath {
   '/admin/registrations': typeof AdminRegistrationsRouteWithChildren
   '/admin/rentals': typeof AdminRentalsRouteWithChildren
   '/app/carnet': typeof AppCarnetRoute
+  '/app/partidas': typeof AppPartidasRoute
   '/app/profile': typeof AppProfileRoute
   '/ca/activitats': typeof CaActivitatsRoute
   '/ca/avis-legal': typeof CaAvisLegalRoute
@@ -707,6 +714,7 @@ export interface FileRoutesByTo {
   '/admin/invitations': typeof AdminInvitationsRoute
   '/admin/members': typeof AdminMembersRoute
   '/app/carnet': typeof AppCarnetRoute
+  '/app/partidas': typeof AppPartidasRoute
   '/app/profile': typeof AppProfileRoute
   '/ca/activitats': typeof CaActivitatsRoute
   '/ca/avis-legal': typeof CaAvisLegalRoute
@@ -805,6 +813,7 @@ export interface FileRoutesById {
   '/admin/registrations': typeof AdminRegistrationsRouteWithChildren
   '/admin/rentals': typeof AdminRentalsRouteWithChildren
   '/app/carnet': typeof AppCarnetRoute
+  '/app/partidas': typeof AppPartidasRoute
   '/app/profile': typeof AppProfileRoute
   '/ca/activitats': typeof CaActivitatsRoute
   '/ca/avis-legal': typeof CaAvisLegalRoute
@@ -904,6 +913,7 @@ export interface FileRouteTypes {
     | '/admin/registrations'
     | '/admin/rentals'
     | '/app/carnet'
+    | '/app/partidas'
     | '/app/profile'
     | '/ca/activitats'
     | '/ca/avis-legal'
@@ -995,6 +1005,7 @@ export interface FileRouteTypes {
     | '/admin/invitations'
     | '/admin/members'
     | '/app/carnet'
+    | '/app/partidas'
     | '/app/profile'
     | '/ca/activitats'
     | '/ca/avis-legal'
@@ -1092,6 +1103,7 @@ export interface FileRouteTypes {
     | '/admin/registrations'
     | '/admin/rentals'
     | '/app/carnet'
+    | '/app/partidas'
     | '/app/profile'
     | '/ca/activitats'
     | '/ca/avis-legal'
@@ -1676,6 +1688,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppProfileRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/partidas': {
+      id: '/app/partidas'
+      path: '/partidas'
+      fullPath: '/app/partidas'
+      preLoaderRoute: typeof AppPartidasRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/app/carnet': {
       id: '/app/carnet'
       path: '/carnet'
@@ -1995,6 +2014,7 @@ const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
 interface AppRouteChildren {
   AppCarnetRoute: typeof AppCarnetRoute
+  AppPartidasRoute: typeof AppPartidasRoute
   AppProfileRoute: typeof AppProfileRoute
   AppIndexRoute: typeof AppIndexRoute
   AppRentalsMineRoute: typeof AppRentalsMineRoute
@@ -2003,6 +2023,7 @@ interface AppRouteChildren {
 
 const AppRouteChildren: AppRouteChildren = {
   AppCarnetRoute: AppCarnetRoute,
+  AppPartidasRoute: AppPartidasRoute,
   AppProfileRoute: AppProfileRoute,
   AppIndexRoute: AppIndexRoute,
   AppRentalsMineRoute: AppRentalsMineRoute,

@@ -6,6 +6,8 @@ import {
   inviteToKleffGroup,
   searchLudoyaUsers,
   searchLudoyaBoardgames,
+  listLudoyaMatches,
+  createLudoyaMatch,
 } from "@/lib/ludoya.server";
 
 // -------- Public (no auth): validate username during invite acceptance --------
@@ -102,5 +104,51 @@ export const searchLudoyaBoardgamesFn = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const results = await searchLudoyaBoardgames(data.query, 20, 0);
     return { results };
+  });
+
+// -------- Authenticated: list & create partidas in KLEFF group --------
+
+export const listKleffMatches = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async () => {
+    return await listLudoyaMatches();
+  });
+
+const createMatchSchema = z.object({
+  title: z.string().min(2).max(120),
+  scheduledAt: z.string().min(4),
+  boardgameId: z.string().nullable().optional(),
+  boardgameSlug: z.string().nullable().optional(),
+  boardgameName: z.string().nullable().optional(),
+  minPlayers: z.number().int().min(1).max(50).nullable().optional(),
+  maxPlayers: z.number().int().min(1).max(50).nullable().optional(),
+  location: z.string().max(200).nullable().optional(),
+  notes: z.string().max(2000).nullable().optional(),
+});
+
+export const createKleffMatch = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) => createMatchSchema.parse(input))
+  .handler(async ({ data, context }) => {
+    const { data: profile } = await context.supabase
+      .from("profiles")
+      .select("ludoya_username")
+      .eq("id", context.userId)
+      .maybeSingle();
+
+    const result = await createLudoyaMatch({
+      title: data.title,
+      scheduledAt: data.scheduledAt,
+      boardgameId: data.boardgameId ?? null,
+      boardgameSlug: data.boardgameSlug ?? null,
+      minPlayers: data.minPlayers ?? null,
+      maxPlayers: data.maxPlayers ?? null,
+      location: data.location ?? null,
+      notes: data.notes ?? null,
+      hostUsername: profile?.ludoya_username ?? null,
+    });
+
+    if (!result.ok) throw new Error(result.message ?? "No se pudo crear la partida");
+    return { match: result.match ?? null };
   });
 
