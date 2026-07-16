@@ -99,29 +99,24 @@ export interface LudoyaMatch {
   url?: string | null;
 }
 
-const MATCH_LIST_PATHS = ["/matches", "/group/matches", "/members/matches"];
-const MATCH_CREATE_PATHS = ["/matches", "/group/matches"];
+const EVENT_TYPE = "PLANNED_PLAY";
 
 export async function listLudoyaMatches(): Promise<{ matches: LudoyaMatch[]; endpointOk: boolean; lastError?: string }> {
-  for (const path of MATCH_LIST_PATHS) {
-    try {
-      const res = await ludoyaFetch(path);
-      if (res.ok) {
-        const json = (await res.json()) as any;
-        const els: any[] =
-          json?.matches?.elements ?? json?.elements ?? json?.data ?? (Array.isArray(json) ? json : []);
-        return { matches: els as LudoyaMatch[], endpointOk: true };
-      }
-      if (res.status !== 404) {
-        let msg = `HTTP ${res.status}`;
-        try { msg = ((await res.json()) as { message?: string }).message ?? msg; } catch { /* ignore */ }
-        return { matches: [], endpointOk: false, lastError: `${path}: ${msg}` };
-      }
-    } catch (e) {
-      return { matches: [], endpointOk: false, lastError: e instanceof Error ? e.message : String(e) };
+  try {
+    const q = new URLSearchParams({ type: EVENT_TYPE, pagination: "50,0" });
+    const res = await ludoyaFetch(`/events?${q.toString()}`);
+    if (res.ok) {
+      const json = (await res.json()) as any;
+      const els: any[] =
+        json?.events?.elements ?? json?.elements ?? json?.data ?? (Array.isArray(json) ? json : []);
+      return { matches: els as LudoyaMatch[], endpointOk: true };
     }
+    let msg = `HTTP ${res.status}`;
+    try { msg = ((await res.json()) as { message?: string }).message ?? msg; } catch { /* ignore */ }
+    return { matches: [], endpointOk: false, lastError: `/events: ${msg}` };
+  } catch (e) {
+    return { matches: [], endpointOk: false, lastError: e instanceof Error ? e.message : String(e) };
   }
-  return { matches: [], endpointOk: false, lastError: "No matches endpoint available yet" };
 }
 
 export interface CreateLudoyaMatchInput {
@@ -138,6 +133,7 @@ export interface CreateLudoyaMatchInput {
 
 export async function createLudoyaMatch(input: CreateLudoyaMatchInput): Promise<{ ok: boolean; match?: LudoyaMatch; httpStatus: number; message?: string }> {
   const body = {
+    type: EVENT_TYPE,
     title: input.title,
     scheduledAt: input.scheduledAt,
     boardgameId: input.boardgameId ?? undefined,
@@ -148,18 +144,14 @@ export async function createLudoyaMatch(input: CreateLudoyaMatchInput): Promise<
     notes: input.notes ?? undefined,
     hostUsername: input.hostUsername ?? undefined,
   };
-  let lastStatus = 0;
-  let lastMsg: string | undefined;
-  for (const path of MATCH_CREATE_PATHS) {
-    const res = await ludoyaFetch(path, { method: "POST", body: JSON.stringify(body) });
-    if (res.ok || res.status === 201) {
-      let match: LudoyaMatch | undefined;
-      try { match = (await res.json()) as LudoyaMatch; } catch { /* ignore */ }
-      return { ok: true, match, httpStatus: res.status };
-    }
-    lastStatus = res.status;
-    try { lastMsg = ((await res.json()) as { message?: string }).message; } catch { /* ignore */ }
-    if (res.status !== 404) break;
+  const res = await ludoyaFetch(`/events`, { method: "POST", body: JSON.stringify(body) });
+  if (res.ok || res.status === 201) {
+    let match: LudoyaMatch | undefined;
+    try { match = (await res.json()) as LudoyaMatch; } catch { /* ignore */ }
+    return { ok: true, match, httpStatus: res.status };
   }
-  return { ok: false, httpStatus: lastStatus, message: lastMsg ?? "No se pudo crear la partida en Ludoya" };
+  let message: string | undefined;
+  try { message = ((await res.json()) as { message?: string }).message; } catch { /* ignore */ }
+  return { ok: false, httpStatus: res.status, message: message ?? "No se pudo crear la partida en Ludoya" };
 }
+
