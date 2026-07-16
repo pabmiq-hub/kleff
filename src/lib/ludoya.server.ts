@@ -80,14 +80,21 @@ export async function searchLudoyaBoardgames(query: string, size = 30, page = 0)
 // NOTE: Endpoint paths are best-effort until Ludoya publishes the official docs.
 // We try a few candidates and fall back gracefully so the UI keeps working.
 
+export type LudoyaEventType = "MEETUP" | "PLANNED_PLAY" | "TOURNAMENT" | string;
+
 export interface LudoyaMatch {
   id: string;
+  type: LudoyaEventType;
   title?: string | null;
   scheduledAt?: string | null; // ISO date
+  endsAt?: string | null;
   location?: string | null;
   notes?: string | null;
   minPlayers?: number | null;
   maxPlayers?: number | null;
+  capacity?: number | null;
+  participantCount?: number | null;
+  imageUrl?: string | null;
   boardgame?: {
     id?: string;
     slug?: string;
@@ -96,6 +103,7 @@ export interface LudoyaMatch {
   } | null;
   createdBy?: { id?: string; username?: string; name?: string } | null;
   participants?: Array<{ id?: string; username?: string; name?: string }> | null;
+  parentEvent?: { id: string; title?: string | null } | null;
   url?: string | null;
 }
 
@@ -112,14 +120,25 @@ export async function listLudoyaMatches(): Promise<{ matches: LudoyaMatch[]; end
         ?? json?.events?.elements
         ?? json?.elements
         ?? (Array.isArray(json) ? json : []);
+      const parentRef = (e: any) => {
+        const p = e.parentEvent ?? e.parent ?? null;
+        const pid = e.parentEventId ?? p?.id ?? null;
+        if (!pid) return null;
+        return { id: pid, title: p?.title ?? null };
+      };
       const matches: LudoyaMatch[] = raw.map((e) => ({
         id: e.id,
+        type: (e.type ?? "MEETUP") as LudoyaEventType,
         title: e.title ?? null,
         scheduledAt: e.startsAt ?? e.scheduledAt ?? null,
+        endsAt: e.endsAt ?? null,
         location: e.location ?? e.venue?.name ?? null,
         notes: e.description ?? e.notes ?? null,
         minPlayers: e.minPlayerCount ?? e.minPlayers ?? null,
-        maxPlayers: e.maxPlayerCount ?? e.capacity ?? e.maxPlayers ?? null,
+        maxPlayers: e.maxPlayerCount ?? e.maxPlayers ?? null,
+        capacity: typeof e.capacity === "number" ? e.capacity : null,
+        participantCount: typeof e.participantCount === "number" ? e.participantCount : null,
+        imageUrl: e.imageUrl ?? null,
         boardgame: e.boardgame
           ? {
               id: e.boardgame.id,
@@ -127,14 +146,9 @@ export async function listLudoyaMatches(): Promise<{ matches: LudoyaMatch[]; end
               name: e.boardgame.name,
               imageUrl: e.boardgame.imageUrl ?? null,
             }
-          : e.imageUrl
-            ? { name: e.title, imageUrl: e.imageUrl }
-            : null,
-        participants: Array.isArray(e.participants)
-          ? e.participants
-          : typeof e.participantCount === "number"
-            ? new Array(e.participantCount).fill({})
-            : null,
+          : null,
+        participants: Array.isArray(e.participants) ? e.participants : null,
+        parentEvent: parentRef(e),
         url: e.url ?? (e.id ? `https://app.ludoya.com/events/${e.id}` : null),
       }));
       return { matches, endpointOk: true };
@@ -146,6 +160,7 @@ export async function listLudoyaMatches(): Promise<{ matches: LudoyaMatch[]; end
     return { matches: [], endpointOk: false, lastError: e instanceof Error ? e.message : String(e) };
   }
 }
+
 
 
 export interface CreateLudoyaMatchInput {
