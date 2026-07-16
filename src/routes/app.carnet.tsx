@@ -60,20 +60,31 @@ function CarnetPage() {
               </div>
             </div>
 
-            <div className="border-t border-cream/20 pt-4 flex items-end justify-between">
-              <div>
-                <p className="text-xs uppercase tracking-wider text-cream/60">Nº socio</p>
-                <p className="font-mono text-3xl font-bold">{memberNumber}</p>
+            <div className="border-t border-cream/20 pt-4 flex items-end justify-between gap-4">
+              <div className="space-y-3">
+                <div>
+                  <p className="text-xs uppercase tracking-wider text-cream/60">Nº socio</p>
+                  <p className="font-mono text-3xl font-bold">{memberNumber}</p>
+                </div>
+                <div>
+                  <p className="text-xs uppercase tracking-wider text-cream/60">Socio desde</p>
+                  <p className="font-semibold">{new Date(profile.created_at).toLocaleDateString("es-ES")}</p>
+                </div>
               </div>
-              <div className="text-right">
-                <p className="text-xs uppercase tracking-wider text-cream/60">Socio desde</p>
-                <p className="font-semibold">{new Date(profile.created_at).toLocaleDateString()}</p>
+              <div className="bg-cream p-2 rounded-lg border-2 border-ink shrink-0">
+                <QRCodeSVG
+                  value={`https://www.kleff.es/verificar/${profile.id}`}
+                  size={110}
+                  level="M"
+                  bgColor="#ffffff"
+                  fgColor="#1a1a1a"
+                />
               </div>
             </div>
           </div>
         </div>
         <p className="text-center text-xs text-muted-foreground mt-3">
-          Próximamente — código QR y carnet descargable.
+          Escanea el QR para verificar el carnet como socio.
         </p>
       </div>
     </div>
