@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useAuth } from "@/auth/AuthProvider";
-import { IdCard, Dices, ListChecks } from "lucide-react";
+import { IdCard, Dices, ListChecks, Gamepad2 } from "lucide-react";
 
 export const Route = createFileRoute("/app/")({
   component: AppHome,
