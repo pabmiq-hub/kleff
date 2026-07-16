@@ -59,3 +59,28 @@ export const updateMyProfile = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { success: true };
   });
+
+// ---------------- Public: verify a member by profile id (QR carnet) ----------------
+
+export const verifyMember = createServerFn({ method: "POST" })
+  .inputValidator((input: unknown) => z.object({ id: z.string().uuid() }).parse(input))
+  .handler(async ({ data }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: profile, error } = await supabaseAdmin
+      .from("profiles")
+      .select("id, member_number, full_name, username, avatar_url, created_at")
+      .eq("id", data.id)
+      .maybeSingle();
+    if (error) throw new Error(error.message);
+    if (!profile) return { valid: false as const };
+    return {
+      valid: true as const,
+      member: {
+        memberNumber: profile.member_number,
+        fullName: profile.full_name,
+        username: profile.username,
+        avatarUrl: profile.avatar_url,
+        memberSince: profile.created_at,
+      },
+    };
+  });
