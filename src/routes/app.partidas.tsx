@@ -192,22 +192,6 @@ function PartidasPage() {
   );
 }
 
-function ItemGrid({ items, emptyText }: { items: UiMatch[]; emptyText: string }) {
-  if (items.length === 0) {
-    return (
-      <div className="bg-card border-2 border-ink rounded-2xl p-8 shadow-tactile-sm text-center">
-        <p className="text-muted-foreground text-sm">{emptyText}</p>
-      </div>
-    );
-  }
-  return (
-    <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-      {items.map((m) => (
-        <MatchCard key={m.id} match={m} />
-      ))}
-    </div>
-  );
-}
 
 function MatchCard({ match }: { match: UiMatch }) {
   const when = match.scheduledAt ? new Date(match.scheduledAt) : null;
