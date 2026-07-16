@@ -67,6 +67,13 @@ const profileSchema = z.object({
     .min(5)
     .max(40)
     .regex(/^[A-Za-z0-9-]+$/, "Formato no válido"),
+  ludoyaUsername: z
+    .string()
+    .min(2)
+    .max(60)
+    .regex(/^[a-zA-Z0-9_.-]+$/)
+    .nullable()
+    .optional(),
 });
 
 export const acceptInvitation = createServerFn({ method: "POST" })
