@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
+import { QRCodeSVG } from "qrcode.react";
 import { getMyProfile } from "@/lib/profile.functions";
 
 export const Route = createFileRoute("/app/carnet")({
@@ -8,7 +9,13 @@ export const Route = createFileRoute("/app/carnet")({
 });
 
 interface ProfileData {
+  id: string;
   member_number: number;
+  full_name: string;
+  username: string;
+  avatar_url: string | null;
+  created_at: string;
+}
   full_name: string;
   username: string;
   avatar_url: string | null;

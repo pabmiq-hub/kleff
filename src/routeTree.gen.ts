@@ -37,6 +37,7 @@ import { Route as EnIndexRouteImport } from './routes/en.index'
 import { Route as CaIndexRouteImport } from './routes/ca.index'
 import { Route as AppIndexRouteImport } from './routes/app.index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
+import { Route as VerificarIdRouteImport } from './routes/verificar.$id'
 import { Route as InviteTokenRouteImport } from './routes/invite.$token'
 import { Route as InscripcionSlugRouteImport } from './routes/inscripcion.$slug'
 import { Route as EnTournamentsRouteImport } from './routes/en.tournaments'
@@ -244,6 +245,11 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => AdminRoute,
+} as any)
+const VerificarIdRoute = VerificarIdRouteImport.update({
+  id: '/verificar/$id',
+  path: '/verificar/$id',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const InviteTokenRoute = InviteTokenRouteImport.update({
   id: '/invite/$token',
@@ -645,6 +651,7 @@ export interface FileRoutesByFullPath {
   '/en/tournaments': typeof EnTournamentsRoute
   '/inscripcion/$slug': typeof InscripcionSlugRoute
   '/invite/$token': typeof InviteTokenRoute
+  '/verificar/$id': typeof VerificarIdRoute
   '/admin/': typeof AdminIndexRoute
   '/app/': typeof AppIndexRoute
   '/ca/': typeof CaIndexRoute
@@ -735,6 +742,7 @@ export interface FileRoutesByTo {
   '/en/tournaments': typeof EnTournamentsRoute
   '/inscripcion/$slug': typeof InscripcionSlugRoute
   '/invite/$token': typeof InviteTokenRoute
+  '/verificar/$id': typeof VerificarIdRoute
   '/admin': typeof AdminIndexRoute
   '/app': typeof AppIndexRoute
   '/ca': typeof CaIndexRoute
@@ -832,6 +840,7 @@ export interface FileRoutesById {
   '/en/tournaments': typeof EnTournamentsRoute
   '/inscripcion/$slug': typeof InscripcionSlugRoute
   '/invite/$token': typeof InviteTokenRoute
+  '/verificar/$id': typeof VerificarIdRoute
   '/admin/': typeof AdminIndexRoute
   '/app/': typeof AppIndexRoute
   '/ca/': typeof CaIndexRoute
@@ -930,6 +939,7 @@ export interface FileRouteTypes {
     | '/en/tournaments'
     | '/inscripcion/$slug'
     | '/invite/$token'
+    | '/verificar/$id'
     | '/admin/'
     | '/app/'
     | '/ca/'
@@ -1020,6 +1030,7 @@ export interface FileRouteTypes {
     | '/en/tournaments'
     | '/inscripcion/$slug'
     | '/invite/$token'
+    | '/verificar/$id'
     | '/admin'
     | '/app'
     | '/ca'
@@ -1116,6 +1127,7 @@ export interface FileRouteTypes {
     | '/en/tournaments'
     | '/inscripcion/$slug'
     | '/invite/$token'
+    | '/verificar/$id'
     | '/admin/'
     | '/app/'
     | '/ca/'
@@ -1205,6 +1217,7 @@ export interface RootRouteChildren {
   EnTournamentsRoute: typeof EnTournamentsRoute
   InscripcionSlugRoute: typeof InscripcionSlugRoute
   InviteTokenRoute: typeof InviteTokenRoute
+  VerificarIdRoute: typeof VerificarIdRoute
   CaIndexRoute: typeof CaIndexRoute
   EnIndexRoute: typeof EnIndexRoute
   ApiPublicContactRoute: typeof ApiPublicContactRoute
@@ -1410,6 +1423,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/'
       preLoaderRoute: typeof AdminIndexRouteImport
       parentRoute: typeof AdminRoute
+    }
+    '/verificar/$id': {
+      id: '/verificar/$id'
+      path: '/verificar/$id'
+      fullPath: '/verificar/$id'
+      preLoaderRoute: typeof VerificarIdRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/invite/$token': {
       id: '/invite/$token'
@@ -2050,6 +2070,7 @@ const rootRouteChildren: RootRouteChildren = {
   EnTournamentsRoute: EnTournamentsRoute,
   InscripcionSlugRoute: InscripcionSlugRoute,
   InviteTokenRoute: InviteTokenRoute,
+  VerificarIdRoute: VerificarIdRoute,
   CaIndexRoute: CaIndexRoute,
   EnIndexRoute: EnIndexRoute,
   ApiPublicContactRoute: ApiPublicContactRoute,
