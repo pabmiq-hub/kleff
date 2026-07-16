@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Dialog,
   DialogContent,
@@ -19,7 +20,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { CalendarDays, MapPin, Plus, Users, ExternalLink, RefreshCw, Search } from "lucide-react";
+import { CalendarDays, MapPin, Plus, Users, ExternalLink, RefreshCw, Search, Layers } from "lucide-react";
 
 export const Route = createFileRoute("/app/partidas")({
   head: () => ({
@@ -33,16 +34,22 @@ export const Route = createFileRoute("/app/partidas")({
 
 interface UiMatch {
   id: string;
+  type: string;
   title?: string | null;
   scheduledAt?: string | null;
   location?: string | null;
-  notes?: string | null;
-  minPlayers?: number | null;
+  capacity?: number | null;
+  participantCount?: number | null;
   maxPlayers?: number | null;
-  boardgame?: { name?: string; slug?: string; imageUrl?: string | null } | null;
-  createdBy?: { username?: string; name?: string } | null;
-  participants?: Array<{ username?: string; name?: string }> | null;
+  minPlayers?: number | null;
+  parentEvent?: { id: string; title?: string | null } | null;
   url?: string | null;
+}
+
+function classify(type: string): "partida" | "torneo" | "evento" {
+  if (type === "PLANNED_PLAY") return "partida";
+  if (type === "TOURNAMENT") return "torneo";
+  return "evento";
 }
 
 function PartidasPage() {
@@ -51,7 +58,7 @@ function PartidasPage() {
 
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [matches, setMatches] = useState<UiMatch[]>([]);
+  const [items, setItems] = useState<UiMatch[]>([]);
   const [warning, setWarning] = useState<string | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
 
@@ -59,7 +66,7 @@ function PartidasPage() {
     setRefreshing(true);
     try {
       const r = await listFn({ data: undefined as never });
-      setMatches((r.matches ?? []) as UiMatch[]);
+      setItems((r.matches ?? []) as UiMatch[]);
       setWarning(r.endpointOk ? null : r.lastError ?? "Sincronización con Ludoya no disponible todavía");
     } catch (err) {
       setWarning(err instanceof Error ? err.message : "Error al cargar");
@@ -73,13 +80,17 @@ function PartidasPage() {
     void load();
   }, []);
 
+  const partidas = useMemo(() => items.filter((m) => classify(m.type) === "partida"), [items]);
+  const torneos = useMemo(() => items.filter((m) => classify(m.type) === "torneo"), [items]);
+  const eventos = useMemo(() => items.filter((m) => classify(m.type) === "evento"), [items]);
+
   return (
     <div className="space-y-6">
       <header className="flex items-start justify-between gap-4 flex-wrap">
         <div>
-          <h1 className="font-display text-3xl font-bold">Partidas</h1>
+          <h1 className="font-display text-3xl font-bold">Partidas y eventos</h1>
           <p className="text-muted-foreground mt-1">
-            Eventos y partidas del grupo de KLEFF en Ludoya.
+            Actividad del grupo de KLEFF en Ludoya.
           </p>
         </div>
         <div className="flex gap-2">
@@ -107,57 +118,84 @@ function PartidasPage() {
 
       {warning && (
         <div className="bg-cream border-2 border-ink/20 rounded-2xl p-4 text-sm text-muted-foreground">
-          <p>
-            <strong>Sincronización con Ludoya:</strong> {warning}
-          </p>
-          <p className="mt-1">
-            Cuando confirmemos los endpoints oficiales de partidas, esta lista se
-            rellenará automáticamente y la creación se publicará en el grupo.
-          </p>
+          <strong>Aviso:</strong> {warning}
         </div>
       )}
 
       {loading ? (
         <p className="text-muted-foreground">Cargando…</p>
-      ) : matches.length === 0 ? (
-        <div className="bg-card border-2 border-ink rounded-2xl p-8 shadow-tactile-sm text-center">
-          <p className="font-display text-xl font-bold">Sin partidas por ahora</p>
-          <p className="text-muted-foreground text-sm mt-1">
-            Sé el primero en proponer una partida al grupo de KLEFF.
-          </p>
-        </div>
       ) : (
-        <div className="grid sm:grid-cols-2 gap-4">
-          {matches.map((m) => (
-            <MatchCard key={m.id} match={m} />
-          ))}
-        </div>
+        <Tabs defaultValue="partidas" className="w-full">
+          <TabsList>
+            <TabsTrigger value="partidas">Partidas ({partidas.length})</TabsTrigger>
+            <TabsTrigger value="torneos">Torneos ({torneos.length})</TabsTrigger>
+            <TabsTrigger value="eventos">Eventos ({eventos.length})</TabsTrigger>
+          </TabsList>
+          <TabsContent value="partidas" className="mt-4">
+            <ItemGrid items={partidas} emptyText="Aún no hay partidas programadas. ¡Crea la primera!" />
+          </TabsContent>
+          <TabsContent value="torneos" className="mt-4">
+            <ItemGrid items={torneos} emptyText="No hay torneos programados." />
+          </TabsContent>
+          <TabsContent value="eventos" className="mt-4">
+            <ItemGrid items={eventos} emptyText="No hay eventos próximos." />
+          </TabsContent>
+        </Tabs>
       )}
+    </div>
+  );
+}
+
+function ItemGrid({ items, emptyText }: { items: UiMatch[]; emptyText: string }) {
+  if (items.length === 0) {
+    return (
+      <div className="bg-card border-2 border-ink rounded-2xl p-8 shadow-tactile-sm text-center">
+        <p className="text-muted-foreground text-sm">{emptyText}</p>
+      </div>
+    );
+  }
+  return (
+    <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      {items.map((m) => (
+        <MatchCard key={m.id} match={m} />
+      ))}
     </div>
   );
 }
 
 function MatchCard({ match }: { match: UiMatch }) {
   const when = match.scheduledAt ? new Date(match.scheduledAt) : null;
+  const kind = classify(match.type);
+  const badge =
+    kind === "partida" ? { text: "Partida", cls: "bg-coral-deep/10 text-coral-deep" }
+    : kind === "torneo" ? { text: "Torneo", cls: "bg-amber-500/10 text-amber-700" }
+    : { text: "Evento", cls: "bg-primary-soft/30 text-ink" };
+
+  const plazas =
+    typeof match.capacity === "number"
+      ? `${match.participantCount ?? 0}/${match.capacity} plazas`
+      : typeof match.maxPlayers === "number"
+        ? `${match.participantCount ?? 0}/${match.maxPlayers} jugadores`
+        : typeof match.participantCount === "number"
+          ? `${match.participantCount} apuntados`
+          : null;
+
   return (
-    <article className="bg-card border-2 border-ink rounded-2xl p-5 shadow-tactile-sm space-y-2">
-      <header className="flex gap-3">
-        {match.boardgame?.imageUrl && (
-          <img
-            src={match.boardgame.imageUrl}
-            alt=""
-            className="h-14 w-14 rounded-lg object-cover border border-ink/10"
-          />
+    <article className="bg-card border-2 border-ink rounded-2xl p-5 shadow-tactile-sm space-y-3 flex flex-col">
+      <div className="flex items-center justify-between gap-2">
+        <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold ${badge.cls}`}>
+          {badge.text}
+        </span>
+        {match.parentEvent && (
+          <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
+            <Layers className="h-3 w-3" />
+            {match.parentEvent.title ?? "en un evento"}
+          </span>
         )}
-        <div className="flex-1">
-          <h3 className="font-display text-lg font-bold leading-tight">
-            {match.title || match.boardgame?.name || "Partida"}
-          </h3>
-          {match.boardgame?.name && match.title && (
-            <p className="text-xs text-muted-foreground">{match.boardgame.name}</p>
-          )}
-        </div>
-      </header>
+      </div>
+      <h3 className="font-display text-lg font-bold leading-tight">
+        {match.title || "Sin título"}
+      </h3>
       <ul className="text-sm text-muted-foreground space-y-1">
         {when && (
           <li className="flex items-center gap-2">
@@ -170,21 +208,18 @@ function MatchCard({ match }: { match: UiMatch }) {
             <MapPin className="h-4 w-4" /> {match.location}
           </li>
         )}
-        {(match.minPlayers || match.maxPlayers) && (
+        {plazas && (
           <li className="flex items-center gap-2">
-            <Users className="h-4 w-4" />
-            {match.minPlayers ?? "?"}–{match.maxPlayers ?? "?"} jugadores
-            {match.participants && ` · ${match.participants.length} apuntados`}
+            <Users className="h-4 w-4" /> {plazas}
           </li>
         )}
       </ul>
-      {match.notes && <p className="text-sm">{match.notes}</p>}
       {match.url && (
         <a
           href={match.url}
           target="_blank"
           rel="noreferrer"
-          className="text-sm inline-flex items-center gap-1 text-coral-deep font-semibold hover:underline"
+          className="text-sm inline-flex items-center gap-1 text-coral-deep font-semibold hover:underline mt-auto"
         >
           Ver en Ludoya <ExternalLink className="h-3 w-3" />
         </a>
