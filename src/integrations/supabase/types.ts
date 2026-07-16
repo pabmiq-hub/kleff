@@ -725,6 +725,7 @@ export type Database = {
           id: string
           id_document_encrypted: string
           id_document_nonce: string
+          ludoya_username: string | null
           member_number: number
           updated_at: string
           username: string
@@ -738,6 +739,7 @@ export type Database = {
           id: string
           id_document_encrypted: string
           id_document_nonce: string
+          ludoya_username?: string | null
           member_number?: number
           updated_at?: string
           username: string
@@ -751,6 +753,7 @@ export type Database = {
           id?: string
           id_document_encrypted?: string
           id_document_nonce?: string
+          ludoya_username?: string | null
           member_number?: number
           updated_at?: string
           username?: string
