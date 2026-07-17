@@ -19,7 +19,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { CalendarDays, MapPin, Plus, Users, ExternalLink, RefreshCw, Search, Layers, Trophy, Dice5 } from "lucide-react";
+import { CalendarDays, MapPin, Plus, Users, ExternalLink, RefreshCw, Search, Layers, Trophy, Dice5, ChevronDown } from "lucide-react";
 
 export const Route = createFileRoute("/app/partidas")({
   head: () => ({
@@ -98,10 +98,22 @@ function PartidasPage() {
     }),
     [sorted],
   );
-  // Build parent event lookup for showing "dentro de X" chip
+  // Build parent event lookup + children-by-event for the dropdown
   const parentById = useMemo(() => {
     const m = new Map<string, UiMatch>();
     for (const it of sorted) if (classify(it.type) === "evento") m.set(it.id, it);
+    return m;
+  }, [sorted]);
+  const childrenByEvent = useMemo(() => {
+    const m = new Map<string, UiMatch[]>();
+    for (const it of sorted) {
+      if (classify(it.type) === "evento") continue;
+      const pid = it.parentEvent?.id;
+      if (!pid) continue;
+      const arr = m.get(pid) ?? [];
+      arr.push(it);
+      m.set(pid, arr);
+    }
     return m;
   }, [sorted]);
 
@@ -198,6 +210,7 @@ function PartidasPage() {
               key={m.id}
               match={m}
               parent={m.parentEvent?.id ? parentById.get(m.parentEvent.id) ?? null : null}
+              childItems={classify(m.type) === "evento" ? childrenByEvent.get(m.id) ?? [] : []}
             />
           ))}
         </div>
@@ -218,7 +231,7 @@ function plazasLabel(m: UiMatch) {
   return null;
 }
 
-function ActivityCard({ match, parent }: { match: UiMatch; parent?: UiMatch | null }) {
+function ActivityCard({ match, parent, childItems = [] }: { match: UiMatch; parent?: UiMatch | null; childItems?: UiMatch[] }) {
   const kind = classify(match.type);
   const when = formatWhen(match.scheduledAt);
   const plazas = plazasLabel(match);
@@ -289,10 +302,50 @@ function ActivityCard({ match, parent }: { match: UiMatch; parent?: UiMatch | nu
           href={match.url}
           target="_blank"
           rel="noreferrer"
-          className={`text-xs inline-flex items-center gap-1 font-semibold mt-auto pt-1 ${style.link}`}
+          className={`text-xs inline-flex items-center gap-1 font-semibold pt-1 ${style.link}`}
         >
           Ver en Ludoya <ExternalLink className="h-3 w-3" />
         </a>
+      )}
+      {childItems.length > 0 && (
+        <details className="mt-auto pt-2 border-t border-ink/10 group">
+          <summary className={`cursor-pointer list-none flex items-center justify-between gap-2 text-[11px] font-bold uppercase tracking-wide ${style.meta}`}>
+            <span className="inline-flex items-center gap-1.5">
+              <Layers className="h-3 w-3" />
+              {childItems.length} {childItems.length === 1 ? "actividad" : "actividades"}
+            </span>
+            <ChevronDown className="h-3.5 w-3.5 transition-transform group-open:rotate-180" />
+          </summary>
+          <ul className="mt-2 space-y-1.5">
+            {childItems.map((c) => {
+              const ck = classify(c.type);
+              const dot = ck === "torneo" ? "bg-amber-400" : "bg-coral-deep";
+              return (
+                <li key={c.id} className="flex items-start gap-2 text-xs">
+                  <span className={`mt-1 h-1.5 w-1.5 rounded-full shrink-0 ${dot}`} />
+                  <div className="flex-1 min-w-0">
+                    <div className={`font-semibold truncate ${style.title}`}>{c.title || "Sin título"}</div>
+                    <div className={`text-[11px] ${style.meta}`}>
+                      {ck === "torneo" ? "Torneo" : "Partida"}
+                      {c.scheduledAt && ` · ${formatWhen(c.scheduledAt)}`}
+                    </div>
+                  </div>
+                  {c.url && (
+                    <a
+                      href={c.url}
+                      target="_blank"
+                      rel="noreferrer"
+                      className={`shrink-0 ${style.link}`}
+                      aria-label="Ver en Ludoya"
+                    >
+                      <ExternalLink className="h-3.5 w-3.5" />
+                    </a>
+                  )}
+                </li>
+              );
+            })}
+          </ul>
+        </details>
       )}
     </article>
   );
