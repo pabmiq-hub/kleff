@@ -190,7 +190,9 @@ function PartidasPage() {
               : "No hay elementos en este filtro."}
           </p>
         </div>
+      ) : (
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+
           {visible.map((m) => (
             <ActivityCard
               key={m.id}
