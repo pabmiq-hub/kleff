@@ -98,44 +98,19 @@ function PartidasPage() {
     }),
     [sorted],
   );
-  // Group items: parent events and their children, plus standalone
-  const { parentEvents, childrenByEvent, standalone } = useMemo(() => {
-    const parents = new Map<string, UiMatch>();
-    const children = new Map<string, UiMatch[]>();
-    const stand: UiMatch[] = [];
-
-    for (const m of sorted) {
-      if (classify(m.type) === "evento") parents.set(m.id, m);
-    }
-    for (const m of sorted) {
-      if (classify(m.type) === "evento") continue;
-      const pid = m.parentEvent?.id;
-      if (pid && parents.has(pid)) {
-        const arr = children.get(pid) ?? [];
-        arr.push(m);
-        children.set(pid, arr);
-      } else {
-        stand.push(m);
-      }
-    }
-    return { parentEvents: Array.from(parents.values()), childrenByEvent: children, standalone: stand };
+  // Build parent event lookup for showing "dentro de X" chip
+  const parentById = useMemo(() => {
+    const m = new Map<string, UiMatch>();
+    for (const it of sorted) if (classify(it.type) === "evento") m.set(it.id, it);
+    return m;
   }, [sorted]);
 
-  const visibleParents = useMemo(() => {
-    if (filter === "todos" || filter === "evento") return parentEvents;
-    // For partida/torneo: only parents that contain matching children
-    return parentEvents.filter((p) =>
-      (childrenByEvent.get(p.id) ?? []).some((c) => classify(c.type) === filter),
-    );
-  }, [parentEvents, childrenByEvent, filter]);
+  const visible = useMemo(() => {
+    if (filter === "todos") return sorted;
+    return sorted.filter((m) => classify(m.type) === filter);
+  }, [sorted, filter]);
 
-  const visibleStandalone = useMemo(() => {
-    if (filter === "evento") return [];
-    if (filter === "todos") return standalone;
-    return standalone.filter((m) => classify(m.type) === filter);
-  }, [standalone, filter]);
-
-  const isEmpty = visibleParents.length === 0 && visibleStandalone.length === 0;
+  const isEmpty = visible.length === 0;
 
   const filterOptions: { key: typeof filter; label: string }[] = [
     { key: "todos", label: "Todos" },
