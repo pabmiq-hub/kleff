@@ -98,10 +98,22 @@ function PartidasPage() {
     }),
     [sorted],
   );
-  // Build parent event lookup for showing "dentro de X" chip
+  // Build parent event lookup + children-by-event for the dropdown
   const parentById = useMemo(() => {
     const m = new Map<string, UiMatch>();
     for (const it of sorted) if (classify(it.type) === "evento") m.set(it.id, it);
+    return m;
+  }, [sorted]);
+  const childrenByEvent = useMemo(() => {
+    const m = new Map<string, UiMatch[]>();
+    for (const it of sorted) {
+      if (classify(it.type) === "evento") continue;
+      const pid = it.parentEvent?.id;
+      if (!pid) continue;
+      const arr = m.get(pid) ?? [];
+      arr.push(it);
+      m.set(pid, arr);
+    }
     return m;
   }, [sorted]);
 
