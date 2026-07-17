@@ -218,77 +218,18 @@ function plazasLabel(m: UiMatch) {
   return null;
 }
 
-function EventGroup({ event, children }: { event: UiMatch; children: UiMatch[] }) {
-  const when = formatWhen(event.scheduledAt);
-  const plazas = plazasLabel(event);
-
-  return (
-    <article className="rounded-3xl border-2 border-ink shadow-tactile bg-primary-soft/30 overflow-hidden">
-      {/* Event header — large, coral top band */}
-      <div className="relative bg-gradient-coral text-cream px-6 py-5 border-b-2 border-ink">
-        <div className="flex items-start justify-between gap-4 flex-wrap">
-          <div className="space-y-2 flex-1 min-w-0">
-            <div className="inline-flex items-center gap-2 rounded-full bg-cream text-ink px-3 py-1 text-xs font-bold uppercase tracking-wide border-2 border-ink">
-              <CalendarDays className="h-3.5 w-3.5" />
-              Evento
-            </div>
-            <h2 className="font-display text-2xl font-bold leading-tight">
-              {event.title || "Sin título"}
-            </h2>
-            <ul className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-cream/90">
-              {when && <li className="inline-flex items-center gap-1.5"><CalendarDays className="h-4 w-4" />{when}</li>}
-              {event.location && <li className="inline-flex items-center gap-1.5"><MapPin className="h-4 w-4" />{event.location}</li>}
-              {plazas && <li className="inline-flex items-center gap-1.5"><Users className="h-4 w-4" />{plazas}</li>}
-            </ul>
-          </div>
-          {event.url && (
-            <a
-              href={event.url}
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex items-center gap-1 text-sm bg-ink text-cream px-3 py-1.5 rounded-full font-semibold border-2 border-ink hover:bg-ink/80"
-            >
-              Ver <ExternalLink className="h-3 w-3" />
-            </a>
-          )}
-        </div>
-      </div>
-
-      {/* Children (nested, indented visually) */}
-      <div className="p-5">
-        {children.length === 0 ? (
-          <p className="text-sm text-muted-foreground italic">Sin partidas ni torneos programados dentro del evento.</p>
-        ) : (
-          <>
-            <div className="flex items-center gap-2 mb-3 text-xs uppercase tracking-wider font-bold text-ink/60">
-              <Layers className="h-3.5 w-3.5" />
-              Dentro del evento · {children.length}
-            </div>
-            <div className="grid sm:grid-cols-2 gap-3">
-              {children.map((c) => (
-                <ActivityCard key={c.id} match={c} nested />
-              ))}
-            </div>
-          </>
-        )}
-      </div>
-    </article>
-  );
-}
-
-function ActivityCard({ match, nested = false }: { match: UiMatch; nested?: boolean }) {
+function ActivityCard({ match, parent }: { match: UiMatch; parent?: UiMatch | null }) {
   const kind = classify(match.type);
   const when = formatWhen(match.scheduledAt);
   const plazas = plazasLabel(match);
 
-  // Distinct visual language per type
   const style =
     kind === "torneo"
       ? {
           container: "bg-ink text-cream border-ink",
           borderTop: "before:bg-amber-400",
           badge: "bg-amber-400 text-ink",
-          icon: <Trophy className="h-3.5 w-3.5" />,
+          icon: <Trophy className="h-3 w-3" />,
           label: "Torneo",
           title: "text-cream",
           meta: "text-cream/75",
@@ -299,7 +240,7 @@ function ActivityCard({ match, nested = false }: { match: UiMatch; nested?: bool
             container: "bg-card text-ink border-ink",
             borderTop: "before:bg-coral-deep",
             badge: "bg-coral-deep text-cream",
-            icon: <Dice5 className="h-3.5 w-3.5" />,
+            icon: <Dice5 className="h-3 w-3" />,
             label: "Partida",
             title: "text-ink",
             meta: "text-muted-foreground",
@@ -307,46 +248,48 @@ function ActivityCard({ match, nested = false }: { match: UiMatch; nested?: bool
           }
         : {
             container: "bg-primary-soft/40 text-ink border-ink",
-            borderTop: "before:bg-ink",
+            borderTop: "before:bg-coral-deep",
             badge: "bg-ink text-cream",
-            icon: <CalendarDays className="h-3.5 w-3.5" />,
+            icon: <CalendarDays className="h-3 w-3" />,
             label: "Evento",
             title: "text-ink",
             meta: "text-muted-foreground",
             link: "text-coral-deep hover:underline",
           };
 
+  const parentLabel = parent?.title ?? match.parentEvent?.title ?? null;
+
   return (
     <article
-      className={`relative rounded-2xl border-2 ${style.container} p-4 ${nested ? "shadow-tactile-sm" : "shadow-tactile-sm"} flex flex-col gap-2 overflow-hidden
-        before:content-[''] before:absolute before:top-0 before:left-0 before:right-0 before:h-1.5 ${style.borderTop}`}
+      className={`relative rounded-xl border-2 ${style.container} p-3 shadow-tactile-sm flex flex-col gap-1.5 overflow-hidden
+        before:content-[''] before:absolute before:top-0 before:left-0 before:right-0 before:h-1 ${style.borderTop}`}
     >
-      <div className="flex items-center justify-between gap-2 pt-1">
-        <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide ${style.badge}`}>
+      <div className="flex items-center justify-between gap-2 pt-0.5">
+        <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide ${style.badge}`}>
           {style.icon}
           {style.label}
         </span>
-        {!nested && match.parentEvent && (
-          <span className={`inline-flex items-center gap-1 text-[11px] ${style.meta}`}>
-            <Layers className="h-3 w-3" />
-            {match.parentEvent.title ?? "en evento"}
+        {parentLabel && kind !== "evento" && (
+          <span className={`inline-flex items-center gap-1 text-[10px] truncate max-w-[55%] ${style.meta}`}>
+            <Layers className="h-3 w-3 shrink-0" />
+            <span className="truncate">{parentLabel}</span>
           </span>
         )}
       </div>
-      <h3 className={`font-display text-base font-bold leading-tight ${style.title}`}>
+      <h3 className={`font-display text-sm font-bold leading-snug ${style.title}`}>
         {match.title || "Sin título"}
       </h3>
-      <ul className={`text-sm space-y-1 ${style.meta}`}>
-        {when && <li className="flex items-center gap-2"><CalendarDays className="h-4 w-4 shrink-0" />{when}</li>}
-        {match.location && <li className="flex items-center gap-2"><MapPin className="h-4 w-4 shrink-0" />{match.location}</li>}
-        {plazas && <li className="flex items-center gap-2"><Users className="h-4 w-4 shrink-0" />{plazas}</li>}
+      <ul className={`text-xs space-y-0.5 ${style.meta}`}>
+        {when && <li className="flex items-center gap-1.5"><CalendarDays className="h-3.5 w-3.5 shrink-0" />{when}</li>}
+        {match.location && <li className="flex items-center gap-1.5"><MapPin className="h-3.5 w-3.5 shrink-0" /><span className="truncate">{match.location}</span></li>}
+        {plazas && <li className="flex items-center gap-1.5"><Users className="h-3.5 w-3.5 shrink-0" />{plazas}</li>}
       </ul>
       {match.url && (
         <a
           href={match.url}
           target="_blank"
           rel="noreferrer"
-          className={`text-sm inline-flex items-center gap-1 font-semibold mt-auto pt-1 ${style.link}`}
+          className={`text-xs inline-flex items-center gap-1 font-semibold mt-auto pt-1 ${style.link}`}
         >
           Ver en Ludoya <ExternalLink className="h-3 w-3" />
         </a>
@@ -354,6 +297,7 @@ function ActivityCard({ match, nested = false }: { match: UiMatch; nested?: bool
     </article>
   );
 }
+
 
 
 interface BgOption {
