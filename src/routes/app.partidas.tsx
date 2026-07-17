@@ -231,7 +231,7 @@ function plazasLabel(m: UiMatch) {
   return null;
 }
 
-function ActivityCard({ match, parent }: { match: UiMatch; parent?: UiMatch | null }) {
+function ActivityCard({ match, parent, childItems = [] }: { match: UiMatch; parent?: UiMatch | null; childItems?: UiMatch[] }) {
   const kind = classify(match.type);
   const when = formatWhen(match.scheduledAt);
   const plazas = plazasLabel(match);
