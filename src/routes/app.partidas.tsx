@@ -210,6 +210,7 @@ function PartidasPage() {
               key={m.id}
               match={m}
               parent={m.parentEvent?.id ? parentById.get(m.parentEvent.id) ?? null : null}
+              children={classify(m.type) === "evento" ? childrenByEvent.get(m.id) ?? [] : []}
             />
           ))}
         </div>
