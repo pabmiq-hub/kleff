@@ -19,7 +19,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { CalendarDays, MapPin, Plus, Users, ExternalLink, RefreshCw, Search, Layers, Trophy, Dice5, Sparkles } from "lucide-react";
+import { CalendarDays, MapPin, Plus, Users, ExternalLink, RefreshCw, Search, Layers, Trophy, Dice5 } from "lucide-react";
 
 export const Route = createFileRoute("/app/partidas")({
   head: () => ({
