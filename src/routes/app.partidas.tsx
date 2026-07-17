@@ -302,10 +302,50 @@ function ActivityCard({ match, parent, childItems = [] }: { match: UiMatch; pare
           href={match.url}
           target="_blank"
           rel="noreferrer"
-          className={`text-xs inline-flex items-center gap-1 font-semibold mt-auto pt-1 ${style.link}`}
+          className={`text-xs inline-flex items-center gap-1 font-semibold pt-1 ${style.link}`}
         >
           Ver en Ludoya <ExternalLink className="h-3 w-3" />
         </a>
+      )}
+      {childItems.length > 0 && (
+        <details className="mt-auto pt-2 border-t border-ink/10 group">
+          <summary className={`cursor-pointer list-none flex items-center justify-between gap-2 text-[11px] font-bold uppercase tracking-wide ${style.meta}`}>
+            <span className="inline-flex items-center gap-1.5">
+              <Layers className="h-3 w-3" />
+              {childItems.length} {childItems.length === 1 ? "actividad" : "actividades"}
+            </span>
+            <ChevronDown className="h-3.5 w-3.5 transition-transform group-open:rotate-180" />
+          </summary>
+          <ul className="mt-2 space-y-1.5">
+            {childItems.map((c) => {
+              const ck = classify(c.type);
+              const dot = ck === "torneo" ? "bg-amber-400" : "bg-coral-deep";
+              return (
+                <li key={c.id} className="flex items-start gap-2 text-xs">
+                  <span className={`mt-1 h-1.5 w-1.5 rounded-full shrink-0 ${dot}`} />
+                  <div className="flex-1 min-w-0">
+                    <div className={`font-semibold truncate ${style.title}`}>{c.title || "Sin título"}</div>
+                    <div className={`text-[11px] ${style.meta}`}>
+                      {ck === "torneo" ? "Torneo" : "Partida"}
+                      {c.scheduledAt && ` · ${formatWhen(c.scheduledAt)}`}
+                    </div>
+                  </div>
+                  {c.url && (
+                    <a
+                      href={c.url}
+                      target="_blank"
+                      rel="noreferrer"
+                      className={`shrink-0 ${style.link}`}
+                      aria-label="Ver en Ludoya"
+                    >
+                      <ExternalLink className="h-3.5 w-3.5" />
+                    </a>
+                  )}
+                </li>
+              );
+            })}
+          </ul>
+        </details>
       )}
     </article>
   );
