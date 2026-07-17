@@ -190,34 +190,14 @@ function PartidasPage() {
               : "No hay elementos en este filtro."}
           </p>
         </div>
-      ) : (
-        <div className="space-y-8">
-          {visibleParents.length > 0 && (
-            <section className="space-y-4">
-              {visibleParents.map((ev) => {
-                const kids = (childrenByEvent.get(ev.id) ?? []).filter((c) =>
-                  filter === "todos" || filter === "evento" ? true : classify(c.type) === filter,
-                );
-                return <EventGroup key={ev.id} event={ev} children={kids} />;
-              })}
-            </section>
-          )}
-
-          {visibleStandalone.length > 0 && (
-            <section className="space-y-3">
-              {visibleParents.length > 0 && (
-                <h2 className="font-display text-lg font-bold text-ink/80 flex items-center gap-2">
-                  <Sparkles className="h-4 w-4 text-coral-deep" />
-                  Fuera de eventos
-                </h2>
-              )}
-              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {visibleStandalone.map((m) => (
-                  <ActivityCard key={m.id} match={m} />
-                ))}
-              </div>
-            </section>
-          )}
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {visible.map((m) => (
+            <ActivityCard
+              key={m.id}
+              match={m}
+              parent={m.parentEvent?.id ? parentById.get(m.parentEvent.id) ?? null : null}
+            />
+          ))}
         </div>
       )}
     </div>
