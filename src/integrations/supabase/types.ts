@@ -715,6 +715,39 @@ export type Database = {
         }
         Relationships: []
       }
+      notifications: {
+        Row: {
+          body: string | null
+          created_at: string
+          id: string
+          read_at: string | null
+          title: string
+          type: string
+          url: string | null
+          user_id: string
+        }
+        Insert: {
+          body?: string | null
+          created_at?: string
+          id?: string
+          read_at?: string | null
+          title: string
+          type: string
+          url?: string | null
+          user_id: string
+        }
+        Update: {
+          body?: string | null
+          created_at?: string
+          id?: string
+          read_at?: string | null
+          title?: string
+          type?: string
+          url?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -974,6 +1007,29 @@ export type Database = {
           },
         ]
       }
+      rental_reminders_sent: {
+        Row: {
+          rental_id: string
+          sent_at: string
+        }
+        Insert: {
+          rental_id: string
+          sent_at?: string
+        }
+        Update: {
+          rental_id?: string
+          sent_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rental_reminders_sent_rental_id_fkey"
+            columns: ["rental_id"]
+            isOneToOne: true
+            referencedRelation: "rentals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       rental_requests: {
         Row: {
           created_at: string
@@ -1215,6 +1271,7 @@ export type Database = {
           read_ct: number
         }[]
       }
+      send_rental_due_reminders: { Args: never; Returns: undefined }
     }
     Enums: {
       app_role: "super_admin" | "user"
