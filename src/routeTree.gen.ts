@@ -74,6 +74,7 @@ import { Route as CaAvisLegalRouteImport } from './routes/ca.avis-legal'
 import { Route as CaActivitatsRouteImport } from './routes/ca.activitats'
 import { Route as AppProfileRouteImport } from './routes/app.profile'
 import { Route as AppPartidasRouteImport } from './routes/app.partidas'
+import { Route as AppKleffersRouteImport } from './routes/app.kleffers'
 import { Route as AppCarnetRouteImport } from './routes/app.carnet'
 import { Route as AdminRentalsRouteImport } from './routes/admin.rentals'
 import { Route as AdminRegistrationsRouteImport } from './routes/admin.registrations'
@@ -432,6 +433,11 @@ const AppPartidasRoute = AppPartidasRouteImport.update({
   path: '/partidas',
   getParentRoute: () => AppRoute,
 } as any)
+const AppKleffersRoute = AppKleffersRouteImport.update({
+  id: '/kleffers',
+  path: '/kleffers',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppCarnetRoute = AppCarnetRouteImport.update({
   id: '/carnet',
   path: '/carnet',
@@ -622,6 +628,7 @@ export interface FileRoutesByFullPath {
   '/admin/registrations': typeof AdminRegistrationsRouteWithChildren
   '/admin/rentals': typeof AdminRentalsRouteWithChildren
   '/app/carnet': typeof AppCarnetRoute
+  '/app/kleffers': typeof AppKleffersRoute
   '/app/partidas': typeof AppPartidasRoute
   '/app/profile': typeof AppProfileRoute
   '/ca/activitats': typeof CaActivitatsRoute
@@ -714,6 +721,7 @@ export interface FileRoutesByTo {
   '/admin/invitations': typeof AdminInvitationsRoute
   '/admin/members': typeof AdminMembersRoute
   '/app/carnet': typeof AppCarnetRoute
+  '/app/kleffers': typeof AppKleffersRoute
   '/app/partidas': typeof AppPartidasRoute
   '/app/profile': typeof AppProfileRoute
   '/ca/activitats': typeof CaActivitatsRoute
@@ -813,6 +821,7 @@ export interface FileRoutesById {
   '/admin/registrations': typeof AdminRegistrationsRouteWithChildren
   '/admin/rentals': typeof AdminRentalsRouteWithChildren
   '/app/carnet': typeof AppCarnetRoute
+  '/app/kleffers': typeof AppKleffersRoute
   '/app/partidas': typeof AppPartidasRoute
   '/app/profile': typeof AppProfileRoute
   '/ca/activitats': typeof CaActivitatsRoute
@@ -913,6 +922,7 @@ export interface FileRouteTypes {
     | '/admin/registrations'
     | '/admin/rentals'
     | '/app/carnet'
+    | '/app/kleffers'
     | '/app/partidas'
     | '/app/profile'
     | '/ca/activitats'
@@ -1005,6 +1015,7 @@ export interface FileRouteTypes {
     | '/admin/invitations'
     | '/admin/members'
     | '/app/carnet'
+    | '/app/kleffers'
     | '/app/partidas'
     | '/app/profile'
     | '/ca/activitats'
@@ -1103,6 +1114,7 @@ export interface FileRouteTypes {
     | '/admin/registrations'
     | '/admin/rentals'
     | '/app/carnet'
+    | '/app/kleffers'
     | '/app/partidas'
     | '/app/profile'
     | '/ca/activitats'
@@ -1695,6 +1707,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppPartidasRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/kleffers': {
+      id: '/app/kleffers'
+      path: '/kleffers'
+      fullPath: '/app/kleffers'
+      preLoaderRoute: typeof AppKleffersRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/app/carnet': {
       id: '/app/carnet'
       path: '/carnet'
@@ -2014,6 +2033,7 @@ const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
 interface AppRouteChildren {
   AppCarnetRoute: typeof AppCarnetRoute
+  AppKleffersRoute: typeof AppKleffersRoute
   AppPartidasRoute: typeof AppPartidasRoute
   AppProfileRoute: typeof AppProfileRoute
   AppIndexRoute: typeof AppIndexRoute
@@ -2023,6 +2043,7 @@ interface AppRouteChildren {
 
 const AppRouteChildren: AppRouteChildren = {
   AppCarnetRoute: AppCarnetRoute,
+  AppKleffersRoute: AppKleffersRoute,
   AppPartidasRoute: AppPartidasRoute,
   AppProfileRoute: AppProfileRoute,
   AppIndexRoute: AppIndexRoute,

@@ -1,7 +1,8 @@
 import { createFileRoute, Outlet, Link, useNavigate } from "@tanstack/react-router";
 import { useAuth } from "@/auth/AuthProvider";
 import { Button } from "@/components/ui/button";
-import { Home, User, IdCard, Dices, LogOut, Shield, Gamepad2 } from "lucide-react";
+import { Home, User, IdCard, Dices, LogOut, Shield, Gamepad2, Users } from "lucide-react";
+import { NotificationsBell } from "@/components/app/NotificationsBell";
 
 export const Route = createFileRoute("/app")({
   head: () => ({
@@ -45,13 +46,19 @@ function AppLayout() {
           <NavLink to="/app" icon={<Home className="h-4 w-4" />} label="Inicio" exact />
           <NavLink to="/app/profile" icon={<User className="h-4 w-4" />} label="Mi perfil" />
           <NavLink to="/app/carnet" icon={<IdCard className="h-4 w-4" />} label="Mi carnet" />
+          <NavLink to="/app/kleffers" icon={<Users className="h-4 w-4" />} label="Kleffers" />
           <NavLink to="/app/partidas" icon={<Gamepad2 className="h-4 w-4" />} label="Partidas" />
           <NavLink to="/app/rentals" icon={<Dices className="h-4 w-4" />} label="Alquilar" />
           <NavLink to="/app/rentals/mine" icon={<Dices className="h-4 w-4" />} label="Mis alquileres" />
         </nav>
-        <Button variant="ghost" size="sm" onClick={handleLogout} className="md:mt-auto">
-          <LogOut className="h-4 w-4 mr-2" /> Salir
-        </Button>
+        <div className="md:mt-auto flex md:flex-col items-center md:items-stretch gap-1">
+          <div className="md:flex md:justify-start">
+            <NotificationsBell />
+          </div>
+          <Button variant="ghost" size="sm" onClick={handleLogout}>
+            <LogOut className="h-4 w-4 mr-2" /> <span className="hidden md:inline">Salir</span>
+          </Button>
+        </div>
       </aside>
       <main className="flex-1 p-4 md:p-8 max-w-5xl">
         {isSuperAdmin && (

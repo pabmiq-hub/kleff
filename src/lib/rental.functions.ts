@@ -412,21 +412,50 @@ export const decideRentalRequest = createServerFn({ method: "POST" })
       .eq("id", data.id);
     if (updErr) throw new Error(updErr.message);
 
+    let dueAtIso: string | null = null;
     if (data.decision === "approved") {
       const startedAt = req.pickup_date ? new Date(`${req.pickup_date}T18:00:00`) : new Date();
       const dueAt = req.return_date
         ? new Date(`${req.return_date}T23:59:00`)
         : new Date(Date.now() + (req.requested_days ?? 7) * 86400000);
+      dueAtIso = dueAt.toISOString();
       const { error: rErr } = await supabaseAdmin.from("rentals").insert({
         user_id: req.user_id,
         game_id: req.game_id,
         request_id: req.id,
         started_at: startedAt.toISOString(),
-        due_at: dueAt.toISOString(),
+        due_at: dueAtIso,
         status: "active",
         created_by: context.userId,
       });
       if (rErr) throw new Error(rErr.message);
+    }
+
+    // Notify the requester
+    try {
+      const { data: game } = await supabaseAdmin
+        .from("bgg_games")
+        .select("title")
+        .eq("id", req.game_id)
+        .maybeSingle();
+      const gameTitle = game?.title ?? "el juego";
+      const approved = data.decision === "approved";
+      const title = approved ? "Alquiler aprobado" : "Alquiler rechazado";
+      const dueLabel = dueAtIso
+        ? new Date(dueAtIso).toLocaleDateString("es-ES", { day: "2-digit", month: "2-digit", year: "numeric" })
+        : null;
+      const body = approved
+        ? `Tu solicitud para "${gameTitle}" ha sido aprobada${dueLabel ? `. Devolución antes del ${dueLabel}` : ""}.${data.note ? ` Nota: ${data.note}` : ""}`
+        : `Tu solicitud para "${gameTitle}" ha sido rechazada.${data.note ? ` Motivo: ${data.note}` : ""}`;
+      await supabaseAdmin.from("notifications").insert({
+        user_id: req.user_id,
+        type: approved ? "rental_approved" : "rental_rejected",
+        title,
+        body,
+        url: "/app/rentals/mine",
+      });
+    } catch {
+      // Non-blocking: don't fail the decision if notification insert fails
     }
     return { success: true };
   });
