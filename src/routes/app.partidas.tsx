@@ -119,15 +119,9 @@ function PartidasPage() {
   }, [sorted, parentById]);
 
   const visible = useMemo(() => {
-    // Hide items that are nested inside a visible parent event — they'll
-    // render inside the parent's dropdown instead of at the top level.
-    const base = sorted.filter((m) => {
-      const pid = m.parentEvent?.id;
-      return !pid || !parentById.has(pid);
-    });
-    if (filter === "todos") return base;
-    return base.filter((m) => classify(m.type) === filter);
-  }, [sorted, filter, parentById]);
+    if (filter === "todos") return sorted;
+    return sorted.filter((m) => classify(m.type) === filter);
+  }, [sorted, filter]);
 
   const isEmpty = visible.length === 0;
 
