@@ -235,6 +235,17 @@ export async function listLudoyaMatches(): Promise<{ matches: LudoyaMatch[]; end
       seen.add(m.id);
       matches.push(m);
     }
+
+    // Backfill parent titles now that we know every event's title, and use
+    // parentId (Ludoya's canonical field) to keep the hierarchy consistent
+    // regardless of which endpoint returned each item.
+    const titleById = new Map(matches.map((m) => [m.id, m.title ?? null]));
+    for (const m of matches) {
+      if (m.parentEvent && !m.parentEvent.title) {
+        const t = titleById.get(m.parentEvent.id);
+        if (t) m.parentEvent = { ...m.parentEvent, title: t };
+      }
+    }
     return { matches, endpointOk: true };
   } catch (e) {
     return { matches: [], endpointOk: false, lastError: e instanceof Error ? e.message : String(e) };
