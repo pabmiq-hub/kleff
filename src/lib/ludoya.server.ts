@@ -114,7 +114,9 @@ function mapRawEvent(e: any, parent?: { id: string; title?: string | null } | nu
     ? { id: e.parentEvent.id, title: e.parentEvent.title ?? null }
     : e.parentEventId
       ? { id: e.parentEventId, title: null }
-      : null);
+      : e.parentId
+        ? { id: e.parentId, title: null }
+        : null);
   const game = e.boardgame ?? e.game ?? null;
   const loc = typeof e.location === "string"
     ? e.location
