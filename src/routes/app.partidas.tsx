@@ -107,15 +107,16 @@ function PartidasPage() {
   const childrenByEvent = useMemo(() => {
     const m = new Map<string, UiMatch[]>();
     for (const it of sorted) {
-      if (classify(it.type) === "evento") continue;
       const pid = it.parentEvent?.id;
       if (!pid) continue;
+      // Only nest under a parent that is itself an evento present in the list.
+      if (!parentById.has(pid)) continue;
       const arr = m.get(pid) ?? [];
       arr.push(it);
       m.set(pid, arr);
     }
     return m;
-  }, [sorted]);
+  }, [sorted, parentById]);
 
   const visible = useMemo(() => {
     if (filter === "todos") return sorted;
