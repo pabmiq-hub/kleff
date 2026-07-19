@@ -326,14 +326,15 @@ function ActivityCard({ match, parent, childItems = [] }: { match: UiMatch; pare
           <ul className="mt-2 space-y-1.5">
             {childItems.map((c) => {
               const ck = classify(c.type);
-              const dot = ck === "torneo" ? "bg-amber-400" : "bg-coral-deep";
+              const dot = ck === "torneo" ? "bg-amber-400" : ck === "evento" ? "bg-ink" : "bg-coral-deep";
+              const kLabel = ck === "torneo" ? "Torneo" : ck === "evento" ? "Evento" : "Partida";
               return (
                 <li key={c.id} className="flex items-start gap-2 text-xs">
                   <span className={`mt-1 h-1.5 w-1.5 rounded-full shrink-0 ${dot}`} />
                   <div className="flex-1 min-w-0">
                     <div className={`font-semibold truncate ${style.title}`}>{c.title || "Sin título"}</div>
                     <div className={`text-[11px] ${style.meta}`}>
-                      {ck === "torneo" ? "Torneo" : "Partida"}
+                      {kLabel}
                       {c.scheduledAt && ` · ${formatWhen(c.scheduledAt)}`}
                     </div>
                   </div>
