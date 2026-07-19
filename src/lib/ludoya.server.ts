@@ -150,6 +150,10 @@ async function fetchEventChildren(eventId: string): Promise<any[]> {
   // The /public/v1/events/{id}/children endpoint isn't exposed, but the
   // internal /events/{id}/children accepts the group API key and returns
   // TOURNAMENT + PLANNED_PLAY items scheduled inside a parent event.
+  // NOTE: sub-MEETUP children with visibility "ONLY_GROUP" are filtered out
+  // by the API when called with a group API key (they only render for
+  // signed-in members). To surface partidas nested inside such sub-meetups
+  // we recurse when a child reports childEventCount > 0.
   try {
     const res = await fetch(`https://api.ludoya.com/events/${eventId}/children`, {
       headers: { "X-Api-Key": apiKey() },
@@ -161,6 +165,23 @@ async function fetchEventChildren(eventId: string): Promise<any[]> {
   } catch {
     return [];
   }
+}
+
+async function fetchEvent(eventId: string): Promise<any | null> {
+  try {
+    const res = await fetch(`https://api.ludoya.com/events/${eventId}`, {
+      headers: { "X-Api-Key": apiKey() },
+    });
+    if (!res.ok) return null;
+    return (await res.json()) as any;
+  } catch {
+    return null;
+  }
+}
+
+function extraParentIds(): string[] {
+  const raw = process.env.LUDOYA_EXTRA_PARENT_EVENT_IDS ?? "";
+  return raw.split(",").map((s) => s.trim()).filter(Boolean);
 }
 
 export async function listLudoyaMatches(): Promise<{ matches: LudoyaMatch[]; endpointOk: boolean; lastError?: string }> {
@@ -179,16 +200,31 @@ export async function listLudoyaMatches(): Promise<{ matches: LudoyaMatch[]; end
       ?? json?.elements
       ?? (Array.isArray(json) ? json : []);
 
+    // Include manually-configured extra parent event IDs (e.g. sub-meetups
+    // with "Solo grupo" visibility that the listing endpoint hides).
+    const extras = await Promise.all(extraParentIds().map((id) => fetchEvent(id)));
+    for (const e of extras) if (e && !raw.some((r) => r.id === e.id)) raw.push(e);
+
     const parents = raw.map((e) => mapRawEvent(e));
 
-    // For each parent event, fetch its partidas + torneos in parallel.
-    const childLists = await Promise.all(
-      raw.map(async (e) => {
-        const items = await fetchEventChildren(e.id);
-        const parentRef = { id: e.id, title: e.title ?? null };
-        return items.map((c) => mapRawEvent(c, parentRef));
-      }),
-    );
+    // Recursively fetch children (depth up to 2) so we surface partidas /
+    // torneos that live inside a sub-MEETUP.
+    const visited = new Set<string>();
+    async function collectChildren(parentEvt: any, depth: number): Promise<LudoyaMatch[]> {
+      if (depth > 2 || !parentEvt?.id || visited.has(parentEvt.id)) return [];
+      visited.add(parentEvt.id);
+      const items = await fetchEventChildren(parentEvt.id);
+      const parentRef = { id: parentEvt.id, title: parentEvt.title ?? null };
+      const mapped = items.map((c) => mapRawEvent(c, parentRef));
+      const nested = await Promise.all(
+        items
+          .filter((c) => c?.type === "MEETUP" && (c?.childEventCount ?? 0) > 0)
+          .map((c) => collectChildren(c, depth + 1)),
+      );
+      return [...mapped, ...nested.flat()];
+    }
+
+    const childLists = await Promise.all(raw.map((e) => collectChildren(e, 1)));
 
     const seen = new Set<string>();
     const matches: LudoyaMatch[] = [];
