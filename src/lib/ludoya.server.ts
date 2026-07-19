@@ -114,7 +114,9 @@ function mapRawEvent(e: any, parent?: { id: string; title?: string | null } | nu
     ? { id: e.parentEvent.id, title: e.parentEvent.title ?? null }
     : e.parentEventId
       ? { id: e.parentEventId, title: null }
-      : null);
+      : e.parentId
+        ? { id: e.parentId, title: null }
+        : null);
   const game = e.boardgame ?? e.game ?? null;
   const loc = typeof e.location === "string"
     ? e.location
@@ -232,6 +234,17 @@ export async function listLudoyaMatches(): Promise<{ matches: LudoyaMatch[]; end
       if (!m.id || seen.has(m.id)) continue;
       seen.add(m.id);
       matches.push(m);
+    }
+
+    // Backfill parent titles now that we know every event's title, and use
+    // parentId (Ludoya's canonical field) to keep the hierarchy consistent
+    // regardless of which endpoint returned each item.
+    const titleById = new Map(matches.map((m) => [m.id, m.title ?? null]));
+    for (const m of matches) {
+      if (m.parentEvent && !m.parentEvent.title) {
+        const t = titleById.get(m.parentEvent.id);
+        if (t) m.parentEvent = { ...m.parentEvent, title: t };
+      }
     }
     return { matches, endpointOk: true };
   } catch (e) {

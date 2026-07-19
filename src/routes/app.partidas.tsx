@@ -107,20 +107,27 @@ function PartidasPage() {
   const childrenByEvent = useMemo(() => {
     const m = new Map<string, UiMatch[]>();
     for (const it of sorted) {
-      if (classify(it.type) === "evento") continue;
       const pid = it.parentEvent?.id;
       if (!pid) continue;
+      // Only nest under a parent that is itself an evento present in the list.
+      if (!parentById.has(pid)) continue;
       const arr = m.get(pid) ?? [];
       arr.push(it);
       m.set(pid, arr);
     }
     return m;
-  }, [sorted]);
+  }, [sorted, parentById]);
 
   const visible = useMemo(() => {
-    if (filter === "todos") return sorted;
-    return sorted.filter((m) => classify(m.type) === filter);
-  }, [sorted, filter]);
+    // Hide items that are nested inside a visible parent event — they'll
+    // render inside the parent's dropdown instead of at the top level.
+    const base = sorted.filter((m) => {
+      const pid = m.parentEvent?.id;
+      return !pid || !parentById.has(pid);
+    });
+    if (filter === "todos") return base;
+    return base.filter((m) => classify(m.type) === filter);
+  }, [sorted, filter, parentById]);
 
   const isEmpty = visible.length === 0;
 
@@ -319,14 +326,15 @@ function ActivityCard({ match, parent, childItems = [] }: { match: UiMatch; pare
           <ul className="mt-2 space-y-1.5">
             {childItems.map((c) => {
               const ck = classify(c.type);
-              const dot = ck === "torneo" ? "bg-amber-400" : "bg-coral-deep";
+              const dot = ck === "torneo" ? "bg-amber-400" : ck === "evento" ? "bg-ink" : "bg-coral-deep";
+              const kLabel = ck === "torneo" ? "Torneo" : ck === "evento" ? "Evento" : "Partida";
               return (
                 <li key={c.id} className="flex items-start gap-2 text-xs">
                   <span className={`mt-1 h-1.5 w-1.5 rounded-full shrink-0 ${dot}`} />
                   <div className="flex-1 min-w-0">
                     <div className={`font-semibold truncate ${style.title}`}>{c.title || "Sin título"}</div>
                     <div className={`text-[11px] ${style.meta}`}>
-                      {ck === "torneo" ? "Torneo" : "Partida"}
+                      {kLabel}
                       {c.scheduledAt && ` · ${formatWhen(c.scheduledAt)}`}
                     </div>
                   </div>
