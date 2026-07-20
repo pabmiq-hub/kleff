@@ -89,6 +89,7 @@ import { Route as AdminMediaIndexRouteImport } from './routes/admin.media.index'
 import { Route as AdminContentIndexRouteImport } from './routes/admin.content.index'
 import { Route as AdminBlogIndexRouteImport } from './routes/admin.blog.index'
 import { Route as AppRentalsMineRouteImport } from './routes/app.rentals.mine'
+import { Route as ApiPublicUploadMyAvatarRouteImport } from './routes/api.public.upload-my-avatar'
 import { Route as ApiPublicUploadInviteAvatarRouteImport } from './routes/api.public.upload-invite-avatar'
 import { Route as ApiPublicSyncBggRouteImport } from './routes/api.public.sync-bgg'
 import { Route as ApiPublicContactRouteImport } from './routes/api.public.contact'
@@ -508,6 +509,11 @@ const AppRentalsMineRoute = AppRentalsMineRouteImport.update({
   path: '/rentals/mine',
   getParentRoute: () => AppRoute,
 } as any)
+const ApiPublicUploadMyAvatarRoute = ApiPublicUploadMyAvatarRouteImport.update({
+  id: '/api/public/upload-my-avatar',
+  path: '/api/public/upload-my-avatar',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicUploadInviteAvatarRoute =
   ApiPublicUploadInviteAvatarRouteImport.update({
     id: '/api/public/upload-invite-avatar',
@@ -686,6 +692,7 @@ export interface FileRoutesByFullPath {
   '/api/public/contact': typeof ApiPublicContactRoute
   '/api/public/sync-bgg': typeof ApiPublicSyncBggRoute
   '/api/public/upload-invite-avatar': typeof ApiPublicUploadInviteAvatarRoute
+  '/api/public/upload-my-avatar': typeof ApiPublicUploadMyAvatarRoute
   '/app/rentals/mine': typeof AppRentalsMineRoute
   '/admin/blog/': typeof AdminBlogIndexRoute
   '/admin/content/': typeof AdminContentIndexRoute
@@ -779,6 +786,7 @@ export interface FileRoutesByTo {
   '/api/public/contact': typeof ApiPublicContactRoute
   '/api/public/sync-bgg': typeof ApiPublicSyncBggRoute
   '/api/public/upload-invite-avatar': typeof ApiPublicUploadInviteAvatarRoute
+  '/api/public/upload-my-avatar': typeof ApiPublicUploadMyAvatarRoute
   '/app/rentals/mine': typeof AppRentalsMineRoute
   '/admin/blog': typeof AdminBlogIndexRoute
   '/admin/content': typeof AdminContentIndexRoute
@@ -879,6 +887,7 @@ export interface FileRoutesById {
   '/api/public/contact': typeof ApiPublicContactRoute
   '/api/public/sync-bgg': typeof ApiPublicSyncBggRoute
   '/api/public/upload-invite-avatar': typeof ApiPublicUploadInviteAvatarRoute
+  '/api/public/upload-my-avatar': typeof ApiPublicUploadMyAvatarRoute
   '/app/rentals/mine': typeof AppRentalsMineRoute
   '/admin/blog/': typeof AdminBlogIndexRoute
   '/admin/content/': typeof AdminContentIndexRoute
@@ -980,6 +989,7 @@ export interface FileRouteTypes {
     | '/api/public/contact'
     | '/api/public/sync-bgg'
     | '/api/public/upload-invite-avatar'
+    | '/api/public/upload-my-avatar'
     | '/app/rentals/mine'
     | '/admin/blog/'
     | '/admin/content/'
@@ -1073,6 +1083,7 @@ export interface FileRouteTypes {
     | '/api/public/contact'
     | '/api/public/sync-bgg'
     | '/api/public/upload-invite-avatar'
+    | '/api/public/upload-my-avatar'
     | '/app/rentals/mine'
     | '/admin/blog'
     | '/admin/content'
@@ -1172,6 +1183,7 @@ export interface FileRouteTypes {
     | '/api/public/contact'
     | '/api/public/sync-bgg'
     | '/api/public/upload-invite-avatar'
+    | '/api/public/upload-my-avatar'
     | '/app/rentals/mine'
     | '/admin/blog/'
     | '/admin/content/'
@@ -1247,6 +1259,7 @@ export interface RootRouteChildren {
   ApiPublicContactRoute: typeof ApiPublicContactRoute
   ApiPublicSyncBggRoute: typeof ApiPublicSyncBggRoute
   ApiPublicUploadInviteAvatarRoute: typeof ApiPublicUploadInviteAvatarRoute
+  ApiPublicUploadMyAvatarRoute: typeof ApiPublicUploadMyAvatarRoute
   LovableEmailQueueProcessRoute: typeof LovableEmailQueueProcessRoute
 }
 
@@ -1812,6 +1825,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppRentalsMineRouteImport
       parentRoute: typeof AppRoute
     }
+    '/api/public/upload-my-avatar': {
+      id: '/api/public/upload-my-avatar'
+      path: '/api/public/upload-my-avatar'
+      fullPath: '/api/public/upload-my-avatar'
+      preLoaderRoute: typeof ApiPublicUploadMyAvatarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/upload-invite-avatar': {
       id: '/api/public/upload-invite-avatar'
       path: '/api/public/upload-invite-avatar'
@@ -2118,17 +2138,9 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicContactRoute: ApiPublicContactRoute,
   ApiPublicSyncBggRoute: ApiPublicSyncBggRoute,
   ApiPublicUploadInviteAvatarRoute: ApiPublicUploadInviteAvatarRoute,
+  ApiPublicUploadMyAvatarRoute: ApiPublicUploadMyAvatarRoute,
   LovableEmailQueueProcessRoute: LovableEmailQueueProcessRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { createStart } from '@tanstack/react-start'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-  }
-}

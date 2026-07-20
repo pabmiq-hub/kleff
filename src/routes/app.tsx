@@ -51,24 +51,26 @@ function AppLayout() {
           <NavLink to="/app/rentals" icon={<Dices className="h-4 w-4" />} label="Alquilar" />
           <NavLink to="/app/rentals/mine" icon={<Dices className="h-4 w-4" />} label="Mis alquileres" />
         </nav>
-        <div className="md:mt-auto flex md:flex-col items-center md:items-stretch gap-1">
-          <div className="md:flex md:justify-start">
-            <NotificationsBell />
-          </div>
-          <Button variant="ghost" size="sm" onClick={handleLogout}>
+        <div className="md:mt-auto">
+          <Button variant="ghost" size="sm" onClick={handleLogout} className="w-full justify-start">
             <LogOut className="h-4 w-4 mr-2" /> <span className="hidden md:inline">Salir</span>
           </Button>
         </div>
       </aside>
-      <main className="flex-1 p-4 md:p-8 max-w-5xl">
-        {isSuperAdmin && (
-          <Link
-            to="/admin"
-            className="mb-4 flex items-center gap-2 text-sm bg-ink text-cream rounded-lg px-3 py-2 w-fit hover:bg-ink/90"
-          >
-            <Shield className="h-4 w-4" /> Eres super admin · ir al panel de administración
-          </Link>
-        )}
+      <main className="flex-1 p-4 md:p-8 max-w-5xl w-full">
+        <div className="flex items-center justify-between gap-3 mb-4">
+          <div>
+            {isSuperAdmin && (
+              <Link
+                to="/admin"
+                className="flex items-center gap-2 text-sm bg-ink text-cream rounded-lg px-3 py-2 w-fit hover:bg-ink/90"
+              >
+                <Shield className="h-4 w-4" /> Eres super admin · ir al panel de administración
+              </Link>
+            )}
+          </div>
+          <NotificationsBell />
+        </div>
         <Outlet />
       </main>
     </div>
