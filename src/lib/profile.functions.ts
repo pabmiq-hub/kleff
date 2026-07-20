@@ -32,6 +32,9 @@ const updateSchema = z.object({
     .regex(/^[a-zA-Z0-9_.-]+$/),
   avatarUrl: z.string().url().max(500).nullable().optional(),
   gender: z.enum(["female", "male", "non_binary", "other", "prefer_not_to_say"]),
+  dateOfBirth: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/, "Fecha inválida"),
 });
 
 export const updateMyProfile = createServerFn({ method: "POST" })
@@ -54,6 +57,7 @@ export const updateMyProfile = createServerFn({ method: "POST" })
         username: data.username,
         avatar_url: data.avatarUrl ?? null,
         gender: data.gender,
+        date_of_birth: data.dateOfBirth,
       })
       .eq("id", context.userId);
     if (error) throw new Error(error.message);
