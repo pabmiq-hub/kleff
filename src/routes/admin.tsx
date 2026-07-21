@@ -53,7 +53,7 @@ function AdminLayout() {
 
   return (
     <div className="min-h-screen bg-cream text-ink flex flex-col md:flex-row">
-      <aside className="md:w-64 bg-cream-deep border-b-2 md:border-b-0 md:border-r border-ink/10 p-4 md:p-6 flex md:flex-col gap-2 md:min-h-screen">
+      <aside className="md:w-64 md:shrink-0 bg-cream-deep border-b-2 md:border-b-0 md:border-r border-ink/10 p-4 md:p-6 flex md:flex-col gap-2 md:min-h-screen md:sticky md:top-0 md:h-screen z-30">
         <Link to="/admin" className="font-display font-bold text-xl tracking-tight mb-0 md:mb-6 text-ink">
           KLEFF{" "}
           <span className="text-coral text-xs font-sans font-semibold inline-flex items-center gap-1">
