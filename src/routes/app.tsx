@@ -38,7 +38,7 @@ function AppLayout() {
 
   return (
     <div className="min-h-screen bg-cream-deep flex flex-col md:flex-row">
-      <aside className="md:w-64 bg-card border-b-2 md:border-b-0 md:border-r-2 border-ink p-4 md:p-6 flex md:flex-col gap-2 md:min-h-screen">
+      <aside className="md:w-64 md:shrink-0 bg-card border-b-2 md:border-b-0 md:border-r-2 border-ink p-4 md:p-6 flex md:flex-col gap-2 md:min-h-screen md:sticky md:top-0 md:h-screen z-30">
         <Link to="/app" className="font-display font-bold text-xl tracking-tight mb-0 md:mb-6">
           KLEFF <span className="text-coral-deep text-sm font-sans font-semibold">socios</span>
         </Link>
@@ -57,23 +57,28 @@ function AppLayout() {
           </Button>
         </div>
       </aside>
-      <main className="flex-1 p-4 md:p-8 max-w-5xl w-full">
-        <div className="flex items-center justify-between gap-3 mb-4">
-          <div>
-            {isSuperAdmin && (
-              <Link
-                to="/admin"
-                className="flex items-center gap-2 text-sm bg-ink text-cream rounded-lg px-3 py-2 w-fit hover:bg-ink/90"
-              >
-                <Shield className="h-4 w-4" /> Eres super admin · ir al panel de administración
-              </Link>
-            )}
+      <div className="flex-1 flex flex-col min-w-0">
+        <div className="sticky top-0 z-20 bg-cream-deep/95 backdrop-blur border-b border-ink/10">
+          <div className="max-w-5xl w-full mx-auto md:mx-0 px-4 md:px-8 py-3 flex items-center justify-between gap-3">
+            <div>
+              {isSuperAdmin && (
+                <Link
+                  to="/admin"
+                  className="flex items-center gap-2 text-sm bg-ink text-cream rounded-lg px-3 py-2 w-fit hover:bg-ink/90"
+                >
+                  <Shield className="h-4 w-4" /> <span className="hidden sm:inline">Eres super admin · ir al panel de administración</span><span className="sm:hidden">Admin</span>
+                </Link>
+              )}
+            </div>
+            <NotificationsBell />
           </div>
-          <NotificationsBell />
         </div>
-        <Outlet />
-      </main>
+        <main className="flex-1 p-4 md:p-8 max-w-5xl w-full">
+          <Outlet />
+        </main>
+      </div>
     </div>
+
   );
 }
 
