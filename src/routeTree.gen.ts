@@ -72,6 +72,7 @@ import { Route as CaBloodOnTheClocktowerRouteImport } from './routes/ca.blood-on
 import { Route as CaBlogRouteImport } from './routes/ca.blog'
 import { Route as CaAvisLegalRouteImport } from './routes/ca.avis-legal'
 import { Route as CaActivitatsRouteImport } from './routes/ca.activitats'
+import { Route as AppRentalsRouteImport } from './routes/app.rentals'
 import { Route as AppProfileRouteImport } from './routes/app.profile'
 import { Route as AppPartidasRouteImport } from './routes/app.partidas'
 import { Route as AppKleffersRouteImport } from './routes/app.kleffers'
@@ -424,6 +425,11 @@ const CaActivitatsRoute = CaActivitatsRouteImport.update({
   path: '/ca/activitats',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AppRentalsRoute = AppRentalsRouteImport.update({
+  id: '/rentals',
+  path: '/rentals',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppProfileRoute = AppProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
@@ -475,9 +481,9 @@ const AdminBlogRoute = AdminBlogRouteImport.update({
   getParentRoute: () => AdminRoute,
 } as any)
 const AppRentalsIndexRoute = AppRentalsIndexRouteImport.update({
-  id: '/rentals/',
-  path: '/rentals/',
-  getParentRoute: () => AppRoute,
+  id: '/',
+  path: '/',
+  getParentRoute: () => AppRentalsRoute,
 } as any)
 const AdminRentalsIndexRoute = AdminRentalsIndexRouteImport.update({
   id: '/',
@@ -505,9 +511,9 @@ const AdminBlogIndexRoute = AdminBlogIndexRouteImport.update({
   getParentRoute: () => AdminBlogRoute,
 } as any)
 const AppRentalsMineRoute = AppRentalsMineRouteImport.update({
-  id: '/rentals/mine',
-  path: '/rentals/mine',
-  getParentRoute: () => AppRoute,
+  id: '/mine',
+  path: '/mine',
+  getParentRoute: () => AppRentalsRoute,
 } as any)
 const ApiPublicUploadMyAvatarRoute = ApiPublicUploadMyAvatarRouteImport.update({
   id: '/api/public/upload-my-avatar',
@@ -637,6 +643,7 @@ export interface FileRoutesByFullPath {
   '/app/kleffers': typeof AppKleffersRoute
   '/app/partidas': typeof AppPartidasRoute
   '/app/profile': typeof AppProfileRoute
+  '/app/rentals': typeof AppRentalsRouteWithChildren
   '/ca/activitats': typeof CaActivitatsRoute
   '/ca/avis-legal': typeof CaAvisLegalRoute
   '/ca/blog': typeof CaBlogRoute
@@ -832,6 +839,7 @@ export interface FileRoutesById {
   '/app/kleffers': typeof AppKleffersRoute
   '/app/partidas': typeof AppPartidasRoute
   '/app/profile': typeof AppProfileRoute
+  '/app/rentals': typeof AppRentalsRouteWithChildren
   '/ca/activitats': typeof CaActivitatsRoute
   '/ca/avis-legal': typeof CaAvisLegalRoute
   '/ca/blog': typeof CaBlogRoute
@@ -934,6 +942,7 @@ export interface FileRouteTypes {
     | '/app/kleffers'
     | '/app/partidas'
     | '/app/profile'
+    | '/app/rentals'
     | '/ca/activitats'
     | '/ca/avis-legal'
     | '/ca/blog'
@@ -1128,6 +1137,7 @@ export interface FileRouteTypes {
     | '/app/kleffers'
     | '/app/partidas'
     | '/app/profile'
+    | '/app/rentals'
     | '/ca/activitats'
     | '/ca/avis-legal'
     | '/ca/blog'
@@ -1706,6 +1716,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CaActivitatsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/app/rentals': {
+      id: '/app/rentals'
+      path: '/rentals'
+      fullPath: '/app/rentals'
+      preLoaderRoute: typeof AppRentalsRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/app/profile': {
       id: '/app/profile'
       path: '/profile'
@@ -1778,10 +1795,10 @@ declare module '@tanstack/react-router' {
     }
     '/app/rentals/': {
       id: '/app/rentals/'
-      path: '/rentals'
+      path: '/'
       fullPath: '/app/rentals/'
       preLoaderRoute: typeof AppRentalsIndexRouteImport
-      parentRoute: typeof AppRoute
+      parentRoute: typeof AppRentalsRoute
     }
     '/admin/rentals/': {
       id: '/admin/rentals/'
@@ -1820,10 +1837,10 @@ declare module '@tanstack/react-router' {
     }
     '/app/rentals/mine': {
       id: '/app/rentals/mine'
-      path: '/rentals/mine'
+      path: '/mine'
       fullPath: '/app/rentals/mine'
       preLoaderRoute: typeof AppRentalsMineRouteImport
-      parentRoute: typeof AppRoute
+      parentRoute: typeof AppRentalsRoute
     }
     '/api/public/upload-my-avatar': {
       id: '/api/public/upload-my-avatar'
@@ -2051,14 +2068,27 @@ const AdminRouteChildren: AdminRouteChildren = {
 
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
+interface AppRentalsRouteChildren {
+  AppRentalsMineRoute: typeof AppRentalsMineRoute
+  AppRentalsIndexRoute: typeof AppRentalsIndexRoute
+}
+
+const AppRentalsRouteChildren: AppRentalsRouteChildren = {
+  AppRentalsMineRoute: AppRentalsMineRoute,
+  AppRentalsIndexRoute: AppRentalsIndexRoute,
+}
+
+const AppRentalsRouteWithChildren = AppRentalsRoute._addFileChildren(
+  AppRentalsRouteChildren,
+)
+
 interface AppRouteChildren {
   AppCarnetRoute: typeof AppCarnetRoute
   AppKleffersRoute: typeof AppKleffersRoute
   AppPartidasRoute: typeof AppPartidasRoute
   AppProfileRoute: typeof AppProfileRoute
+  AppRentalsRoute: typeof AppRentalsRouteWithChildren
   AppIndexRoute: typeof AppIndexRoute
-  AppRentalsMineRoute: typeof AppRentalsMineRoute
-  AppRentalsIndexRoute: typeof AppRentalsIndexRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
@@ -2066,9 +2096,8 @@ const AppRouteChildren: AppRouteChildren = {
   AppKleffersRoute: AppKleffersRoute,
   AppPartidasRoute: AppPartidasRoute,
   AppProfileRoute: AppProfileRoute,
+  AppRentalsRoute: AppRentalsRouteWithChildren,
   AppIndexRoute: AppIndexRoute,
-  AppRentalsMineRoute: AppRentalsMineRoute,
-  AppRentalsIndexRoute: AppRentalsIndexRoute,
 }
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
@@ -2144,12 +2173,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { createStart } from '@tanstack/react-start'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-  }
-}

@@ -13,7 +13,9 @@ function RentalsLayout() {
       </header>
       <nav className="flex flex-wrap gap-1 border-b border-ink/15">
         <TabLink to="/app/rentals" exact label="Catálogo" />
-        <TabLink to="/app/rentals/mine" label="Mis alquileres" />
+        <TabLink to="/app/rentals/active" label="Activos" />
+        <TabLink to="/app/rentals/requests" label="Solicitudes" />
+        <TabLink to="/app/rentals/history" label="Histórico" />
       </nav>
       <Outlet />
     </div>
