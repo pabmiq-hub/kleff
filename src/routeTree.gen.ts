@@ -72,6 +72,7 @@ import { Route as CaBloodOnTheClocktowerRouteImport } from './routes/ca.blood-on
 import { Route as CaBlogRouteImport } from './routes/ca.blog'
 import { Route as CaAvisLegalRouteImport } from './routes/ca.avis-legal'
 import { Route as CaActivitatsRouteImport } from './routes/ca.activitats'
+import { Route as AppRentalsRouteImport } from './routes/app.rentals'
 import { Route as AppProfileRouteImport } from './routes/app.profile'
 import { Route as AppPartidasRouteImport } from './routes/app.partidas'
 import { Route as AppKleffersRouteImport } from './routes/app.kleffers'
@@ -88,7 +89,9 @@ import { Route as AdminRegistrationsIndexRouteImport } from './routes/admin.regi
 import { Route as AdminMediaIndexRouteImport } from './routes/admin.media.index'
 import { Route as AdminContentIndexRouteImport } from './routes/admin.content.index'
 import { Route as AdminBlogIndexRouteImport } from './routes/admin.blog.index'
-import { Route as AppRentalsMineRouteImport } from './routes/app.rentals.mine'
+import { Route as AppRentalsRequestsRouteImport } from './routes/app.rentals.requests'
+import { Route as AppRentalsHistoryRouteImport } from './routes/app.rentals.history'
+import { Route as AppRentalsActiveRouteImport } from './routes/app.rentals.active'
 import { Route as ApiPublicUploadMyAvatarRouteImport } from './routes/api.public.upload-my-avatar'
 import { Route as ApiPublicUploadInviteAvatarRouteImport } from './routes/api.public.upload-invite-avatar'
 import { Route as ApiPublicSyncBggRouteImport } from './routes/api.public.sync-bgg'
@@ -424,6 +427,11 @@ const CaActivitatsRoute = CaActivitatsRouteImport.update({
   path: '/ca/activitats',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AppRentalsRoute = AppRentalsRouteImport.update({
+  id: '/rentals',
+  path: '/rentals',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppProfileRoute = AppProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
@@ -475,9 +483,9 @@ const AdminBlogRoute = AdminBlogRouteImport.update({
   getParentRoute: () => AdminRoute,
 } as any)
 const AppRentalsIndexRoute = AppRentalsIndexRouteImport.update({
-  id: '/rentals/',
-  path: '/rentals/',
-  getParentRoute: () => AppRoute,
+  id: '/',
+  path: '/',
+  getParentRoute: () => AppRentalsRoute,
 } as any)
 const AdminRentalsIndexRoute = AdminRentalsIndexRouteImport.update({
   id: '/',
@@ -504,10 +512,20 @@ const AdminBlogIndexRoute = AdminBlogIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AdminBlogRoute,
 } as any)
-const AppRentalsMineRoute = AppRentalsMineRouteImport.update({
-  id: '/rentals/mine',
-  path: '/rentals/mine',
-  getParentRoute: () => AppRoute,
+const AppRentalsRequestsRoute = AppRentalsRequestsRouteImport.update({
+  id: '/requests',
+  path: '/requests',
+  getParentRoute: () => AppRentalsRoute,
+} as any)
+const AppRentalsHistoryRoute = AppRentalsHistoryRouteImport.update({
+  id: '/history',
+  path: '/history',
+  getParentRoute: () => AppRentalsRoute,
+} as any)
+const AppRentalsActiveRoute = AppRentalsActiveRouteImport.update({
+  id: '/active',
+  path: '/active',
+  getParentRoute: () => AppRentalsRoute,
 } as any)
 const ApiPublicUploadMyAvatarRoute = ApiPublicUploadMyAvatarRouteImport.update({
   id: '/api/public/upload-my-avatar',
@@ -637,6 +655,7 @@ export interface FileRoutesByFullPath {
   '/app/kleffers': typeof AppKleffersRoute
   '/app/partidas': typeof AppPartidasRoute
   '/app/profile': typeof AppProfileRoute
+  '/app/rentals': typeof AppRentalsRouteWithChildren
   '/ca/activitats': typeof CaActivitatsRoute
   '/ca/avis-legal': typeof CaAvisLegalRoute
   '/ca/blog': typeof CaBlogRoute
@@ -693,7 +712,9 @@ export interface FileRoutesByFullPath {
   '/api/public/sync-bgg': typeof ApiPublicSyncBggRoute
   '/api/public/upload-invite-avatar': typeof ApiPublicUploadInviteAvatarRoute
   '/api/public/upload-my-avatar': typeof ApiPublicUploadMyAvatarRoute
-  '/app/rentals/mine': typeof AppRentalsMineRoute
+  '/app/rentals/active': typeof AppRentalsActiveRoute
+  '/app/rentals/history': typeof AppRentalsHistoryRoute
+  '/app/rentals/requests': typeof AppRentalsRequestsRoute
   '/admin/blog/': typeof AdminBlogIndexRoute
   '/admin/content/': typeof AdminContentIndexRoute
   '/admin/media/': typeof AdminMediaIndexRoute
@@ -787,7 +808,9 @@ export interface FileRoutesByTo {
   '/api/public/sync-bgg': typeof ApiPublicSyncBggRoute
   '/api/public/upload-invite-avatar': typeof ApiPublicUploadInviteAvatarRoute
   '/api/public/upload-my-avatar': typeof ApiPublicUploadMyAvatarRoute
-  '/app/rentals/mine': typeof AppRentalsMineRoute
+  '/app/rentals/active': typeof AppRentalsActiveRoute
+  '/app/rentals/history': typeof AppRentalsHistoryRoute
+  '/app/rentals/requests': typeof AppRentalsRequestsRoute
   '/admin/blog': typeof AdminBlogIndexRoute
   '/admin/content': typeof AdminContentIndexRoute
   '/admin/media': typeof AdminMediaIndexRoute
@@ -832,6 +855,7 @@ export interface FileRoutesById {
   '/app/kleffers': typeof AppKleffersRoute
   '/app/partidas': typeof AppPartidasRoute
   '/app/profile': typeof AppProfileRoute
+  '/app/rentals': typeof AppRentalsRouteWithChildren
   '/ca/activitats': typeof CaActivitatsRoute
   '/ca/avis-legal': typeof CaAvisLegalRoute
   '/ca/blog': typeof CaBlogRoute
@@ -888,7 +912,9 @@ export interface FileRoutesById {
   '/api/public/sync-bgg': typeof ApiPublicSyncBggRoute
   '/api/public/upload-invite-avatar': typeof ApiPublicUploadInviteAvatarRoute
   '/api/public/upload-my-avatar': typeof ApiPublicUploadMyAvatarRoute
-  '/app/rentals/mine': typeof AppRentalsMineRoute
+  '/app/rentals/active': typeof AppRentalsActiveRoute
+  '/app/rentals/history': typeof AppRentalsHistoryRoute
+  '/app/rentals/requests': typeof AppRentalsRequestsRoute
   '/admin/blog/': typeof AdminBlogIndexRoute
   '/admin/content/': typeof AdminContentIndexRoute
   '/admin/media/': typeof AdminMediaIndexRoute
@@ -934,6 +960,7 @@ export interface FileRouteTypes {
     | '/app/kleffers'
     | '/app/partidas'
     | '/app/profile'
+    | '/app/rentals'
     | '/ca/activitats'
     | '/ca/avis-legal'
     | '/ca/blog'
@@ -990,7 +1017,9 @@ export interface FileRouteTypes {
     | '/api/public/sync-bgg'
     | '/api/public/upload-invite-avatar'
     | '/api/public/upload-my-avatar'
-    | '/app/rentals/mine'
+    | '/app/rentals/active'
+    | '/app/rentals/history'
+    | '/app/rentals/requests'
     | '/admin/blog/'
     | '/admin/content/'
     | '/admin/media/'
@@ -1084,7 +1113,9 @@ export interface FileRouteTypes {
     | '/api/public/sync-bgg'
     | '/api/public/upload-invite-avatar'
     | '/api/public/upload-my-avatar'
-    | '/app/rentals/mine'
+    | '/app/rentals/active'
+    | '/app/rentals/history'
+    | '/app/rentals/requests'
     | '/admin/blog'
     | '/admin/content'
     | '/admin/media'
@@ -1128,6 +1159,7 @@ export interface FileRouteTypes {
     | '/app/kleffers'
     | '/app/partidas'
     | '/app/profile'
+    | '/app/rentals'
     | '/ca/activitats'
     | '/ca/avis-legal'
     | '/ca/blog'
@@ -1184,7 +1216,9 @@ export interface FileRouteTypes {
     | '/api/public/sync-bgg'
     | '/api/public/upload-invite-avatar'
     | '/api/public/upload-my-avatar'
-    | '/app/rentals/mine'
+    | '/app/rentals/active'
+    | '/app/rentals/history'
+    | '/app/rentals/requests'
     | '/admin/blog/'
     | '/admin/content/'
     | '/admin/media/'
@@ -1706,6 +1740,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CaActivitatsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/app/rentals': {
+      id: '/app/rentals'
+      path: '/rentals'
+      fullPath: '/app/rentals'
+      preLoaderRoute: typeof AppRentalsRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/app/profile': {
       id: '/app/profile'
       path: '/profile'
@@ -1778,10 +1819,10 @@ declare module '@tanstack/react-router' {
     }
     '/app/rentals/': {
       id: '/app/rentals/'
-      path: '/rentals'
+      path: '/'
       fullPath: '/app/rentals/'
       preLoaderRoute: typeof AppRentalsIndexRouteImport
-      parentRoute: typeof AppRoute
+      parentRoute: typeof AppRentalsRoute
     }
     '/admin/rentals/': {
       id: '/admin/rentals/'
@@ -1818,12 +1859,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminBlogIndexRouteImport
       parentRoute: typeof AdminBlogRoute
     }
-    '/app/rentals/mine': {
-      id: '/app/rentals/mine'
-      path: '/rentals/mine'
-      fullPath: '/app/rentals/mine'
-      preLoaderRoute: typeof AppRentalsMineRouteImport
-      parentRoute: typeof AppRoute
+    '/app/rentals/requests': {
+      id: '/app/rentals/requests'
+      path: '/requests'
+      fullPath: '/app/rentals/requests'
+      preLoaderRoute: typeof AppRentalsRequestsRouteImport
+      parentRoute: typeof AppRentalsRoute
+    }
+    '/app/rentals/history': {
+      id: '/app/rentals/history'
+      path: '/history'
+      fullPath: '/app/rentals/history'
+      preLoaderRoute: typeof AppRentalsHistoryRouteImport
+      parentRoute: typeof AppRentalsRoute
+    }
+    '/app/rentals/active': {
+      id: '/app/rentals/active'
+      path: '/active'
+      fullPath: '/app/rentals/active'
+      preLoaderRoute: typeof AppRentalsActiveRouteImport
+      parentRoute: typeof AppRentalsRoute
     }
     '/api/public/upload-my-avatar': {
       id: '/api/public/upload-my-avatar'
@@ -2051,14 +2106,31 @@ const AdminRouteChildren: AdminRouteChildren = {
 
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
+interface AppRentalsRouteChildren {
+  AppRentalsActiveRoute: typeof AppRentalsActiveRoute
+  AppRentalsHistoryRoute: typeof AppRentalsHistoryRoute
+  AppRentalsRequestsRoute: typeof AppRentalsRequestsRoute
+  AppRentalsIndexRoute: typeof AppRentalsIndexRoute
+}
+
+const AppRentalsRouteChildren: AppRentalsRouteChildren = {
+  AppRentalsActiveRoute: AppRentalsActiveRoute,
+  AppRentalsHistoryRoute: AppRentalsHistoryRoute,
+  AppRentalsRequestsRoute: AppRentalsRequestsRoute,
+  AppRentalsIndexRoute: AppRentalsIndexRoute,
+}
+
+const AppRentalsRouteWithChildren = AppRentalsRoute._addFileChildren(
+  AppRentalsRouteChildren,
+)
+
 interface AppRouteChildren {
   AppCarnetRoute: typeof AppCarnetRoute
   AppKleffersRoute: typeof AppKleffersRoute
   AppPartidasRoute: typeof AppPartidasRoute
   AppProfileRoute: typeof AppProfileRoute
+  AppRentalsRoute: typeof AppRentalsRouteWithChildren
   AppIndexRoute: typeof AppIndexRoute
-  AppRentalsMineRoute: typeof AppRentalsMineRoute
-  AppRentalsIndexRoute: typeof AppRentalsIndexRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
@@ -2066,9 +2138,8 @@ const AppRouteChildren: AppRouteChildren = {
   AppKleffersRoute: AppKleffersRoute,
   AppPartidasRoute: AppPartidasRoute,
   AppProfileRoute: AppProfileRoute,
+  AppRentalsRoute: AppRentalsRouteWithChildren,
   AppIndexRoute: AppIndexRoute,
-  AppRentalsMineRoute: AppRentalsMineRoute,
-  AppRentalsIndexRoute: AppRentalsIndexRoute,
 }
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)

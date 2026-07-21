@@ -59,12 +59,9 @@ function RentalsCatalog() {
 
   return (
     <div className="space-y-6">
-      <header>
-        <h1 className="font-display text-3xl font-bold">Alquilar juegos</h1>
-        <p className="text-muted-foreground mt-1">
-          Recoges una noche de juego ({weekdayLabel(weekday)}) y devuelves el siguiente {weekdayLabel(weekday)}.
-        </p>
-      </header>
+      <p className="text-muted-foreground">
+        Recoges una noche de juego ({weekdayLabel(weekday)}) y devuelves el siguiente {weekdayLabel(weekday)}.
+      </p>
 
       <Input
         placeholder="Buscar juego…"
