@@ -48,8 +48,7 @@ function AppLayout() {
           <NavLink to="/app/carnet" icon={<IdCard className="h-4 w-4" />} label="Mi carnet" />
           <NavLink to="/app/kleffers" icon={<Users className="h-4 w-4" />} label="Kleffers" />
           <NavLink to="/app/partidas" icon={<Gamepad2 className="h-4 w-4" />} label="Partidas" />
-          <NavLink to="/app/rentals" icon={<Dices className="h-4 w-4" />} label="Alquilar" />
-          <NavLink to="/app/rentals/mine" icon={<Dices className="h-4 w-4" />} label="Mis alquileres" />
+          <NavLink to="/app/rentals" icon={<Dices className="h-4 w-4" />} label="Alquiler" />
         </nav>
         <div className="md:mt-auto">
           <Button variant="ghost" size="sm" onClick={handleLogout} className="w-full justify-start">
