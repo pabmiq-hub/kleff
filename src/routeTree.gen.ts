@@ -89,7 +89,9 @@ import { Route as AdminRegistrationsIndexRouteImport } from './routes/admin.regi
 import { Route as AdminMediaIndexRouteImport } from './routes/admin.media.index'
 import { Route as AdminContentIndexRouteImport } from './routes/admin.content.index'
 import { Route as AdminBlogIndexRouteImport } from './routes/admin.blog.index'
-import { Route as AppRentalsMineRouteImport } from './routes/app.rentals.mine'
+import { Route as AppRentalsRequestsRouteImport } from './routes/app.rentals.requests'
+import { Route as AppRentalsHistoryRouteImport } from './routes/app.rentals.history'
+import { Route as AppRentalsActiveRouteImport } from './routes/app.rentals.active'
 import { Route as ApiPublicUploadMyAvatarRouteImport } from './routes/api.public.upload-my-avatar'
 import { Route as ApiPublicUploadInviteAvatarRouteImport } from './routes/api.public.upload-invite-avatar'
 import { Route as ApiPublicSyncBggRouteImport } from './routes/api.public.sync-bgg'
@@ -510,9 +512,19 @@ const AdminBlogIndexRoute = AdminBlogIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AdminBlogRoute,
 } as any)
-const AppRentalsMineRoute = AppRentalsMineRouteImport.update({
-  id: '/mine',
-  path: '/mine',
+const AppRentalsRequestsRoute = AppRentalsRequestsRouteImport.update({
+  id: '/requests',
+  path: '/requests',
+  getParentRoute: () => AppRentalsRoute,
+} as any)
+const AppRentalsHistoryRoute = AppRentalsHistoryRouteImport.update({
+  id: '/history',
+  path: '/history',
+  getParentRoute: () => AppRentalsRoute,
+} as any)
+const AppRentalsActiveRoute = AppRentalsActiveRouteImport.update({
+  id: '/active',
+  path: '/active',
   getParentRoute: () => AppRentalsRoute,
 } as any)
 const ApiPublicUploadMyAvatarRoute = ApiPublicUploadMyAvatarRouteImport.update({
@@ -700,7 +712,9 @@ export interface FileRoutesByFullPath {
   '/api/public/sync-bgg': typeof ApiPublicSyncBggRoute
   '/api/public/upload-invite-avatar': typeof ApiPublicUploadInviteAvatarRoute
   '/api/public/upload-my-avatar': typeof ApiPublicUploadMyAvatarRoute
-  '/app/rentals/mine': typeof AppRentalsMineRoute
+  '/app/rentals/active': typeof AppRentalsActiveRoute
+  '/app/rentals/history': typeof AppRentalsHistoryRoute
+  '/app/rentals/requests': typeof AppRentalsRequestsRoute
   '/admin/blog/': typeof AdminBlogIndexRoute
   '/admin/content/': typeof AdminContentIndexRoute
   '/admin/media/': typeof AdminMediaIndexRoute
@@ -794,7 +808,9 @@ export interface FileRoutesByTo {
   '/api/public/sync-bgg': typeof ApiPublicSyncBggRoute
   '/api/public/upload-invite-avatar': typeof ApiPublicUploadInviteAvatarRoute
   '/api/public/upload-my-avatar': typeof ApiPublicUploadMyAvatarRoute
-  '/app/rentals/mine': typeof AppRentalsMineRoute
+  '/app/rentals/active': typeof AppRentalsActiveRoute
+  '/app/rentals/history': typeof AppRentalsHistoryRoute
+  '/app/rentals/requests': typeof AppRentalsRequestsRoute
   '/admin/blog': typeof AdminBlogIndexRoute
   '/admin/content': typeof AdminContentIndexRoute
   '/admin/media': typeof AdminMediaIndexRoute
@@ -896,7 +912,9 @@ export interface FileRoutesById {
   '/api/public/sync-bgg': typeof ApiPublicSyncBggRoute
   '/api/public/upload-invite-avatar': typeof ApiPublicUploadInviteAvatarRoute
   '/api/public/upload-my-avatar': typeof ApiPublicUploadMyAvatarRoute
-  '/app/rentals/mine': typeof AppRentalsMineRoute
+  '/app/rentals/active': typeof AppRentalsActiveRoute
+  '/app/rentals/history': typeof AppRentalsHistoryRoute
+  '/app/rentals/requests': typeof AppRentalsRequestsRoute
   '/admin/blog/': typeof AdminBlogIndexRoute
   '/admin/content/': typeof AdminContentIndexRoute
   '/admin/media/': typeof AdminMediaIndexRoute
@@ -999,7 +1017,9 @@ export interface FileRouteTypes {
     | '/api/public/sync-bgg'
     | '/api/public/upload-invite-avatar'
     | '/api/public/upload-my-avatar'
-    | '/app/rentals/mine'
+    | '/app/rentals/active'
+    | '/app/rentals/history'
+    | '/app/rentals/requests'
     | '/admin/blog/'
     | '/admin/content/'
     | '/admin/media/'
@@ -1093,7 +1113,9 @@ export interface FileRouteTypes {
     | '/api/public/sync-bgg'
     | '/api/public/upload-invite-avatar'
     | '/api/public/upload-my-avatar'
-    | '/app/rentals/mine'
+    | '/app/rentals/active'
+    | '/app/rentals/history'
+    | '/app/rentals/requests'
     | '/admin/blog'
     | '/admin/content'
     | '/admin/media'
@@ -1194,7 +1216,9 @@ export interface FileRouteTypes {
     | '/api/public/sync-bgg'
     | '/api/public/upload-invite-avatar'
     | '/api/public/upload-my-avatar'
-    | '/app/rentals/mine'
+    | '/app/rentals/active'
+    | '/app/rentals/history'
+    | '/app/rentals/requests'
     | '/admin/blog/'
     | '/admin/content/'
     | '/admin/media/'
@@ -1835,11 +1859,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminBlogIndexRouteImport
       parentRoute: typeof AdminBlogRoute
     }
-    '/app/rentals/mine': {
-      id: '/app/rentals/mine'
-      path: '/mine'
-      fullPath: '/app/rentals/mine'
-      preLoaderRoute: typeof AppRentalsMineRouteImport
+    '/app/rentals/requests': {
+      id: '/app/rentals/requests'
+      path: '/requests'
+      fullPath: '/app/rentals/requests'
+      preLoaderRoute: typeof AppRentalsRequestsRouteImport
+      parentRoute: typeof AppRentalsRoute
+    }
+    '/app/rentals/history': {
+      id: '/app/rentals/history'
+      path: '/history'
+      fullPath: '/app/rentals/history'
+      preLoaderRoute: typeof AppRentalsHistoryRouteImport
+      parentRoute: typeof AppRentalsRoute
+    }
+    '/app/rentals/active': {
+      id: '/app/rentals/active'
+      path: '/active'
+      fullPath: '/app/rentals/active'
+      preLoaderRoute: typeof AppRentalsActiveRouteImport
       parentRoute: typeof AppRentalsRoute
     }
     '/api/public/upload-my-avatar': {
@@ -2069,12 +2107,16 @@ const AdminRouteChildren: AdminRouteChildren = {
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
 interface AppRentalsRouteChildren {
-  AppRentalsMineRoute: typeof AppRentalsMineRoute
+  AppRentalsActiveRoute: typeof AppRentalsActiveRoute
+  AppRentalsHistoryRoute: typeof AppRentalsHistoryRoute
+  AppRentalsRequestsRoute: typeof AppRentalsRequestsRoute
   AppRentalsIndexRoute: typeof AppRentalsIndexRoute
 }
 
 const AppRentalsRouteChildren: AppRentalsRouteChildren = {
-  AppRentalsMineRoute: AppRentalsMineRoute,
+  AppRentalsActiveRoute: AppRentalsActiveRoute,
+  AppRentalsHistoryRoute: AppRentalsHistoryRoute,
+  AppRentalsRequestsRoute: AppRentalsRequestsRoute,
   AppRentalsIndexRoute: AppRentalsIndexRoute,
 }
 
