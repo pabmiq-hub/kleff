@@ -52,8 +52,8 @@ function AdminLayout() {
   };
 
   return (
-    <div className="min-h-screen bg-cream text-ink flex flex-col md:flex-row">
-      <aside className="md:w-64 md:shrink-0 bg-cream-deep border-b-2 md:border-b-0 md:border-r border-ink/10 p-4 md:p-6 flex md:flex-col gap-2 md:min-h-screen md:sticky md:top-0 md:h-screen z-30">
+    <div className="h-screen bg-cream text-ink flex flex-col md:flex-row overflow-hidden">
+      <aside className="md:w-64 md:shrink-0 bg-cream-deep border-b-2 md:border-b-0 md:border-r border-ink/10 p-4 md:p-6 flex md:flex-col gap-2 md:h-screen z-30 md:overflow-y-auto">
         <Link to="/admin" className="font-display font-bold text-xl tracking-tight mb-0 md:mb-6 text-ink">
           KLEFF{" "}
           <span className="text-coral text-xs font-sans font-semibold inline-flex items-center gap-1">
@@ -86,8 +86,10 @@ function AdminLayout() {
           </Button>
         </div>
       </aside>
-      <main className="flex-1 p-4 md:p-8 max-w-6xl">
-        <Outlet />
+      <main className="flex-1 overflow-y-auto p-4 md:p-8">
+        <div className="max-w-6xl w-full">
+          <Outlet />
+        </div>
       </main>
     </div>
   );
