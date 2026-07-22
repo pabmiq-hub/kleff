@@ -222,6 +222,18 @@ function CatalogPage() {
               <LocationBadge loc={g} />
             </div>
             <LocationDialog game={g} onSaved={refresh} updateFn={updateFn} />
+            <FeaturedDialog
+              game={g}
+              current={featured.filter((x) => x.game_id === g.id)}
+              onCreate={async (start, end) => {
+                await createFeaturedFn({ data: { gameId: g.id, startDate: start, endDate: end } });
+                await refresh();
+              }}
+              onDelete={async (id) => {
+                await deleteFeaturedFn({ data: { id } });
+                await refresh();
+              }}
+            />
             <Button size="sm" variant="ghost" className="text-ink/70 hover:text-ink hover:bg-ink/10" onClick={() => toggleActive(g)}>
               {g.is_active ? "Desactivar" : "Activar"}
             </Button>
