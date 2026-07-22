@@ -378,3 +378,144 @@ function LocationDialog({
   );
 }
 
+function FeaturedDialog({
+  game,
+  current,
+  onCreate,
+  onDelete,
+}: {
+  game: Game;
+  current: FeaturedRow[];
+  onCreate: (start: string, end: string) => Promise<void>;
+  onDelete: (id: string) => Promise<void>;
+}) {
+  const [open, setOpen] = useState(false);
+  const [range, setRange] = useState<DateRange | undefined>(() => {
+    const today = new Date();
+    return { from: today, to: today };
+  });
+  const [saving, setSaving] = useState(false);
+  const today = toISODate(new Date());
+  const hasActive = current.some((c) => c.start_date <= today && c.end_date >= today);
+
+  const save = async () => {
+    if (!range?.from) {
+      toast.error("Selecciona una fecha de inicio");
+      return;
+    }
+    setSaving(true);
+    try {
+      const start = toISODate(range.from);
+      const end = toISODate(range.to ?? range.from);
+      await onCreate(start, end);
+      toast.success("Destacado programado");
+      setRange({ from: new Date(), to: new Date() });
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Error");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button
+          size="sm"
+          variant="ghost"
+          className={
+            hasActive
+              ? "text-coral-deep hover:bg-coral/30"
+              : current.length > 0
+                ? "text-coral hover:bg-coral/20"
+                : "text-ink/60 hover:text-coral hover:bg-coral/20"
+          }
+          title={hasActive ? "Destacado activo" : current.length > 0 ? "Destacado programado" : "Destacar"}
+        >
+          <Star className={`h-4 w-4 ${hasActive || current.length > 0 ? "fill-current" : ""}`} />
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle>Destacar “{game.title}”</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4">
+          <div>
+            <Label className="text-xs uppercase tracking-wider text-ink/60">
+              Selecciona el rango de fechas
+            </Label>
+            <p className="text-xs text-ink/60 mt-1">
+              Haz clic en el día inicial y arrastra o haz clic en el día final.
+            </p>
+            <div className="mt-2 flex justify-center">
+              <Calendar
+                mode="range"
+                selected={range}
+                onSelect={setRange}
+                numberOfMonths={1}
+                disabled={{ before: new Date(new Date().setHours(0, 0, 0, 0)) }}
+              />
+            </div>
+          </div>
+
+          {range?.from && (
+            <p className="text-sm text-center text-ink/80">
+              {formatEs(toISODate(range.from))}
+              {range.to && range.to.getTime() !== range.from.getTime()
+                ? ` → ${formatEs(toISODate(range.to))}`
+                : ""}
+            </p>
+          )}
+
+          <Button
+            onClick={save}
+            disabled={saving || !range?.from}
+            className="w-full bg-coral hover:bg-coral-deep text-ink"
+          >
+            {saving ? "Guardando…" : "Programar destacado"}
+          </Button>
+
+          {current.length > 0 && (
+            <div className="border-t border-ink/15 pt-3 space-y-2">
+              <p className="text-xs uppercase tracking-wider text-ink/60">Destacados existentes</p>
+              {current.map((c) => {
+                const isActive = c.start_date <= today && c.end_date >= today;
+                const isPast = c.end_date < today;
+                return (
+                  <div
+                    key={c.id}
+                    className="flex items-center justify-between text-sm bg-ink/5 rounded-lg px-3 py-2"
+                  >
+                    <div>
+                      <span className={isActive ? "font-semibold text-coral-deep" : ""}>
+                        {formatEs(c.start_date)} → {formatEs(c.end_date)}
+                      </span>
+                      {isActive && <span className="ml-2 text-xs">(activo)</span>}
+                      {isPast && <span className="ml-2 text-xs text-ink/50">(pasado)</span>}
+                    </div>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="text-coral hover:bg-coral/20"
+                      onClick={async () => {
+                        try {
+                          await onDelete(c.id);
+                          toast.success("Eliminado");
+                        } catch (err) {
+                          toast.error(err instanceof Error ? err.message : "Error");
+                        }
+                      }}
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </Button>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
