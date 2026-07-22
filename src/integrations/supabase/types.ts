@@ -544,6 +544,47 @@ export type Database = {
         }
         Relationships: []
       }
+      featured_games: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          end_date: string
+          game_id: string
+          id: string
+          notified_at: string | null
+          start_date: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          end_date: string
+          game_id: string
+          id?: string
+          notified_at?: string | null
+          start_date: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          end_date?: string
+          game_id?: string
+          id?: string
+          notified_at?: string | null
+          start_date?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "featured_games_game_id_fkey"
+            columns: ["game_id"]
+            isOneToOne: false
+            referencedRelation: "bgg_games"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       id_document_audit: {
         Row: {
           accessed_at: string
