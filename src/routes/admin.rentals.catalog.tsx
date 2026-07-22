@@ -85,16 +85,15 @@ function CatalogPage() {
     ]);
     setGames(r.games as Game[]);
     setFeatured(
-      (f.featured as Array<{ id: string; game_id: string; start_date: string; end_date: string }>).map(
-        (x) => ({ id: x.id, game_id: x.game_id, start_date: x.start_date, end_date: x.end_date }),
-      ),
+      ((f as { featured: FeaturedRow[] }).featured ?? []).map((x) => ({
+        id: x.id,
+        game_id: x.game_id,
+        start_date: x.start_date,
+        end_date: x.end_date,
+      })),
     );
   };
 
-  const refresh = async () => {
-    const r = await listFn({ data: undefined as never });
-    setGames(r.games as Game[]);
-  };
 
   useEffect(() => {
     setLoading(true);
