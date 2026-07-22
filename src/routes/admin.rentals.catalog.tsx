@@ -67,12 +67,29 @@ function CatalogPage() {
   const updateFn = useServerFn(updateRentalGame);
   const deleteFn = useServerFn(deleteRentalGame);
   const syncFn = useServerFn(adminSyncBggCollection);
+  const listFeaturedFn = useServerFn(listFeaturedGames);
+  const createFeaturedFn = useServerFn(createFeaturedGame);
+  const deleteFeaturedFn = useServerFn(deleteFeaturedGame);
 
   const [games, setGames] = useState<Game[]>([]);
+  const [featured, setFeatured] = useState<FeaturedRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState(false);
   const [search, setSearch] = useState("");
   const [shelfFilter, setShelfFilter] = useState<string>("all");
+
+  const refresh = async () => {
+    const [r, f] = await Promise.all([
+      listFn({ data: undefined as never }),
+      listFeaturedFn({ data: undefined as never }),
+    ]);
+    setGames(r.games as Game[]);
+    setFeatured(
+      (f.featured as Array<{ id: string; game_id: string; start_date: string; end_date: string }>).map(
+        (x) => ({ id: x.id, game_id: x.game_id, start_date: x.start_date, end_date: x.end_date }),
+      ),
+    );
+  };
 
   const refresh = async () => {
     const r = await listFn({ data: undefined as never });
