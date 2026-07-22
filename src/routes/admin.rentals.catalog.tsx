@@ -3,18 +3,48 @@ import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { listRentalGames, updateRentalGame, deleteRentalGame } from "@/lib/rental.functions";
 import { adminSyncBggCollection } from "@/lib/bgg.functions";
+import {
+  listFeaturedGames,
+  createFeaturedGame,
+  deleteFeaturedGame,
+} from "@/lib/featured.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Calendar } from "@/components/ui/calendar";
 import { LocationBadge } from "@/components/ludoteca/LocationBadge";
 import { toast } from "sonner";
-import { Trash2, RefreshCw, MapPin } from "lucide-react";
+import { Trash2, RefreshCw, MapPin, Star } from "lucide-react";
+import type { DateRange } from "react-day-picker";
 
 export const Route = createFileRoute("/admin/rentals/catalog")({
   component: CatalogPage,
 });
+
+interface FeaturedRow {
+  id: string;
+  game_id: string;
+  start_date: string;
+  end_date: string;
+}
+
+function toISODate(d: Date): string {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+}
+
+function formatEs(iso: string): string {
+  const [y, m, d] = iso.split("-").map((n) => Number(n));
+  return new Date(y, m - 1, d).toLocaleDateString("es-ES", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
+}
 
 interface Game {
   id: string;
@@ -37,17 +67,34 @@ function CatalogPage() {
   const updateFn = useServerFn(updateRentalGame);
   const deleteFn = useServerFn(deleteRentalGame);
   const syncFn = useServerFn(adminSyncBggCollection);
+  const listFeaturedFn = useServerFn(listFeaturedGames);
+  const createFeaturedFn = useServerFn(createFeaturedGame);
+  const deleteFeaturedFn = useServerFn(deleteFeaturedGame);
 
   const [games, setGames] = useState<Game[]>([]);
+  const [featured, setFeatured] = useState<FeaturedRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState(false);
   const [search, setSearch] = useState("");
   const [shelfFilter, setShelfFilter] = useState<string>("all");
 
   const refresh = async () => {
-    const r = await listFn({ data: undefined as never });
+    const [r, f] = await Promise.all([
+      listFn({ data: undefined as never }),
+      listFeaturedFn({ data: undefined as never }),
+    ]);
     setGames(r.games as Game[]);
+    setFeatured(
+      ((f as unknown as { featured: FeaturedRow[] }).featured ?? []).map((x) => ({
+        id: x.id,
+        game_id: x.game_id,
+        start_date: x.start_date,
+        end_date: x.end_date,
+      })),
+    );
   };
+
+
 
   useEffect(() => {
     setLoading(true);
@@ -175,6 +222,18 @@ function CatalogPage() {
               <LocationBadge loc={g} />
             </div>
             <LocationDialog game={g} onSaved={refresh} updateFn={updateFn} />
+            <FeaturedDialog
+              game={g}
+              current={featured.filter((x) => x.game_id === g.id)}
+              onCreate={async (start: string, end: string) => {
+                await createFeaturedFn({ data: { gameId: g.id, startDate: start, endDate: end } });
+                await refresh();
+              }}
+              onDelete={async (id: string) => {
+                await deleteFeaturedFn({ data: { id } });
+                await refresh();
+              }}
+            />
             <Button size="sm" variant="ghost" className="text-ink/70 hover:text-ink hover:bg-ink/10" onClick={() => toggleActive(g)}>
               {g.is_active ? "Desactivar" : "Activar"}
             </Button>
@@ -313,6 +372,147 @@ function LocationDialog({
           )}
 
           <Button onClick={save} className="w-full bg-coral hover:bg-coral-deep text-ink">Guardar</Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function FeaturedDialog({
+  game,
+  current,
+  onCreate,
+  onDelete,
+}: {
+  game: Game;
+  current: FeaturedRow[];
+  onCreate: (start: string, end: string) => Promise<void>;
+  onDelete: (id: string) => Promise<void>;
+}) {
+  const [open, setOpen] = useState(false);
+  const [range, setRange] = useState<DateRange | undefined>(() => {
+    const today = new Date();
+    return { from: today, to: today };
+  });
+  const [saving, setSaving] = useState(false);
+  const today = toISODate(new Date());
+  const hasActive = current.some((c) => c.start_date <= today && c.end_date >= today);
+
+  const save = async () => {
+    if (!range?.from) {
+      toast.error("Selecciona una fecha de inicio");
+      return;
+    }
+    setSaving(true);
+    try {
+      const start = toISODate(range.from);
+      const end = toISODate(range.to ?? range.from);
+      await onCreate(start, end);
+      toast.success("Destacado programado");
+      setRange({ from: new Date(), to: new Date() });
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Error");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button
+          size="sm"
+          variant="ghost"
+          className={
+            hasActive
+              ? "text-coral-deep hover:bg-coral/30"
+              : current.length > 0
+                ? "text-coral hover:bg-coral/20"
+                : "text-ink/60 hover:text-coral hover:bg-coral/20"
+          }
+          title={hasActive ? "Destacado activo" : current.length > 0 ? "Destacado programado" : "Destacar"}
+        >
+          <Star className={`h-4 w-4 ${hasActive || current.length > 0 ? "fill-current" : ""}`} />
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle>Destacar “{game.title}”</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4">
+          <div>
+            <Label className="text-xs uppercase tracking-wider text-ink/60">
+              Selecciona el rango de fechas
+            </Label>
+            <p className="text-xs text-ink/60 mt-1">
+              Haz clic en el día inicial y arrastra o haz clic en el día final.
+            </p>
+            <div className="mt-2 flex justify-center">
+              <Calendar
+                mode="range"
+                selected={range}
+                onSelect={setRange}
+                numberOfMonths={1}
+                disabled={{ before: new Date(new Date().setHours(0, 0, 0, 0)) }}
+              />
+            </div>
+          </div>
+
+          {range?.from && (
+            <p className="text-sm text-center text-ink/80">
+              {formatEs(toISODate(range.from))}
+              {range.to && range.to.getTime() !== range.from.getTime()
+                ? ` → ${formatEs(toISODate(range.to))}`
+                : ""}
+            </p>
+          )}
+
+          <Button
+            onClick={save}
+            disabled={saving || !range?.from}
+            className="w-full bg-coral hover:bg-coral-deep text-ink"
+          >
+            {saving ? "Guardando…" : "Programar destacado"}
+          </Button>
+
+          {current.length > 0 && (
+            <div className="border-t border-ink/15 pt-3 space-y-2">
+              <p className="text-xs uppercase tracking-wider text-ink/60">Destacados existentes</p>
+              {current.map((c) => {
+                const isActive = c.start_date <= today && c.end_date >= today;
+                const isPast = c.end_date < today;
+                return (
+                  <div
+                    key={c.id}
+                    className="flex items-center justify-between text-sm bg-ink/5 rounded-lg px-3 py-2"
+                  >
+                    <div>
+                      <span className={isActive ? "font-semibold text-coral-deep" : ""}>
+                        {formatEs(c.start_date)} → {formatEs(c.end_date)}
+                      </span>
+                      {isActive && <span className="ml-2 text-xs">(activo)</span>}
+                      {isPast && <span className="ml-2 text-xs text-ink/50">(pasado)</span>}
+                    </div>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="text-coral hover:bg-coral/20"
+                      onClick={async () => {
+                        try {
+                          await onDelete(c.id);
+                          toast.success("Eliminado");
+                        } catch (err) {
+                          toast.error(err instanceof Error ? err.message : "Error");
+                        }
+                      }}
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </Button>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
       </DialogContent>
     </Dialog>

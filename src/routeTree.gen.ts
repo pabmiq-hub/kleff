@@ -110,6 +110,7 @@ import { Route as AdminContentPageKeyRouteImport } from './routes/admin.content.
 import { Route as AdminBlogNewRouteImport } from './routes/admin.blog.new'
 import { Route as AdminBlogIdRouteImport } from './routes/admin.blog.$id'
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
+import { Route as ApiPublicHooksFeaturedDispatchRouteImport } from './routes/api.public.hooks.featured-dispatch'
 
 const TorneosRoute = TorneosRouteImport.update({
   id: '/torneos',
@@ -619,6 +620,12 @@ const LovableEmailQueueProcessRoute =
     path: '/lovable/email/queue/process',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicHooksFeaturedDispatchRoute =
+  ApiPublicHooksFeaturedDispatchRouteImport.update({
+    id: '/api/public/hooks/featured-dispatch',
+    path: '/api/public/hooks/featured-dispatch',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -721,6 +728,7 @@ export interface FileRoutesByFullPath {
   '/admin/registrations/': typeof AdminRegistrationsIndexRoute
   '/admin/rentals/': typeof AdminRentalsIndexRoute
   '/app/rentals/': typeof AppRentalsIndexRoute
+  '/api/public/hooks/featured-dispatch': typeof ApiPublicHooksFeaturedDispatchRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
 }
 export interface FileRoutesByTo {
@@ -817,6 +825,7 @@ export interface FileRoutesByTo {
   '/admin/registrations': typeof AdminRegistrationsIndexRoute
   '/admin/rentals': typeof AdminRentalsIndexRoute
   '/app/rentals': typeof AppRentalsIndexRoute
+  '/api/public/hooks/featured-dispatch': typeof ApiPublicHooksFeaturedDispatchRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
 }
 export interface FileRoutesById {
@@ -921,6 +930,7 @@ export interface FileRoutesById {
   '/admin/registrations/': typeof AdminRegistrationsIndexRoute
   '/admin/rentals/': typeof AdminRentalsIndexRoute
   '/app/rentals/': typeof AppRentalsIndexRoute
+  '/api/public/hooks/featured-dispatch': typeof ApiPublicHooksFeaturedDispatchRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
 }
 export interface FileRouteTypes {
@@ -1026,6 +1036,7 @@ export interface FileRouteTypes {
     | '/admin/registrations/'
     | '/admin/rentals/'
     | '/app/rentals/'
+    | '/api/public/hooks/featured-dispatch'
     | '/lovable/email/queue/process'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -1122,6 +1133,7 @@ export interface FileRouteTypes {
     | '/admin/registrations'
     | '/admin/rentals'
     | '/app/rentals'
+    | '/api/public/hooks/featured-dispatch'
     | '/lovable/email/queue/process'
   id:
     | '__root__'
@@ -1225,6 +1237,7 @@ export interface FileRouteTypes {
     | '/admin/registrations/'
     | '/admin/rentals/'
     | '/app/rentals/'
+    | '/api/public/hooks/featured-dispatch'
     | '/lovable/email/queue/process'
   fileRoutesById: FileRoutesById
 }
@@ -1294,6 +1307,7 @@ export interface RootRouteChildren {
   ApiPublicSyncBggRoute: typeof ApiPublicSyncBggRoute
   ApiPublicUploadInviteAvatarRoute: typeof ApiPublicUploadInviteAvatarRoute
   ApiPublicUploadMyAvatarRoute: typeof ApiPublicUploadMyAvatarRoute
+  ApiPublicHooksFeaturedDispatchRoute: typeof ApiPublicHooksFeaturedDispatchRoute
   LovableEmailQueueProcessRoute: typeof LovableEmailQueueProcessRoute
 }
 
@@ -2006,6 +2020,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LovableEmailQueueProcessRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/featured-dispatch': {
+      id: '/api/public/hooks/featured-dispatch'
+      path: '/api/public/hooks/featured-dispatch'
+      fullPath: '/api/public/hooks/featured-dispatch'
+      preLoaderRoute: typeof ApiPublicHooksFeaturedDispatchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -2210,6 +2231,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicSyncBggRoute: ApiPublicSyncBggRoute,
   ApiPublicUploadInviteAvatarRoute: ApiPublicUploadInviteAvatarRoute,
   ApiPublicUploadMyAvatarRoute: ApiPublicUploadMyAvatarRoute,
+  ApiPublicHooksFeaturedDispatchRoute: ApiPublicHooksFeaturedDispatchRoute,
   LovableEmailQueueProcessRoute: LovableEmailQueueProcessRoute,
 }
 export const routeTree = rootRouteImport
