@@ -3,18 +3,48 @@ import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { listRentalGames, updateRentalGame, deleteRentalGame } from "@/lib/rental.functions";
 import { adminSyncBggCollection } from "@/lib/bgg.functions";
+import {
+  listFeaturedGames,
+  createFeaturedGame,
+  deleteFeaturedGame,
+} from "@/lib/featured.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Calendar } from "@/components/ui/calendar";
 import { LocationBadge } from "@/components/ludoteca/LocationBadge";
 import { toast } from "sonner";
-import { Trash2, RefreshCw, MapPin } from "lucide-react";
+import { Trash2, RefreshCw, MapPin, Star } from "lucide-react";
+import type { DateRange } from "react-day-picker";
 
 export const Route = createFileRoute("/admin/rentals/catalog")({
   component: CatalogPage,
 });
+
+interface FeaturedRow {
+  id: string;
+  game_id: string;
+  start_date: string;
+  end_date: string;
+}
+
+function toISODate(d: Date): string {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+}
+
+function formatEs(iso: string): string {
+  const [y, m, d] = iso.split("-").map((n) => Number(n));
+  return new Date(y, m - 1, d).toLocaleDateString("es-ES", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
+}
 
 interface Game {
   id: string;
