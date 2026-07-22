@@ -225,11 +225,11 @@ function CatalogPage() {
             <FeaturedDialog
               game={g}
               current={featured.filter((x) => x.game_id === g.id)}
-              onCreate={async (start, end) => {
+              onCreate={async (start: string, end: string) => {
                 await createFeaturedFn({ data: { gameId: g.id, startDate: start, endDate: end } });
                 await refresh();
               }}
-              onDelete={async (id) => {
+              onDelete={async (id: string) => {
                 await deleteFeaturedFn({ data: { id } });
                 await refresh();
               }}
