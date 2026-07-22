@@ -85,7 +85,7 @@ function CatalogPage() {
     ]);
     setGames(r.games as Game[]);
     setFeatured(
-      ((f as { featured: FeaturedRow[] }).featured ?? []).map((x) => ({
+      ((f as unknown as { featured: FeaturedRow[] }).featured ?? []).map((x) => ({
         id: x.id,
         game_id: x.game_id,
         start_date: x.start_date,
@@ -93,6 +93,7 @@ function CatalogPage() {
       })),
     );
   };
+
 
 
   useEffect(() => {
