@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useAuth } from "@/auth/AuthProvider";
 import { IdCard, Dices, Gamepad2, Users } from "lucide-react";
+import { FeaturedGamesCard } from "@/components/app/FeaturedGamesCard";
 
 export const Route = createFileRoute("/app/")({
   component: AppHome,
@@ -21,6 +22,8 @@ function AppHome() {
         <QuickCard to="/app/partidas" icon={<Gamepad2 className="h-5 w-5" />} title="Partidas" desc="Eventos del grupo de KLEFF en Ludoya." />
         <QuickCard to="/app/rentals" icon={<Dices className="h-5 w-5" />} title="Alquiler" desc="Catálogo, solicitudes y alquileres activos." />
       </div>
+
+      <FeaturedGamesCard />
     </div>
   );
 }
