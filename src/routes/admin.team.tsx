@@ -139,7 +139,7 @@ function TeamAdminPage() {
                 </div>
                 <div className="text-xs text-ink/60 truncate">{r.role_es}</div>
               </div>
-              <div className="text-xs text-ink/50 tabular-nums w-14 text-right">#{r.sort_order}</div>
+              
               <Button size="sm" variant="outline" onClick={() => startEdit(r)}>
                 <Pencil className="h-3.5 w-3.5" />
               </Button>
