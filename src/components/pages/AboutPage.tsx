@@ -1,6 +1,9 @@
 import { Link } from "@tanstack/react-router";
 import { ArrowRight, Calendar, Globe2, Sparkles, Dice5, ExternalLink } from "lucide-react";
 import { useI18n } from "@/i18n/I18nProvider";
+import { useEffect, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
+import { listTeamMembersPublic, type TeamMemberRow } from "@/lib/team.functions";
 
 const HERO_IMAGE_DEFAULT =
   "https://gyecpblbaovmprdvgmct.supabase.co/storage/v1/object/public/media/cms/kleff-estacio-espai-juegos-de-mesa-2-estacio-nk0knd.jpg";
@@ -129,6 +132,23 @@ export function AboutPage() {
   const mission = useSectionContent("about.mission");
   const manifesto = useSectionContent("about.manifesto");
   const cta = useSectionContent("about.cta");
+  const loadTeam = useServerFn(listTeamMembersPublic);
+  const [dbTeam, setDbTeam] = useState<TeamMemberRow[] | null>(null);
+  useEffect(() => {
+    loadTeam().then(setDbTeam).catch(() => setDbTeam([]));
+  }, [loadTeam]);
+  const team: TeamMember[] = (dbTeam && dbTeam.length > 0)
+    ? dbTeam.map((r) => ({
+        name: r.name,
+        emoji: r.emoji,
+        photo: r.photo_url ?? "",
+        favoriteGame: r.favorite_game,
+        luckyNumber: r.lucky_number,
+        role: { es: r.role_es, en: r.role_en, ca: r.role_ca },
+        bio: { es: r.bio_es, en: r.bio_en, ca: r.bio_ca },
+        color: { es: r.color_es, en: r.color_en, ca: r.color_ca },
+      }))
+    : TEAM;
 
   const manifestoLine1 =
     locale === "en"
@@ -290,7 +310,7 @@ export function AboutPage() {
             </p>
           </div>
           <div className="mt-12 grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {TEAM.map((m) => (
+            {team.map((m) => (
               <TeamFlipCard key={m.name} member={m} locale={locale} />
             ))}
           </div>

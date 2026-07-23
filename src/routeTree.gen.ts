@@ -77,6 +77,7 @@ import { Route as AppProfileRouteImport } from './routes/app.profile'
 import { Route as AppPartidasRouteImport } from './routes/app.partidas'
 import { Route as AppKleffersRouteImport } from './routes/app.kleffers'
 import { Route as AppCarnetRouteImport } from './routes/app.carnet'
+import { Route as AdminTeamRouteImport } from './routes/admin.team'
 import { Route as AdminRentalsRouteImport } from './routes/admin.rentals'
 import { Route as AdminRegistrationsRouteImport } from './routes/admin.registrations'
 import { Route as AdminMembersRouteImport } from './routes/admin.members'
@@ -453,6 +454,11 @@ const AppCarnetRoute = AppCarnetRouteImport.update({
   path: '/carnet',
   getParentRoute: () => AppRoute,
 } as any)
+const AdminTeamRoute = AdminTeamRouteImport.update({
+  id: '/team',
+  path: '/team',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminRentalsRoute = AdminRentalsRouteImport.update({
   id: '/rentals',
   path: '/rentals',
@@ -658,6 +664,7 @@ export interface FileRoutesByFullPath {
   '/admin/members': typeof AdminMembersRoute
   '/admin/registrations': typeof AdminRegistrationsRouteWithChildren
   '/admin/rentals': typeof AdminRentalsRouteWithChildren
+  '/admin/team': typeof AdminTeamRoute
   '/app/carnet': typeof AppCarnetRoute
   '/app/kleffers': typeof AppKleffersRoute
   '/app/partidas': typeof AppPartidasRoute
@@ -756,6 +763,7 @@ export interface FileRoutesByTo {
   '/torneos': typeof TorneosRoute
   '/admin/invitations': typeof AdminInvitationsRoute
   '/admin/members': typeof AdminMembersRoute
+  '/admin/team': typeof AdminTeamRoute
   '/app/carnet': typeof AppCarnetRoute
   '/app/kleffers': typeof AppKleffersRoute
   '/app/partidas': typeof AppPartidasRoute
@@ -860,6 +868,7 @@ export interface FileRoutesById {
   '/admin/members': typeof AdminMembersRoute
   '/admin/registrations': typeof AdminRegistrationsRouteWithChildren
   '/admin/rentals': typeof AdminRentalsRouteWithChildren
+  '/admin/team': typeof AdminTeamRoute
   '/app/carnet': typeof AppCarnetRoute
   '/app/kleffers': typeof AppKleffersRoute
   '/app/partidas': typeof AppPartidasRoute
@@ -966,6 +975,7 @@ export interface FileRouteTypes {
     | '/admin/members'
     | '/admin/registrations'
     | '/admin/rentals'
+    | '/admin/team'
     | '/app/carnet'
     | '/app/kleffers'
     | '/app/partidas'
@@ -1064,6 +1074,7 @@ export interface FileRouteTypes {
     | '/torneos'
     | '/admin/invitations'
     | '/admin/members'
+    | '/admin/team'
     | '/app/carnet'
     | '/app/kleffers'
     | '/app/partidas'
@@ -1167,6 +1178,7 @@ export interface FileRouteTypes {
     | '/admin/members'
     | '/admin/registrations'
     | '/admin/rentals'
+    | '/admin/team'
     | '/app/carnet'
     | '/app/kleffers'
     | '/app/partidas'
@@ -1789,6 +1801,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppCarnetRouteImport
       parentRoute: typeof AppRoute
     }
+    '/admin/team': {
+      id: '/admin/team'
+      path: '/team'
+      fullPath: '/admin/team'
+      preLoaderRoute: typeof AdminTeamRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/rentals': {
       id: '/admin/rentals'
       path: '/rentals'
@@ -2104,6 +2123,7 @@ interface AdminRouteChildren {
   AdminMembersRoute: typeof AdminMembersRoute
   AdminRegistrationsRoute: typeof AdminRegistrationsRouteWithChildren
   AdminRentalsRoute: typeof AdminRentalsRouteWithChildren
+  AdminTeamRoute: typeof AdminTeamRoute
   AdminIndexRoute: typeof AdminIndexRoute
   AdminMediaIdRoute: typeof AdminMediaIdRoute
   AdminMediaNewRoute: typeof AdminMediaNewRoute
@@ -2118,6 +2138,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminMembersRoute: AdminMembersRoute,
   AdminRegistrationsRoute: AdminRegistrationsRouteWithChildren,
   AdminRentalsRoute: AdminRentalsRouteWithChildren,
+  AdminTeamRoute: AdminTeamRoute,
   AdminIndexRoute: AdminIndexRoute,
   AdminMediaIdRoute: AdminMediaIdRoute,
   AdminMediaNewRoute: AdminMediaNewRoute,

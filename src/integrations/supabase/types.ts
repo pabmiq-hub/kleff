@@ -1244,6 +1244,72 @@ export type Database = {
         }
         Relationships: []
       }
+      team_members: {
+        Row: {
+          active: boolean
+          bio_ca: string
+          bio_en: string
+          bio_es: string
+          color_ca: string
+          color_en: string
+          color_es: string
+          created_at: string
+          emoji: string
+          favorite_game: string
+          id: string
+          lucky_number: string
+          name: string
+          photo_url: string | null
+          role_ca: string
+          role_en: string
+          role_es: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          bio_ca?: string
+          bio_en?: string
+          bio_es?: string
+          color_ca?: string
+          color_en?: string
+          color_es?: string
+          created_at?: string
+          emoji?: string
+          favorite_game?: string
+          id?: string
+          lucky_number?: string
+          name: string
+          photo_url?: string | null
+          role_ca?: string
+          role_en?: string
+          role_es?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          bio_ca?: string
+          bio_en?: string
+          bio_es?: string
+          color_ca?: string
+          color_en?: string
+          color_es?: string
+          created_at?: string
+          emoji?: string
+          favorite_game?: string
+          id?: string
+          lucky_number?: string
+          name?: string
+          photo_url?: string | null
+          role_ca?: string
+          role_en?: string
+          role_es?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
