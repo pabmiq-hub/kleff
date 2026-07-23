@@ -1,6 +1,9 @@
 import { Link } from "@tanstack/react-router";
 import { ArrowRight, Calendar, Globe2, Sparkles, Dice5, ExternalLink } from "lucide-react";
 import { useI18n } from "@/i18n/I18nProvider";
+import { useEffect, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
+import { listTeamMembersPublic, type TeamMemberRow } from "@/lib/team.functions";
 
 const HERO_IMAGE_DEFAULT =
   "https://gyecpblbaovmprdvgmct.supabase.co/storage/v1/object/public/media/cms/kleff-estacio-espai-juegos-de-mesa-2-estacio-nk0knd.jpg";
