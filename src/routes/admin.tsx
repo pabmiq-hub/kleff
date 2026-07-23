@@ -12,6 +12,7 @@ import {
   LogOut,
   Shield,
   ExternalLink,
+  UserCircle2,
 } from "lucide-react";
 
 export const Route = createFileRoute("/admin")({
