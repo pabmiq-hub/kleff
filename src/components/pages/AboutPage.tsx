@@ -132,6 +132,23 @@ export function AboutPage() {
   const mission = useSectionContent("about.mission");
   const manifesto = useSectionContent("about.manifesto");
   const cta = useSectionContent("about.cta");
+  const loadTeam = useServerFn(listTeamMembersPublic);
+  const [dbTeam, setDbTeam] = useState<TeamMemberRow[] | null>(null);
+  useEffect(() => {
+    loadTeam().then(setDbTeam).catch(() => setDbTeam([]));
+  }, [loadTeam]);
+  const team: TeamMember[] = (dbTeam && dbTeam.length > 0)
+    ? dbTeam.map((r) => ({
+        name: r.name,
+        emoji: r.emoji,
+        photo: r.photo_url ?? "",
+        favoriteGame: r.favorite_game,
+        luckyNumber: r.lucky_number,
+        role: { es: r.role_es, en: r.role_en, ca: r.role_ca },
+        bio: { es: r.bio_es, en: r.bio_en, ca: r.bio_ca },
+        color: { es: r.color_es, en: r.color_en, ca: r.color_ca },
+      }))
+    : TEAM;
 
   const manifestoLine1 =
     locale === "en"
