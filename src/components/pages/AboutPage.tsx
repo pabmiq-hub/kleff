@@ -310,7 +310,7 @@ export function AboutPage() {
             </p>
           </div>
           <div className="mt-12 grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {TEAM.map((m) => (
+            {team.map((m) => (
               <TeamFlipCard key={m.name} member={m} locale={locale} />
             ))}
           </div>
