@@ -213,7 +213,7 @@ export async function listLudoyaMatches(): Promise<{ matches: LudoyaMatch[]; end
     // torneos that live inside a sub-MEETUP.
     const visited = new Set<string>();
     async function collectChildren(parentEvt: any, depth: number): Promise<LudoyaMatch[]> {
-      if (depth > 2 || !parentEvt?.id || visited.has(parentEvt.id)) return [];
+      if (depth > 4 || !parentEvt?.id || visited.has(parentEvt.id)) return [];
       visited.add(parentEvt.id);
       const items = await fetchEventChildren(parentEvt.id);
       const parentRef = { id: parentEvt.id, title: parentEvt.title ?? null };
