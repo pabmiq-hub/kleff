@@ -220,7 +220,7 @@ export async function listLudoyaMatches(): Promise<{ matches: LudoyaMatch[]; end
       const mapped = items.map((c) => mapRawEvent(c, parentRef));
       const nested = await Promise.all(
         items
-          .filter((c) => c?.type === "MEETUP" && (c?.childEventCount ?? 0) > 0)
+          .filter((c) => (c?.childEventCount ?? 0) > 0)
           .map((c) => collectChildren(c, depth + 1)),
       );
       return [...mapped, ...nested.flat()];
