@@ -149,24 +149,27 @@ function mapRawEvent(e: any, parent?: { id: string; title?: string | null } | nu
 }
 
 async function fetchEventChildren(eventId: string): Promise<any[]> {
-  // The /public/v1/events/{id}/children endpoint isn't exposed, but the
-  // internal /events/{id}/children accepts the group API key and returns
-  // TOURNAMENT + PLANNED_PLAY items scheduled inside a parent event.
-  // NOTE: sub-MEETUP children with visibility "ONLY_GROUP" are filtered out
-  // by the API when called with a group API key (they only render for
-  // signed-in members). To surface partidas nested inside such sub-meetups
-  // we recurse when a child reports childEventCount > 0.
-  try {
-    const res = await fetch(`https://api.ludoya.com/events/${eventId}/children`, {
-      headers: { "X-Api-Key": apiKey() },
-    });
-    if (!res.ok) return [];
-    const json = (await res.json()) as any;
-    const list: any[] = json?.list ?? json?.elements ?? (Array.isArray(json) ? json : []);
-    return list;
-  } catch {
-    return [];
+  // Ludoya currently exposes children from the public group endpoint as
+  // `{ children: [...] }`. Older/internal endpoints return `{ list: [...] }`,
+  // so keep both shapes as fallbacks.
+  const paths = [
+    `${BASE}/events/${eventId}/children?pagination=100,0`,
+    `https://api.ludoya.com/events/${eventId}/children?pagination=100,0`,
+  ];
+
+  for (const url of paths) {
+    try {
+      const res = await fetch(url, { headers: { "X-Api-Key": apiKey() } });
+      if (!res.ok) continue;
+      const json = (await res.json()) as any;
+      const list: any[] = json?.children ?? json?.list ?? json?.elements ?? (Array.isArray(json) ? json : []);
+      if (list.length > 0) return list;
+    } catch {
+      // Try the next known endpoint shape.
+    }
   }
+
+  return [];
 }
 
 async function fetchEvent(eventId: string): Promise<any | null> {
@@ -218,11 +221,7 @@ export async function listLudoyaMatches(): Promise<{ matches: LudoyaMatch[]; end
       const items = await fetchEventChildren(parentEvt.id);
       const parentRef = { id: parentEvt.id, title: parentEvt.title ?? null };
       const mapped = items.map((c) => mapRawEvent(c, parentRef));
-      const nested = await Promise.all(
-        items
-          .filter((c) => (c?.childEventCount ?? 0) > 0)
-          .map((c) => collectChildren(c, depth + 1)),
-      );
+      const nested = await Promise.all(items.map((c) => collectChildren(c, depth + 1)));
       return [...mapped, ...nested.flat()];
     }
 
