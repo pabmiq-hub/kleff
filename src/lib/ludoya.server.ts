@@ -188,7 +188,7 @@ function extraParentIds(): string[] {
 
 export async function listLudoyaMatches(): Promise<{ matches: LudoyaMatch[]; endpointOk: boolean; lastError?: string }> {
   try {
-    const q = new URLSearchParams({ pagination: "50,0" });
+    const q = new URLSearchParams({ pagination: "100,0" });
     const res = await ludoyaFetch(`/events?${q.toString()}`);
     if (!res.ok) {
       let msg = `HTTP ${res.status}`;
@@ -213,14 +213,14 @@ export async function listLudoyaMatches(): Promise<{ matches: LudoyaMatch[]; end
     // torneos that live inside a sub-MEETUP.
     const visited = new Set<string>();
     async function collectChildren(parentEvt: any, depth: number): Promise<LudoyaMatch[]> {
-      if (depth > 2 || !parentEvt?.id || visited.has(parentEvt.id)) return [];
+      if (depth > 4 || !parentEvt?.id || visited.has(parentEvt.id)) return [];
       visited.add(parentEvt.id);
       const items = await fetchEventChildren(parentEvt.id);
       const parentRef = { id: parentEvt.id, title: parentEvt.title ?? null };
       const mapped = items.map((c) => mapRawEvent(c, parentRef));
       const nested = await Promise.all(
         items
-          .filter((c) => c?.type === "MEETUP" && (c?.childEventCount ?? 0) > 0)
+          .filter((c) => (c?.childEventCount ?? 0) > 0)
           .map((c) => collectChildren(c, depth + 1)),
       );
       return [...mapped, ...nested.flat()];
@@ -229,12 +229,24 @@ export async function listLudoyaMatches(): Promise<{ matches: LudoyaMatch[]; end
     const childLists = await Promise.all(raw.map((e) => collectChildren(e, 1)));
 
     const seen = new Set<string>();
-    const matches: LudoyaMatch[] = [];
+    const all: LudoyaMatch[] = [];
     for (const m of [...parents, ...childLists.flat()]) {
       if (!m.id || seen.has(m.id)) continue;
       seen.add(m.id);
-      matches.push(m);
+      all.push(m);
     }
+
+    // Only surface upcoming activity. An item is "future" when its endsAt is
+    // still ahead (multi-day events) or, if no end date, when its scheduledAt
+    // hasn't passed yet. Items without any date are kept (treated as pending).
+    const now = Date.now();
+    const matches = all.filter((m) => {
+      const endMs = m.endsAt ? Date.parse(m.endsAt) : NaN;
+      if (!Number.isNaN(endMs)) return endMs >= now;
+      const startMs = m.scheduledAt ? Date.parse(m.scheduledAt) : NaN;
+      if (!Number.isNaN(startMs)) return startMs >= now;
+      return true;
+    });
 
     // Backfill parent titles now that we know every event's title, and use
     // parentId (Ludoya's canonical field) to keep the hierarchy consistent
