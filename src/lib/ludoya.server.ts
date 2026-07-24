@@ -188,7 +188,7 @@ function extraParentIds(): string[] {
 
 export async function listLudoyaMatches(): Promise<{ matches: LudoyaMatch[]; endpointOk: boolean; lastError?: string }> {
   try {
-    const q = new URLSearchParams({ pagination: "50,0" });
+    const q = new URLSearchParams({ pagination: "100,0" });
     const res = await ludoyaFetch(`/events?${q.toString()}`);
     if (!res.ok) {
       let msg = `HTTP ${res.status}`;
