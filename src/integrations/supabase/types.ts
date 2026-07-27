@@ -794,6 +794,9 @@ export type Database = {
           avatar_url: string | null
           created_at: string
           date_of_birth: string
+          dues_paid: boolean
+          dues_paid_at: string | null
+          dues_paid_by: string | null
           full_name: string
           gender: Database["public"]["Enums"]["gender_type"]
           id: string
@@ -808,6 +811,9 @@ export type Database = {
           avatar_url?: string | null
           created_at?: string
           date_of_birth: string
+          dues_paid?: boolean
+          dues_paid_at?: string | null
+          dues_paid_by?: string | null
           full_name: string
           gender: Database["public"]["Enums"]["gender_type"]
           id: string
@@ -822,6 +828,9 @@ export type Database = {
           avatar_url?: string | null
           created_at?: string
           date_of_birth?: string
+          dues_paid?: boolean
+          dues_paid_at?: string | null
+          dues_paid_by?: string | null
           full_name?: string
           gender?: Database["public"]["Enums"]["gender_type"]
           id?: string

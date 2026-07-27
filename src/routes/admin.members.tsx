@@ -1,11 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { listUsers, getUserIdDocument } from "@/lib/admin.functions";
+import { listUsers, getUserIdDocument, setMemberDuesPaid } from "@/lib/admin.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { toast } from "sonner";
-import { LayoutGrid, List, Search, Eye } from "lucide-react";
+import { LayoutGrid, List, Search, Eye, CheckCircle2, XCircle, Mail, Calendar, User as UserIcon, IdCard, Shield } from "lucide-react";
 
 export const Route = createFileRoute("/admin/members")({
   component: MembersPage,
@@ -22,6 +23,10 @@ interface MemberRow {
   email: string | null;
   roles: string[];
   created_at: string;
+  ludoya_username: string | null;
+  dues_paid: boolean;
+  dues_paid_at: string | null;
+  dues_paid_by: string | null;
 }
 
 function formatMemberNumber(n: number) {
@@ -31,17 +36,27 @@ function formatMemberNumber(n: number) {
 function MembersPage() {
   const listFn = useServerFn(listUsers);
   const getDniFn = useServerFn(getUserIdDocument);
+  const setDuesFn = useServerFn(setMemberDuesPaid);
   const [members, setMembers] = useState<MemberRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [view, setView] = useState<"list" | "cards">("list");
   const [query, setQuery] = useState("");
-  const [revealed, setRevealed] = useState<Record<string, string>>({});
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [dni, setDni] = useState<string | null>(null);
+  const [dniLoading, setDniLoading] = useState(false);
+  const [savingDues, setSavingDues] = useState(false);
 
-  useEffect(() => {
+  const load = () => {
+    setLoading(true);
     void listFn({ data: undefined as never })
       .then((r) => setMembers(r.users as MemberRow[]))
       .finally(() => setLoading(false));
-  }, [listFn]);
+  };
+
+  useEffect(() => {
+    load();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -55,12 +70,47 @@ function MembersPage() {
     );
   }, [members, query]);
 
-  const handleRevealDni = async (userId: string) => {
+  const selected = useMemo(
+    () => members.find((m) => m.id === selectedId) ?? null,
+    [members, selectedId],
+  );
+
+  const openMember = (m: MemberRow) => {
+    setSelectedId(m.id);
+    setDni(null);
+  };
+
+  const handleRevealDni = async () => {
+    if (!selected) return;
+    setDniLoading(true);
     try {
-      const r = await getDniFn({ data: { userId } });
-      setRevealed((prev) => ({ ...prev, [userId]: r.idDocument ?? "—" }));
+      const r = await getDniFn({ data: { userId: selected.id } });
+      setDni(r.idDocument ?? "—");
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Error");
+    } finally {
+      setDniLoading(false);
+    }
+  };
+
+  const handleToggleDues = async () => {
+    if (!selected) return;
+    setSavingDues(true);
+    try {
+      const next = !selected.dues_paid;
+      await setDuesFn({ data: { userId: selected.id, paid: next } });
+      setMembers((prev) =>
+        prev.map((m) =>
+          m.id === selected.id
+            ? { ...m, dues_paid: next, dues_paid_at: next ? new Date().toISOString() : null }
+            : m,
+        ),
+      );
+      toast.success(next ? "Cuota marcada como pagada" : "Cuota marcada como pendiente");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Error");
+    } finally {
+      setSavingDues(false);
     }
   };
 
@@ -112,7 +162,8 @@ function MembersPage() {
                 <th className="text-left px-4 py-3 hidden md:table-cell">Email</th>
                 <th className="text-left px-4 py-3 hidden lg:table-cell">Nacimiento</th>
                 <th className="text-left px-4 py-3 hidden lg:table-cell">Alta</th>
-                <th className="text-left px-4 py-3">DNI</th>
+                <th className="text-left px-4 py-3">Cuota</th>
+                <th className="text-right px-4 py-3"></th>
               </tr>
             </thead>
             <tbody>
@@ -143,19 +194,26 @@ function MembersPage() {
                   <td className="px-4 py-3 hidden lg:table-cell text-ink/70">{m.date_of_birth}</td>
                   <td className="px-4 py-3 hidden lg:table-cell text-ink/70">{new Date(m.created_at).toLocaleDateString()}</td>
                   <td className="px-4 py-3">
-                    {revealed[m.id] ? (
-                      <code className="text-xs bg-ink/10 rounded px-2 py-1 border border-ink/20">{revealed[m.id]}</code>
+                    {m.dues_paid ? (
+                      <span className="inline-flex items-center gap-1 text-xs bg-emerald-100 text-emerald-800 px-2 py-1 rounded font-semibold">
+                        <CheckCircle2 className="h-3 w-3" /> Pagada
+                      </span>
                     ) : (
-                      <Button size="sm" variant="ghost" className="text-ink/70 hover:text-ink hover:bg-ink/10" onClick={() => handleRevealDni(m.id)}>
-                        <Eye className="h-3.5 w-3.5 mr-1" /> Ver
-                      </Button>
+                      <span className="inline-flex items-center gap-1 text-xs bg-ink/10 text-ink/70 px-2 py-1 rounded font-semibold">
+                        <XCircle className="h-3 w-3" /> Pendiente
+                      </span>
                     )}
+                  </td>
+                  <td className="px-4 py-3 text-right">
+                    <Button size="sm" variant="ghost" className="text-ink/70 hover:text-ink hover:bg-ink/10" onClick={() => openMember(m)}>
+                      <Eye className="h-3.5 w-3.5 mr-1" /> Ver
+                    </Button>
                   </td>
                 </tr>
               ))}
               {filtered.length === 0 && (
                 <tr>
-                  <td colSpan={6} className="px-4 py-8 text-center text-ink/50">Sin resultados.</td>
+                  <td colSpan={7} className="px-4 py-8 text-center text-ink/50">Sin resultados.</td>
                 </tr>
               )}
             </tbody>
@@ -164,7 +222,11 @@ function MembersPage() {
       ) : (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {filtered.map((m) => (
-            <div key={m.id} className="bg-ink/5 border border-ink/15 rounded-2xl p-5">
+            <button
+              key={m.id}
+              onClick={() => openMember(m)}
+              className="text-left bg-ink/5 border border-ink/15 rounded-2xl p-5 hover:bg-ink/10 transition-colors"
+            >
               <div className="flex items-center gap-3 mb-3">
                 {m.avatar_url ? (
                   <img src={m.avatar_url} alt="" className="h-14 w-14 rounded-full object-cover border-2 border-coral" />
@@ -181,28 +243,139 @@ function MembersPage() {
               </div>
               <div className="space-y-1 text-xs text-ink/70">
                 <p className="truncate">{m.email}</p>
-                <p>Nacimiento: {m.date_of_birth}</p>
                 <p>Alta: {new Date(m.created_at).toLocaleDateString()}</p>
-                {m.roles.includes("super_admin") && (
-                  <span className="inline-block mt-1 text-[10px] bg-coral text-ink px-1.5 py-0.5 rounded font-bold">ADMIN</span>
-                )}
+                <div className="flex items-center gap-2 mt-2">
+                  {m.dues_paid ? (
+                    <span className="inline-flex items-center gap-1 text-[10px] bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded font-bold">
+                      <CheckCircle2 className="h-3 w-3" /> CUOTA OK
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center gap-1 text-[10px] bg-ink/10 text-ink/70 px-1.5 py-0.5 rounded font-bold">
+                      <XCircle className="h-3 w-3" /> PENDIENTE
+                    </span>
+                  )}
+                  {m.roles.includes("super_admin") && (
+                    <span className="text-[10px] bg-coral text-ink px-1.5 py-0.5 rounded font-bold">ADMIN</span>
+                  )}
+                </div>
               </div>
-              <div className="mt-3 pt-3 border-t border-ink/10">
-                {revealed[m.id] ? (
-                  <code className="block text-xs bg-ink/10 rounded px-2 py-1 border border-ink/20">DNI: {revealed[m.id]}</code>
-                ) : (
-                  <Button size="sm" variant="ghost" className="text-ink/70 hover:text-ink hover:bg-ink/10 w-full" onClick={() => handleRevealDni(m.id)}>
-                    <Eye className="h-3.5 w-3.5 mr-1" /> Ver DNI
-                  </Button>
-                )}
-              </div>
-            </div>
+            </button>
           ))}
           {filtered.length === 0 && (
             <p className="col-span-full text-center text-ink/50 py-8">Sin resultados.</p>
           )}
         </div>
       )}
+
+      <Sheet open={!!selected} onOpenChange={(o) => !o && setSelectedId(null)}>
+        <SheetContent className="w-full sm:max-w-md bg-cream text-ink overflow-y-auto">
+          {selected && (
+            <>
+              <SheetHeader className="text-left">
+                <SheetTitle className="font-display text-2xl">Detalles del socio</SheetTitle>
+                <SheetDescription className="font-mono text-coral font-semibold">
+                  {formatMemberNumber(selected.member_number)}
+                </SheetDescription>
+              </SheetHeader>
+
+              <div className="mt-6 space-y-6">
+                <div className="flex items-center gap-4">
+                  {selected.avatar_url ? (
+                    <img src={selected.avatar_url} alt="" className="h-20 w-20 rounded-full object-cover border-2 border-coral" />
+                  ) : (
+                    <div className="h-20 w-20 rounded-full bg-coral/30 flex items-center justify-center font-bold text-ink text-3xl">
+                      {selected.full_name.charAt(0).toUpperCase()}
+                    </div>
+                  )}
+                  <div className="min-w-0">
+                    <p className="font-semibold text-lg">{selected.full_name}</p>
+                    <p className="text-sm text-ink/60">@{selected.username}</p>
+                    {selected.roles.includes("super_admin") && (
+                      <span className="inline-flex items-center gap-1 mt-1 text-[10px] bg-coral text-ink px-1.5 py-0.5 rounded font-bold">
+                        <Shield className="h-3 w-3" /> SUPER ADMIN
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                <div className={`rounded-2xl border-2 p-4 ${selected.dues_paid ? "bg-emerald-50 border-emerald-300" : "bg-ink/5 border-ink/20"}`}>
+                  <div className="flex items-start justify-between gap-3 mb-3">
+                    <div>
+                      <p className="text-xs uppercase tracking-wide text-ink/60 font-semibold">Cuota de socio</p>
+                      <p className={`font-bold text-lg ${selected.dues_paid ? "text-emerald-800" : "text-ink/70"}`}>
+                        {selected.dues_paid ? "Pagada" : "Pendiente"}
+                      </p>
+                      {selected.dues_paid && selected.dues_paid_at && (
+                        <p className="text-xs text-ink/50 mt-0.5">
+                          Actualizada el {new Date(selected.dues_paid_at).toLocaleDateString()}
+                        </p>
+                      )}
+                    </div>
+                    {selected.dues_paid ? (
+                      <CheckCircle2 className="h-8 w-8 text-emerald-600 shrink-0" />
+                    ) : (
+                      <XCircle className="h-8 w-8 text-ink/40 shrink-0" />
+                    )}
+                  </div>
+                  <Button
+                    onClick={handleToggleDues}
+                    disabled={savingDues}
+                    variant={selected.dues_paid ? "outline" : "default"}
+                    className="w-full"
+                  >
+                    {savingDues
+                      ? "Guardando…"
+                      : selected.dues_paid
+                        ? "Marcar como pendiente"
+                        : "Marcar cuota como pagada"}
+                  </Button>
+                </div>
+
+                <div className="space-y-3 text-sm">
+                  <InfoRow icon={<Mail className="h-4 w-4" />} label="Email" value={selected.email ?? "—"} />
+                  <InfoRow icon={<Calendar className="h-4 w-4" />} label="Fecha de nacimiento" value={selected.date_of_birth} />
+                  <InfoRow icon={<UserIcon className="h-4 w-4" />} label="Género" value={selected.gender.replace("_", " ")} />
+                  <InfoRow icon={<Calendar className="h-4 w-4" />} label="Alta" value={new Date(selected.created_at).toLocaleDateString()} />
+                  {selected.ludoya_username && (
+                    <InfoRow icon={<UserIcon className="h-4 w-4" />} label="Ludoya" value={`@${selected.ludoya_username}`} />
+                  )}
+                </div>
+
+                <div className="border-t border-ink/10 pt-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2 text-sm font-semibold">
+                      <IdCard className="h-4 w-4" /> Documento de identidad
+                    </div>
+                    {!dni && (
+                      <Button size="sm" variant="ghost" onClick={handleRevealDni} disabled={dniLoading}>
+                        <Eye className="h-3.5 w-3.5 mr-1" /> {dniLoading ? "Descifrando…" : "Revelar"}
+                      </Button>
+                    )}
+                  </div>
+                  {dni && (
+                    <code className="block text-xs bg-ink/10 rounded px-3 py-2 border border-ink/20 font-mono">{dni}</code>
+                  )}
+                  <p className="text-[10px] text-ink/40 mt-2">
+                    Cada acceso al DNI queda registrado en el log de auditoría.
+                  </p>
+                </div>
+              </div>
+            </>
+          )}
+        </SheetContent>
+      </Sheet>
+    </div>
+  );
+}
+
+function InfoRow({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
+  return (
+    <div className="flex items-start gap-3">
+      <span className="text-ink/50 mt-0.5">{icon}</span>
+      <div className="flex-1 min-w-0">
+        <p className="text-xs text-ink/50 uppercase tracking-wide">{label}</p>
+        <p className="text-ink truncate">{value}</p>
+      </div>
     </div>
   );
 }

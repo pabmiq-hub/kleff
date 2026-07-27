@@ -1,6 +1,7 @@
 import { createFileRoute, Outlet, Link, useNavigate } from "@tanstack/react-router";
 import { useAuth } from "@/auth/AuthProvider";
 import { Button } from "@/components/ui/button";
+import { NotificationsBell } from "@/components/app/NotificationsBell";
 import {
   LayoutDashboard,
   Users,
@@ -88,8 +89,11 @@ function AdminLayout() {
           </Button>
         </div>
       </aside>
-      <main className="flex-1 overflow-y-auto p-4 md:p-8">
-        <div className="max-w-6xl w-full">
+      <main className="flex-1 overflow-y-auto">
+        <div className="sticky top-0 z-20 flex items-center justify-end gap-2 px-4 md:px-8 py-3 bg-cream/90 backdrop-blur border-b border-ink/10">
+          <NotificationsBell />
+        </div>
+        <div className="max-w-6xl w-full p-4 md:p-8">
           <Outlet />
         </div>
       </main>

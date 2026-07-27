@@ -278,7 +278,7 @@ export const listUsers = createServerFn({ method: "POST" })
     await assertSuperAdmin(context.userId);
     const { data: profiles, error } = await supabaseAdmin
       .from("profiles")
-      .select("id, member_number, username, full_name, avatar_url, date_of_birth, gender, created_at")
+      .select("id, member_number, username, full_name, avatar_url, date_of_birth, gender, created_at, ludoya_username, dues_paid, dues_paid_at, dues_paid_by")
       .order("member_number", { ascending: true });
     if (error) throw new Error(error.message);
 
@@ -305,6 +305,27 @@ export const listUsers = createServerFn({ method: "POST" })
         roles: roleMap.get(p.id) ?? [],
       })),
     };
+  });
+
+// ---------------- Admin: toggle dues paid ----------------
+
+export const setMemberDuesPaid = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) =>
+    z.object({ userId: z.string().uuid(), paid: z.boolean() }).parse(input),
+  )
+  .handler(async ({ data, context }) => {
+    await assertSuperAdmin(context.userId);
+    const { error } = await supabaseAdmin
+      .from("profiles")
+      .update({
+        dues_paid: data.paid,
+        dues_paid_at: data.paid ? new Date().toISOString() : null,
+        dues_paid_by: data.paid ? context.userId : null,
+      })
+      .eq("id", data.userId);
+    if (error) throw new Error(error.message);
+    return { success: true };
   });
 
 // ---------------- Admin: get DNI of a user ----------------
