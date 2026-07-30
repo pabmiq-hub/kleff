@@ -642,6 +642,391 @@ export type Database = {
         }
         Relationships: []
       }
+      karma_categories: {
+        Row: {
+          code: string
+          created_at: string
+          description_ca: string
+          description_en: string
+          description_es: string
+          grp: Database["public"]["Enums"]["karma_category_group"]
+          id: string
+          is_active: boolean
+          limit_count: number | null
+          limit_period: Database["public"]["Enums"]["karma_limit_period"]
+          member_requestable: boolean
+          name_ca: string
+          name_en: string
+          name_es: string
+          points: number
+          points_max: number | null
+          points_min: number | null
+          requires_evidence: boolean
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          description_ca?: string
+          description_en?: string
+          description_es?: string
+          grp: Database["public"]["Enums"]["karma_category_group"]
+          id?: string
+          is_active?: boolean
+          limit_count?: number | null
+          limit_period?: Database["public"]["Enums"]["karma_limit_period"]
+          member_requestable?: boolean
+          name_ca?: string
+          name_en?: string
+          name_es: string
+          points?: number
+          points_max?: number | null
+          points_min?: number | null
+          requires_evidence?: boolean
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          description_ca?: string
+          description_en?: string
+          description_es?: string
+          grp?: Database["public"]["Enums"]["karma_category_group"]
+          id?: string
+          is_active?: boolean
+          limit_count?: number | null
+          limit_period?: Database["public"]["Enums"]["karma_limit_period"]
+          member_requestable?: boolean
+          name_ca?: string
+          name_en?: string
+          name_es?: string
+          points?: number
+          points_max?: number | null
+          points_min?: number | null
+          requires_evidence?: boolean
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      karma_entries: {
+        Row: {
+          category_id: string | null
+          created_at: string
+          created_by: string | null
+          decided_at: string | null
+          decided_by: string | null
+          decision_note: string | null
+          description: string | null
+          event_ref: string | null
+          evidence_url: string | null
+          game_id: string | null
+          id: string
+          points: number
+          season_id: string | null
+          status: Database["public"]["Enums"]["karma_entry_status"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          category_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          decided_at?: string | null
+          decided_by?: string | null
+          decision_note?: string | null
+          description?: string | null
+          event_ref?: string | null
+          evidence_url?: string | null
+          game_id?: string | null
+          id?: string
+          points?: number
+          season_id?: string | null
+          status?: Database["public"]["Enums"]["karma_entry_status"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          category_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          decided_at?: string | null
+          decided_by?: string | null
+          decision_note?: string | null
+          description?: string | null
+          event_ref?: string | null
+          evidence_url?: string | null
+          game_id?: string | null
+          id?: string
+          points?: number
+          season_id?: string | null
+          status?: Database["public"]["Enums"]["karma_entry_status"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "karma_entries_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "karma_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "karma_entries_game_id_fkey"
+            columns: ["game_id"]
+            isOneToOne: false
+            referencedRelation: "bgg_games"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "karma_entries_season_id_fkey"
+            columns: ["season_id"]
+            isOneToOne: false
+            referencedRelation: "karma_seasons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      karma_perks: {
+        Row: {
+          consumed_at: string | null
+          created_at: string
+          expires_at: string | null
+          id: string
+          kind: Database["public"]["Enums"]["karma_reward_effect"]
+          redemption_id: string | null
+          user_id: string
+          value: number | null
+        }
+        Insert: {
+          consumed_at?: string | null
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          kind: Database["public"]["Enums"]["karma_reward_effect"]
+          redemption_id?: string | null
+          user_id: string
+          value?: number | null
+        }
+        Update: {
+          consumed_at?: string | null
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          kind?: Database["public"]["Enums"]["karma_reward_effect"]
+          redemption_id?: string | null
+          user_id?: string
+          value?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "karma_perks_redemption_id_fkey"
+            columns: ["redemption_id"]
+            isOneToOne: false
+            referencedRelation: "karma_redemptions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      karma_redemptions: {
+        Row: {
+          created_at: string
+          decided_at: string | null
+          decided_by: string | null
+          id: string
+          note: string | null
+          points_spent: number
+          reward_id: string | null
+          season_id: string | null
+          status: Database["public"]["Enums"]["karma_redemption_status"]
+          target_rental_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          decided_at?: string | null
+          decided_by?: string | null
+          id?: string
+          note?: string | null
+          points_spent: number
+          reward_id?: string | null
+          season_id?: string | null
+          status?: Database["public"]["Enums"]["karma_redemption_status"]
+          target_rental_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          decided_at?: string | null
+          decided_by?: string | null
+          id?: string
+          note?: string | null
+          points_spent?: number
+          reward_id?: string | null
+          season_id?: string | null
+          status?: Database["public"]["Enums"]["karma_redemption_status"]
+          target_rental_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "karma_redemptions_reward_id_fkey"
+            columns: ["reward_id"]
+            isOneToOne: false
+            referencedRelation: "karma_rewards"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "karma_redemptions_season_id_fkey"
+            columns: ["season_id"]
+            isOneToOne: false
+            referencedRelation: "karma_seasons"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "karma_redemptions_target_rental_id_fkey"
+            columns: ["target_rental_id"]
+            isOneToOne: false
+            referencedRelation: "rentals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      karma_referrals: {
+        Row: {
+          created_at: string
+          id: string
+          loyalty_awarded: boolean
+          note: string | null
+          referred_name: string
+          referred_user_id: string | null
+          referrer_id: string
+          signup_awarded: boolean
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          loyalty_awarded?: boolean
+          note?: string | null
+          referred_name: string
+          referred_user_id?: string | null
+          referrer_id: string
+          signup_awarded?: boolean
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          loyalty_awarded?: boolean
+          note?: string | null
+          referred_name?: string
+          referred_user_id?: string | null
+          referrer_id?: string
+          signup_awarded?: boolean
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      karma_rewards: {
+        Row: {
+          code: string
+          cost: number
+          created_at: string
+          description_ca: string
+          description_en: string
+          description_es: string
+          effect: Database["public"]["Enums"]["karma_reward_effect"]
+          effect_value: number | null
+          id: string
+          is_active: boolean
+          name_ca: string
+          name_en: string
+          name_es: string
+          sort_order: number
+          stock: number | null
+          updated_at: string
+        }
+        Insert: {
+          code: string
+          cost: number
+          created_at?: string
+          description_ca?: string
+          description_en?: string
+          description_es?: string
+          effect?: Database["public"]["Enums"]["karma_reward_effect"]
+          effect_value?: number | null
+          id?: string
+          is_active?: boolean
+          name_ca?: string
+          name_en?: string
+          name_es: string
+          sort_order?: number
+          stock?: number | null
+          updated_at?: string
+        }
+        Update: {
+          code?: string
+          cost?: number
+          created_at?: string
+          description_ca?: string
+          description_en?: string
+          description_es?: string
+          effect?: Database["public"]["Enums"]["karma_reward_effect"]
+          effect_value?: number | null
+          id?: string
+          is_active?: boolean
+          name_ca?: string
+          name_en?: string
+          name_es?: string
+          sort_order?: number
+          stock?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      karma_seasons: {
+        Row: {
+          carryover_max: number
+          closed_at: string | null
+          created_at: string
+          ends_on: string
+          id: string
+          is_active: boolean
+          name: string
+          starts_on: string
+          updated_at: string
+        }
+        Insert: {
+          carryover_max?: number
+          closed_at?: string | null
+          created_at?: string
+          ends_on: string
+          id?: string
+          is_active?: boolean
+          name: string
+          starts_on: string
+          updated_at?: string
+        }
+        Update: {
+          carryover_max?: number
+          closed_at?: string | null
+          created_at?: string
+          ends_on?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          starts_on?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       kv_cache: {
         Row: {
           fetched_at: string
@@ -802,6 +1187,7 @@ export type Database = {
           id: string
           id_document_encrypted: string
           id_document_nonce: string
+          karma_ranking_opt_in: boolean
           ludoya_username: string | null
           member_number: number
           updated_at: string
@@ -819,6 +1205,7 @@ export type Database = {
           id: string
           id_document_encrypted: string
           id_document_nonce: string
+          karma_ranking_opt_in?: boolean
           ludoya_username?: string | null
           member_number?: number
           updated_at?: string
@@ -836,6 +1223,7 @@ export type Database = {
           id?: string
           id_document_encrypted?: string
           id_document_nonce?: string
+          karma_ranking_opt_in?: boolean
           ludoya_username?: string | null
           member_number?: number
           updated_at?: string
@@ -1370,6 +1758,13 @@ export type Database = {
         Returns: boolean
       }
       is_super_admin: { Args: never; Returns: boolean }
+      karma_active_season: { Args: never; Returns: string }
+      karma_balance: { Args: { _user_id: string }; Returns: number }
+      karma_category_usage: {
+        Args: { _category_id: string; _user_id: string }
+        Returns: number
+      }
+      karma_lifetime: { Args: { _user_id: string }; Returns: number }
       move_to_dlq: {
         Args: {
           dlq_name: string
@@ -1398,6 +1793,29 @@ export type Database = {
         | "non_binary"
         | "other"
         | "prefer_not_to_say"
+      karma_category_group:
+        | "ludoteca"
+        | "difusion"
+        | "referidos"
+        | "participacion"
+        | "organizacion"
+        | "otras"
+      karma_entry_status: "pending" | "approved" | "rejected" | "voided"
+      karma_limit_period: "none" | "weekly" | "monthly"
+      karma_redemption_status:
+        | "requested"
+        | "approved"
+        | "delivered"
+        | "rejected"
+      karma_reward_effect:
+        | "manual"
+        | "fee_discount"
+        | "raffle_ticket"
+        | "extra_rental"
+        | "extend_rental"
+        | "tournament_discount"
+        | "priority_access"
+        | "double_vote"
       rental_request_status:
         | "pending"
         | "approved"
@@ -1553,6 +1971,32 @@ export const Constants = {
         "non_binary",
         "other",
         "prefer_not_to_say",
+      ],
+      karma_category_group: [
+        "ludoteca",
+        "difusion",
+        "referidos",
+        "participacion",
+        "organizacion",
+        "otras",
+      ],
+      karma_entry_status: ["pending", "approved", "rejected", "voided"],
+      karma_limit_period: ["none", "weekly", "monthly"],
+      karma_redemption_status: [
+        "requested",
+        "approved",
+        "delivered",
+        "rejected",
+      ],
+      karma_reward_effect: [
+        "manual",
+        "fee_discount",
+        "raffle_ticket",
+        "extra_rental",
+        "extend_rental",
+        "tournament_discount",
+        "priority_access",
+        "double_vote",
       ],
       rental_request_status: [
         "pending",
