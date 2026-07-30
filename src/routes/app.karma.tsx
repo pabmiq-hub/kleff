@@ -10,7 +10,7 @@ import {
   getKarmaRanking,
   setKarmaRankingOptIn,
 } from "@/lib/karma.functions";
-import { levelForKarma, nextLevel, KARMA_LEVELS } from "@/lib/karma-levels";
+import { levelForKarma, nextLevelForKarma as nextLevel, KARMA_LEVELS } from "@/lib/karma-levels";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
