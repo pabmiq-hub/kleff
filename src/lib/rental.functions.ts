@@ -256,8 +256,11 @@ export const createRentalRequest = createServerFn({ method: "POST" })
       }
     }
 
-    // Anti-abuse 3: monthly quota
+    // Anti-abuse 3: monthly quota (Karma perks can raise it)
     if (settings.monthly_quota > 0) {
+      const { activeExtraRentalPerks } = await import("@/lib/karma.server");
+      const extraSlots = await activeExtraRentalPerks(context.userId);
+      const quota = settings.monthly_quota + extraSlots;
       const monthStart = new Date();
       monthStart.setDate(1);
       monthStart.setHours(0, 0, 0, 0);
@@ -267,10 +270,11 @@ export const createRentalRequest = createServerFn({ method: "POST" })
         .eq("user_id", context.userId)
         .in("status", ["pending", "approved", "waitlisted"])
         .gte("created_at", monthStart.toISOString());
-      if ((monthCount ?? 0) >= settings.monthly_quota) {
-        throw new Error(`Has alcanzado tu cuota mensual de ${settings.monthly_quota} alquileres.`);
+      if ((monthCount ?? 0) >= quota) {
+        throw new Error(`Has alcanzado tu cuota mensual de ${quota} alquileres.`);
       }
     }
+
 
     // Availability for that pickup date
     const { data: game, error: gErr } = await supabaseAdmin
