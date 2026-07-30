@@ -1,7 +1,7 @@
 import { createFileRoute, Outlet, Link, useNavigate } from "@tanstack/react-router";
 import { useAuth } from "@/auth/AuthProvider";
 import { Button } from "@/components/ui/button";
-import { Home, User, IdCard, Dices, LogOut, Shield, Gamepad2, Users } from "lucide-react";
+import { Home, User, IdCard, Dices, LogOut, Shield, Gamepad2, Users, Sparkles } from "lucide-react";
 import { NotificationsBell } from "@/components/app/NotificationsBell";
 
 export const Route = createFileRoute("/app")({
@@ -49,6 +49,7 @@ function AppLayout() {
           <NavLink to="/app/kleffers" icon={<Users className="h-4 w-4" />} label="Comunidad" />
           <NavLink to="/app/partidas" icon={<Gamepad2 className="h-4 w-4" />} label="Partidas" />
           <NavLink to="/app/rentals" icon={<Dices className="h-4 w-4" />} label="Alquiler" />
+          <NavLink to="/app/karma" icon={<Sparkles className="h-4 w-4" />} label="Karma" />
         </nav>
         <div className="md:mt-auto">
           <Button variant="ghost" size="sm" onClick={handleLogout} className="w-full justify-start">
