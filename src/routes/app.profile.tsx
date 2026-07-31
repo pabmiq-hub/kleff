@@ -174,8 +174,11 @@ function ProfilePage() {
 
   return (
     <div className="max-w-2xl space-y-6">
-      <div className="flex items-baseline justify-between gap-4">
-        <h1 className="font-display text-3xl font-bold">Mi perfil</h1>
+      <div className="flex flex-wrap items-baseline justify-between gap-4">
+        <div className="flex flex-wrap items-center gap-3">
+          <h1 className="font-display text-3xl font-bold">Mi perfil</h1>
+          <KarmaLevelBadge />
+        </div>
         {memberNumber !== null && (
           <p className="text-sm text-muted-foreground">
             Socio nº <span className="font-mono font-semibold text-ink">{memberNumber}</span>
