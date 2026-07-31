@@ -35,6 +35,19 @@ function formatMemberNumber(n: number) {
   return `K-${String(n).padStart(4, "0")}`;
 }
 
+interface MemberKarma {
+  balance: number;
+  lifetime: number;
+  entries: {
+    id: string;
+    points: number;
+    status: string;
+    description: string | null;
+    created_at: string;
+    categoryName: string;
+  }[];
+}
+
 function MembersPage() {
   const listFn = useServerFn(listUsers);
   const getDniFn = useServerFn(getUserIdDocument);
