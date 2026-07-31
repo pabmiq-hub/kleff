@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { CheckCircle2, ExternalLink, Upload, ShieldCheck } from "lucide-react";
+import { KarmaLevelBadge } from "@/components/app/KarmaLevelBadge";
 
 export const Route = createFileRoute("/app/profile")({
   component: ProfilePage,
