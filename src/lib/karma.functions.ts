@@ -263,3 +263,16 @@ export const setKarmaRankingOptIn = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { success: true };
   });
+
+// ---------------- Lightweight summary (badge) ----------------
+
+export const getMyKarmaSummary = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { karmaBalance, karmaLifetime } = await import("@/lib/karma.server");
+    const [balance, lifetime] = await Promise.all([
+      karmaBalance(context.userId),
+      karmaLifetime(context.userId),
+    ]);
+    return { balance, lifetime };
+  });

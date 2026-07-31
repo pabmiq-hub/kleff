@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { QRCodeSVG } from "qrcode.react";
 import { getMyProfile } from "@/lib/profile.functions";
+import { KarmaLevelBadge } from "@/components/app/KarmaLevelBadge";
 
 export const Route = createFileRoute("/app/carnet")({
   component: CarnetPage,
@@ -57,6 +58,9 @@ function CarnetPage() {
               <div>
                 <p className="font-display text-2xl font-bold leading-tight">{profile.full_name}</p>
                 <p className="text-cream/70 text-sm">@{profile.username}</p>
+                <div className="mt-1.5">
+                  <KarmaLevelBadge variant="dark" />
+                </div>
               </div>
             </div>
 

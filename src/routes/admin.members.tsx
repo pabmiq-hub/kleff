@@ -6,7 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { toast } from "sonner";
-import { LayoutGrid, List, Search, Eye, CheckCircle2, XCircle, Mail, Calendar, User as UserIcon, IdCard, Shield } from "lucide-react";
+import { LayoutGrid, List, Search, Eye, CheckCircle2, XCircle, Mail, Calendar, User as UserIcon, IdCard, Shield, Sparkles } from "lucide-react";
+import { adminGetMemberKarma } from "@/lib/karma-admin.functions";
+import { levelForKarma, KARMA_ENTRY_STATUS_LABELS } from "@/lib/karma-levels";
 
 export const Route = createFileRoute("/admin/members")({
   component: MembersPage,
@@ -33,10 +35,24 @@ function formatMemberNumber(n: number) {
   return `K-${String(n).padStart(4, "0")}`;
 }
 
+interface MemberKarma {
+  balance: number;
+  lifetime: number;
+  entries: {
+    id: string;
+    points: number;
+    status: string;
+    description: string | null;
+    created_at: string;
+    categoryName: string;
+  }[];
+}
+
 function MembersPage() {
   const listFn = useServerFn(listUsers);
   const getDniFn = useServerFn(getUserIdDocument);
   const setDuesFn = useServerFn(setMemberDuesPaid);
+  const memberKarmaFn = useServerFn(adminGetMemberKarma);
   const [members, setMembers] = useState<MemberRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [view, setView] = useState<"list" | "cards">("list");
@@ -45,6 +61,9 @@ function MembersPage() {
   const [dni, setDni] = useState<string | null>(null);
   const [dniLoading, setDniLoading] = useState(false);
   const [savingDues, setSavingDues] = useState(false);
+  const [karma, setKarma] = useState<MemberKarma | null>(null);
+  const [karmaLoading, setKarmaLoading] = useState(false);
+  const [showKarmaHistory, setShowKarmaHistory] = useState(false);
 
   const load = () => {
     setLoading(true);
@@ -78,6 +97,13 @@ function MembersPage() {
   const openMember = (m: MemberRow) => {
     setSelectedId(m.id);
     setDni(null);
+    setKarma(null);
+    setShowKarmaHistory(false);
+    setKarmaLoading(true);
+    void memberKarmaFn({ data: { userId: m.id } })
+      .then((r) => setKarma(r as MemberKarma))
+      .catch(() => setKarma(null))
+      .finally(() => setKarmaLoading(false));
   };
 
   const handleRevealDni = async () => {
@@ -329,6 +355,51 @@ function MembersPage() {
                         ? "Marcar como pendiente"
                         : "Marcar cuota como pagada"}
                   </Button>
+                </div>
+
+                <div className="rounded-2xl border-2 border-ink/20 bg-ink/5 p-4">
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-2 text-xs uppercase tracking-wide text-ink/60 font-semibold">
+                      <Sparkles className="h-4 w-4" /> Karma
+                    </div>
+                    {karma && (
+                      <Button size="sm" variant="ghost" onClick={() => setShowKarmaHistory((v) => !v)}>
+                        {showKarmaHistory ? "Ocultar historial" : "Ver historial"}
+                      </Button>
+                    )}
+                  </div>
+                  {karmaLoading && <p className="text-sm text-ink/50 mt-2">Cargando…</p>}
+                  {!karmaLoading && karma && (
+                    <>
+                      <div className="mt-2 flex flex-wrap items-baseline gap-x-6 gap-y-1">
+                        <p className="font-bold text-lg">
+                          {karma.balance} <span className="text-sm font-normal text-ink/60">pts disponibles</span>
+                        </p>
+                        <p className="text-sm text-ink/70">{karma.lifetime} pts históricos</p>
+                      </div>
+                      <p className="text-sm font-semibold text-coral mt-1">{levelForKarma(karma.lifetime).name}</p>
+                      {showKarmaHistory && (
+                        <ul className="mt-3 space-y-2 max-h-64 overflow-y-auto">
+                          {karma.entries.map((e) => (
+                            <li key={e.id} className="text-xs border-t border-ink/10 pt-2">
+                              <div className="flex items-center justify-between gap-2">
+                                <span className="font-semibold truncate">{e.categoryName}</span>
+                                <span className="font-mono shrink-0">{e.points > 0 ? `+${e.points}` : e.points}</span>
+                              </div>
+                              <div className="flex items-center justify-between gap-2 text-ink/50">
+                                <span>{KARMA_ENTRY_STATUS_LABELS[e.status] ?? e.status}</span>
+                                <span>{new Date(e.created_at).toLocaleDateString()}</span>
+                              </div>
+                              {e.description && <p className="text-ink/60 mt-0.5">{e.description}</p>}
+                            </li>
+                          ))}
+                          {karma.entries.length === 0 && (
+                            <li className="text-xs text-ink/50 pt-2">Sin movimientos de karma.</li>
+                          )}
+                        </ul>
+                      )}
+                    </>
+                  )}
                 </div>
 
                 <div className="space-y-3 text-sm">
