@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { QRCodeSVG } from "qrcode.react";
 import { getMyProfile } from "@/lib/profile.functions";
+import { KarmaLevelBadge } from "@/components/app/KarmaLevelBadge";
 
 export const Route = createFileRoute("/app/carnet")({
   component: CarnetPage,
