@@ -39,6 +39,7 @@ function MembersPage() {
   const listFn = useServerFn(listUsers);
   const getDniFn = useServerFn(getUserIdDocument);
   const setDuesFn = useServerFn(setMemberDuesPaid);
+  const memberKarmaFn = useServerFn(adminGetMemberKarma);
   const [members, setMembers] = useState<MemberRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [view, setView] = useState<"list" | "cards">("list");
@@ -47,6 +48,9 @@ function MembersPage() {
   const [dni, setDni] = useState<string | null>(null);
   const [dniLoading, setDniLoading] = useState(false);
   const [savingDues, setSavingDues] = useState(false);
+  const [karma, setKarma] = useState<MemberKarma | null>(null);
+  const [karmaLoading, setKarmaLoading] = useState(false);
+  const [showKarmaHistory, setShowKarmaHistory] = useState(false);
 
   const load = () => {
     setLoading(true);
