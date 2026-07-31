@@ -357,6 +357,51 @@ function MembersPage() {
                   </Button>
                 </div>
 
+                <div className="rounded-2xl border-2 border-ink/20 bg-ink/5 p-4">
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-2 text-xs uppercase tracking-wide text-ink/60 font-semibold">
+                      <Sparkles className="h-4 w-4" /> Karma
+                    </div>
+                    {karma && (
+                      <Button size="sm" variant="ghost" onClick={() => setShowKarmaHistory((v) => !v)}>
+                        {showKarmaHistory ? "Ocultar historial" : "Ver historial"}
+                      </Button>
+                    )}
+                  </div>
+                  {karmaLoading && <p className="text-sm text-ink/50 mt-2">Cargando…</p>}
+                  {!karmaLoading && karma && (
+                    <>
+                      <div className="mt-2 flex flex-wrap items-baseline gap-x-6 gap-y-1">
+                        <p className="font-bold text-lg">
+                          {karma.balance} <span className="text-sm font-normal text-ink/60">pts disponibles</span>
+                        </p>
+                        <p className="text-sm text-ink/70">{karma.lifetime} pts históricos</p>
+                      </div>
+                      <p className="text-sm font-semibold text-coral mt-1">{levelForKarma(karma.lifetime).name}</p>
+                      {showKarmaHistory && (
+                        <ul className="mt-3 space-y-2 max-h-64 overflow-y-auto">
+                          {karma.entries.map((e) => (
+                            <li key={e.id} className="text-xs border-t border-ink/10 pt-2">
+                              <div className="flex items-center justify-between gap-2">
+                                <span className="font-semibold truncate">{e.categoryName}</span>
+                                <span className="font-mono shrink-0">{e.points > 0 ? `+${e.points}` : e.points}</span>
+                              </div>
+                              <div className="flex items-center justify-between gap-2 text-ink/50">
+                                <span>{KARMA_ENTRY_STATUS_LABELS[e.status] ?? e.status}</span>
+                                <span>{new Date(e.created_at).toLocaleDateString()}</span>
+                              </div>
+                              {e.description && <p className="text-ink/60 mt-0.5">{e.description}</p>}
+                            </li>
+                          ))}
+                          {karma.entries.length === 0 && (
+                            <li className="text-xs text-ink/50 pt-2">Sin movimientos de karma.</li>
+                          )}
+                        </ul>
+                      )}
+                    </>
+                  )}
+                </div>
+
                 <div className="space-y-3 text-sm">
                   <InfoRow icon={<Mail className="h-4 w-4" />} label="Email" value={selected.email ?? "—"} />
                   <InfoRow icon={<Calendar className="h-4 w-4" />} label="Fecha de nacimiento" value={selected.date_of_birth} />
