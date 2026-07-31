@@ -6,7 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { toast } from "sonner";
-import { LayoutGrid, List, Search, Eye, CheckCircle2, XCircle, Mail, Calendar, User as UserIcon, IdCard, Shield } from "lucide-react";
+import { LayoutGrid, List, Search, Eye, CheckCircle2, XCircle, Mail, Calendar, User as UserIcon, IdCard, Shield, Sparkles } from "lucide-react";
+import { adminGetMemberKarma } from "@/lib/karma-admin.functions";
+import { levelForKarma, KARMA_ENTRY_STATUS_LABELS } from "@/lib/karma-levels";
 
 export const Route = createFileRoute("/admin/members")({
   component: MembersPage,
