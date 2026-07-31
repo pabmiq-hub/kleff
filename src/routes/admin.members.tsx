@@ -97,6 +97,13 @@ function MembersPage() {
   const openMember = (m: MemberRow) => {
     setSelectedId(m.id);
     setDni(null);
+    setKarma(null);
+    setShowKarmaHistory(false);
+    setKarmaLoading(true);
+    void memberKarmaFn({ data: { userId: m.id } })
+      .then((r) => setKarma(r as MemberKarma))
+      .catch(() => setKarma(null))
+      .finally(() => setKarmaLoading(false));
   };
 
   const handleRevealDni = async () => {
