@@ -53,7 +53,11 @@ type Category = {
   code: string;
   grp: string;
   name_es: string;
+  name_ca?: string | null;
+  name_en?: string | null;
   description_es: string | null;
+  description_ca?: string | null;
+  description_en?: string | null;
   points: number;
   points_min: number | null;
   points_max: number | null;
@@ -66,7 +70,11 @@ type Category = {
 type Reward = {
   id: string;
   name_es: string;
+  name_ca?: string | null;
+  name_en?: string | null;
   description_es: string | null;
+  description_ca?: string | null;
+  description_en?: string | null;
   cost: number;
   effect: string;
   effect_value: number | null;
