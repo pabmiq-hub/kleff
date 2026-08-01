@@ -38,6 +38,7 @@ function formatMemberNumber(n: number) {
 interface MemberKarma {
   balance: number;
   lifetime: number;
+  feeDiscountEuros: number;
   entries: {
     id: string;
     points: number;
@@ -378,6 +379,13 @@ function MembersPage() {
                         <p className="text-sm text-ink/70">{karma.lifetime} pts históricos</p>
                       </div>
                       <p className="text-sm font-semibold text-coral mt-1">{levelForKarma(karma.lifetime).name}</p>
+                      {karma.feeDiscountEuros > 0 && (
+                        <p className="text-sm mt-2 rounded-lg bg-coral/10 border border-coral/30 px-3 py-2">
+                          Vale de descuento de cuota acumulado:{" "}
+                          <strong>{karma.feeDiscountEuros} €</strong>{" "}
+                          <span className="text-ink/50">(50 pts = 1 €)</span>
+                        </p>
+                      )}
                       {showKarmaHistory && (
                         <ul className="mt-3 space-y-2 max-h-64 overflow-y-auto">
                           {karma.entries.map((e) => (

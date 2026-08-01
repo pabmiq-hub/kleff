@@ -33,7 +33,10 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Sparkles, Gift, Trophy, Plus, Loader2 } from "lucide-react";
+import { Sparkles, Gift, Trophy, Plus, Loader2, Users, Crown } from "lucide-react";
+import { ImagePicker } from "@/components/cms/ImagePicker";
+import { useI18n } from "@/i18n/I18nProvider";
+import { getMyReferrals, createMyReferral } from "@/lib/karma-referrals.functions";
 
 export const Route = createFileRoute("/app/karma")({
   head: () => ({
@@ -50,7 +53,11 @@ type Category = {
   code: string;
   grp: string;
   name_es: string;
+  name_ca?: string | null;
+  name_en?: string | null;
   description_es: string | null;
+  description_ca?: string | null;
+  description_en?: string | null;
   points: number;
   points_min: number | null;
   points_max: number | null;
@@ -63,7 +70,11 @@ type Category = {
 type Reward = {
   id: string;
   name_es: string;
+  name_ca?: string | null;
+  name_en?: string | null;
   description_es: string | null;
+  description_ca?: string | null;
+  description_en?: string | null;
   cost: number;
   effect: string;
   effect_value: number | null;
@@ -89,16 +100,29 @@ const STATUS_LABELS: Record<string, string> = {
 };
 
 function KarmaPage() {
+  const { locale } = useI18n();
+  const loc = <T extends Record<string, unknown>>(row: T, field: "name" | "description"): string => {
+    const v = (row[`${field}_${locale}` as keyof T] ?? row[`${field}_es` as keyof T]) as string | null;
+    return v ?? "";
+  };
+
   const loadMine = useServerFn(getMyKarma);
   const loadCatalog = useServerFn(getKarmaCatalog);
   const loadRanking = useServerFn(getKarmaRanking);
   const submitEntry = useServerFn(submitKarmaEntry);
   const redeem = useServerFn(redeemKarmaReward);
   const setOptIn = useServerFn(setKarmaRankingOptIn);
+  const loadReferrals = useServerFn(getMyReferrals);
+  const addReferral = useServerFn(createMyReferral);
 
   const [mine, setMine] = useState<Awaited<ReturnType<typeof getMyKarma>> | null>(null);
   const [catalog, setCatalog] = useState<{ categories: Category[]; rewards: Reward[]; season: { name: string; ends_on: string } | null } | null>(null);
   const [ranking, setRanking] = useState<{ userId: string; name: string; avatarUrl: string | null; points: number }[]>([]);
+  const [referrals, setReferrals] = useState<
+    { id: string; referred_name: string; signup_awarded: boolean; loyalty_awarded: boolean; note: string | null; created_at: string }[]
+  >([]);
+  const [referredName, setReferredName] = useState("");
+  const [referralNote, setReferralNote] = useState("");
   const [loading, setLoading] = useState(true);
 
   const [entryOpen, setEntryOpen] = useState(false);
@@ -111,15 +135,34 @@ function KarmaPage() {
   const [targetRental, setTargetRental] = useState("");
 
   const refresh = useCallback(async () => {
-    const [m, c, r] = await Promise.all([
+    const [m, c, r, ref] = await Promise.all([
       loadMine({ data: undefined as never }),
       loadCatalog({ data: undefined as never }),
       loadRanking({ data: undefined as never }),
+      loadReferrals({ data: undefined as never }),
     ]);
     setMine(m);
     setCatalog(c as never);
     setRanking(r.ranking);
-  }, [loadMine, loadCatalog, loadRanking]);
+    setReferrals(ref.referrals);
+  }, [loadMine, loadCatalog, loadRanking, loadReferrals]);
+
+  async function handleAddReferral() {
+    if (referredName.trim().length < 2) return;
+    setSaving(true);
+    try {
+      await addReferral({ data: { referredName: referredName.trim(), note: referralNote || undefined } });
+      toast.success("Referido registrado. El equipo lo validará.");
+      setReferredName("");
+      setReferralNote("");
+      await refresh();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "No se pudo registrar");
+    } finally {
+      setSaving(false);
+    }
+  }
+
 
   useEffect(() => {
     void refresh().finally(() => setLoading(false));
@@ -245,6 +288,7 @@ function KarmaPage() {
         <TabsList>
           <TabsTrigger value="catalogo">Cómo sumar</TabsTrigger>
           <TabsTrigger value="recompensas">Recompensas</TabsTrigger>
+          <TabsTrigger value="referidos">Referidos</TabsTrigger>
           <TabsTrigger value="historial">Mi historial</TabsTrigger>
           <TabsTrigger value="ranking">Ranking</TabsTrigger>
         </TabsList>
@@ -258,9 +302,9 @@ function KarmaPage() {
                   <div key={c.id} className="rounded-xl border border-ink/10 bg-white p-4">
                     <div className="flex items-start justify-between gap-3">
                       <div>
-                        <p className="font-semibold">{c.name_es}</p>
-                        {c.description_es ? (
-                          <p className="text-sm text-ink/60 mt-1">{c.description_es}</p>
+                        <p className="font-semibold">{loc(c, "name")}</p>
+                        {loc(c, "description") ? (
+                          <p className="text-sm text-ink/60 mt-1">{loc(c, "description")}</p>
                         ) : null}
                         <div className="flex flex-wrap gap-1.5 mt-2">
                           {c.limit_period !== "none" && c.limit_count ? (
@@ -297,9 +341,9 @@ function KarmaPage() {
               return (
                 <div key={r.id} className="rounded-2xl border border-ink/10 bg-white p-5 flex flex-col">
                   <Gift className="h-5 w-5 text-coral" />
-                  <p className="font-semibold mt-2">{r.name_es}</p>
-                  {r.description_es ? (
-                    <p className="text-sm text-ink/60 mt-1 flex-1">{r.description_es}</p>
+                  <p className="font-semibold mt-2">{loc(r, "name")}</p>
+                  {loc(r, "description") ? (
+                    <p className="text-sm text-ink/60 mt-1 flex-1">{loc(r, "description")}</p>
                   ) : (
                     <div className="flex-1" />
                   )}
@@ -321,6 +365,67 @@ function KarmaPage() {
             })}
           </div>
         </TabsContent>
+
+        <TabsContent value="referidos" className="space-y-4 pt-4">
+          <div className="rounded-2xl border border-ink/10 bg-white p-5">
+            <div className="flex items-center gap-2">
+              <Users className="h-5 w-5 text-coral" />
+              <h2 className="font-display text-lg font-bold">Trae a alguien nuevo</h2>
+            </div>
+            <p className="text-sm text-ink/60 mt-1">
+              Registra a quién has traído a KLEFF. El equipo lo valida: +15 pts cuando se da de alta y +10 pts
+              extra si sigue viniendo (fidelización).
+            </p>
+            <div className="grid gap-3 sm:grid-cols-[1fr_1fr_auto] items-end mt-4">
+              <div className="space-y-1.5">
+                <Label>Nombre del referido</Label>
+                <Input
+                  value={referredName}
+                  onChange={(e) => setReferredName(e.target.value)}
+                  placeholder="Nombre y apellido"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label>Nota (opcional)</Label>
+                <Input
+                  value={referralNote}
+                  onChange={(e) => setReferralNote(e.target.value)}
+                  placeholder="Cuándo vino, en qué evento…"
+                />
+              </div>
+              <Button onClick={handleAddReferral} disabled={saving || referredName.trim().length < 2}>
+                Registrar
+              </Button>
+            </div>
+          </div>
+
+          <div className="rounded-xl border border-ink/10 bg-white divide-y divide-ink/10">
+            {referrals.length === 0 ? (
+              <p className="p-4 text-sm text-ink/50">Todavía no has registrado referidos.</p>
+            ) : (
+              referrals.map((r) => (
+                <div key={r.id} className="p-4 flex items-start justify-between gap-3">
+                  <div>
+                    <p className="font-medium">{r.referred_name}</p>
+                    {r.note ? <p className="text-sm text-ink/60">{r.note}</p> : null}
+                    <p className="text-xs text-ink/40 mt-1">
+                      {new Date(r.created_at).toLocaleDateString("es-ES")}
+                    </p>
+                  </div>
+                  <div className="flex flex-wrap gap-1.5 justify-end">
+                    <Badge variant="secondary" className="text-[11px]">
+                      {r.signup_awarded ? "Alta +15 ✓" : "Alta pendiente"}
+                    </Badge>
+                    <Badge variant="secondary" className="text-[11px]">
+                      {r.loyalty_awarded ? "Fidelización +10 ✓" : "Fidelización pendiente"}
+                    </Badge>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </TabsContent>
+
 
         <TabsContent value="historial" className="space-y-6 pt-4">
           <section>
@@ -394,6 +499,22 @@ function KarmaPage() {
               Quiero aparecer en el ranking público de socios
             </Label>
           </div>
+          {ranking.length > 0 ? (
+            <div className="rounded-2xl border-2 border-coral/40 bg-coral/10 p-5 flex items-center gap-4">
+              {ranking[0].avatarUrl ? (
+                <img src={ranking[0].avatarUrl} alt="" className="h-14 w-14 rounded-full object-cover" />
+              ) : (
+                <div className="h-14 w-14 rounded-full bg-ink/10" />
+              )}
+              <div className="flex-1">
+                <p className="text-xs uppercase tracking-wide text-ink/60 font-semibold flex items-center gap-1.5">
+                  <Crown className="h-4 w-4 text-coral" /> Socio del mes
+                </p>
+                <p className="font-display text-2xl font-bold">{ranking[0].name}</p>
+              </div>
+              <span className="font-display text-2xl font-bold text-coral">{ranking[0].points} pts</span>
+            </div>
+          ) : null}
           <div className="rounded-xl border border-ink/10 bg-white divide-y divide-ink/10">
             {ranking.length === 0 ? (
               <p className="p-4 text-sm text-ink/50">Aún no hay puntuaciones este mes.</p>
@@ -448,7 +569,7 @@ function KarmaPage() {
                     .filter((c) => c.member_requestable)
                     .map((c) => (
                       <SelectItem key={c.id} value={c.id}>
-                        {c.name_es} (+{c.points})
+                        {loc(c, "name")} (+{c.points})
                       </SelectItem>
                     ))}
                 </SelectContent>
@@ -472,6 +593,13 @@ function KarmaPage() {
                 onChange={(e) => setEvidenceUrl(e.target.value)}
                 placeholder="Enlace a la publicación, reseña o foto"
               />
+              <p className="text-xs text-ink/50">O sube una imagen desde tu dispositivo:</p>
+              <ImagePicker
+                url={evidenceUrl && /^https?:\/\//.test(evidenceUrl) && /\.(png|jpe?g|webp|gif|avif)$/i.test(evidenceUrl) ? evidenceUrl : ""}
+                onChange={(u) => setEvidenceUrl(u)}
+                height="h-28"
+                label="Subir captura o foto"
+              />
             </div>
           </div>
           <DialogFooter>
@@ -489,7 +617,7 @@ function KarmaPage() {
       <Dialog open={!!rewardOpen} onOpenChange={(o) => !o && setRewardOpen(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Canjear {rewardOpen?.name_es}</DialogTitle>
+            <DialogTitle>Canjear {rewardOpen ? loc(rewardOpen, "name") : ""}</DialogTitle>
             <DialogDescription>
               Se descontarán {rewardOpen?.cost} puntos de tu saldo.
             </DialogDescription>

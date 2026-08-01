@@ -46,6 +46,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Loader2, Plus, Trash2, Check, X } from "lucide-react";
+import { adminListReferrals, adminAwardReferral, adminDeleteReferral } from "@/lib/karma-referrals.functions";
 
 export const Route = createFileRoute("/admin/karma")({
   head: () => ({
@@ -140,6 +141,9 @@ function AdminKarmaPage() {
   const saveSeason = useServerFn(adminSaveKarmaSeason);
   const closeSeason = useServerFn(adminCloseKarmaSeason);
   const loadUsers = useServerFn(listUsers);
+  const listReferrals = useServerFn(adminListReferrals);
+  const awardReferral = useServerFn(adminAwardReferral);
+  const removeReferral = useServerFn(adminDeleteReferral);
 
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState<"pending" | "approved" | "rejected" | "voided" | "all">("pending");
@@ -147,6 +151,7 @@ function AdminKarmaPage() {
   const [config, setConfig] = useState<{ categories: Cat[]; rewards: Rew[]; seasons: { id: string; name: string; starts_on: string; ends_on: string; carryover_max: number; is_active: boolean }[] }>({ categories: [], rewards: [], seasons: [] });
   const [redemptions, setRedemptions] = useState<Awaited<ReturnType<typeof adminListKarmaRedemptions>>["redemptions"]>([]);
   const [members, setMembers] = useState<{ id: string; full_name: string; member_number: number }[]>([]);
+  const [referrals, setReferrals] = useState<Awaited<ReturnType<typeof adminListReferrals>>["referrals"]>([]);
 
   const [catForm, setCatForm] = useState<typeof EMPTY_CAT | null>(null);
   const [rewForm, setRewForm] = useState<typeof EMPTY_REW | null>(null);
@@ -159,16 +164,18 @@ function AdminKarmaPage() {
 
   const refresh = useCallback(
     async (status = statusFilter) => {
-      const [e, c, r] = await Promise.all([
+      const [e, c, r, ref] = await Promise.all([
         listEntries({ data: { status } }),
         listConfig({ data: undefined as never }),
         listRedemptions({ data: undefined as never }),
+        listReferrals({ data: undefined as never }),
       ]);
       setEntries(e.entries);
       setConfig(c as never);
       setRedemptions(r.redemptions);
+      setReferrals(ref.referrals);
     },
-    [listEntries, listConfig, listRedemptions, statusFilter],
+    [listEntries, listConfig, listRedemptions, listReferrals, statusFilter],
   );
 
   useEffect(() => {
@@ -203,6 +210,7 @@ function AdminKarmaPage() {
   }
 
   const pendingCount = entries.filter((e) => e.status === "pending").length;
+  const pendingReferrals = referrals.filter((r) => !r.signup_awarded || !r.loyalty_awarded).length;
 
   return (
     <div className="space-y-6">
@@ -222,6 +230,9 @@ function AdminKarmaPage() {
             Contribuciones{pendingCount ? ` (${pendingCount})` : ""}
           </TabsTrigger>
           <TabsTrigger value="redemptions">Canjes</TabsTrigger>
+          <TabsTrigger value="referrals">
+            Referidos{pendingReferrals ? ` (${pendingReferrals})` : ""}
+          </TabsTrigger>
           <TabsTrigger value="categories">Baremo</TabsTrigger>
           <TabsTrigger value="rewards">Recompensas</TabsTrigger>
           <TabsTrigger value="seasons">Temporadas</TabsTrigger>
@@ -397,6 +408,63 @@ function AdminKarmaPage() {
         </TabsContent>
 
         {/* ---- Categories ---- */}
+        {/* ---- Referrals ---- */}
+        <TabsContent value="referrals" className="pt-4">
+          <div className="rounded-xl border border-ink/10 bg-white divide-y divide-ink/10">
+            {referrals.length === 0 ? (
+              <p className="p-4 text-sm text-ink/50">Todavía no hay referidos registrados.</p>
+            ) : (
+              referrals.map((r) => (
+                <div key={r.id} className="p-4 flex flex-wrap items-start justify-between gap-3">
+                  <div className="min-w-[220px]">
+                    <p className="font-medium">{r.referred_name}</p>
+                    <p className="text-sm text-ink/60">Referido por {r.referrerName}</p>
+                    {r.note ? <p className="text-sm text-ink/60">{r.note}</p> : null}
+                    <p className="text-xs text-ink/40 mt-1">
+                      {new Date(r.created_at).toLocaleDateString("es-ES")}
+                    </p>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    {r.signup_awarded ? (
+                      <Badge variant="secondary" className="text-[11px]">Alta +15 ✓</Badge>
+                    ) : (
+                      <Button
+                        size="sm"
+                        disabled={saving}
+                        onClick={() => run(() => awardReferral({ data: { id: r.id, kind: "signup" } }), "Alta validada (+15)")}
+                        className="gap-1"
+                      >
+                        <Check className="h-3.5 w-3.5" /> Validar alta (+15)
+                      </Button>
+                    )}
+                    {r.loyalty_awarded ? (
+                      <Badge variant="secondary" className="text-[11px]">Fidelización +10 ✓</Badge>
+                    ) : (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        disabled={saving || !r.signup_awarded}
+                        onClick={() => run(() => awardReferral({ data: { id: r.id, kind: "loyalty" } }), "Fidelización validada (+10)")}
+                        className="gap-1"
+                      >
+                        <Check className="h-3.5 w-3.5" /> Fidelización (+10)
+                      </Button>
+                    )}
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      disabled={saving}
+                      onClick={() => run(() => removeReferral({ data: { id: r.id } }), "Referido eliminado")}
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </Button>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </TabsContent>
+
         <TabsContent value="categories" className="space-y-3 pt-4">
           <Button variant="outline" className="gap-2" onClick={() => setCatForm({ ...EMPTY_CAT })}>
             <Plus className="h-4 w-4" /> Nueva categoría

@@ -637,9 +637,37 @@ export const adminGetMemberKarma = createServerFn({ method: "POST" })
     const { data: categories } = await supabaseAdmin.from("karma_categories").select("id, name_es");
     const catMap = new Map((categories ?? []).map((c) => [c.id, c.name_es]));
 
+    // Fee discount vouchers earned (50 pts = 1 €), not consumed and not expired
+    const { data: perks } = await supabaseAdmin
+      .from("karma_perks")
+      .select("value, expires_at, consumed_at, redemption_id")
+      .eq("user_id", data.userId)
+      .eq("kind", "fee_discount")
+      .is("consumed_at", null);
+    const nowMs = Date.now();
+    const validPerks = (perks ?? []).filter((p) => !p.expires_at || new Date(p.expires_at).getTime() > nowMs);
+    let feeDiscountEuros = 0;
+    if (validPerks.length > 0) {
+      const redIds = validPerks.map((p) => p.redemption_id).filter(Boolean) as string[];
+      let spentMap: Record<string, number> = {};
+      if (redIds.length > 0) {
+        const { data: reds } = await supabaseAdmin
+          .from("karma_redemptions")
+          .select("id, points_spent")
+          .in("id", redIds);
+        spentMap = Object.fromEntries((reds ?? []).map((r) => [r.id, r.points_spent ?? 0]));
+      }
+      feeDiscountEuros = validPerks.reduce((sum, p) => {
+        if (p.value && p.value > 0) return sum + p.value;
+        const spent = p.redemption_id ? (spentMap[p.redemption_id] ?? 0) : 0;
+        return sum + Math.floor(spent / 50);
+      }, 0);
+    }
+
     return {
       balance,
       lifetime,
+      feeDiscountEuros,
       entries: (entries ?? []).map((e) => ({
         ...e,
         categoryName: e.category_id ? (catMap.get(e.category_id) ?? "—") : "Ajuste manual",
