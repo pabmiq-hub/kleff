@@ -38,6 +38,7 @@ function formatMemberNumber(n: number) {
 interface MemberKarma {
   balance: number;
   lifetime: number;
+  feeDiscountEuros: number;
   entries: {
     id: string;
     points: number;
