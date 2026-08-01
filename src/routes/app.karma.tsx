@@ -33,7 +33,10 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Sparkles, Gift, Trophy, Plus, Loader2 } from "lucide-react";
+import { Sparkles, Gift, Trophy, Plus, Loader2, Users, Crown } from "lucide-react";
+import { ImagePicker } from "@/components/cms/ImagePicker";
+import { useI18n } from "@/i18n/I18nProvider";
+import { getMyReferrals, createMyReferral } from "@/lib/karma-referrals.functions";
 
 export const Route = createFileRoute("/app/karma")({
   head: () => ({
