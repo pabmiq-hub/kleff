@@ -288,6 +288,7 @@ function KarmaPage() {
         <TabsList>
           <TabsTrigger value="catalogo">Cómo sumar</TabsTrigger>
           <TabsTrigger value="recompensas">Recompensas</TabsTrigger>
+          <TabsTrigger value="referidos">Referidos</TabsTrigger>
           <TabsTrigger value="historial">Mi historial</TabsTrigger>
           <TabsTrigger value="ranking">Ranking</TabsTrigger>
         </TabsList>
@@ -301,9 +302,9 @@ function KarmaPage() {
                   <div key={c.id} className="rounded-xl border border-ink/10 bg-white p-4">
                     <div className="flex items-start justify-between gap-3">
                       <div>
-                        <p className="font-semibold">{c.name_es}</p>
-                        {c.description_es ? (
-                          <p className="text-sm text-ink/60 mt-1">{c.description_es}</p>
+                        <p className="font-semibold">{loc(c, "name")}</p>
+                        {loc(c, "description") ? (
+                          <p className="text-sm text-ink/60 mt-1">{loc(c, "description")}</p>
                         ) : null}
                         <div className="flex flex-wrap gap-1.5 mt-2">
                           {c.limit_period !== "none" && c.limit_count ? (
@@ -340,9 +341,9 @@ function KarmaPage() {
               return (
                 <div key={r.id} className="rounded-2xl border border-ink/10 bg-white p-5 flex flex-col">
                   <Gift className="h-5 w-5 text-coral" />
-                  <p className="font-semibold mt-2">{r.name_es}</p>
-                  {r.description_es ? (
-                    <p className="text-sm text-ink/60 mt-1 flex-1">{r.description_es}</p>
+                  <p className="font-semibold mt-2">{loc(r, "name")}</p>
+                  {loc(r, "description") ? (
+                    <p className="text-sm text-ink/60 mt-1 flex-1">{loc(r, "description")}</p>
                   ) : (
                     <div className="flex-1" />
                   )}
@@ -491,7 +492,7 @@ function KarmaPage() {
                     .filter((c) => c.member_requestable)
                     .map((c) => (
                       <SelectItem key={c.id} value={c.id}>
-                        {c.name_es} (+{c.points})
+                        {loc(c, "name")} (+{c.points})
                       </SelectItem>
                     ))}
                 </SelectContent>
@@ -532,7 +533,7 @@ function KarmaPage() {
       <Dialog open={!!rewardOpen} onOpenChange={(o) => !o && setRewardOpen(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Canjear {rewardOpen?.name_es}</DialogTitle>
+            <DialogTitle>Canjear {rewardOpen ? loc(rewardOpen, "name") : ""}</DialogTitle>
             <DialogDescription>
               Se descontarán {rewardOpen?.cost} puntos de tu saldo.
             </DialogDescription>
