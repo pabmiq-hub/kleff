@@ -499,6 +499,22 @@ function KarmaPage() {
               Quiero aparecer en el ranking público de socios
             </Label>
           </div>
+          {ranking.length > 0 ? (
+            <div className="rounded-2xl border-2 border-coral/40 bg-coral/10 p-5 flex items-center gap-4">
+              {ranking[0].avatarUrl ? (
+                <img src={ranking[0].avatarUrl} alt="" className="h-14 w-14 rounded-full object-cover" />
+              ) : (
+                <div className="h-14 w-14 rounded-full bg-ink/10" />
+              )}
+              <div className="flex-1">
+                <p className="text-xs uppercase tracking-wide text-ink/60 font-semibold flex items-center gap-1.5">
+                  <Crown className="h-4 w-4 text-coral" /> Socio del mes
+                </p>
+                <p className="font-display text-2xl font-bold">{ranking[0].name}</p>
+              </div>
+              <span className="font-display text-2xl font-bold text-coral">{ranking[0].points} pts</span>
+            </div>
+          ) : null}
           <div className="rounded-xl border border-ink/10 bg-white divide-y divide-ink/10">
             {ranking.length === 0 ? (
               <p className="p-4 text-sm text-ink/50">Aún no hay puntuaciones este mes.</p>
@@ -576,6 +592,13 @@ function KarmaPage() {
                 value={evidenceUrl}
                 onChange={(e) => setEvidenceUrl(e.target.value)}
                 placeholder="Enlace a la publicación, reseña o foto"
+              />
+              <p className="text-xs text-ink/50">O sube una imagen desde tu dispositivo:</p>
+              <ImagePicker
+                url={evidenceUrl && /^https?:\/\//.test(evidenceUrl) && /\.(png|jpe?g|webp|gif|avif)$/i.test(evidenceUrl) ? evidenceUrl : ""}
+                onChange={(u) => setEvidenceUrl(u)}
+                height="h-28"
+                label="Subir captura o foto"
               />
             </div>
           </div>
