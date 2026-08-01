@@ -100,16 +100,29 @@ const STATUS_LABELS: Record<string, string> = {
 };
 
 function KarmaPage() {
+  const { locale } = useI18n();
+  const loc = <T extends Record<string, unknown>>(row: T, field: "name" | "description"): string => {
+    const v = (row[`${field}_${locale}` as keyof T] ?? row[`${field}_es` as keyof T]) as string | null;
+    return v ?? "";
+  };
+
   const loadMine = useServerFn(getMyKarma);
   const loadCatalog = useServerFn(getKarmaCatalog);
   const loadRanking = useServerFn(getKarmaRanking);
   const submitEntry = useServerFn(submitKarmaEntry);
   const redeem = useServerFn(redeemKarmaReward);
   const setOptIn = useServerFn(setKarmaRankingOptIn);
+  const loadReferrals = useServerFn(getMyReferrals);
+  const addReferral = useServerFn(createMyReferral);
 
   const [mine, setMine] = useState<Awaited<ReturnType<typeof getMyKarma>> | null>(null);
   const [catalog, setCatalog] = useState<{ categories: Category[]; rewards: Reward[]; season: { name: string; ends_on: string } | null } | null>(null);
   const [ranking, setRanking] = useState<{ userId: string; name: string; avatarUrl: string | null; points: number }[]>([]);
+  const [referrals, setReferrals] = useState<
+    { id: string; referred_name: string; signup_awarded: boolean; loyalty_awarded: boolean; note: string | null; created_at: string }[]
+  >([]);
+  const [referredName, setReferredName] = useState("");
+  const [referralNote, setReferralNote] = useState("");
   const [loading, setLoading] = useState(true);
 
   const [entryOpen, setEntryOpen] = useState(false);
@@ -122,15 +135,34 @@ function KarmaPage() {
   const [targetRental, setTargetRental] = useState("");
 
   const refresh = useCallback(async () => {
-    const [m, c, r] = await Promise.all([
+    const [m, c, r, ref] = await Promise.all([
       loadMine({ data: undefined as never }),
       loadCatalog({ data: undefined as never }),
       loadRanking({ data: undefined as never }),
+      loadReferrals({ data: undefined as never }),
     ]);
     setMine(m);
     setCatalog(c as never);
     setRanking(r.ranking);
-  }, [loadMine, loadCatalog, loadRanking]);
+    setReferrals(ref.referrals);
+  }, [loadMine, loadCatalog, loadRanking, loadReferrals]);
+
+  async function handleAddReferral() {
+    if (referredName.trim().length < 2) return;
+    setSaving(true);
+    try {
+      await addReferral({ data: { referredName: referredName.trim(), note: referralNote || undefined } });
+      toast.success("Referido registrado. El equipo lo validará.");
+      setReferredName("");
+      setReferralNote("");
+      await refresh();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "No se pudo registrar");
+    } finally {
+      setSaving(false);
+    }
+  }
+
 
   useEffect(() => {
     void refresh().finally(() => setLoading(false));
