@@ -366,6 +366,67 @@ function KarmaPage() {
           </div>
         </TabsContent>
 
+        <TabsContent value="referidos" className="space-y-4 pt-4">
+          <div className="rounded-2xl border border-ink/10 bg-white p-5">
+            <div className="flex items-center gap-2">
+              <Users className="h-5 w-5 text-coral" />
+              <h2 className="font-display text-lg font-bold">Trae a alguien nuevo</h2>
+            </div>
+            <p className="text-sm text-ink/60 mt-1">
+              Registra a quién has traído a KLEFF. El equipo lo valida: +15 pts cuando se da de alta y +10 pts
+              extra si sigue viniendo (fidelización).
+            </p>
+            <div className="grid gap-3 sm:grid-cols-[1fr_1fr_auto] items-end mt-4">
+              <div className="space-y-1.5">
+                <Label>Nombre del referido</Label>
+                <Input
+                  value={referredName}
+                  onChange={(e) => setReferredName(e.target.value)}
+                  placeholder="Nombre y apellido"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label>Nota (opcional)</Label>
+                <Input
+                  value={referralNote}
+                  onChange={(e) => setReferralNote(e.target.value)}
+                  placeholder="Cuándo vino, en qué evento…"
+                />
+              </div>
+              <Button onClick={handleAddReferral} disabled={saving || referredName.trim().length < 2}>
+                Registrar
+              </Button>
+            </div>
+          </div>
+
+          <div className="rounded-xl border border-ink/10 bg-white divide-y divide-ink/10">
+            {referrals.length === 0 ? (
+              <p className="p-4 text-sm text-ink/50">Todavía no has registrado referidos.</p>
+            ) : (
+              referrals.map((r) => (
+                <div key={r.id} className="p-4 flex items-start justify-between gap-3">
+                  <div>
+                    <p className="font-medium">{r.referred_name}</p>
+                    {r.note ? <p className="text-sm text-ink/60">{r.note}</p> : null}
+                    <p className="text-xs text-ink/40 mt-1">
+                      {new Date(r.created_at).toLocaleDateString("es-ES")}
+                    </p>
+                  </div>
+                  <div className="flex flex-wrap gap-1.5 justify-end">
+                    <Badge variant="secondary" className="text-[11px]">
+                      {r.signup_awarded ? "Alta +15 ✓" : "Alta pendiente"}
+                    </Badge>
+                    <Badge variant="secondary" className="text-[11px]">
+                      {r.loyalty_awarded ? "Fidelización +10 ✓" : "Fidelización pendiente"}
+                    </Badge>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </TabsContent>
+
+
         <TabsContent value="historial" className="space-y-6 pt-4">
           <section>
             <h2 className="font-display text-lg font-bold mb-2">Contribuciones</h2>
