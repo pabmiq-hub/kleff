@@ -958,70 +958,8 @@ function AdminKarmaPage() {
         </DialogContent>
       </Dialog>
 
-      {/* Close season dialog */}
-      <Dialog open={!!seasonForm} onOpenChange={(o) => !o && setSeasonForm(null)}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Cerrar {seasonForm?.name}</DialogTitle>
-          </DialogHeader>
-          {seasonForm ? (
-            <div className="space-y-3">
-              <div className="space-y-1.5">
-                <Label>Nombre de la nueva temporada</Label>
-                <Input
-                  value={seasonForm.nextName}
-                  onChange={(e) => setSeasonForm({ ...seasonForm, nextName: e.target.value })}
-                />
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1.5">
-                  <Label>Inicio</Label>
-                  <Input
-                    type="date"
-                    value={seasonForm.nextStartsOn}
-                    onChange={(e) => setSeasonForm({ ...seasonForm, nextStartsOn: e.target.value })}
-                  />
-                </div>
-                <div className="space-y-1.5">
-                  <Label>Fin</Label>
-                  <Input
-                    type="date"
-                    value={seasonForm.nextEndsOn}
-                    onChange={(e) => setSeasonForm({ ...seasonForm, nextEndsOn: e.target.value })}
-                  />
-                </div>
-              </div>
-              <p className="text-xs text-ink/50">
-                Al cerrar, cada socio conserva como máximo el remanente configurado y recibe una notificación.
-              </p>
-            </div>
-          ) : null}
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setSeasonForm(null)}>
-              Cancelar
-            </Button>
-            <Button
-              disabled={saving || !seasonForm?.nextName || !seasonForm?.nextStartsOn || !seasonForm?.nextEndsOn}
-              onClick={() =>
-                seasonForm &&
-                run(async () => {
-                  await closeSeason({
-                    data: {
-                      seasonId: seasonForm.id,
-                      nextName: seasonForm.nextName,
-                      nextStartsOn: seasonForm.nextStartsOn,
-                      nextEndsOn: seasonForm.nextEndsOn,
-                    },
-                  });
-                  setSeasonForm(null);
-                }, "Temporada cerrada")
-              }
-            >
-              Cerrar temporada
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+
+
     </div>
   );
 }
