@@ -164,24 +164,27 @@ function AdminKarmaPage() {
   const [grantUser, setGrantUser] = useState("");
   const [grantPoints, setGrantPoints] = useState(10);
   const [grantDesc, setGrantDesc] = useState("");
-  const [seasonForm, setSeasonForm] = useState<{ id: string; name: string; nextName: string; nextStartsOn: string; nextEndsOn: string } | null>(null);
   const [saving, setSaving] = useState(false);
 
   const refresh = useCallback(
     async (status = statusFilter) => {
-      const [e, c, r, ref] = await Promise.all([
+      const [e, c, r, ref, cy] = await Promise.all([
         listEntries({ data: { status } }),
         listConfig({ data: undefined as never }),
         listRedemptions({ data: undefined as never }),
         listReferrals({ data: undefined as never }),
+        listCycles({ data: undefined as never }),
       ]);
       setEntries(e.entries);
       setConfig(c as never);
+      setCarryoverInput(c.carryoverMax);
       setRedemptions(r.redemptions);
       setReferrals(ref.referrals);
+      setCycles(cy.cycles);
     },
-    [listEntries, listConfig, listRedemptions, listReferrals, statusFilter],
+    [listEntries, listConfig, listRedemptions, listReferrals, listCycles, statusFilter],
   );
+
 
   useEffect(() => {
     void Promise.all([
