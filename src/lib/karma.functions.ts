@@ -98,7 +98,15 @@ export const getMyKarma = createServerFn({ method: "POST" })
     return {
       balance,
       lifetime,
+      cycle: {
+        index: cycle.cycleIndex,
+        startsAt: cycle.startsAt,
+        endsAt: cycle.endsAt,
+        carryoverIn: cycle.carryoverIn,
+        carryoverMax,
+      },
       rankingOptIn: profile?.karma_ranking_opt_in ?? true,
+
       entries: (entries ?? []).map((e) => ({
         ...e,
         categoryName: e.category_id ? (catMap.get(e.category_id)?.name_es ?? "—") : "Ajuste manual",
