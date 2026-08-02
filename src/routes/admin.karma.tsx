@@ -14,8 +14,9 @@ import {
   adminDeleteKarmaReward,
   adminListKarmaRedemptions,
   adminDecideKarmaRedemption,
-  adminSaveKarmaSeason,
-  adminCloseKarmaSeason,
+  adminSaveKarmaSettings,
+  adminListKarmaCycles,
+
 } from "@/lib/karma-admin.functions";
 import { listUsers } from "@/lib/admin.functions";
 import {
