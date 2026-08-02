@@ -216,13 +216,18 @@ export const adminListKarmaConfig = createServerFn({ method: "POST" })
     const { assertSuperAdmin } = await import("@/lib/assert-role.server");
     await assertSuperAdmin(context.userId);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const [{ data: categories }, { data: rewards }, { data: seasons }] = await Promise.all([
+    const [{ data: categories }, { data: rewards }, { data: settings }] = await Promise.all([
       supabaseAdmin.from("karma_categories").select("*").order("sort_order", { ascending: true }),
       supabaseAdmin.from("karma_rewards").select("*").order("sort_order", { ascending: true }),
-      supabaseAdmin.from("karma_seasons").select("*").order("starts_on", { ascending: false }),
+      supabaseAdmin.from("karma_settings").select("carryover_max").eq("id", true).maybeSingle(),
     ]);
-    return { categories: categories ?? [], rewards: rewards ?? [], seasons: seasons ?? [] };
+    return {
+      categories: categories ?? [],
+      rewards: rewards ?? [],
+      carryoverMax: settings?.carryover_max ?? 30,
+    };
   });
+
 
 export const adminSaveKarmaCategory = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
