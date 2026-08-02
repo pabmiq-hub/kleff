@@ -249,8 +249,11 @@ function KarmaPage() {
           <h1 className="font-display text-4xl font-bold">Karma</h1>
           <p className="text-ink/60 mt-1">
             Suma puntos por cuidar la comunidad y cámbialos por ventajas.
-            {catalog?.season ? ` Temporada: ${catalog.season.name}.` : ""}
+            {mine?.cycle
+              ? ` Tu año de Karma ${mine.cycle.index} termina el ${new Date(mine.cycle.endsAt).toLocaleDateString("es-ES")} (se conservan hasta ${mine.cycle.carryoverMax} pts).`
+              : ""}
           </p>
+
         </div>
         <Button onClick={() => setEntryOpen(true)} className="gap-2">
           <Plus className="h-4 w-4" /> Registrar contribución

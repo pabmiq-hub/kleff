@@ -14,8 +14,9 @@ import {
   adminDeleteKarmaReward,
   adminListKarmaRedemptions,
   adminDecideKarmaRedemption,
-  adminSaveKarmaSeason,
-  adminCloseKarmaSeason,
+  adminSaveKarmaSettings,
+  adminListKarmaCycles,
+
 } from "@/lib/karma-admin.functions";
 import { listUsers } from "@/lib/admin.functions";
 import {
@@ -138,8 +139,9 @@ function AdminKarmaPage() {
   const deleteReward = useServerFn(adminDeleteKarmaReward);
   const listRedemptions = useServerFn(adminListKarmaRedemptions);
   const decideRedemption = useServerFn(adminDecideKarmaRedemption);
-  const saveSeason = useServerFn(adminSaveKarmaSeason);
-  const closeSeason = useServerFn(adminCloseKarmaSeason);
+  const saveSettings = useServerFn(adminSaveKarmaSettings);
+  const listCycles = useServerFn(adminListKarmaCycles);
+
   const loadUsers = useServerFn(listUsers);
   const listReferrals = useServerFn(adminListReferrals);
   const awardReferral = useServerFn(adminAwardReferral);
@@ -148,7 +150,10 @@ function AdminKarmaPage() {
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState<"pending" | "approved" | "rejected" | "voided" | "all">("pending");
   const [entries, setEntries] = useState<Awaited<ReturnType<typeof adminListKarmaEntries>>["entries"]>([]);
-  const [config, setConfig] = useState<{ categories: Cat[]; rewards: Rew[]; seasons: { id: string; name: string; starts_on: string; ends_on: string; carryover_max: number; is_active: boolean }[] }>({ categories: [], rewards: [], seasons: [] });
+  const [config, setConfig] = useState<{ categories: Cat[]; rewards: Rew[]; carryoverMax: number }>({ categories: [], rewards: [], carryoverMax: 30 });
+  const [cycles, setCycles] = useState<Awaited<ReturnType<typeof adminListKarmaCycles>>["cycles"]>([]);
+  const [carryoverInput, setCarryoverInput] = useState(30);
+
   const [redemptions, setRedemptions] = useState<Awaited<ReturnType<typeof adminListKarmaRedemptions>>["redemptions"]>([]);
   const [members, setMembers] = useState<{ id: string; full_name: string; member_number: number }[]>([]);
   const [referrals, setReferrals] = useState<Awaited<ReturnType<typeof adminListReferrals>>["referrals"]>([]);
@@ -159,24 +164,27 @@ function AdminKarmaPage() {
   const [grantUser, setGrantUser] = useState("");
   const [grantPoints, setGrantPoints] = useState(10);
   const [grantDesc, setGrantDesc] = useState("");
-  const [seasonForm, setSeasonForm] = useState<{ id: string; name: string; nextName: string; nextStartsOn: string; nextEndsOn: string } | null>(null);
   const [saving, setSaving] = useState(false);
 
   const refresh = useCallback(
     async (status = statusFilter) => {
-      const [e, c, r, ref] = await Promise.all([
+      const [e, c, r, ref, cy] = await Promise.all([
         listEntries({ data: { status } }),
         listConfig({ data: undefined as never }),
         listRedemptions({ data: undefined as never }),
         listReferrals({ data: undefined as never }),
+        listCycles({ data: undefined as never }),
       ]);
       setEntries(e.entries);
       setConfig(c as never);
+      setCarryoverInput(c.carryoverMax);
       setRedemptions(r.redemptions);
       setReferrals(ref.referrals);
+      setCycles(cy.cycles);
     },
-    [listEntries, listConfig, listRedemptions, listReferrals, statusFilter],
+    [listEntries, listConfig, listRedemptions, listReferrals, listCycles, statusFilter],
   );
+
 
   useEffect(() => {
     void Promise.all([
@@ -235,7 +243,7 @@ function AdminKarmaPage() {
           </TabsTrigger>
           <TabsTrigger value="categories">Baremo</TabsTrigger>
           <TabsTrigger value="rewards">Recompensas</TabsTrigger>
-          <TabsTrigger value="seasons">Temporadas</TabsTrigger>
+          <TabsTrigger value="seasons">Ciclos</TabsTrigger>
         </TabsList>
 
         {/* ---- Entries ---- */}
@@ -582,65 +590,59 @@ function AdminKarmaPage() {
           </div>
         </TabsContent>
 
-        {/* ---- Seasons ---- */}
-        <TabsContent value="seasons" className="space-y-3 pt-4">
-          <div className="rounded-xl border border-ink/10 bg-white divide-y divide-ink/10">
-            {config.seasons.map((s) => (
-              <div key={s.id} className="p-4 flex flex-wrap items-center justify-between gap-3">
-                <div>
-                  <p className="font-medium">
-                    {s.name} {s.is_active ? <Badge className="ml-1">Activa</Badge> : null}
-                  </p>
-                  <p className="text-xs text-ink/50">
-                    {s.starts_on} → {s.ends_on} · remanente máx. {s.carryover_max} pts
-                  </p>
-                </div>
-                <div className="flex gap-2">
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() =>
-                      void run(
-                        () =>
-                          saveSeason({
-                            data: {
-                              id: s.id,
-                              name: s.name,
-                              startsOn: s.starts_on,
-                              endsOn: s.ends_on,
-                              carryoverMax: s.carryover_max,
-                              isActive: true,
-                            },
-                          }),
-                        "Temporada activada",
-                      )
-                    }
-                    disabled={s.is_active}
-                  >
-                    Activar
-                  </Button>
-                  {s.is_active ? (
-                    <Button
-                      size="sm"
-                      onClick={() =>
-                        setSeasonForm({
-                          id: s.id,
-                          name: s.name,
-                          nextName: "",
-                          nextStartsOn: "",
-                          nextEndsOn: "",
-                        })
-                      }
-                    >
-                      Cerrar temporada
-                    </Button>
-                  ) : null}
-                </div>
+        {/* ---- Cycles ---- */}
+        <TabsContent value="seasons" className="space-y-4 pt-4">
+          <div className="rounded-xl border border-ink/10 bg-white p-4 space-y-3">
+            <div>
+              <p className="font-medium">Ciclos individuales</p>
+              <p className="text-xs text-ink/50">
+                Cada socio tiene su propio año de Karma, que empieza el día de su alta y se renueva en su
+                aniversario. Al renovarse conserva como máximo el remanente configurado.
+              </p>
+            </div>
+            <div className="flex flex-wrap items-end gap-3">
+              <div className="space-y-1.5">
+                <Label>Remanente máximo (pts)</Label>
+                <Input
+                  type="number"
+                  min={0}
+                  className="w-40"
+                  value={carryoverInput}
+                  onChange={(e) => setCarryoverInput(Number(e.target.value))}
+                />
               </div>
-            ))}
+              <Button
+                disabled={saving}
+                onClick={() => void run(() => saveSettings({ data: { carryoverMax: carryoverInput } }), "Ajustes guardados")}
+              >
+                Guardar
+              </Button>
+            </div>
+          </div>
+
+          <div className="rounded-xl border border-ink/10 bg-white divide-y divide-ink/10">
+            {cycles.length === 0 ? (
+              <p className="p-4 text-sm text-ink/50">Sin socios todavía.</p>
+            ) : (
+              cycles.map((c) => (
+                <div key={c.userId} className="p-4 flex flex-wrap items-center justify-between gap-3">
+                  <div>
+                    <p className="font-medium">
+                      {c.name} <Badge variant="secondary" className="ml-1">Año {c.cycleIndex}</Badge>
+                    </p>
+                    <p className="text-xs text-ink/50">
+                      {new Date(c.startsAt).toLocaleDateString("es-ES")} →{" "}
+                      {new Date(c.endsAt).toLocaleDateString("es-ES")} · remanente heredado {c.carryoverIn} pts
+                    </p>
+                  </div>
+                  <p className="text-sm font-medium">{c.balance} pts</p>
+                </div>
+              ))
+            )}
           </div>
         </TabsContent>
       </Tabs>
+
 
       {/* Category dialog */}
       <Dialog open={!!catForm} onOpenChange={(o) => !o && setCatForm(null)}>
@@ -959,70 +961,8 @@ function AdminKarmaPage() {
         </DialogContent>
       </Dialog>
 
-      {/* Close season dialog */}
-      <Dialog open={!!seasonForm} onOpenChange={(o) => !o && setSeasonForm(null)}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Cerrar {seasonForm?.name}</DialogTitle>
-          </DialogHeader>
-          {seasonForm ? (
-            <div className="space-y-3">
-              <div className="space-y-1.5">
-                <Label>Nombre de la nueva temporada</Label>
-                <Input
-                  value={seasonForm.nextName}
-                  onChange={(e) => setSeasonForm({ ...seasonForm, nextName: e.target.value })}
-                />
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1.5">
-                  <Label>Inicio</Label>
-                  <Input
-                    type="date"
-                    value={seasonForm.nextStartsOn}
-                    onChange={(e) => setSeasonForm({ ...seasonForm, nextStartsOn: e.target.value })}
-                  />
-                </div>
-                <div className="space-y-1.5">
-                  <Label>Fin</Label>
-                  <Input
-                    type="date"
-                    value={seasonForm.nextEndsOn}
-                    onChange={(e) => setSeasonForm({ ...seasonForm, nextEndsOn: e.target.value })}
-                  />
-                </div>
-              </div>
-              <p className="text-xs text-ink/50">
-                Al cerrar, cada socio conserva como máximo el remanente configurado y recibe una notificación.
-              </p>
-            </div>
-          ) : null}
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setSeasonForm(null)}>
-              Cancelar
-            </Button>
-            <Button
-              disabled={saving || !seasonForm?.nextName || !seasonForm?.nextStartsOn || !seasonForm?.nextEndsOn}
-              onClick={() =>
-                seasonForm &&
-                run(async () => {
-                  await closeSeason({
-                    data: {
-                      seasonId: seasonForm.id,
-                      nextName: seasonForm.nextName,
-                      nextStartsOn: seasonForm.nextStartsOn,
-                      nextEndsOn: seasonForm.nextEndsOn,
-                    },
-                  });
-                  setSeasonForm(null);
-                }, "Temporada cerrada")
-              }
-            >
-              Cerrar temporada
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+
+
     </div>
   );
 }

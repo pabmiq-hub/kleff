@@ -1027,6 +1027,66 @@ export type Database = {
         }
         Relationships: []
       }
+      karma_settings: {
+        Row: {
+          carryover_max: number
+          id: boolean
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          carryover_max?: number
+          id?: boolean
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          carryover_max?: number
+          id?: boolean
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
+      karma_user_cycles: {
+        Row: {
+          carryover_in: number
+          closed_at: string | null
+          created_at: string
+          cycle_index: number
+          ends_at: string
+          id: string
+          points_at_close: number | null
+          starts_at: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          carryover_in?: number
+          closed_at?: string | null
+          created_at?: string
+          cycle_index?: number
+          ends_at: string
+          id?: string
+          points_at_close?: number | null
+          starts_at: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          carryover_in?: number
+          closed_at?: string | null
+          created_at?: string
+          cycle_index?: number
+          ends_at?: string
+          id?: string
+          points_at_close?: number | null
+          starts_at?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       kv_cache: {
         Row: {
           fetched_at: string

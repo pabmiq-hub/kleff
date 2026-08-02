@@ -216,13 +216,18 @@ export const adminListKarmaConfig = createServerFn({ method: "POST" })
     const { assertSuperAdmin } = await import("@/lib/assert-role.server");
     await assertSuperAdmin(context.userId);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const [{ data: categories }, { data: rewards }, { data: seasons }] = await Promise.all([
+    const [{ data: categories }, { data: rewards }, { data: settings }] = await Promise.all([
       supabaseAdmin.from("karma_categories").select("*").order("sort_order", { ascending: true }),
       supabaseAdmin.from("karma_rewards").select("*").order("sort_order", { ascending: true }),
-      supabaseAdmin.from("karma_seasons").select("*").order("starts_on", { ascending: false }),
+      supabaseAdmin.from("karma_settings").select("carryover_max").eq("id", true).maybeSingle(),
     ]);
-    return { categories: categories ?? [], rewards: rewards ?? [], seasons: seasons ?? [] };
+    return {
+      categories: categories ?? [],
+      rewards: rewards ?? [],
+      carryoverMax: settings?.carryover_max ?? 30,
+    };
   });
+
 
 export const adminSaveKarmaCategory = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -489,132 +494,67 @@ export const adminDecideKarmaRedemption = createServerFn({ method: "POST" })
     return { success: true };
   });
 
-// ---------------- Admin: seasons ----------------
+// ---------------- Admin: per-member karma cycles ----------------
 
-export const adminSaveKarmaSeason = createServerFn({ method: "POST" })
+export const adminSaveKarmaSettings = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) =>
-    z
-      .object({
-        id: z.string().uuid().nullable().optional(),
-        name: z.string().min(2).max(120),
-        startsOn: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
-        endsOn: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
-        carryoverMax: z.number().int().min(0).max(1000),
-        isActive: z.boolean(),
-      })
-      .parse(input),
+    z.object({ carryoverMax: z.number().int().min(0).max(1000) }).parse(input),
   )
   .handler(async ({ data, context }) => {
     const { assertSuperAdmin } = await import("@/lib/assert-role.server");
     await assertSuperAdmin(context.userId);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-
-    const row = {
-      name: data.name,
-      starts_on: data.startsOn,
-      ends_on: data.endsOn,
-      carryover_max: data.carryoverMax,
-      is_active: data.isActive,
-    };
-
-    let seasonId = data.id ?? null;
-    if (seasonId) {
-      const { error } = await supabaseAdmin.from("karma_seasons").update(row).eq("id", seasonId);
-      if (error) throw new Error(error.message);
-    } else {
-      const { data: created, error } = await supabaseAdmin.from("karma_seasons").insert(row).select("id").single();
-      if (error) throw new Error(error.message);
-      seasonId = created.id;
-    }
-
-    if (data.isActive && seasonId) {
-      await supabaseAdmin.from("karma_seasons").update({ is_active: false }).neq("id", seasonId);
-    }
-    return { success: true, id: seasonId };
+    const { error } = await supabaseAdmin
+      .from("karma_settings")
+      .upsert({ id: true, carryover_max: data.carryoverMax, updated_by: context.userId });
+    if (error) throw new Error(error.message);
+    return { success: true };
   });
 
-export const adminCloseKarmaSeason = createServerFn({ method: "POST" })
+/** Lists every member with their current karma cycle window and balance. */
+export const adminListKarmaCycles = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) =>
-    z
-      .object({
-        seasonId: z.string().uuid(),
-        nextName: z.string().min(2).max(120),
-        nextStartsOn: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
-        nextEndsOn: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
-      })
-      .parse(input),
-  )
-  .handler(async ({ data, context }) => {
+  .handler(async ({ context }) => {
     const { assertSuperAdmin } = await import("@/lib/assert-role.server");
     await assertSuperAdmin(context.userId);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { karmaBalance, notifyUser } = await import("@/lib/karma.server");
+    const { ensureUserCycle, karmaBalance } = await import("@/lib/karma.server");
 
-    const { data: season } = await supabaseAdmin
-      .from("karma_seasons")
-      .select("*")
-      .eq("id", data.seasonId)
-      .maybeSingle();
-    if (!season) throw new Error("Temporada no encontrada");
+    const { data: profiles } = await supabaseAdmin
+      .from("profiles")
+      .select("id, full_name, username, created_at")
+      .order("created_at", { ascending: true });
 
-    // Create the next season and make it active
-    const { data: next, error: nextErr } = await supabaseAdmin
-      .from("karma_seasons")
-      .insert({
-        name: data.nextName,
-        starts_on: data.nextStartsOn,
-        ends_on: data.nextEndsOn,
-        carryover_max: season.carryover_max,
-        is_active: true,
-      })
-      .select("id")
-      .single();
-    if (nextErr) throw new Error(nextErr.message);
+    const rows: {
+      userId: string;
+      name: string;
+      signupAt: string;
+      cycleIndex: number;
+      startsAt: string;
+      endsAt: string;
+      carryoverIn: number;
+      balance: number;
+    }[] = [];
 
-    await supabaseAdmin
-      .from("karma_seasons")
-      .update({ is_active: false, closed_at: new Date().toISOString() })
-      .eq("id", season.id);
-    await supabaseAdmin.from("karma_seasons").update({ is_active: false }).neq("id", next.id);
-    await supabaseAdmin.from("karma_seasons").update({ is_active: true }).eq("id", next.id);
-
-    // Carry over a limited remainder for every member with balance
-    const { data: users } = await supabaseAdmin
-      .from("karma_entries")
-      .select("user_id")
-      .eq("season_id", season.id)
-      .eq("status", "approved");
-    const uniqueUsers = [...new Set((users ?? []).map((u) => u.user_id))];
-
-    let carried = 0;
-    for (const userId of uniqueUsers) {
-      const balance = await karmaBalance(userId);
-      const amount = Math.max(0, Math.min(balance, season.carryover_max));
-      if (amount > 0) {
-        await supabaseAdmin.from("karma_entries").insert({
-          user_id: userId,
-          season_id: next.id,
-          points: amount,
-          status: "approved",
-          description: `Remanente de ${season.name}`,
-          created_by: context.userId,
-          decided_by: context.userId,
-          decided_at: new Date().toISOString(),
-        });
-        carried += 1;
-        await notifyUser(
-          userId,
-          "karma_season",
-          "Nueva temporada de Karma",
-          `Se ha cerrado ${season.name}. Tu remanente de ${amount} puntos pasa a ${data.nextName}.`,
-        );
-      }
+    for (const p of profiles ?? []) {
+      const cycle = await ensureUserCycle(p.id);
+      const balance = await karmaBalance(p.id);
+      rows.push({
+        userId: p.id,
+        name: p.full_name || p.username,
+        signupAt: p.created_at,
+        cycleIndex: cycle.cycleIndex,
+        startsAt: cycle.startsAt,
+        endsAt: cycle.endsAt,
+        carryoverIn: cycle.carryoverIn,
+        balance,
+      });
     }
-
-    return { success: true, carriedMembers: carried, nextSeasonId: next.id };
+    rows.sort((a, b) => new Date(a.endsAt).getTime() - new Date(b.endsAt).getTime());
+    return { cycles: rows };
   });
+
 
 // ---------------- Admin: per-member karma summary ----------------
 

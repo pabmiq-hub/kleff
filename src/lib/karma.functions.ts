@@ -34,10 +34,18 @@ export const getMyKarma = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { karmaBalance, karmaLifetime } = await import("@/lib/karma.server");
+    const { karmaBalance, karmaLifetime, ensureUserCycle, karmaCarryoverMax } = await import(
+      "@/lib/karma.server"
+    );
     const userId = context.userId;
 
-    const [balance, lifetime] = await Promise.all([karmaBalance(userId), karmaLifetime(userId)]);
+    const [balance, lifetime, cycle, carryoverMax] = await Promise.all([
+      karmaBalance(userId),
+      karmaLifetime(userId),
+      ensureUserCycle(userId),
+      karmaCarryoverMax(),
+    ]);
+
 
     const { data: entries } = await supabaseAdmin
       .from("karma_entries")
@@ -90,7 +98,15 @@ export const getMyKarma = createServerFn({ method: "POST" })
     return {
       balance,
       lifetime,
+      cycle: {
+        index: cycle.cycleIndex,
+        startsAt: cycle.startsAt,
+        endsAt: cycle.endsAt,
+        carryoverIn: cycle.carryoverIn,
+        carryoverMax,
+      },
       rankingOptIn: profile?.karma_ranking_opt_in ?? true,
+
       entries: (entries ?? []).map((e) => ({
         ...e,
         categoryName: e.category_id ? (catMap.get(e.category_id)?.name_es ?? "—") : "Ajuste manual",
