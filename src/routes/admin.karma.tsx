@@ -150,7 +150,10 @@ function AdminKarmaPage() {
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState<"pending" | "approved" | "rejected" | "voided" | "all">("pending");
   const [entries, setEntries] = useState<Awaited<ReturnType<typeof adminListKarmaEntries>>["entries"]>([]);
-  const [config, setConfig] = useState<{ categories: Cat[]; rewards: Rew[]; seasons: { id: string; name: string; starts_on: string; ends_on: string; carryover_max: number; is_active: boolean }[] }>({ categories: [], rewards: [], seasons: [] });
+  const [config, setConfig] = useState<{ categories: Cat[]; rewards: Rew[]; carryoverMax: number }>({ categories: [], rewards: [], carryoverMax: 30 });
+  const [cycles, setCycles] = useState<Awaited<ReturnType<typeof adminListKarmaCycles>>["cycles"]>([]);
+  const [carryoverInput, setCarryoverInput] = useState(30);
+
   const [redemptions, setRedemptions] = useState<Awaited<ReturnType<typeof adminListKarmaRedemptions>>["redemptions"]>([]);
   const [members, setMembers] = useState<{ id: string; full_name: string; member_number: number }[]>([]);
   const [referrals, setReferrals] = useState<Awaited<ReturnType<typeof adminListReferrals>>["referrals"]>([]);
