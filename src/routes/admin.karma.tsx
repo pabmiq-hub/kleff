@@ -243,7 +243,7 @@ function AdminKarmaPage() {
           </TabsTrigger>
           <TabsTrigger value="categories">Baremo</TabsTrigger>
           <TabsTrigger value="rewards">Recompensas</TabsTrigger>
-          <TabsTrigger value="seasons">Temporadas</TabsTrigger>
+          <TabsTrigger value="seasons">Ciclos</TabsTrigger>
         </TabsList>
 
         {/* ---- Entries ---- */}
