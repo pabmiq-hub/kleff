@@ -587,65 +587,59 @@ function AdminKarmaPage() {
           </div>
         </TabsContent>
 
-        {/* ---- Seasons ---- */}
-        <TabsContent value="seasons" className="space-y-3 pt-4">
-          <div className="rounded-xl border border-ink/10 bg-white divide-y divide-ink/10">
-            {config.seasons.map((s) => (
-              <div key={s.id} className="p-4 flex flex-wrap items-center justify-between gap-3">
-                <div>
-                  <p className="font-medium">
-                    {s.name} {s.is_active ? <Badge className="ml-1">Activa</Badge> : null}
-                  </p>
-                  <p className="text-xs text-ink/50">
-                    {s.starts_on} → {s.ends_on} · remanente máx. {s.carryover_max} pts
-                  </p>
-                </div>
-                <div className="flex gap-2">
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() =>
-                      void run(
-                        () =>
-                          saveSeason({
-                            data: {
-                              id: s.id,
-                              name: s.name,
-                              startsOn: s.starts_on,
-                              endsOn: s.ends_on,
-                              carryoverMax: s.carryover_max,
-                              isActive: true,
-                            },
-                          }),
-                        "Temporada activada",
-                      )
-                    }
-                    disabled={s.is_active}
-                  >
-                    Activar
-                  </Button>
-                  {s.is_active ? (
-                    <Button
-                      size="sm"
-                      onClick={() =>
-                        setSeasonForm({
-                          id: s.id,
-                          name: s.name,
-                          nextName: "",
-                          nextStartsOn: "",
-                          nextEndsOn: "",
-                        })
-                      }
-                    >
-                      Cerrar temporada
-                    </Button>
-                  ) : null}
-                </div>
+        {/* ---- Cycles ---- */}
+        <TabsContent value="seasons" className="space-y-4 pt-4">
+          <div className="rounded-xl border border-ink/10 bg-white p-4 space-y-3">
+            <div>
+              <p className="font-medium">Ciclos individuales</p>
+              <p className="text-xs text-ink/50">
+                Cada socio tiene su propio año de Karma, que empieza el día de su alta y se renueva en su
+                aniversario. Al renovarse conserva como máximo el remanente configurado.
+              </p>
+            </div>
+            <div className="flex flex-wrap items-end gap-3">
+              <div className="space-y-1.5">
+                <Label>Remanente máximo (pts)</Label>
+                <Input
+                  type="number"
+                  min={0}
+                  className="w-40"
+                  value={carryoverInput}
+                  onChange={(e) => setCarryoverInput(Number(e.target.value))}
+                />
               </div>
-            ))}
+              <Button
+                disabled={saving}
+                onClick={() => void run(() => saveSettings({ data: { carryoverMax: carryoverInput } }), "Ajustes guardados")}
+              >
+                Guardar
+              </Button>
+            </div>
+          </div>
+
+          <div className="rounded-xl border border-ink/10 bg-white divide-y divide-ink/10">
+            {cycles.length === 0 ? (
+              <p className="p-4 text-sm text-ink/50">Sin socios todavía.</p>
+            ) : (
+              cycles.map((c) => (
+                <div key={c.userId} className="p-4 flex flex-wrap items-center justify-between gap-3">
+                  <div>
+                    <p className="font-medium">
+                      {c.name} <Badge variant="secondary" className="ml-1">Año {c.cycleIndex}</Badge>
+                    </p>
+                    <p className="text-xs text-ink/50">
+                      {new Date(c.startsAt).toLocaleDateString("es-ES")} →{" "}
+                      {new Date(c.endsAt).toLocaleDateString("es-ES")} · remanente heredado {c.carryoverIn} pts
+                    </p>
+                  </div>
+                  <p className="text-sm font-medium">{c.balance} pts</p>
+                </div>
+              ))
+            )}
           </div>
         </TabsContent>
       </Tabs>
+
 
       {/* Category dialog */}
       <Dialog open={!!catForm} onOpenChange={(o) => !o && setCatForm(null)}>
