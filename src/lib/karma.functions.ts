@@ -34,10 +34,18 @@ export const getMyKarma = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { karmaBalance, karmaLifetime } = await import("@/lib/karma.server");
+    const { karmaBalance, karmaLifetime, ensureUserCycle, karmaCarryoverMax } = await import(
+      "@/lib/karma.server"
+    );
     const userId = context.userId;
 
-    const [balance, lifetime] = await Promise.all([karmaBalance(userId), karmaLifetime(userId)]);
+    const [balance, lifetime, cycle, carryoverMax] = await Promise.all([
+      karmaBalance(userId),
+      karmaLifetime(userId),
+      ensureUserCycle(userId),
+      karmaCarryoverMax(),
+    ]);
+
 
     const { data: entries } = await supabaseAdmin
       .from("karma_entries")
