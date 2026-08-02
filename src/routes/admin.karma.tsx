@@ -139,8 +139,9 @@ function AdminKarmaPage() {
   const deleteReward = useServerFn(adminDeleteKarmaReward);
   const listRedemptions = useServerFn(adminListKarmaRedemptions);
   const decideRedemption = useServerFn(adminDecideKarmaRedemption);
-  const saveSeason = useServerFn(adminSaveKarmaSeason);
-  const closeSeason = useServerFn(adminCloseKarmaSeason);
+  const saveSettings = useServerFn(adminSaveKarmaSettings);
+  const listCycles = useServerFn(adminListKarmaCycles);
+
   const loadUsers = useServerFn(listUsers);
   const listReferrals = useServerFn(adminListReferrals);
   const awardReferral = useServerFn(adminAwardReferral);
