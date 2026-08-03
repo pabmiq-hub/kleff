@@ -448,7 +448,10 @@ function CreateMatchDialog({
         maxPlayers: maxPlayers ? Number(maxPlayers) : null,
         location: location.trim() || null,
         notes: notes.trim() || null,
+        parentEventId: parentEventId || null,
+        claimKarma,
       });
+
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Error");
     } finally {
