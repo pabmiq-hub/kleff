@@ -153,13 +153,22 @@ function PartidasPage() {
               </Button>
             </DialogTrigger>
             <CreateMatchDialog
+              eventOptions={sorted
+                .filter((m) => classify(m.type) === "evento" || classify(m.type) === "torneo")
+                .map((m) => ({ id: m.id, title: m.title ?? "Evento" }))}
               onSubmit={async (payload) => {
-                await createFn({ data: payload });
+                const res = await createFn({ data: payload });
                 toast.success("Partida creada en Ludoya");
+                if (res.karma?.claimed) {
+                  toast.success(`+${res.karma.points} karma solicitados (pendiente de validación)`);
+                } else if (res.karma?.reason) {
+                  toast.message(`Karma no reclamado: ${res.karma.reason}`);
+                }
                 setDialogOpen(false);
                 void load();
               }}
             />
+
           </Dialog>
         </div>
       </header>
