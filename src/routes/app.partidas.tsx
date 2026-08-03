@@ -373,7 +373,9 @@ interface BgOption {
 
 function CreateMatchDialog({
   onSubmit,
+  eventOptions = [],
 }: {
+  eventOptions?: { id: string; title: string }[];
   onSubmit: (payload: {
     title: string;
     scheduledAt: string;
@@ -384,6 +386,8 @@ function CreateMatchDialog({
     maxPlayers?: number | null;
     location?: string | null;
     notes?: string | null;
+    parentEventId?: string | null;
+    claimKarma?: boolean;
   }) => Promise<void>;
 }) {
   const searchFn = useServerFn(searchLudoyaBoardgamesFn);
@@ -394,6 +398,8 @@ function CreateMatchDialog({
   const [notes, setNotes] = useState("");
   const [minPlayers, setMinPlayers] = useState<string>("");
   const [maxPlayers, setMaxPlayers] = useState<string>("");
+  const [parentEventId, setParentEventId] = useState<string>("");
+  const [claimKarma, setClaimKarma] = useState(true);
 
   const [bgQuery, setBgQuery] = useState("");
   const [bgResults, setBgResults] = useState<BgOption[]>([]);
@@ -401,6 +407,7 @@ function CreateMatchDialog({
   const [bg, setBg] = useState<BgOption | null>(null);
 
   const [submitting, setSubmitting] = useState(false);
+
 
   const canSubmit = useMemo(
     () => title.trim().length >= 2 && scheduledAt.length >= 4,
