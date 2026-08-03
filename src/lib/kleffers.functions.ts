@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 /**
@@ -12,8 +13,38 @@ export const listKleffers = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data, error } = await supabaseAdmin
       .from("profiles")
-      .select("id, username, avatar_url, ludoya_username, member_number, created_at")
+      .select(
+        "id, username, avatar_url, ludoya_username, ludoya_display_name, ludoya_avatar_url, member_number, created_at",
+      )
       .order("member_number", { ascending: true });
     if (error) throw new Error(error.message);
     return { kleffers: data ?? [] };
+  });
+
+/** Ficha ampliada de un kleffer, con su perfil de Ludoya si lo tiene vinculado. */
+export const getKlefferProfile = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) => z.object({ id: z.string().uuid() }).parse(input))
+  .handler(async ({ data }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: profile, error } = await supabaseAdmin
+      .from("profiles")
+      .select(
+        "id, username, avatar_url, member_number, created_at, ludoya_username, ludoya_display_name, ludoya_avatar_url",
+      )
+      .eq("id", data.id)
+      .maybeSingle();
+    if (error) throw new Error(error.message);
+    if (!profile) return { profile: null, ludoya: null };
+
+    let ludoya = null;
+    if (profile.ludoya_username) {
+      try {
+        const { getLudoyaMember } = await import("@/lib/ludoya.server");
+        ludoya = await getLudoyaMember(profile.ludoya_username);
+      } catch {
+        ludoya = null;
+      }
+    }
+    return { profile, ludoya };
   });

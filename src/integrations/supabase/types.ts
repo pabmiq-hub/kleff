@@ -1248,6 +1248,10 @@ export type Database = {
           id_document_encrypted: string
           id_document_nonce: string
           karma_ranking_opt_in: boolean
+          ludoya_avatar_url: string | null
+          ludoya_display_name: string | null
+          ludoya_linked_at: string | null
+          ludoya_user_id: string | null
           ludoya_username: string | null
           member_number: number
           updated_at: string
@@ -1266,6 +1270,10 @@ export type Database = {
           id_document_encrypted: string
           id_document_nonce: string
           karma_ranking_opt_in?: boolean
+          ludoya_avatar_url?: string | null
+          ludoya_display_name?: string | null
+          ludoya_linked_at?: string | null
+          ludoya_user_id?: string | null
           ludoya_username?: string | null
           member_number?: number
           updated_at?: string
@@ -1284,6 +1292,10 @@ export type Database = {
           id_document_encrypted?: string
           id_document_nonce?: string
           karma_ranking_opt_in?: boolean
+          ludoya_avatar_url?: string | null
+          ludoya_display_name?: string | null
+          ludoya_linked_at?: string | null
+          ludoya_user_id?: string | null
           ludoya_username?: string | null
           member_number?: number
           updated_at?: string
