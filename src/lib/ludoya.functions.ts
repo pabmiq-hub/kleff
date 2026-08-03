@@ -124,6 +124,8 @@ const createMatchSchema = z.object({
   maxPlayers: z.number().int().min(1).max(50).nullable().optional(),
   location: z.string().max(200).nullable().optional(),
   notes: z.string().max(2000).nullable().optional(),
+  parentEventId: z.string().max(120).nullable().optional(),
+  claimKarma: z.boolean().optional(),
 });
 
 export const createKleffMatch = createServerFn({ method: "POST" })
@@ -146,9 +148,61 @@ export const createKleffMatch = createServerFn({ method: "POST" })
       location: data.location ?? null,
       notes: data.notes ?? null,
       hostUsername: profile?.ludoya_username ?? null,
+      parentId: data.parentEventId ?? null,
     });
 
     if (!result.ok) throw new Error(result.message ?? "No se pudo crear la partida");
-    return { match: result.match ?? null };
+
+    let karma: { claimed: boolean; points?: number; reason?: string } = { claimed: false };
+    if (data.claimKarma !== false) {
+      karma = await claimLudoyaMatchKarma(context.userId, data.title);
+    }
+
+    return { match: result.match ?? null, karma };
   });
+
+/** Registra (pendiente de validación) la contribución de karma por crear una partida en Ludoya. */
+async function claimLudoyaMatchKarma(
+  userId: string,
+  title: string,
+): Promise<{ claimed: boolean; points?: number; reason?: string }> {
+  try {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { activeSeasonId, categoryUsage } = await import("@/lib/karma.server");
+
+    const { data: categories } = await supabaseAdmin
+      .from("karma_categories")
+      .select("id, points, limit_period, limit_count, is_active, code, name_es")
+      .eq("is_active", true);
+
+    const category = (categories ?? []).find((c) => {
+      const hay = `${c.code} ${c.name_es}`.toLowerCase();
+      return hay.includes("ludoya") && hay.includes("partida");
+    });
+    if (!category) return { claimed: false, reason: "Sin categoría de karma configurada" };
+
+    if (category.limit_period !== "none" && category.limit_count) {
+      const used = await categoryUsage(userId, category.id, category.limit_period);
+      if (used >= category.limit_count) {
+        return { claimed: false, reason: "Has alcanzado el límite de esta categoría" };
+      }
+    }
+
+    const seasonId = await activeSeasonId();
+    const { error } = await supabaseAdmin.from("karma_entries").insert({
+      user_id: userId,
+      category_id: category.id,
+      season_id: seasonId,
+      points: category.points,
+      status: "pending",
+      description: `Partida creada en Ludoya: ${title}`,
+      created_by: userId,
+    });
+    if (error) return { claimed: false, reason: error.message };
+    return { claimed: true, points: category.points };
+  } catch (e) {
+    return { claimed: false, reason: (e as Error).message };
+  }
+}
+
 

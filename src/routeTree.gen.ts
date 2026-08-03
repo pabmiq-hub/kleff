@@ -92,6 +92,7 @@ import { Route as AdminRegistrationsIndexRouteImport } from './routes/admin.regi
 import { Route as AdminMediaIndexRouteImport } from './routes/admin.media.index'
 import { Route as AdminContentIndexRouteImport } from './routes/admin.content.index'
 import { Route as AdminBlogIndexRouteImport } from './routes/admin.blog.index'
+import { Route as AuthLudoyaCallbackRouteImport } from './routes/auth.ludoya.callback'
 import { Route as AppRentalsRequestsRouteImport } from './routes/app.rentals.requests'
 import { Route as AppRentalsHistoryRouteImport } from './routes/app.rentals.history'
 import { Route as AppRentalsActiveRouteImport } from './routes/app.rentals.active'
@@ -531,6 +532,11 @@ const AdminBlogIndexRoute = AdminBlogIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AdminBlogRoute,
 } as any)
+const AuthLudoyaCallbackRoute = AuthLudoyaCallbackRouteImport.update({
+  id: '/auth/ludoya/callback',
+  path: '/auth/ludoya/callback',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AppRentalsRequestsRoute = AppRentalsRequestsRouteImport.update({
   id: '/requests',
   path: '/requests',
@@ -743,6 +749,7 @@ export interface FileRoutesByFullPath {
   '/app/rentals/active': typeof AppRentalsActiveRoute
   '/app/rentals/history': typeof AppRentalsHistoryRoute
   '/app/rentals/requests': typeof AppRentalsRequestsRoute
+  '/auth/ludoya/callback': typeof AuthLudoyaCallbackRoute
   '/admin/blog/': typeof AdminBlogIndexRoute
   '/admin/content/': typeof AdminContentIndexRoute
   '/admin/media/': typeof AdminMediaIndexRoute
@@ -843,6 +850,7 @@ export interface FileRoutesByTo {
   '/app/rentals/active': typeof AppRentalsActiveRoute
   '/app/rentals/history': typeof AppRentalsHistoryRoute
   '/app/rentals/requests': typeof AppRentalsRequestsRoute
+  '/auth/ludoya/callback': typeof AuthLudoyaCallbackRoute
   '/admin/blog': typeof AdminBlogIndexRoute
   '/admin/content': typeof AdminContentIndexRoute
   '/admin/media': typeof AdminMediaIndexRoute
@@ -951,6 +959,7 @@ export interface FileRoutesById {
   '/app/rentals/active': typeof AppRentalsActiveRoute
   '/app/rentals/history': typeof AppRentalsHistoryRoute
   '/app/rentals/requests': typeof AppRentalsRequestsRoute
+  '/auth/ludoya/callback': typeof AuthLudoyaCallbackRoute
   '/admin/blog/': typeof AdminBlogIndexRoute
   '/admin/content/': typeof AdminContentIndexRoute
   '/admin/media/': typeof AdminMediaIndexRoute
@@ -1060,6 +1069,7 @@ export interface FileRouteTypes {
     | '/app/rentals/active'
     | '/app/rentals/history'
     | '/app/rentals/requests'
+    | '/auth/ludoya/callback'
     | '/admin/blog/'
     | '/admin/content/'
     | '/admin/media/'
@@ -1160,6 +1170,7 @@ export interface FileRouteTypes {
     | '/app/rentals/active'
     | '/app/rentals/history'
     | '/app/rentals/requests'
+    | '/auth/ludoya/callback'
     | '/admin/blog'
     | '/admin/content'
     | '/admin/media'
@@ -1267,6 +1278,7 @@ export interface FileRouteTypes {
     | '/app/rentals/active'
     | '/app/rentals/history'
     | '/app/rentals/requests'
+    | '/auth/ludoya/callback'
     | '/admin/blog/'
     | '/admin/content/'
     | '/admin/media/'
@@ -1343,6 +1355,7 @@ export interface RootRouteChildren {
   ApiPublicSyncBggRoute: typeof ApiPublicSyncBggRoute
   ApiPublicUploadInviteAvatarRoute: typeof ApiPublicUploadInviteAvatarRoute
   ApiPublicUploadMyAvatarRoute: typeof ApiPublicUploadMyAvatarRoute
+  AuthLudoyaCallbackRoute: typeof AuthLudoyaCallbackRoute
   ApiPublicHooksFeaturedDispatchRoute: typeof ApiPublicHooksFeaturedDispatchRoute
   LovableEmailQueueProcessRoute: typeof LovableEmailQueueProcessRoute
 }
@@ -1930,6 +1943,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminBlogIndexRouteImport
       parentRoute: typeof AdminBlogRoute
     }
+    '/auth/ludoya/callback': {
+      id: '/auth/ludoya/callback'
+      path: '/auth/ludoya/callback'
+      fullPath: '/auth/ludoya/callback'
+      preLoaderRoute: typeof AuthLudoyaCallbackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/app/rentals/requests': {
       id: '/app/rentals/requests'
       path: '/requests'
@@ -2294,18 +2314,10 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicSyncBggRoute: ApiPublicSyncBggRoute,
   ApiPublicUploadInviteAvatarRoute: ApiPublicUploadInviteAvatarRoute,
   ApiPublicUploadMyAvatarRoute: ApiPublicUploadMyAvatarRoute,
+  AuthLudoyaCallbackRoute: AuthLudoyaCallbackRoute,
   ApiPublicHooksFeaturedDispatchRoute: ApiPublicHooksFeaturedDispatchRoute,
   LovableEmailQueueProcessRoute: LovableEmailQueueProcessRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { createStart } from '@tanstack/react-start'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-  }
-}

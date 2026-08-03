@@ -275,6 +275,7 @@ export interface CreateLudoyaMatchInput {
   location?: string | null;
   notes?: string | null;
   hostUsername?: string | null;
+  parentId?: string | null;
 }
 
 export async function createLudoyaMatch(input: CreateLudoyaMatchInput): Promise<{ ok: boolean; match?: LudoyaMatch; httpStatus: number; message?: string }> {
@@ -289,7 +290,9 @@ export async function createLudoyaMatch(input: CreateLudoyaMatchInput): Promise<
     location: input.location ?? undefined,
     notes: input.notes ?? undefined,
     hostUsername: input.hostUsername ?? undefined,
+    parentId: input.parentId ?? undefined,
   };
+
   const res = await ludoyaFetch(`/events`, { method: "POST", body: JSON.stringify(body) });
   if (res.ok || res.status === 201) {
     let match: LudoyaMatch | undefined;
@@ -301,3 +304,83 @@ export async function createLudoyaMatch(input: CreateLudoyaMatchInput): Promise<
   return { ok: false, httpStatus: res.status, message: message ?? "No se pudo crear la partida en Ludoya" };
 }
 
+
+// -------- Group members (perfil público de un socio en Ludoya) --------
+
+export interface LudoyaMember {
+  id: string | null;
+  username: string;
+  name: string | null;
+  avatarUrl: string | null;
+  joinedAt: string | null;
+  role: string | null;
+  stats: Record<string, number> | null;
+  collection: Array<{ id?: string; name?: string; imageUrl?: string | null }>;
+}
+
+async function fetchGroupMembers(): Promise<any[]> {
+  const res = await ludoyaFetch(`/members?pagination=200,0`);
+  if (!res.ok) throw new Error(`Ludoya members error (${res.status})`);
+  const json = (await res.json()) as any;
+  return (
+    json?.members?.elements ??
+    json?.users?.elements ??
+    json?.elements ??
+    (Array.isArray(json) ? json : [])
+  );
+}
+
+/** Perfil de un miembro del grupo KLEFF, cacheado 15 minutos en kv_cache. */
+export async function getLudoyaMember(username: string): Promise<LudoyaMember | null> {
+  const target = username.trim().toLowerCase();
+  if (!target) return null;
+
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const cacheKey = `ludoya:member:${target}`;
+  const { data: cached } = await supabaseAdmin
+    .from("kv_cache")
+    .select("value, fetched_at")
+    .eq("key", cacheKey)
+    .maybeSingle();
+  if (cached && Date.now() - Date.parse(cached.fetched_at) < 15 * 60 * 1000) {
+    return cached.value as unknown as LudoyaMember;
+  }
+
+  let raw: any = null;
+  try {
+    const members = await fetchGroupMembers();
+    raw = members.find((m) => String(m.username ?? m.user?.username ?? "").toLowerCase() === target) ?? null;
+  } catch {
+    /* fall through to public search */
+  }
+  if (!raw) {
+    const found = await findLudoyaUserByUsername(target);
+    if (!found) return null;
+    raw = found;
+  }
+
+  const u = raw.user ?? raw;
+  const member: LudoyaMember = {
+    id: u.id ?? null,
+    username: u.username ?? target,
+    name: u.name ?? u.displayName ?? null,
+    avatarUrl: u.avatarUrl ?? u.avatar_url ?? null,
+    joinedAt: raw.joinedAt ?? raw.createdAt ?? null,
+    role: raw.role ?? null,
+    stats:
+      raw.stats && typeof raw.stats === "object"
+        ? (raw.stats as Record<string, number>)
+        : null,
+    collection: Array.isArray(raw.collection?.elements)
+      ? raw.collection.elements.slice(0, 12)
+      : Array.isArray(raw.collection)
+        ? raw.collection.slice(0, 12)
+        : [],
+  };
+
+  await supabaseAdmin
+    .from("kv_cache")
+    .upsert({ key: cacheKey, value: member as unknown as any, fetched_at: new Date().toISOString() });
+
+  return member;
+}

@@ -153,13 +153,22 @@ function PartidasPage() {
               </Button>
             </DialogTrigger>
             <CreateMatchDialog
+              eventOptions={sorted
+                .filter((m) => classify(m.type) === "evento" || classify(m.type) === "torneo")
+                .map((m) => ({ id: m.id, title: m.title ?? "Evento" }))}
               onSubmit={async (payload) => {
-                await createFn({ data: payload });
+                const res = await createFn({ data: payload });
                 toast.success("Partida creada en Ludoya");
+                if (res.karma?.claimed) {
+                  toast.success(`+${res.karma.points} karma solicitados (pendiente de validación)`);
+                } else if (res.karma?.reason) {
+                  toast.message(`Karma no reclamado: ${res.karma.reason}`);
+                }
                 setDialogOpen(false);
                 void load();
               }}
             />
+
           </Dialog>
         </div>
       </header>
@@ -364,7 +373,9 @@ interface BgOption {
 
 function CreateMatchDialog({
   onSubmit,
+  eventOptions = [],
 }: {
+  eventOptions?: { id: string; title: string }[];
   onSubmit: (payload: {
     title: string;
     scheduledAt: string;
@@ -375,6 +386,8 @@ function CreateMatchDialog({
     maxPlayers?: number | null;
     location?: string | null;
     notes?: string | null;
+    parentEventId?: string | null;
+    claimKarma?: boolean;
   }) => Promise<void>;
 }) {
   const searchFn = useServerFn(searchLudoyaBoardgamesFn);
@@ -385,6 +398,8 @@ function CreateMatchDialog({
   const [notes, setNotes] = useState("");
   const [minPlayers, setMinPlayers] = useState<string>("");
   const [maxPlayers, setMaxPlayers] = useState<string>("");
+  const [parentEventId, setParentEventId] = useState<string>("");
+  const [claimKarma, setClaimKarma] = useState(true);
 
   const [bgQuery, setBgQuery] = useState("");
   const [bgResults, setBgResults] = useState<BgOption[]>([]);
@@ -392,6 +407,7 @@ function CreateMatchDialog({
   const [bg, setBg] = useState<BgOption | null>(null);
 
   const [submitting, setSubmitting] = useState(false);
+
 
   const canSubmit = useMemo(
     () => title.trim().length >= 2 && scheduledAt.length >= 4,
@@ -432,7 +448,10 @@ function CreateMatchDialog({
         maxPlayers: maxPlayers ? Number(maxPlayers) : null,
         location: location.trim() || null,
         notes: notes.trim() || null,
+        parentEventId: parentEventId || null,
+        claimKarma,
       });
+
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Error");
     } finally {
@@ -518,6 +537,33 @@ function CreateMatchDialog({
           <Label>Notas (opcional)</Label>
           <Textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={3} />
         </div>
+
+        <div className="space-y-2">
+          <Label>¿Dentro de un evento? (opcional)</Label>
+          <select
+            value={parentEventId}
+            onChange={(e) => setParentEventId(e.target.value)}
+            className="w-full h-10 rounded-lg border-2 border-ink bg-background px-3 text-sm"
+          >
+            <option value="">Publicar en el muro de la comunidad</option>
+            {eventOptions.map((o) => (
+              <option key={o.id} value={o.id}>
+                {o.title}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <label className="flex items-center gap-2 text-sm cursor-pointer">
+          <input
+            type="checkbox"
+            checked={claimKarma}
+            onChange={(e) => setClaimKarma(e.target.checked)}
+            className="accent-coral"
+          />
+          Reclamar karma por crear esta partida
+        </label>
+
 
         <DialogFooter>
           <Button type="submit" disabled={!canSubmit || submitting}>
