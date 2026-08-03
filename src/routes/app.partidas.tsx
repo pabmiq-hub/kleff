@@ -538,6 +538,33 @@ function CreateMatchDialog({
           <Textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={3} />
         </div>
 
+        <div className="space-y-2">
+          <Label>¿Dentro de un evento? (opcional)</Label>
+          <select
+            value={parentEventId}
+            onChange={(e) => setParentEventId(e.target.value)}
+            className="w-full h-10 rounded-lg border-2 border-ink bg-background px-3 text-sm"
+          >
+            <option value="">Publicar en el muro de la comunidad</option>
+            {eventOptions.map((o) => (
+              <option key={o.id} value={o.id}>
+                {o.title}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <label className="flex items-center gap-2 text-sm cursor-pointer">
+          <input
+            type="checkbox"
+            checked={claimKarma}
+            onChange={(e) => setClaimKarma(e.target.checked)}
+            className="accent-coral"
+          />
+          Reclamar karma por crear esta partida
+        </label>
+
+
         <DialogFooter>
           <Button type="submit" disabled={!canSubmit || submitting}>
             {submitting ? "Creando…" : "Crear partida"}
