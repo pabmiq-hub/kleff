@@ -18,7 +18,15 @@ export const listKleffers = createServerFn({ method: "POST" })
       )
       .order("member_number", { ascending: true });
     if (error) throw new Error(error.message);
-    return { kleffers: data ?? [] };
+
+    const { data: extended } = await supabaseAdmin
+      .from("member_profiles")
+      .select("user_id, attends_alone, goals, favorite_games, game_types, availability, experience_level, bio")
+      .eq("is_public", true);
+
+    const byUser = new Map((extended ?? []).map((e) => [e.user_id, e]));
+    const kleffers = (data ?? []).map((k) => ({ ...k, extended: byUser.get(k.id) ?? null }));
+    return { kleffers };
   });
 
 /** Ficha ampliada de un kleffer, con su perfil de Ludoya si lo tiene vinculado. */
@@ -35,7 +43,14 @@ export const getKlefferProfile = createServerFn({ method: "POST" })
       .eq("id", data.id)
       .maybeSingle();
     if (error) throw new Error(error.message);
-    if (!profile) return { profile: null, ludoya: null };
+    if (!profile) return { profile: null, ludoya: null, extended: null };
+
+    const { data: extended } = await supabaseAdmin
+      .from("member_profiles")
+      .select("*")
+      .eq("user_id", data.id)
+      .eq("is_public", true)
+      .maybeSingle();
 
     let ludoya = null;
     if (profile.ludoya_username) {
@@ -46,5 +61,6 @@ export const getKlefferProfile = createServerFn({ method: "POST" })
         ludoya = null;
       }
     }
-    return { profile, ludoya };
+    return { profile, ludoya, extended: extended ?? null };
   });
+
