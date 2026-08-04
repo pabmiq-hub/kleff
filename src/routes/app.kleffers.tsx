@@ -228,7 +228,50 @@ function KleffersPage() {
                   </div>
                 </div>
 
+                {extended && (
+                  <section className="rounded-2xl border border-ink/15 p-4 space-y-2 text-sm">
+                    <h3 className="font-semibold">Perfil de kleffer</h3>
+                    {extended.bio && <p className="italic text-ink/70">“{extended.bio}”</p>}
+                    {extended.attends_alone && (
+                      <p>{labelOf(ATTENDS_ALONE, extended.attends_alone)}</p>
+                    )}
+                    {extended.scheduled_games && <p>{labelOf(SCHEDULED_GAMES, extended.scheduled_games)}</p>}
+                    {extended.experience_level && (
+                      <p>Nivel: {labelOf(EXPERIENCE, extended.experience_level)}</p>
+                    )}
+                    {extended.teaches && <p>{labelOf(TEACHES, extended.teaches)}</p>}
+                    {(extended.favorite_games ?? []).length > 0 && (
+                      <div>
+                        <p className="text-xs uppercase tracking-wide text-ink/50 mb-1">Juegos favoritos</p>
+                        <div className="flex flex-wrap gap-2">
+                          {(extended.favorite_games ?? []).map((g) => (
+                            <span key={g.id} className="rounded-full bg-cream-deep/60 px-2 py-1 text-xs">{g.name}</span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    {[
+                      { title: "Busca", items: labelsOf(GOALS, extended.goals) },
+                      { title: "Le gustan", items: labelsOf(GAME_TYPES, extended.game_types) },
+                      { title: "Disponibilidad", items: labelsOf(AVAILABILITY, extended.availability) },
+                      { title: "Idiomas", items: labelsOf(LANGUAGES, extended.languages) },
+                    ]
+                      .filter((b) => b.items.length > 0)
+                      .map((b) => (
+                        <div key={b.title}>
+                          <p className="text-xs uppercase tracking-wide text-ink/50 mb-1">{b.title}</p>
+                          <div className="flex flex-wrap gap-2">
+                            {b.items.map((it) => (
+                              <span key={it} className="rounded-full bg-cream-deep/60 px-2 py-1 text-xs">{it}</span>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                  </section>
+                )}
+
                 <section className="rounded-2xl border border-ink/15 p-4">
+
                   <h3 className="font-semibold mb-2">Ludoya</h3>
                   {!selected.ludoya_username ? (
                     <p className="text-sm text-ink/50">Este kleffer todavía no ha vinculado su cuenta.</p>
