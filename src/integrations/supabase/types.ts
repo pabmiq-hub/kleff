@@ -1201,6 +1201,65 @@ export type Database = {
         }
         Relationships: []
       }
+      member_profiles: {
+        Row: {
+          attends_alone: string | null
+          availability: string[]
+          bio: string | null
+          created_at: string
+          experience_level: string | null
+          favorite_games: Json
+          game_types: string[]
+          goals: string[]
+          is_public: boolean
+          languages: string[]
+          scheduled_games: string | null
+          teaches: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          attends_alone?: string | null
+          availability?: string[]
+          bio?: string | null
+          created_at?: string
+          experience_level?: string | null
+          favorite_games?: Json
+          game_types?: string[]
+          goals?: string[]
+          is_public?: boolean
+          languages?: string[]
+          scheduled_games?: string | null
+          teaches?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          attends_alone?: string | null
+          availability?: string[]
+          bio?: string | null
+          created_at?: string
+          experience_level?: string | null
+          favorite_games?: Json
+          game_types?: string[]
+          goals?: string[]
+          is_public?: boolean
+          languages?: string[]
+          scheduled_games?: string | null
+          teaches?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "member_profiles_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notifications: {
         Row: {
           body: string | null
