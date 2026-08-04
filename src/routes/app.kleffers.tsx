@@ -58,9 +58,12 @@ function KleffersPage() {
   const [loading, setLoading] = useState(true);
   const [q, setQ] = useState("");
   const [onlyLudoya, setOnlyLudoya] = useState(false);
+  const [onlyAlone, setOnlyAlone] = useState(false);
+  const [availability, setAvailability] = useState("");
 
   const [selected, setSelected] = useState<Kleffer | null>(null);
   const [ludoya, setLudoya] = useState<LudoyaMember | null>(null);
+  const [extended, setExtended] = useState<KlefferExtended | null>(null);
   const [detailLoading, setDetailLoading] = useState(false);
 
   useEffect(() => {
@@ -72,24 +75,31 @@ function KleffersPage() {
   const open = (k: Kleffer) => {
     setSelected(k);
     setLudoya(null);
-    if (!k.ludoya_username) return;
+    setExtended(k.extended);
     setDetailLoading(true);
     void detailFn({ data: { id: k.id } })
-      .then((r) => setLudoya((r.ludoya as LudoyaMember | null) ?? null))
+      .then((r) => {
+        setLudoya((r.ludoya as LudoyaMember | null) ?? null);
+        setExtended((r.extended as KlefferExtended | null) ?? null);
+      })
       .catch(() => setLudoya(null))
       .finally(() => setDetailLoading(false));
   };
 
   const filtered = items.filter((k) => {
     if (onlyLudoya && !k.ludoya_username) return false;
+    if (onlyAlone && k.extended?.attends_alone !== "alone") return false;
+    if (availability && !(k.extended?.availability ?? []).includes(availability)) return false;
     const s = q.trim().toLowerCase();
     if (!s) return true;
     return (
       k.username.toLowerCase().includes(s) ||
       (k.ludoya_username?.toLowerCase().includes(s) ?? false) ||
-      (k.ludoya_display_name?.toLowerCase().includes(s) ?? false)
+      (k.ludoya_display_name?.toLowerCase().includes(s) ?? false) ||
+      (k.extended?.favorite_games ?? []).some((g) => g.name.toLowerCase().includes(s))
     );
   });
+
 
   return (
     <div className="space-y-6">
