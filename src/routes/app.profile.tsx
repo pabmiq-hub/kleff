@@ -235,6 +235,10 @@ function ProfilePage() {
 
       <LudoyaLinkCard onChanged={() => void reload()} />
 
+      <KlefferProfileForm />
+
+
+
     </div>
   );
 }
