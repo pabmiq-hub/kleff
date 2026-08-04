@@ -116,7 +116,7 @@ function KleffersPage() {
           <Input
             value={q}
             onChange={(e) => setQ(e.target.value)}
-            placeholder="Buscar por usuario o Ludoya…"
+            placeholder="Buscar por usuario, Ludoya o juego favorito…"
             className="pl-9"
           />
         </div>
@@ -129,7 +129,27 @@ function KleffersPage() {
           />
           Solo con Ludoya
         </label>
+        <label className="flex items-center gap-2 text-sm text-ink/70 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={onlyAlone}
+            onChange={(e) => setOnlyAlone(e.target.checked)}
+            className="accent-coral"
+          />
+          Vienen solos/as
+        </label>
+        <select
+          value={availability}
+          onChange={(e) => setAvailability(e.target.value)}
+          className="h-9 rounded-md border border-ink/20 bg-card px-2 text-sm"
+        >
+          <option value="">Cualquier disponibilidad</option>
+          {AVAILABILITY.map((a) => (
+            <option key={a.value} value={a.value}>{a.label}</option>
+          ))}
+        </select>
       </div>
+
 
       {loading ? (
         <p className="text-ink/60">Cargando kleffers…</p>
