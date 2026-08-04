@@ -5,6 +5,18 @@ import { listKleffers, getKlefferProfile } from "@/lib/kleffers.functions";
 import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Search, ExternalLink } from "lucide-react";
+import {
+  ATTENDS_ALONE,
+  AVAILABILITY,
+  EXPERIENCE,
+  GAME_TYPES,
+  GOALS,
+  LANGUAGES,
+  SCHEDULED_GAMES,
+  TEACHES,
+  labelOf,
+  labelsOf,
+} from "@/lib/kleffer-profile-options";
 
 export const Route = createFileRoute("/app/kleffers")({
   head: () => ({
