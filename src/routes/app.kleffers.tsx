@@ -16,6 +16,19 @@ export const Route = createFileRoute("/app/kleffers")({
   component: KleffersPage,
 });
 
+interface KlefferExtended {
+  attends_alone?: string | null;
+  goals?: string[] | null;
+  favorite_games?: Array<{ id: string; name: string; imageUrl?: string | null }> | null;
+  game_types?: string[] | null;
+  availability?: string[] | null;
+  experience_level?: string | null;
+  languages?: string[] | null;
+  teaches?: string | null;
+  scheduled_games?: string | null;
+  bio?: string | null;
+}
+
 interface Kleffer {
   id: string;
   username: string;
@@ -25,6 +38,7 @@ interface Kleffer {
   ludoya_avatar_url: string | null;
   member_number: number;
   created_at: string;
+  extended: KlefferExtended | null;
 }
 
 interface LudoyaMember {
@@ -35,6 +49,7 @@ interface LudoyaMember {
   stats: Record<string, number> | null;
   collection: Array<{ id?: string; name?: string; imageUrl?: string | null }>;
 }
+
 
 function KleffersPage() {
   const fn = useServerFn(listKleffers);
