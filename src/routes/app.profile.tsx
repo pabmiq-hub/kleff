@@ -4,6 +4,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { getMyProfile, updateMyProfile } from "@/lib/profile.functions";
 import { LudoyaLinkCard } from "@/components/app/LudoyaLinkCard";
+import { KlefferProfileForm } from "@/components/app/KlefferProfileForm";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -233,6 +234,10 @@ function ProfilePage() {
       </form>
 
       <LudoyaLinkCard onChanged={() => void reload()} />
+
+      <KlefferProfileForm />
+
+
 
     </div>
   );

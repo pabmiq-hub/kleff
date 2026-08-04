@@ -5,6 +5,18 @@ import { listKleffers, getKlefferProfile } from "@/lib/kleffers.functions";
 import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Search, ExternalLink } from "lucide-react";
+import {
+  ATTENDS_ALONE,
+  AVAILABILITY,
+  EXPERIENCE,
+  GAME_TYPES,
+  GOALS,
+  LANGUAGES,
+  SCHEDULED_GAMES,
+  TEACHES,
+  labelOf,
+  labelsOf,
+} from "@/lib/kleffer-profile-options";
 
 export const Route = createFileRoute("/app/kleffers")({
   head: () => ({
@@ -16,6 +28,19 @@ export const Route = createFileRoute("/app/kleffers")({
   component: KleffersPage,
 });
 
+interface KlefferExtended {
+  attends_alone?: string | null;
+  goals?: string[] | null;
+  favorite_games?: Array<{ id: string; name: string; imageUrl?: string | null }> | null;
+  game_types?: string[] | null;
+  availability?: string[] | null;
+  experience_level?: string | null;
+  languages?: string[] | null;
+  teaches?: string | null;
+  scheduled_games?: string | null;
+  bio?: string | null;
+}
+
 interface Kleffer {
   id: string;
   username: string;
@@ -25,6 +50,7 @@ interface Kleffer {
   ludoya_avatar_url: string | null;
   member_number: number;
   created_at: string;
+  extended: KlefferExtended | null;
 }
 
 interface LudoyaMember {
@@ -36,6 +62,7 @@ interface LudoyaMember {
   collection: Array<{ id?: string; name?: string; imageUrl?: string | null }>;
 }
 
+
 function KleffersPage() {
   const fn = useServerFn(listKleffers);
   const detailFn = useServerFn(getKlefferProfile);
@@ -43,9 +70,12 @@ function KleffersPage() {
   const [loading, setLoading] = useState(true);
   const [q, setQ] = useState("");
   const [onlyLudoya, setOnlyLudoya] = useState(false);
+  const [onlyAlone, setOnlyAlone] = useState(false);
+  const [availability, setAvailability] = useState("");
 
   const [selected, setSelected] = useState<Kleffer | null>(null);
   const [ludoya, setLudoya] = useState<LudoyaMember | null>(null);
+  const [extended, setExtended] = useState<KlefferExtended | null>(null);
   const [detailLoading, setDetailLoading] = useState(false);
 
   useEffect(() => {
@@ -57,24 +87,31 @@ function KleffersPage() {
   const open = (k: Kleffer) => {
     setSelected(k);
     setLudoya(null);
-    if (!k.ludoya_username) return;
+    setExtended(k.extended);
     setDetailLoading(true);
     void detailFn({ data: { id: k.id } })
-      .then((r) => setLudoya((r.ludoya as LudoyaMember | null) ?? null))
+      .then((r) => {
+        setLudoya((r.ludoya as LudoyaMember | null) ?? null);
+        setExtended((r.extended as KlefferExtended | null) ?? null);
+      })
       .catch(() => setLudoya(null))
       .finally(() => setDetailLoading(false));
   };
 
   const filtered = items.filter((k) => {
     if (onlyLudoya && !k.ludoya_username) return false;
+    if (onlyAlone && k.extended?.attends_alone !== "alone") return false;
+    if (availability && !(k.extended?.availability ?? []).includes(availability)) return false;
     const s = q.trim().toLowerCase();
     if (!s) return true;
     return (
       k.username.toLowerCase().includes(s) ||
       (k.ludoya_username?.toLowerCase().includes(s) ?? false) ||
-      (k.ludoya_display_name?.toLowerCase().includes(s) ?? false)
+      (k.ludoya_display_name?.toLowerCase().includes(s) ?? false) ||
+      (k.extended?.favorite_games ?? []).some((g) => g.name.toLowerCase().includes(s))
     );
   });
+
 
   return (
     <div className="space-y-6">
@@ -91,7 +128,7 @@ function KleffersPage() {
           <Input
             value={q}
             onChange={(e) => setQ(e.target.value)}
-            placeholder="Buscar por usuario o Ludoya…"
+            placeholder="Buscar por usuario, Ludoya o juego favorito…"
             className="pl-9"
           />
         </div>
@@ -104,7 +141,27 @@ function KleffersPage() {
           />
           Solo con Ludoya
         </label>
+        <label className="flex items-center gap-2 text-sm text-ink/70 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={onlyAlone}
+            onChange={(e) => setOnlyAlone(e.target.checked)}
+            className="accent-coral"
+          />
+          Vienen solos/as
+        </label>
+        <select
+          value={availability}
+          onChange={(e) => setAvailability(e.target.value)}
+          className="h-9 rounded-md border border-ink/20 bg-card px-2 text-sm"
+        >
+          <option value="">Cualquier disponibilidad</option>
+          {AVAILABILITY.map((a) => (
+            <option key={a.value} value={a.value}>{a.label}</option>
+          ))}
+        </select>
       </div>
+
 
       {loading ? (
         <p className="text-ink/60">Cargando kleffers…</p>
@@ -171,7 +228,50 @@ function KleffersPage() {
                   </div>
                 </div>
 
+                {extended && (
+                  <section className="rounded-2xl border border-ink/15 p-4 space-y-2 text-sm">
+                    <h3 className="font-semibold">Perfil de kleffer</h3>
+                    {extended.bio && <p className="italic text-ink/70">“{extended.bio}”</p>}
+                    {extended.attends_alone && (
+                      <p>{labelOf(ATTENDS_ALONE, extended.attends_alone)}</p>
+                    )}
+                    {extended.scheduled_games && <p>{labelOf(SCHEDULED_GAMES, extended.scheduled_games)}</p>}
+                    {extended.experience_level && (
+                      <p>Nivel: {labelOf(EXPERIENCE, extended.experience_level)}</p>
+                    )}
+                    {extended.teaches && <p>{labelOf(TEACHES, extended.teaches)}</p>}
+                    {(extended.favorite_games ?? []).length > 0 && (
+                      <div>
+                        <p className="text-xs uppercase tracking-wide text-ink/50 mb-1">Juegos favoritos</p>
+                        <div className="flex flex-wrap gap-2">
+                          {(extended.favorite_games ?? []).map((g) => (
+                            <span key={g.id} className="rounded-full bg-cream-deep/60 px-2 py-1 text-xs">{g.name}</span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    {[
+                      { title: "Busca", items: labelsOf(GOALS, extended.goals) },
+                      { title: "Le gustan", items: labelsOf(GAME_TYPES, extended.game_types) },
+                      { title: "Disponibilidad", items: labelsOf(AVAILABILITY, extended.availability) },
+                      { title: "Idiomas", items: labelsOf(LANGUAGES, extended.languages) },
+                    ]
+                      .filter((b) => b.items.length > 0)
+                      .map((b) => (
+                        <div key={b.title}>
+                          <p className="text-xs uppercase tracking-wide text-ink/50 mb-1">{b.title}</p>
+                          <div className="flex flex-wrap gap-2">
+                            {b.items.map((it) => (
+                              <span key={it} className="rounded-full bg-cream-deep/60 px-2 py-1 text-xs">{it}</span>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                  </section>
+                )}
+
                 <section className="rounded-2xl border border-ink/15 p-4">
+
                   <h3 className="font-semibold mb-2">Ludoya</h3>
                   {!selected.ludoya_username ? (
                     <p className="text-sm text-ink/50">Este kleffer todavía no ha vinculado su cuenta.</p>
