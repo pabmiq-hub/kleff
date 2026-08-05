@@ -39,14 +39,14 @@ export const completeLudoyaLink = createServerFn({ method: "POST" })
     z.object({ code: z.string().min(4).max(2048), state: z.string().min(4).max(2048) }).parse(input),
   )
   .handler(async ({ data, context }) => {
-    const { verifyState, exchangeCode } = await import("@/lib/ludoya-oidc.server");
+    const { verifyState, exchangeCode, nonceFromState } = await import("@/lib/ludoya-oidc.server");
     const request = getRequest();
     if (!request) throw new Error("Solicitud inválida");
     if (!(await verifyState(data.state, context.userId))) {
       throw new Error("La sesión de vinculación ha caducado. Inténtalo de nuevo.");
     }
 
-    const identity = await exchangeCode(data.code, redirectUriFrom(request.url));
+    const identity = await exchangeCode(data.code, redirectUriFrom(request.url), nonceFromState(data.state));
 
     // Another member cannot claim the same Ludoya account.
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
