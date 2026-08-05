@@ -72,6 +72,7 @@ import { Route as CaBloodOnTheClocktowerRouteImport } from './routes/ca.blood-on
 import { Route as CaBlogRouteImport } from './routes/ca.blog'
 import { Route as CaAvisLegalRouteImport } from './routes/ca.avis-legal'
 import { Route as CaActivitatsRouteImport } from './routes/ca.activitats'
+import { Route as AppVotacionesRouteImport } from './routes/app.votaciones'
 import { Route as AppRentalsRouteImport } from './routes/app.rentals'
 import { Route as AppProfileRouteImport } from './routes/app.profile'
 import { Route as AppPartidasRouteImport } from './routes/app.partidas'
@@ -432,6 +433,11 @@ const CaActivitatsRoute = CaActivitatsRouteImport.update({
   path: '/ca/activitats',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AppVotacionesRoute = AppVotacionesRouteImport.update({
+  id: '/votaciones',
+  path: '/votaciones',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppRentalsRoute = AppRentalsRouteImport.update({
   id: '/rentals',
   path: '/rentals',
@@ -690,6 +696,7 @@ export interface FileRoutesByFullPath {
   '/app/partidas': typeof AppPartidasRoute
   '/app/profile': typeof AppProfileRoute
   '/app/rentals': typeof AppRentalsRouteWithChildren
+  '/app/votaciones': typeof AppVotacionesRoute
   '/ca/activitats': typeof CaActivitatsRoute
   '/ca/avis-legal': typeof CaAvisLegalRoute
   '/ca/blog': typeof CaBlogRoute
@@ -791,6 +798,7 @@ export interface FileRoutesByTo {
   '/app/kleffers': typeof AppKleffersRoute
   '/app/partidas': typeof AppPartidasRoute
   '/app/profile': typeof AppProfileRoute
+  '/app/votaciones': typeof AppVotacionesRoute
   '/ca/activitats': typeof CaActivitatsRoute
   '/ca/avis-legal': typeof CaAvisLegalRoute
   '/ca/blog': typeof CaBlogRoute
@@ -900,6 +908,7 @@ export interface FileRoutesById {
   '/app/partidas': typeof AppPartidasRoute
   '/app/profile': typeof AppProfileRoute
   '/app/rentals': typeof AppRentalsRouteWithChildren
+  '/app/votaciones': typeof AppVotacionesRoute
   '/ca/activitats': typeof CaActivitatsRoute
   '/ca/avis-legal': typeof CaAvisLegalRoute
   '/ca/blog': typeof CaBlogRoute
@@ -1010,6 +1019,7 @@ export interface FileRouteTypes {
     | '/app/partidas'
     | '/app/profile'
     | '/app/rentals'
+    | '/app/votaciones'
     | '/ca/activitats'
     | '/ca/avis-legal'
     | '/ca/blog'
@@ -1111,6 +1121,7 @@ export interface FileRouteTypes {
     | '/app/kleffers'
     | '/app/partidas'
     | '/app/profile'
+    | '/app/votaciones'
     | '/ca/activitats'
     | '/ca/avis-legal'
     | '/ca/blog'
@@ -1219,6 +1230,7 @@ export interface FileRouteTypes {
     | '/app/partidas'
     | '/app/profile'
     | '/app/rentals'
+    | '/app/votaciones'
     | '/ca/activitats'
     | '/ca/avis-legal'
     | '/ca/blog'
@@ -1803,6 +1815,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CaActivitatsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/app/votaciones': {
+      id: '/app/votaciones'
+      path: '/votaciones'
+      fullPath: '/app/votaciones'
+      preLoaderRoute: typeof AppVotacionesRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/app/rentals': {
       id: '/app/rentals'
       path: '/rentals'
@@ -2233,6 +2252,7 @@ interface AppRouteChildren {
   AppPartidasRoute: typeof AppPartidasRoute
   AppProfileRoute: typeof AppProfileRoute
   AppRentalsRoute: typeof AppRentalsRouteWithChildren
+  AppVotacionesRoute: typeof AppVotacionesRoute
   AppIndexRoute: typeof AppIndexRoute
 }
 
@@ -2243,6 +2263,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppPartidasRoute: AppPartidasRoute,
   AppProfileRoute: AppProfileRoute,
   AppRentalsRoute: AppRentalsRouteWithChildren,
+  AppVotacionesRoute: AppVotacionesRoute,
   AppIndexRoute: AppIndexRoute,
 }
 
