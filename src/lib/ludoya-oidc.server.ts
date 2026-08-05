@@ -83,31 +83,47 @@ export async function signState(userId: string): Promise<string> {
   return `${payload}.${await hmac(payload)}`;
 }
 
+function decodeState(state: string): { u: string; n: string; e: number } | null {
+  const [payload] = state.split(".");
+  if (!payload) return null;
+  try {
+    return JSON.parse(new TextDecoder().decode(fromB64url(payload))) as {
+      u: string;
+      n: string;
+      e: number;
+    };
+  } catch {
+    return null;
+  }
+}
+
+/** The nonce is the random value embedded in the signed state (OIDC replay protection). */
+export function nonceFromState(state: string): string | null {
+  return decodeState(state)?.n ?? null;
+}
+
 export async function verifyState(state: string, userId: string): Promise<boolean> {
   const [payload, sig] = state.split(".");
   if (!payload || !sig) return false;
   if ((await hmac(payload)) !== sig) return false;
-  try {
-    const data = JSON.parse(new TextDecoder().decode(fromB64url(payload))) as {
-      u: string;
-      e: number;
-    };
-    return data.u === userId && data.e > Date.now();
-  } catch {
-    return false;
-  }
+  const data = decodeState(state);
+  if (!data) return false;
+  return data.u === userId && data.e > Date.now();
 }
 
 // ---------------- Authorization + token exchange ----------------
 
 export async function buildAuthorizationUrl(state: string, redirectUri: string): Promise<string> {
   const { authorization_endpoint } = await discover();
+  const nonce = nonceFromState(state);
+  if (!nonce) throw new Error("No se pudo generar el nonce de la solicitud");
   const url = new URL(authorization_endpoint);
   url.searchParams.set("response_type", "code");
   url.searchParams.set("client_id", clientId());
   url.searchParams.set("redirect_uri", redirectUri);
   url.searchParams.set("scope", LUDOYA_SCOPES);
   url.searchParams.set("state", state);
+  url.searchParams.set("nonce", nonce);
   return url.toString();
 }
 
@@ -125,7 +141,11 @@ function decodeJwtPayload(token: string): Record<string, unknown> {
   return JSON.parse(new TextDecoder().decode(fromB64url(part))) as Record<string, unknown>;
 }
 
-export async function exchangeCode(code: string, redirectUri: string): Promise<LudoyaIdentity> {
+export async function exchangeCode(
+  code: string,
+  redirectUri: string,
+  expectedNonce?: string | null,
+): Promise<LudoyaIdentity> {
   const { token_endpoint, userinfo_endpoint } = await discover();
   const body = new URLSearchParams({
     grant_type: "authorization_code",
@@ -151,6 +171,13 @@ export async function exchangeCode(code: string, redirectUri: string): Promise<L
 
   let claims: Record<string, unknown> = {};
   if (tokens.id_token) claims = decodeJwtPayload(tokens.id_token);
+
+  // OIDC replay protection: the id_token nonce must match the one we sent.
+  if (expectedNonce && typeof claims["nonce"] === "string" && claims["nonce"] !== expectedNonce) {
+    throw new Error("La respuesta de Ludoya no es válida (nonce incorrecto)");
+  }
+
+
 
   // Fill gaps from userinfo when available (username/avatar are the ones we need).
   if (userinfo_endpoint && tokens.access_token) {
