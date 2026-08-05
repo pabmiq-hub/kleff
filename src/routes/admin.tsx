@@ -15,7 +15,7 @@ import {
   ExternalLink,
   UserCircle2,
   Sparkles,
-} from "lucide-react";
+, Vote } from "lucide-react";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
@@ -73,6 +73,7 @@ function AdminLayout() {
           <AdminNavLink to="/admin/blog" icon={<Newspaper className="h-4 w-4" />} label="Blog" />
           <AdminNavLink to="/admin/media" icon={<Newspaper className="h-4 w-4" />} label="Medios" />
           <AdminNavLink to="/admin/team" icon={<UserCircle2 className="h-4 w-4" />} label="Equipo" />
+          <AdminNavLink to="/admin/polls" icon={<Vote className="h-4 w-4" />} label="Votaciones" />
           <AdminNavLink to="/admin/karma" icon={<Sparkles className="h-4 w-4" />} label="Karma" />
 
         </nav>
