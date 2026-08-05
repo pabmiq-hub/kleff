@@ -72,6 +72,7 @@ import { Route as CaBloodOnTheClocktowerRouteImport } from './routes/ca.blood-on
 import { Route as CaBlogRouteImport } from './routes/ca.blog'
 import { Route as CaAvisLegalRouteImport } from './routes/ca.avis-legal'
 import { Route as CaActivitatsRouteImport } from './routes/ca.activitats'
+import { Route as AppVotacionesRouteImport } from './routes/app.votaciones'
 import { Route as AppRentalsRouteImport } from './routes/app.rentals'
 import { Route as AppProfileRouteImport } from './routes/app.profile'
 import { Route as AppPartidasRouteImport } from './routes/app.partidas'
@@ -81,6 +82,7 @@ import { Route as AppCarnetRouteImport } from './routes/app.carnet'
 import { Route as AdminTeamRouteImport } from './routes/admin.team'
 import { Route as AdminRentalsRouteImport } from './routes/admin.rentals'
 import { Route as AdminRegistrationsRouteImport } from './routes/admin.registrations'
+import { Route as AdminPollsRouteImport } from './routes/admin.polls'
 import { Route as AdminMembersRouteImport } from './routes/admin.members'
 import { Route as AdminKarmaRouteImport } from './routes/admin.karma'
 import { Route as AdminInvitationsRouteImport } from './routes/admin.invitations'
@@ -432,6 +434,11 @@ const CaActivitatsRoute = CaActivitatsRouteImport.update({
   path: '/ca/activitats',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AppVotacionesRoute = AppVotacionesRouteImport.update({
+  id: '/votaciones',
+  path: '/votaciones',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppRentalsRoute = AppRentalsRouteImport.update({
   id: '/rentals',
   path: '/rentals',
@@ -475,6 +482,11 @@ const AdminRentalsRoute = AdminRentalsRouteImport.update({
 const AdminRegistrationsRoute = AdminRegistrationsRouteImport.update({
   id: '/registrations',
   path: '/registrations',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminPollsRoute = AdminPollsRouteImport.update({
+  id: '/polls',
+  path: '/polls',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminMembersRoute = AdminMembersRouteImport.update({
@@ -681,6 +693,7 @@ export interface FileRoutesByFullPath {
   '/admin/invitations': typeof AdminInvitationsRoute
   '/admin/karma': typeof AdminKarmaRoute
   '/admin/members': typeof AdminMembersRoute
+  '/admin/polls': typeof AdminPollsRoute
   '/admin/registrations': typeof AdminRegistrationsRouteWithChildren
   '/admin/rentals': typeof AdminRentalsRouteWithChildren
   '/admin/team': typeof AdminTeamRoute
@@ -690,6 +703,7 @@ export interface FileRoutesByFullPath {
   '/app/partidas': typeof AppPartidasRoute
   '/app/profile': typeof AppProfileRoute
   '/app/rentals': typeof AppRentalsRouteWithChildren
+  '/app/votaciones': typeof AppVotacionesRoute
   '/ca/activitats': typeof CaActivitatsRoute
   '/ca/avis-legal': typeof CaAvisLegalRoute
   '/ca/blog': typeof CaBlogRoute
@@ -785,12 +799,14 @@ export interface FileRoutesByTo {
   '/admin/invitations': typeof AdminInvitationsRoute
   '/admin/karma': typeof AdminKarmaRoute
   '/admin/members': typeof AdminMembersRoute
+  '/admin/polls': typeof AdminPollsRoute
   '/admin/team': typeof AdminTeamRoute
   '/app/carnet': typeof AppCarnetRoute
   '/app/karma': typeof AppKarmaRoute
   '/app/kleffers': typeof AppKleffersRoute
   '/app/partidas': typeof AppPartidasRoute
   '/app/profile': typeof AppProfileRoute
+  '/app/votaciones': typeof AppVotacionesRoute
   '/ca/activitats': typeof CaActivitatsRoute
   '/ca/avis-legal': typeof CaAvisLegalRoute
   '/ca/blog': typeof CaBlogRoute
@@ -891,6 +907,7 @@ export interface FileRoutesById {
   '/admin/invitations': typeof AdminInvitationsRoute
   '/admin/karma': typeof AdminKarmaRoute
   '/admin/members': typeof AdminMembersRoute
+  '/admin/polls': typeof AdminPollsRoute
   '/admin/registrations': typeof AdminRegistrationsRouteWithChildren
   '/admin/rentals': typeof AdminRentalsRouteWithChildren
   '/admin/team': typeof AdminTeamRoute
@@ -900,6 +917,7 @@ export interface FileRoutesById {
   '/app/partidas': typeof AppPartidasRoute
   '/app/profile': typeof AppProfileRoute
   '/app/rentals': typeof AppRentalsRouteWithChildren
+  '/app/votaciones': typeof AppVotacionesRoute
   '/ca/activitats': typeof CaActivitatsRoute
   '/ca/avis-legal': typeof CaAvisLegalRoute
   '/ca/blog': typeof CaBlogRoute
@@ -1001,6 +1019,7 @@ export interface FileRouteTypes {
     | '/admin/invitations'
     | '/admin/karma'
     | '/admin/members'
+    | '/admin/polls'
     | '/admin/registrations'
     | '/admin/rentals'
     | '/admin/team'
@@ -1010,6 +1029,7 @@ export interface FileRouteTypes {
     | '/app/partidas'
     | '/app/profile'
     | '/app/rentals'
+    | '/app/votaciones'
     | '/ca/activitats'
     | '/ca/avis-legal'
     | '/ca/blog'
@@ -1105,12 +1125,14 @@ export interface FileRouteTypes {
     | '/admin/invitations'
     | '/admin/karma'
     | '/admin/members'
+    | '/admin/polls'
     | '/admin/team'
     | '/app/carnet'
     | '/app/karma'
     | '/app/kleffers'
     | '/app/partidas'
     | '/app/profile'
+    | '/app/votaciones'
     | '/ca/activitats'
     | '/ca/avis-legal'
     | '/ca/blog'
@@ -1210,6 +1232,7 @@ export interface FileRouteTypes {
     | '/admin/invitations'
     | '/admin/karma'
     | '/admin/members'
+    | '/admin/polls'
     | '/admin/registrations'
     | '/admin/rentals'
     | '/admin/team'
@@ -1219,6 +1242,7 @@ export interface FileRouteTypes {
     | '/app/partidas'
     | '/app/profile'
     | '/app/rentals'
+    | '/app/votaciones'
     | '/ca/activitats'
     | '/ca/avis-legal'
     | '/ca/blog'
@@ -1803,6 +1827,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CaActivitatsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/app/votaciones': {
+      id: '/app/votaciones'
+      path: '/votaciones'
+      fullPath: '/app/votaciones'
+      preLoaderRoute: typeof AppVotacionesRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/app/rentals': {
       id: '/app/rentals'
       path: '/rentals'
@@ -1864,6 +1895,13 @@ declare module '@tanstack/react-router' {
       path: '/registrations'
       fullPath: '/admin/registrations'
       preLoaderRoute: typeof AdminRegistrationsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/polls': {
+      id: '/admin/polls'
+      path: '/polls'
+      fullPath: '/admin/polls'
+      preLoaderRoute: typeof AdminPollsRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/members': {
@@ -2180,6 +2218,7 @@ interface AdminRouteChildren {
   AdminInvitationsRoute: typeof AdminInvitationsRoute
   AdminKarmaRoute: typeof AdminKarmaRoute
   AdminMembersRoute: typeof AdminMembersRoute
+  AdminPollsRoute: typeof AdminPollsRoute
   AdminRegistrationsRoute: typeof AdminRegistrationsRouteWithChildren
   AdminRentalsRoute: typeof AdminRentalsRouteWithChildren
   AdminTeamRoute: typeof AdminTeamRoute
@@ -2196,6 +2235,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminInvitationsRoute: AdminInvitationsRoute,
   AdminKarmaRoute: AdminKarmaRoute,
   AdminMembersRoute: AdminMembersRoute,
+  AdminPollsRoute: AdminPollsRoute,
   AdminRegistrationsRoute: AdminRegistrationsRouteWithChildren,
   AdminRentalsRoute: AdminRentalsRouteWithChildren,
   AdminTeamRoute: AdminTeamRoute,
@@ -2233,6 +2273,7 @@ interface AppRouteChildren {
   AppPartidasRoute: typeof AppPartidasRoute
   AppProfileRoute: typeof AppProfileRoute
   AppRentalsRoute: typeof AppRentalsRouteWithChildren
+  AppVotacionesRoute: typeof AppVotacionesRoute
   AppIndexRoute: typeof AppIndexRoute
 }
 
@@ -2243,6 +2284,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppPartidasRoute: AppPartidasRoute,
   AppProfileRoute: AppProfileRoute,
   AppRentalsRoute: AppRentalsRouteWithChildren,
+  AppVotacionesRoute: AppVotacionesRoute,
   AppIndexRoute: AppIndexRoute,
 }
 

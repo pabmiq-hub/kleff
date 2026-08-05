@@ -1293,6 +1293,195 @@ export type Database = {
         }
         Relationships: []
       }
+      poll_options: {
+        Row: {
+          created_at: string
+          description: string | null
+          game_image_url: string | null
+          game_ref: string | null
+          game_year: number | null
+          id: string
+          label: string
+          poll_id: string
+          sort_order: number
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          game_image_url?: string | null
+          game_ref?: string | null
+          game_year?: number | null
+          id?: string
+          label: string
+          poll_id: string
+          sort_order?: number
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          game_image_url?: string | null
+          game_ref?: string | null
+          game_year?: number | null
+          id?: string
+          label?: string
+          poll_id?: string
+          sort_order?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "poll_options_poll_id_fkey"
+            columns: ["poll_id"]
+            isOneToOne: false
+            referencedRelation: "polls"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      poll_responses: {
+        Row: {
+          answers: Json
+          created_at: string
+          id: string
+          poll_id: string
+          user_id: string
+        }
+        Insert: {
+          answers?: Json
+          created_at?: string
+          id?: string
+          poll_id: string
+          user_id: string
+        }
+        Update: {
+          answers?: Json
+          created_at?: string
+          id?: string
+          poll_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "poll_responses_poll_id_fkey"
+            columns: ["poll_id"]
+            isOneToOne: false
+            referencedRelation: "polls"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      poll_votes: {
+        Row: {
+          created_at: string
+          id: string
+          option_id: string
+          poll_id: string
+          user_id: string
+          weight: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          option_id: string
+          poll_id: string
+          user_id: string
+          weight?: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          option_id?: string
+          poll_id?: string
+          user_id?: string
+          weight?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "poll_votes_option_id_fkey"
+            columns: ["option_id"]
+            isOneToOne: false
+            referencedRelation: "poll_options"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "poll_votes_poll_id_fkey"
+            columns: ["poll_id"]
+            isOneToOne: false
+            referencedRelation: "polls"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      polls: {
+        Row: {
+          closes_at: string | null
+          created_at: string
+          created_by: string | null
+          description_ca: string | null
+          description_en: string | null
+          description_es: string | null
+          id: string
+          karma_category_id: string | null
+          kind: Database["public"]["Enums"]["poll_kind"]
+          max_choices: number
+          opens_at: string
+          questions: Json
+          show_results: boolean
+          status: Database["public"]["Enums"]["poll_status"]
+          title_ca: string | null
+          title_en: string | null
+          title_es: string
+          updated_at: string
+        }
+        Insert: {
+          closes_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          description_ca?: string | null
+          description_en?: string | null
+          description_es?: string | null
+          id?: string
+          karma_category_id?: string | null
+          kind?: Database["public"]["Enums"]["poll_kind"]
+          max_choices?: number
+          opens_at?: string
+          questions?: Json
+          show_results?: boolean
+          status?: Database["public"]["Enums"]["poll_status"]
+          title_ca?: string | null
+          title_en?: string | null
+          title_es: string
+          updated_at?: string
+        }
+        Update: {
+          closes_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          description_ca?: string | null
+          description_en?: string | null
+          description_es?: string | null
+          id?: string
+          karma_category_id?: string | null
+          kind?: Database["public"]["Enums"]["poll_kind"]
+          max_choices?: number
+          opens_at?: string
+          questions?: Json
+          show_results?: boolean
+          status?: Database["public"]["Enums"]["poll_status"]
+          title_ca?: string | null
+          title_en?: string | null
+          title_es?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "polls_karma_category_id_fkey"
+            columns: ["karma_category_id"]
+            isOneToOne: false
+            referencedRelation: "karma_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -1947,6 +2136,8 @@ export type Database = {
         | "tournament_discount"
         | "priority_access"
         | "double_vote"
+      poll_kind: "survey" | "acquisition"
+      poll_status: "draft" | "published" | "closed"
       rental_request_status:
         | "pending"
         | "approved"
@@ -2129,6 +2320,8 @@ export const Constants = {
         "priority_access",
         "double_vote",
       ],
+      poll_kind: ["survey", "acquisition"],
+      poll_status: ["draft", "published", "closed"],
       rental_request_status: [
         "pending",
         "approved",
