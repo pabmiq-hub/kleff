@@ -82,6 +82,7 @@ import { Route as AppCarnetRouteImport } from './routes/app.carnet'
 import { Route as AdminTeamRouteImport } from './routes/admin.team'
 import { Route as AdminRentalsRouteImport } from './routes/admin.rentals'
 import { Route as AdminRegistrationsRouteImport } from './routes/admin.registrations'
+import { Route as AdminPollsRouteImport } from './routes/admin.polls'
 import { Route as AdminMembersRouteImport } from './routes/admin.members'
 import { Route as AdminKarmaRouteImport } from './routes/admin.karma'
 import { Route as AdminInvitationsRouteImport } from './routes/admin.invitations'
@@ -483,6 +484,11 @@ const AdminRegistrationsRoute = AdminRegistrationsRouteImport.update({
   path: '/registrations',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminPollsRoute = AdminPollsRouteImport.update({
+  id: '/polls',
+  path: '/polls',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminMembersRoute = AdminMembersRouteImport.update({
   id: '/members',
   path: '/members',
@@ -687,6 +693,7 @@ export interface FileRoutesByFullPath {
   '/admin/invitations': typeof AdminInvitationsRoute
   '/admin/karma': typeof AdminKarmaRoute
   '/admin/members': typeof AdminMembersRoute
+  '/admin/polls': typeof AdminPollsRoute
   '/admin/registrations': typeof AdminRegistrationsRouteWithChildren
   '/admin/rentals': typeof AdminRentalsRouteWithChildren
   '/admin/team': typeof AdminTeamRoute
@@ -792,6 +799,7 @@ export interface FileRoutesByTo {
   '/admin/invitations': typeof AdminInvitationsRoute
   '/admin/karma': typeof AdminKarmaRoute
   '/admin/members': typeof AdminMembersRoute
+  '/admin/polls': typeof AdminPollsRoute
   '/admin/team': typeof AdminTeamRoute
   '/app/carnet': typeof AppCarnetRoute
   '/app/karma': typeof AppKarmaRoute
@@ -899,6 +907,7 @@ export interface FileRoutesById {
   '/admin/invitations': typeof AdminInvitationsRoute
   '/admin/karma': typeof AdminKarmaRoute
   '/admin/members': typeof AdminMembersRoute
+  '/admin/polls': typeof AdminPollsRoute
   '/admin/registrations': typeof AdminRegistrationsRouteWithChildren
   '/admin/rentals': typeof AdminRentalsRouteWithChildren
   '/admin/team': typeof AdminTeamRoute
@@ -1010,6 +1019,7 @@ export interface FileRouteTypes {
     | '/admin/invitations'
     | '/admin/karma'
     | '/admin/members'
+    | '/admin/polls'
     | '/admin/registrations'
     | '/admin/rentals'
     | '/admin/team'
@@ -1115,6 +1125,7 @@ export interface FileRouteTypes {
     | '/admin/invitations'
     | '/admin/karma'
     | '/admin/members'
+    | '/admin/polls'
     | '/admin/team'
     | '/app/carnet'
     | '/app/karma'
@@ -1221,6 +1232,7 @@ export interface FileRouteTypes {
     | '/admin/invitations'
     | '/admin/karma'
     | '/admin/members'
+    | '/admin/polls'
     | '/admin/registrations'
     | '/admin/rentals'
     | '/admin/team'
@@ -1885,6 +1897,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminRegistrationsRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/polls': {
+      id: '/admin/polls'
+      path: '/polls'
+      fullPath: '/admin/polls'
+      preLoaderRoute: typeof AdminPollsRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/members': {
       id: '/admin/members'
       path: '/members'
@@ -2199,6 +2218,7 @@ interface AdminRouteChildren {
   AdminInvitationsRoute: typeof AdminInvitationsRoute
   AdminKarmaRoute: typeof AdminKarmaRoute
   AdminMembersRoute: typeof AdminMembersRoute
+  AdminPollsRoute: typeof AdminPollsRoute
   AdminRegistrationsRoute: typeof AdminRegistrationsRouteWithChildren
   AdminRentalsRoute: typeof AdminRentalsRouteWithChildren
   AdminTeamRoute: typeof AdminTeamRoute
@@ -2215,6 +2235,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminInvitationsRoute: AdminInvitationsRoute,
   AdminKarmaRoute: AdminKarmaRoute,
   AdminMembersRoute: AdminMembersRoute,
+  AdminPollsRoute: AdminPollsRoute,
   AdminRegistrationsRoute: AdminRegistrationsRouteWithChildren,
   AdminRentalsRoute: AdminRentalsRouteWithChildren,
   AdminTeamRoute: AdminTeamRoute,
