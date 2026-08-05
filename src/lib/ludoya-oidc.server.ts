@@ -83,19 +83,32 @@ export async function signState(userId: string): Promise<string> {
   return `${payload}.${await hmac(payload)}`;
 }
 
+function decodeState(state: string): { u: string; n: string; e: number } | null {
+  const [payload] = state.split(".");
+  if (!payload) return null;
+  try {
+    return JSON.parse(new TextDecoder().decode(fromB64url(payload))) as {
+      u: string;
+      n: string;
+      e: number;
+    };
+  } catch {
+    return null;
+  }
+}
+
+/** The nonce is the random value embedded in the signed state (OIDC replay protection). */
+export function nonceFromState(state: string): string | null {
+  return decodeState(state)?.n ?? null;
+}
+
 export async function verifyState(state: string, userId: string): Promise<boolean> {
   const [payload, sig] = state.split(".");
   if (!payload || !sig) return false;
   if ((await hmac(payload)) !== sig) return false;
-  try {
-    const data = JSON.parse(new TextDecoder().decode(fromB64url(payload))) as {
-      u: string;
-      e: number;
-    };
-    return data.u === userId && data.e > Date.now();
-  } catch {
-    return false;
-  }
+  const data = decodeState(state);
+  if (!data) return false;
+  return data.u === userId && data.e > Date.now();
 }
 
 // ---------------- Authorization + token exchange ----------------
