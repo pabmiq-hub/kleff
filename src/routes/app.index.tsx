@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useAuth } from "@/auth/AuthProvider";
 import { IdCard, Dices, Gamepad2, Users } from "lucide-react";
 import { FeaturedGamesCard } from "@/components/app/FeaturedGamesCard";
+import { ActivePollsCard } from "@/components/app/ActivePollsCard";
 
 export const Route = createFileRoute("/app/")({
   component: AppHome,
@@ -24,6 +25,7 @@ function AppHome() {
       </div>
 
       <FeaturedGamesCard />
+      <ActivePollsCard />
     </div>
   );
 }
