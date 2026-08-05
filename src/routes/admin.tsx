@@ -15,7 +15,8 @@ import {
   ExternalLink,
   UserCircle2,
   Sparkles,
-, Vote } from "lucide-react";
+  Vote,
+} from "lucide-react";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
