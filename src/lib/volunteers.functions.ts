@@ -114,7 +114,7 @@ export const adminListVolunteerApplications = createServerFn({ method: "POST" })
         adminNotes: a.admin_notes,
         createdAt: a.created_at,
         decidedAt: a.decided_at,
-        answers: (a.answers ?? {}) as Record<string, unknown>,
+        answers: (a.answers ?? {}) as Record<string, string | string[]>,
         member: byId.get(a.user_id) ?? null,
       })),
     };
@@ -142,7 +142,11 @@ export const adminUpdateVolunteerApplication = createServerFn({ method: "POST" }
       .eq("id", data.id)
       .maybeSingle();
 
-    const payload: Record<string, unknown> = {};
+    const payload: {
+      status?: string;
+      decided_at?: string | null;
+      admin_notes?: string | null;
+    } = {};
     if (data.status) {
       payload.status = data.status;
       payload.decided_at = data.status === "pending" ? null : new Date().toISOString();
