@@ -3,6 +3,7 @@ import { useAuth } from "@/auth/AuthProvider";
 import { IdCard, Dices, Gamepad2, Users } from "lucide-react";
 import { FeaturedGamesCard } from "@/components/app/FeaturedGamesCard";
 import { ActivePollsCard } from "@/components/app/ActivePollsCard";
+import { VolunteerCard } from "@/components/app/VolunteerCard";
 
 export const Route = createFileRoute("/app/")({
   component: AppHome,
@@ -26,6 +27,7 @@ function AppHome() {
 
       <FeaturedGamesCard />
       <ActivePollsCard />
+      <VolunteerCard />
     </div>
   );
 }

@@ -14,6 +14,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { ImagePicker } from "@/components/cms/ImagePicker";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { VolunteerApplications } from "@/components/admin/VolunteerApplications";
 import { toast } from "sonner";
 import { Trash2, Plus, Pencil } from "lucide-react";
 
@@ -107,13 +109,25 @@ function TeamAdminPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-start justify-between gap-4 flex-wrap">
-        <div>
-          <h1 className="text-3xl font-display font-bold text-ink">Equipo</h1>
-          <p className="text-ink/60 mt-1">
-            Miembros que aparecen en <em>Quiénes somos</em>. Los cambios se reflejan en las 3 versiones de idioma.
-          </p>
-        </div>
+      <div>
+        <h1 className="text-3xl font-display font-bold text-ink">Equipo</h1>
+        <p className="text-ink/60 mt-1">
+          Fichas públicas de <em>Quiénes somos</em> y solicitudes para el equipo de organización.
+        </p>
+      </div>
+
+      <Tabs defaultValue="cards" className="space-y-4">
+        <TabsList>
+          <TabsTrigger value="cards">Fichas públicas</TabsTrigger>
+          <TabsTrigger value="applications">Solicitudes</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="applications">
+          <VolunteerApplications />
+        </TabsContent>
+
+        <TabsContent value="cards" className="space-y-4">
+      <div className="flex justify-end">
         <Button onClick={startNew} className="bg-coral text-cream hover:bg-coral/90">
           <Plus className="h-4 w-4 mr-2" /> Nuevo miembro
         </Button>
@@ -151,6 +165,8 @@ function TeamAdminPage() {
           {rows.length === 0 && <p className="text-ink/60">No hay miembros. Crea el primero.</p>}
         </div>
       )}
+        </TabsContent>
+      </Tabs>
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger asChild>

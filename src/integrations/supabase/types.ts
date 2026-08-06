@@ -2048,6 +2048,48 @@ export type Database = {
         }
         Relationships: []
       }
+      volunteer_applications: {
+        Row: {
+          admin_notes: string | null
+          answers: Json
+          created_at: string
+          decided_at: string | null
+          email: string
+          full_name: string
+          id: string
+          phone: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          answers?: Json
+          created_at?: string
+          decided_at?: string | null
+          email: string
+          full_name: string
+          id?: string
+          phone?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          admin_notes?: string | null
+          answers?: Json
+          created_at?: string
+          decided_at?: string | null
+          email?: string
+          full_name?: string
+          id?: string
+          phone?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
