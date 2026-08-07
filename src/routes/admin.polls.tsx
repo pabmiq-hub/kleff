@@ -163,9 +163,19 @@ function AdminPollsPage() {
       toast.error("Añade al menos dos opciones");
       return;
     }
-    if (draft.kind === "survey" && draft.questions.length === 0) {
-      toast.error("Añade al menos una pregunta");
-      return;
+    if (draft.kind === "survey") {
+      if (draft.questions.length === 0) {
+        toast.error("Añade al menos una pregunta");
+        return;
+      }
+      if (draft.questions.some((q) => !q.label.trim())) {
+        toast.error("Todas las preguntas necesitan un enunciado");
+        return;
+      }
+      if (draft.questions.some((q) => HAS_OPTIONS(q.type) && q.options.filter((o) => o.trim()).length < 2)) {
+        toast.error("Las preguntas con opciones necesitan al menos dos respuestas");
+        return;
+      }
     }
     setBusy(true);
     try {
@@ -183,9 +193,11 @@ function AdminPollsPage() {
           showResults: draft.showResults,
           questions: draft.questions.map((q) => ({
             id: q.id,
-            label: q.label,
+            label: q.label.trim(),
             type: q.type,
-            options: q.options,
+            help: q.help.trim() || null,
+            required: q.required,
+            options: HAS_OPTIONS(q.type) ? q.options.map((o) => o.trim()).filter(Boolean) : [],
           })),
           options: draft.options.map((o) => ({
             id: o.id,
