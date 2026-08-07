@@ -53,7 +53,7 @@ export const listMyPolls = createServerFn({ method: "POST" })
           closesAt: p.closes_at,
           maxChoices: p.max_choices,
           showResults: p.show_results,
-          questions: (p.questions ?? []) as { id: string; label: string; type: string; options?: string[] }[],
+          questions: (p.questions ?? []) as { id: string; label: string; type: string; help?: string | null; required?: boolean; options?: string[] }[],
           open: isPollOpen(p),
           options: opts.map((o) => ({
             id: o.id,

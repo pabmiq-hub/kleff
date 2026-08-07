@@ -63,7 +63,7 @@ export const adminListPolls = createServerFn({ method: "POST" })
       : { data: [] };
     const { data: categories } = await supabaseAdmin
       .from("karma_categories")
-      .select("id, name_es, points")
+      .select("id, code, name_es, points")
       .eq("is_active", true)
       .order("sort_order");
 
@@ -84,7 +84,7 @@ export const adminListPolls = createServerFn({ method: "POST" })
           karmaCategoryId: p.karma_category_id,
           maxChoices: p.max_choices,
           showResults: p.show_results,
-          questions: (p.questions ?? []) as { id: string; label: string; type: string; options?: string[] }[],
+          questions: (p.questions ?? []) as { id: string; label: string; type: string; help?: string | null; required?: boolean; options?: string[] }[],
           options: (options ?? [])
             .filter((o) => o.poll_id === p.id)
             .map((o) => ({
