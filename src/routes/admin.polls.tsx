@@ -30,7 +30,30 @@ type OptionDraft = {
   year: number | null;
 };
 
-type QuestionDraft = { id: string; label: string; type: "text" | "textarea" | "single" | "multi"; options: string[] };
+type QuestionType = "text" | "textarea" | "email" | "phone" | "number" | "date" | "single" | "multi" | "select";
+
+const QUESTION_TYPES: { value: QuestionType; label: string }[] = [
+  { value: "text", label: "Texto corto" },
+  { value: "textarea", label: "Texto largo" },
+  { value: "email", label: "Email" },
+  { value: "phone", label: "Teléfono" },
+  { value: "number", label: "Número" },
+  { value: "date", label: "Fecha" },
+  { value: "single", label: "Opción única" },
+  { value: "multi", label: "Varias opciones" },
+  { value: "select", label: "Desplegable" },
+];
+
+const HAS_OPTIONS = (t: QuestionType) => t === "single" || t === "multi" || t === "select";
+
+type QuestionDraft = {
+  id: string;
+  label: string;
+  type: QuestionType;
+  help: string;
+  required: boolean;
+  options: string[];
+};
 
 type Draft = {
   id: string | null;
@@ -81,6 +104,14 @@ function AdminPollsPage() {
   const [results, setResults] = useState<{ id?: string; name?: string; imageUrl?: string; year?: number }[]>([]);
   const [searching, setSearching] = useState(false);
 
+  const defaultKarmaFor = useCallback(
+    (kind: Draft["kind"]) => {
+      const code = kind === "survey" ? "survey" : "poll_vote";
+      return (data?.categories ?? []).find((c) => c.code === code)?.id ?? "none";
+    },
+    [data],
+  );
+
   const reload = useCallback(() => listFn({ data: undefined as never }).then(setData), [listFn]);
 
   useEffect(() => {
@@ -102,7 +133,9 @@ function AdminPollsPage() {
       questions: (p.questions ?? []).map((q) => ({
         id: q.id,
         label: q.label,
-        type: q.type as QuestionDraft["type"],
+        type: q.type as QuestionType,
+        help: q.help ?? "",
+        required: q.required ?? true,
         options: q.options ?? [],
       })),
       options: p.options.map((o) => ({
@@ -138,9 +171,19 @@ function AdminPollsPage() {
       toast.error("Añade al menos dos opciones");
       return;
     }
-    if (draft.kind === "survey" && draft.questions.length === 0) {
-      toast.error("Añade al menos una pregunta");
-      return;
+    if (draft.kind === "survey") {
+      if (draft.questions.length === 0) {
+        toast.error("Añade al menos una pregunta");
+        return;
+      }
+      if (draft.questions.some((q) => !q.label.trim())) {
+        toast.error("Todas las preguntas necesitan un enunciado");
+        return;
+      }
+      if (draft.questions.some((q) => HAS_OPTIONS(q.type) && q.options.filter((o) => o.trim()).length < 2)) {
+        toast.error("Las preguntas con opciones necesitan al menos dos respuestas");
+        return;
+      }
     }
     setBusy(true);
     try {
@@ -158,9 +201,11 @@ function AdminPollsPage() {
           showResults: draft.showResults,
           questions: draft.questions.map((q) => ({
             id: q.id,
-            label: q.label,
+            label: q.label.trim(),
             type: q.type,
-            options: q.options,
+            help: q.help.trim() || null,
+            required: q.required,
+            options: HAS_OPTIONS(q.type) ? q.options.map((o) => o.trim()).filter(Boolean) : [],
           })),
           options: draft.options.map((o) => ({
             id: o.id,
@@ -208,7 +253,7 @@ function AdminPollsPage() {
           <h1 className="font-display text-3xl font-bold">Encuestas y votaciones</h1>
           <p className="text-ink/70 mt-1">Crea encuestas generales y votaciones de nuevas adquisiciones.</p>
         </div>
-        <Button onClick={() => setDraft(emptyDraft())}>
+        <Button onClick={() => { const d = emptyDraft(); setDraft({ ...d, karmaCategoryId: defaultKarmaFor(d.kind) }); }}>
           <Plus className="h-4 w-4 mr-2" /> Nueva
         </Button>
       </header>
@@ -289,7 +334,10 @@ function AdminPollsPage() {
                   <Label>Tipo</Label>
                   <Select
                     value={draft.kind}
-                    onValueChange={(v) => setDraft({ ...draft, kind: v as Draft["kind"] })}
+                    onValueChange={(v) => {
+                      const kind = v as Draft["kind"];
+                      setDraft({ ...draft, kind, karmaCategoryId: defaultKarmaFor(kind) });
+                    }}
                   >
                     <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>
@@ -466,59 +514,96 @@ function AdminPollsPage() {
               ) : (
                 <div className="space-y-2">
                   <Label>Preguntas</Label>
-                  {draft.questions.map((q, i) => (
-                    <div key={i} className="rounded-xl border border-ink/10 p-3 space-y-2">
-                      <div className="flex gap-2">
-                        <Input
-                          value={q.label}
-                          placeholder="Pregunta"
-                          onChange={(e) => {
-                            const questions = [...draft.questions];
-                            questions[i] = { ...q, label: e.target.value };
-                            setDraft({ ...draft, questions });
-                          }}
-                        />
-                        <Select
-                          value={q.type}
-                          onValueChange={(v) => {
-                            const questions = [...draft.questions];
-                            questions[i] = { ...q, type: v as QuestionDraft["type"] };
-                            setDraft({ ...draft, questions });
-                          }}
-                        >
-                          <SelectTrigger className="w-40"><SelectValue /></SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="text">Texto corto</SelectItem>
-                            <SelectItem value="textarea">Texto largo</SelectItem>
-                            <SelectItem value="single">Opción única</SelectItem>
-                            <SelectItem value="multi">Varias opciones</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => setDraft({ ...draft, questions: draft.questions.filter((_, x) => x !== i) })}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
+                  {draft.questions.map((q, i) => {
+                    const update = (patch: Partial<QuestionDraft>) => {
+                      const questions = [...draft.questions];
+                      questions[i] = { ...q, ...patch };
+                      setDraft({ ...draft, questions });
+                    };
+                    return (
+                      <div key={q.id} className="rounded-xl border border-ink/10 p-3 space-y-3">
+                        <div className="flex gap-2">
+                          <Input
+                            value={q.label}
+                            placeholder="Pregunta"
+                            onChange={(e) => update({ label: e.target.value })}
+                          />
+                          <Select
+                            value={q.type}
+                            onValueChange={(v) => {
+                              const type = v as QuestionType;
+                              update({
+                                type,
+                                options: HAS_OPTIONS(type) && q.options.length === 0 ? ["", ""] : q.options,
+                              });
+                            }}
+                          >
+                            <SelectTrigger className="w-44"><SelectValue /></SelectTrigger>
+                            <SelectContent>
+                              {QUESTION_TYPES.map((t) => (
+                                <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setDraft({ ...draft, questions: draft.questions.filter((_, x) => x !== i) })}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+
+                        <div className="grid sm:grid-cols-[1fr_auto] gap-3 items-center">
+                          <Input
+                            value={q.help}
+                            placeholder="Texto de ayuda (opcional)"
+                            onChange={(e) => update({ help: e.target.value })}
+                          />
+                          <div className="flex items-center gap-2">
+                            <Switch checked={q.required} onCheckedChange={(v) => update({ required: v })} />
+                            <Label className="font-normal text-sm">Obligatoria</Label>
+                          </div>
+                        </div>
+
+                        {HAS_OPTIONS(q.type) && (
+                          <div className="space-y-2">
+                            <Label className="text-xs text-ink/60">Opciones de respuesta</Label>
+                            {q.options.map((opt, oi) => (
+                              <div key={oi} className="flex gap-2">
+                                <Input
+                                  value={opt}
+                                  placeholder={`Opción ${oi + 1}`}
+                                  onChange={(e) => {
+                                    const options = [...q.options];
+                                    options[oi] = e.target.value;
+                                    update({ options });
+                                  }}
+                                />
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => update({ options: q.options.filter((_, x) => x !== oi) })}
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            ))}
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              onClick={() => update({ options: [...q.options, ""] })}
+                            >
+                              <Plus className="h-4 w-4 mr-1" /> Añadir opción
+                            </Button>
+                          </div>
+                        )}
                       </div>
-                      {(q.type === "single" || q.type === "multi") && (
-                        <Input
-                          value={q.options.join(", ")}
-                          placeholder="Opciones separadas por comas"
-                          onChange={(e) => {
-                            const questions = [...draft.questions];
-                            questions[i] = {
-                              ...q,
-                              options: e.target.value.split(",").map((s) => s.trim()).filter(Boolean),
-                            };
-                            setDraft({ ...draft, questions });
-                          }}
-                        />
-                      )}
-                    </div>
-                  ))}
+                    );
+                  })}
                   <Button
                     type="button"
                     variant="ghost"
@@ -528,13 +613,14 @@ function AdminPollsPage() {
                         ...draft,
                         questions: [
                           ...draft.questions,
-                          { id: `q${Date.now()}`, label: "", type: "text", options: [] },
+                          { id: `q${Date.now()}`, label: "", type: "text", help: "", required: true, options: [] },
                         ],
                       })
                     }
                   >
                     <Plus className="h-4 w-4 mr-1" /> Añadir pregunta
                   </Button>
+
                 </div>
               )}
 
