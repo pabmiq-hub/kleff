@@ -491,59 +491,96 @@ function AdminPollsPage() {
               ) : (
                 <div className="space-y-2">
                   <Label>Preguntas</Label>
-                  {draft.questions.map((q, i) => (
-                    <div key={i} className="rounded-xl border border-ink/10 p-3 space-y-2">
-                      <div className="flex gap-2">
-                        <Input
-                          value={q.label}
-                          placeholder="Pregunta"
-                          onChange={(e) => {
-                            const questions = [...draft.questions];
-                            questions[i] = { ...q, label: e.target.value };
-                            setDraft({ ...draft, questions });
-                          }}
-                        />
-                        <Select
-                          value={q.type}
-                          onValueChange={(v) => {
-                            const questions = [...draft.questions];
-                            questions[i] = { ...q, type: v as QuestionDraft["type"] };
-                            setDraft({ ...draft, questions });
-                          }}
-                        >
-                          <SelectTrigger className="w-40"><SelectValue /></SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="text">Texto corto</SelectItem>
-                            <SelectItem value="textarea">Texto largo</SelectItem>
-                            <SelectItem value="single">Opción única</SelectItem>
-                            <SelectItem value="multi">Varias opciones</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => setDraft({ ...draft, questions: draft.questions.filter((_, x) => x !== i) })}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
+                  {draft.questions.map((q, i) => {
+                    const update = (patch: Partial<QuestionDraft>) => {
+                      const questions = [...draft.questions];
+                      questions[i] = { ...q, ...patch };
+                      setDraft({ ...draft, questions });
+                    };
+                    return (
+                      <div key={q.id} className="rounded-xl border border-ink/10 p-3 space-y-3">
+                        <div className="flex gap-2">
+                          <Input
+                            value={q.label}
+                            placeholder="Pregunta"
+                            onChange={(e) => update({ label: e.target.value })}
+                          />
+                          <Select
+                            value={q.type}
+                            onValueChange={(v) => {
+                              const type = v as QuestionType;
+                              update({
+                                type,
+                                options: HAS_OPTIONS(type) && q.options.length === 0 ? ["", ""] : q.options,
+                              });
+                            }}
+                          >
+                            <SelectTrigger className="w-44"><SelectValue /></SelectTrigger>
+                            <SelectContent>
+                              {QUESTION_TYPES.map((t) => (
+                                <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setDraft({ ...draft, questions: draft.questions.filter((_, x) => x !== i) })}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+
+                        <div className="grid sm:grid-cols-[1fr_auto] gap-3 items-center">
+                          <Input
+                            value={q.help}
+                            placeholder="Texto de ayuda (opcional)"
+                            onChange={(e) => update({ help: e.target.value })}
+                          />
+                          <div className="flex items-center gap-2">
+                            <Switch checked={q.required} onCheckedChange={(v) => update({ required: v })} />
+                            <Label className="font-normal text-sm">Obligatoria</Label>
+                          </div>
+                        </div>
+
+                        {HAS_OPTIONS(q.type) && (
+                          <div className="space-y-2">
+                            <Label className="text-xs text-ink/60">Opciones de respuesta</Label>
+                            {q.options.map((opt, oi) => (
+                              <div key={oi} className="flex gap-2">
+                                <Input
+                                  value={opt}
+                                  placeholder={`Opción ${oi + 1}`}
+                                  onChange={(e) => {
+                                    const options = [...q.options];
+                                    options[oi] = e.target.value;
+                                    update({ options });
+                                  }}
+                                />
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => update({ options: q.options.filter((_, x) => x !== oi) })}
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            ))}
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              onClick={() => update({ options: [...q.options, ""] })}
+                            >
+                              <Plus className="h-4 w-4 mr-1" /> Añadir opción
+                            </Button>
+                          </div>
+                        )}
                       </div>
-                      {(q.type === "single" || q.type === "multi") && (
-                        <Input
-                          value={q.options.join(", ")}
-                          placeholder="Opciones separadas por comas"
-                          onChange={(e) => {
-                            const questions = [...draft.questions];
-                            questions[i] = {
-                              ...q,
-                              options: e.target.value.split(",").map((s) => s.trim()).filter(Boolean),
-                            };
-                            setDraft({ ...draft, questions });
-                          }}
-                        />
-                      )}
-                    </div>
-                  ))}
+                    );
+                  })}
                   <Button
                     type="button"
                     variant="ghost"
@@ -553,13 +590,14 @@ function AdminPollsPage() {
                         ...draft,
                         questions: [
                           ...draft.questions,
-                          { id: `q${Date.now()}`, label: "", type: "text", options: [] },
+                          { id: `q${Date.now()}`, label: "", type: "text", help: "", required: true, options: [] },
                         ],
                       })
                     }
                   >
                     <Plus className="h-4 w-4 mr-1" /> Añadir pregunta
                   </Button>
+
                 </div>
               )}
 
