@@ -79,7 +79,7 @@ export async function awardPollKarma(
   const { data: category } = await supabaseAdmin
     .from("karma_categories")
     .select("id, points, is_active")
-    .eq("id", categoryId)
+    .eq("id", resolvedId)
     .maybeSingle();
   if (!category || !category.is_active) return { awarded: false };
 
