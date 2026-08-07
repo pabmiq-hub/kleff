@@ -30,7 +30,30 @@ type OptionDraft = {
   year: number | null;
 };
 
-type QuestionDraft = { id: string; label: string; type: "text" | "textarea" | "single" | "multi"; options: string[] };
+type QuestionType = "text" | "textarea" | "email" | "phone" | "number" | "date" | "single" | "multi" | "select";
+
+const QUESTION_TYPES: { value: QuestionType; label: string }[] = [
+  { value: "text", label: "Texto corto" },
+  { value: "textarea", label: "Texto largo" },
+  { value: "email", label: "Email" },
+  { value: "phone", label: "Teléfono" },
+  { value: "number", label: "Número" },
+  { value: "date", label: "Fecha" },
+  { value: "single", label: "Opción única" },
+  { value: "multi", label: "Varias opciones" },
+  { value: "select", label: "Desplegable" },
+];
+
+const HAS_OPTIONS = (t: QuestionType) => t === "single" || t === "multi" || t === "select";
+
+type QuestionDraft = {
+  id: string;
+  label: string;
+  type: QuestionType;
+  help: string;
+  required: boolean;
+  options: string[];
+};
 
 type Draft = {
   id: string | null;
