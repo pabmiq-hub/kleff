@@ -159,7 +159,11 @@ export function PollCard({ poll, onDone }: { poll: MemberPoll; onDone: () => voi
         <div className="space-y-4">
           {poll.questions.map((q) => (
             <div key={q.id} className="space-y-2">
-              <Label>{q.label}</Label>
+              <Label>
+                {q.label}
+                {(q.required ?? true) && <span className="text-coral-deep"> *</span>}
+              </Label>
+              {q.help && <p className="text-xs text-muted-foreground">{q.help}</p>}
               {q.type === "textarea" ? (
                 <Textarea
                   value={answers[q.id] ?? ""}
@@ -182,6 +186,23 @@ export function PollCard({ poll, onDone }: { poll: MemberPoll; onDone: () => voi
                     </div>
                   ))}
                 </RadioGroup>
+              ) : q.type === "select" ? (
+                <Select
+                  value={answers[q.id] ?? ""}
+                  onValueChange={(v) => setAnswers({ ...answers, [q.id]: v })}
+                  disabled={!poll.open}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecciona una opción" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {(q.options ?? []).map((opt) => (
+                      <SelectItem key={opt} value={opt}>
+                        {opt}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               ) : q.type === "multi" ? (
                 <div className="space-y-1">
                   {(q.options ?? []).map((opt) => {
@@ -206,6 +227,9 @@ export function PollCard({ poll, onDone }: { poll: MemberPoll; onDone: () => voi
                 </div>
               ) : (
                 <Input
+                  type={
+                    q.type === "email" ? "email" : q.type === "phone" ? "tel" : q.type === "number" ? "number" : q.type === "date" ? "date" : "text"
+                  }
                   value={answers[q.id] ?? ""}
                   onChange={(e) => setAnswers({ ...answers, [q.id]: e.target.value })}
                   disabled={!poll.open}
