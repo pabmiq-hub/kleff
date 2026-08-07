@@ -125,7 +125,9 @@ function AdminPollsPage() {
       questions: (p.questions ?? []).map((q) => ({
         id: q.id,
         label: q.label,
-        type: q.type as QuestionDraft["type"],
+        type: q.type as QuestionType,
+        help: q.help ?? "",
+        required: q.required ?? true,
         options: q.options ?? [],
       })),
       options: p.options.map((o) => ({
