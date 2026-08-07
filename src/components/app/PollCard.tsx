@@ -69,9 +69,9 @@ export function PollCard({ poll, onDone }: { poll: MemberPoll; onDone: () => voi
   };
 
   const handleAnswers = async () => {
-    const missing = poll.questions.some((q) => !(answers[q.id] ?? "").trim());
+    const missing = poll.questions.some((q) => (q.required ?? true) && !(answers[q.id] ?? "").trim());
     if (missing) {
-      toast.error("Responde a todas las preguntas");
+      toast.error("Responde a todas las preguntas obligatorias");
       return;
     }
     setBusy(true);
