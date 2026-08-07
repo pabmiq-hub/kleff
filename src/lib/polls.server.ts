@@ -41,17 +41,32 @@ export async function consumeDoubleVotePerk(userId: string): Promise<number> {
   return 2;
 }
 
+/** Categoría de karma por defecto según el tipo de votación. */
+export const DEFAULT_POLL_KARMA_CODE = { survey: "survey", acquisition: "poll_vote" } as const;
+
+export async function defaultKarmaCategoryId(kind: "survey" | "acquisition"): Promise<string | null> {
+  const { data } = await supabaseAdmin
+    .from("karma_categories")
+    .select("id")
+    .eq("code", DEFAULT_POLL_KARMA_CODE[kind])
+    .eq("is_active", true)
+    .maybeSingle();
+  return data?.id ?? null;
+}
+
 /**
  * Crea (una sola vez por votación y socio) la contribución de karma asociada a la encuesta.
- * Respeta el flujo de validación de la categoría configurada en /admin/karma.
+ * Si la votación no tiene categoría asignada, usa la categoría por defecto de su tipo.
  */
 export async function awardPollKarma(
   userId: string,
   pollId: string,
   categoryId: string | null,
   pollTitle: string,
+  kind?: "survey" | "acquisition",
 ): Promise<{ awarded: boolean; points?: number }> {
-  if (!categoryId) return { awarded: false };
+  const resolvedId = categoryId ?? (kind ? await defaultKarmaCategoryId(kind) : null);
+  if (!resolvedId) return { awarded: false };
   const eventRef = `poll:${pollId}`;
   const { data: existing } = await supabaseAdmin
     .from("karma_entries")
