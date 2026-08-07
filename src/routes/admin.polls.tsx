@@ -104,6 +104,14 @@ function AdminPollsPage() {
   const [results, setResults] = useState<{ id?: string; name?: string; imageUrl?: string; year?: number }[]>([]);
   const [searching, setSearching] = useState(false);
 
+  const defaultKarmaFor = useCallback(
+    (kind: Draft["kind"]) => {
+      const code = kind === "survey" ? "survey" : "poll_vote";
+      return (data?.categories ?? []).find((c) => c.code === code)?.id ?? "none";
+    },
+    [data],
+  );
+
   const reload = useCallback(() => listFn({ data: undefined as never }).then(setData), [listFn]);
 
   useEffect(() => {
@@ -245,7 +253,7 @@ function AdminPollsPage() {
           <h1 className="font-display text-3xl font-bold">Encuestas y votaciones</h1>
           <p className="text-ink/70 mt-1">Crea encuestas generales y votaciones de nuevas adquisiciones.</p>
         </div>
-        <Button onClick={() => setDraft(emptyDraft())}>
+        <Button onClick={() => { const d = emptyDraft(); setDraft({ ...d, karmaCategoryId: defaultKarmaFor(d.kind) }); }}>
           <Plus className="h-4 w-4 mr-2" /> Nueva
         </Button>
       </header>
@@ -326,7 +334,10 @@ function AdminPollsPage() {
                   <Label>Tipo</Label>
                   <Select
                     value={draft.kind}
-                    onValueChange={(v) => setDraft({ ...draft, kind: v as Draft["kind"] })}
+                    onValueChange={(v) => {
+                      const kind = v as Draft["kind"];
+                      setDraft({ ...draft, kind, karmaCategoryId: defaultKarmaFor(kind) });
+                    }}
                   >
                     <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>
