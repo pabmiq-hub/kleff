@@ -117,7 +117,7 @@ export const submitPollVote = createServerFn({ method: "POST" })
     );
     if (error) throw new Error(error.message);
 
-    const karma = await awardPollKarma(context.userId, poll.id, poll.karma_category_id, poll.title_es);
+    const karma = await awardPollKarma(context.userId, poll.id, poll.karma_category_id, poll.title_es, poll.kind as "survey" | "acquisition");
     return { success: true as const, weight, karma };
   });
 
@@ -149,6 +149,6 @@ export const submitPollResponse = createServerFn({ method: "POST" })
       );
     if (error) throw new Error(error.message);
 
-    const karma = await awardPollKarma(context.userId, poll.id, poll.karma_category_id, poll.title_es);
+    const karma = await awardPollKarma(context.userId, poll.id, poll.karma_category_id, poll.title_es, poll.kind as "survey" | "acquisition");
     return { success: true as const, karma };
   });
