@@ -27,8 +27,10 @@ const pollSchema = z.object({
       z.object({
         id: z.string().max(40),
         label: z.string().min(1).max(300),
-        type: z.enum(["text", "textarea", "single", "multi"]),
-        options: z.array(z.string().max(200)).max(20).optional(),
+        type: z.enum(["text", "textarea", "email", "phone", "number", "date", "single", "multi", "select"]),
+        help: z.string().max(300).nullable().optional(),
+        required: z.boolean().optional(),
+        options: z.array(z.string().max(200)).max(30).optional(),
       }),
     )
     .max(30),
