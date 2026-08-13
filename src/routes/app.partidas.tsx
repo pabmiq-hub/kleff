@@ -480,25 +480,25 @@ function CreateMatchDialog({
   return (
     <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
       <DialogHeader>
-        <DialogTitle>Nueva partida</DialogTitle>
+        <DialogTitle>{t.title}</DialogTitle>
       </DialogHeader>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="space-y-2">
           <Label>{t.titleField}</Label>
-          <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Noche de Wingspan" required />
+          <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder={t.titlePlaceholder} required />
         </div>
         <div className="space-y-2">
-          <Label>Fecha y hora</Label>
+          <Label>{t.dateTime}</Label>
           <Input type="datetime-local" value={scheduledAt} onChange={(e) => setScheduledAt(e.target.value)} required />
         </div>
 
         <div className="space-y-2">
-          <Label>Juego (opcional)</Label>
+          <Label>{t.game}</Label>
           {bg ? (
             <div className="flex items-center gap-2 border-2 border-ink rounded-lg p-2">
               {bg.imageUrl && <img src={bg.imageUrl} alt="" className="h-10 w-10 rounded object-cover" />}
               <span className="flex-1 text-sm font-medium">{bg.name}</span>
-              <Button type="button" variant="ghost" size="sm" onClick={() => setBg(null)}>Cambiar</Button>
+              <Button type="button" variant="ghost" size="sm" onClick={() => setBg(null)}>{t.change}</Button>
             </div>
           ) : (
             <>
@@ -506,7 +506,7 @@ function CreateMatchDialog({
                 <Input
                   value={bgQuery}
                   onChange={(e) => setBgQuery(e.target.value)}
-                  placeholder="Buscar en Ludoya…"
+                  placeholder={t.searchPlaceholder}
                   onKeyDown={(e) => {
                     if (e.key === "Enter") { e.preventDefault(); void runSearch(); }
                   }}
@@ -537,33 +537,33 @@ function CreateMatchDialog({
 
         <div className="grid grid-cols-2 gap-3">
           <div className="space-y-2">
-            <Label>Jugadores mín.</Label>
+            <Label>{t.minPlayers}</Label>
             <Input type="number" min={1} max={50} value={minPlayers} onChange={(e) => setMinPlayers(e.target.value)} />
           </div>
           <div className="space-y-2">
-            <Label>Jugadores máx.</Label>
+            <Label>{t.maxPlayers}</Label>
             <Input type="number" min={1} max={50} value={maxPlayers} onChange={(e) => setMaxPlayers(e.target.value)} />
           </div>
         </div>
 
         <div className="space-y-2">
-          <Label>Lugar (opcional)</Label>
-          <Input value={location} onChange={(e) => setLocation(e.target.value)} placeholder="Local KLEFF, Hugo's Diner…" />
+          <Label>{t.location}</Label>
+          <Input value={location} onChange={(e) => setLocation(e.target.value)} placeholder={t.locationPlaceholder} />
         </div>
 
         <div className="space-y-2">
-          <Label>Notas (opcional)</Label>
+          <Label>{t.notes}</Label>
           <Textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={3} />
         </div>
 
         <div className="space-y-2">
-          <Label>¿Dentro de un evento? (opcional)</Label>
+          <Label>{t.parentEvent}</Label>
           <select
             value={parentEventId}
             onChange={(e) => setParentEventId(e.target.value)}
             className="w-full h-10 rounded-lg border-2 border-ink bg-background px-3 text-sm"
           >
-            <option value="">Publicar en el muro de la comunidad</option>
+            <option value="">{t.publishToWall}</option>
             {eventOptions.map((o) => (
               <option key={o.id} value={o.id}>
                 {o.title}
@@ -579,7 +579,7 @@ function CreateMatchDialog({
             onChange={(e) => setClaimKarma(e.target.checked)}
             className="accent-coral"
           />
-          Reclamar karma por crear esta partida
+          {t.claimKarma}
         </label>
 
 

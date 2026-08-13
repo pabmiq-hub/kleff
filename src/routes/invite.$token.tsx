@@ -84,9 +84,9 @@ function InvitePage() {
       if (!res.ok) throw new Error("Upload failed");
       const json = (await res.json()) as { url: string };
       setAvatarUrl(json.url);
-      toast.success("Foto subida");
+      toast.success(t.photoUploaded);
     } catch {
-      toast.error("Error al subir la foto");
+      toast.error(t.photoError);
     } finally {
       setUploadingAvatar(false);
     }
@@ -95,7 +95,7 @@ function InvitePage() {
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (!form.gender) {
-      toast.error("Selecciona un género");
+      toast.error(t.selectGenderError);
       return;
     }
     setSubmitting(true);
@@ -111,6 +111,7 @@ function InvitePage() {
           gender: form.gender,
           idDocument: form.idDocument.trim().toUpperCase(),
           ludoyaUsername: form.ludoyaUsername.trim() || null,
+          locale,
         },
       });
       // Auto-login
@@ -119,10 +120,10 @@ function InvitePage() {
         password: form.password,
       });
       if (error) throw error;
-      toast.success("¡Bienvenido a KLEFF!");
+      toast.success(t.welcome);
       void navigate({ to: "/app" });
     } catch (err) {
-      const msg = err instanceof Error ? err.message : "Error al crear la cuenta";
+      const msg = err instanceof Error ? err.message : t.createError;
       toast.error(msg);
     } finally {
       setSubmitting(false);
