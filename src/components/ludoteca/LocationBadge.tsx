@@ -1,4 +1,6 @@
 import { Triangle, Heart, Square, Archive, Package } from "lucide-react";
+import { useAppLocale, type AppLocale } from "@/i18n/app-i18n";
+import { rentalsDict } from "@/i18n/app/rentals";
 
 export type ShelfLocation = "A" | "B" | "C" | "D" | "on_demand" | "drawer";
 export type ShelfShape = "triangle" | "heart" | "square";
@@ -22,20 +24,6 @@ const COLOR_BG: Record<ShelfColor, string> = {
   blue: "bg-sky-400 text-ink border-ink",
 };
 
-export const COLOR_LABEL: Record<ShelfColor, string> = {
-  green: "verde",
-  pink: "rosa",
-  red: "rojo",
-  yellow: "amarillo",
-  blue: "azul",
-};
-
-const SHAPE_LABEL: Record<ShelfShape, string> = {
-  triangle: "triángulo",
-  heart: "corazón",
-  square: "cuadrado",
-};
-
 function ShapeIcon({ shape, className }: { shape: ShelfShape; className?: string }) {
   if (shape === "triangle") return <Triangle className={className} />;
   if (shape === "heart") return <Heart className={className} />;
@@ -49,27 +37,30 @@ function normalizeShelf(s: string | null | undefined): string | null {
   return map[s] ?? s;
 }
 
-export function describeLocation(loc: LocationFields): string {
+export function describeLocation(loc: LocationFields, locale: AppLocale = "es"): string {
+  const t = rentalsDict[locale].location;
   const shelf = normalizeShelf(loc.shelf as string | null);
-  if (!shelf) return "Ubicación no definida";
-  if (shelf === "on_demand") return "Bajo pedido — no está en la ludoteca fija, se puede pedir para próximos eventos";
+  if (!shelf) return t.undefined;
+  if (shelf === "on_demand") return t.onDemand;
   if (shelf === "drawer") {
     const n = loc.drawer_number ?? "?";
     const l = loc.drawer_letter ?? "?";
-    return `Cajón ${n}${l.toUpperCase()}`;
+    return t.drawer(n, l);
   }
-  const shape = loc.shape ? SHAPE_LABEL[loc.shape] : "—";
+  const shape = loc.shape ? t.shapeLabel[loc.shape] : "—";
   const slot = loc.slot_number ?? "?";
-  const color = loc.shelf_color ? `, color ${COLOR_LABEL[loc.shelf_color]}` : "";
-  return `Estantería ${shelf} · ${shape}${color} · nº ${slot}`;
+  const color = loc.shelf_color ? t.colorSuffix(t.colorLabel[loc.shelf_color]) : "";
+  return t.shelf(shelf, shape, color, slot);
 }
 
 export function LocationBadge({ loc, size = "sm" }: { loc: LocationFields; size?: "sm" | "md" }) {
+  const { locale } = useAppLocale();
+  const t = rentalsDict[locale].location;
   const small = size === "sm";
   const text = small ? "text-[10px]" : "text-xs";
   const pad = small ? "px-1.5 py-0.5" : "px-2 py-1";
   const icon = small ? "h-2.5 w-2.5" : "h-3.5 w-3.5";
-  const tooltip = describeLocation(loc);
+  const tooltip = describeLocation(loc, locale);
   const shelf = normalizeShelf(loc.shelf as string | null);
 
   if (!shelf) {
@@ -89,7 +80,7 @@ export function LocationBadge({ loc, size = "sm" }: { loc: LocationFields; size?
         title={tooltip}
         className={`inline-flex items-center gap-1 rounded-full border-2 ${pad} ${text} font-bold uppercase tracking-wider bg-ink text-cream border-ink`}
       >
-        <Package className={icon} /> Bajo pedido
+        <Package className={icon} /> {t.onDemandShort}
       </span>
     );
   }
@@ -121,27 +112,29 @@ export function LocationBadge({ loc, size = "sm" }: { loc: LocationFields; size?
 }
 
 export function LocationLegend() {
+  const { locale } = useAppLocale();
+  const t = rentalsDict[locale].location;
   return (
     <div className="rounded-2xl border-2 border-ink/15 bg-cream-deep/40 p-5">
       <p className="text-[10px] font-bold uppercase tracking-widest text-foreground/60 mb-3">
-        Cómo encontrar un juego
+        {t.legendTitle}
       </p>
       <div className="flex flex-wrap gap-3 text-xs text-foreground/75">
         <span className="inline-flex items-center gap-2">
           <LocationBadge loc={{ shelf: "A", shape: "triangle", slot_number: 3, drawer_number: null, drawer_letter: null, shelf_color: "green" }} />
-          Estantería A, forma triángulo, color verde, nº 3
+          {t.legendShelfExample}
         </span>
         <span className="inline-flex items-center gap-2">
           <LocationBadge loc={{ shelf: "drawer", shape: null, slot_number: null, drawer_number: 2, drawer_letter: "a" }} />
-          Cajón 2, letra A
+          {t.legendDrawerExample}
         </span>
         <span className="inline-flex items-center gap-2">
           <LocationBadge loc={{ shelf: "on_demand", shape: null, slot_number: null, drawer_number: null, drawer_letter: null }} />
-          No está en la ludoteca fija — se puede pedir para próximos eventos
+          {t.legendOnDemandExample}
         </span>
       </div>
       <p className="mt-3 text-[11px] text-foreground/55">
-        Cada juego lleva un chip de color: la letra indica la estantería (A-D), el icono la forma del separador, el color del chip el color del separador y la cifra la posición (1-5). Los cajones usan número (1-4) + letra (A-D).
+        {t.legendFooter}
       </p>
     </div>
   );

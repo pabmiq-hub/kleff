@@ -1,5 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMyRentalsData, Empty, Row, statusLabel } from "@/components/app/rentals-mine";
+import { useMyRentalsData, Empty, Row, useStatusLabel } from "@/components/app/rentals-mine";
+import { useAppLocale } from "@/i18n/app-i18n";
+import { rentalsDict, localeToIntl } from "@/i18n/app/rentals";
 
 export const Route = createFileRoute("/app/rentals/active")({
   component: ActivePage,
@@ -7,19 +9,22 @@ export const Route = createFileRoute("/app/rentals/active")({
 
 function ActivePage() {
   const { rentals, loading } = useMyRentalsData();
-  if (loading) return <p className="text-muted-foreground">Cargando…</p>;
+  const { locale } = useAppLocale();
+  const t = rentalsDict[locale];
+  const statusLabel = useStatusLabel(locale);
+  if (loading) return <p className="text-muted-foreground">{t.active.loading}</p>;
   const active = rentals.filter((r) => r.status === "active" || r.status === "overdue");
   return (
     <div className="space-y-2">
       {active.length === 0 ? (
-        <Empty msg="No tienes juegos alquilados ahora mismo." />
+        <Empty msg={t.active.empty} />
       ) : (
         active.map((r) => (
           <Row
             key={r.id}
-            title={r.bgg_games?.title ?? "Juego"}
+            title={r.bgg_games?.title ?? t.gameFallback}
             img={r.bgg_games?.image_url}
-            sub={`Devolución: ${new Date(r.due_at).toLocaleDateString()}`}
+            sub={`${t.active.returnLabel}: ${new Date(r.due_at).toLocaleDateString(localeToIntl(locale))}`}
             badge={statusLabel[r.status]}
           />
         ))

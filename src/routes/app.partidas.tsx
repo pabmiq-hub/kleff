@@ -20,6 +20,8 @@ import {
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { CalendarDays, MapPin, Plus, Users, ExternalLink, RefreshCw, Search, Layers, Trophy, Dice5, ChevronDown } from "lucide-react";
+import { useAppLocale } from "@/i18n/app-i18n";
+import { communityDict } from "@/i18n/app/community";
 
 export const Route = createFileRoute("/app/partidas")({
   head: () => ({
@@ -52,6 +54,8 @@ function classify(type: string): "partida" | "torneo" | "evento" {
 }
 
 function PartidasPage() {
+  const { locale } = useAppLocale();
+  const t = communityDict[locale].partidas;
   const listFn = useServerFn(listKleffMatches);
   const createFn = useServerFn(createKleffMatch);
 
@@ -67,9 +71,9 @@ function PartidasPage() {
     try {
       const r = await listFn({ data: undefined as never });
       setItems((r.matches ?? []) as UiMatch[]);
-      setWarning(r.endpointOk ? null : r.lastError ?? "Sincronización con Ludoya no disponible todavía");
+      setWarning(r.endpointOk ? null : r.lastError ?? t.syncUnavailable);
     } catch (err) {
-      setWarning(err instanceof Error ? err.message : "Error al cargar");
+      setWarning(err instanceof Error ? err.message : t.loadError);
     } finally {
       setRefreshing(false);
       setLoading(false);
@@ -126,43 +130,43 @@ function PartidasPage() {
   const isEmpty = visible.length === 0;
 
   const filterOptions: { key: typeof filter; label: string }[] = [
-    { key: "todos", label: "Todos" },
-    { key: "evento", label: "Eventos" },
-    { key: "torneo", label: "Torneos" },
-    { key: "partida", label: "Partidas" },
+    { key: "todos", label: t.filters.all },
+    { key: "evento", label: t.filters.events },
+    { key: "torneo", label: t.filters.tournaments },
+    { key: "partida", label: t.filters.matches },
   ];
 
   return (
     <div className="space-y-6">
       <header className="flex items-start justify-between gap-4 flex-wrap">
         <div>
-          <h1 className="font-display text-3xl font-bold">Partidas y eventos</h1>
+          <h1 className="font-display text-3xl font-bold">{t.title}</h1>
           <p className="text-muted-foreground mt-1">
-            Actividad del grupo de KLEFF en Ludoya.
+            {t.subtitle}
           </p>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" size="sm" onClick={() => void load()} disabled={refreshing}>
             <RefreshCw className={`h-4 w-4 mr-2 ${refreshing ? "animate-spin" : ""}`} />
-            Actualizar
+            {t.refresh}
           </Button>
           <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
             <DialogTrigger asChild>
               <Button size="sm">
-                <Plus className="h-4 w-4 mr-2" /> Crear partida
+                <Plus className="h-4 w-4 mr-2" /> {t.createMatch}
               </Button>
             </DialogTrigger>
             <CreateMatchDialog
               eventOptions={sorted
                 .filter((m) => classify(m.type) === "evento" || classify(m.type) === "torneo")
-                .map((m) => ({ id: m.id, title: m.title ?? "Evento" }))}
+                .map((m) => ({ id: m.id, title: m.title ?? t.filters.events }))}
               onSubmit={async (payload) => {
                 const res = await createFn({ data: payload });
-                toast.success("Partida creada en Ludoya");
+                toast.success(t.matchCreated);
                 if (res.karma?.claimed) {
-                  toast.success(`+${res.karma.points} karma solicitados (pendiente de validación)`);
+                  toast.success(t.karmaClaimed(res.karma.points));
                 } else if (res.karma?.reason) {
-                  toast.message(`Karma no reclamado: ${res.karma.reason}`);
+                  toast.message(t.karmaNotClaimed(res.karma.reason));
                 }
                 setDialogOpen(false);
                 void load();
@@ -175,7 +179,7 @@ function PartidasPage() {
 
       {warning && (
         <div className="bg-cream border-2 border-ink/20 rounded-2xl p-4 text-sm text-muted-foreground">
-          <strong>Aviso:</strong> {warning}
+          <strong>{t.warningPrefix}</strong> {warning}
         </div>
       )}
 
@@ -203,13 +207,13 @@ function PartidasPage() {
       </div>
 
       {loading ? (
-        <p className="text-muted-foreground">Cargando…</p>
+        <p className="text-muted-foreground">{t.loading}</p>
       ) : isEmpty ? (
         <div className="bg-card border-2 border-ink rounded-2xl p-8 shadow-tactile-sm text-center">
           <p className="text-muted-foreground text-sm">
             {counts.todos === 0
-              ? "Aún no hay actividad programada en el grupo de KLEFF."
-              : "No hay elementos en este filtro."}
+              ? t.emptyNoActivity
+              : t.emptyFilter}
           </p>
         </div>
       ) : (
@@ -221,6 +225,8 @@ function PartidasPage() {
               match={m}
               parent={m.parentEvent?.id ? parentById.get(m.parentEvent.id) ?? null : null}
               childItems={classify(m.type) === "evento" ? childrenByEvent.get(m.id) ?? [] : []}
+              t={t}
+              dateLocale={communityDict[locale].dateLocale}
             />
           ))}
         </div>
@@ -229,22 +235,34 @@ function PartidasPage() {
   );
 }
 
-function formatWhen(iso?: string | null) {
+function formatWhen(iso: string | null | undefined, dateLocale: string) {
   if (!iso) return null;
-  return new Date(iso).toLocaleString("es-ES", { dateStyle: "medium", timeStyle: "short" });
+  return new Date(iso).toLocaleString(dateLocale, { dateStyle: "medium", timeStyle: "short" });
 }
 
-function plazasLabel(m: UiMatch) {
-  if (typeof m.capacity === "number") return `${m.participantCount ?? 0}/${m.capacity} plazas`;
-  if (typeof m.maxPlayers === "number") return `${m.participantCount ?? 0}/${m.maxPlayers} jugadores`;
-  if (typeof m.participantCount === "number") return `${m.participantCount} apuntados`;
+function plazasLabel(m: UiMatch, t: (typeof communityDict)["es"]["partidas"]) {
+  if (typeof m.capacity === "number") return t.seats(m.participantCount ?? 0, m.capacity);
+  if (typeof m.maxPlayers === "number") return t.players(m.participantCount ?? 0, m.maxPlayers);
+  if (typeof m.participantCount === "number") return t.signedUp(m.participantCount);
   return null;
 }
 
-function ActivityCard({ match, parent, childItems = [] }: { match: UiMatch; parent?: UiMatch | null; childItems?: UiMatch[] }) {
+function ActivityCard({
+  match,
+  parent,
+  childItems = [],
+  t,
+  dateLocale,
+}: {
+  match: UiMatch;
+  parent?: UiMatch | null;
+  childItems?: UiMatch[];
+  t: (typeof communityDict)["es"]["partidas"];
+  dateLocale: string;
+}) {
   const kind = classify(match.type);
-  const when = formatWhen(match.scheduledAt);
-  const plazas = plazasLabel(match);
+  const when = formatWhen(match.scheduledAt, dateLocale);
+  const plazas = plazasLabel(match, t);
 
   const style =
     kind === "torneo"
@@ -253,7 +271,7 @@ function ActivityCard({ match, parent, childItems = [] }: { match: UiMatch; pare
           borderTop: "before:bg-amber-400",
           badge: "bg-amber-400 text-ink",
           icon: <Trophy className="h-3 w-3" />,
-          label: "Torneo",
+          label: t.typeLabels.torneo,
           title: "text-cream",
           meta: "text-cream/75",
           link: "text-amber-300 hover:text-amber-200",
@@ -264,7 +282,7 @@ function ActivityCard({ match, parent, childItems = [] }: { match: UiMatch; pare
             borderTop: "before:bg-coral-deep",
             badge: "bg-coral-deep text-cream",
             icon: <Dice5 className="h-3 w-3" />,
-            label: "Partida",
+            label: t.typeLabels.partida,
             title: "text-ink",
             meta: "text-muted-foreground",
             link: "text-coral-deep hover:underline",
@@ -274,7 +292,7 @@ function ActivityCard({ match, parent, childItems = [] }: { match: UiMatch; pare
             borderTop: "before:bg-coral-deep",
             badge: "bg-ink text-cream",
             icon: <CalendarDays className="h-3 w-3" />,
-            label: "Evento",
+            label: t.typeLabels.evento,
             title: "text-ink",
             meta: "text-muted-foreground",
             link: "text-coral-deep hover:underline",
@@ -300,7 +318,7 @@ function ActivityCard({ match, parent, childItems = [] }: { match: UiMatch; pare
         )}
       </div>
       <h3 className={`font-display text-sm font-bold leading-snug ${style.title}`}>
-        {match.title || "Sin título"}
+        {match.title || t.untitled}
       </h3>
       <ul className={`text-xs space-y-0.5 ${style.meta}`}>
         {when && <li className="flex items-center gap-1.5"><CalendarDays className="h-3.5 w-3.5 shrink-0" />{when}</li>}
@@ -314,7 +332,7 @@ function ActivityCard({ match, parent, childItems = [] }: { match: UiMatch; pare
           rel="noreferrer"
           className={`text-xs inline-flex items-center gap-1 font-semibold pt-1 ${style.link}`}
         >
-          Ver en Ludoya <ExternalLink className="h-3 w-3" />
+          {t.viewInLudoya} <ExternalLink className="h-3 w-3" />
         </a>
       )}
       {childItems.length > 0 && (
@@ -322,7 +340,7 @@ function ActivityCard({ match, parent, childItems = [] }: { match: UiMatch; pare
           <summary className={`cursor-pointer list-none flex items-center justify-between gap-2 text-[11px] font-bold uppercase tracking-wide ${style.meta}`}>
             <span className="inline-flex items-center gap-1.5">
               <Layers className="h-3 w-3" />
-              {childItems.length} {childItems.length === 1 ? "actividad" : "actividades"}
+              {childItems.length} {childItems.length === 1 ? t.activity : t.activities}
             </span>
             <ChevronDown className="h-3.5 w-3.5 transition-transform group-open:rotate-180" />
           </summary>
@@ -330,15 +348,15 @@ function ActivityCard({ match, parent, childItems = [] }: { match: UiMatch; pare
             {childItems.map((c) => {
               const ck = classify(c.type);
               const dot = ck === "torneo" ? "bg-amber-400" : ck === "evento" ? "bg-ink" : "bg-coral-deep";
-              const kLabel = ck === "torneo" ? "Torneo" : ck === "evento" ? "Evento" : "Partida";
+              const kLabel = ck === "torneo" ? t.typeLabels.torneo : ck === "evento" ? t.typeLabels.evento : t.typeLabels.partida;
               return (
                 <li key={c.id} className="flex items-start gap-2 text-xs">
                   <span className={`mt-1 h-1.5 w-1.5 rounded-full shrink-0 ${dot}`} />
                   <div className="flex-1 min-w-0">
-                    <div className={`font-semibold truncate ${style.title}`}>{c.title || "Sin título"}</div>
+                    <div className={`font-semibold truncate ${style.title}`}>{c.title || t.untitled}</div>
                     <div className={`text-[11px] ${style.meta}`}>
                       {kLabel}
-                      {c.scheduledAt && ` · ${formatWhen(c.scheduledAt)}`}
+                      {c.scheduledAt && ` · ${formatWhen(c.scheduledAt, dateLocale)}`}
                     </div>
                   </div>
                   {c.url && (
@@ -347,7 +365,7 @@ function ActivityCard({ match, parent, childItems = [] }: { match: UiMatch; pare
                       target="_blank"
                       rel="noreferrer"
                       className={`shrink-0 ${style.link}`}
-                      aria-label="Ver en Ludoya"
+                      aria-label={t.viewInLudoya}
                     >
                       <ExternalLink className="h-3.5 w-3.5" />
                     </a>

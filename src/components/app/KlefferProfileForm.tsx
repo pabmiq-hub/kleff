@@ -15,6 +15,7 @@ import {
   klefferProfileCompletion,
   type FavoriteGame,
   type KlefferProfileData,
+  localizeOptions,
 } from "@/lib/kleffer-profile-options";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,6 +25,8 @@ import { Progress } from "@/components/ui/progress";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import { Search, X, Loader2 } from "lucide-react";
+import { useAppLocale } from "@/i18n/app-i18n";
+import { accountDict } from "@/i18n/app/account";
 
 function Chips({
   options,
@@ -67,6 +70,8 @@ export function KlefferProfileForm() {
   const save = useServerFn(updateMyKlefferProfile);
   const searchFn = useServerFn(searchLudoyaBoardgamesFn);
 
+  const { locale } = useAppLocale();
+  const t = accountDict[locale].kleffer;
   const [state, setState] = useState<KlefferProfileData>(EMPTY_KLEFFER_PROFILE);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -124,7 +129,7 @@ export function KlefferProfileForm() {
 
   const addGame = (g: FavoriteGame) => {
     if (state.favorite_games.length >= 5) {
-      toast.error("Máximo 5 juegos favoritos");
+      toast.error(t.maxGamesError);
       return;
     }
     if (state.favorite_games.some((x) => x.id === g.id)) return;
@@ -152,33 +157,33 @@ export function KlefferProfileForm() {
           isPublic: state.is_public,
         },
       });
-      toast.success("Perfil de kleffer guardado");
+      toast.success(t.saveSuccess);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Error guardando");
+      toast.error(err instanceof Error ? err.message : t.saveError);
     } finally {
       setSaving(false);
     }
   };
 
-  if (loading) return <p className="text-muted-foreground">Cargando perfil de kleffer…</p>;
+  if (loading) return <p className="text-muted-foreground">{t.loading}</p>;
 
   return (
     <form onSubmit={submit} className="space-y-6 bg-card border-2 border-ink rounded-2xl p-6 shadow-tactile-sm">
       <div className="space-y-2">
         <div className="flex items-baseline justify-between gap-4">
-          <h2 className="font-display text-2xl font-bold">Mi perfil de kleffer</h2>
-          <span className="text-sm text-muted-foreground">{completion}% completado</span>
+          <h2 className="font-display text-2xl font-bold">{t.title}</h2>
+          <span className="text-sm text-muted-foreground">{completion}% {t.completed}</span>
         </div>
         <Progress value={completion} />
         <p className="text-sm text-muted-foreground">
-          Cuéntanos cómo juegas para que otros kleffers puedan conectar contigo. Todo es opcional.
+          {t.intro}
         </p>
       </div>
 
       <div className="space-y-2">
-        <Label>¿Sueles venir solo/a a los eventos?</Label>
+        <Label>{t.attendsAloneLabel}</Label>
         <Chips
-          options={ATTENDS_ALONE}
+          options={localizeOptions("attendsAlone", ATTENDS_ALONE, locale)}
           single
           values={state.attends_alone ? [state.attends_alone] : []}
           onChange={(v) => setState((s) => ({ ...s, attends_alone: v[0] ?? null }))}
@@ -186,9 +191,9 @@ export function KlefferProfileForm() {
       </div>
 
       <div className="space-y-2">
-        <Label>¿Te gusta apuntarte a partidas programadas?</Label>
+        <Label>{t.scheduledGamesLabel}</Label>
         <Chips
-          options={SCHEDULED_GAMES}
+          options={localizeOptions("scheduledGames", SCHEDULED_GAMES, locale)}
           single
           values={state.scheduled_games ? [state.scheduled_games] : []}
           onChange={(v) => setState((s) => ({ ...s, scheduled_games: v[0] ?? null }))}
@@ -196,12 +201,12 @@ export function KlefferProfileForm() {
       </div>
 
       <div className="space-y-2">
-        <Label>¿Qué buscas en KLEFF?</Label>
-        <Chips options={GOALS} values={state.goals} onChange={(v) => setState((s) => ({ ...s, goals: v }))} />
+        <Label>{t.goalsLabel}</Label>
+        <Chips options={localizeOptions("goals", GOALS, locale)} values={state.goals} onChange={(v) => setState((s) => ({ ...s, goals: v }))} />
       </div>
 
       <div className="space-y-2">
-        <Label>Juegos favoritos (hasta 5)</Label>
+        <Label>{t.favoriteGamesLabel}</Label>
         {state.favorite_games.length > 0 && (
           <div className="flex flex-wrap gap-2">
             {state.favorite_games.map((g) => (
@@ -218,7 +223,7 @@ export function KlefferProfileForm() {
                   onClick={() =>
                     setState((s) => ({ ...s, favorite_games: s.favorite_games.filter((x) => x.id !== g.id) }))
                   }
-                  aria-label={`Quitar ${g.name}`}
+                  aria-label={`${t.removeGame} ${g.name}`}
                 >
                   <X className="h-3.5 w-3.5 text-ink/50 hover:text-coral-deep" />
                 </button>
@@ -231,7 +236,7 @@ export function KlefferProfileForm() {
           <Input
             value={gameQuery}
             onChange={(e) => setGameQuery(e.target.value)}
-            placeholder="Buscar juego…"
+            placeholder={t.searchGamePlaceholder}
             className="pl-9"
           />
           {searching && <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-ink/40" />}
@@ -255,18 +260,18 @@ export function KlefferProfileForm() {
       </div>
 
       <div className="space-y-2">
-        <Label>Tipos de juego preferidos</Label>
+        <Label>{t.gameTypesLabel}</Label>
         <Chips
-          options={GAME_TYPES}
+          options={localizeOptions("gameTypes", GAME_TYPES, locale)}
           values={state.game_types}
           onChange={(v) => setState((s) => ({ ...s, game_types: v }))}
         />
       </div>
 
       <div className="space-y-2">
-        <Label>Nivel de experiencia</Label>
+        <Label>{t.experienceLabel}</Label>
         <Chips
-          options={EXPERIENCE}
+          options={localizeOptions("experience", EXPERIENCE, locale)}
           single
           values={state.experience_level ? [state.experience_level] : []}
           onChange={(v) => setState((s) => ({ ...s, experience_level: v[0] ?? null }))}
@@ -274,27 +279,27 @@ export function KlefferProfileForm() {
       </div>
 
       <div className="space-y-2">
-        <Label>¿Cuándo sueles poder venir?</Label>
+        <Label>{t.availabilityLabel}</Label>
         <Chips
-          options={AVAILABILITY}
+          options={localizeOptions("availability", AVAILABILITY, locale)}
           values={state.availability}
           onChange={(v) => setState((s) => ({ ...s, availability: v }))}
         />
       </div>
 
       <div className="space-y-2">
-        <Label>Idiomas en los que juegas</Label>
+        <Label>{t.languagesLabel}</Label>
         <Chips
-          options={LANGUAGES}
+          options={localizeOptions("languages", LANGUAGES, locale)}
           values={state.languages}
           onChange={(v) => setState((s) => ({ ...s, languages: v }))}
         />
       </div>
 
       <div className="space-y-2">
-        <Label>¿Enseñas juegos a otros?</Label>
+        <Label>{t.teachesLabel}</Label>
         <Chips
-          options={TEACHES}
+          options={localizeOptions("teaches", TEACHES, locale)}
           single
           values={state.teaches ? [state.teaches] : []}
           onChange={(v) => setState((s) => ({ ...s, teaches: v[0] ?? null }))}
@@ -302,12 +307,12 @@ export function KlefferProfileForm() {
       </div>
 
       <div className="space-y-2">
-        <Label>Frase de presentación</Label>
+        <Label>{t.bioLabel}</Label>
         <Textarea
           value={state.bio ?? ""}
           maxLength={200}
           rows={3}
-          placeholder="Preséntate en pocas palabras…"
+          placeholder={t.bioPlaceholder}
           onChange={(e) => setState((s) => ({ ...s, bio: e.target.value }))}
         />
         <p className="text-xs text-muted-foreground text-right">{(state.bio ?? "").length}/200</p>
@@ -315,8 +320,8 @@ export function KlefferProfileForm() {
 
       <div className="flex items-center justify-between gap-4 rounded-xl border border-ink/15 bg-cream-deep/40 p-3">
         <div>
-          <p className="text-sm font-semibold">Visible para otros kleffers</p>
-          <p className="text-xs text-muted-foreground">Si lo desactivas, solo lo verá el equipo de KLEFF.</p>
+          <p className="text-sm font-semibold">{t.publicTitle}</p>
+          <p className="text-xs text-muted-foreground">{t.publicDesc}</p>
         </div>
         <Switch
           checked={state.is_public}
@@ -324,7 +329,7 @@ export function KlefferProfileForm() {
         />
       </div>
 
-      <Button type="submit" disabled={saving}>{saving ? "Guardando…" : "Guardar perfil de kleffer"}</Button>
+      <Button type="submit" disabled={saving}>{saving ? t.saving : t.save}</Button>
     </form>
   );
 }

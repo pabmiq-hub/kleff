@@ -33,7 +33,10 @@ function InvitePage() {
   const { invitation, token } = Route.useLoaderData();
   const navigate = useNavigate();
   const acceptFn = useServerFn(acceptInvitation);
+  const { locale, setLocale } = useAppLocale();
+  const t = signupDict[locale];
 
+  const [step, setStep] = useState<"language" | "form">("language");
   const [submitting, setSubmitting] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
@@ -48,18 +51,12 @@ function InvitePage() {
   });
 
   if (!invitation.valid) {
-    const reasonText: Record<string, string> = {
-      not_found: "Esta invitación no existe.",
-      revoked: "Esta invitación ha sido revocada.",
-      used: "Esta invitación ya se ha utilizado.",
-      expired: "Esta invitación ha caducado. Pide una nueva al equipo de KLEFF.",
-    };
     return (
       <div className="min-h-screen flex items-center justify-center bg-cream-deep px-4">
         <div className="bg-card border-2 border-ink rounded-2xl shadow-tactile p-8 max-w-md text-center">
-          <h1 className="font-display text-2xl font-bold mb-2">Invitación no válida</h1>
-          <p className="text-muted-foreground mb-6">{reasonText[invitation.reason]}</p>
-          <Link to="/" className="text-coral-deep underline">Volver a la web</Link>
+          <h1 className="font-display text-2xl font-bold mb-2">{t.invalidTitle}</h1>
+          <p className="text-muted-foreground mb-6">{t.reasons[invitation.reason]}</p>
+          <Link to="/" className="text-coral-deep underline">{t.backToSite}</Link>
         </div>
       </div>
     );

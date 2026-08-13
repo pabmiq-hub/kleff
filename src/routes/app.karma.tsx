@@ -35,7 +35,9 @@ import {
 } from "@/components/ui/dialog";
 import { Sparkles, Gift, Trophy, Plus, Loader2, Users, Crown } from "lucide-react";
 import { ImagePicker } from "@/components/cms/ImagePicker";
-import { useI18n } from "@/i18n/I18nProvider";
+import { useAppLocale, pickLocalized } from "@/i18n/app-i18n";
+import { commonDict } from "@/i18n/app/common";
+import { karmaDict } from "@/i18n/app/karma";
 import { getMyReferrals, createMyReferral } from "@/lib/karma-referrals.functions";
 
 export const Route = createFileRoute("/app/karma")({
@@ -81,29 +83,16 @@ type Reward = {
   stock: number | null;
 };
 
-const GROUP_LABELS: Record<string, string> = {
-  ludoteca: "Ludoteca y juegos",
-  difusion: "Difusión y comunidad",
-  referidos: "Referidos",
-  participacion: "Participación",
-  organizacion: "Organización",
-  otras: "Otras",
-};
-
-const STATUS_LABELS: Record<string, string> = {
-  pending: "Pendiente",
-  approved: "Aprobada",
-  rejected: "Rechazada",
-  voided: "Anulada",
-  requested: "Solicitado",
-  delivered: "Entregado",
-};
-
 function KarmaPage() {
-  const { locale } = useI18n();
+  const { locale } = useAppLocale();
+  const c = commonDict[locale];
+  const k = karmaDict[locale];
   const loc = <T extends Record<string, unknown>>(row: T, field: "name" | "description"): string => {
-    const v = (row[`${field}_${locale}` as keyof T] ?? row[`${field}_es` as keyof T]) as string | null;
-    return v ?? "";
+    return pickLocalized(locale, {
+      es: row[`${field}_es` as keyof T] as string | null,
+      ca: row[`${field}_ca` as keyof T] as string | null,
+      en: row[`${field}_en` as keyof T] as string | null,
+    });
   };
 
   const loadMine = useServerFn(getMyKarma);
@@ -152,12 +141,12 @@ function KarmaPage() {
     setSaving(true);
     try {
       await addReferral({ data: { referredName: referredName.trim(), note: referralNote || undefined } });
-      toast.success("Referido registrado. El equipo lo validará.");
+      toast.success(k.toastReferralSuccess);
       setReferredName("");
       setReferralNote("");
       await refresh();
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "No se pudo registrar");
+      toast.error(err instanceof Error ? err.message : k.toastReferralError);
     } finally {
       setSaving(false);
     }
@@ -200,14 +189,14 @@ function KarmaPage() {
           evidenceUrl: evidenceUrl || undefined,
         },
       });
-      toast.success("Contribución enviada. El equipo la revisará pronto.");
+      toast.success(k.toastEntrySuccess);
       setEntryOpen(false);
       setCategoryId("");
       setDescription("");
       setEvidenceUrl("");
       await refresh();
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "No se pudo enviar");
+      toast.error(err instanceof Error ? err.message : k.toastEntryError);
     } finally {
       setSaving(false);
     }
@@ -223,12 +212,12 @@ function KarmaPage() {
           targetRentalId: rewardOpen.effect === "extend_rental" ? targetRental || null : null,
         },
       });
-      toast.success("Canje solicitado. Te avisaremos cuando se confirme.");
+      toast.success(k.toastRedeemSuccess);
       setRewardOpen(null);
       setTargetRental("");
       await refresh();
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "No se pudo canjear");
+      toast.error(err instanceof Error ? err.message : k.toastRedeemError);
     } finally {
       setSaving(false);
     }
@@ -246,60 +235,60 @@ function KarmaPage() {
     <div className="space-y-6">
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h1 className="font-display text-4xl font-bold">Karma</h1>
+          <h1 className="font-display text-4xl font-bold">{k.pageTitle}</h1>
           <p className="text-ink/60 mt-1">
-            Suma puntos por cuidar la comunidad y cámbialos por ventajas.
+            {k.intro}
             {mine?.cycle
-              ? ` Tu año de Karma ${mine.cycle.index} termina el ${new Date(mine.cycle.endsAt).toLocaleDateString("es-ES")} (se conservan hasta ${mine.cycle.carryoverMax} pts).`
+              ? k.cycleInfo(mine.cycle.index, new Date(mine.cycle.endsAt).toLocaleDateString(k.dateLocale), mine.cycle.carryoverMax)
               : ""}
           </p>
 
         </div>
         <Button onClick={() => setEntryOpen(true)} className="gap-2">
-          <Plus className="h-4 w-4" /> Registrar contribución
+          <Plus className="h-4 w-4" /> {k.registerContribution}
         </Button>
       </header>
 
       <div className="grid gap-4 sm:grid-cols-3">
         <div className="rounded-2xl border border-ink/10 bg-white p-5">
-          <p className="text-xs uppercase tracking-wide text-ink/50">Saldo disponible</p>
+          <p className="text-xs uppercase tracking-wide text-ink/50">{k.availableBalance}</p>
           <p className="font-display text-4xl font-bold mt-1">{mine?.balance ?? 0}</p>
-          <p className="text-xs text-ink/50 mt-1">puntos de Karma</p>
+          <p className="text-xs text-ink/50 mt-1">{k.karmaPoints}</p>
         </div>
         <div className="rounded-2xl border border-ink/10 bg-white p-5">
-          <p className="text-xs uppercase tracking-wide text-ink/50">Nivel</p>
+          <p className="text-xs uppercase tracking-wide text-ink/50">{k.level}</p>
           <p className="font-display text-2xl font-bold mt-1 flex items-center gap-2">
-            <Sparkles className="h-5 w-5 text-coral" /> {level.name}
+            <Sparkles className="h-5 w-5 text-coral" /> {pickLocalized(locale, { es: level.name, ca: level.name_ca, en: level.name_en })}
           </p>
           <div className="mt-3 h-2 rounded-full bg-ink/10 overflow-hidden">
             <div className="h-full bg-coral" style={{ width: `${progress}%` }} />
           </div>
           <p className="text-xs text-ink/50 mt-2">
             {upcoming
-              ? `${upcoming.min - (mine?.lifetime ?? 0)} pts para ${upcoming.name}`
-              : "Nivel máximo alcanzado"}
+              ? k.ptsFor(upcoming.min - (mine?.lifetime ?? 0), pickLocalized(locale, { es: upcoming.name, ca: upcoming.name_ca, en: upcoming.name_en }))
+              : k.maxLevelReached}
           </p>
         </div>
         <div className="rounded-2xl border border-ink/10 bg-white p-5">
-          <p className="text-xs uppercase tracking-wide text-ink/50">Karma histórico</p>
+          <p className="text-xs uppercase tracking-wide text-ink/50">{k.lifetimeKarma}</p>
           <p className="font-display text-4xl font-bold mt-1">{mine?.lifetime ?? 0}</p>
-          <p className="text-xs text-ink/50 mt-1">{level.perk}</p>
+          <p className="text-xs text-ink/50 mt-1">{pickLocalized(locale, { es: level.perk, ca: level.perk_ca, en: level.perk_en })}</p>
         </div>
       </div>
 
       <Tabs defaultValue="catalogo">
         <TabsList>
-          <TabsTrigger value="catalogo">Cómo sumar</TabsTrigger>
-          <TabsTrigger value="recompensas">Recompensas</TabsTrigger>
-          <TabsTrigger value="referidos">Referidos</TabsTrigger>
-          <TabsTrigger value="historial">Mi historial</TabsTrigger>
-          <TabsTrigger value="ranking">Ranking</TabsTrigger>
+          <TabsTrigger value="catalogo">{k.tabs.catalog}</TabsTrigger>
+          <TabsTrigger value="recompensas">{k.tabs.rewards}</TabsTrigger>
+          <TabsTrigger value="referidos">{k.tabs.referrals}</TabsTrigger>
+          <TabsTrigger value="historial">{k.tabs.history}</TabsTrigger>
+          <TabsTrigger value="ranking">{k.tabs.ranking}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="catalogo" className="space-y-6 pt-4">
           {grouped.map(([grp, cats]) => (
             <section key={grp}>
-              <h2 className="font-display text-lg font-bold mb-2">{GROUP_LABELS[grp] ?? grp}</h2>
+              <h2 className="font-display text-lg font-bold mb-2">{k.groupLabels[grp] ?? grp}</h2>
               <div className="grid gap-2 sm:grid-cols-2">
                 {cats.map((c) => (
                   <div key={c.id} className="rounded-xl border border-ink/10 bg-white p-4">
@@ -312,14 +301,14 @@ function KarmaPage() {
                         <div className="flex flex-wrap gap-1.5 mt-2">
                           {c.limit_period !== "none" && c.limit_count ? (
                             <Badge variant="secondary" className="text-[11px]">
-                              Máx. {c.limit_count} / {c.limit_period === "weekly" ? "semana" : "mes"}
+                              {k.max} {c.limit_count} / {c.limit_period === "weekly" ? k.perWeek : k.perMonth}
                             </Badge>
                           ) : null}
                           {c.requires_evidence ? (
-                            <Badge variant="secondary" className="text-[11px]">Requiere evidencia</Badge>
+                            <Badge variant="secondary" className="text-[11px]">{k.requiresEvidence}</Badge>
                           ) : null}
                           {!c.member_requestable ? (
-                            <Badge variant="secondary" className="text-[11px]">Asigna el equipo</Badge>
+                            <Badge variant="secondary" className="text-[11px]">{k.teamAssigns}</Badge>
                           ) : null}
                         </div>
                       </div>
@@ -360,7 +349,7 @@ function KarmaPage() {
                         setTargetRental("");
                       }}
                     >
-                      {soldOut ? "Agotado" : affordable ? "Canjear" : "Saldo insuficiente"}
+                      {soldOut ? k.soldOut : affordable ? k.redeem : k.insufficientBalance}
                     </Button>
                   </div>
                 </div>
@@ -373,38 +362,37 @@ function KarmaPage() {
           <div className="rounded-2xl border border-ink/10 bg-white p-5">
             <div className="flex items-center gap-2">
               <Users className="h-5 w-5 text-coral" />
-              <h2 className="font-display text-lg font-bold">Trae a alguien nuevo</h2>
+              <h2 className="font-display text-lg font-bold">{k.bringSomeoneNew}</h2>
             </div>
             <p className="text-sm text-ink/60 mt-1">
-              Registra a quién has traído a KLEFF. El equipo lo valida: +15 pts cuando se da de alta y +10 pts
-              extra si sigue viniendo (fidelización).
+              {k.referralIntro}
             </p>
             <div className="grid gap-3 sm:grid-cols-[1fr_1fr_auto] items-end mt-4">
               <div className="space-y-1.5">
-                <Label>Nombre del referido</Label>
+                <Label>{k.referredNameLabel}</Label>
                 <Input
                   value={referredName}
                   onChange={(e) => setReferredName(e.target.value)}
-                  placeholder="Nombre y apellido"
+                  placeholder={k.referredNamePlaceholder}
                 />
               </div>
               <div className="space-y-1.5">
-                <Label>Nota (opcional)</Label>
+                <Label>{k.noteOptionalLabel}</Label>
                 <Input
                   value={referralNote}
                   onChange={(e) => setReferralNote(e.target.value)}
-                  placeholder="Cuándo vino, en qué evento…"
+                  placeholder={k.notePlaceholder}
                 />
               </div>
               <Button onClick={handleAddReferral} disabled={saving || referredName.trim().length < 2}>
-                Registrar
+                {k.register}
               </Button>
             </div>
           </div>
 
           <div className="rounded-xl border border-ink/10 bg-white divide-y divide-ink/10">
             {referrals.length === 0 ? (
-              <p className="p-4 text-sm text-ink/50">Todavía no has registrado referidos.</p>
+              <p className="p-4 text-sm text-ink/50">{k.noReferrals}</p>
             ) : (
               referrals.map((r) => (
                 <div key={r.id} className="p-4 flex items-start justify-between gap-3">
@@ -412,15 +400,15 @@ function KarmaPage() {
                     <p className="font-medium">{r.referred_name}</p>
                     {r.note ? <p className="text-sm text-ink/60">{r.note}</p> : null}
                     <p className="text-xs text-ink/40 mt-1">
-                      {new Date(r.created_at).toLocaleDateString("es-ES")}
+                      {new Date(r.created_at).toLocaleDateString(k.dateLocale)}
                     </p>
                   </div>
                   <div className="flex flex-wrap gap-1.5 justify-end">
                     <Badge variant="secondary" className="text-[11px]">
-                      {r.signup_awarded ? "Alta +15 ✓" : "Alta pendiente"}
+                      {r.signup_awarded ? k.signupAwarded : k.signupPending}
                     </Badge>
                     <Badge variant="secondary" className="text-[11px]">
-                      {r.loyalty_awarded ? "Fidelización +10 ✓" : "Fidelización pendiente"}
+                      {r.loyalty_awarded ? k.loyaltyAwarded : k.loyaltyPending}
                     </Badge>
                   </div>
                 </div>

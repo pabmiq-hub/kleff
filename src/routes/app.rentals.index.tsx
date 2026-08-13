@@ -16,7 +16,9 @@ import {
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { LocationBadge, type LocationFields } from "@/components/ludoteca/LocationBadge";
-import { upcomingGameNights, toISODate, weekdayLabel } from "@/lib/gameNights";
+import { upcomingGameNights, toISODate } from "@/lib/gameNights";
+import { useAppLocale } from "@/i18n/app-i18n";
+import { rentalsDict, localeToIntl } from "@/i18n/app/rentals";
 
 export const Route = createFileRoute("/app/rentals/")({
   component: RentalsCatalog,
@@ -36,6 +38,8 @@ function RentalsCatalog() {
   const listFn = useServerFn(listRentalGames);
   const requestFn = useServerFn(createRentalRequest);
   const settingsFn = useServerFn(getRentalSettings);
+  const { locale } = useAppLocale();
+  const t = rentalsDict[locale];
   const [games, setGames] = useState<Game[]>([]);
   const [weekday, setWeekday] = useState(3);
   const [loading, setLoading] = useState(true);
@@ -57,24 +61,24 @@ function RentalsCatalog() {
     return games.filter((g) => g.title.toLowerCase().includes(q));
   }, [games, search]);
 
+  const weekdayName = t.weekdays[weekday] ?? "—";
+
   return (
     <div className="space-y-6">
-      <p className="text-muted-foreground">
-        Recoges una noche de juego ({weekdayLabel(weekday)}) y devuelves el siguiente {weekdayLabel(weekday)}.
-      </p>
+      <p className="text-muted-foreground">{t.catalog.pickupHint(weekdayName)}</p>
 
       <Input
-        placeholder="Buscar juego…"
+        placeholder={t.catalog.searchPlaceholder}
         value={search}
         onChange={(e) => setSearch(e.target.value)}
         className="max-w-md"
       />
 
       {loading ? (
-        <p className="text-muted-foreground">Cargando catálogo…</p>
+        <p className="text-muted-foreground">{t.catalog.loading}</p>
       ) : filtered.length === 0 ? (
         <div className="bg-card border-2 border-ink rounded-2xl p-8 text-center text-muted-foreground">
-          Sin resultados.
+          {t.catalog.noResults}
         </div>
       ) : (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -96,6 +100,9 @@ function GameCard({
   upcoming: Date[];
   onRequest: ReturnType<typeof useServerFn<typeof createRentalRequest>>;
 }) {
+  const { locale } = useAppLocale();
+  const t = rentalsDict[locale];
+  const intlLocale = localeToIntl(locale);
   const [open, setOpen] = useState(false);
   const [pickupISO, setPickupISO] = useState(toISODate(upcoming[0]));
   const [acceptWaitlist, setAcceptWaitlist] = useState(false);
@@ -110,14 +117,14 @@ function GameCard({
         data: { gameId: game.id, pickupDate: pickupISO, message: message || null, acceptWaitlist },
       });
       if (res.status === "waitlisted") {
-        toast.success(`Apuntado en lista de espera (#${res.waitlistPosition}).`);
+        toast.success(t.catalog.waitlistedToast(res.waitlistPosition));
       } else {
-        toast.success("Solicitud enviada. El equipo la revisará.");
+        toast.success(t.catalog.submittedToast);
       }
       setOpen(false);
       setMessage("");
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Error");
+      toast.error(err instanceof Error ? err.message : t.catalog.genericError);
     } finally {
       setSubmitting(false);
     }
@@ -137,20 +144,20 @@ function GameCard({
         </div>
         {game.description && <p className="text-sm text-muted-foreground mt-1 line-clamp-3">{game.description}</p>}
         <p className="text-xs text-muted-foreground mt-2">
-          {game.total_copies ?? 1} copia{(game.total_copies ?? 1) === 1 ? "" : "s"} en total
+          {t.catalog.copiesTotal(game.total_copies ?? 1)}
         </p>
         <div className="mt-auto pt-3">
           <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-              <Button className="w-full">Solicitar alquiler</Button>
+              <Button className="w-full">{t.catalog.requestButton}</Button>
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>Solicitar "{game.title}"</DialogTitle>
+                <DialogTitle>{t.catalog.requestTitle(game.title)}</DialogTitle>
               </DialogHeader>
               <form onSubmit={submit} className="space-y-4">
                 <div className="space-y-2">
-                  <Label>Noche de recogida</Label>
+                  <Label>{t.catalog.pickupNight}</Label>
                   <div className="grid grid-cols-2 gap-2">
                     {upcoming.map((d) => {
                       const iso = toISODate(d);
@@ -164,29 +171,29 @@ function GameCard({
                             active ? "bg-coral text-cream border-ink" : "bg-card border-ink/30 hover:border-ink"
                           }`}
                         >
-                          {d.toLocaleDateString(undefined, { weekday: "short", day: "numeric", month: "short" })}
+                          {d.toLocaleDateString(intlLocale, { weekday: "short", day: "numeric", month: "short" })}
                         </button>
                       );
                     })}
                   </div>
                   <p className="text-xs text-muted-foreground">
-                    Devolución: {(() => {
+                    {t.catalog.returnLabel}: {(() => {
                       const ret = new Date(pickupISO);
                       ret.setDate(ret.getDate() + 7);
-                      return ret.toLocaleDateString();
+                      return ret.toLocaleDateString(intlLocale);
                     })()}
                   </p>
                 </div>
                 <div className="space-y-1">
-                  <Label>Mensaje (opcional)</Label>
-                  <Textarea value={message} onChange={(e) => setMessage(e.target.value)} placeholder="Cualquier nota para el equipo" />
+                  <Label>{t.catalog.messageLabel}</Label>
+                  <Textarea value={message} onChange={(e) => setMessage(e.target.value)} placeholder={t.catalog.messagePlaceholder} />
                 </div>
                 <label className="flex items-center gap-2 text-sm">
                   <Checkbox checked={acceptWaitlist} onCheckedChange={(v) => setAcceptWaitlist(v === true)} />
-                  Si no hay copia, apúntame en lista de espera
+                  {t.catalog.waitlistCheckbox}
                 </label>
                 <Button type="submit" disabled={submitting} className="w-full">
-                  {submitting ? "Enviando…" : "Enviar solicitud"}
+                  {submitting ? t.catalog.submitting : t.catalog.submit}
                 </Button>
               </form>
             </DialogContent>

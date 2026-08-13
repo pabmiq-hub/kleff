@@ -1,21 +1,25 @@
 import { createFileRoute, Outlet, Link } from "@tanstack/react-router";
+import { useAppLocale } from "@/i18n/app-i18n";
+import { rentalsDict } from "@/i18n/app/rentals";
 
 export const Route = createFileRoute("/app/rentals")({
   component: RentalsLayout,
 });
 
 function RentalsLayout() {
+  const { locale } = useAppLocale();
+  const t = rentalsDict[locale];
   return (
     <div className="space-y-6">
       <header>
-        <h1 className="font-display text-3xl font-bold">Alquiler de juegos</h1>
-        <p className="text-muted-foreground mt-1">Catálogo, solicitudes y devoluciones.</p>
+        <h1 className="font-display text-3xl font-bold">{t.title}</h1>
+        <p className="text-muted-foreground mt-1">{t.subtitle}</p>
       </header>
       <nav className="flex flex-wrap gap-1 border-b border-ink/15">
-        <TabLink to="/app/rentals" exact label="Catálogo" />
-        <TabLink to="/app/rentals/active" label="Activos" />
-        <TabLink to="/app/rentals/requests" label="Solicitudes" />
-        <TabLink to="/app/rentals/history" label="Histórico" />
+        <TabLink to="/app/rentals" exact label={t.tabs.catalog} />
+        <TabLink to="/app/rentals/active" label={t.tabs.active} />
+        <TabLink to="/app/rentals/requests" label={t.tabs.requests} />
+        <TabLink to="/app/rentals/history" label={t.tabs.history} />
       </nav>
       <Outlet />
     </div>

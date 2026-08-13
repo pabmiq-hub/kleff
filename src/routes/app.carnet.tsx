@@ -4,6 +4,8 @@ import { useServerFn } from "@tanstack/react-start";
 import { QRCodeSVG } from "qrcode.react";
 import { getMyProfile } from "@/lib/profile.functions";
 import { KarmaLevelBadge } from "@/components/app/KarmaLevelBadge";
+import { useAppLocale } from "@/i18n/app-i18n";
+import { accountDict } from "@/i18n/app/account";
 
 export const Route = createFileRoute("/app/carnet")({
   component: CarnetPage,
@@ -22,6 +24,8 @@ function CarnetPage() {
   const fn = useServerFn(getMyProfile);
   const [profile, setProfile] = useState<ProfileData | null>(null);
   const [loading, setLoading] = useState(true);
+  const { locale } = useAppLocale();
+  const t = accountDict[locale];
 
   useEffect(() => {
     void fn({ data: undefined as never })
@@ -29,16 +33,16 @@ function CarnetPage() {
       .finally(() => setLoading(false));
   }, [fn]);
 
-  if (loading) return <p className="text-muted-foreground">Cargando…</p>;
-  if (!profile) return <p className="text-muted-foreground">No se pudo cargar tu carnet.</p>;
+  if (loading) return <p className="text-muted-foreground">{t.layout.loading}</p>;
+  if (!profile) return <p className="text-muted-foreground">{t.carnet.loadError}</p>;
 
   const memberNumber = `K-${String(profile.member_number).padStart(4, "0")}`;
 
   return (
     <div className="space-y-6">
       <header>
-        <h1 className="font-display text-3xl font-bold">Mi carnet</h1>
-        <p className="text-muted-foreground mt-1">Tu identificación como Kleffer.</p>
+        <h1 className="font-display text-3xl font-bold">{t.carnet.title}</h1>
+        <p className="text-muted-foreground mt-1">{t.carnet.subtitle}</p>
       </header>
 
       <div className="max-w-md mx-auto">
@@ -67,12 +71,12 @@ function CarnetPage() {
             <div className="border-t border-cream/20 pt-4 flex items-end justify-between gap-4">
               <div className="space-y-3">
                 <div>
-                  <p className="text-xs uppercase tracking-wider text-cream/60">Nº socio</p>
+                  <p className="text-xs uppercase tracking-wider text-cream/60">{t.carnet.memberNumber}</p>
                   <p className="font-mono text-3xl font-bold">{memberNumber}</p>
                 </div>
                 <div>
-                  <p className="text-xs uppercase tracking-wider text-cream/60">Socio desde</p>
-                  <p className="font-semibold">{new Date(profile.created_at).toLocaleDateString("es-ES")}</p>
+                  <p className="text-xs uppercase tracking-wider text-cream/60">{t.carnet.memberSince}</p>
+                  <p className="font-semibold">{new Date(profile.created_at).toLocaleDateString(t.dateLocale)}</p>
                 </div>
               </div>
               <div className="bg-cream p-2 rounded-lg border-2 border-ink shrink-0">
@@ -88,7 +92,7 @@ function CarnetPage() {
           </div>
         </div>
         <p className="text-center text-xs text-muted-foreground mt-3">
-          Escanea el QR para verificar el carnet como socio.
+          {t.carnet.scanHint}
         </p>
       </div>
     </div>

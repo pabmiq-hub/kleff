@@ -4,6 +4,8 @@ import { IdCard, Dices, Gamepad2, Users } from "lucide-react";
 import { FeaturedGamesCard } from "@/components/app/FeaturedGamesCard";
 import { ActivePollsCard } from "@/components/app/ActivePollsCard";
 import { VolunteerCard } from "@/components/app/VolunteerCard";
+import { useAppLocale } from "@/i18n/app-i18n";
+import { accountDict } from "@/i18n/app/account";
 
 export const Route = createFileRoute("/app/")({
   component: AppHome,
@@ -11,18 +13,20 @@ export const Route = createFileRoute("/app/")({
 
 function AppHome() {
   const { user } = useAuth();
+  const { locale } = useAppLocale();
+  const t = accountDict[locale];
   return (
     <div className="space-y-6">
       <header>
-        <h1 className="font-display text-3xl font-bold">Hola 👋</h1>
+        <h1 className="font-display text-3xl font-bold">{t.home.greeting}</h1>
         <p className="text-muted-foreground mt-1">{user?.email}</p>
       </header>
 
       <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <QuickCard to="/app/carnet" icon={<IdCard className="h-5 w-5" />} title="Mi carnet" desc="Tu carnet digital de socio." />
-        <QuickCard to="/app/kleffers" icon={<Users className="h-5 w-5" />} title="Comunidad" desc="Directorio de socios activos." />
-        <QuickCard to="/app/partidas" icon={<Gamepad2 className="h-5 w-5" />} title="Partidas" desc="Eventos del grupo de KLEFF en Ludoya." />
-        <QuickCard to="/app/rentals" icon={<Dices className="h-5 w-5" />} title="Alquiler" desc="Catálogo, solicitudes y alquileres activos." />
+        <QuickCard to="/app/carnet" icon={<IdCard className="h-5 w-5" />} title={t.home.cardCarnetTitle} desc={t.home.cardCarnetDesc} />
+        <QuickCard to="/app/kleffers" icon={<Users className="h-5 w-5" />} title={t.home.cardCommunityTitle} desc={t.home.cardCommunityDesc} />
+        <QuickCard to="/app/partidas" icon={<Gamepad2 className="h-5 w-5" />} title={t.home.cardGamesTitle} desc={t.home.cardGamesDesc} />
+        <QuickCard to="/app/rentals" icon={<Dices className="h-5 w-5" />} title={t.home.cardRentalsTitle} desc={t.home.cardRentalsDesc} />
       </div>
 
       <FeaturedGamesCard />
