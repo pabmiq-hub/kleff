@@ -68,7 +68,7 @@ export function PollCard({ poll, onDone }: { poll: MemberPoll; onDone: () => voi
     try {
       const r = await voteFn({ data: { pollId: poll.id, optionIds: selected } });
       toast.success(r.weight === 2 ? t.voteRegisteredDouble : t.voteRegistered);
-      if (r.karma?.awarded) toast.success(t.karmaAwarded(r.karma.points));
+      if (r.karma?.awarded) toast.success(t.karmaAwarded(r.karma.points ?? 0));
       onDone();
     } catch (err) {
       toast.error(err instanceof Error ? err.message : t.genericError);
@@ -87,7 +87,7 @@ export function PollCard({ poll, onDone }: { poll: MemberPoll; onDone: () => voi
     try {
       const r = await responseFn({ data: { pollId: poll.id, answers } });
       toast.success(t.answersSent);
-      if (r.karma?.awarded) toast.success(t.karmaAwarded(r.karma.points));
+      if (r.karma?.awarded) toast.success(t.karmaAwarded(r.karma.points ?? 0));
       onDone();
     } catch (err) {
       toast.error(err instanceof Error ? err.message : t.genericError);
