@@ -511,6 +511,8 @@ function AdminPollsPage() {
                                     {
                                       id: null,
                                       label: g.name ?? "Juego",
+                                      labelCa: "",
+                                      labelEn: "",
                                       description: "",
                                       gameRef: g.id ? String(g.id) : null,
                                       imageUrl: g.imageUrl ?? null,
