@@ -11,6 +11,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { CheckCircle2, Sparkles } from "lucide-react";
 import { toast } from "sonner";
+import { useAppLocale, pickLocalized } from "@/i18n/app-i18n";
+import { pollsDict } from "@/i18n/app/polls";
+
+const DATE_LOCALE: Record<string, string> = { es: "es-ES", ca: "ca-ES", en: "en-GB" };
 
 export type MemberPoll = Awaited<ReturnType<typeof listMyPolls>>["polls"][number];
 
@@ -37,6 +41,8 @@ function pct(value: number, total: number) {
 }
 
 export function PollCard({ poll, onDone }: { poll: MemberPoll; onDone: () => void }) {
+  const { locale } = useAppLocale();
+  const t = pollsDict[locale].card;
   const voteFn = useServerFn(submitPollVote);
   const responseFn = useServerFn(submitPollResponse);
   const [selected, setSelected] = useState<string[]>(poll.myVotes);
@@ -44,6 +50,8 @@ export function PollCard({ poll, onDone }: { poll: MemberPoll; onDone: () => voi
   const [busy, setBusy] = useState(false);
 
   const totalVotes = poll.options.reduce((sum, o) => sum + (o.votes ?? 0), 0);
+  const title = pickLocalized(locale, { es: poll.title, ca: poll.titleCa, en: poll.titleEn });
+  const description = pickLocalized(locale, { es: poll.description, ca: poll.descriptionCa, en: poll.descriptionEn });
 
   const toggle = (id: string) => {
     setSelected((prev) => {
@@ -59,11 +67,11 @@ export function PollCard({ poll, onDone }: { poll: MemberPoll; onDone: () => voi
     setBusy(true);
     try {
       const r = await voteFn({ data: { pollId: poll.id, optionIds: selected } });
-      toast.success(r.weight === 2 ? "Voto registrado con peso doble ✨" : "Voto registrado");
-      if (r.karma?.awarded) toast.success(`+${r.karma.points} de karma por participar`);
+      toast.success(r.weight === 2 ? t.voteRegisteredDouble : t.voteRegistered);
+      if (r.karma?.awarded) toast.success(t.karmaAwarded(r.karma.points ?? 0));
       onDone();
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Error");
+      toast.error(err instanceof Error ? err.message : t.genericError);
     } finally {
       setBusy(false);
     }
@@ -72,17 +80,17 @@ export function PollCard({ poll, onDone }: { poll: MemberPoll; onDone: () => voi
   const handleAnswers = async () => {
     const missing = poll.questions.some((q) => (q.required ?? true) && !(answers[q.id] ?? "").trim());
     if (missing) {
-      toast.error("Responde a todas las preguntas obligatorias");
+      toast.error(t.answerRequired);
       return;
     }
     setBusy(true);
     try {
       const r = await responseFn({ data: { pollId: poll.id, answers } });
-      toast.success("Respuestas enviadas");
-      if (r.karma?.awarded) toast.success(`+${r.karma.points} de karma por participar`);
+      toast.success(t.answersSent);
+      if (r.karma?.awarded) toast.success(t.karmaAwarded(r.karma.points ?? 0));
       onDone();
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Error");
+      toast.error(err instanceof Error ? err.message : t.genericError);
     } finally {
       setBusy(false);
     }
@@ -92,31 +100,35 @@ export function PollCard({ poll, onDone }: { poll: MemberPoll; onDone: () => voi
     <article className="bg-card border-2 border-ink rounded-2xl p-6 shadow-tactile-sm space-y-4">
       <header className="space-y-1">
         <div className="flex flex-wrap items-center gap-2">
-          <h3 className="font-display text-xl font-bold">{poll.title}</h3>
-          <Badge variant="outline">{poll.kind === "survey" ? "Encuesta" : "Adquisiciones"}</Badge>
-          {!poll.open && <Badge variant="secondary">Cerrada</Badge>}
+          <h3 className="font-display text-xl font-bold">{title}</h3>
+          <Badge variant="outline">{poll.kind === "survey" ? t.kindSurvey : t.kindAcquisition}</Badge>
+          {!poll.open && <Badge variant="secondary">{t.closed}</Badge>}
           {poll.participated && (
             <span className="inline-flex items-center gap-1 text-xs text-emerald-700">
-              <CheckCircle2 className="h-4 w-4" /> Ya participaste
+              <CheckCircle2 className="h-4 w-4" /> {t.alreadyParticipated}
             </span>
           )}
         </div>
-        {poll.description && <p className="text-sm text-muted-foreground">{poll.description}</p>}
+        {description && <p className="text-sm text-muted-foreground">{description}</p>}
         {poll.closesAt && (
           <p className="text-xs text-muted-foreground">
-            Cierra el {new Date(poll.closesAt).toLocaleDateString("es-ES", { day: "numeric", month: "long" })}
+            {t.closesOn} {new Date(poll.closesAt).toLocaleDateString(DATE_LOCALE[locale] ?? "es-ES", { day: "numeric", month: "long" })}
           </p>
         )}
       </header>
 
       {poll.kind === "acquisition" ? (
         <div className="space-y-3">
-          <p className="text-xs text-muted-foreground">
-            Puedes elegir hasta {poll.maxChoices} {poll.maxChoices === 1 ? "opción" : "opciones"}.
-          </p>
+          <p className="text-xs text-muted-foreground">{t.chooseUpTo(poll.maxChoices)}</p>
           <ul className="space-y-2">
             {poll.options.map((o) => {
               const checked = selected.includes(o.id);
+              const optLabel = pickLocalized(locale, { es: o.label, ca: o.labelCa, en: o.labelEn });
+              const optDescription = pickLocalized(locale, {
+                es: o.description,
+                ca: o.descriptionCa,
+                en: o.descriptionEn,
+              });
               return (
                 <li key={o.id}>
                   <label
@@ -130,9 +142,9 @@ export function PollCard({ poll, onDone }: { poll: MemberPoll; onDone: () => voi
                     )}
                     <div className="min-w-0 flex-1">
                       <p className="font-semibold text-sm">
-                        {o.label} {o.year ? <span className="text-muted-foreground font-normal">({o.year})</span> : null}
+                        {optLabel} {o.year ? <span className="text-muted-foreground font-normal">({o.year})</span> : null}
                       </p>
-                      {o.description && <p className="text-xs text-muted-foreground line-clamp-2">{o.description}</p>}
+                      {optDescription && <p className="text-xs text-muted-foreground line-clamp-2">{optDescription}</p>}
                       {poll.showResults && o.votes !== null && (
                         <div className="mt-1 flex items-center gap-2">
                           <div className="h-1.5 flex-1 rounded-full bg-ink/10 overflow-hidden">
@@ -152,97 +164,104 @@ export function PollCard({ poll, onDone }: { poll: MemberPoll; onDone: () => voi
           </ul>
           {poll.open && (
             <Button onClick={handleVote} disabled={busy || selected.length === 0}>
-              {busy ? "Enviando…" : poll.myVotes.length ? "Cambiar mi voto" : "Votar"}
+              {busy ? t.sending : poll.myVotes.length ? t.changeVote : t.vote}
             </Button>
           )}
         </div>
       ) : (
         <div className="space-y-4">
-          {poll.questions.map((q) => (
-            <div key={q.id} className="space-y-2">
-              <Label>
-                {q.label}
-                {(q.required ?? true) && <span className="text-coral-deep"> *</span>}
-              </Label>
-              {q.help && <p className="text-xs text-muted-foreground">{q.help}</p>}
-              {q.type === "textarea" ? (
-                <Textarea
-                  value={answers[q.id] ?? ""}
-                  onChange={(e) => setAnswers({ ...answers, [q.id]: e.target.value })}
-                  disabled={!poll.open}
-                  maxLength={2000}
-                />
-              ) : q.type === "single" ? (
-                <RadioGroup
-                  value={answers[q.id] ?? ""}
-                  onValueChange={(v) => setAnswers({ ...answers, [q.id]: v })}
-                  disabled={!poll.open}
-                >
-                  {(q.options ?? []).map((opt) => (
-                    <div key={opt} className="flex items-center gap-2">
-                      <RadioGroupItem value={opt} id={`${q.id}-${opt}`} />
-                      <Label htmlFor={`${q.id}-${opt}`} className="font-normal">
-                        {opt}
-                      </Label>
-                    </div>
-                  ))}
-                </RadioGroup>
-              ) : q.type === "select" ? (
-                <Select
-                  value={answers[q.id] ?? ""}
-                  onValueChange={(v) => setAnswers({ ...answers, [q.id]: v })}
-                  disabled={!poll.open}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecciona una opción" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {(q.options ?? []).map((opt) => (
-                      <SelectItem key={opt} value={opt}>
-                        {opt}
-                      </SelectItem>
+          {poll.questions.map((q) => {
+            const qLabel = pickLocalized(locale, { es: q.label, ca: q.labelCa, en: q.labelEn });
+            const qHelp = pickLocalized(locale, { es: q.help ?? "", ca: q.helpCa, en: q.helpEn });
+            const qOptions =
+              (locale === "ca" && q.optionsCa?.length ? q.optionsCa : locale === "en" && q.optionsEn?.length ? q.optionsEn : q.options) ??
+              [];
+            return (
+              <div key={q.id} className="space-y-2">
+                <Label>
+                  {qLabel}
+                  {(q.required ?? true) && <span className="text-coral-deep"> *</span>}
+                </Label>
+                {qHelp && <p className="text-xs text-muted-foreground">{qHelp}</p>}
+                {q.type === "textarea" ? (
+                  <Textarea
+                    value={answers[q.id] ?? ""}
+                    onChange={(e) => setAnswers({ ...answers, [q.id]: e.target.value })}
+                    disabled={!poll.open}
+                    maxLength={2000}
+                  />
+                ) : q.type === "single" ? (
+                  <RadioGroup
+                    value={answers[q.id] ?? ""}
+                    onValueChange={(v) => setAnswers({ ...answers, [q.id]: v })}
+                    disabled={!poll.open}
+                  >
+                    {(q.options ?? []).map((opt, i) => (
+                      <div key={opt} className="flex items-center gap-2">
+                        <RadioGroupItem value={opt} id={`${q.id}-${opt}`} />
+                        <Label htmlFor={`${q.id}-${opt}`} className="font-normal">
+                          {qOptions[i] ?? opt}
+                        </Label>
+                      </div>
                     ))}
-                  </SelectContent>
-                </Select>
-              ) : q.type === "multi" ? (
-                <div className="space-y-1">
-                  {(q.options ?? []).map((opt) => {
-                    const current = (answers[q.id] ?? "").split("|").filter(Boolean);
-                    const checked = current.includes(opt);
-                    return (
-                      <label key={opt} className="flex items-center gap-2 text-sm">
-                        <Checkbox
-                          checked={checked}
-                          disabled={!poll.open}
-                          onCheckedChange={() =>
-                            setAnswers({
-                              ...answers,
-                              [q.id]: (checked ? current.filter((c) => c !== opt) : [...current, opt]).join("|"),
-                            })
-                          }
-                        />
-                        {opt}
-                      </label>
-                    );
-                  })}
-                </div>
-              ) : (
-                <Input
-                  type={
-                    q.type === "email" ? "email" : q.type === "phone" ? "tel" : q.type === "number" ? "number" : q.type === "date" ? "date" : "text"
-                  }
-                  value={answers[q.id] ?? ""}
-                  onChange={(e) => setAnswers({ ...answers, [q.id]: e.target.value })}
-                  disabled={!poll.open}
-                  maxLength={2000}
-                />
-              )}
-            </div>
-          ))}
+                  </RadioGroup>
+                ) : q.type === "select" ? (
+                  <Select
+                    value={answers[q.id] ?? ""}
+                    onValueChange={(v) => setAnswers({ ...answers, [q.id]: v })}
+                    disabled={!poll.open}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder={t.selectPlaceholder} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {(q.options ?? []).map((opt, i) => (
+                        <SelectItem key={opt} value={opt}>
+                          {qOptions[i] ?? opt}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                ) : q.type === "multi" ? (
+                  <div className="space-y-1">
+                    {(q.options ?? []).map((opt, i) => {
+                      const current = (answers[q.id] ?? "").split("|").filter(Boolean);
+                      const checked = current.includes(opt);
+                      return (
+                        <label key={opt} className="flex items-center gap-2 text-sm">
+                          <Checkbox
+                            checked={checked}
+                            disabled={!poll.open}
+                            onCheckedChange={() =>
+                              setAnswers({
+                                ...answers,
+                                [q.id]: (checked ? current.filter((c) => c !== opt) : [...current, opt]).join("|"),
+                              })
+                            }
+                          />
+                          {qOptions[i] ?? opt}
+                        </label>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <Input
+                    type={
+                      q.type === "email" ? "email" : q.type === "phone" ? "tel" : q.type === "number" ? "number" : q.type === "date" ? "date" : "text"
+                    }
+                    value={answers[q.id] ?? ""}
+                    onChange={(e) => setAnswers({ ...answers, [q.id]: e.target.value })}
+                    disabled={!poll.open}
+                    maxLength={2000}
+                  />
+                )}
+              </div>
+            );
+          })}
           {poll.open && (
             <Button onClick={handleAnswers} disabled={busy}>
               <Sparkles className="h-4 w-4 mr-2" />
-              {busy ? "Enviando…" : poll.myAnswers ? "Actualizar respuestas" : "Enviar respuestas"}
+              {busy ? t.sending : poll.myAnswers ? t.updateAnswers : t.sendAnswers}
             </Button>
           )}
         </div>

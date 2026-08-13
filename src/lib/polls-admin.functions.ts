@@ -5,7 +5,11 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 const optionSchema = z.object({
   id: z.string().uuid().nullable().optional(),
   label: z.string().min(1).max(200),
+  labelCa: z.string().max(200).nullable().optional(),
+  labelEn: z.string().max(200).nullable().optional(),
   description: z.string().max(500).nullable().optional(),
+  descriptionCa: z.string().max(500).nullable().optional(),
+  descriptionEn: z.string().max(500).nullable().optional(),
   gameRef: z.string().max(120).nullable().optional(),
   imageUrl: z.string().max(600).nullable().optional(),
   year: z.number().int().min(1900).max(2100).nullable().optional(),
@@ -16,7 +20,11 @@ const pollSchema = z.object({
   kind: z.enum(["survey", "acquisition"]),
   status: z.enum(["draft", "published", "closed"]),
   titleEs: z.string().min(2).max(200),
+  titleCa: z.string().max(200).nullable().optional(),
+  titleEn: z.string().max(200).nullable().optional(),
   descriptionEs: z.string().max(2000).nullable().optional(),
+  descriptionCa: z.string().max(2000).nullable().optional(),
+  descriptionEn: z.string().max(2000).nullable().optional(),
   opensAt: z.string().min(4),
   closesAt: z.string().min(4).nullable().optional(),
   karmaCategoryId: z.string().uuid().nullable().optional(),
@@ -27,10 +35,16 @@ const pollSchema = z.object({
       z.object({
         id: z.string().max(40),
         label: z.string().min(1).max(300),
+        labelCa: z.string().max(300).nullable().optional(),
+        labelEn: z.string().max(300).nullable().optional(),
         type: z.enum(["text", "textarea", "email", "phone", "number", "date", "single", "multi", "select"]),
         help: z.string().max(300).nullable().optional(),
+        helpCa: z.string().max(300).nullable().optional(),
+        helpEn: z.string().max(300).nullable().optional(),
         required: z.boolean().optional(),
         options: z.array(z.string().max(200)).max(30).optional(),
+        optionsCa: z.array(z.string().max(200)).max(30).optional(),
+        optionsEn: z.array(z.string().max(200)).max(30).optional(),
       }),
     )
     .max(30),
@@ -78,19 +92,40 @@ export const adminListPolls = createServerFn({ method: "POST" })
           kind: p.kind,
           status: p.status,
           titleEs: p.title_es,
+          titleCa: p.title_ca,
+          titleEn: p.title_en,
           descriptionEs: p.description_es,
+          descriptionCa: p.description_ca,
+          descriptionEn: p.description_en,
           opensAt: p.opens_at,
           closesAt: p.closes_at,
           karmaCategoryId: p.karma_category_id,
           maxChoices: p.max_choices,
           showResults: p.show_results,
-          questions: (p.questions ?? []) as { id: string; label: string; type: string; help?: string | null; required?: boolean; options?: string[] }[],
+          questions: (p.questions ?? []) as {
+            id: string;
+            label: string;
+            labelCa?: string | null;
+            labelEn?: string | null;
+            type: string;
+            help?: string | null;
+            helpCa?: string | null;
+            helpEn?: string | null;
+            required?: boolean;
+            options?: string[];
+            optionsCa?: string[];
+            optionsEn?: string[];
+          }[],
           options: (options ?? [])
             .filter((o) => o.poll_id === p.id)
             .map((o) => ({
               id: o.id,
               label: o.label,
+              labelCa: o.label_ca,
+              labelEn: o.label_en,
               description: o.description,
+              descriptionCa: o.description_ca,
+              descriptionEn: o.description_en,
               gameRef: o.game_ref,
               imageUrl: o.game_image_url,
               year: o.game_year,
@@ -117,7 +152,11 @@ export const adminSavePoll = createServerFn({ method: "POST" })
       kind: data.kind,
       status: data.status,
       title_es: data.titleEs,
+      title_ca: data.titleCa ?? null,
+      title_en: data.titleEn ?? null,
       description_es: data.descriptionEs ?? null,
+      description_ca: data.descriptionCa ?? null,
+      description_en: data.descriptionEn ?? null,
       opens_at: new Date(data.opensAt).toISOString(),
       closes_at: data.closesAt ? new Date(data.closesAt).toISOString() : null,
       karma_category_id: data.karmaCategoryId ?? null,
@@ -150,7 +189,11 @@ export const adminSavePoll = createServerFn({ method: "POST" })
       const row = {
         poll_id: pollId,
         label: o.label,
+        label_ca: o.labelCa ?? null,
+        label_en: o.labelEn ?? null,
         description: o.description ?? null,
+        description_ca: o.descriptionCa ?? null,
+        description_en: o.descriptionEn ?? null,
         game_ref: o.gameRef ?? null,
         game_image_url: o.imageUrl ?? null,
         game_year: o.year ?? null,

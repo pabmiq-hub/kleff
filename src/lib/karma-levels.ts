@@ -1,16 +1,60 @@
 export type KarmaLevel = {
   key: string;
   name: string;
+  name_ca: string;
+  name_en: string;
   min: number;
   max: number | null;
   perk: string;
+  perk_ca: string;
+  perk_en: string;
 };
 
 export const KARMA_LEVELS: KarmaLevel[] = [
-  { key: "aprendiz", name: "Aprendiz de mesa", min: 0, max: 49, perk: "—" },
-  { key: "estratega", name: "Estratega KLEFF", min: 50, max: 149, perk: "Insignia en el perfil y el carnet" },
-  { key: "maestro", name: "Maestro del Tablero", min: 150, max: 299, perk: "Insignia + mención en perfiles" },
-  { key: "leyenda", name: "Leyenda de KLEFF", min: 300, max: null, perk: "Insignia + regalo simbólico anual" },
+  {
+    key: "aprendiz",
+    name: "Aprendiz de mesa",
+    name_ca: "Aprenent de taula",
+    name_en: "Board apprentice",
+    min: 0,
+    max: 49,
+    perk: "—",
+    perk_ca: "—",
+    perk_en: "—",
+  },
+  {
+    key: "estratega",
+    name: "Estratega KLEFF",
+    name_ca: "Estrateg KLEFF",
+    name_en: "KLEFF strategist",
+    min: 50,
+    max: 149,
+    perk: "Insignia en el perfil y el carnet",
+    perk_ca: "Insígnia al perfil i al carnet",
+    perk_en: "Badge on profile and membership card",
+  },
+  {
+    key: "maestro",
+    name: "Maestro del Tablero",
+    name_ca: "Mestre del Tauler",
+    name_en: "Board master",
+    min: 150,
+    max: 299,
+    perk: "Insignia + mención en perfiles",
+    perk_ca: "Insígnia + menció als perfils",
+    perk_en: "Badge + mention on profiles",
+  },
+  {
+    key: "leyenda",
+    name: "Leyenda de KLEFF",
+    name_ca: "Llegenda de KLEFF",
+    name_en: "KLEFF legend",
+    min: 300,
+    max: null,
+    perk: "Insignia + regalo simbólico anual",
+    perk_ca: "Insígnia + regal simbòlic anual",
+    perk_en: "Badge + symbolic yearly gift",
+  },
 ];
 
 export function levelForKarma(lifetime: number): KarmaLevel {

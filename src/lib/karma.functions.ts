@@ -56,7 +56,7 @@ export const getMyKarma = createServerFn({ method: "POST" })
 
     const { data: categories } = await supabaseAdmin
       .from("karma_categories")
-      .select("id, name_es, grp, points, limit_period, limit_count");
+      .select("id, name_es, name_ca, name_en, grp, points, limit_period, limit_count");
 
     const { data: redemptions } = await supabaseAdmin
       .from("karma_redemptions")
@@ -65,7 +65,7 @@ export const getMyKarma = createServerFn({ method: "POST" })
       .order("created_at", { ascending: false })
       .limit(100);
 
-    const { data: rewards } = await supabaseAdmin.from("karma_rewards").select("id, name_es, effect");
+    const { data: rewards } = await supabaseAdmin.from("karma_rewards").select("id, name_es, name_ca, name_en, effect");
 
     const { data: perks } = await supabaseAdmin
       .from("karma_perks")
@@ -107,20 +107,30 @@ export const getMyKarma = createServerFn({ method: "POST" })
       },
       rankingOptIn: profile?.karma_ranking_opt_in ?? true,
 
-      entries: (entries ?? []).map((e) => ({
-        ...e,
-        categoryName: e.category_id ? (catMap.get(e.category_id)?.name_es ?? "—") : "Ajuste manual",
-      })),
-      redemptions: (redemptions ?? []).map((r) => ({
-        ...r,
-        rewardName: r.reward_id ? (rewardMap.get(r.reward_id)?.name_es ?? "—") : "—",
-        effect: r.reward_id ? (rewardMap.get(r.reward_id)?.effect ?? "manual") : "manual",
-      })),
+      entries: (entries ?? []).map((e) => {
+        const cat = e.category_id ? catMap.get(e.category_id) : null;
+        return {
+          ...e,
+          categoryName: cat?.name_es ?? null,
+          categoryName_ca: cat?.name_ca ?? null,
+          categoryName_en: cat?.name_en ?? null,
+        };
+      }),
+      redemptions: (redemptions ?? []).map((r) => {
+        const rew = r.reward_id ? rewardMap.get(r.reward_id) : null;
+        return {
+          ...r,
+          rewardName: rew?.name_es ?? null,
+          rewardName_ca: rew?.name_ca ?? null,
+          rewardName_en: rew?.name_en ?? null,
+          effect: rew?.effect ?? "manual",
+        };
+      }),
       perks: perks ?? [],
       activeRentals: (activeRentals ?? []).map((r) => ({
         id: r.id,
         dueAt: r.due_at,
-        title: r.game_id ? (gameTitles[r.game_id] ?? "Juego") : "Juego",
+        title: r.game_id ? (gameTitles[r.game_id] ?? null) : null,
       })),
     };
   });

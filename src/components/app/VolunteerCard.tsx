@@ -9,7 +9,6 @@ import {
   VOLUNTEER_EVENT_ROLES,
   VOLUNTEER_INSTITUTIONAL,
   VOLUNTEER_LANGUAGES,
-  VOLUNTEER_STATUS_LABELS,
   type VolunteerAnswers,
 } from "@/lib/volunteer-options";
 import { Button } from "@/components/ui/button";
@@ -20,15 +19,19 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { HeartHandshake } from "lucide-react";
+import { useAppLocale } from "@/i18n/app-i18n";
+import { pollsDict } from "@/i18n/app/polls";
 
 function MultiCheck({
   title,
   options,
+  labels,
   value,
   onChange,
 }: {
   title: string;
   options: readonly string[];
+  labels: readonly string[];
   value: string[];
   onChange: (next: string[]) => void;
 }) {
@@ -38,10 +41,10 @@ function MultiCheck({
     <div>
       <Label className="text-sm font-semibold">{title}</Label>
       <div className="grid sm:grid-cols-2 gap-2 mt-2">
-        {options.map((o) => (
+        {options.map((o, i) => (
           <label key={o} className="flex items-start gap-2 text-sm cursor-pointer">
             <Checkbox checked={value.includes(o)} onCheckedChange={() => toggle(o)} className="mt-0.5" />
-            <span>{o}</span>
+            <span>{labels[i] ?? o}</span>
           </label>
         ))}
       </div>
@@ -50,6 +53,8 @@ function MultiCheck({
 }
 
 export function VolunteerCard() {
+  const { locale } = useAppLocale();
+  const t = pollsDict[locale].volunteer;
   const load = useServerFn(getMyVolunteerApplication);
   const submit = useServerFn(submitVolunteerApplication);
   const [open, setOpen] = useState(false);
@@ -85,17 +90,17 @@ export function VolunteerCard() {
 
   const send = async () => {
     if (!fullName.trim() || !email.trim()) {
-      toast.error("Nombre y email son obligatorios");
+      toast.error(t.requiredNameEmail);
       return;
     }
     if (answers.areas.length === 0) {
-      toast.error("Elige al menos un área de colaboración");
+      toast.error(t.requiredArea);
       return;
     }
     setSaving(true);
     try {
       await submit({ data: { fullName, email, phone: phone || null, answers } });
-      toast.success("¡Solicitud enviada! Te avisaremos pronto.");
+      toast.success(t.success);
       setOpen(false);
       await reload();
     } catch (e) {
@@ -108,6 +113,7 @@ export function VolunteerCard() {
   if (loading) return null;
 
   const inProgress = status === "pending" || status === "reviewing";
+  const statusLabel = status ? (t.status as Record<string, string>)[status] ?? status : null;
 
   return (
     <>
@@ -115,15 +121,12 @@ export function VolunteerCard() {
         <div className="flex items-start justify-between gap-4 flex-wrap">
           <div>
             <div className="flex items-center gap-2 text-coral-deep font-semibold">
-              <HeartHandshake className="h-5 w-5" /> Equipo de organización
+              <HeartHandshake className="h-5 w-5" /> {t.title}
             </div>
-            <p className="text-sm text-muted-foreground mt-2 max-w-xl">
-              ¿Te apetece echar una mano en los eventos de KLEFF? Cuéntanos en qué te gustaría colaborar y nos ponemos
-              en contacto contigo.
-            </p>
-            {status && (
+            <p className="text-sm text-muted-foreground mt-2 max-w-xl">{t.description}</p>
+            {statusLabel && (
               <p className="text-xs mt-2 text-ink/70">
-                Estado de tu solicitud: <strong>{VOLUNTEER_STATUS_LABELS[status] ?? status}</strong>
+                {t.statusLabel}: <strong>{statusLabel}</strong>
               </p>
             )}
           </div>
@@ -132,7 +135,7 @@ export function VolunteerCard() {
             disabled={inProgress}
             className="bg-coral text-cream hover:bg-coral/90"
           >
-            {inProgress ? "Solicitud enviada" : status === "accepted" ? "Ya formas parte" : "Únete al equipo"}
+            {inProgress ? t.ctaSent : status === "accepted" ? t.ctaAccepted : t.ctaJoin}
           </Button>
         </div>
       </div>
@@ -140,104 +143,110 @@ export function VolunteerCard() {
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Únete al equipo de organización</DialogTitle>
+            <DialogTitle>{t.dialogTitle}</DialogTitle>
           </DialogHeader>
           <div className="space-y-5">
             <div className="grid sm:grid-cols-3 gap-3">
               <div>
-                <Label className="text-xs">Nombre</Label>
+                <Label className="text-xs">{t.name}</Label>
                 <Input value={fullName} onChange={(e) => setFullName(e.target.value)} />
               </div>
               <div>
-                <Label className="text-xs">Email</Label>
+                <Label className="text-xs">{t.email}</Label>
                 <Input value={email} onChange={(e) => setEmail(e.target.value)} />
               </div>
               <div>
-                <Label className="text-xs">Teléfono</Label>
+                <Label className="text-xs">{t.phone}</Label>
                 <Input value={phone} onChange={(e) => setPhone(e.target.value)} />
               </div>
             </div>
 
             <MultiCheck
-              title="¿En qué áreas te gustaría colaborar?"
+              title={t.areasTitle}
               options={VOLUNTEER_AREAS}
+              labels={t.areas}
               value={answers.areas}
               onChange={(v) => set("areas", v)}
             />
             <MultiCheck
-              title="¿En qué tipo de eventos puedes ayudar?"
+              title={t.eventCategoriesTitle}
               options={VOLUNTEER_EVENT_CATEGORIES}
+              labels={t.eventCategories}
               value={answers.eventCategories}
               onChange={(v) => set("eventCategories", v)}
             />
             <MultiCheck
-              title="Rol dentro del evento"
+              title={t.eventRolesTitle}
               options={VOLUNTEER_EVENT_ROLES}
+              labels={t.eventRoles}
               value={answers.eventRoles}
               onChange={(v) => set("eventRoles", v)}
             />
             <MultiCheck
-              title="¿Qué beneficios te gustaría recibir?"
+              title={t.benefitsTitle}
               options={VOLUNTEER_BENEFITS}
+              labels={t.benefits}
               value={answers.benefits}
               onChange={(v) => set("benefits", v)}
             />
             <MultiCheck
-              title="Idiomas en los que puedes atender"
+              title={t.languagesTitle}
               options={VOLUNTEER_LANGUAGES}
+              labels={t.languages}
               value={answers.languages}
               onChange={(v) => set("languages", v)}
             />
             <MultiCheck
-              title="Áreas institucionales"
+              title={t.institutionalTitle}
               options={VOLUNTEER_INSTITUTIONAL}
+              labels={t.institutional}
               value={answers.institutional}
               onChange={(v) => set("institutional", v)}
             />
 
             <div>
-              <Label className="text-sm font-semibold">Disponibilidad habitual</Label>
+              <Label className="text-sm font-semibold">{t.availabilityTitle}</Label>
               <Input
                 className="mt-2"
-                placeholder="Ej. viernes tarde y sábados"
+                placeholder={t.availabilityPlaceholder}
                 value={answers.availability}
                 onChange={(e) => set("availability", e.target.value)}
               />
             </div>
 
             <div className="border-t pt-4 space-y-3">
-              <Label className="text-sm font-semibold">Sobre la cuota de socio</Label>
+              <Label className="text-sm font-semibold">{t.duesTitle}</Label>
               <div className="flex items-center gap-4 text-sm">
-                <span className="text-muted-foreground">¿Debería existir una cuota?</span>
+                <span className="text-muted-foreground">{t.duesQuestion}</span>
                 <label className="flex items-center gap-2 cursor-pointer">
                   <Checkbox
                     checked={answers.duesOpinion === "yes"}
                     onCheckedChange={() => set("duesOpinion", answers.duesOpinion === "yes" ? "" : "yes")}
                   />
-                  Sí
+                  {t.duesYes}
                 </label>
                 <label className="flex items-center gap-2 cursor-pointer">
                   <Checkbox
                     checked={answers.duesOpinion === "no"}
                     onCheckedChange={() => set("duesOpinion", answers.duesOpinion === "no" ? "" : "no")}
                   />
-                  No
+                  {t.duesNo}
                 </label>
               </div>
               <div className="grid sm:grid-cols-2 gap-3">
                 <div>
-                  <Label className="text-xs">Importe anual justo (€)</Label>
+                  <Label className="text-xs">{t.duesAmount}</Label>
                   <Input value={answers.duesAmount} onChange={(e) => set("duesAmount", e.target.value)} />
                 </div>
                 <div>
-                  <Label className="text-xs">Beneficios que debería incluir</Label>
+                  <Label className="text-xs">{t.duesBenefits}</Label>
                   <Input value={answers.duesBenefits} onChange={(e) => set("duesBenefits", e.target.value)} />
                 </div>
               </div>
             </div>
 
             <div>
-              <Label className="text-sm font-semibold">Comentarios y propuestas de mejora</Label>
+              <Label className="text-sm font-semibold">{t.commentsTitle}</Label>
               <Textarea
                 className="mt-2"
                 rows={4}
@@ -248,10 +257,10 @@ export function VolunteerCard() {
 
             <div className="flex justify-end gap-2 border-t pt-4">
               <Button variant="outline" onClick={() => setOpen(false)}>
-                Cancelar
+                {t.cancel}
               </Button>
               <Button onClick={send} disabled={saving} className="bg-coral text-cream hover:bg-coral/90">
-                {saving ? "Enviando…" : "Enviar solicitud"}
+                {saving ? t.sending : t.send}
               </Button>
             </div>
           </div>

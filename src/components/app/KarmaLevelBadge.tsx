@@ -3,6 +3,8 @@ import { useServerFn } from "@tanstack/react-start";
 import { Sparkles } from "lucide-react";
 import { getMyKarmaSummary } from "@/lib/karma.functions";
 import { levelForKarma } from "@/lib/karma-levels";
+import { useAppLocale } from "@/i18n/app-i18n";
+import { accountDict } from "@/i18n/app/account";
 
 type Variant = "light" | "dark";
 
@@ -10,6 +12,8 @@ type Variant = "light" | "dark";
 export function KarmaLevelBadge({ variant = "light" }: { variant?: Variant }) {
   const fn = useServerFn(getMyKarmaSummary);
   const [summary, setSummary] = useState<{ balance: number; lifetime: number } | null>(null);
+  const { locale } = useAppLocale();
+  const t = accountDict[locale];
 
   useEffect(() => {
     let cancelled = false;
@@ -34,11 +38,11 @@ export function KarmaLevelBadge({ variant = "light" }: { variant?: Variant }) {
   return (
     <span
       className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-semibold ${styles}`}
-      title={`${summary.lifetime} puntos de karma acumulados`}
+      title={t.karmaBadge.tooltip(summary.lifetime)}
     >
       <Sparkles className="h-3.5 w-3.5" />
       {level.name}
-      <span className="opacity-70">· {summary.balance} pts</span>
+      <span className="opacity-70">· {summary.balance} {t.karmaBadge.points}</span>
     </span>
   );
 }

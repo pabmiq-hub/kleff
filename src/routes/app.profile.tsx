@@ -13,6 +13,9 @@ import { toast } from "sonner";
 import { Upload, ShieldCheck } from "lucide-react";
 
 import { KarmaLevelBadge } from "@/components/app/KarmaLevelBadge";
+import { useAppLocale } from "@/i18n/app-i18n";
+import { accountDict } from "@/i18n/app/account";
+import { commonDict } from "@/i18n/app/common";
 
 export const Route = createFileRoute("/app/profile")({
   component: ProfilePage,
@@ -21,6 +24,9 @@ export const Route = createFileRoute("/app/profile")({
 function ProfilePage() {
   const fetchProfile = useServerFn(getMyProfile);
   const updateFn = useServerFn(updateMyProfile);
+  const { locale } = useAppLocale();
+  const t = accountDict[locale];
+  const c = commonDict[locale];
 
 
   const [loading, setLoading] = useState(true);
@@ -61,11 +67,11 @@ function ProfilePage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.gender) {
-      toast.error("Selecciona un género");
+      toast.error(t.profile.selectGenderError);
       return;
     }
     if (!form.dateOfBirth) {
-      toast.error("Indica tu fecha de nacimiento");
+      toast.error(t.profile.dobRequiredError);
       return;
     }
     setSubmitting(true);
@@ -79,9 +85,9 @@ function ProfilePage() {
           dateOfBirth: form.dateOfBirth,
         },
       });
-      toast.success("Perfil actualizado");
+      toast.success(t.profile.updateSuccess);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Error");
+      toast.error(err instanceof Error ? err.message : t.profile.genericError);
     } finally {
       setSubmitting(false);
     }
@@ -89,14 +95,14 @@ function ProfilePage() {
 
   const handleAvatarUpload = async (file: File) => {
     if (file.size > 2 * 1024 * 1024) {
-      toast.error("La imagen no puede superar los 2MB");
+      toast.error(t.profile.imageTooLargeError);
       return;
     }
     setUploading(true);
     try {
       const { data: sess } = await supabase.auth.getSession();
       const token = sess.session?.access_token;
-      if (!token) throw new Error("Sesión no válida");
+      if (!token) throw new Error(t.profile.invalidSessionError);
       const fd = new FormData();
       fd.append("file", file);
       const res = await fetch("/api/public/upload-my-avatar", {
@@ -107,9 +113,9 @@ function ProfilePage() {
       if (!res.ok) throw new Error(await res.text());
       const json = (await res.json()) as { url: string };
       setForm((f) => ({ ...f, avatarUrl: json.url }));
-      toast.success("Foto actualizada");
+      toast.success(t.profile.photoUpdated);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Error subiendo la foto");
+      toast.error(err instanceof Error ? err.message : t.profile.photoUploadError);
     } finally {
       setUploading(false);
     }
@@ -118,18 +124,18 @@ function ProfilePage() {
 
 
 
-  if (loading) return <p className="text-muted-foreground">Cargando…</p>;
+  if (loading) return <p className="text-muted-foreground">{t.layout.loading}</p>;
 
   return (
     <div className="max-w-2xl space-y-6">
       <div className="flex flex-wrap items-baseline justify-between gap-4">
         <div className="flex flex-wrap items-center gap-3">
-          <h1 className="font-display text-3xl font-bold">Mi perfil</h1>
+          <h1 className="font-display text-3xl font-bold">{t.profile.title}</h1>
           <KarmaLevelBadge />
         </div>
         {memberNumber !== null && (
           <p className="text-sm text-muted-foreground">
-            Socio nº <span className="font-mono font-semibold text-ink">{memberNumber}</span>
+            {t.profile.memberNumber} <span className="font-mono font-semibold text-ink">{memberNumber}</span>
           </p>
         )}
       </div>
@@ -141,7 +147,7 @@ function ProfilePage() {
             {form.avatarUrl ? (
               <img src={form.avatarUrl} alt="" className="h-full w-full object-cover" />
             ) : (
-              <div className="h-full w-full flex items-center justify-center text-ink/30 text-xs">Sin foto</div>
+              <div className="h-full w-full flex items-center justify-center text-ink/30 text-xs">{t.profile.noPhoto}</div>
             )}
           </div>
           <div className="flex flex-col gap-2">
@@ -164,7 +170,7 @@ function ProfilePage() {
               onClick={() => fileRef.current?.click()}
             >
               <Upload className="h-4 w-4 mr-2" />
-              {uploading ? "Subiendo…" : form.avatarUrl ? "Cambiar foto" : "Subir foto"}
+              {uploading ? t.profile.uploading : form.avatarUrl ? t.profile.changePhoto : t.profile.uploadPhoto}
             </Button>
             {form.avatarUrl && (
               <button
@@ -172,7 +178,7 @@ function ProfilePage() {
                 className="text-xs text-muted-foreground hover:text-coral-deep text-left"
                 onClick={() => setForm((f) => ({ ...f, avatarUrl: "" }))}
               >
-                Quitar foto
+                {t.profile.removePhoto}
               </button>
             )}
           </div>
@@ -180,11 +186,11 @@ function ProfilePage() {
 
         <div className="grid sm:grid-cols-2 gap-4">
           <div className="space-y-2">
-            <Label>Nombre completo *</Label>
+            <Label>{t.profile.fullName}</Label>
             <Input value={form.fullName} onChange={(e) => setForm({ ...form, fullName: e.target.value })} required />
           </div>
           <div className="space-y-2">
-            <Label>Nombre de usuario *</Label>
+            <Label>{t.profile.username}</Label>
             <Input
               value={form.username}
               onChange={(e) => setForm({ ...form, username: e.target.value })}
@@ -198,7 +204,7 @@ function ProfilePage() {
 
         <div className="grid sm:grid-cols-2 gap-4">
           <div className="space-y-2">
-            <Label>Fecha de nacimiento *</Label>
+            <Label>{t.profile.dateOfBirth}</Label>
             <Input
               type="date"
               value={form.dateOfBirth}
@@ -207,15 +213,15 @@ function ProfilePage() {
             />
           </div>
           <div className="space-y-2">
-            <Label>Género *</Label>
+            <Label>{t.profile.gender}</Label>
             <Select value={form.gender} onValueChange={(v) => setForm({ ...form, gender: v as typeof form.gender })}>
-              <SelectTrigger><SelectValue placeholder="Selecciona…" /></SelectTrigger>
+              <SelectTrigger><SelectValue placeholder={t.profile.genderPlaceholder} /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="female">Mujer</SelectItem>
-                <SelectItem value="male">Hombre</SelectItem>
-                <SelectItem value="non_binary">No binario</SelectItem>
-                <SelectItem value="other">Otro</SelectItem>
-                <SelectItem value="prefer_not_to_say">Prefiero no decirlo</SelectItem>
+                <SelectItem value="female">{t.profile.genderFemale}</SelectItem>
+                <SelectItem value="male">{t.profile.genderMale}</SelectItem>
+                <SelectItem value="non_binary">{t.profile.genderNonBinary}</SelectItem>
+                <SelectItem value="other">{t.profile.genderOther}</SelectItem>
+                <SelectItem value="prefer_not_to_say">{t.profile.genderPreferNot}</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -224,13 +230,12 @@ function ProfilePage() {
         <div className="rounded-xl border border-ink/15 bg-cream-deep/40 p-3 flex items-start gap-2 text-xs text-muted-foreground">
           <ShieldCheck className="h-4 w-4 mt-0.5 text-emerald-700 shrink-0" />
           <p>
-            Tu documento de identidad se guardó cifrado durante el alta y no es editable desde aquí. Si necesitas
-            actualizarlo, escríbenos a{" "}
+            {t.profile.idNotice}{" "}
             <a href="mailto:hola@kleff.es" className="underline">hola@kleff.es</a>.
           </p>
         </div>
 
-        <Button type="submit" disabled={submitting}>{submitting ? "Guardando…" : "Guardar cambios"}</Button>
+        <Button type="submit" disabled={submitting}>{submitting ? c.saving : c.saveChanges}</Button>
       </form>
 
       <LudoyaLinkCard onChanged={() => void reload()} />

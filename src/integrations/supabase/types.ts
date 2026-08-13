@@ -1297,33 +1297,45 @@ export type Database = {
         Row: {
           created_at: string
           description: string | null
+          description_ca: string | null
+          description_en: string | null
           game_image_url: string | null
           game_ref: string | null
           game_year: number | null
           id: string
           label: string
+          label_ca: string | null
+          label_en: string | null
           poll_id: string
           sort_order: number
         }
         Insert: {
           created_at?: string
           description?: string | null
+          description_ca?: string | null
+          description_en?: string | null
           game_image_url?: string | null
           game_ref?: string | null
           game_year?: number | null
           id?: string
           label: string
+          label_ca?: string | null
+          label_en?: string | null
           poll_id: string
           sort_order?: number
         }
         Update: {
           created_at?: string
           description?: string | null
+          description_ca?: string | null
+          description_en?: string | null
           game_image_url?: string | null
           game_ref?: string | null
           game_year?: number | null
           id?: string
           label?: string
+          label_ca?: string | null
+          label_en?: string | null
           poll_id?: string
           sort_order?: number
         }
@@ -1502,6 +1514,7 @@ export type Database = {
           ludoya_user_id: string | null
           ludoya_username: string | null
           member_number: number
+          preferred_locale: string
           updated_at: string
           username: string
         }
@@ -1524,6 +1537,7 @@ export type Database = {
           ludoya_user_id?: string | null
           ludoya_username?: string | null
           member_number?: number
+          preferred_locale?: string
           updated_at?: string
           username: string
         }
@@ -1546,6 +1560,7 @@ export type Database = {
           ludoya_user_id?: string | null
           ludoya_username?: string | null
           member_number?: number
+          preferred_locale?: string
           updated_at?: string
           username?: string
         }

@@ -2,6 +2,7 @@ import { Outlet, Link, createRootRoute, HeadContent, Scripts } from "@tanstack/r
 
 import appCss from "../styles.css?url";
 import { I18nProvider } from "@/i18n/I18nProvider";
+import { AppLocaleProvider } from "@/i18n/app-i18n";
 import { AuthProvider } from "@/auth/AuthProvider";
 import { EditorProvider } from "@/editor/EditorProvider";
 import { EditorOverlay } from "@/editor/EditorOverlay";
@@ -132,14 +133,16 @@ function RootComponent() {
   return (
     <AuthProvider>
       <I18nProvider>
-        <EditorProvider>
-          <EditorLayoutShift>
-            <Outlet />
-          </EditorLayoutShift>
-          <EditorOverlay />
-          <CookieConsent />
-          <Toaster />
-        </EditorProvider>
+        <AppLocaleProvider>
+          <EditorProvider>
+            <EditorLayoutShift>
+              <Outlet />
+            </EditorLayoutShift>
+            <EditorOverlay />
+            <CookieConsent />
+            <Toaster />
+          </EditorProvider>
+        </AppLocaleProvider>
       </I18nProvider>
     </AuthProvider>
   );

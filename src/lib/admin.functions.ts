@@ -74,6 +74,7 @@ const profileSchema = z.object({
     .regex(/^[a-zA-Z0-9_.-]+$/)
     .nullable()
     .optional(),
+  locale: z.enum(["es", "ca", "en"]).optional(),
 });
 
 export const acceptInvitation = createServerFn({ method: "POST" })
@@ -147,6 +148,7 @@ export const acceptInvitation = createServerFn({ method: "POST" })
       id_document_encrypted: ciphertext,
       id_document_nonce: nonce,
       ludoya_username: ludoyaUsername,
+      preferred_locale: data.locale ?? "es",
     });
     if (profileErr) {
       await supabaseAdmin.auth.admin.deleteUser(userId);

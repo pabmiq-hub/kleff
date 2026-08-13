@@ -14,6 +14,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
+import { useAppLocale } from "@/i18n/app-i18n";
+import { signupDict } from "@/i18n/app/signup";
+import { LOCALES, LOCALE_LABELS } from "@/i18n/config";
 
 export const Route = createFileRoute("/invite/$token")({
   head: () => ({
@@ -33,7 +36,10 @@ function InvitePage() {
   const { invitation, token } = Route.useLoaderData();
   const navigate = useNavigate();
   const acceptFn = useServerFn(acceptInvitation);
+  const { locale, setLocale } = useAppLocale();
+  const t = signupDict[locale];
 
+  const [step, setStep] = useState<"language" | "form">("language");
   const [submitting, setSubmitting] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
@@ -48,18 +54,12 @@ function InvitePage() {
   });
 
   if (!invitation.valid) {
-    const reasonText: Record<string, string> = {
-      not_found: "Esta invitación no existe.",
-      revoked: "Esta invitación ha sido revocada.",
-      used: "Esta invitación ya se ha utilizado.",
-      expired: "Esta invitación ha caducado. Pide una nueva al equipo de KLEFF.",
-    };
     return (
       <div className="min-h-screen flex items-center justify-center bg-cream-deep px-4">
         <div className="bg-card border-2 border-ink rounded-2xl shadow-tactile p-8 max-w-md text-center">
-          <h1 className="font-display text-2xl font-bold mb-2">Invitación no válida</h1>
-          <p className="text-muted-foreground mb-6">{reasonText[invitation.reason]}</p>
-          <Link to="/" className="text-coral-deep underline">Volver a la web</Link>
+          <h1 className="font-display text-2xl font-bold mb-2">{t.invalidTitle}</h1>
+          <p className="text-muted-foreground mb-6">{t.reasons[invitation.reason]}</p>
+          <Link to="/" className="text-coral-deep underline">{t.backToSite}</Link>
         </div>
       </div>
     );
@@ -67,7 +67,7 @@ function InvitePage() {
 
   const handleAvatarUpload = async (file: File) => {
     if (file.size > 2 * 1024 * 1024) {
-      toast.error("La imagen no puede superar los 2MB");
+      toast.error(t.imageTooBig);
       return;
     }
     setUploadingAvatar(true);
@@ -84,9 +84,9 @@ function InvitePage() {
       if (!res.ok) throw new Error("Upload failed");
       const json = (await res.json()) as { url: string };
       setAvatarUrl(json.url);
-      toast.success("Foto subida");
+      toast.success(t.photoUploaded);
     } catch {
-      toast.error("Error al subir la foto");
+      toast.error(t.photoError);
     } finally {
       setUploadingAvatar(false);
     }
@@ -95,7 +95,7 @@ function InvitePage() {
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (!form.gender) {
-      toast.error("Selecciona un género");
+      toast.error(t.selectGenderError);
       return;
     }
     setSubmitting(true);
@@ -111,6 +111,7 @@ function InvitePage() {
           gender: form.gender,
           idDocument: form.idDocument.trim().toUpperCase(),
           ludoyaUsername: form.ludoyaUsername.trim() || null,
+          locale,
         },
       });
       // Auto-login
@@ -119,15 +120,52 @@ function InvitePage() {
         password: form.password,
       });
       if (error) throw error;
-      toast.success("¡Bienvenido a KLEFF!");
+      toast.success(t.welcome);
       void navigate({ to: "/app" });
     } catch (err) {
-      const msg = err instanceof Error ? err.message : "Error al crear la cuenta";
+      const msg = err instanceof Error ? err.message : t.createError;
       toast.error(msg);
     } finally {
       setSubmitting(false);
     }
   };
+
+  if (step === "language") {
+    return (
+      <div className="min-h-screen bg-cream-deep py-8 px-4 flex items-center">
+        <div className="max-w-xl mx-auto w-full">
+          <Link to="/" className="block text-center mb-6">
+            <span className="font-display font-bold text-2xl">KLEFF</span>
+          </Link>
+          <div className="bg-card border-2 border-ink rounded-2xl shadow-tactile p-6 sm:p-8">
+            <p className="text-xs uppercase tracking-wider text-coral-deep font-bold mb-2">{t.step1}</p>
+            <h1 className="font-display text-2xl sm:text-3xl font-bold mb-2">{t.languageTitle}</h1>
+            <p className="text-sm text-muted-foreground mb-6">{t.languageSubtitle}</p>
+            <div className="grid gap-3">
+              {LOCALES.map((l) => (
+                <button
+                  key={l}
+                  type="button"
+                  onClick={() => setLocale(l)}
+                  aria-pressed={locale === l}
+                  className={`w-full text-left rounded-xl border-2 px-4 py-3 font-semibold transition-colors ${
+                    locale === l
+                      ? "border-ink bg-ink text-cream"
+                      : "border-ink/20 bg-cream-deep/40 text-foreground hover:border-ink"
+                  }`}
+                >
+                  {LOCALE_LABELS[l]}
+                </button>
+              ))}
+            </div>
+            <Button className="w-full mt-6" onClick={() => setStep("form")}>
+              {t.continue}
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-cream-deep py-8 px-4">
@@ -137,17 +175,25 @@ function InvitePage() {
         </Link>
 
         <div className="bg-card border-2 border-ink rounded-2xl shadow-tactile p-6 sm:p-8">
-          <h1 className="font-display text-2xl sm:text-3xl font-bold mb-1">
-            Crea tu cuenta
-          </h1>
+          <div className="flex items-center justify-between gap-3 mb-2">
+            <p className="text-xs uppercase tracking-wider text-coral-deep font-bold">{t.step2}</p>
+            <button
+              type="button"
+              onClick={() => setStep("language")}
+              className="text-xs text-muted-foreground underline hover:text-foreground"
+            >
+              {t.changeLanguage}
+            </button>
+          </div>
+          <h1 className="font-display text-2xl sm:text-3xl font-bold mb-1">{t.title}</h1>
           <p className="text-sm text-muted-foreground mb-6">
-            Bienvenido a la zona privada de KLEFF. Esta cuenta será para <strong>{invitation.email}</strong>.
+            {t.introA} <strong>{invitation.email}</strong>.
           </p>
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <div className="grid sm:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="username">Nombre de usuario *</Label>
+                <Label htmlFor="username">{t.username} *</Label>
                 <Input
                   id="username"
                   required
@@ -156,11 +202,11 @@ function InvitePage() {
                   pattern="[a-zA-Z0-9_.\-]+"
                   value={form.username}
                   onChange={(e) => setForm({ ...form, username: e.target.value })}
-                  placeholder="ej. ada_lovelace"
+                  placeholder={t.usernamePlaceholder}
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="fullName">Nombre completo *</Label>
+                <Label htmlFor="fullName">{t.fullName} *</Label>
                 <Input
                   id="fullName"
                   required
@@ -172,7 +218,7 @@ function InvitePage() {
 
             <div className="grid sm:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="dateOfBirth">Fecha de nacimiento *</Label>
+                <Label htmlFor="dateOfBirth">{t.dateOfBirth} *</Label>
                 <Input
                   id="dateOfBirth"
                   type="date"
@@ -182,24 +228,24 @@ function InvitePage() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="gender">Género *</Label>
+                <Label htmlFor="gender">{t.gender} *</Label>
                 <Select value={form.gender} onValueChange={(v) => setForm({ ...form, gender: v as typeof form.gender })}>
                   <SelectTrigger id="gender">
-                    <SelectValue placeholder="Selecciona…" />
+                    <SelectValue placeholder={t.selectPlaceholder} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="female">Mujer</SelectItem>
-                    <SelectItem value="male">Hombre</SelectItem>
-                    <SelectItem value="non_binary">No binario</SelectItem>
-                    <SelectItem value="other">Otro</SelectItem>
-                    <SelectItem value="prefer_not_to_say">Prefiero no decirlo</SelectItem>
+                    <SelectItem value="female">{t.genders.female}</SelectItem>
+                    <SelectItem value="male">{t.genders.male}</SelectItem>
+                    <SelectItem value="non_binary">{t.genders.non_binary}</SelectItem>
+                    <SelectItem value="other">{t.genders.other}</SelectItem>
+                    <SelectItem value="prefer_not_to_say">{t.genders.prefer_not_to_say}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="idDocument">Documento de identidad (DNI/NIE/Pasaporte) *</Label>
+              <Label htmlFor="idDocument">{t.idDocument} *</Label>
               <Input
                 id="idDocument"
                 required
@@ -207,13 +253,11 @@ function InvitePage() {
                 onChange={(e) => setForm({ ...form, idDocument: e.target.value })}
                 placeholder="12345678A"
               />
-              <p className="text-xs text-muted-foreground">
-                🔒 Cifrado de extremo a extremo. Solo el equipo administrador puede consultarlo, exclusivamente para emitir tu carnet de socio.
-              </p>
+              <p className="text-xs text-muted-foreground">{t.idDocumentHelp}</p>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="avatar">Foto de perfil</Label>
+              <Label htmlFor="avatar">{t.avatar}</Label>
               <Input
                 id="avatar"
                 type="file"
@@ -230,7 +274,7 @@ function InvitePage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="ludoyaUsername">Usuario de Ludoya (opcional)</Label>
+              <Label htmlFor="ludoyaUsername">{t.ludoya}</Label>
               <Input
                 id="ludoyaUsername"
                 minLength={2}
@@ -238,15 +282,17 @@ function InvitePage() {
                 pattern="[a-zA-Z0-9_.\-]+"
                 value={form.ludoyaUsername}
                 onChange={(e) => setForm({ ...form, ludoyaUsername: e.target.value })}
-                placeholder="tu_usuario_en_ludoya"
+                placeholder={t.ludoyaPlaceholder}
               />
               <p className="text-xs text-muted-foreground">
-                Si tienes cuenta en <a href="https://app.ludoya.com" target="_blank" rel="noreferrer" className="underline">Ludoya</a>, la vinculamos con tu perfil y te enviamos una invitación al grupo de KLEFF automáticamente.
+                {t.ludoyaHelpA}{" "}
+                <a href="https://app.ludoya.com" target="_blank" rel="noreferrer" className="underline">Ludoya</a>
+                {t.ludoyaHelpB}
               </p>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password">Contraseña *</Label>
+              <Label htmlFor="password">{t.password} *</Label>
               <Input
                 id="password"
                 type="password"
@@ -257,11 +303,11 @@ function InvitePage() {
                 value={form.password}
                 onChange={(e) => setForm({ ...form, password: e.target.value })}
               />
-              <p className="text-xs text-muted-foreground">Mínimo 8 caracteres.</p>
+              <p className="text-xs text-muted-foreground">{t.passwordHelp}</p>
             </div>
 
             <Button type="submit" disabled={submitting || uploadingAvatar} className="w-full">
-              {submitting ? "Creando cuenta…" : "Crear cuenta y acceder"}
+              {submitting ? t.submitting : t.submit}
             </Button>
           </form>
         </div>

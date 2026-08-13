@@ -24,6 +24,8 @@ type AdminPoll = AdminData["polls"][number];
 type OptionDraft = {
   id: string | null;
   label: string;
+  labelCa: string;
+  labelEn: string;
   description: string;
   gameRef: string | null;
   imageUrl: string | null;
@@ -49,10 +51,14 @@ const HAS_OPTIONS = (t: QuestionType) => t === "single" || t === "multi" || t ==
 type QuestionDraft = {
   id: string;
   label: string;
+  labelCa: string;
+  labelEn: string;
   type: QuestionType;
   help: string;
   required: boolean;
   options: string[];
+  optionsCa: string[];
+  optionsEn: string[];
 };
 
 type Draft = {
@@ -60,7 +66,11 @@ type Draft = {
   kind: "survey" | "acquisition";
   status: "draft" | "published" | "closed";
   titleEs: string;
+  titleCa: string;
+  titleEn: string;
   descriptionEs: string;
+  descriptionCa: string;
+  descriptionEn: string;
   opensAt: string;
   closesAt: string;
   karmaCategoryId: string;
@@ -78,7 +88,11 @@ function emptyDraft(): Draft {
     kind: "acquisition",
     status: "draft",
     titleEs: "",
+    titleCa: "",
+    titleEn: "",
     descriptionEs: "",
+    descriptionCa: "",
+    descriptionEn: "",
     opensAt: new Date().toISOString().slice(0, 16),
     closesAt: "",
     karmaCategoryId: "none",
@@ -124,7 +138,11 @@ function AdminPollsPage() {
       kind: p.kind as Draft["kind"],
       status: p.status as Draft["status"],
       titleEs: p.titleEs,
+      titleCa: p.titleCa ?? "",
+      titleEn: p.titleEn ?? "",
       descriptionEs: p.descriptionEs ?? "",
+      descriptionCa: p.descriptionCa ?? "",
+      descriptionEn: p.descriptionEn ?? "",
       opensAt: toLocalInput(p.opensAt),
       closesAt: toLocalInput(p.closesAt),
       karmaCategoryId: p.karmaCategoryId ?? "none",
@@ -133,14 +151,20 @@ function AdminPollsPage() {
       questions: (p.questions ?? []).map((q) => ({
         id: q.id,
         label: q.label,
+        labelCa: q.labelCa ?? "",
+        labelEn: q.labelEn ?? "",
         type: q.type as QuestionType,
         help: q.help ?? "",
         required: q.required ?? true,
         options: q.options ?? [],
+        optionsCa: q.optionsCa ?? [],
+        optionsEn: q.optionsEn ?? [],
       })),
       options: p.options.map((o) => ({
         id: o.id,
         label: o.label,
+        labelCa: o.labelCa ?? "",
+        labelEn: o.labelEn ?? "",
         description: o.description ?? "",
         gameRef: o.gameRef ?? null,
         imageUrl: o.imageUrl ?? null,
@@ -193,7 +217,11 @@ function AdminPollsPage() {
           kind: draft.kind,
           status: draft.status,
           titleEs: draft.titleEs,
+          titleCa: draft.titleCa || null,
+          titleEn: draft.titleEn || null,
           descriptionEs: draft.descriptionEs || null,
+          descriptionCa: draft.descriptionCa || null,
+          descriptionEn: draft.descriptionEn || null,
           opensAt: draft.opensAt,
           closesAt: draft.closesAt || null,
           karmaCategoryId: draft.karmaCategoryId === "none" ? null : draft.karmaCategoryId,
@@ -202,14 +230,20 @@ function AdminPollsPage() {
           questions: draft.questions.map((q) => ({
             id: q.id,
             label: q.label.trim(),
+            labelCa: q.labelCa.trim() || null,
+            labelEn: q.labelEn.trim() || null,
             type: q.type,
             help: q.help.trim() || null,
             required: q.required,
             options: HAS_OPTIONS(q.type) ? q.options.map((o) => o.trim()).filter(Boolean) : [],
+            optionsCa: HAS_OPTIONS(q.type) ? q.optionsCa.map((o) => o.trim()) : [],
+            optionsEn: HAS_OPTIONS(q.type) ? q.optionsEn.map((o) => o.trim()) : [],
           })),
           options: draft.options.map((o) => ({
             id: o.id,
             label: o.label,
+            labelCa: o.labelCa || null,
+            labelEn: o.labelEn || null,
             description: o.description || null,
             gameRef: o.gameRef,
             imageUrl: o.imageUrl,
@@ -366,15 +400,41 @@ function AdminPollsPage() {
               </div>
 
               <div className="space-y-1">
-                <Label>Título</Label>
+                <Label>Título (ES)</Label>
                 <Input value={draft.titleEs} onChange={(e) => setDraft({ ...draft, titleEs: e.target.value })} />
               </div>
+              <div className="grid sm:grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <Label>Títol (CA)</Label>
+                  <Input value={draft.titleCa} onChange={(e) => setDraft({ ...draft, titleCa: e.target.value })} />
+                </div>
+                <div className="space-y-1">
+                  <Label>Title (EN)</Label>
+                  <Input value={draft.titleEn} onChange={(e) => setDraft({ ...draft, titleEn: e.target.value })} />
+                </div>
+              </div>
               <div className="space-y-1">
-                <Label>Descripción</Label>
+                <Label>Descripción (ES)</Label>
                 <Textarea
                   value={draft.descriptionEs}
                   onChange={(e) => setDraft({ ...draft, descriptionEs: e.target.value })}
                 />
+              </div>
+              <div className="grid sm:grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <Label>Descripció (CA)</Label>
+                  <Textarea
+                    value={draft.descriptionCa}
+                    onChange={(e) => setDraft({ ...draft, descriptionCa: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-1">
+                  <Label>Description (EN)</Label>
+                  <Textarea
+                    value={draft.descriptionEn}
+                    onChange={(e) => setDraft({ ...draft, descriptionEn: e.target.value })}
+                  />
+                </div>
               </div>
 
               <div className="grid sm:grid-cols-2 gap-3">
@@ -451,6 +511,8 @@ function AdminPollsPage() {
                                     {
                                       id: null,
                                       label: g.name ?? "Juego",
+                                      labelCa: "",
+                                      labelEn: "",
                                       description: "",
                                       gameRef: g.id ? String(g.id) : null,
                                       imageUrl: g.imageUrl ?? null,
@@ -477,7 +539,7 @@ function AdminPollsPage() {
                           ...draft,
                           options: [
                             ...draft.options,
-                            { id: null, label: "", description: "", gameRef: null, imageUrl: null, year: null },
+                            { id: null, label: "", labelCa: "", labelEn: "", description: "", gameRef: null, imageUrl: null, year: null },
                           ],
                         })
                       }
@@ -488,25 +550,47 @@ function AdminPollsPage() {
 
                   <ul className="space-y-2">
                     {draft.options.map((o, i) => (
-                      <li key={i} className="flex items-center gap-2">
-                        {o.imageUrl && <img src={o.imageUrl} alt="" className="h-9 w-9 rounded object-cover" />}
-                        <Input
-                          value={o.label}
-                          placeholder="Nombre de la opción"
-                          onChange={(e) => {
-                            const options = [...draft.options];
-                            options[i] = { ...o, label: e.target.value };
-                            setDraft({ ...draft, options });
-                          }}
-                        />
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => setDraft({ ...draft, options: draft.options.filter((_, x) => x !== i) })}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
+                      <li key={i} className="space-y-2">
+                        <div className="flex items-center gap-2">
+                          {o.imageUrl && <img src={o.imageUrl} alt="" className="h-9 w-9 rounded object-cover" />}
+                          <Input
+                            value={o.label}
+                            placeholder="Nombre de la opción (ES)"
+                            onChange={(e) => {
+                              const options = [...draft.options];
+                              options[i] = { ...o, label: e.target.value };
+                              setDraft({ ...draft, options });
+                            }}
+                          />
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setDraft({ ...draft, options: draft.options.filter((_, x) => x !== i) })}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                        <div className="grid sm:grid-cols-2 gap-2 pl-1">
+                          <Input
+                            value={o.labelCa}
+                            placeholder="Nom (CA)"
+                            onChange={(e) => {
+                              const options = [...draft.options];
+                              options[i] = { ...o, labelCa: e.target.value };
+                              setDraft({ ...draft, options });
+                            }}
+                          />
+                          <Input
+                            value={o.labelEn}
+                            placeholder="Name (EN)"
+                            onChange={(e) => {
+                              const options = [...draft.options];
+                              options[i] = { ...o, labelEn: e.target.value };
+                              setDraft({ ...draft, options });
+                            }}
+                          />
+                        </div>
                       </li>
                     ))}
                   </ul>
@@ -555,6 +639,19 @@ function AdminPollsPage() {
                           </Button>
                         </div>
 
+                        <div className="grid sm:grid-cols-2 gap-2">
+                          <Input
+                            value={q.labelCa}
+                            placeholder="Pregunta (CA)"
+                            onChange={(e) => update({ labelCa: e.target.value })}
+                          />
+                          <Input
+                            value={q.labelEn}
+                            placeholder="Question (EN)"
+                            onChange={(e) => update({ labelEn: e.target.value })}
+                          />
+                        </div>
+
                         <div className="grid sm:grid-cols-[1fr_auto] gap-3 items-center">
                           <Input
                             value={q.help}
@@ -571,24 +668,54 @@ function AdminPollsPage() {
                           <div className="space-y-2">
                             <Label className="text-xs text-ink/60">Opciones de respuesta</Label>
                             {q.options.map((opt, oi) => (
-                              <div key={oi} className="flex gap-2">
-                                <Input
-                                  value={opt}
-                                  placeholder={`Opción ${oi + 1}`}
-                                  onChange={(e) => {
-                                    const options = [...q.options];
-                                    options[oi] = e.target.value;
-                                    update({ options });
-                                  }}
-                                />
-                                <Button
-                                  type="button"
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => update({ options: q.options.filter((_, x) => x !== oi) })}
-                                >
-                                  <Trash2 className="h-4 w-4" />
-                                </Button>
+                              <div key={oi} className="space-y-2">
+                                <div className="flex gap-2">
+                                  <Input
+                                    value={opt}
+                                    placeholder={`Opción ${oi + 1} (ES)`}
+                                    onChange={(e) => {
+                                      const options = [...q.options];
+                                      options[oi] = e.target.value;
+                                      update({ options });
+                                    }}
+                                  />
+                                  <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() =>
+                                      update({
+                                        options: q.options.filter((_, x) => x !== oi),
+                                        optionsCa: q.optionsCa.filter((_, x) => x !== oi),
+                                        optionsEn: q.optionsEn.filter((_, x) => x !== oi),
+                                      })
+                                    }
+                                  >
+                                    <Trash2 className="h-4 w-4" />
+                                  </Button>
+                                </div>
+                                <div className="grid sm:grid-cols-2 gap-2 pl-1">
+                                  <Input
+                                    value={q.optionsCa[oi] ?? ""}
+                                    placeholder={`Opció ${oi + 1} (CA)`}
+                                    onChange={(e) => {
+                                      const optionsCa = [...q.optionsCa];
+                                      while (optionsCa.length < q.options.length) optionsCa.push("");
+                                      optionsCa[oi] = e.target.value;
+                                      update({ optionsCa });
+                                    }}
+                                  />
+                                  <Input
+                                    value={q.optionsEn[oi] ?? ""}
+                                    placeholder={`Option ${oi + 1} (EN)`}
+                                    onChange={(e) => {
+                                      const optionsEn = [...q.optionsEn];
+                                      while (optionsEn.length < q.options.length) optionsEn.push("");
+                                      optionsEn[oi] = e.target.value;
+                                      update({ optionsEn });
+                                    }}
+                                  />
+                                </div>
                               </div>
                             ))}
                             <Button
@@ -613,7 +740,7 @@ function AdminPollsPage() {
                         ...draft,
                         questions: [
                           ...draft.questions,
-                          { id: `q${Date.now()}`, label: "", type: "text", help: "", required: true, options: [] },
+                          { id: `q${Date.now()}`, label: "", labelCa: "", labelEn: "", type: "text", help: "", required: true, options: [], optionsCa: [], optionsEn: [] },
                         ],
                       })
                     }

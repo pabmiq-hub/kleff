@@ -5,18 +5,14 @@ import { listKleffers, getKlefferProfile } from "@/lib/kleffers.functions";
 import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Search, ExternalLink } from "lucide-react";
+import { AVAILABILITY } from "@/lib/kleffer-profile-options";
+import { useAppLocale } from "@/i18n/app-i18n";
 import {
-  ATTENDS_ALONE,
-  AVAILABILITY,
-  EXPERIENCE,
-  GAME_TYPES,
-  GOALS,
-  LANGUAGES,
-  SCHEDULED_GAMES,
-  TEACHES,
-  labelOf,
-  labelsOf,
-} from "@/lib/kleffer-profile-options";
+  communityDict,
+  klefferOptionLabels,
+  klefferLabelOf,
+  klefferLabelsOf,
+} from "@/i18n/app/community";
 
 export const Route = createFileRoute("/app/kleffers")({
   head: () => ({
@@ -64,6 +60,9 @@ interface LudoyaMember {
 
 
 function KleffersPage() {
+  const { locale } = useAppLocale();
+  const t = communityDict[locale].kleffers;
+  const opt = klefferOptionLabels[locale];
   const fn = useServerFn(listKleffers);
   const detailFn = useServerFn(getKlefferProfile);
   const [items, setItems] = useState<Kleffer[]>([]);
@@ -116,9 +115,9 @@ function KleffersPage() {
   return (
     <div className="space-y-6">
       <header>
-        <h1 className="font-display text-4xl font-bold">Comunidad</h1>
+        <h1 className="font-display text-4xl font-bold">{t.title}</h1>
         <p className="text-ink/60 mt-1">
-          Directorio de socios activos. {items.length} kleffers en total.
+          {t.subtitle(items.length)}
         </p>
       </header>
 
@@ -128,7 +127,7 @@ function KleffersPage() {
           <Input
             value={q}
             onChange={(e) => setQ(e.target.value)}
-            placeholder="Buscar por usuario, Ludoya o juego favorito…"
+            placeholder={t.searchPlaceholder}
             className="pl-9"
           />
         </div>
@@ -139,7 +138,7 @@ function KleffersPage() {
             onChange={(e) => setOnlyLudoya(e.target.checked)}
             className="accent-coral"
           />
-          Solo con Ludoya
+          {t.onlyLudoya}
         </label>
         <label className="flex items-center gap-2 text-sm text-ink/70 cursor-pointer">
           <input
@@ -148,23 +147,23 @@ function KleffersPage() {
             onChange={(e) => setOnlyAlone(e.target.checked)}
             className="accent-coral"
           />
-          Vienen solos/as
+          {t.onlyAlone}
         </label>
         <select
           value={availability}
           onChange={(e) => setAvailability(e.target.value)}
           className="h-9 rounded-md border border-ink/20 bg-card px-2 text-sm"
         >
-          <option value="">Cualquier disponibilidad</option>
+          <option value="">{t.anyAvailability}</option>
           {AVAILABILITY.map((a) => (
-            <option key={a.value} value={a.value}>{a.label}</option>
+            <option key={a.value} value={a.value}>{klefferLabelOf(opt.availability, a.value)}</option>
           ))}
         </select>
       </div>
 
 
       {loading ? (
-        <p className="text-ink/60">Cargando kleffers…</p>
+        <p className="text-ink/60">{t.loading}</p>
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
           {filtered.map((k) => (
@@ -187,14 +186,14 @@ function KleffersPage() {
               )}
               <p className="mt-3 font-semibold truncate w-full">@{k.username}</p>
               {k.ludoya_username ? (
-                <span className="mt-2 text-xs text-coral-deep">En Ludoya</span>
+                <span className="mt-2 text-xs text-coral-deep">{t.inLudoya}</span>
               ) : (
-                <span className="mt-2 text-xs text-ink/40">Sin Ludoya</span>
+                <span className="mt-2 text-xs text-ink/40">{t.noLudoya}</span>
               )}
             </button>
           ))}
           {filtered.length === 0 && (
-            <p className="col-span-full text-center text-ink/50 py-8">Sin resultados.</p>
+            <p className="col-span-full text-center text-ink/50 py-8">{t.noResults}</p>
           )}
         </div>
       )}
@@ -222,27 +221,27 @@ function KleffersPage() {
                   )}
                   <div className="text-sm text-ink/70">
                     <p>
-                      Socio nº <span className="font-mono font-semibold text-ink">{selected.member_number}</span>
+                      {t.memberNumber} <span className="font-mono font-semibold text-ink">{selected.member_number}</span>
                     </p>
-                    <p>Desde {new Date(selected.created_at).toLocaleDateString("es-ES")}</p>
+                    <p>{t.since} {new Date(selected.created_at).toLocaleDateString(communityDict[locale].dateLocale)}</p>
                   </div>
                 </div>
 
                 {extended && (
                   <section className="rounded-2xl border border-ink/15 p-4 space-y-2 text-sm">
-                    <h3 className="font-semibold">Perfil de kleffer</h3>
+                    <h3 className="font-semibold">{t.profileTitle}</h3>
                     {extended.bio && <p className="italic text-ink/70">“{extended.bio}”</p>}
                     {extended.attends_alone && (
-                      <p>{labelOf(ATTENDS_ALONE, extended.attends_alone)}</p>
+                      <p>{klefferLabelOf(opt.attends_alone, extended.attends_alone)}</p>
                     )}
-                    {extended.scheduled_games && <p>{labelOf(SCHEDULED_GAMES, extended.scheduled_games)}</p>}
+                    {extended.scheduled_games && <p>{klefferLabelOf(opt.scheduled_games, extended.scheduled_games)}</p>}
                     {extended.experience_level && (
-                      <p>Nivel: {labelOf(EXPERIENCE, extended.experience_level)}</p>
+                      <p>{t.level}: {klefferLabelOf(opt.experience_level, extended.experience_level)}</p>
                     )}
-                    {extended.teaches && <p>{labelOf(TEACHES, extended.teaches)}</p>}
+                    {extended.teaches && <p>{klefferLabelOf(opt.teaches, extended.teaches)}</p>}
                     {(extended.favorite_games ?? []).length > 0 && (
                       <div>
-                        <p className="text-xs uppercase tracking-wide text-ink/50 mb-1">Juegos favoritos</p>
+                        <p className="text-xs uppercase tracking-wide text-ink/50 mb-1">{t.favoriteGames}</p>
                         <div className="flex flex-wrap gap-2">
                           {(extended.favorite_games ?? []).map((g) => (
                             <span key={g.id} className="rounded-full bg-cream-deep/60 px-2 py-1 text-xs">{g.name}</span>
@@ -251,10 +250,10 @@ function KleffersPage() {
                       </div>
                     )}
                     {[
-                      { title: "Busca", items: labelsOf(GOALS, extended.goals) },
-                      { title: "Le gustan", items: labelsOf(GAME_TYPES, extended.game_types) },
-                      { title: "Disponibilidad", items: labelsOf(AVAILABILITY, extended.availability) },
-                      { title: "Idiomas", items: labelsOf(LANGUAGES, extended.languages) },
+                      { title: t.goals, items: klefferLabelsOf(opt.goals, extended.goals) },
+                      { title: t.likes, items: klefferLabelsOf(opt.game_types, extended.game_types) },
+                      { title: t.availability, items: klefferLabelsOf(opt.availability, extended.availability) },
+                      { title: t.languages, items: klefferLabelsOf(opt.languages, extended.languages) },
                     ]
                       .filter((b) => b.items.length > 0)
                       .map((b) => (
@@ -272,11 +271,11 @@ function KleffersPage() {
 
                 <section className="rounded-2xl border border-ink/15 p-4">
 
-                  <h3 className="font-semibold mb-2">Ludoya</h3>
+                  <h3 className="font-semibold mb-2">{t.ludoya}</h3>
                   {!selected.ludoya_username ? (
-                    <p className="text-sm text-ink/50">Este kleffer todavía no ha vinculado su cuenta.</p>
+                    <p className="text-sm text-ink/50">{t.notLinked}</p>
                   ) : detailLoading ? (
-                    <p className="text-sm text-ink/50">Cargando perfil de Ludoya…</p>
+                    <p className="text-sm text-ink/50">{t.loadingLudoya}</p>
                   ) : (
                     <div className="space-y-3">
                       <a
@@ -299,7 +298,7 @@ function KleffersPage() {
                       )}
                       {ludoya && ludoya.collection.length > 0 && (
                         <div>
-                          <p className="text-xs uppercase tracking-wide text-ink/50 mb-1">Su colección</p>
+                          <p className="text-xs uppercase tracking-wide text-ink/50 mb-1">{t.collection}</p>
                           <div className="grid grid-cols-4 gap-2">
                             {ludoya.collection.map((g, i) => (
                               <div key={g.id ?? i} className="aspect-square rounded-lg overflow-hidden bg-cream-deep">

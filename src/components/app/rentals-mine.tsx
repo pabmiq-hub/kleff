@@ -3,6 +3,8 @@ import { useServerFn } from "@tanstack/react-start";
 import { listMyRentalRequests, listMyRentals, cancelRentalRequest } from "@/lib/rental.functions";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { useAppLocale, type AppLocale } from "@/i18n/app-i18n";
+import { rentalsDict } from "@/i18n/app/rentals";
 
 export interface ReqRow {
   id: string;
@@ -22,21 +24,16 @@ export interface RentalRow {
   bgg_games: { title: string; image_url: string | null } | null;
 }
 
-export const statusLabel: Record<string, string> = {
-  pending: "Pendiente",
-  approved: "Aprobada",
-  rejected: "Rechazada",
-  cancelled: "Cancelada",
-  active: "En curso",
-  returned: "Devuelto",
-  overdue: "Vencido",
-  lost: "Perdido",
-};
+export function useStatusLabel(locale: AppLocale): Record<string, string> {
+  return rentalsDict[locale].status;
+}
 
 export function useMyRentalsData() {
   const reqFn = useServerFn(listMyRentalRequests);
   const rentFn = useServerFn(listMyRentals);
   const cancelFn = useServerFn(cancelRentalRequest);
+  const { locale } = useAppLocale();
+  const t = rentalsDict[locale];
   const [requests, setRequests] = useState<ReqRow[]>([]);
   const [rentals, setRentals] = useState<RentalRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -59,10 +56,10 @@ export function useMyRentalsData() {
   const cancel = async (id: string) => {
     try {
       await cancelFn({ data: { id } });
-      toast.success("Solicitud cancelada");
+      toast.success(t.requests.cancelledToast);
       await refresh();
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Error");
+      toast.error(err instanceof Error ? err.message : t.requests.genericError);
     }
   };
 
@@ -104,9 +101,11 @@ export function Row({
 }
 
 export function CancelButton({ onCancel }: { onCancel: () => void }) {
+  const { locale } = useAppLocale();
+  const t = rentalsDict[locale];
   return (
     <Button size="sm" variant="ghost" onClick={onCancel}>
-      Cancelar
+      {t.requests.cancel}
     </Button>
   );
 }

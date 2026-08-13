@@ -3,6 +3,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { Link } from "@tanstack/react-router";
 import { Sparkles, Users, Clock, ExternalLink } from "lucide-react";
 import { listCurrentFeaturedGames } from "@/lib/featured.functions";
+import { useAppLocale } from "@/i18n/app-i18n";
 
 interface FeaturedGame {
   id: string;
@@ -28,14 +29,22 @@ interface FeaturedGame {
   } | null;
 }
 
-function formatEs(iso: string): string {
+const DATE_LOCALES: Record<string, string> = { es: "es-ES", ca: "ca-ES", en: "en-GB" };
+
+function formatDate(iso: string, locale: string): string {
   const [y, m, d] = iso.split("-").map((n) => Number(n));
-  return new Date(y, m - 1, d).toLocaleDateString("es-ES", {
+  return new Date(y, m - 1, d).toLocaleDateString(DATE_LOCALES[locale] ?? "es-ES", {
     day: "numeric",
     month: "long",
     year: "numeric",
   });
 }
+
+const STRINGS = {
+  es: { featuredGame: "Juego destacado", featuredGames: "Juegos destacados", from: "del", to: "al", rent: "Alquilar" },
+  ca: { featuredGame: "Joc destacat", featuredGames: "Jocs destacats", from: "del", to: "al", rent: "Lloga" },
+  en: { featuredGame: "Featured game", featuredGames: "Featured games", from: "from", to: "to", rent: "Rent" },
+} as const;
 
 function playersLabel(g: FeaturedGame["bgg_games"]): string | null {
   if (!g) return null;
@@ -55,6 +64,8 @@ function durationLabel(g: FeaturedGame["bgg_games"]): string | null {
 }
 
 export function FeaturedGamesCard() {
+  const { locale } = useAppLocale();
+  const t = STRINGS[locale] ?? STRINGS.es;
   const listFn = useServerFn(listCurrentFeaturedGames);
   const [items, setItems] = useState<FeaturedGame[]>([]);
   const [loaded, setLoaded] = useState(false);
@@ -84,11 +95,11 @@ export function FeaturedGamesCard() {
         <Sparkles className="h-5 w-5 text-coral-deep" />
         <div>
           <h2 className="font-display font-bold text-lg">
-            {items.length === 1 ? "Juego destacado" : "Juegos destacados"}
+            {items.length === 1 ? t.featuredGame : t.featuredGames}
           </h2>
           {allSame && (
             <p className="text-xs text-muted-foreground">
-              del {formatEs(first.start_date)} al {formatEs(first.end_date)}
+              {t.from} {formatDate(first.start_date, locale)} {t.to} {formatDate(first.end_date, locale)}
             </p>
           )}
         </div>
@@ -142,7 +153,7 @@ export function FeaturedGamesCard() {
                 </div>
                 {!allSame && (
                   <p className="text-[11px] text-ink/50">
-                    {formatEs(f.start_date)} → {formatEs(f.end_date)}
+                    {formatDate(f.start_date, locale)} → {formatDate(f.end_date, locale)}
                   </p>
                 )}
                 <div className="flex items-center justify-between pt-1">
@@ -150,7 +161,7 @@ export function FeaturedGamesCard() {
                     to="/app/rentals"
                     className="text-xs font-semibold text-coral-deep hover:underline"
                   >
-                    Alquilar
+                    {t.rent}
                   </Link>
                   {g.bgg_url && (
                     <a

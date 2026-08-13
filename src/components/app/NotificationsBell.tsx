@@ -7,6 +7,8 @@ import {
   markNotificationRead,
   markAllNotificationsRead,
 } from "@/lib/notifications.functions";
+import { useAppLocale } from "@/i18n/app-i18n";
+import { accountDict } from "@/i18n/app/account";
 
 interface Notif {
   id: string;
@@ -18,17 +20,6 @@ interface Notif {
   created_at: string;
 }
 
-function timeAgo(iso: string) {
-  const diff = Date.now() - new Date(iso).getTime();
-  const m = Math.floor(diff / 60000);
-  if (m < 1) return "ahora";
-  if (m < 60) return `hace ${m} min`;
-  const h = Math.floor(m / 60);
-  if (h < 24) return `hace ${h} h`;
-  const d = Math.floor(h / 24);
-  return `hace ${d} d`;
-}
-
 export function NotificationsBell() {
   const listFn = useServerFn(listMyNotifications);
   const readFn = useServerFn(markNotificationRead);
@@ -37,6 +28,19 @@ export function NotificationsBell() {
   const [unread, setUnread] = useState(0);
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
+  const { locale } = useAppLocale();
+  const t = accountDict[locale].notifications;
+
+  const timeAgo = (iso: string) => {
+    const diff = Date.now() - new Date(iso).getTime();
+    const m = Math.floor(diff / 60000);
+    if (m < 1) return t.justNow;
+    if (m < 60) return t.minutesAgo(m);
+    const h = Math.floor(m / 60);
+    if (h < 24) return t.hoursAgo(h);
+    const d = Math.floor(h / 24);
+    return t.daysAgo(d);
+  };
 
   const refresh = async () => {
     try {
@@ -81,7 +85,7 @@ export function NotificationsBell() {
     <div ref={ref} className="relative">
       <button
         onClick={() => setOpen((v) => !v)}
-        aria-label="Notificaciones"
+        aria-label={t.ariaLabel}
         className="relative p-2 rounded-lg hover:bg-primary-soft/40 transition-colors"
       >
         <Bell className="h-5 w-5" />
@@ -95,19 +99,19 @@ export function NotificationsBell() {
       {open && (
         <div className="absolute right-0 mt-2 w-80 max-w-[calc(100vw-2rem)] bg-card border border-ink/20 rounded-xl shadow-lg z-50 overflow-hidden">
           <div className="flex items-center justify-between px-4 py-3 border-b border-ink/10">
-            <p className="font-semibold text-sm">Notificaciones</p>
+            <p className="font-semibold text-sm">{t.title}</p>
             {unread > 0 && (
               <button
                 onClick={handleMarkAll}
                 className="text-xs text-coral-deep hover:underline"
               >
-                Marcar todo leído
+                {t.markAllRead}
               </button>
             )}
           </div>
           <div className="max-h-96 overflow-y-auto">
             {items.length === 0 ? (
-              <p className="text-center text-ink/50 text-sm py-8">Sin notificaciones</p>
+              <p className="text-center text-ink/50 text-sm py-8">{t.empty}</p>
             ) : (
               items.map((n) => {
                 const inner = (

@@ -3,6 +3,10 @@ import { useAuth } from "@/auth/AuthProvider";
 import { Button } from "@/components/ui/button";
 import { Home, User, IdCard, Dices, LogOut, Shield, Gamepad2, Users, Sparkles, Vote } from "lucide-react";
 import { NotificationsBell } from "@/components/app/NotificationsBell";
+import { AppLanguageSwitcher } from "@/components/app/AppLanguageSwitcher";
+import { useAppLocale } from "@/i18n/app-i18n";
+import { commonDict } from "@/i18n/app/common";
+import { accountDict } from "@/i18n/app/account";
 
 export const Route = createFileRoute("/app")({
   head: () => ({
@@ -17,11 +21,14 @@ export const Route = createFileRoute("/app")({
 function AppLayout() {
   const { session, loading, isSuperAdmin, signOut } = useAuth();
   const navigate = useNavigate();
+  const { locale } = useAppLocale();
+  const c = commonDict[locale];
+  const t = accountDict[locale];
 
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-cream-deep">
-        <p className="text-muted-foreground">Cargando…</p>
+        <p className="text-muted-foreground">{t.layout.loading}</p>
       </div>
     );
   }
@@ -43,18 +50,18 @@ function AppLayout() {
           KLEFF <span className="text-coral-deep text-sm font-sans font-semibold">socios</span>
         </Link>
         <nav className="flex md:flex-col gap-1 flex-1 ml-auto md:ml-0">
-          <NavLink to="/app" icon={<Home className="h-4 w-4" />} label="Inicio" exact />
-          <NavLink to="/app/profile" icon={<User className="h-4 w-4" />} label="Mi perfil" />
-          <NavLink to="/app/carnet" icon={<IdCard className="h-4 w-4" />} label="Mi carnet" />
-          <NavLink to="/app/kleffers" icon={<Users className="h-4 w-4" />} label="Comunidad" />
-          <NavLink to="/app/partidas" icon={<Gamepad2 className="h-4 w-4" />} label="Partidas" />
-          <NavLink to="/app/rentals" icon={<Dices className="h-4 w-4" />} label="Alquiler" />
-          <NavLink to="/app/votaciones" icon={<Vote className="h-4 w-4" />} label="Votaciones" />
-          <NavLink to="/app/karma" icon={<Sparkles className="h-4 w-4" />} label="Karma" />
+          <NavLink to="/app" icon={<Home className="h-4 w-4" />} label={c.nav.home} exact />
+          <NavLink to="/app/profile" icon={<User className="h-4 w-4" />} label={c.nav.profile} />
+          <NavLink to="/app/carnet" icon={<IdCard className="h-4 w-4" />} label={c.nav.card} />
+          <NavLink to="/app/kleffers" icon={<Users className="h-4 w-4" />} label={c.nav.community} />
+          <NavLink to="/app/partidas" icon={<Gamepad2 className="h-4 w-4" />} label={c.nav.games} />
+          <NavLink to="/app/rentals" icon={<Dices className="h-4 w-4" />} label={c.nav.rentals} />
+          <NavLink to="/app/votaciones" icon={<Vote className="h-4 w-4" />} label={c.nav.polls} />
+          <NavLink to="/app/karma" icon={<Sparkles className="h-4 w-4" />} label={c.nav.karma} />
         </nav>
         <div className="md:mt-auto">
           <Button variant="ghost" size="sm" onClick={handleLogout} className="w-full justify-start">
-            <LogOut className="h-4 w-4 mr-2" /> <span className="hidden md:inline">Salir</span>
+            <LogOut className="h-4 w-4 mr-2" /> <span className="hidden md:inline">{c.logout}</span>
           </Button>
         </div>
       </aside>
@@ -67,11 +74,17 @@ function AppLayout() {
                   to="/admin"
                   className="flex items-center gap-2 text-sm bg-ink text-cream rounded-lg px-3 py-2 w-fit hover:bg-ink/90"
                 >
-                  <Shield className="h-4 w-4" /> <span className="hidden sm:inline">Eres super admin · ir al panel de administración</span><span className="sm:hidden">Admin</span>
+                  <Shield className="h-4 w-4" /> <span className="hidden sm:inline">{t.layout.superAdminFull}</span><span className="sm:hidden">{t.layout.superAdminShort}</span>
                 </Link>
               )}
             </div>
-            <NotificationsBell />
+            <div className="flex items-center gap-2">
+              <AppLanguageSwitcher className="hidden sm:flex" />
+              <NotificationsBell />
+            </div>
+          </div>
+          <div className="sm:hidden px-4 pb-2 flex justify-end">
+            <AppLanguageSwitcher />
           </div>
         </div>
         <main className="flex-1 overflow-y-auto p-4 md:p-8">
