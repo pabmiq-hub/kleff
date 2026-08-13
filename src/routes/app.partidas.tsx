@@ -164,7 +164,7 @@ function PartidasPage() {
                 const res = await createFn({ data: payload });
                 toast.success(t.matchCreated);
                 if (res.karma?.claimed) {
-                  toast.success(t.karmaClaimed(res.karma.points));
+                  toast.success(t.karmaClaimed(res.karma.points ?? 0));
                 } else if (res.karma?.reason) {
                   toast.message(t.karmaNotClaimed(res.karma.reason));
                 }
@@ -408,6 +408,8 @@ function CreateMatchDialog({
     claimKarma?: boolean;
   }) => Promise<void>;
 }) {
+  const { locale } = useAppLocale();
+  const t = communityDict[locale].createMatch;
   const searchFn = useServerFn(searchLudoyaBoardgamesFn);
 
   const [title, setTitle] = useState("");
