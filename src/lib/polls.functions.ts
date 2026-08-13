@@ -48,17 +48,38 @@ export const listMyPolls = createServerFn({ method: "POST" })
           kind: p.kind,
           status: p.status,
           title: p.title_es,
+          titleCa: p.title_ca,
+          titleEn: p.title_en,
           description: p.description_es,
+          descriptionCa: p.description_ca,
+          descriptionEn: p.description_en,
           opensAt: p.opens_at,
           closesAt: p.closes_at,
           maxChoices: p.max_choices,
           showResults: p.show_results,
-          questions: (p.questions ?? []) as { id: string; label: string; type: string; help?: string | null; required?: boolean; options?: string[] }[],
+          questions: (p.questions ?? []) as {
+            id: string;
+            label: string;
+            labelCa?: string | null;
+            labelEn?: string | null;
+            type: string;
+            help?: string | null;
+            helpCa?: string | null;
+            helpEn?: string | null;
+            required?: boolean;
+            options?: string[];
+            optionsCa?: string[];
+            optionsEn?: string[];
+          }[],
           open: isPollOpen(p),
           options: opts.map((o) => ({
             id: o.id,
             label: o.label,
+            labelCa: o.label_ca,
+            labelEn: o.label_en,
             description: o.description,
+            descriptionCa: o.description_ca,
+            descriptionEn: o.description_en,
             imageUrl: o.game_image_url,
             year: o.game_year,
             votes: p.show_results ? (totals[o.id] ?? 0) : null,
