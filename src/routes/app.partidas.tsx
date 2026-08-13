@@ -409,7 +409,7 @@ function CreateMatchDialog({
   }) => Promise<void>;
 }) {
   const { locale } = useAppLocale();
-  const t = communityDict[locale].createMatch;
+  const t = communityDict[locale].partidas.dialog;
   const searchFn = useServerFn(searchLudoyaBoardgamesFn);
 
   const [title, setTitle] = useState("");
