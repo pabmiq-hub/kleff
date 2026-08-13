@@ -487,7 +487,7 @@ function KarmaPage() {
               }}
             />
             <Label htmlFor="optin" className="text-sm">
-              Quiero aparecer en el ranking público de socios
+              {k.wantAppearRanking}
             </Label>
           </div>
           {ranking.length > 0 ? (
@@ -499,7 +499,7 @@ function KarmaPage() {
               )}
               <div className="flex-1">
                 <p className="text-xs uppercase tracking-wide text-ink/60 font-semibold flex items-center gap-1.5">
-                  <Crown className="h-4 w-4 text-coral" /> Socio del mes
+                  <Crown className="h-4 w-4 text-coral" /> {k.memberOfTheMonth}
                 </p>
                 <p className="font-display text-2xl font-bold">{ranking[0].name}</p>
               </div>
@@ -508,7 +508,7 @@ function KarmaPage() {
           ) : null}
           <div className="rounded-xl border border-ink/10 bg-white divide-y divide-ink/10">
             {ranking.length === 0 ? (
-              <p className="p-4 text-sm text-ink/50">Aún no hay puntuaciones este mes.</p>
+              <p className="p-4 text-sm text-ink/50">{k.noRankingYet}</p>
             ) : (
               ranking.map((r, i) => (
                 <div key={r.userId} className="p-3 flex items-center gap-3">
@@ -526,12 +526,12 @@ function KarmaPage() {
             )}
           </div>
           <div className="rounded-xl border border-ink/10 bg-white p-4">
-            <h3 className="font-display font-bold mb-2">Niveles</h3>
+            <h3 className="font-display font-bold mb-2">{k.levels}</h3>
             <ul className="text-sm space-y-1 text-ink/70">
               {KARMA_LEVELS.map((l) => (
                 <li key={l.key}>
-                  <strong>{l.name}</strong> — {l.min}
-                  {l.max ? `–${l.max}` : "+"} pts · {l.perk}
+                  <strong>{pickLocalized(locale, { es: l.name, ca: l.name_ca, en: l.name_en })}</strong> — {l.min}
+                  {l.max ? `–${l.max}` : "+"} pts · {pickLocalized(locale, { es: l.perk, ca: l.perk_ca, en: l.perk_en })}
                 </li>
               ))}
             </ul>
@@ -543,17 +543,17 @@ function KarmaPage() {
       <Dialog open={entryOpen} onOpenChange={setEntryOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Registrar contribución</DialogTitle>
+            <DialogTitle>{k.registerContributionDialogTitle}</DialogTitle>
             <DialogDescription>
-              El equipo revisará tu solicitud y aprobará los puntos correspondientes.
+              {k.registerContributionDialogDesc}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div className="space-y-1.5">
-              <Label>Categoría</Label>
+              <Label>{k.category}</Label>
               <Select value={categoryId} onValueChange={setCategoryId}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Elige una categoría" />
+                  <SelectValue placeholder={k.chooseCategory} />
                 </SelectTrigger>
                 <SelectContent>
                   {(catalog?.categories ?? [])
@@ -567,38 +567,38 @@ function KarmaPage() {
               </Select>
             </div>
             <div className="space-y-1.5">
-              <Label>Descripción</Label>
+              <Label>{k.description}</Label>
               <Textarea
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                placeholder="Cuéntanos brevemente qué has hecho"
+                placeholder={k.descriptionPlaceholder}
                 rows={3}
               />
             </div>
             <div className="space-y-1.5">
               <Label>
-                Evidencia {selectedCategory?.requires_evidence ? "(obligatoria)" : "(opcional)"}
+                {k.evidence} {selectedCategory?.requires_evidence ? k.mandatory : k.optionalParen}
               </Label>
               <Input
                 value={evidenceUrl}
                 onChange={(e) => setEvidenceUrl(e.target.value)}
-                placeholder="Enlace a la publicación, reseña o foto"
+                placeholder={k.evidencePlaceholder}
               />
-              <p className="text-xs text-ink/50">O sube una imagen desde tu dispositivo:</p>
+              <p className="text-xs text-ink/50">{k.orUploadImage}</p>
               <ImagePicker
                 url={evidenceUrl && /^https?:\/\//.test(evidenceUrl) && /\.(png|jpe?g|webp|gif|avif)$/i.test(evidenceUrl) ? evidenceUrl : ""}
                 onChange={(u) => setEvidenceUrl(u)}
                 height="h-28"
-                label="Subir captura o foto"
+                label={k.uploadImageLabel}
               />
             </div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setEntryOpen(false)}>
-              Cancelar
+              {k.cancel}
             </Button>
             <Button onClick={handleSubmitEntry} disabled={!categoryId || saving}>
-              {saving ? "Enviando…" : "Enviar"}
+              {saving ? k.sendingEntry : k.sendEntry}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -608,22 +608,22 @@ function KarmaPage() {
       <Dialog open={!!rewardOpen} onOpenChange={(o) => !o && setRewardOpen(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Canjear {rewardOpen ? loc(rewardOpen, "name") : ""}</DialogTitle>
+            <DialogTitle>{k.redeemDialogTitle(rewardOpen ? loc(rewardOpen, "name") : "")}</DialogTitle>
             <DialogDescription>
-              Se descontarán {rewardOpen?.cost} puntos de tu saldo.
+              {k.redeemDialogDesc(rewardOpen?.cost ?? 0)}
             </DialogDescription>
           </DialogHeader>
           {rewardOpen?.effect === "extend_rental" ? (
             <div className="space-y-1.5">
-              <Label>Préstamo a ampliar</Label>
+              <Label>{k.rentalToExtend}</Label>
               <Select value={targetRental} onValueChange={setTargetRental}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Elige un préstamo activo" />
+                  <SelectValue placeholder={k.chooseActiveRental} />
                 </SelectTrigger>
                 <SelectContent>
                   {(mine?.activeRentals ?? []).map((r) => (
                     <SelectItem key={r.id} value={r.id}>
-                      {r.title} — vence {new Date(r.dueAt).toLocaleDateString("es-ES")}
+                      {r.title ?? k.game} — {k.dueOn(new Date(r.dueAt).toLocaleDateString(k.dateLocale))}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -632,13 +632,13 @@ function KarmaPage() {
           ) : null}
           <DialogFooter>
             <Button variant="outline" onClick={() => setRewardOpen(null)}>
-              Cancelar
+              {k.cancel}
             </Button>
             <Button
               onClick={handleRedeem}
               disabled={saving || (rewardOpen?.effect === "extend_rental" && !targetRental)}
             >
-              {saving ? "Canjeando…" : "Confirmar canje"}
+              {saving ? k.redeeming : k.confirmRedeem}
             </Button>
           </DialogFooter>
         </DialogContent>

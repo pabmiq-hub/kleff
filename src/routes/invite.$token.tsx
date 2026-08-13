@@ -14,6 +14,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
+import { useAppLocale } from "@/i18n/app-i18n";
+import { signupDict } from "@/i18n/app/signup";
+import { LOCALES, LOCALE_LABELS } from "@/i18n/config";
 
 export const Route = createFileRoute("/invite/$token")({
   head: () => ({
