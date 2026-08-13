@@ -117,7 +117,7 @@ function GameCard({
         data: { gameId: game.id, pickupDate: pickupISO, message: message || null, acceptWaitlist },
       });
       if (res.status === "waitlisted") {
-        toast.success(t.catalog.waitlistedToast(res.waitlistPosition));
+        toast.success(t.catalog.waitlistedToast(res.waitlistPosition ?? 0));
       } else {
         toast.success(t.catalog.submittedToast);
       }

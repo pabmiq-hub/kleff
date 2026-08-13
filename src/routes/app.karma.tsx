@@ -440,7 +440,7 @@ function KarmaPage() {
                         {e.status === "approved" ? `+${e.points}` : `${e.points}`}
                       </p>
                       <Badge variant="secondary" className="text-[11px] mt-1">
-                        {STATUS_LABELS[e.status] ?? e.status}
+                        {k.statusLabels[e.status] ?? e.status}
                       </Badge>
                     </div>
                   </div>
@@ -466,7 +466,7 @@ function KarmaPage() {
                     <div className="text-right">
                       <p className="font-display font-bold">−{r.points_spent}</p>
                       <Badge variant="secondary" className="text-[11px] mt-1">
-                        {STATUS_LABELS[r.status] ?? r.status}
+                        {k.statusLabels[r.status] ?? r.status}
                       </Badge>
                     </div>
                   </div>
