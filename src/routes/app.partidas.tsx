@@ -484,7 +484,7 @@ function CreateMatchDialog({
       </DialogHeader>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="space-y-2">
-          <Label>Título</Label>
+          <Label>{t.titleField}</Label>
           <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Noche de Wingspan" required />
         </div>
         <div className="space-y-2">
@@ -585,7 +585,7 @@ function CreateMatchDialog({
 
         <DialogFooter>
           <Button type="submit" disabled={!canSubmit || submitting}>
-            {submitting ? "Creando…" : "Crear partida"}
+            {submitting ? t.creating : t.create}
           </Button>
         </DialogFooter>
       </form>

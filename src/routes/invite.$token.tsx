@@ -67,7 +67,7 @@ function InvitePage() {
 
   const handleAvatarUpload = async (file: File) => {
     if (file.size > 2 * 1024 * 1024) {
-      toast.error("La imagen no puede superar los 2MB");
+      toast.error(t.imageTooBig);
       return;
     }
     setUploadingAvatar(true);
