@@ -1,11 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { listKleffers, getKlefferProfile } from "@/lib/kleffers.functions";
 import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import { Search, ExternalLink } from "lucide-react";
-import { AVAILABILITY } from "@/lib/kleffer-profile-options";
+import { Search, ExternalLink, X, SlidersHorizontal, Dice5, Users, GraduationCap, CalendarClock, Languages, Target, Sparkles } from "lucide-react";
+import { AVAILABILITY, GAME_TYPES, EXPERIENCE, LANGUAGES, GOALS } from "@/lib/kleffer-profile-options";
 import { useAppLocale } from "@/i18n/app-i18n";
 import {
   communityDict,
@@ -58,6 +58,62 @@ interface LudoyaMember {
   collection: Array<{ id?: string; name?: string; imageUrl?: string | null }>;
 }
 
+function GameThumb({
+  name,
+  imageUrl,
+  className = "",
+}: {
+  name: string;
+  imageUrl?: string | null;
+  className?: string;
+}) {
+  return (
+    <div
+      title={name}
+      className={`relative shrink-0 overflow-hidden rounded-lg bg-cream-deep ring-1 ring-ink/10 ${className}`}
+    >
+      {imageUrl ? (
+        <img src={imageUrl} alt={name} loading="lazy" className="h-full w-full object-cover" />
+      ) : (
+        <div className="flex h-full w-full items-center justify-center text-base">🎲</div>
+      )}
+    </div>
+  );
+}
+
+function Chip({ children, tone = "muted" }: { children: React.ReactNode; tone?: "muted" | "coral" }) {
+  return (
+    <span
+      className={
+        tone === "coral"
+          ? "rounded-full bg-coral/15 px-2 py-0.5 text-xs font-medium text-coral-deep"
+          : "rounded-full bg-cream-deep/70 px-2 py-0.5 text-xs text-ink/75"
+      }
+    >
+      {children}
+    </span>
+  );
+}
+
+function Section({
+  icon: Icon,
+  title,
+  children,
+}: {
+  icon: React.ElementType;
+  title: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <section className="rounded-2xl border border-ink/10 bg-card p-4">
+      <h3 className="mb-3 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-ink/50">
+        <Icon className="h-3.5 w-3.5 shrink-0" />
+        {title}
+      </h3>
+      {children}
+    </section>
+  );
+}
 
 function KleffersPage() {
   const { locale } = useAppLocale();
@@ -71,6 +127,10 @@ function KleffersPage() {
   const [onlyLudoya, setOnlyLudoya] = useState(false);
   const [onlyAlone, setOnlyAlone] = useState(false);
   const [availability, setAvailability] = useState("");
+  const [gameType, setGameType] = useState("");
+  const [experience, setExperience] = useState("");
+  const [language, setLanguage] = useState("");
+  const [goal, setGoal] = useState("");
 
   const [selected, setSelected] = useState<Kleffer | null>(null);
   const [ludoya, setLudoya] = useState<LudoyaMember | null>(null);
@@ -97,103 +157,227 @@ function KleffersPage() {
       .finally(() => setDetailLoading(false));
   };
 
-  const filtered = items.filter((k) => {
-    if (onlyLudoya && !k.ludoya_username) return false;
-    if (onlyAlone && k.extended?.attends_alone !== "alone") return false;
-    if (availability && !(k.extended?.availability ?? []).includes(availability)) return false;
-    const s = q.trim().toLowerCase();
-    if (!s) return true;
-    return (
-      k.username.toLowerCase().includes(s) ||
-      (k.ludoya_username?.toLowerCase().includes(s) ?? false) ||
-      (k.ludoya_display_name?.toLowerCase().includes(s) ?? false) ||
-      (k.extended?.favorite_games ?? []).some((g) => g.name.toLowerCase().includes(s))
-    );
-  });
+  const filtered = useMemo(
+    () =>
+      items.filter((k) => {
+        const e = k.extended;
+        if (onlyLudoya && !k.ludoya_username) return false;
+        if (onlyAlone && e?.attends_alone !== "alone") return false;
+        if (availability && !(e?.availability ?? []).includes(availability)) return false;
+        if (gameType && !(e?.game_types ?? []).includes(gameType)) return false;
+        if (experience && e?.experience_level !== experience) return false;
+        if (language && !(e?.languages ?? []).includes(language)) return false;
+        if (goal && !(e?.goals ?? []).includes(goal)) return false;
+        const s = q.trim().toLowerCase();
+        if (!s) return true;
+        return (
+          k.username.toLowerCase().includes(s) ||
+          (k.ludoya_username?.toLowerCase().includes(s) ?? false) ||
+          (k.ludoya_display_name?.toLowerCase().includes(s) ?? false) ||
+          (e?.favorite_games ?? []).some((g) => g.name.toLowerCase().includes(s))
+        );
+      }),
+    [items, onlyLudoya, onlyAlone, availability, gameType, experience, language, goal, q],
+  );
 
+  const activeFilters =
+    (onlyLudoya ? 1 : 0) +
+    (onlyAlone ? 1 : 0) +
+    [availability, gameType, experience, language, goal].filter(Boolean).length;
+
+  const clearAll = () => {
+    setOnlyLudoya(false);
+    setOnlyAlone(false);
+    setAvailability("");
+    setGameType("");
+    setExperience("");
+    setLanguage("");
+    setGoal("");
+    setQ("");
+  };
+
+  const selectCls =
+    "h-9 rounded-full border border-ink/15 bg-card px-3 text-sm text-ink/80 focus:outline-none focus:ring-2 focus:ring-coral/40";
 
   return (
     <div className="space-y-6">
-      <header>
-        <h1 className="font-display text-4xl font-bold">{t.title}</h1>
-        <p className="text-ink/60 mt-1">
-          {t.subtitle(items.length)}
-        </p>
+      <header className="grid grid-cols-[minmax(0,1fr)_auto] items-end gap-4">
+        <div className="min-w-0">
+          <h1 className="font-display text-3xl font-bold sm:text-4xl">{t.title}</h1>
+          <p className="mt-1 text-ink/60">{t.subtitle(items.length)}</p>
+        </div>
       </header>
 
-      <div className="flex flex-wrap items-center gap-3">
-        <div className="relative max-w-sm flex-1 min-w-[220px]">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-ink/50" />
+      {/* Filtros */}
+      <div className="space-y-3 rounded-2xl border border-ink/10 bg-card p-4">
+        <div className="flex items-center justify-between gap-3">
+          <span className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-ink/50">
+            <SlidersHorizontal className="h-3.5 w-3.5" /> {t.filters}
+          </span>
+          {activeFilters > 0 && (
+            <button
+              type="button"
+              onClick={clearAll}
+              className="inline-flex items-center gap-1 text-xs text-coral-deep hover:underline"
+            >
+              <X className="h-3 w-3" /> {t.clearFilters}
+            </button>
+          )}
+        </div>
+
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink/50" />
           <Input
             value={q}
             onChange={(e) => setQ(e.target.value)}
             placeholder={t.searchPlaceholder}
-            className="pl-9"
+            className="rounded-full pl-9"
           />
         </div>
-        <label className="flex items-center gap-2 text-sm text-ink/70 cursor-pointer">
-          <input
-            type="checkbox"
-            checked={onlyLudoya}
-            onChange={(e) => setOnlyLudoya(e.target.checked)}
-            className="accent-coral"
-          />
-          {t.onlyLudoya}
-        </label>
-        <label className="flex items-center gap-2 text-sm text-ink/70 cursor-pointer">
-          <input
-            type="checkbox"
-            checked={onlyAlone}
-            onChange={(e) => setOnlyAlone(e.target.checked)}
-            className="accent-coral"
-          />
-          {t.onlyAlone}
-        </label>
-        <select
-          value={availability}
-          onChange={(e) => setAvailability(e.target.value)}
-          className="h-9 rounded-md border border-ink/20 bg-card px-2 text-sm"
-        >
-          <option value="">{t.anyAvailability}</option>
-          {AVAILABILITY.map((a) => (
-            <option key={a.value} value={a.value}>{klefferLabelOf(opt.availability, a.value)}</option>
-          ))}
-        </select>
-      </div>
 
+        <div className="flex flex-wrap gap-2">
+          <select value={gameType} onChange={(e) => setGameType(e.target.value)} className={selectCls}>
+            <option value="">{t.anyGameType}</option>
+            {GAME_TYPES.map((g) => (
+              <option key={g.value} value={g.value}>
+                {klefferLabelOf(opt.game_types, g.value)}
+              </option>
+            ))}
+          </select>
+          <select value={availability} onChange={(e) => setAvailability(e.target.value)} className={selectCls}>
+            <option value="">{t.anyAvailability}</option>
+            {AVAILABILITY.map((a) => (
+              <option key={a.value} value={a.value}>
+                {klefferLabelOf(opt.availability, a.value)}
+              </option>
+            ))}
+          </select>
+          <select value={experience} onChange={(e) => setExperience(e.target.value)} className={selectCls}>
+            <option value="">{t.anyExperience}</option>
+            {EXPERIENCE.map((x) => (
+              <option key={x.value} value={x.value}>
+                {klefferLabelOf(opt.experience_level, x.value)}
+              </option>
+            ))}
+          </select>
+          <select value={language} onChange={(e) => setLanguage(e.target.value)} className={selectCls}>
+            <option value="">{t.anyLanguage}</option>
+            {LANGUAGES.map((l) => (
+              <option key={l.value} value={l.value}>
+                {klefferLabelOf(opt.languages, l.value)}
+              </option>
+            ))}
+          </select>
+          <select value={goal} onChange={(e) => setGoal(e.target.value)} className={selectCls}>
+            <option value="">{t.anyGoal}</option>
+            {GOALS.map((g) => (
+              <option key={g.value} value={g.value}>
+                {klefferLabelOf(opt.goals, g.value)}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="flex flex-wrap gap-4 pt-1">
+          <label className="flex cursor-pointer items-center gap-2 text-sm text-ink/70">
+            <input
+              type="checkbox"
+              checked={onlyLudoya}
+              onChange={(e) => setOnlyLudoya(e.target.checked)}
+              className="accent-coral"
+            />
+            {t.onlyLudoya}
+          </label>
+          <label className="flex cursor-pointer items-center gap-2 text-sm text-ink/70">
+            <input
+              type="checkbox"
+              checked={onlyAlone}
+              onChange={(e) => setOnlyAlone(e.target.checked)}
+              className="accent-coral"
+            />
+            {t.onlyAlone}
+          </label>
+          <span className="ml-auto self-center text-xs text-ink/50">{t.results(filtered.length)}</span>
+        </div>
+      </div>
 
       {loading ? (
         <p className="text-ink/60">{t.loading}</p>
       ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-          {filtered.map((k) => (
-            <button
-              key={k.id}
-              type="button"
-              onClick={() => open(k)}
-              className="bg-card border border-ink/15 rounded-2xl p-4 flex flex-col items-center text-center hover:border-coral transition-colors"
-            >
-              {k.avatar_url || k.ludoya_avatar_url ? (
-                <img
-                  src={k.avatar_url ?? k.ludoya_avatar_url ?? ""}
-                  alt={`@${k.username}`}
-                  className="h-20 w-20 rounded-full object-cover border-2 border-coral"
-                />
-              ) : (
-                <div className="h-20 w-20 rounded-full bg-coral/30 flex items-center justify-center text-2xl font-bold text-ink">
-                  {k.username.charAt(0).toUpperCase()}
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+          {filtered.map((k) => {
+            const e = k.extended;
+            const games = (e?.favorite_games ?? []).slice(0, 5);
+            const types = klefferLabelsOf(opt.game_types, e?.game_types).slice(0, 3);
+            const extraTypes = (e?.game_types ?? []).length - types.length;
+            return (
+              <button
+                key={k.id}
+                type="button"
+                onClick={() => open(k)}
+                className="group flex flex-col gap-3 rounded-2xl border border-ink/10 bg-card p-4 text-left transition-colors hover:border-coral"
+              >
+                <div className="grid grid-cols-[auto_minmax(0,1fr)] items-center gap-3">
+                  {k.avatar_url || k.ludoya_avatar_url ? (
+                    <img
+                      src={k.avatar_url ?? k.ludoya_avatar_url ?? ""}
+                      alt={`@${k.username}`}
+                      className="h-14 w-14 shrink-0 rounded-full border-2 border-coral object-cover"
+                    />
+                  ) : (
+                    <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-coral/25 text-xl font-bold">
+                      {k.username.charAt(0).toUpperCase()}
+                    </div>
+                  )}
+                  <div className="min-w-0">
+                    <p className="truncate font-semibold">@{k.username}</p>
+                    <p className="text-xs text-ink/50">
+                      {t.memberNumber} {k.member_number}
+                    </p>
+                    <div className="mt-1 flex flex-wrap gap-1">
+                      {k.ludoya_username ? <Chip tone="coral">{t.inLudoya}</Chip> : <Chip>{t.noLudoya}</Chip>}
+                      {e?.experience_level && <Chip>{klefferLabelOf(opt.experience_level, e.experience_level)}</Chip>}
+                    </div>
+                  </div>
                 </div>
-              )}
-              <p className="mt-3 font-semibold truncate w-full">@{k.username}</p>
-              {k.ludoya_username ? (
-                <span className="mt-2 text-xs text-coral-deep">{t.inLudoya}</span>
-              ) : (
-                <span className="mt-2 text-xs text-ink/40">{t.noLudoya}</span>
-              )}
-            </button>
-          ))}
+
+                {e?.bio && <p className="line-clamp-2 text-sm italic text-ink/60">“{e.bio}”</p>}
+
+                {types.length > 0 && (
+                  <div className="flex flex-wrap gap-1">
+                    {types.map((x) => (
+                      <Chip key={x}>{x}</Chip>
+                    ))}
+                    {extraTypes > 0 && <Chip>{t.plusMore(extraTypes)}</Chip>}
+                  </div>
+                )}
+
+                {games.length > 0 ? (
+                  <div>
+                    <p className="mb-1 text-[10px] uppercase tracking-wide text-ink/40">{t.favoriteGames}</p>
+                    <div className="flex gap-1.5">
+                      {games.map((g) => (
+                        <GameThumb key={g.id} name={g.name} imageUrl={g.imageUrl} className="h-12 w-12" />
+                      ))}
+                    </div>
+                  </div>
+                ) : (
+                  <p className="text-xs text-ink/35">{t.noProfileYet}</p>
+                )}
+
+                {(e?.availability ?? []).length > 0 && (
+                  <p className="flex items-center gap-1.5 text-xs text-ink/55">
+                    <CalendarClock className="h-3.5 w-3.5 shrink-0" />
+                    <span className="truncate">
+                      {klefferLabelsOf(opt.availability, e?.availability).slice(0, 2).join(" · ")}
+                    </span>
+                  </p>
+                )}
+              </button>
+            );
+          })}
           {filtered.length === 0 && (
-            <p className="col-span-full text-center text-ink/50 py-8">{t.noResults}</p>
+            <p className="col-span-full py-8 text-center text-ink/50">{t.noResults}</p>
           )}
         </div>
       )}
@@ -206,72 +390,93 @@ function KleffersPage() {
                 <SheetTitle className="font-display text-2xl">@{selected.username}</SheetTitle>
               </SheetHeader>
 
-              <div className="mt-4 space-y-5">
+              <div className="mt-4 space-y-4">
                 <div className="flex items-center gap-4">
                   {selected.avatar_url || selected.ludoya_avatar_url ? (
                     <img
                       src={selected.avatar_url ?? selected.ludoya_avatar_url ?? ""}
                       alt=""
-                      className="h-20 w-20 rounded-full object-cover border-2 border-coral"
+                      className="h-20 w-20 rounded-full border-2 border-coral object-cover"
                     />
                   ) : (
-                    <div className="h-20 w-20 rounded-full bg-coral/30 flex items-center justify-center text-2xl font-bold">
+                    <div className="flex h-20 w-20 items-center justify-center rounded-full bg-coral/30 text-2xl font-bold">
                       {selected.username.charAt(0).toUpperCase()}
                     </div>
                   )}
                   <div className="text-sm text-ink/70">
                     <p>
-                      {t.memberNumber} <span className="font-mono font-semibold text-ink">{selected.member_number}</span>
+                      {t.memberNumber}{" "}
+                      <span className="font-mono font-semibold text-ink">{selected.member_number}</span>
                     </p>
-                    <p>{t.since} {new Date(selected.created_at).toLocaleDateString(communityDict[locale].dateLocale)}</p>
+                    <p>
+                      {t.since}{" "}
+                      {new Date(selected.created_at).toLocaleDateString(communityDict[locale].dateLocale)}
+                    </p>
                   </div>
                 </div>
 
-                {extended && (
-                  <section className="rounded-2xl border border-ink/15 p-4 space-y-2 text-sm">
-                    <h3 className="font-semibold">{t.profileTitle}</h3>
-                    {extended.bio && <p className="italic text-ink/70">“{extended.bio}”</p>}
-                    {extended.attends_alone && (
-                      <p>{klefferLabelOf(opt.attends_alone, extended.attends_alone)}</p>
-                    )}
-                    {extended.scheduled_games && <p>{klefferLabelOf(opt.scheduled_games, extended.scheduled_games)}</p>}
-                    {extended.experience_level && (
-                      <p>{t.level}: {klefferLabelOf(opt.experience_level, extended.experience_level)}</p>
-                    )}
-                    {extended.teaches && <p>{klefferLabelOf(opt.teaches, extended.teaches)}</p>}
-                    {(extended.favorite_games ?? []).length > 0 && (
-                      <div>
-                        <p className="text-xs uppercase tracking-wide text-ink/50 mb-1">{t.favoriteGames}</p>
-                        <div className="flex flex-wrap gap-2">
-                          {(extended.favorite_games ?? []).map((g) => (
-                            <span key={g.id} className="rounded-full bg-cream-deep/60 px-2 py-1 text-xs">{g.name}</span>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                    {[
-                      { title: t.goals, items: klefferLabelsOf(opt.goals, extended.goals) },
-                      { title: t.likes, items: klefferLabelsOf(opt.game_types, extended.game_types) },
-                      { title: t.availability, items: klefferLabelsOf(opt.availability, extended.availability) },
-                      { title: t.languages, items: klefferLabelsOf(opt.languages, extended.languages) },
-                    ]
-                      .filter((b) => b.items.length > 0)
-                      .map((b) => (
-                        <div key={b.title}>
-                          <p className="text-xs uppercase tracking-wide text-ink/50 mb-1">{b.title}</p>
-                          <div className="flex flex-wrap gap-2">
-                            {b.items.map((it) => (
-                              <span key={it} className="rounded-full bg-cream-deep/60 px-2 py-1 text-xs">{it}</span>
-                            ))}
-                          </div>
-                        </div>
-                      ))}
-                  </section>
+                {extended?.bio && (
+                  <p className="rounded-2xl bg-cream-deep/50 p-3 text-sm italic text-ink/70">“{extended.bio}”</p>
                 )}
 
-                <section className="rounded-2xl border border-ink/15 p-4">
+                {extended && (
+                  <Section icon={Users} title={t.profileTitle}>
+                    <ul className="space-y-1.5 text-sm text-ink/80">
+                      {extended.attends_alone && <li>{klefferLabelOf(opt.attends_alone, extended.attends_alone)}</li>}
+                      {extended.scheduled_games && (
+                        <li>{klefferLabelOf(opt.scheduled_games, extended.scheduled_games)}</li>
+                      )}
+                      {extended.experience_level && (
+                        <li className="flex items-center gap-1.5">
+                          <GraduationCap className="h-3.5 w-3.5 shrink-0 text-ink/40" />
+                          {t.level}: {klefferLabelOf(opt.experience_level, extended.experience_level)}
+                        </li>
+                      )}
+                      {extended.teaches && (
+                        <li className="flex items-center gap-1.5">
+                          <Sparkles className="h-3.5 w-3.5 shrink-0 text-ink/40" />
+                          {klefferLabelOf(opt.teaches, extended.teaches)}
+                        </li>
+                      )}
+                    </ul>
+                  </Section>
+                )}
 
-                  <h3 className="font-semibold mb-2">{t.ludoya}</h3>
+                {(extended?.favorite_games ?? []).length > 0 && (
+                  <Section icon={Dice5} title={t.favoriteGames}>
+                    <div className="grid grid-cols-2 gap-2">
+                      {(extended?.favorite_games ?? []).map((g) => (
+                        <div key={g.id} className="flex items-center gap-2 rounded-xl bg-cream-deep/40 p-1.5">
+                          <GameThumb name={g.name} imageUrl={g.imageUrl} className="h-11 w-11" />
+                          <span className="min-w-0 truncate text-xs font-medium">{g.name}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </Section>
+                )}
+
+                {[
+                  { icon: Target, title: t.goals, items: klefferLabelsOf(opt.goals, extended?.goals) },
+                  { icon: Dice5, title: t.likes, items: klefferLabelsOf(opt.game_types, extended?.game_types) },
+                  {
+                    icon: CalendarClock,
+                    title: t.availability,
+                    items: klefferLabelsOf(opt.availability, extended?.availability),
+                  },
+                  { icon: Languages, title: t.languages, items: klefferLabelsOf(opt.languages, extended?.languages) },
+                ]
+                  .filter((b) => b.items.length > 0)
+                  .map((b) => (
+                    <Section key={b.title} icon={b.icon} title={b.title}>
+                      <div className="flex flex-wrap gap-1.5">
+                        {b.items.map((it) => (
+                          <Chip key={it}>{it}</Chip>
+                        ))}
+                      </div>
+                    </Section>
+                  ))}
+
+                <Section icon={ExternalLink} title={t.ludoya}>
                   {!selected.ludoya_username ? (
                     <p className="text-sm text-ink/50">{t.notLinked}</p>
                   ) : detailLoading ? (
@@ -282,7 +487,7 @@ function KleffersPage() {
                         href={`https://app.ludoya.com/${selected.ludoya_username}`}
                         target="_blank"
                         rel="noreferrer"
-                        className="inline-flex items-center gap-1 text-sm font-mono underline"
+                        className="inline-flex items-center gap-1 font-mono text-sm underline"
                       >
                         @{selected.ludoya_username} <ExternalLink className="h-3 w-3" />
                       </a>
@@ -298,23 +503,22 @@ function KleffersPage() {
                       )}
                       {ludoya && ludoya.collection.length > 0 && (
                         <div>
-                          <p className="text-xs uppercase tracking-wide text-ink/50 mb-1">{t.collection}</p>
+                          <p className="mb-1 text-xs uppercase tracking-wide text-ink/50">{t.collection}</p>
                           <div className="grid grid-cols-4 gap-2">
                             {ludoya.collection.map((g, i) => (
-                              <div key={g.id ?? i} className="aspect-square rounded-lg overflow-hidden bg-cream-deep">
-                                {g.imageUrl ? (
-                                  <img src={g.imageUrl} alt={g.name ?? ""} className="w-full h-full object-cover" />
-                                ) : (
-                                  <div className="w-full h-full flex items-center justify-center text-lg">🎲</div>
-                                )}
-                              </div>
+                              <GameThumb
+                                key={g.id ?? i}
+                                name={g.name ?? ""}
+                                imageUrl={g.imageUrl}
+                                className="aspect-square h-auto w-full"
+                              />
                             ))}
                           </div>
                         </div>
                       )}
                     </div>
                   )}
-                </section>
+                </Section>
               </div>
             </>
           )}
