@@ -21,7 +21,9 @@ export const listKleffers = createServerFn({ method: "POST" })
 
     const { data: extended } = await supabaseAdmin
       .from("member_profiles")
-      .select("user_id, attends_alone, goals, favorite_games, game_types, availability, experience_level, bio")
+      .select(
+        "user_id, attends_alone, goals, favorite_games, game_types, availability, experience_level, bio, languages, teaches, scheduled_games",
+      )
       .eq("is_public", true);
 
     const byUser = new Map((extended ?? []).map((e) => [e.user_id, e]));
