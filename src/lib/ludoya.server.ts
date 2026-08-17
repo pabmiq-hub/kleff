@@ -279,30 +279,68 @@ export interface CreateLudoyaMatchInput {
 }
 
 export async function createLudoyaMatch(input: CreateLudoyaMatchInput): Promise<{ ok: boolean; match?: LudoyaMatch; httpStatus: number; message?: string }> {
-  const body = {
+  // Resolve the host (master) so the creator appears as narrador/anfitrión
+  // and is also signed up as a participant.
+  let masterUserId: string | null = null;
+  if (input.hostUsername) {
+    try {
+      const host = await findLudoyaUserByUsername(input.hostUsername);
+      masterUserId = host?.id ?? null;
+    } catch {
+      masterUserId = null;
+    }
+  }
+
+  const startsAt = new Date(input.scheduledAt);
+  const startsAtIso = Number.isNaN(startsAt.getTime()) ? null : startsAt.toISOString();
+  if (!startsAtIso) return { ok: false, httpStatus: 400, message: "Fecha no válida" };
+
+  // Ludoya has no location/notes fields on events: they live in `description`.
+  const descriptionParts = [input.notes?.trim(), input.location?.trim() ? `📍 ${input.location.trim()}` : null]
+    .filter(Boolean);
+
+  const body: Record<string, unknown> = {
     type: EVENT_TYPE,
     title: input.title,
-    scheduledAt: input.scheduledAt,
-    boardgameId: input.boardgameId ?? undefined,
-    boardgameSlug: input.boardgameSlug ?? undefined,
-    minPlayers: input.minPlayers ?? undefined,
-    maxPlayers: input.maxPlayers ?? undefined,
-    location: input.location ?? undefined,
-    notes: input.notes ?? undefined,
-    hostUsername: input.hostUsername ?? undefined,
-    parentId: input.parentId ?? undefined,
+    startsAt: startsAtIso,
+    timeZone: "Europe/Madrid",
+    ...(descriptionParts.length ? { description: descriptionParts.join("\n\n") } : {}),
+    ...(input.maxPlayers ? { capacity: input.maxPlayers } : {}),
+    ...(input.boardgameId ? { gameId: input.boardgameId } : {}),
+    ...(masterUserId ? { masterUserId } : {}),
+    ...(input.parentId ? { parentEventId: input.parentId } : {}),
   };
 
   const res = await ludoyaFetch(`/events`, { method: "POST", body: JSON.stringify(body) });
-  if (res.ok || res.status === 201) {
-    let match: LudoyaMatch | undefined;
-    try { match = (await res.json()) as LudoyaMatch; } catch { /* ignore */ }
-    return { ok: true, match, httpStatus: res.status };
+  if (!res.ok && res.status !== 201) {
+    let message: string | undefined;
+    try { message = ((await res.json()) as { message?: string }).message; } catch { /* ignore */ }
+    return { ok: false, httpStatus: res.status, message: message ?? "No se pudo crear la partida en Ludoya" };
   }
-  let message: string | undefined;
-  try { message = ((await res.json()) as { message?: string }).message; } catch { /* ignore */ }
-  return { ok: false, httpStatus: res.status, message: message ?? "No se pudo crear la partida en Ludoya" };
+
+  let createdId: string | null = null;
+  try { createdId = ((await res.json()) as { id?: string }).id ?? null; } catch { /* ignore */ }
+
+  // Sign the creator up as participant (Ludoya doesn't do it automatically).
+  if (createdId && masterUserId) {
+    try {
+      await ludoyaFetch(`/events/${createdId}/participants`, {
+        method: "POST",
+        body: JSON.stringify({ userId: masterUserId }),
+      });
+    } catch { /* non-fatal */ }
+  }
+
+  let match: LudoyaMatch | undefined;
+  if (createdId) {
+    const raw = await fetchEvent(createdId);
+    if (raw) match = mapRawEvent(raw);
+    else match = { id: createdId, type: EVENT_TYPE, title: input.title, scheduledAt: startsAtIso, url: `https://app.ludoya.com/events/${createdId}` };
+  }
+
+  return { ok: true, match, httpStatus: res.status };
 }
+
 
 
 // -------- Group members (perfil público de un socio en Ludoya) --------

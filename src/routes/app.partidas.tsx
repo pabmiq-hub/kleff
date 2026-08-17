@@ -405,7 +405,6 @@ function CreateMatchDialog({
     location?: string | null;
     notes?: string | null;
     parentEventId?: string | null;
-    claimKarma?: boolean;
   }) => Promise<void>;
 }) {
   const { locale } = useAppLocale();
@@ -419,7 +418,6 @@ function CreateMatchDialog({
   const [minPlayers, setMinPlayers] = useState<string>("");
   const [maxPlayers, setMaxPlayers] = useState<string>("");
   const [parentEventId, setParentEventId] = useState<string>("");
-  const [claimKarma, setClaimKarma] = useState(true);
 
   const [bgQuery, setBgQuery] = useState("");
   const [bgResults, setBgResults] = useState<BgOption[]>([]);
@@ -469,7 +467,6 @@ function CreateMatchDialog({
         location: location.trim() || null,
         notes: notes.trim() || null,
         parentEventId: parentEventId || null,
-        claimKarma,
       });
 
     } catch (err) {
@@ -573,16 +570,6 @@ function CreateMatchDialog({
             ))}
           </select>
         </div>
-
-        <label className="flex items-center gap-2 text-sm cursor-pointer">
-          <input
-            type="checkbox"
-            checked={claimKarma}
-            onChange={(e) => setClaimKarma(e.target.checked)}
-            className="accent-coral"
-          />
-          {t.claimKarma}
-        </label>
 
 
         <DialogFooter>

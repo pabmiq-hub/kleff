@@ -125,7 +125,6 @@ function KleffersPage() {
   const [loading, setLoading] = useState(true);
   const [q, setQ] = useState("");
   const [onlyLudoya, setOnlyLudoya] = useState(false);
-  const [onlyAlone, setOnlyAlone] = useState(false);
   const [availability, setAvailability] = useState("");
   const [gameType, setGameType] = useState("");
   const [experience, setExperience] = useState("");
@@ -162,7 +161,6 @@ function KleffersPage() {
       items.filter((k) => {
         const e = k.extended;
         if (onlyLudoya && !k.ludoya_username) return false;
-        if (onlyAlone && e?.attends_alone !== "alone") return false;
         if (availability && !(e?.availability ?? []).includes(availability)) return false;
         if (gameType && !(e?.game_types ?? []).includes(gameType)) return false;
         if (experience && e?.experience_level !== experience) return false;
@@ -177,17 +175,15 @@ function KleffersPage() {
           (e?.favorite_games ?? []).some((g) => g.name.toLowerCase().includes(s))
         );
       }),
-    [items, onlyLudoya, onlyAlone, availability, gameType, experience, language, goal, q],
+    [items, onlyLudoya, availability, gameType, experience, language, goal, q],
   );
 
   const activeFilters =
     (onlyLudoya ? 1 : 0) +
-    (onlyAlone ? 1 : 0) +
     [availability, gameType, experience, language, goal].filter(Boolean).length;
 
   const clearAll = () => {
     setOnlyLudoya(false);
-    setOnlyAlone(false);
     setAvailability("");
     setGameType("");
     setExperience("");
@@ -288,15 +284,6 @@ function KleffersPage() {
             />
             {t.onlyLudoya}
           </label>
-          <label className="flex cursor-pointer items-center gap-2 text-sm text-ink/70">
-            <input
-              type="checkbox"
-              checked={onlyAlone}
-              onChange={(e) => setOnlyAlone(e.target.checked)}
-              className="accent-coral"
-            />
-            {t.onlyAlone}
-          </label>
           <span className="ml-auto self-center text-xs text-ink/50">{t.results(filtered.length)}</span>
         </div>
       </div>
@@ -307,75 +294,38 @@ function KleffersPage() {
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {filtered.map((k) => {
             const e = k.extended;
-            const games = (e?.favorite_games ?? []).slice(0, 5);
-            const types = klefferLabelsOf(opt.game_types, e?.game_types).slice(0, 3);
-            const extraTypes = (e?.game_types ?? []).length - types.length;
             return (
               <button
                 key={k.id}
                 type="button"
                 onClick={() => open(k)}
-                className="group flex flex-col gap-3 rounded-2xl border border-ink/10 bg-card p-4 text-left transition-colors hover:border-coral"
+                className="group flex items-center gap-3 rounded-2xl border border-ink/10 bg-card p-4 text-left transition-colors hover:border-coral"
               >
-                <div className="grid grid-cols-[auto_minmax(0,1fr)] items-center gap-3">
-                  {k.avatar_url || k.ludoya_avatar_url ? (
-                    <img
-                      src={k.avatar_url ?? k.ludoya_avatar_url ?? ""}
-                      alt={`@${k.username}`}
-                      className="h-14 w-14 shrink-0 rounded-full border-2 border-coral object-cover"
-                    />
-                  ) : (
-                    <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-coral/25 text-xl font-bold">
-                      {k.username.charAt(0).toUpperCase()}
-                    </div>
-                  )}
-                  <div className="min-w-0">
-                    <p className="truncate font-semibold">@{k.username}</p>
-                    <p className="text-xs text-ink/50">
-                      {t.memberNumber} {k.member_number}
-                    </p>
-                    <div className="mt-1 flex flex-wrap gap-1">
-                      {k.ludoya_username ? <Chip tone="coral">{t.inLudoya}</Chip> : <Chip>{t.noLudoya}</Chip>}
-                      {e?.experience_level && <Chip>{klefferLabelOf(opt.experience_level, e.experience_level)}</Chip>}
-                    </div>
+                {k.avatar_url || k.ludoya_avatar_url ? (
+                  <img
+                    src={k.avatar_url ?? k.ludoya_avatar_url ?? ""}
+                    alt={`@${k.username}`}
+                    className="h-12 w-12 shrink-0 rounded-full border-2 border-coral object-cover"
+                  />
+                ) : (
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-coral/25 text-lg font-bold">
+                    {k.username.charAt(0).toUpperCase()}
+                  </div>
+                )}
+                <div className="min-w-0">
+                  <p className="truncate font-semibold">@{k.username}</p>
+                  <p className="text-xs text-ink/50">
+                    {t.memberNumber} {k.member_number}
+                  </p>
+                  <div className="mt-1 flex flex-wrap gap-1">
+                    {k.ludoya_username ? <Chip tone="coral">{t.inLudoya}</Chip> : <Chip>{t.noLudoya}</Chip>}
+                    {e?.experience_level && <Chip>{klefferLabelOf(opt.experience_level, e.experience_level)}</Chip>}
                   </div>
                 </div>
-
-                {e?.bio && <p className="line-clamp-2 text-sm italic text-ink/60">“{e.bio}”</p>}
-
-                {types.length > 0 && (
-                  <div className="flex flex-wrap gap-1">
-                    {types.map((x) => (
-                      <Chip key={x}>{x}</Chip>
-                    ))}
-                    {extraTypes > 0 && <Chip>{t.plusMore(extraTypes)}</Chip>}
-                  </div>
-                )}
-
-                {games.length > 0 ? (
-                  <div>
-                    <p className="mb-1 text-[10px] uppercase tracking-wide text-ink/40">{t.favoriteGames}</p>
-                    <div className="flex gap-1.5">
-                      {games.map((g) => (
-                        <GameThumb key={g.id} name={g.name} imageUrl={g.imageUrl} className="h-12 w-12" />
-                      ))}
-                    </div>
-                  </div>
-                ) : (
-                  <p className="text-xs text-ink/35">{t.noProfileYet}</p>
-                )}
-
-                {(e?.availability ?? []).length > 0 && (
-                  <p className="flex items-center gap-1.5 text-xs text-ink/55">
-                    <CalendarClock className="h-3.5 w-3.5 shrink-0" />
-                    <span className="truncate">
-                      {klefferLabelsOf(opt.availability, e?.availability).slice(0, 2).join(" · ")}
-                    </span>
-                  </p>
-                )}
               </button>
             );
           })}
+
           {filtered.length === 0 && (
             <p className="col-span-full py-8 text-center text-ink/50">{t.noResults}</p>
           )}
