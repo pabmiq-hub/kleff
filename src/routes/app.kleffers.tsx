@@ -307,44 +307,38 @@ function KleffersPage() {
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {filtered.map((k) => {
             const e = k.extended;
-            const games = (e?.favorite_games ?? []).slice(0, 5);
-            const types = klefferLabelsOf(opt.game_types, e?.game_types).slice(0, 3);
-            const extraTypes = (e?.game_types ?? []).length - types.length;
             return (
               <button
                 key={k.id}
                 type="button"
                 onClick={() => open(k)}
-                className="group flex flex-col gap-3 rounded-2xl border border-ink/10 bg-card p-4 text-left transition-colors hover:border-coral"
+                className="group flex items-center gap-3 rounded-2xl border border-ink/10 bg-card p-4 text-left transition-colors hover:border-coral"
               >
-                <div className="grid grid-cols-[auto_minmax(0,1fr)] items-center gap-3">
-                  {k.avatar_url || k.ludoya_avatar_url ? (
-                    <img
-                      src={k.avatar_url ?? k.ludoya_avatar_url ?? ""}
-                      alt={`@${k.username}`}
-                      className="h-14 w-14 shrink-0 rounded-full border-2 border-coral object-cover"
-                    />
-                  ) : (
-                    <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-coral/25 text-xl font-bold">
-                      {k.username.charAt(0).toUpperCase()}
-                    </div>
-                  )}
-                  <div className="min-w-0">
-                    <p className="truncate font-semibold">@{k.username}</p>
-                    <p className="text-xs text-ink/50">
-                      {t.memberNumber} {k.member_number}
-                    </p>
-                    <div className="mt-1 flex flex-wrap gap-1">
-                      {k.ludoya_username ? <Chip tone="coral">{t.inLudoya}</Chip> : <Chip>{t.noLudoya}</Chip>}
-                      {e?.experience_level && <Chip>{klefferLabelOf(opt.experience_level, e.experience_level)}</Chip>}
-                    </div>
+                {k.avatar_url || k.ludoya_avatar_url ? (
+                  <img
+                    src={k.avatar_url ?? k.ludoya_avatar_url ?? ""}
+                    alt={`@${k.username}`}
+                    className="h-12 w-12 shrink-0 rounded-full border-2 border-coral object-cover"
+                  />
+                ) : (
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-coral/25 text-lg font-bold">
+                    {k.username.charAt(0).toUpperCase()}
+                  </div>
+                )}
+                <div className="min-w-0">
+                  <p className="truncate font-semibold">@{k.username}</p>
+                  <p className="text-xs text-ink/50">
+                    {t.memberNumber} {k.member_number}
+                  </p>
+                  <div className="mt-1 flex flex-wrap gap-1">
+                    {k.ludoya_username ? <Chip tone="coral">{t.inLudoya}</Chip> : <Chip>{t.noLudoya}</Chip>}
+                    {e?.experience_level && <Chip>{klefferLabelOf(opt.experience_level, e.experience_level)}</Chip>}
                   </div>
                 </div>
-
               </button>
-
             );
           })}
+
           {filtered.length === 0 && (
             <p className="col-span-full py-8 text-center text-ink/50">{t.noResults}</p>
           )}
