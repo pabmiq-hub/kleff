@@ -341,39 +341,8 @@ function KleffersPage() {
                   </div>
                 </div>
 
-                {e?.bio && <p className="line-clamp-2 text-sm italic text-ink/60">“{e.bio}”</p>}
-
-                {types.length > 0 && (
-                  <div className="flex flex-wrap gap-1">
-                    {types.map((x) => (
-                      <Chip key={x}>{x}</Chip>
-                    ))}
-                    {extraTypes > 0 && <Chip>{t.plusMore(extraTypes)}</Chip>}
-                  </div>
-                )}
-
-                {games.length > 0 ? (
-                  <div>
-                    <p className="mb-1 text-[10px] uppercase tracking-wide text-ink/40">{t.favoriteGames}</p>
-                    <div className="flex gap-1.5">
-                      {games.map((g) => (
-                        <GameThumb key={g.id} name={g.name} imageUrl={g.imageUrl} className="h-12 w-12" />
-                      ))}
-                    </div>
-                  </div>
-                ) : (
-                  <p className="text-xs text-ink/35">{t.noProfileYet}</p>
-                )}
-
-                {(e?.availability ?? []).length > 0 && (
-                  <p className="flex items-center gap-1.5 text-xs text-ink/55">
-                    <CalendarClock className="h-3.5 w-3.5 shrink-0" />
-                    <span className="truncate">
-                      {klefferLabelsOf(opt.availability, e?.availability).slice(0, 2).join(" · ")}
-                    </span>
-                  </p>
-                )}
               </button>
+
             );
           })}
           {filtered.length === 0 && (
