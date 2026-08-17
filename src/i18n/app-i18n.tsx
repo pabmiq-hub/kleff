@@ -60,12 +60,16 @@ export function AppLocaleProvider({ children }: { children: ReactNode }) {
     storeAppLocale(l);
     void (async () => {
       try {
+        const { supabase } = await import("@/integrations/supabase/client");
+        const { data: sessionData } = await supabase.auth.getSession();
+        if (!sessionData.session) return;
         const { updateMyLocale } = await import("@/lib/locale.functions");
         await updateMyLocale({ data: { locale: l } });
       } catch {
-        /* not signed in — ignore */
+        /* ignore */
       }
     })();
+
   }, []);
 
   return (
