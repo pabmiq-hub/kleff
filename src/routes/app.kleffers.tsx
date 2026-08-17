@@ -125,7 +125,6 @@ function KleffersPage() {
   const [loading, setLoading] = useState(true);
   const [q, setQ] = useState("");
   const [onlyLudoya, setOnlyLudoya] = useState(false);
-  const [onlyAlone, setOnlyAlone] = useState(false);
   const [availability, setAvailability] = useState("");
   const [gameType, setGameType] = useState("");
   const [experience, setExperience] = useState("");
@@ -162,7 +161,6 @@ function KleffersPage() {
       items.filter((k) => {
         const e = k.extended;
         if (onlyLudoya && !k.ludoya_username) return false;
-        if (onlyAlone && e?.attends_alone !== "alone") return false;
         if (availability && !(e?.availability ?? []).includes(availability)) return false;
         if (gameType && !(e?.game_types ?? []).includes(gameType)) return false;
         if (experience && e?.experience_level !== experience) return false;
@@ -177,17 +175,15 @@ function KleffersPage() {
           (e?.favorite_games ?? []).some((g) => g.name.toLowerCase().includes(s))
         );
       }),
-    [items, onlyLudoya, onlyAlone, availability, gameType, experience, language, goal, q],
+    [items, onlyLudoya, availability, gameType, experience, language, goal, q],
   );
 
   const activeFilters =
     (onlyLudoya ? 1 : 0) +
-    (onlyAlone ? 1 : 0) +
     [availability, gameType, experience, language, goal].filter(Boolean).length;
 
   const clearAll = () => {
     setOnlyLudoya(false);
-    setOnlyAlone(false);
     setAvailability("");
     setGameType("");
     setExperience("");
@@ -287,15 +283,6 @@ function KleffersPage() {
               className="accent-coral"
             />
             {t.onlyLudoya}
-          </label>
-          <label className="flex cursor-pointer items-center gap-2 text-sm text-ink/70">
-            <input
-              type="checkbox"
-              checked={onlyAlone}
-              onChange={(e) => setOnlyAlone(e.target.checked)}
-              className="accent-coral"
-            />
-            {t.onlyAlone}
           </label>
           <span className="ml-auto self-center text-xs text-ink/50">{t.results(filtered.length)}</span>
         </div>
