@@ -125,7 +125,7 @@ const createMatchSchema = z.object({
   location: z.string().max(200).nullable().optional(),
   notes: z.string().max(2000).nullable().optional(),
   parentEventId: z.string().max(120).nullable().optional(),
-  claimKarma: z.boolean().optional(),
+  claimKarma: z.boolean().optional(), // deprecado: el karma se reclama siempre
 });
 
 export const createKleffMatch = createServerFn({ method: "POST" })
@@ -153,10 +153,7 @@ export const createKleffMatch = createServerFn({ method: "POST" })
 
     if (!result.ok) throw new Error(result.message ?? "No se pudo crear la partida");
 
-    let karma: { claimed: boolean; points?: number; reason?: string } = { claimed: false };
-    if (data.claimKarma !== false) {
-      karma = await claimLudoyaMatchKarma(context.userId, data.title);
-    }
+    const karma = await claimLudoyaMatchKarma(context.userId, data.title);
 
     return { match: result.match ?? null, karma };
   });
