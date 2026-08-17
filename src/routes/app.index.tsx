@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useAuth } from "@/auth/AuthProvider";
 import { IdCard, Dices, Gamepad2, Users } from "lucide-react";
 import { FeaturedGamesCard } from "@/components/app/FeaturedGamesCard";
+import { EventsCalendarCard } from "@/components/app/EventsCalendarCard";
 import { ActivePollsCard } from "@/components/app/ActivePollsCard";
 import { VolunteerCard } from "@/components/app/VolunteerCard";
 import { useAppLocale } from "@/i18n/app-i18n";
