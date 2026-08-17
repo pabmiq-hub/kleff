@@ -21,9 +21,9 @@ type UiMatch = {
 const LOCALE_TAG: Record<string, string> = { es: "es-ES", ca: "ca-ES", en: "en-GB" };
 
 const TEXT = {
-  es: { title: "Calendario de actividades", loading: "Cargando…", none: "No hay actividades programadas este mes.", eventsOn: "Actividades del", today: "Hoy", open: "Ver en Ludoya" },
-  ca: { title: "Calendari d'activitats", loading: "Carregant…", none: "No hi ha activitats programades aquest mes.", eventsOn: "Activitats del", today: "Avui", open: "Veure a Ludoya" },
-  en: { title: "Activity calendar", loading: "Loading…", none: "No activities scheduled this month.", eventsOn: "Activities on", today: "Today", open: "View on Ludoya" },
+  es: { title: "Calendario de actividades", loading: "Cargando…", none: "No hay actividades programadas este mes.", eventsOn: "Actividad del", eventsOnPlural: "Actividades del", today: "Hoy", open: "Ver en Ludoya" },
+  ca: { title: "Calendari d'activitats", loading: "Carregant…", none: "No hi ha activitats programades aquest mes.", eventsOn: "Activitat del", eventsOnPlural: "Activitats del", today: "Avui", open: "Veure a Ludoya" },
+  en: { title: "Activity calendar", loading: "Loading…", none: "No activities scheduled this month.", eventsOn: "Activity on", eventsOnPlural: "Activities on", today: "Today", open: "View on Ludoya" },
 } as const;
 
 function classify(type: string): "partida" | "torneo" | "evento" {
@@ -108,7 +108,7 @@ export function EventsCalendarCard() {
   const selectedEvents = selected ? byDay.get(selected) ?? [] : [];
 
   return (
-    <section className="bg-card border-2 border-ink rounded-2xl shadow-tactile-sm overflow-hidden">
+    <section className="bg-card border-2 border-ink rounded-2xl shadow-tactile-sm overflow-hidden mx-auto w-full max-w-2xl">
       <header className="flex items-center justify-between gap-2 px-4 py-3 bg-coral-deep text-primary-foreground">
         <div className="flex items-center gap-2 min-w-0">
           <CalendarDays className="h-5 w-5 shrink-0" />
@@ -159,7 +159,7 @@ export function EventsCalendarCard() {
                 disabled={!has}
                 onClick={() => setSelected(k)}
                 className={cn(
-                  "relative aspect-square border border-ink/10 text-sm flex flex-col items-center justify-center gap-0.5 transition-colors",
+                  "relative aspect-square lg:aspect-[4/3] border border-ink/10 text-sm flex flex-col items-center justify-center gap-0.5 transition-colors",
                   inMonth ? "bg-background" : "bg-muted/60 text-muted-foreground",
                   has && "cursor-pointer hover:brightness-95",
                   isToday && "ring-2 ring-inset ring-ink/40",
@@ -167,7 +167,7 @@ export function EventsCalendarCard() {
               >
                 <span
                   className={cn(
-                    "flex items-center justify-center rounded-full h-7 w-7 sm:h-8 sm:w-8 font-semibold",
+                    "flex items-center justify-center rounded-full h-7 w-7 text-sm font-semibold",
                     has && "bg-coral-deep text-primary-foreground shadow-tactile-sm",
                   )}
                 >
@@ -191,7 +191,7 @@ export function EventsCalendarCard() {
         <DialogContent className="max-w-lg max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="capitalize">
-              {t.eventsOn}{" "}
+              {selectedEvents.length === 1 ? t.eventsOn : t.eventsOnPlural}{" "}
               {selected
                 ? new Intl.DateTimeFormat(tag, { weekday: "long", day: "numeric", month: "long" }).format(
                     new Date(selected + "T00:00:00"),
