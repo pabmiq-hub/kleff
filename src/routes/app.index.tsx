@@ -29,6 +29,7 @@ function AppHome() {
         <QuickCard to="/app/rentals" icon={<Dices className="h-5 w-5" />} title={t.home.cardRentalsTitle} desc={t.home.cardRentalsDesc} />
       </div>
 
+      <EventsCalendarCard />
       <FeaturedGamesCard />
       <ActivePollsCard />
       <VolunteerCard />
