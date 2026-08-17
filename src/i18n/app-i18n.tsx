@@ -36,9 +36,12 @@ export function AppLocaleProvider({ children }: { children: ReactNode }) {
     if (stored) setLocaleState(stored);
     setReady(true);
 
-    // Sync with the member profile (if signed in). DB wins on first load.
+    // Sync with the member profile (only when signed in). DB wins on first load.
     void (async () => {
       try {
+        const { supabase } = await import("@/integrations/supabase/client");
+        const { data: sessionData } = await supabase.auth.getSession();
+        if (!sessionData.session) return;
         const { getMyLocale } = await import("@/lib/locale.functions");
         const res = await getMyLocale({ data: undefined as never });
         if (res?.locale && (LOCALES as readonly string[]).includes(res.locale)) {
@@ -46,9 +49,10 @@ export function AppLocaleProvider({ children }: { children: ReactNode }) {
           storeAppLocale(res.locale as AppLocale);
         }
       } catch {
-        /* not signed in — ignore */
+        /* ignore */
       }
     })();
+
   }, []);
 
   const setLocale = useCallback((l: AppLocale) => {
