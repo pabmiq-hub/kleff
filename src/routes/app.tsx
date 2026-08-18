@@ -1,7 +1,7 @@
 import { createFileRoute, Outlet, Link, useNavigate } from "@tanstack/react-router";
 import { useAuth } from "@/auth/AuthProvider";
 import { Button } from "@/components/ui/button";
-import { Home, User, IdCard, Dices, LogOut, Shield, Gamepad2, Users, Sparkles, Vote } from "lucide-react";
+import { Home, User, IdCard, Dices, LogOut, Shield, Gamepad2, Users, Sparkles, Vote, Award } from "lucide-react";
 import { NotificationsBell } from "@/components/app/NotificationsBell";
 import { AppLanguageSwitcher } from "@/components/app/AppLanguageSwitcher";
 import { useAppLocale } from "@/i18n/app-i18n";
