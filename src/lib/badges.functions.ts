@@ -100,3 +100,41 @@ export const setMemberBadgeProgress = createServerFn({ method: "POST" })
     );
     return { success: true };
   });
+
+/** Admin: full badge catalogue with a member's progress (manual + automatic). */
+export const getMemberBadgesAdmin = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) => z.object({ userId: z.string().uuid() }).parse(input))
+  .handler(async ({ data, context }) => {
+    const { data: isAdmin } = await context.supabase.rpc("has_role", {
+      _user_id: context.userId,
+      _role: "super_admin",
+    });
+    if (!isAdmin) throw new Error("Forbidden");
+
+    const { recomputeUserBadges } = await import("@/lib/badges.server");
+    await recomputeUserBadges(data.userId);
+
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const [{ data: badges }, { data: rows }] = await Promise.all([
+      supabaseAdmin
+        .from("badges")
+        .select(`${BADGE_FIELDS}, source, auto_metric`)
+        .eq("is_active", true)
+        .order("sort_order"),
+      supabaseAdmin
+        .from("user_badges")
+        .select("badge_id, progress, tier, unlocked_at")
+        .eq("user_id", data.userId),
+    ]);
+    const byBadge = new Map((rows ?? []).map((m) => [m.badge_id, m]));
+    return {
+      badges: (badges ?? []).map((b) => ({
+        badge: b,
+        progress: byBadge.get(b.id)?.progress ?? 0,
+        tier: byBadge.get(b.id)?.tier ?? null,
+        unlockedAt: byBadge.get(b.id)?.unlocked_at ?? null,
+        seenAt: null,
+      })),
+    };
+  });
