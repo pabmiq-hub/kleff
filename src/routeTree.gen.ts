@@ -78,6 +78,7 @@ import { Route as AppProfileRouteImport } from './routes/app.profile'
 import { Route as AppPartidasRouteImport } from './routes/app.partidas'
 import { Route as AppKleffersRouteImport } from './routes/app.kleffers'
 import { Route as AppKarmaRouteImport } from './routes/app.karma'
+import { Route as AppInsigniasRouteImport } from './routes/app.insignias'
 import { Route as AppCarnetRouteImport } from './routes/app.carnet'
 import { Route as AdminTeamRouteImport } from './routes/admin.team'
 import { Route as AdminRentalsRouteImport } from './routes/admin.rentals'
@@ -464,6 +465,11 @@ const AppKarmaRoute = AppKarmaRouteImport.update({
   path: '/karma',
   getParentRoute: () => AppRoute,
 } as any)
+const AppInsigniasRoute = AppInsigniasRouteImport.update({
+  id: '/insignias',
+  path: '/insignias',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppCarnetRoute = AppCarnetRouteImport.update({
   id: '/carnet',
   path: '/carnet',
@@ -698,6 +704,7 @@ export interface FileRoutesByFullPath {
   '/admin/rentals': typeof AdminRentalsRouteWithChildren
   '/admin/team': typeof AdminTeamRoute
   '/app/carnet': typeof AppCarnetRoute
+  '/app/insignias': typeof AppInsigniasRoute
   '/app/karma': typeof AppKarmaRoute
   '/app/kleffers': typeof AppKleffersRoute
   '/app/partidas': typeof AppPartidasRoute
@@ -802,6 +809,7 @@ export interface FileRoutesByTo {
   '/admin/polls': typeof AdminPollsRoute
   '/admin/team': typeof AdminTeamRoute
   '/app/carnet': typeof AppCarnetRoute
+  '/app/insignias': typeof AppInsigniasRoute
   '/app/karma': typeof AppKarmaRoute
   '/app/kleffers': typeof AppKleffersRoute
   '/app/partidas': typeof AppPartidasRoute
@@ -912,6 +920,7 @@ export interface FileRoutesById {
   '/admin/rentals': typeof AdminRentalsRouteWithChildren
   '/admin/team': typeof AdminTeamRoute
   '/app/carnet': typeof AppCarnetRoute
+  '/app/insignias': typeof AppInsigniasRoute
   '/app/karma': typeof AppKarmaRoute
   '/app/kleffers': typeof AppKleffersRoute
   '/app/partidas': typeof AppPartidasRoute
@@ -1024,6 +1033,7 @@ export interface FileRouteTypes {
     | '/admin/rentals'
     | '/admin/team'
     | '/app/carnet'
+    | '/app/insignias'
     | '/app/karma'
     | '/app/kleffers'
     | '/app/partidas'
@@ -1128,6 +1138,7 @@ export interface FileRouteTypes {
     | '/admin/polls'
     | '/admin/team'
     | '/app/carnet'
+    | '/app/insignias'
     | '/app/karma'
     | '/app/kleffers'
     | '/app/partidas'
@@ -1237,6 +1248,7 @@ export interface FileRouteTypes {
     | '/admin/rentals'
     | '/admin/team'
     | '/app/carnet'
+    | '/app/insignias'
     | '/app/karma'
     | '/app/kleffers'
     | '/app/partidas'
@@ -1869,6 +1881,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppKarmaRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/insignias': {
+      id: '/app/insignias'
+      path: '/insignias'
+      fullPath: '/app/insignias'
+      preLoaderRoute: typeof AppInsigniasRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/app/carnet': {
       id: '/app/carnet'
       path: '/carnet'
@@ -2268,6 +2287,7 @@ const AppRentalsRouteWithChildren = AppRentalsRoute._addFileChildren(
 
 interface AppRouteChildren {
   AppCarnetRoute: typeof AppCarnetRoute
+  AppInsigniasRoute: typeof AppInsigniasRoute
   AppKarmaRoute: typeof AppKarmaRoute
   AppKleffersRoute: typeof AppKleffersRoute
   AppPartidasRoute: typeof AppPartidasRoute
@@ -2279,6 +2299,7 @@ interface AppRouteChildren {
 
 const AppRouteChildren: AppRouteChildren = {
   AppCarnetRoute: AppCarnetRoute,
+  AppInsigniasRoute: AppInsigniasRoute,
   AppKarmaRoute: AppKarmaRoute,
   AppKleffersRoute: AppKleffersRoute,
   AppPartidasRoute: AppPartidasRoute,
