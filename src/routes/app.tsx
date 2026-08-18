@@ -58,6 +58,7 @@ function AppLayout() {
           <NavLink to="/app/rentals" icon={<Dices className="h-4 w-4" />} label={c.nav.rentals} />
           <NavLink to="/app/votaciones" icon={<Vote className="h-4 w-4" />} label={c.nav.polls} />
           <NavLink to="/app/karma" icon={<Sparkles className="h-4 w-4" />} label={c.nav.karma} />
+          <NavLink to="/app/insignias" icon={<Award className="h-4 w-4" />} label={c.nav.badges} />
         </nav>
         <div className="md:mt-auto">
           <Button variant="ghost" size="sm" onClick={handleLogout} className="w-full justify-start">
