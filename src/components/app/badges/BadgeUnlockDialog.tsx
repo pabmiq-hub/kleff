@@ -1,4 +1,4 @@
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { BadgeGlyph } from "./BadgeIcon";
 import { badgeDescription, badgeName, TIER_LABELS, TIER_RING, type UserBadge } from "@/lib/badges";
@@ -26,7 +26,7 @@ export function BadgeUnlockDialog({
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
       <DialogContent className="max-w-sm text-center">
         <div className="flex flex-col items-center gap-4 py-2">
-          <p className="font-display text-xl font-bold text-coral-deep">{t.title}</p>
+          <DialogTitle className="font-display text-xl font-bold text-coral-deep">{t.title}</DialogTitle>
           <BadgeGlyph
             icon={item.badge.icon}
             unlocked
