@@ -1,7 +1,7 @@
 import { createFileRoute, Outlet, Link, useNavigate } from "@tanstack/react-router";
 import { useAuth } from "@/auth/AuthProvider";
 import { Button } from "@/components/ui/button";
-import { Home, User, IdCard, Dices, LogOut, Shield, Gamepad2, Users, Sparkles, Vote } from "lucide-react";
+import { Home, User, IdCard, Dices, LogOut, Shield, Gamepad2, Users, Sparkles, Vote, Award } from "lucide-react";
 import { NotificationsBell } from "@/components/app/NotificationsBell";
 import { AppLanguageSwitcher } from "@/components/app/AppLanguageSwitcher";
 import { useAppLocale } from "@/i18n/app-i18n";
@@ -58,6 +58,7 @@ function AppLayout() {
           <NavLink to="/app/rentals" icon={<Dices className="h-4 w-4" />} label={c.nav.rentals} />
           <NavLink to="/app/votaciones" icon={<Vote className="h-4 w-4" />} label={c.nav.polls} />
           <NavLink to="/app/karma" icon={<Sparkles className="h-4 w-4" />} label={c.nav.karma} />
+          <NavLink to="/app/insignias" icon={<Award className="h-4 w-4" />} label={c.nav.badges} />
         </nav>
         <div className="md:mt-auto">
           <Button variant="ghost" size="sm" onClick={handleLogout} className="w-full justify-start">

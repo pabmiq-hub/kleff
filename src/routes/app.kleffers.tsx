@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { listKleffers, getKlefferProfile } from "@/lib/kleffers.functions";
 import { Input } from "@/components/ui/input";
+import { MemberBadgesRow } from "@/components/app/badges/MemberBadgesRow";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Search, ExternalLink, X, SlidersHorizontal, Dice5, Users, GraduationCap, CalendarClock, Languages, Target, Sparkles } from "lucide-react";
 import { AVAILABILITY, GAME_TYPES, EXPERIENCE, LANGUAGES, GOALS } from "@/lib/kleffer-profile-options";
@@ -341,6 +342,7 @@ function KleffersPage() {
               </SheetHeader>
 
               <div className="mt-4 space-y-4">
+                <MemberBadgesRow userId={selected.id} />
                 <div className="flex items-center gap-4">
                   {selected.avatar_url || selected.ludoya_avatar_url ? (
                     <img

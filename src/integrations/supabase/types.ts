@@ -14,6 +14,75 @@ export type Database = {
   }
   public: {
     Tables: {
+      badges: {
+        Row: {
+          auto_metric: string | null
+          auto_param: string | null
+          code: string
+          color: string
+          created_at: string
+          description_ca: string
+          description_en: string
+          description_es: string
+          grp: string
+          icon: string
+          id: string
+          is_active: boolean
+          kind: Database["public"]["Enums"]["badge_kind"]
+          name_ca: string
+          name_en: string
+          name_es: string
+          sort_order: number
+          source: Database["public"]["Enums"]["badge_source"]
+          tiers: Json
+          updated_at: string
+        }
+        Insert: {
+          auto_metric?: string | null
+          auto_param?: string | null
+          code: string
+          color?: string
+          created_at?: string
+          description_ca?: string
+          description_en?: string
+          description_es?: string
+          grp?: string
+          icon?: string
+          id?: string
+          is_active?: boolean
+          kind?: Database["public"]["Enums"]["badge_kind"]
+          name_ca: string
+          name_en: string
+          name_es: string
+          sort_order?: number
+          source?: Database["public"]["Enums"]["badge_source"]
+          tiers?: Json
+          updated_at?: string
+        }
+        Update: {
+          auto_metric?: string | null
+          auto_param?: string | null
+          code?: string
+          color?: string
+          created_at?: string
+          description_ca?: string
+          description_en?: string
+          description_es?: string
+          grp?: string
+          icon?: string
+          id?: string
+          is_active?: boolean
+          kind?: Database["public"]["Enums"]["badge_kind"]
+          name_ca?: string
+          name_en?: string
+          name_es?: string
+          sort_order?: number
+          source?: Database["public"]["Enums"]["badge_source"]
+          tiers?: Json
+          updated_at?: string
+        }
+        Relationships: []
+      }
       bgg_games: {
         Row: {
           bgg_id: number | null
@@ -2042,6 +2111,56 @@ export type Database = {
         }
         Relationships: []
       }
+      user_badges: {
+        Row: {
+          awarded_by: string | null
+          badge_id: string
+          created_at: string
+          id: string
+          note: string | null
+          progress: number
+          seen_at: string | null
+          tier: string | null
+          unlocked_at: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          awarded_by?: string | null
+          badge_id: string
+          created_at?: string
+          id?: string
+          note?: string | null
+          progress?: number
+          seen_at?: string | null
+          tier?: string | null
+          unlocked_at?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          awarded_by?: string | null
+          badge_id?: string
+          created_at?: string
+          id?: string
+          note?: string | null
+          progress?: number
+          seen_at?: string | null
+          tier?: string | null
+          unlocked_at?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_badges_badge_id_fkey"
+            columns: ["badge_id"]
+            isOneToOne: false
+            referencedRelation: "badges"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -2163,6 +2282,8 @@ export type Database = {
     }
     Enums: {
       app_role: "super_admin" | "user"
+      badge_kind: "tiered" | "unique"
+      badge_source: "ludoya" | "karma" | "manual"
       drawer_letter: "a" | "b" | "c" | "d"
       gender_type:
         | "female"
@@ -2343,6 +2464,8 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["super_admin", "user"],
+      badge_kind: ["tiered", "unique"],
+      badge_source: ["ludoya", "karma", "manual"],
       drawer_letter: ["a", "b", "c", "d"],
       gender_type: [
         "female",
