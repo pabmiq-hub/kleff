@@ -4,6 +4,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { listUsers, getUserIdDocument, setMemberDuesPaid } from "@/lib/admin.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { MemberBadgesAdmin } from "@/components/admin/MemberBadgesAdmin";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { toast } from "sonner";
 import { LayoutGrid, List, Search, Eye, CheckCircle2, XCircle, Mail, Calendar, User as UserIcon, IdCard, Shield, Sparkles } from "lucide-react";
