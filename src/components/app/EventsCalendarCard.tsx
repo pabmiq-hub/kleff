@@ -135,12 +135,12 @@ export function EventsCalendarCard() {
         </div>
       </header>
 
-      <div className="p-2 sm:p-3">
+      <div className="p-1.5 sm:p-2">
         <div className="grid grid-cols-7 rounded-lg overflow-hidden border border-ink/20">
           {weekdays.map((w) => (
             <div
               key={w.en}
-              className="bg-ink text-background text-[10px] sm:text-xs font-bold uppercase text-center py-1.5 leading-tight"
+              className="bg-ink text-background text-[10px] sm:text-xs font-bold uppercase text-center py-1 leading-tight"
             >
               <span className="block">{w.long}</span>
             </div>
@@ -158,7 +158,7 @@ export function EventsCalendarCard() {
                 disabled={!has}
                 onClick={() => setSelected(k)}
                 className={cn(
-                  "relative h-14 sm:h-16 lg:h-20 border border-ink/10 text-sm flex flex-col items-center justify-center gap-0.5 transition-colors",
+                  "relative h-11 sm:h-12 lg:h-14 border border-ink/10 text-sm flex flex-col items-center justify-center gap-0.5 transition-colors",
                   inMonth ? "bg-background" : "bg-muted/60 text-muted-foreground",
                   has && "cursor-pointer hover:brightness-95",
                   isToday && "ring-2 ring-inset ring-ink/40",
@@ -166,14 +166,14 @@ export function EventsCalendarCard() {
               >
                 <span
                   className={cn(
-                    "flex items-center justify-center rounded-full h-6 w-6 text-sm font-semibold",
+                    "flex items-center justify-center rounded-full h-5 w-5 text-xs font-semibold",
                     has && "bg-coral-deep text-primary-foreground shadow-tactile-sm",
                   )}
                 >
                   {d.getDate()}
                 </span>
                 {has && (
-                  <span className="text-[9px] sm:text-[10px] font-medium text-coral-deep">
+                  <span className="text-[9px] font-medium text-coral-deep">
                     {events.length}
                   </span>
                 )}
