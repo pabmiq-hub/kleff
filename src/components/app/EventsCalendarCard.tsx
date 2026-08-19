@@ -108,8 +108,8 @@ export function EventsCalendarCard() {
   const selectedEvents = selected ? byDay.get(selected) ?? [] : [];
 
   return (
-    <section className="bg-card border-2 border-ink rounded-2xl shadow-tactile-sm overflow-hidden mx-auto w-full max-w-2xl">
-      <header className="flex items-center justify-between gap-2 px-4 py-3 bg-coral-deep text-primary-foreground">
+    <section className="bg-card border-2 border-ink rounded-2xl shadow-tactile-sm overflow-hidden w-full">
+      <header className="flex items-center justify-between gap-2 px-4 py-2.5 bg-coral-deep text-primary-foreground">
         <div className="flex items-center gap-2 min-w-0">
           <CalendarDays className="h-5 w-5 shrink-0" />
           <h2 className="font-display text-lg font-bold capitalize truncate">{monthLabel}</h2>
@@ -140,10 +140,9 @@ export function EventsCalendarCard() {
           {weekdays.map((w) => (
             <div
               key={w.en}
-              className="bg-ink text-background text-[10px] sm:text-xs font-bold uppercase text-center py-2 leading-tight"
+              className="bg-ink text-background text-[10px] sm:text-xs font-bold uppercase text-center py-1.5 leading-tight"
             >
               <span className="block">{w.long}</span>
-              <span className="hidden sm:block italic font-medium opacity-70">{w.en}</span>
             </div>
           ))}
           {cells.map((d) => {
@@ -159,7 +158,7 @@ export function EventsCalendarCard() {
                 disabled={!has}
                 onClick={() => setSelected(k)}
                 className={cn(
-                  "relative aspect-square lg:aspect-[4/3] border border-ink/10 text-sm flex flex-col items-center justify-center gap-0.5 transition-colors",
+                  "relative h-14 sm:h-16 lg:h-20 border border-ink/10 text-sm flex flex-col items-center justify-center gap-0.5 transition-colors",
                   inMonth ? "bg-background" : "bg-muted/60 text-muted-foreground",
                   has && "cursor-pointer hover:brightness-95",
                   isToday && "ring-2 ring-inset ring-ink/40",
@@ -167,7 +166,7 @@ export function EventsCalendarCard() {
               >
                 <span
                   className={cn(
-                    "flex items-center justify-center rounded-full h-7 w-7 text-sm font-semibold",
+                    "flex items-center justify-center rounded-full h-6 w-6 text-sm font-semibold",
                     has && "bg-coral-deep text-primary-foreground shadow-tactile-sm",
                   )}
                 >
