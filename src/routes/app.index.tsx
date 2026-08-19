@@ -15,10 +15,18 @@ function AppHome() {
     <div className="space-y-6">
       <MemberHeroCard />
       <BadgesStripCard />
-      <EventsCalendarCard />
+
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        <div className="lg:col-span-4 space-y-6">
+          <VolunteerCard />
+          <ActivePollsCard />
+        </div>
+        <div className="lg:col-span-8">
+          <EventsCalendarCard />
+        </div>
+      </div>
+
       <FeaturedGamesCard />
-      <ActivePollsCard />
-      <VolunteerCard />
     </div>
   );
 }
