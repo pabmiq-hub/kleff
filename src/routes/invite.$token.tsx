@@ -50,7 +50,6 @@ function InvitePage() {
     dateOfBirth: "",
     gender: "" as "" | "female" | "male" | "non_binary" | "other" | "prefer_not_to_say",
     idDocument: "",
-    ludoyaUsername: "",
   });
 
   if (!invitation.valid) {
@@ -110,7 +109,6 @@ function InvitePage() {
           dateOfBirth: form.dateOfBirth,
           gender: form.gender,
           idDocument: form.idDocument.trim().toUpperCase(),
-          ludoyaUsername: form.ludoyaUsername.trim() || null,
           locale,
         },
       });
@@ -271,24 +269,6 @@ function InvitePage() {
               {avatarUrl && (
                 <img src={avatarUrl} alt="" className="mt-2 h-20 w-20 rounded-full object-cover border-2 border-ink" />
               )}
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="ludoyaUsername">{t.ludoya}</Label>
-              <Input
-                id="ludoyaUsername"
-                minLength={2}
-                maxLength={60}
-                pattern="[a-zA-Z0-9_.\-]+"
-                value={form.ludoyaUsername}
-                onChange={(e) => setForm({ ...form, ludoyaUsername: e.target.value })}
-                placeholder={t.ludoyaPlaceholder}
-              />
-              <p className="text-xs text-muted-foreground">
-                {t.ludoyaHelpA}{" "}
-                <a href="https://app.ludoya.com" target="_blank" rel="noreferrer" className="underline">Ludoya</a>
-                {t.ludoyaHelpB}
-              </p>
             </div>
 
             <div className="space-y-2">

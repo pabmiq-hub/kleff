@@ -29,6 +29,19 @@ async function assertSuperAdmin(userId: string): Promise<void> {
   if (!data) throw new Error("Forbidden: super admin role required");
 }
 
+/** Returns the lowest free member number (fills gaps left by deleted members). */
+async function nextMemberNumber(): Promise<number> {
+  const { data, error } = await supabaseAdmin
+    .from("profiles")
+    .select("member_number")
+    .order("member_number", { ascending: true });
+  if (error) throw new Error(error.message);
+  const taken = new Set((data ?? []).map((r) => r.member_number));
+  let n = 1;
+  while (taken.has(n)) n += 1;
+  return n;
+}
+
 // ---------------- Public: validate invitation token ----------------
 
 export const validateInvitation = createServerFn({ method: "POST" })
@@ -147,6 +160,7 @@ export const acceptInvitation = createServerFn({ method: "POST" })
       gender: data.gender,
       id_document_encrypted: ciphertext,
       id_document_nonce: nonce,
+      member_number: await nextMemberNumber(),
       ludoya_username: ludoyaUsername,
       preferred_locale: data.locale ?? "es",
     });
@@ -343,4 +357,38 @@ export const getUserIdDocument = createServerFn({ method: "POST" })
     });
     if (error) throw new Error(error.message);
     return { idDocument: result as string | null };
+  });
+
+// ---------------- Admin: delete a member ----------------
+
+export const deleteMember = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) => z.object({ userId: z.string().uuid() }).parse(input))
+  .handler(async ({ data, context }) => {
+    await assertSuperAdmin(context.userId);
+    if (data.userId === context.userId) throw new Error("No puedes eliminar tu propia cuenta");
+
+    // Clean up rows that are not linked by a cascading foreign key
+    const tables = [
+      "karma_perks",
+      "karma_redemptions",
+      "karma_entries",
+      "rental_requests",
+      "rentals",
+    ] as const;
+    for (const table of tables) {
+      const { error } = await supabaseAdmin.from(table).delete().eq("user_id", data.userId);
+      if (error) console.warn(`deleteMember: ${table}: ${error.message}`);
+    }
+    {
+      const { error } = await supabaseAdmin
+        .from("karma_referrals")
+        .delete()
+        .eq("referrer_id", data.userId);
+      if (error) console.warn(`deleteMember: karma_referrals: ${error.message}`);
+    }
+
+    const { error } = await supabaseAdmin.auth.admin.deleteUser(data.userId);
+    if (error) throw new Error(error.message);
+    return { success: true };
   });

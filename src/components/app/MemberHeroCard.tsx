@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { Link } from "@tanstack/react-router";
-import { Sparkles, IdCard, ArrowRight } from "lucide-react";
+import { Sparkles, IdCard, ArrowRight, UserPen } from "lucide-react";
 import { getMyProfile } from "@/lib/profile.functions";
 import { getMyKarmaSummary } from "@/lib/karma.functions";
+import { getMyKlefferProfile } from "@/lib/kleffer-profile.functions";
 import { levelForKarma, nextLevelForKarma } from "@/lib/karma-levels";
 import { useAppLocale } from "@/i18n/app-i18n";
 
@@ -18,6 +19,8 @@ const TEXT = {
     maxLevel: "Nivel máximo alcanzado",
     card: "Ver mi carnet",
     karma: "Mi karma",
+    completeTitle: "Completa tu perfil de kleffer",
+    complete: "Completar perfil",
   },
   ca: {
     hello: "Hola",
@@ -29,6 +32,8 @@ const TEXT = {
     maxLevel: "Nivell màxim assolit",
     card: "Veure el meu carnet",
     karma: "El meu karma",
+    completeTitle: "Completa el teu perfil de kleffer",
+    complete: "Completar perfil",
   },
   en: {
     hello: "Hi",
@@ -40,6 +45,8 @@ const TEXT = {
     maxLevel: "Top level reached",
     card: "View my card",
     karma: "My karma",
+    completeTitle: "Complete your kleffer profile",
+    complete: "Complete profile",
   },
 } as const;
 
@@ -58,6 +65,8 @@ export function MemberHeroCard() {
     created_at: string;
   } | null>(null);
   const [karma, setKarma] = useState<{ balance: number; lifetime: number } | null>(null);
+  const klefferFn = useServerFn(getMyKlefferProfile);
+  const [completion, setCompletion] = useState<number | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -71,10 +80,31 @@ export function MemberHeroCard() {
         if (!cancelled) setKarma(r);
       })
       .catch(() => undefined);
+    void klefferFn({ data: undefined as never })
+      .then((r) => {
+        if (cancelled) return;
+        const p = r.profile as Record<string, unknown> | null;
+        const filled = [
+          p?.["attends_alone"],
+          p?.["scheduled_games"],
+          p?.["experience_level"],
+          p?.["teaches"],
+          p?.["bio"],
+          p?.["goals"],
+          p?.["favorite_games"],
+          p?.["game_types"],
+          p?.["availability"],
+          p?.["languages"],
+        ].filter((v) =>
+          Array.isArray(v) ? v.length > 0 : typeof v === "string" ? v.trim().length > 0 : false,
+        ).length;
+        setCompletion(Math.round((filled / 10) * 100));
+      })
+      .catch(() => undefined);
     return () => {
       cancelled = true;
     };
-  }, [profileFn, karmaFn]);
+  }, [profileFn, karmaFn, klefferFn]);
 
   const level = karma ? levelForKarma(karma.lifetime) : null;
   const next = karma ? nextLevelForKarma(karma.lifetime) : null;
@@ -166,6 +196,23 @@ export function MemberHeroCard() {
         >
           {t.karma} <ArrowRight className="h-4 w-4" />
         </Link>
+
+        {completion !== null && completion < 100 && (
+          <Link
+            to="/app/profile"
+            className="inline-flex items-center gap-3 text-sm rounded-full bg-cream/10 hover:bg-cream/20 transition-colors pl-3 pr-3 py-1.5 min-w-0"
+          >
+            <UserPen className="h-4 w-4 shrink-0" />
+            <span className="truncate">{t.completeTitle}</span>
+            <span className="hidden sm:block h-1.5 w-20 rounded-full bg-cream/20 overflow-hidden">
+              <span
+                className="block h-full rounded-full bg-coral"
+                style={{ width: `${Math.max(4, completion)}%` }}
+              />
+            </span>
+            <span className="font-semibold text-cream/80">{completion}%</span>
+          </Link>
+        )}
       </div>
     </section>
   );
