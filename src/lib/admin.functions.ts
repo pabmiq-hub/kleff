@@ -344,3 +344,32 @@ export const getUserIdDocument = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { idDocument: result as string | null };
   });
+
+// ---------------- Admin: delete a member ----------------
+
+export const deleteMember = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) => z.object({ userId: z.string().uuid() }).parse(input))
+  .handler(async ({ data, context }) => {
+    await assertSuperAdmin(context.userId);
+    if (data.userId === context.userId) throw new Error("No puedes eliminar tu propia cuenta");
+
+    // Clean up rows that are not linked by a cascading foreign key
+    const tables = [
+      "karma_perks",
+      "karma_redemptions",
+      "karma_entries",
+      "karma_referrals",
+      "rental_requests",
+      "rentals",
+    ] as const;
+    for (const table of tables) {
+      const column = table === "karma_referrals" ? "referrer_id" : "user_id";
+      const { error } = await supabaseAdmin.from(table).delete().eq(column, data.userId);
+      if (error) console.warn(`deleteMember: ${table}: ${error.message}`);
+    }
+
+    const { error } = await supabaseAdmin.auth.admin.deleteUser(data.userId);
+    if (error) throw new Error(error.message);
+    return { success: true };
+  });
