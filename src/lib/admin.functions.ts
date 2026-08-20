@@ -160,6 +160,7 @@ export const acceptInvitation = createServerFn({ method: "POST" })
       gender: data.gender,
       id_document_encrypted: ciphertext,
       id_document_nonce: nonce,
+      member_number: await nextMemberNumber(),
       ludoya_username: ludoyaUsername,
       preferred_locale: data.locale ?? "es",
     });
@@ -372,14 +373,19 @@ export const deleteMember = createServerFn({ method: "POST" })
       "karma_perks",
       "karma_redemptions",
       "karma_entries",
-      "karma_referrals",
       "rental_requests",
       "rentals",
     ] as const;
     for (const table of tables) {
-      const column = table === "karma_referrals" ? "referrer_id" : "user_id";
-      const { error } = await supabaseAdmin.from(table).delete().eq(column, data.userId);
+      const { error } = await supabaseAdmin.from(table).delete().eq("user_id", data.userId);
       if (error) console.warn(`deleteMember: ${table}: ${error.message}`);
+    }
+    {
+      const { error } = await supabaseAdmin
+        .from("karma_referrals")
+        .delete()
+        .eq("referrer_id", data.userId);
+      if (error) console.warn(`deleteMember: karma_referrals: ${error.message}`);
     }
 
     const { error } = await supabaseAdmin.auth.admin.deleteUser(data.userId);
