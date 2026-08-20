@@ -1,13 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { listUsers, getUserIdDocument, setMemberDuesPaid } from "@/lib/admin.functions";
+import { listUsers, getUserIdDocument, setMemberDuesPaid, deleteMember } from "@/lib/admin.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { MemberBadgesAdmin } from "@/components/admin/MemberBadgesAdmin";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { toast } from "sonner";
-import { LayoutGrid, List, Search, Eye, CheckCircle2, XCircle, Mail, Calendar, User as UserIcon, IdCard, Shield, Sparkles } from "lucide-react";
+import { LayoutGrid, List, Search, Eye, CheckCircle2, XCircle, Mail, Calendar, User as UserIcon, IdCard, Shield, Sparkles, Trash2 } from "lucide-react";
 import { adminGetMemberKarma } from "@/lib/karma-admin.functions";
 import { levelForKarma, KARMA_ENTRY_STATUS_LABELS } from "@/lib/karma-levels";
 
@@ -54,6 +54,8 @@ function MembersPage() {
   const listFn = useServerFn(listUsers);
   const getDniFn = useServerFn(getUserIdDocument);
   const setDuesFn = useServerFn(setMemberDuesPaid);
+  const deleteMemberFn = useServerFn(deleteMember);
+  const [deleting, setDeleting] = useState(false);
   const memberKarmaFn = useServerFn(adminGetMemberKarma);
   const [members, setMembers] = useState<MemberRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -441,6 +443,42 @@ function MembersPage() {
                   <p className="text-[10px] text-ink/40 mt-2">
                     Cada acceso al DNI queda registrado en el log de auditoría.
                   </p>
+                </div>
+
+                <div className="border-t border-ink/10 pt-4">
+                  <p className="text-sm font-semibold text-red-700 mb-1">Zona peligrosa</p>
+                  <p className="text-xs text-ink/60 mb-3">
+                    Al eliminar un socio, su número ({formatMemberNumber(selected.member_number)}) queda
+                    vacante y se asignará al siguiente socio que se dé de alta.
+                  </p>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={deleting}
+                    className="text-red-600 border-red-300 hover:bg-red-50"
+                    onClick={async () => {
+                      if (
+                        !confirm(
+                          `¿Eliminar definitivamente a ${selected.full_name}? Esta acción no se puede deshacer.`,
+                        )
+                      )
+                        return;
+                      setDeleting(true);
+                      try {
+                        await deleteMemberFn({ data: { userId: selected.id } });
+                        toast.success("Socio eliminado");
+                        setSelectedId(null);
+                        load();
+                      } catch (e) {
+                        toast.error((e as Error).message);
+                      } finally {
+                        setDeleting(false);
+                      }
+                    }}
+                  >
+                    <Trash2 className="h-3.5 w-3.5 mr-1.5" />
+                    {deleting ? "Eliminando…" : "Eliminar socio"}
+                  </Button>
                 </div>
               </div>
             </>
