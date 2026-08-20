@@ -29,6 +29,19 @@ async function assertSuperAdmin(userId: string): Promise<void> {
   if (!data) throw new Error("Forbidden: super admin role required");
 }
 
+/** Returns the lowest free member number (fills gaps left by deleted members). */
+async function nextMemberNumber(): Promise<number> {
+  const { data, error } = await supabaseAdmin
+    .from("profiles")
+    .select("member_number")
+    .order("member_number", { ascending: true });
+  if (error) throw new Error(error.message);
+  const taken = new Set((data ?? []).map((r) => r.member_number));
+  let n = 1;
+  while (taken.has(n)) n += 1;
+  return n;
+}
+
 // ---------------- Public: validate invitation token ----------------
 
 export const validateInvitation = createServerFn({ method: "POST" })
