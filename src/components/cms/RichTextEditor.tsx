@@ -16,7 +16,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { useServerFn } from "@tanstack/react-start";
 import { uploadMedia } from "@/lib/media.functions";
-import { arrayBufferToBase64 } from "@/lib/base64";
+import { optimizeToUploadPayload } from "@/lib/image-optimize";
 import { toast } from "sonner";
 
 type Props = {
@@ -96,11 +96,7 @@ export function RichTextEditor({ value, onChange, placeholder, minimal, allowIma
       const file = input.files?.[0];
       if (!file) return;
       try {
-        const buf = await file.arrayBuffer();
-        const base64 = arrayBufferToBase64(buf);
-        const { url } = await upload({
-          data: { fileName: file.name, contentType: file.type || "image/jpeg", base64 },
-        });
+        const { url } = await upload({ data: await optimizeToUploadPayload(file) });
         editor.chain().focus().setImage({ src: url, alt: file.name }).run();
       } catch (e) {
         toast.error((e as Error).message);
@@ -117,11 +113,7 @@ export function RichTextEditor({ value, onChange, placeholder, minimal, allowIma
       const file = input.files?.[0];
       if (!file) return;
       try {
-        const buf = await file.arrayBuffer();
-        const base64 = arrayBufferToBase64(buf);
-        const { url } = await upload({
-          data: { fileName: file.name, contentType: file.type || "image/jpeg", base64 },
-        });
+        const { url } = await upload({ data: await optimizeToUploadPayload(file) });
         const caption = window.prompt("Pie de foto (descripción de la imagen)", "") ?? "";
         const safe = caption.replace(/</g, "&lt;").replace(/>/g, "&gt;");
         const html = `<figure><img src="${url}" alt="${safe || file.name}" class="rounded-lg max-w-full h-auto" /><figcaption class="text-sm text-center italic text-ink/60 mt-2">${safe}</figcaption></figure><p></p>`;
