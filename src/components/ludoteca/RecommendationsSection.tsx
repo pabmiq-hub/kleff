@@ -95,7 +95,7 @@ export function RecommendationsSection({ games }: { games: Game[] }) {
                 className="w-full flex items-center gap-3 px-3 py-2 hover:bg-cream-deep text-left"
               >
                 {g.image_url || g.thumbnail_url ? (
-                  <img src={g.image_url ?? g.thumbnail_url ?? ""} alt="" className="h-8 w-8 rounded object-cover" />
+                  <img loading="lazy" decoding="async" src={g.image_url ?? g.thumbnail_url ?? ""} alt="" className="h-8 w-8 rounded object-cover" />
                 ) : (
                   <div className="h-8 w-8 rounded bg-primary-soft" />
                 )}

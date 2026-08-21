@@ -215,7 +215,7 @@ export function KlefferProfileForm() {
                 className="flex items-center gap-2 rounded-full border border-ink/20 bg-cream-deep/50 pl-1 pr-2 py-1 text-sm"
               >
                 {g.imageUrl ? (
-                  <img src={g.imageUrl} alt="" className="h-6 w-6 rounded-full object-cover" />
+                  <img loading="lazy" decoding="async" src={g.imageUrl} alt="" className="h-6 w-6 rounded-full object-cover" />
                 ) : null}
                 {g.name}
                 <button
@@ -249,7 +249,7 @@ export function KlefferProfileForm() {
                     onClick={() => addGame(g)}
                     className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm hover:bg-cream-deep/60"
                   >
-                    {g.imageUrl ? <img src={g.imageUrl} alt="" className="h-8 w-8 rounded object-cover" /> : null}
+                    {g.imageUrl ? <img loading="lazy" decoding="async" src={g.imageUrl} alt="" className="h-8 w-8 rounded object-cover" /> : null}
                     {g.name}
                   </button>
                 </li>

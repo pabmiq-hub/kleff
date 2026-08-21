@@ -116,7 +116,7 @@ export function RichTextEditor({ value, onChange, placeholder, minimal, allowIma
         const { url } = await upload({ data: await optimizeToUploadPayload(file) });
         const caption = window.prompt("Pie de foto (descripción de la imagen)", "") ?? "";
         const safe = caption.replace(/</g, "&lt;").replace(/>/g, "&gt;");
-        const html = `<figure><img src="${url}" alt="${safe || file.name}" class="rounded-lg max-w-full h-auto" /><figcaption class="text-sm text-center italic text-ink/60 mt-2">${safe}</figcaption></figure><p></p>`;
+        const html = `<figure><img loading="lazy" decoding="async" src="${url}" alt="${safe || file.name}" class="rounded-lg max-w-full h-auto" /><figcaption class="text-sm text-center italic text-ink/60 mt-2">${safe}</figcaption></figure><p></p>`;
         editor.chain().focus().insertContent(html).run();
       } catch (e) {
         toast.error((e as Error).message);

@@ -138,7 +138,7 @@ export function PollCard({ poll, onDone }: { poll: MemberPoll; onDone: () => voi
                   >
                     <Checkbox checked={checked} onCheckedChange={() => toggle(o.id)} disabled={!poll.open} />
                     {o.imageUrl && (
-                      <img src={o.imageUrl} alt="" className="h-12 w-12 rounded-lg object-cover border border-ink/10" />
+                      <img loading="lazy" decoding="async" src={o.imageUrl} alt="" className="h-12 w-12 rounded-lg object-cover border border-ink/10" />
                     )}
                     <div className="min-w-0 flex-1">
                       <p className="font-semibold text-sm">

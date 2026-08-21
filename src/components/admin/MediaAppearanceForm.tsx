@@ -442,7 +442,7 @@ export function MediaAppearanceForm({ initial }: Props) {
             </label>
           </div>
           {imageUrl && (
-            <img
+            <img loading="lazy" decoding="async"
               src={imageUrl}
               alt="vista previa"
               className="mt-3 max-h-40 rounded-md border border-ink/10"

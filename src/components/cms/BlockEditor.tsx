@@ -696,7 +696,7 @@ function GalleryForm({
         {data.images.map((img, i) => (
           <div key={i} className="space-y-1 border border-cream/10 rounded p-1">
             <div className="relative">
-              <img
+              <img loading="lazy" decoding="async"
                 src={img.url}
                 alt={img.alt}
                 className="w-full aspect-square object-cover rounded"

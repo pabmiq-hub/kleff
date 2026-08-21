@@ -407,7 +407,7 @@ function TeamFlipCard({
         <div className="flip-card-face bg-card border-2 border-ink shadow-tactile-sm rounded-3xl flex flex-col">
           <div className="relative flex-1 bg-gradient-to-br from-coral/25 via-cream-deep/60 to-coral/35 overflow-hidden">
             {member.photo ? (
-              <img
+              <img loading="lazy" decoding="async"
                 src={member.photo}
                 alt={member.name}
                 width="450"

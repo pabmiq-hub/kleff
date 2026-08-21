@@ -579,7 +579,7 @@ export function SlowFriendingPage() {
         <div className="absolute -top-16 -right-16 size-80 rounded-full bg-coral/20 blur-3xl pointer-events-none" />
         <div className="absolute -bottom-16 -left-16 size-80 rounded-full bg-coral/10 blur-3xl pointer-events-none" />
         <div className="relative mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 text-center">
-          <img
+          <img loading="lazy" decoding="async"
             src={logoAsset.url}
             alt=""
             aria-hidden

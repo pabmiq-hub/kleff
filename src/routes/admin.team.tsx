@@ -141,7 +141,7 @@ function TeamAdminPage() {
             <div key={r.id} className="flex items-center gap-4 bg-cream-deep/40 border border-ink/10 rounded-2xl p-3">
               <div className="size-14 rounded-full bg-cream border-2 border-ink flex items-center justify-center overflow-hidden shrink-0">
                 {r.photo_url ? (
-                  <img src={r.photo_url} alt={r.name} className="h-full w-full object-cover" />
+                  <img loading="lazy" decoding="async" src={r.photo_url} alt={r.name} className="h-full w-full object-cover" />
                 ) : (
                   <span className="text-2xl">{r.emoji}</span>
                 )}

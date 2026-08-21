@@ -141,7 +141,7 @@ function Row({
   return (
     <div className="bg-ink/5 border border-ink/15 rounded-2xl p-4 flex flex-wrap items-start gap-4">
       {r.bgg_games?.image_url ? (
-        <img src={r.bgg_games.image_url} alt="" className="h-16 w-16 rounded-lg object-cover border border-ink/20" />
+        <img loading="lazy" decoding="async" src={r.bgg_games.image_url} alt="" className="h-16 w-16 rounded-lg object-cover border border-ink/20" />
       ) : (
         <div className="h-16 w-16 rounded-lg bg-coral/30 flex items-center justify-center font-bold text-ink">🎲</div>
       )}

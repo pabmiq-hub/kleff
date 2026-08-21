@@ -147,7 +147,7 @@ function ProfilePage() {
         <div className="flex items-center gap-4">
           <div className="h-20 w-20 rounded-full border-2 border-ink overflow-hidden bg-cream-deep shrink-0">
             {form.avatarUrl ? (
-              <img src={form.avatarUrl} alt="" className="h-full w-full object-cover" />
+              <img loading="lazy" decoding="async" src={form.avatarUrl} alt="" className="h-full w-full object-cover" />
             ) : (
               <div className="h-full w-full flex items-center justify-center text-ink/30 text-xs">{t.profile.noPhoto}</div>
             )}

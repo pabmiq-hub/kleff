@@ -203,7 +203,7 @@ function MembersPage() {
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-3">
                       {m.avatar_url ? (
-                        <img src={m.avatar_url} alt="" className="h-9 w-9 rounded-full object-cover border border-ink/20" />
+                        <img loading="lazy" decoding="async" src={m.avatar_url} alt="" className="h-9 w-9 rounded-full object-cover border border-ink/20" />
                       ) : (
                         <div className="h-9 w-9 rounded-full bg-coral/30 flex items-center justify-center font-bold text-ink">
                           {m.full_name.charAt(0).toUpperCase()}
@@ -259,7 +259,7 @@ function MembersPage() {
             >
               <div className="flex items-center gap-3 mb-3">
                 {m.avatar_url ? (
-                  <img src={m.avatar_url} alt="" className="h-14 w-14 rounded-full object-cover border-2 border-coral" />
+                  <img loading="lazy" decoding="async" src={m.avatar_url} alt="" className="h-14 w-14 rounded-full object-cover border-2 border-coral" />
                 ) : (
                   <div className="h-14 w-14 rounded-full bg-coral/30 flex items-center justify-center font-bold text-ink text-xl">
                     {m.full_name.charAt(0).toUpperCase()}
@@ -311,7 +311,7 @@ function MembersPage() {
               <div className="mt-6 space-y-6">
                 <div className="flex items-center gap-4">
                   {selected.avatar_url ? (
-                    <img src={selected.avatar_url} alt="" className="h-20 w-20 rounded-full object-cover border-2 border-coral" />
+                    <img loading="lazy" decoding="async" src={selected.avatar_url} alt="" className="h-20 w-20 rounded-full object-cover border-2 border-coral" />
                   ) : (
                     <div className="h-20 w-20 rounded-full bg-coral/30 flex items-center justify-center font-bold text-ink text-3xl">
                       {selected.full_name.charAt(0).toUpperCase()}

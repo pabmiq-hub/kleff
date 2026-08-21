@@ -552,7 +552,7 @@ function AdminPollsPage() {
                     {draft.options.map((o, i) => (
                       <li key={i} className="space-y-2">
                         <div className="flex items-center gap-2">
-                          {o.imageUrl && <img src={o.imageUrl} alt="" className="h-9 w-9 rounded object-cover" />}
+                          {o.imageUrl && <img loading="lazy" decoding="async" src={o.imageUrl} alt="" className="h-9 w-9 rounded object-cover" />}
                           <Input
                             value={o.label}
                             placeholder="Nombre de la opción (ES)"

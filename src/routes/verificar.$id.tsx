@@ -61,7 +61,7 @@ function VerifyPage() {
 
             <div className="flex items-center gap-4 border-t-2 border-ink/10 pt-6">
               {state.member.avatarUrl ? (
-                <img
+                <img loading="lazy" decoding="async"
                   src={state.member.avatarUrl}
                   alt=""
                   className="h-20 w-20 rounded-full object-cover border-2 border-ink"

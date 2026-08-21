@@ -19,7 +19,7 @@ export function SiteFooter() {
         <div className="md:col-span-2">
           <div className="flex items-center gap-3 mb-5">
             <div className="size-12 bg-coral rounded-xl border-2 border-cream/20 flex items-center justify-center overflow-hidden">
-              <img src={logo} alt="KLEFF" className="h-8 w-8 object-contain" />
+              <img loading="lazy" decoding="async" src={logo} alt="KLEFF" className="h-8 w-8 object-contain" />
             </div>
             <span className="font-display font-bold text-2xl tracking-tight">KLEFF</span>
           </div>
