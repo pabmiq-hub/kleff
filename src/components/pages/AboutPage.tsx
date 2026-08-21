@@ -412,7 +412,6 @@ function TeamFlipCard({
                 alt={member.name}
                 width="450"
                 height="600"
-                decoding="async"
                 className="absolute inset-0 h-full w-full object-cover"
               />
             ) : (
