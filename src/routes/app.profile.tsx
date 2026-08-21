@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
+import { optimizeImage } from "@/lib/image-optimize";
 import { supabase } from "@/integrations/supabase/client";
 import { getMyProfile, updateMyProfile } from "@/lib/profile.functions";
 import { LudoyaLinkCard } from "@/components/app/LudoyaLinkCard";
@@ -103,8 +104,9 @@ function ProfilePage() {
       const { data: sess } = await supabase.auth.getSession();
       const token = sess.session?.access_token;
       if (!token) throw new Error(t.profile.invalidSessionError);
+      const { file: optimized } = await optimizeImage(file, { maxSize: 512, quality: 0.85 });
       const fd = new FormData();
-      fd.append("file", file);
+      fd.append("file", optimized);
       const res = await fetch("/api/public/upload-my-avatar", {
         method: "POST",
         headers: { Authorization: `Bearer ${token}` },

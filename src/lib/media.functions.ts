@@ -186,7 +186,12 @@ export const uploadMedia = createServerFn({ method: "POST" })
 
     const { error } = await supabaseAdmin.storage
       .from("media")
-      .upload(path, bytes, { contentType: data.contentType, upsert: false });
+      .upload(path, bytes, {
+        contentType: data.contentType,
+        upsert: false,
+        // 1 year immutable cache — filenames carry a random suffix so they never collide.
+        cacheControl: "31536000",
+      });
 
     if (error) throw new Error(error.message);
 
