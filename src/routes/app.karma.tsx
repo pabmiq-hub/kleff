@@ -493,7 +493,7 @@ function KarmaPage() {
           {ranking.length > 0 ? (
             <div className="rounded-2xl border-2 border-coral/40 bg-coral/10 p-5 flex items-center gap-4">
               {ranking[0].avatarUrl ? (
-                <img src={ranking[0].avatarUrl} alt="" className="h-14 w-14 rounded-full object-cover" />
+                <img loading="lazy" decoding="async" src={ranking[0].avatarUrl} alt="" className="h-14 w-14 rounded-full object-cover" />
               ) : (
                 <div className="h-14 w-14 rounded-full bg-ink/10" />
               )}
@@ -514,7 +514,7 @@ function KarmaPage() {
                 <div key={r.userId} className="p-3 flex items-center gap-3">
                   <span className="w-6 text-center font-display font-bold text-ink/50">{i + 1}</span>
                   {r.avatarUrl ? (
-                    <img src={r.avatarUrl} alt="" className="h-8 w-8 rounded-full object-cover" />
+                    <img loading="lazy" decoding="async" src={r.avatarUrl} alt="" className="h-8 w-8 rounded-full object-cover" />
                   ) : (
                     <div className="h-8 w-8 rounded-full bg-ink/10" />
                   )}

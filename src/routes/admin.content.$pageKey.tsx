@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import { getPageSchema, withDefaults, type FieldType, type SectionSchema } from "@/cms/schemas";
 import { adminGetSection, adminSaveSection } from "@/lib/content.functions";
 import { uploadMedia } from "@/lib/media.functions";
-import { arrayBufferToBase64 } from "@/lib/base64";
+import { optimizeToUploadPayload } from "@/lib/image-optimize";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -267,15 +267,7 @@ function ImageField({
     }
     setUploading(true);
     try {
-      const buf = await file.arrayBuffer();
-      const base64 = arrayBufferToBase64(buf);
-      const r = await upload({
-        data: {
-          fileName: file.name,
-          contentType: file.type || "application/octet-stream",
-          base64,
-        },
-      });
+      const r = await upload({ data: await optimizeToUploadPayload(file) });
       onChange(r.url);
       toast.success("Imagen subida");
     } catch (e) {
@@ -291,7 +283,7 @@ function ImageField({
       {field.help && <p className="text-xs text-ink/50 mt-0.5">{field.help}</p>}
       <div className="mt-1.5 flex items-start gap-3">
         {value && (
-          <img
+          <img loading="lazy" decoding="async"
             src={value}
             alt=""
             className="h-24 w-24 object-cover rounded-lg border border-ink/15"

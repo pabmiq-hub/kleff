@@ -17,6 +17,7 @@ import { toast } from "sonner";
 import { useAppLocale } from "@/i18n/app-i18n";
 import { signupDict } from "@/i18n/app/signup";
 import { LOCALES, LOCALE_LABELS } from "@/i18n/config";
+import { optimizeImage } from "@/lib/image-optimize";
 
 export const Route = createFileRoute("/invite/$token")({
   head: () => ({
@@ -74,8 +75,9 @@ function InvitePage() {
     // Simpler: use the email + random name (anonymous upload not allowed in policy).
     // Workaround: upload via a server function with service role
     try {
+      const { file: optimized } = await optimizeImage(file, { maxSize: 512, quality: 0.85 });
       const formData = new FormData();
-      formData.append("file", file);
+      formData.append("file", optimized);
       const res = await fetch(`/api/public/upload-invite-avatar?token=${encodeURIComponent(token)}`, {
         method: "POST",
         body: formData,
@@ -267,7 +269,7 @@ function InvitePage() {
                 }}
               />
               {avatarUrl && (
-                <img src={avatarUrl} alt="" className="mt-2 h-20 w-20 rounded-full object-cover border-2 border-ink" />
+                <img loading="lazy" decoding="async" src={avatarUrl} alt="" className="mt-2 h-20 w-20 rounded-full object-cover border-2 border-ink" />
               )}
             </div>
 

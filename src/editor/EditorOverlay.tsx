@@ -22,7 +22,7 @@ import { useEditor } from "./EditorProvider";
 import { InlineFormatToolbar } from "./Editable";
 import type { StyleProps } from "./types";
 import { uploadMedia } from "@/lib/media.functions";
-import { arrayBufferToBase64 } from "@/lib/base64";
+import { optimizeToUploadPayload } from "@/lib/image-optimize";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -133,11 +133,7 @@ function PropertiesPanel({ onClose, hasSelection }: { onClose: () => void; hasSe
     }
     setUploading(true);
     try {
-      const buf = await file.arrayBuffer();
-      const base64 = arrayBufferToBase64(buf);
-      const r = await upload({
-        data: { fileName: file.name, contentType: file.type || "application/octet-stream", base64 },
-      });
+      const r = await upload({ data: await optimizeToUploadPayload(file) });
       await setImage(selected.id, r.url);
       toast.success("Imagen actualizada");
     } catch (e) {

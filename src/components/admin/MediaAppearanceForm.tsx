@@ -16,6 +16,7 @@ import {
   type MediaAppearance,
 } from "@/lib/media-appearances.functions";
 import { uploadMedia } from "@/lib/media.functions";
+import { optimizeToUploadPayload } from "@/lib/image-optimize";
 import { MediaCard } from "@/components/pages/MediaPage";
 
 const MONTH_LABELS = [
@@ -177,14 +178,7 @@ export function MediaAppearanceForm({ initial }: Props) {
     }
     setUploading(true);
     try {
-      const buf = await file.arrayBuffer();
-      const bytes = new Uint8Array(buf);
-      let bin = "";
-      for (let i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
-      const base64 = btoa(bin);
-      const res = await uploadFn({
-        data: { fileName: file.name, contentType: file.type || "image/jpeg", base64 },
-      });
+      const res = await uploadFn({ data: await optimizeToUploadPayload(file) });
       hasLocalChangesRef.current = true;
       setImageUrl(res.url);
       toast.success("Imagen subida");
@@ -448,7 +442,7 @@ export function MediaAppearanceForm({ initial }: Props) {
             </label>
           </div>
           {imageUrl && (
-            <img
+            <img loading="lazy" decoding="async"
               src={imageUrl}
               alt="vista previa"
               className="mt-3 max-h-40 rounded-md border border-ink/10"

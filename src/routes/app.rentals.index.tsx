@@ -133,7 +133,7 @@ function GameCard({
   return (
     <div className="bg-card border-2 border-ink rounded-2xl overflow-hidden shadow-tactile-sm flex flex-col">
       {game.image_url ? (
-        <img src={game.image_url} alt={game.title} className="aspect-video object-cover w-full" />
+        <img loading="lazy" decoding="async" src={game.image_url} alt={game.title} className="aspect-video object-cover w-full" />
       ) : (
         <div className="aspect-video bg-primary-soft flex items-center justify-center text-5xl">🎲</div>
       )}

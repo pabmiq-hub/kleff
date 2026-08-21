@@ -53,7 +53,7 @@ function CarnetPage() {
           <div className="relative space-y-6 mt-8">
             <div className="flex items-center gap-4">
               {profile.avatar_url ? (
-                <img src={profile.avatar_url} alt="" className="h-20 w-20 rounded-full object-cover border-4 border-cream" />
+                <img loading="lazy" decoding="async" src={profile.avatar_url} alt="" className="h-20 w-20 rounded-full object-cover border-4 border-cream" />
               ) : (
                 <div className="h-20 w-20 rounded-full bg-cream/20 border-4 border-cream flex items-center justify-center font-display text-3xl font-bold">
                   {profile.full_name.charAt(0).toUpperCase()}

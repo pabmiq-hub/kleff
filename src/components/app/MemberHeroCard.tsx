@@ -136,7 +136,7 @@ export function MemberHeroCard() {
         <div className="flex items-center gap-4 min-w-0">
           <div className="h-16 w-16 shrink-0 rounded-2xl border-2 border-cream/30 bg-cream/10 overflow-hidden flex items-center justify-center font-display text-xl font-bold">
             {profile?.avatar_url ? (
-              <img src={profile.avatar_url} alt="" className="h-full w-full object-cover" />
+              <img loading="lazy" decoding="async" src={profile.avatar_url} alt="" className="h-full w-full object-cover" />
             ) : (
               initials
             )}

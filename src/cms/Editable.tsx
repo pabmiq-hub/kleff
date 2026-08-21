@@ -23,7 +23,7 @@ import { toast } from "sonner";
 import { useEditor } from "@/editor/EditorProvider";
 import type { StyleProps } from "@/editor/types";
 import { uploadMedia } from "@/lib/media.functions";
-import { arrayBufferToBase64 } from "@/lib/base64";
+import { optimizeToUploadPayload } from "@/lib/image-optimize";
 import { useSection, useSectionValue } from "./SectionContext";
 
 /* ----------------------------- helpers ----------------------------- */
@@ -219,15 +219,7 @@ export function CmsImage({
       }
       setUploading(true);
       try {
-        const buf = await file.arrayBuffer();
-        const base64 = arrayBufferToBase64(buf);
-        const r = await upload({
-          data: {
-            fileName: file.name,
-            contentType: file.type || "application/octet-stream",
-            base64,
-          },
-        });
+        const r = await upload({ data: await optimizeToUploadPayload(file) });
         setField(field, r.url);
         toast.success("Imagen subida");
       } catch (e) {

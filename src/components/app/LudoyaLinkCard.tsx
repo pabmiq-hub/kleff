@@ -174,7 +174,7 @@ export function LudoyaLinkCard({ onChanged }: { onChanged?: () => void }) {
         <div className="space-y-3">
           <div className="flex items-center gap-3">
             {profile?.ludoya_avatar_url && (
-              <img
+              <img loading="lazy" decoding="async"
                 src={profile.ludoya_avatar_url}
                 alt=""
                 className="h-10 w-10 rounded-full object-cover border border-ink/20"

@@ -37,7 +37,7 @@ export const Route = createFileRoute("/api/public/upload-invite-avatar")({
 
         const { error: upErr } = await supabaseAdmin.storage
           .from("avatars")
-          .upload(path, buf, { contentType: file.type, upsert: true });
+          .upload(path, buf, { contentType: file.type, upsert: true, cacheControl: "31536000" });
         if (upErr) return new Response(upErr.message, { status: 500 });
 
         const { data: pub } = supabaseAdmin.storage.from("avatars").getPublicUrl(path);
