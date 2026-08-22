@@ -3,6 +3,7 @@ import { SiteLayout } from "@/components/site/SiteLayout";
 import { Link } from "@tanstack/react-router";
 import { ChevronLeft, Calendar, User } from "lucide-react";
 import type { BlogPostFull } from "@/lib/blog.functions";
+import { getOptimizedImageUrl, getResponsiveImageSrcSet, optimizeHtmlImageSources } from "@/lib/image-delivery";
 
 export function BlogPostPage({ post }: { post: BlogPostFull }) {
   const { locale, href } = useI18n();
@@ -20,7 +21,12 @@ export function BlogPostPage({ post }: { post: BlogPostFull }) {
         {post.cover_image_url && (
           <div className="relative w-full aspect-[21/9] md:aspect-[21/8] overflow-hidden bg-muted">
             <img
-              src={post.cover_image_url}
+              src={getOptimizedImageUrl(post.cover_image_url, { width: 1440, height: 810, quality: 80 })}
+              srcSet={getResponsiveImageSrcSet(post.cover_image_url, [640, 960, 1280, 1440], {
+                height: 810,
+                quality: 80,
+              })}
+              sizes="100vw"
               alt={post.title}
               className="absolute inset-0 h-full w-full object-cover"
               loading="eager"
@@ -71,7 +77,7 @@ export function BlogPostPage({ post }: { post: BlogPostFull }) {
           <div
             className="blog-content mt-10 mb-20"
             // Content originates from our own WordPress and is preserved as HTML.
-            dangerouslySetInnerHTML={{ __html: post.content }}
+            dangerouslySetInnerHTML={{ __html: optimizeHtmlImageSources(post.content) }}
           />
         </div>
       </article>
