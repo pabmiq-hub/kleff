@@ -119,10 +119,11 @@ export function FeaturedGamesCard() {
               {(g.image_url || g.thumbnail_url) && (
                 <div className="aspect-[4/3] bg-ink/5 relative">
                   <img
-                    src={g.image_url ?? g.thumbnail_url ?? ""}
+                    src={g.thumbnail_url ?? g.image_url ?? ""}
                     alt={g.title}
                     className="w-full h-full object-cover"
                     loading="lazy"
+                    decoding="async"
                   />
                   {g.bgg_rating && (
                     <span className="absolute top-2 right-2 bg-ink text-cream text-xs font-bold rounded-full px-2 py-1 flex items-center gap-1">
