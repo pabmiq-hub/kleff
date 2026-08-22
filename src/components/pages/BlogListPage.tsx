@@ -62,7 +62,7 @@ export function BlogListPage({ posts }: { posts: BlogPostSummary[] }) {
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-            {posts.slice(0, 12).map((p) => (
+            {posts.map((p) => (
               <Link
                 key={p.id}
                 to={pathFor(p.slug)}
