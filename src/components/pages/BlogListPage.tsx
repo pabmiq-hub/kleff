@@ -3,6 +3,7 @@ import { SiteLayout } from "@/components/site/SiteLayout";
 import { Link } from "@tanstack/react-router";
 import { Calendar, Newspaper } from "lucide-react";
 import type { BlogPostSummary } from "@/lib/blog.functions";
+import { getOptimizedImageUrl, getResponsiveImageSrcSet } from "@/lib/image-delivery";
 
 export function BlogListPage({ posts }: { posts: BlogPostSummary[] }) {
   const { locale } = useI18n();
@@ -70,7 +71,11 @@ export function BlogListPage({ posts }: { posts: BlogPostSummary[] }) {
                 {p.cover_image_url ? (
                   <div className="relative aspect-[16/10] overflow-hidden bg-muted">
                     <img
-                      src={p.cover_image_url}
+                      src={getOptimizedImageUrl(p.cover_image_url, { width: 720, height: 450 })}
+                      srcSet={getResponsiveImageSrcSet(p.cover_image_url, [360, 540, 720, 1080], {
+                        height: 450,
+                      })}
+                      sizes="(min-width: 1024px) 30vw, (min-width: 640px) 45vw, 100vw"
                       alt={p.title}
                       loading="lazy"
                       decoding="async"

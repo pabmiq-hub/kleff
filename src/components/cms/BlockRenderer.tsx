@@ -1,6 +1,7 @@
 // Public-facing renderer for CMS blocks.
 import type { BlockData, BlockType } from "@/cms/blockTypes";
 import { EmbeddedRegistrationForm } from "@/components/cms/EmbeddedRegistrationForm";
+import { getOptimizedImageUrl, getResponsiveImageSrcSet } from "@/lib/image-delivery";
 
 type AnyBlock = { id: string; type: BlockType; data: unknown; hidden?: boolean };
 
@@ -29,7 +30,7 @@ function HeroBlock({ data }: { data: BlockData["hero"] }) {
   return (
     <section className="relative w-full min-h-[55vh] md:min-h-[70vh] flex overflow-hidden bg-ink">
       {data.image_url && (
-        <img loading="lazy" decoding="async" src={data.image_url} alt="" className="absolute inset-0 w-full h-full object-cover" />
+        <img loading="eager" fetchPriority="high" decoding="async" src={getOptimizedImageUrl(data.image_url, { width: 1440, height: 900, quality: 80 })} srcSet={getResponsiveImageSrcSet(data.image_url, [640, 960, 1280, 1440], { height: 900, quality: 80 })} sizes="100vw" alt="" className="absolute inset-0 w-full h-full object-cover" />
       )}
       <div className="absolute inset-0 bg-ink" style={{ opacity: overlay }} />
       <div className={`relative z-10 mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 py-20 md:py-28 flex flex-col justify-center w-full ${align}`}>
@@ -83,7 +84,7 @@ function BlockView({ block }: { block: AnyBlock }) {
       if (!d.url) return null;
       return (
         <figure className={cls}>
-          <img src={d.url} alt={d.alt || ""} loading="lazy" decoding="async" className="w-full h-auto rounded-xl" />
+          <img src={getOptimizedImageUrl(d.url, { width: 1280, quality: 78, resize: "contain" })} srcSet={getResponsiveImageSrcSet(d.url, [480, 768, 1024, 1280], { quality: 78, resize: "contain" })} sizes="(min-width: 1024px) 768px, 100vw" alt={d.alt || ""} loading="lazy" decoding="async" className="w-full h-auto rounded-xl" />
           {d.caption && (
             <figcaption className="mt-2 text-sm text-muted-foreground text-center italic">{d.caption}</figcaption>
           )}
@@ -156,7 +157,7 @@ function BlockView({ block }: { block: AnyBlock }) {
           {d.items.map((item, i) => (
             <div key={i} className="space-y-3">
               {item.image_url && (
-                <img src={item.image_url} alt="" loading="lazy" className="w-full h-auto rounded-xl" />
+                <img src={getOptimizedImageUrl(item.image_url, { width: 720, quality: 76, resize: "contain" })} alt="" loading="lazy" decoding="async" className="w-full h-auto rounded-xl" />
               )}
               <div
                 className="prose prose-lg max-w-none prose-a:text-coral"
@@ -181,7 +182,7 @@ function BlockView({ block }: { block: AnyBlock }) {
                 target={d.lightbox ? "_blank" : undefined}
                 rel="noreferrer"
               >
-                <img src={img.url} alt={img.alt || ""} loading="lazy" className="w-full aspect-square object-cover hover:scale-105 transition-transform" />
+                <img src={getOptimizedImageUrl(img.url, { width: 560, height: 560 })} alt={img.alt || ""} loading="lazy" decoding="async" className="w-full aspect-square object-cover hover:scale-105 transition-transform" />
               </a>
               {img.caption && <figcaption className="mt-1 text-xs text-muted-foreground text-center">{img.caption}</figcaption>}
             </figure>
@@ -197,7 +198,7 @@ function BlockView({ block }: { block: AnyBlock }) {
           {d.items.map((c, i) => (
             <article key={i} className="rounded-2xl border border-ink/10 bg-card overflow-hidden flex flex-col">
               {c.image_url && (
-                <img src={c.image_url} alt="" loading="lazy" className="w-full aspect-video object-cover" />
+                <img src={getOptimizedImageUrl(c.image_url, { width: 720, height: 405 })} alt="" loading="lazy" decoding="async" className="w-full aspect-video object-cover" />
               )}
               <div className="p-5 flex-1 flex flex-col gap-3">
                 <h3 className="font-display text-xl font-semibold text-foreground">{c.title}</h3>

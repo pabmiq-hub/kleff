@@ -17,6 +17,7 @@ import type { MediaAppearance } from "@/lib/media-appearances.functions";
 import { EditableText } from "@/editor/Editable";
 import { useSectionContent } from "@/cms/useSectionContent";
 import { or } from "@/cms/or";
+import { getOptimizedImageUrl, getResponsiveImageSrcSet } from "@/lib/image-delivery";
 
 type LoaderData = {
   mediaItems: MediaAppearance[];
@@ -94,7 +95,9 @@ export function MediaCard({
         {image ? (
           <>
             <img
-              src={image}
+              src={getOptimizedImageUrl(image, { width: 720, height: 405 })}
+              srcSet={getResponsiveImageSrcSet(image, [360, 540, 720, 1080], { height: 405 })}
+              sizes="(min-width: 1024px) 30vw, (min-width: 640px) 45vw, 100vw"
               alt={title ?? ""}
               loading="lazy"
               className="absolute inset-0 h-full w-full object-cover group-hover:scale-105 transition-transform duration-500"

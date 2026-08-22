@@ -19,7 +19,7 @@ import { useI18n } from "@/i18n/I18nProvider";
 import { SiteLayout } from "@/components/site/SiteLayout";
 import logoAsset from "@/assets/slow-friending-ludico-logo.png.asset.json";
 import estacioAsset from "@/assets/slf-estacio.jpg.asset.json";
-import hugosAsset from "@/assets/slf-hugos-diner.jpg.asset.json";
+import hugosAsset from "@/assets/slf-hugos-diner.webp.asset.json";
 
 const MEETUP_URL = "https://www.meetup.com/es-ES/kleff-bcn/events/?type=upcoming";
 
@@ -559,6 +559,7 @@ export function SlowFriendingPage() {
                     alt={v.name}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                     loading="lazy"
+                    decoding="async"
                   />
                   <span className="absolute top-3 left-3 inline-flex items-center gap-1.5 bg-coral text-cream border-2 border-ink rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-widest shadow-tactile-sm">
                     <MapPin className="h-3 w-3" /> {v.tag}

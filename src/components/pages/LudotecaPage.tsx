@@ -517,7 +517,7 @@ export function LudotecaPage() {
                   <div className="relative aspect-square bg-cream-deep overflow-hidden border-b-2 border-ink">
                     {g.image_url || g.thumbnail_url ? (
                       <img
-                        src={g.image_url ?? g.thumbnail_url ?? ""}
+                        src={g.thumbnail_url ?? g.image_url ?? ""}
                         alt={g.title}
                         loading="lazy"
                         decoding="async"

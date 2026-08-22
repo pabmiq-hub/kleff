@@ -17,6 +17,7 @@ import {
   useRef,
   useState,
 } from "react";
+import { getOptimizedImageUrl, getResponsiveImageSrcSet } from "@/lib/image-delivery";
 import { useServerFn } from "@tanstack/react-start";
 import { Plus, Trash2, ArrowUp, ArrowDown, ImagePlus, Loader2 } from "lucide-react";
 import { toast } from "sonner";
@@ -264,7 +265,12 @@ export function CmsImage({
     >
       {value ? (
         <img
-          src={value}
+          src={getOptimizedImageUrl(value, { width: 1440, quality: 80, resize: "contain" })}
+          srcSet={getResponsiveImageSrcSet(value, [480, 768, 1024, 1440], {
+            quality: 80,
+            resize: "contain",
+          })}
+          sizes="100vw"
           alt={alt}
           width={width}
           height={height}
