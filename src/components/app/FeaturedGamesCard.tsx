@@ -120,7 +120,7 @@ export function FeaturedGamesCard() {
               {(g.image_url || g.thumbnail_url) && (
                 <div className="aspect-[4/3] bg-ink/5 relative">
                   <img
-                    src={getLudoyaImageUrl(g.thumbnail_url ?? g.image_url)}
+                    src={getLudoyaImageUrl(g.image_url ?? g.thumbnail_url)}
                     alt={g.title}
                     className="w-full h-full object-cover"
                     loading="lazy"

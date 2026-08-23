@@ -408,9 +408,11 @@ function buildRecord(
   return {
     bgg_id: bggId,
     title,
-    image_url: extra?.image_url ?? prev?.image_url ?? g.image?.url ?? null,
+    // Ludoya is the source of truth. Its image identifiers can change, so a
+    // previous URL must never win over the current API response.
+    image_url: g.image?.url ?? extra?.image_url ?? prev?.image_url ?? null,
     thumbnail_url:
-      extra?.thumbnail_url ?? prev?.thumbnail_url ?? g.image?.thumbnailUrl ?? g.image?.previewUrl ?? null,
+      g.image?.thumbnailUrl ?? g.image?.previewUrl ?? extra?.thumbnail_url ?? prev?.thumbnail_url ?? null,
     description: extra?.description ?? prev?.description ?? null,
     year_published: g.yearPublished ?? null,
     min_players: minP,
