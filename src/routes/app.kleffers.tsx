@@ -9,12 +9,12 @@ import { Search, ExternalLink, X, SlidersHorizontal, Dice5, Users, GraduationCap
 import { AVAILABILITY, GAME_TYPES, EXPERIENCE, LANGUAGES, GOALS } from "@/lib/kleffer-profile-options";
 import { useAppLocale } from "@/i18n/app-i18n";
 import {
-import { getOptimizedImageUrl } from "@/lib/image-delivery";
   communityDict,
   klefferOptionLabels,
   klefferLabelOf,
   klefferLabelsOf,
 } from "@/i18n/app/community";
+import { getOptimizedImageUrl } from "@/lib/image-delivery";
 
 export const Route = createFileRoute("/app/kleffers")({
   head: () => ({
