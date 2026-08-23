@@ -20,7 +20,7 @@ import { SiteLayout } from "@/components/site/SiteLayout";
 import logoAsset from "@/assets/slow-friending-ludico-logo.png.asset.json";
 import estacioAsset from "@/assets/slf-estacio.jpg.asset.json";
 import hugosAsset from "@/assets/slf-hugos-diner.webp.asset.json";
-import { getOptimizedImageUrl } from "@/lib/image-delivery";
+import { getOptimizedImageUrl, getResponsiveImageSrcSet } from "@/lib/image-delivery";
 
 const MEETUP_URL = "https://www.meetup.com/es-ES/kleff-bcn/events/?type=upcoming";
 

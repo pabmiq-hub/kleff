@@ -19,7 +19,7 @@ import { SiteLayout } from "@/components/site/SiteLayout";
 import { useSectionContent } from "@/cms/useSectionContent";
 import { EditableText, EditableImage } from "@/editor/Editable";
 import type { MeetupEvent, MeetupGroupStats, GoogleStats } from "@/lib/meetup.functions";
-import { getOptimizedImageUrl } from "@/lib/image-delivery";
+import { getOptimizedImageUrl, getResponsiveImageSrcSet } from "@/lib/image-delivery";
 
 // Returns `value` if it's a non-empty string, otherwise `fallback`. Used to
 // overlay CMS-edited copy on top of the static i18n dictionaries.
