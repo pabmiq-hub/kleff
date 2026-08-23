@@ -8,6 +8,7 @@ import {
 } from "react";
 import { useEditor } from "./EditorProvider";
 import type { StyleProps } from "./types";
+import { getOptimizedImageUrl, getResponsiveImageSrcSet } from "@/lib/image-delivery";
 
 function styleToCss(s: StyleProps | undefined): CSSProperties {
   if (!s) return {};
@@ -190,6 +191,9 @@ type EditableImageProps = CommonProps & {
   loading?: "lazy" | "eager";
   fetchPriority?: "high" | "low" | "auto";
   decoding?: "sync" | "async" | "auto";
+  sizes?: string;
+  /** Candidate widths for the responsive srcSet (CDN-resized). */
+  srcSetWidths?: readonly number[];
 };
 
 export function EditableImage({
@@ -203,6 +207,8 @@ export function EditableImage({
   loading,
   fetchPriority,
   decoding,
+  sizes,
+  srcSetWidths,
 }: EditableImageProps) {
   const { editMode, overrides, selected, setSelected } = useEditor();
   const ref = useRef<HTMLImageElement | null>(null);
@@ -240,11 +246,20 @@ export function EditableImage({
     <img
       ref={ref}
       data-edit-id={id}
-      src={finalSrc}
+      src={getOptimizedImageUrl(finalSrc, {
+        width: typeof width === "number" ? Math.min(width, 1600) : 1440,
+        quality: 78,
+        resize: "contain",
+      })}
+      srcSet={getResponsiveImageSrcSet(finalSrc, srcSetWidths ?? [480, 768, 1024, 1440], {
+        quality: 78,
+        resize: "contain",
+      })}
+      sizes={sizes ?? "100vw"}
       alt={finalAlt}
       width={width}
       height={height}
-      loading={loading}
+      loading={loading ?? "lazy"}
       fetchPriority={fetchPriority}
       decoding={decoding ?? "async"}
       onClick={handleClick}

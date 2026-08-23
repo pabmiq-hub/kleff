@@ -6,6 +6,7 @@ import { getMyProfile } from "@/lib/profile.functions";
 import { KarmaLevelBadge } from "@/components/app/KarmaLevelBadge";
 import { useAppLocale } from "@/i18n/app-i18n";
 import { accountDict } from "@/i18n/app/account";
+import { getOptimizedImageUrl } from "@/lib/image-delivery";
 
 export const Route = createFileRoute("/app/carnet")({
   component: CarnetPage,
@@ -53,7 +54,7 @@ function CarnetPage() {
           <div className="relative space-y-6 mt-8">
             <div className="flex items-center gap-4">
               {profile.avatar_url ? (
-                <img loading="lazy" decoding="async" src={profile.avatar_url} alt="" className="h-20 w-20 rounded-full object-cover border-4 border-cream" />
+                <img width={80} height={80} loading="lazy" decoding="async" src={getOptimizedImageUrl(profile.avatar_url, { width: 160, height: 160 })} alt="" className="h-20 w-20 rounded-full object-cover border-4 border-cream" />
               ) : (
                 <div className="h-20 w-20 rounded-full bg-cream/20 border-4 border-cream flex items-center justify-center font-display text-3xl font-bold">
                   {profile.full_name.charAt(0).toUpperCase()}

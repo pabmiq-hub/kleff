@@ -22,6 +22,7 @@ import { toast } from "sonner";
 import { CalendarDays, MapPin, Plus, Users, ExternalLink, RefreshCw, Search, Layers, Trophy, Dice5, ChevronDown } from "lucide-react";
 import { useAppLocale } from "@/i18n/app-i18n";
 import { communityDict } from "@/i18n/app/community";
+import { getOptimizedImageUrl } from "@/lib/image-delivery";
 
 export const Route = createFileRoute("/app/partidas")({
   head: () => ({
@@ -495,7 +496,7 @@ function CreateMatchDialog({
           <Label>{t.game}</Label>
           {bg ? (
             <div className="flex items-center gap-2 border-2 border-ink rounded-lg p-2">
-              {bg.imageUrl && <img loading="lazy" decoding="async" src={bg.imageUrl} alt="" className="h-10 w-10 rounded object-cover" />}
+              {bg.imageUrl && <img width={40} height={40} loading="lazy" decoding="async" src={getOptimizedImageUrl(bg.imageUrl, { width: 80, height: 80 })} alt="" className="h-10 w-10 rounded object-cover" />}
               <span className="flex-1 text-sm font-medium">{bg.name}</span>
               <Button type="button" variant="ghost" size="sm" onClick={() => setBg(null)}>{t.change}</Button>
             </div>
@@ -523,7 +524,7 @@ function CreateMatchDialog({
                         onClick={() => { setBg(g); setBgResults([]); setBgQuery(""); }}
                         className="w-full flex items-center gap-2 p-2 text-left hover:bg-primary-soft/20"
                       >
-                        {g.imageUrl && <img loading="lazy" decoding="async" src={g.imageUrl} alt="" className="h-8 w-8 rounded object-cover" />}
+                        {g.imageUrl && <img width={32} height={32} loading="lazy" decoding="async" src={getOptimizedImageUrl(g.imageUrl, { width: 64, height: 64 })} alt="" className="h-8 w-8 rounded object-cover" />}
                         <span className="text-sm">{g.name}</span>
                       </button>
                     </li>
