@@ -75,7 +75,7 @@ function GameThumb({
       className={`relative shrink-0 overflow-hidden rounded-lg bg-cream-deep ring-1 ring-ink/10 ${className}`}
     >
       {imageUrl ? (
-        <img src={imageUrl} alt={name} loading="lazy" className="h-full w-full object-cover" />
+        <img src={getOptimizedImageUrl(imageUrl, { width: 160, height: 160 })} alt={name} width={80} height={80} loading="lazy" decoding="async" className="h-full w-full object-cover" />
       ) : (
         <div className="flex h-full w-full items-center justify-center text-base">🎲</div>
       )}

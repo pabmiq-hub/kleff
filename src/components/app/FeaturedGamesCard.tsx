@@ -4,6 +4,7 @@ import { Link } from "@tanstack/react-router";
 import { Sparkles, Users, Clock, ExternalLink } from "lucide-react";
 import { listCurrentFeaturedGames } from "@/lib/featured.functions";
 import { useAppLocale } from "@/i18n/app-i18n";
+import { getOptimizedImageUrl } from "@/lib/image-delivery";
 
 interface FeaturedGame {
   id: string;
@@ -119,8 +120,10 @@ export function FeaturedGamesCard() {
               {(g.image_url || g.thumbnail_url) && (
                 <div className="aspect-[4/3] bg-ink/5 relative">
                   <img
-                    src={g.thumbnail_url ?? g.image_url ?? ""}
+                    src={getOptimizedImageUrl(g.thumbnail_url ?? g.image_url ?? "", { width: 400, height: 300 })}
                     alt={g.title}
+                    width={400}
+                    height={300}
                     className="w-full h-full object-cover"
                     loading="lazy"
                     decoding="async"

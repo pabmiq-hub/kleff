@@ -19,6 +19,7 @@ import { SiteLayout } from "@/components/site/SiteLayout";
 import { useSectionContent } from "@/cms/useSectionContent";
 import { EditableText, EditableImage } from "@/editor/Editable";
 import type { MeetupEvent, MeetupGroupStats, GoogleStats } from "@/lib/meetup.functions";
+import { getOptimizedImageUrl } from "@/lib/image-delivery";
 
 // Returns `value` if it's a non-empty string, otherwise `fallback`. Used to
 // overlay CMS-edited copy on top of the static i18n dictionaries.
@@ -113,9 +114,14 @@ function EventCard({
       {event.imageUrl && (
         <div className="relative aspect-[16/10] border-b-2 border-ink overflow-hidden">
           <img
-            src={event.imageUrl}
+            src={getOptimizedImageUrl(event.imageUrl, { width: 720, height: 450 })}
+            srcSet={getResponsiveImageSrcSet(event.imageUrl, [360, 540, 720, 1080], { height: 450 })}
+            sizes="(min-width: 1024px) 32vw, (min-width: 640px) 48vw, 100vw"
             alt={event.title}
+            width={720}
+            height={450}
             loading="lazy"
+            decoding="async"
             className="absolute inset-0 h-full w-full object-cover group-hover:scale-105 transition-transform duration-500"
           />
         </div>

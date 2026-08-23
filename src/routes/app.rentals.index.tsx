@@ -19,6 +19,7 @@ import { LocationBadge, type LocationFields } from "@/components/ludoteca/Locati
 import { upcomingGameNights, toISODate } from "@/lib/gameNights";
 import { useAppLocale } from "@/i18n/app-i18n";
 import { rentalsDict, localeToIntl } from "@/i18n/app/rentals";
+import { getOptimizedImageUrl } from "@/lib/image-delivery";
 
 export const Route = createFileRoute("/app/rentals/")({
   component: RentalsCatalog,
@@ -133,7 +134,7 @@ function GameCard({
   return (
     <div className="bg-card border-2 border-ink rounded-2xl overflow-hidden shadow-tactile-sm flex flex-col">
       {game.image_url ? (
-        <img loading="lazy" decoding="async" src={game.image_url} alt={game.title} className="aspect-video object-cover w-full" />
+        <img loading="lazy" decoding="async" src={getOptimizedImageUrl(game.image_url, { width: 640, height: 360 })} alt={game.title} width={640} height={360} className="aspect-video object-cover w-full" />
       ) : (
         <div className="aspect-video bg-primary-soft flex items-center justify-center text-5xl">🎲</div>
       )}

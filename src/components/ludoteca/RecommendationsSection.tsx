@@ -123,8 +123,10 @@ export function RecommendationsSection({ games }: { games: Game[] }) {
               <div className="aspect-square bg-cream-deep">
                 {game.image_url || game.thumbnail_url ? (
                   <img
-                    src={game.thumbnail_url ?? game.image_url ?? ""}
+                    src={getOptimizedImageUrl(game.thumbnail_url ?? game.image_url ?? "", { width: 480, height: 480 })}
                     alt={game.title}
+                    width={480}
+                    height={480}
                     loading="lazy"
                     decoding="async"
                     className="w-full h-full object-cover"

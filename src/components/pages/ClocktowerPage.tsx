@@ -529,9 +529,12 @@ function Gallery({ images }: { images: string[] }) {
     return (
       <div className="aspect-[16/9] bg-cream-deep/40 overflow-hidden border-b-2 border-ink/10">
         <img
-          src={images[0]}
+          src={getOptimizedImageUrl(images[0], { width: 960, height: 540 })}
           alt=""
+          width={960}
+          height={540}
           loading="lazy"
+          decoding="async"
           className="h-full w-full object-cover"
         />
       </div>
@@ -541,14 +544,14 @@ function Gallery({ images }: { images: string[] }) {
   return (
     <div className="grid grid-cols-3 grid-rows-2 gap-1 aspect-[16/9] bg-cream-deep/40 border-b-2 border-ink/10">
       <div className="col-span-2 row-span-2 overflow-hidden">
-        <img src={images[0]} alt="" loading="lazy" className="h-full w-full object-cover" />
+        <img src={getOptimizedImageUrl(images[0], { width: 640, height: 480 })} alt="" width={640} height={480} loading="lazy" decoding="async" className="h-full w-full object-cover" />
       </div>
       <div className="overflow-hidden">
-        <img src={images[1]} alt="" loading="lazy" className="h-full w-full object-cover" />
+        <img src={getOptimizedImageUrl(images[1], { width: 320, height: 240 })} alt="" width={320} height={240} loading="lazy" decoding="async" className="h-full w-full object-cover" />
       </div>
       {images[2] ? (
         <div className="overflow-hidden">
-          <img src={images[2]} alt="" loading="lazy" className="h-full w-full object-cover" />
+          <img src={getOptimizedImageUrl(images[2], { width: 320, height: 240 })} alt="" width={320} height={240} loading="lazy" decoding="async" className="h-full w-full object-cover" />
         </div>
       ) : (
         <div className="bg-cream-deep/60 flex items-center justify-center text-foreground/30">
