@@ -283,7 +283,7 @@ function ImageField({
       {field.help && <p className="text-xs text-ink/50 mt-0.5">{field.help}</p>}
       <div className="mt-1.5 flex items-start gap-3">
         {value && (
-          <img loading="lazy" decoding="async"
+          <img width={96} height={96} loading="lazy" decoding="async"
             src={value}
             alt=""
             className="h-24 w-24 object-cover rounded-lg border border-ink/15"

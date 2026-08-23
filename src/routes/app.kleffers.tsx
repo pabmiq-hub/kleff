@@ -303,7 +303,7 @@ function KleffersPage() {
                 className="group flex items-center gap-3 rounded-2xl border border-ink/10 bg-card p-4 text-left transition-colors hover:border-coral"
               >
                 {k.avatar_url || k.ludoya_avatar_url ? (
-                  <img loading="lazy" decoding="async"
+                  <img width={48} height={48} loading="lazy" decoding="async"
                     src={k.avatar_url ?? k.ludoya_avatar_url ?? ""}
                     alt={`@${k.username}`}
                     className="h-12 w-12 shrink-0 rounded-full border-2 border-coral object-cover"
@@ -345,7 +345,7 @@ function KleffersPage() {
                 <MemberBadgesRow userId={selected.id} />
                 <div className="flex items-center gap-4">
                   {selected.avatar_url || selected.ludoya_avatar_url ? (
-                    <img loading="lazy" decoding="async"
+                    <img width={80} height={80} loading="lazy" decoding="async"
                       src={selected.avatar_url ?? selected.ludoya_avatar_url ?? ""}
                       alt=""
                       className="h-20 w-20 rounded-full border-2 border-coral object-cover"

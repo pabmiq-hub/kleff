@@ -195,7 +195,7 @@ function CatalogPage() {
         {filtered.map((g) => (
           <div key={g.id} className="bg-ink/5 border border-ink/15 rounded-2xl p-3 flex flex-wrap items-center gap-3">
             {g.image_url ? (
-              <img loading="lazy" decoding="async" src={g.image_url} alt="" className="h-12 w-12 rounded-lg object-cover border border-ink/20" />
+              <img width={48} height={48} loading="lazy" decoding="async" src={g.image_url} alt="" className="h-12 w-12 rounded-lg object-cover border border-ink/20" />
             ) : (
               <div className="h-12 w-12 rounded-lg bg-coral/30 flex items-center justify-center font-bold text-ink">🎲</div>
             )}

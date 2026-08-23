@@ -269,7 +269,7 @@ function InvitePage() {
                 }}
               />
               {avatarUrl && (
-                <img loading="lazy" decoding="async" src={avatarUrl} alt="" className="mt-2 h-20 w-20 rounded-full object-cover border-2 border-ink" />
+                <img width={80} height={80} loading="lazy" decoding="async" src={avatarUrl} alt="" className="mt-2 h-20 w-20 rounded-full object-cover border-2 border-ink" />
               )}
             </div>
 

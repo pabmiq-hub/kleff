@@ -86,7 +86,7 @@ export function Row({
   return (
     <div className="bg-card border-2 border-ink rounded-2xl p-3 flex items-center gap-3 shadow-tactile-sm">
       {img ? (
-        <img loading="lazy" decoding="async" src={img} alt="" className="h-12 w-12 rounded-lg object-cover border border-ink/20" />
+        <img width={48} height={48} loading="lazy" decoding="async" src={img} alt="" className="h-12 w-12 rounded-lg object-cover border border-ink/20" />
       ) : (
         <div className="h-12 w-12 rounded-lg bg-primary-soft flex items-center justify-center">🎲</div>
       )}
