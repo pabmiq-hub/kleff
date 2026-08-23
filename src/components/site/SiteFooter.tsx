@@ -4,6 +4,7 @@ import logoAsset from "@/assets/kleff-logo-white.png.asset.json";
 const logo = logoAsset.url;
 import { useI18n } from "@/i18n/I18nProvider";
 import { openCookieSettings } from "@/components/site/CookieConsent";
+import { getOptimizedImageUrl } from "@/lib/image-delivery";
 
 export function SiteFooter() {
   const { t, href } = useI18n();
@@ -19,7 +20,7 @@ export function SiteFooter() {
         <div className="md:col-span-2">
           <div className="flex items-center gap-3 mb-5">
             <div className="size-12 bg-coral rounded-xl border-2 border-cream/20 flex items-center justify-center overflow-hidden">
-              <img width={32} height={32} loading="lazy" decoding="async" src={logo} alt="KLEFF" className="h-8 w-8 object-contain" />
+              <img width={32} height={32} loading="lazy" decoding="async" src={getOptimizedImageUrl(logo, { width: 64, height: 64 })} alt="KLEFF" className="h-8 w-8 object-contain" />
             </div>
             <span className="font-display font-bold text-2xl tracking-tight">KLEFF</span>
           </div>

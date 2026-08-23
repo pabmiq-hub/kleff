@@ -19,6 +19,7 @@ import { useEditor } from "@/editor/EditorProvider";
 import { useI18n } from "@/i18n/I18nProvider";
 import clocktowerLogo from "@/assets/clocktower-logo.webp";
 import clocktowerHero from "@/assets/clocktower-hero.webp";
+import { getOptimizedImageUrl } from "@/lib/image-delivery";
 
 /** Convert any Instagram reel URL to its `/embed` equivalent. */
 function reelToEmbed(url: string): string | null {
@@ -92,7 +93,7 @@ function HeroSection() {
     <section className="relative bg-ink text-cream overflow-hidden border-b-2 border-ink/20">
       <div className="absolute inset-0 opacity-30">
         <img
-          src={heroImg}
+          src={getOptimizedImageUrl(heroImg, { width: 1200, height: 1200 })}
           alt=""
           className="absolute inset-0 h-full w-full object-cover"
           loading="eager"
@@ -154,7 +155,7 @@ function HeroSection() {
           <div className="relative max-w-[420px] w-full">
             <div className="absolute inset-0 bg-coral/30 blur-2xl rounded-full scale-90" aria-hidden />
             <img
-              src={clocktowerLogo}
+              src={getOptimizedImageUrl(clocktowerLogo, { width: 1200, height: 1200 })}
               alt="Blood on the Clocktower"
               width={1024}
               height={1024}

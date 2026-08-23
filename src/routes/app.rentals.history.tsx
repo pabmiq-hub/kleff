@@ -4,6 +4,7 @@ import { useMyRentalsData, Empty, type RentalRow } from "@/components/app/rental
 import { useAppLocale } from "@/i18n/app-i18n";
 import { rentalsDict, localeToIntl } from "@/i18n/app/rentals";
 import type { AppLocale } from "@/i18n/app-i18n";
+import { getOptimizedImageUrl } from "@/lib/image-delivery";
 
 export const Route = createFileRoute("/app/rentals/history")({
   component: HistoryPage,
@@ -78,7 +79,7 @@ function GroupCard({ group }: { group: Group }) {
     <div className="bg-card border-2 border-ink rounded-2xl shadow-tactile-sm overflow-hidden">
       <div className="p-3 flex items-center gap-3">
         {group.img ? (
-          <img width={48} height={48} loading="lazy" decoding="async" src={group.img} alt="" className="h-12 w-12 rounded-lg object-cover border border-ink/20" />
+          <img width={48} height={48} loading="lazy" decoding="async" src={getOptimizedImageUrl(group.img, { width: 96, height: 96 })} alt="" className="h-12 w-12 rounded-lg object-cover border border-ink/20" />
         ) : (
           <div className="h-12 w-12 rounded-lg bg-primary-soft flex items-center justify-center">🎲</div>
         )}

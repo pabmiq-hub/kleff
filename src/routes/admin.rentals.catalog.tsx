@@ -18,6 +18,7 @@ import { LocationBadge } from "@/components/ludoteca/LocationBadge";
 import { toast } from "sonner";
 import { Trash2, RefreshCw, MapPin, Star } from "lucide-react";
 import type { DateRange } from "react-day-picker";
+import { getOptimizedImageUrl } from "@/lib/image-delivery";
 
 export const Route = createFileRoute("/admin/rentals/catalog")({
   component: CatalogPage,
@@ -195,7 +196,7 @@ function CatalogPage() {
         {filtered.map((g) => (
           <div key={g.id} className="bg-ink/5 border border-ink/15 rounded-2xl p-3 flex flex-wrap items-center gap-3">
             {g.image_url ? (
-              <img width={48} height={48} loading="lazy" decoding="async" src={g.image_url} alt="" className="h-12 w-12 rounded-lg object-cover border border-ink/20" />
+              <img width={48} height={48} loading="lazy" decoding="async" src={getOptimizedImageUrl(g.image_url, { width: 96, height: 96 })} alt="" className="h-12 w-12 rounded-lg object-cover border border-ink/20" />
             ) : (
               <div className="h-12 w-12 rounded-lg bg-coral/30 flex items-center justify-center font-bold text-ink">🎲</div>
             )}

@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useAppLocale, type AppLocale } from "@/i18n/app-i18n";
 import { rentalsDict } from "@/i18n/app/rentals";
+import { getOptimizedImageUrl } from "@/lib/image-delivery";
 
 export interface ReqRow {
   id: string;
@@ -86,7 +87,7 @@ export function Row({
   return (
     <div className="bg-card border-2 border-ink rounded-2xl p-3 flex items-center gap-3 shadow-tactile-sm">
       {img ? (
-        <img width={48} height={48} loading="lazy" decoding="async" src={img} alt="" className="h-12 w-12 rounded-lg object-cover border border-ink/20" />
+        <img width={48} height={48} loading="lazy" decoding="async" src={getOptimizedImageUrl(img, { width: 96, height: 96 })} alt="" className="h-12 w-12 rounded-lg object-cover border border-ink/20" />
       ) : (
         <div className="h-12 w-12 rounded-lg bg-primary-soft flex items-center justify-center">🎲</div>
       )}

@@ -13,6 +13,7 @@ import { CheckCircle2, ExternalLink, Link2 } from "lucide-react";
 import { toast } from "sonner";
 import { useAppLocale } from "@/i18n/app-i18n";
 import { accountDict } from "@/i18n/app/account";
+import { getOptimizedImageUrl } from "@/lib/image-delivery";
 
 type LudoyaProfile = {
   ludoya_username: string | null;
@@ -175,7 +176,7 @@ export function LudoyaLinkCard({ onChanged }: { onChanged?: () => void }) {
           <div className="flex items-center gap-3">
             {profile?.ludoya_avatar_url && (
               <img width={40} height={40} loading="lazy" decoding="async"
-                src={profile.ludoya_avatar_url}
+                src={getOptimizedImageUrl(profile.ludoya_avatar_url, { width: 80, height: 80 })}
                 alt=""
                 className="h-10 w-10 rounded-full object-cover border border-ink/20"
               />

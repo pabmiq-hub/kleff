@@ -4,6 +4,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { CheckCircle2, XCircle, Loader2 } from "lucide-react";
 import { verifyMember } from "@/lib/profile.functions";
 import { SiteLayout } from "@/components/site/SiteLayout";
+import { getOptimizedImageUrl } from "@/lib/image-delivery";
 
 export const Route = createFileRoute("/verificar/$id")({
   component: VerifyPage,
@@ -62,7 +63,7 @@ function VerifyPage() {
             <div className="flex items-center gap-4 border-t-2 border-ink/10 pt-6">
               {state.member.avatarUrl ? (
                 <img width={80} height={80} loading="lazy" decoding="async"
-                  src={state.member.avatarUrl}
+                  src={getOptimizedImageUrl(state.member.avatarUrl, { width: 160, height: 160 })}
                   alt=""
                   className="h-20 w-20 rounded-full object-cover border-2 border-ink"
                 />

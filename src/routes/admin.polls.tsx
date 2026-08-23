@@ -13,6 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Plus, Trash2, Search, Send, Pencil } from "lucide-react";
 import { toast } from "sonner";
+import { getOptimizedImageUrl } from "@/lib/image-delivery";
 
 export const Route = createFileRoute("/admin/polls")({
   component: AdminPollsPage,
@@ -552,7 +553,7 @@ function AdminPollsPage() {
                     {draft.options.map((o, i) => (
                       <li key={i} className="space-y-2">
                         <div className="flex items-center gap-2">
-                          {o.imageUrl && <img width={36} height={36} loading="lazy" decoding="async" src={o.imageUrl} alt="" className="h-9 w-9 rounded object-cover" />}
+                          {o.imageUrl && <img width={36} height={36} loading="lazy" decoding="async" src={getOptimizedImageUrl(o.imageUrl, { width: 72, height: 72 })} alt="" className="h-9 w-9 rounded object-cover" />}
                           <Input
                             value={o.label}
                             placeholder="Nombre de la opción (ES)"

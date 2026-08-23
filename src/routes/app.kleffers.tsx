@@ -9,6 +9,7 @@ import { Search, ExternalLink, X, SlidersHorizontal, Dice5, Users, GraduationCap
 import { AVAILABILITY, GAME_TYPES, EXPERIENCE, LANGUAGES, GOALS } from "@/lib/kleffer-profile-options";
 import { useAppLocale } from "@/i18n/app-i18n";
 import {
+import { getOptimizedImageUrl } from "@/lib/image-delivery";
   communityDict,
   klefferOptionLabels,
   klefferLabelOf,
@@ -304,7 +305,7 @@ function KleffersPage() {
               >
                 {k.avatar_url || k.ludoya_avatar_url ? (
                   <img width={48} height={48} loading="lazy" decoding="async"
-                    src={k.avatar_url ?? k.ludoya_avatar_url ?? ""}
+                    src={getOptimizedImageUrl(k.avatar_url ?? k.ludoya_avatar_url ?? "", { width: 96, height: 96 })}
                     alt={`@${k.username}`}
                     className="h-12 w-12 shrink-0 rounded-full border-2 border-coral object-cover"
                   />
@@ -346,7 +347,7 @@ function KleffersPage() {
                 <div className="flex items-center gap-4">
                   {selected.avatar_url || selected.ludoya_avatar_url ? (
                     <img width={80} height={80} loading="lazy" decoding="async"
-                      src={selected.avatar_url ?? selected.ludoya_avatar_url ?? ""}
+                      src={getOptimizedImageUrl(selected.avatar_url ?? selected.ludoya_avatar_url ?? "", { width: 160, height: 160 })}
                       alt=""
                       className="h-20 w-20 rounded-full border-2 border-coral object-cover"
                     />

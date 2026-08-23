@@ -6,6 +6,7 @@ const logo = logoAsset.url;
 import { useI18n, stripLocaleFromPath } from "@/i18n/I18nProvider";
 import { LOCALES, LOCALE_SHORT, type Locale } from "@/i18n/config";
 import { useLocation } from "@tanstack/react-router";
+import { getOptimizedImageUrl } from "@/lib/image-delivery";
 
 export function SiteHeader() {
   const { t, locale, href, hrefFor } = useI18n();
@@ -28,7 +29,7 @@ export function SiteHeader() {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex items-center justify-between h-16 md:h-20">
         <Link to={href("/")} aria-label="KLEFF — Inicio" className="flex items-center gap-3 group">
           <div className="size-10 bg-coral rounded-xl border-2 border-ink flex items-center justify-center font-display font-bold text-cream shadow-tactile-sm group-hover:scale-105 transition-transform overflow-hidden">
-            <img width={28} height={28} loading="lazy" decoding="async" src={logo} alt="KLEFF" className="h-7 w-7 object-contain" />
+            <img width={28} height={28} loading="lazy" decoding="async" src={getOptimizedImageUrl(logo, { width: 56, height: 56 })} alt="KLEFF" className="h-7 w-7 object-contain" />
           </div>
           <span className="font-display font-bold text-xl tracking-tight text-foreground">KLEFF</span>
         </Link>
