@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { EditableText } from "@/editor/Editable";
 import { useSectionContent } from "@/cms/useSectionContent";
 import { or } from "@/cms/or";
+import { getLudoyaImageUrl } from "@/lib/ludoya-image";
 
 import { LocationBadge, LocationLegend } from "@/components/ludoteca/LocationBadge";
 import { RecommendationsSection } from "@/components/ludoteca/RecommendationsSection";
@@ -517,7 +518,7 @@ export function LudotecaPage() {
                   <div className="relative aspect-square bg-cream-deep overflow-hidden border-b-2 border-ink">
                     {g.image_url || g.thumbnail_url ? (
                       <img
-                        src={g.thumbnail_url ?? g.image_url ?? ""}
+                        src={getLudoyaImageUrl(g.thumbnail_url ?? g.image_url)}
                         alt={g.title}
                         loading="lazy"
                         decoding="async"

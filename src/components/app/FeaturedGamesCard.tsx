@@ -4,6 +4,7 @@ import { Link } from "@tanstack/react-router";
 import { Sparkles, Users, Clock, ExternalLink } from "lucide-react";
 import { listCurrentFeaturedGames } from "@/lib/featured.functions";
 import { useAppLocale } from "@/i18n/app-i18n";
+import { getLudoyaImageUrl } from "@/lib/ludoya-image";
 
 interface FeaturedGame {
   id: string;
@@ -119,7 +120,7 @@ export function FeaturedGamesCard() {
               {(g.image_url || g.thumbnail_url) && (
                 <div className="aspect-[4/3] bg-ink/5 relative">
                   <img
-                    src={g.thumbnail_url ?? g.image_url ?? ""}
+                    src={getLudoyaImageUrl(g.thumbnail_url ?? g.image_url)}
                     alt={g.title}
                     className="w-full h-full object-cover"
                     loading="lazy"

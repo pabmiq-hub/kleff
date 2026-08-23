@@ -4,6 +4,7 @@ import { recommendSimilar } from "@/lib/ludoteca.functions";
 import { Sparkles, Search, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { getLudoyaImageUrl } from "@/lib/ludoya-image";
 
 interface Game {
   id: string;
@@ -95,7 +96,7 @@ export function RecommendationsSection({ games }: { games: Game[] }) {
                 className="w-full flex items-center gap-3 px-3 py-2 hover:bg-cream-deep text-left"
               >
                 {g.image_url || g.thumbnail_url ? (
-                  <img loading="lazy" decoding="async" src={g.thumbnail_url ?? g.image_url ?? ""} alt="" className="h-8 w-8 rounded object-cover" />
+                  <img loading="lazy" decoding="async" src={getLudoyaImageUrl(g.thumbnail_url ?? g.image_url)} alt="" className="h-8 w-8 rounded object-cover" />
                 ) : (
                   <div className="h-8 w-8 rounded bg-primary-soft" />
                 )}
@@ -122,7 +123,7 @@ export function RecommendationsSection({ games }: { games: Game[] }) {
               <div className="aspect-square bg-cream-deep">
                 {game.image_url || game.thumbnail_url ? (
                   <img
-                    src={game.thumbnail_url ?? game.image_url ?? ""}
+                    src={getLudoyaImageUrl(game.thumbnail_url ?? game.image_url)}
                     alt={game.title}
                     loading="lazy"
                     decoding="async"
