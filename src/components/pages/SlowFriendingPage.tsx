@@ -17,7 +17,7 @@ import {
 } from "lucide-react";
 import { useI18n } from "@/i18n/I18nProvider";
 import { SiteLayout } from "@/components/site/SiteLayout";
-import logoAsset from "@/assets/slow-friending-ludico-logo.png.asset.json";
+import slfLogo from "@/assets/slow-friending-logo.webp";
 import estacioAsset from "@/assets/slf-estacio.jpg.asset.json";
 import hugosAsset from "@/assets/slf-hugos-diner.webp.asset.json";
 import { getOptimizedImageUrl, getResponsiveImageSrcSet } from "@/lib/image-delivery";
@@ -391,7 +391,7 @@ export function SlowFriendingPage() {
               <div className="absolute inset-0 rounded-3xl bg-coral/20 rotate-3" aria-hidden />
               <div className="relative bg-cream border-2 border-ink rounded-3xl p-6 shadow-tactile-lg">
                 <img
-                  src={getOptimizedImageUrl(logoAsset.url, { width: 768, resize: "contain" })}
+                  src={slfLogo}
                   alt="Slow Friending Lúdico"
                   className="w-full h-auto"
                   width={384}
@@ -590,7 +590,7 @@ export function SlowFriendingPage() {
         <div className="absolute -bottom-16 -left-16 size-80 rounded-full bg-coral/10 blur-3xl pointer-events-none" />
         <div className="relative mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 text-center">
           <img loading="lazy" decoding="async"
-            src={getOptimizedImageUrl(logoAsset.url, { width: 448, resize: "contain" })}
+            src={slfLogo}
             alt=""
             aria-hidden
             width={224}
