@@ -102,6 +102,7 @@ import { Route as AppRentalsActiveRouteImport } from './routes/app.rentals.activ
 import { Route as ApiPublicUploadMyAvatarRouteImport } from './routes/api.public.upload-my-avatar'
 import { Route as ApiPublicUploadInviteAvatarRouteImport } from './routes/api.public.upload-invite-avatar'
 import { Route as ApiPublicSyncBggRouteImport } from './routes/api.public.sync-bgg'
+import { Route as ApiPublicLudoyaImageRouteImport } from './routes/api.public.ludoya-image'
 import { Route as ApiPublicContactRouteImport } from './routes/api.public.contact'
 import { Route as AdminRentalsSettingsRouteImport } from './routes/admin.rentals.settings'
 import { Route as AdminRentalsHistoryRouteImport } from './routes/admin.rentals.history'
@@ -586,6 +587,11 @@ const ApiPublicSyncBggRoute = ApiPublicSyncBggRouteImport.update({
   path: '/api/public/sync-bgg',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicLudoyaImageRoute = ApiPublicLudoyaImageRouteImport.update({
+  id: '/api/public/ludoya-image',
+  path: '/api/public/ludoya-image',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicContactRoute = ApiPublicContactRouteImport.update({
   id: '/api/public/contact',
   path: '/api/public/contact',
@@ -764,6 +770,7 @@ export interface FileRoutesByFullPath {
   '/admin/rentals/history': typeof AdminRentalsHistoryRoute
   '/admin/rentals/settings': typeof AdminRentalsSettingsRoute
   '/api/public/contact': typeof ApiPublicContactRoute
+  '/api/public/ludoya-image': typeof ApiPublicLudoyaImageRoute
   '/api/public/sync-bgg': typeof ApiPublicSyncBggRoute
   '/api/public/upload-invite-avatar': typeof ApiPublicUploadInviteAvatarRoute
   '/api/public/upload-my-avatar': typeof ApiPublicUploadMyAvatarRoute
@@ -868,6 +875,7 @@ export interface FileRoutesByTo {
   '/admin/rentals/history': typeof AdminRentalsHistoryRoute
   '/admin/rentals/settings': typeof AdminRentalsSettingsRoute
   '/api/public/contact': typeof ApiPublicContactRoute
+  '/api/public/ludoya-image': typeof ApiPublicLudoyaImageRoute
   '/api/public/sync-bgg': typeof ApiPublicSyncBggRoute
   '/api/public/upload-invite-avatar': typeof ApiPublicUploadInviteAvatarRoute
   '/api/public/upload-my-avatar': typeof ApiPublicUploadMyAvatarRoute
@@ -980,6 +988,7 @@ export interface FileRoutesById {
   '/admin/rentals/history': typeof AdminRentalsHistoryRoute
   '/admin/rentals/settings': typeof AdminRentalsSettingsRoute
   '/api/public/contact': typeof ApiPublicContactRoute
+  '/api/public/ludoya-image': typeof ApiPublicLudoyaImageRoute
   '/api/public/sync-bgg': typeof ApiPublicSyncBggRoute
   '/api/public/upload-invite-avatar': typeof ApiPublicUploadInviteAvatarRoute
   '/api/public/upload-my-avatar': typeof ApiPublicUploadMyAvatarRoute
@@ -1093,6 +1102,7 @@ export interface FileRouteTypes {
     | '/admin/rentals/history'
     | '/admin/rentals/settings'
     | '/api/public/contact'
+    | '/api/public/ludoya-image'
     | '/api/public/sync-bgg'
     | '/api/public/upload-invite-avatar'
     | '/api/public/upload-my-avatar'
@@ -1197,6 +1207,7 @@ export interface FileRouteTypes {
     | '/admin/rentals/history'
     | '/admin/rentals/settings'
     | '/api/public/contact'
+    | '/api/public/ludoya-image'
     | '/api/public/sync-bgg'
     | '/api/public/upload-invite-avatar'
     | '/api/public/upload-my-avatar'
@@ -1308,6 +1319,7 @@ export interface FileRouteTypes {
     | '/admin/rentals/history'
     | '/admin/rentals/settings'
     | '/api/public/contact'
+    | '/api/public/ludoya-image'
     | '/api/public/sync-bgg'
     | '/api/public/upload-invite-avatar'
     | '/api/public/upload-my-avatar'
@@ -1388,6 +1400,7 @@ export interface RootRouteChildren {
   CaIndexRoute: typeof CaIndexRoute
   EnIndexRoute: typeof EnIndexRoute
   ApiPublicContactRoute: typeof ApiPublicContactRoute
+  ApiPublicLudoyaImageRoute: typeof ApiPublicLudoyaImageRoute
   ApiPublicSyncBggRoute: typeof ApiPublicSyncBggRoute
   ApiPublicUploadInviteAvatarRoute: typeof ApiPublicUploadInviteAvatarRoute
   ApiPublicUploadMyAvatarRoute: typeof ApiPublicUploadMyAvatarRoute
@@ -2049,6 +2062,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicSyncBggRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/ludoya-image': {
+      id: '/api/public/ludoya-image'
+      path: '/api/public/ludoya-image'
+      fullPath: '/api/public/ludoya-image'
+      preLoaderRoute: typeof ApiPublicLudoyaImageRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/contact': {
       id: '/api/public/contact'
       path: '/api/public/contact'
@@ -2374,6 +2394,7 @@ const rootRouteChildren: RootRouteChildren = {
   CaIndexRoute: CaIndexRoute,
   EnIndexRoute: EnIndexRoute,
   ApiPublicContactRoute: ApiPublicContactRoute,
+  ApiPublicLudoyaImageRoute: ApiPublicLudoyaImageRoute,
   ApiPublicSyncBggRoute: ApiPublicSyncBggRoute,
   ApiPublicUploadInviteAvatarRoute: ApiPublicUploadInviteAvatarRoute,
   ApiPublicUploadMyAvatarRoute: ApiPublicUploadMyAvatarRoute,
