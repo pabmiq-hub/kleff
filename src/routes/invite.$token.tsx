@@ -18,7 +18,6 @@ import { useAppLocale } from "@/i18n/app-i18n";
 import { signupDict } from "@/i18n/app/signup";
 import { LOCALES, LOCALE_LABELS } from "@/i18n/config";
 import { optimizeImage } from "@/lib/image-optimize";
-import { getOptimizedImageUrl } from "@/lib/image-delivery";
 
 export const Route = createFileRoute("/invite/$token")({
   head: () => ({
@@ -270,7 +269,7 @@ function InvitePage() {
                 }}
               />
               {avatarUrl && (
-                <img width={80} height={80} loading="lazy" decoding="async" src={getOptimizedImageUrl(avatarUrl, { width: 160, height: 160 })} alt="" className="mt-2 h-20 w-20 rounded-full object-cover border-2 border-ink" />
+                <img loading="lazy" decoding="async" src={avatarUrl} alt="" className="mt-2 h-20 w-20 rounded-full object-cover border-2 border-ink" />
               )}
             </div>
 

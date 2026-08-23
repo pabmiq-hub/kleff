@@ -18,7 +18,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { VolunteerApplications } from "@/components/admin/VolunteerApplications";
 import { toast } from "sonner";
 import { Trash2, Plus, Pencil } from "lucide-react";
-import { getOptimizedImageUrl } from "@/lib/image-delivery";
 
 export const Route = createFileRoute("/admin/team")({
   head: () => ({ meta: [{ title: "Equipo — Admin KLEFF" }, { name: "robots", content: "noindex" }] }),
@@ -142,7 +141,7 @@ function TeamAdminPage() {
             <div key={r.id} className="flex items-center gap-4 bg-cream-deep/40 border border-ink/10 rounded-2xl p-3">
               <div className="size-14 rounded-full bg-cream border-2 border-ink flex items-center justify-center overflow-hidden shrink-0">
                 {r.photo_url ? (
-                  <img loading="lazy" decoding="async" src={getOptimizedImageUrl(r.photo_url, { width: 112, height: 112 })} alt={r.name} width={56} height={56} className="h-full w-full object-cover" />
+                  <img loading="lazy" decoding="async" src={r.photo_url} alt={r.name} className="h-full w-full object-cover" />
                 ) : (
                   <span className="text-2xl">{r.emoji}</span>
                 )}

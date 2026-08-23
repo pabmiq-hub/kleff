@@ -20,7 +20,6 @@ import { SectionProvider, useSection, useSectionValue } from "@/cms/SectionConte
 import { CmsImage, CmsList, CmsText } from "@/cms/Editable";
 import { useEditor } from "@/editor/EditorProvider";
 import { useI18n } from "@/i18n/I18nProvider";
-import { getOptimizedImageUrl } from "@/lib/image-delivery";
 
 const SafeMask = VenetianMask;
 
@@ -618,10 +617,7 @@ function LibrarySection() {
                     <img
                       src={g.image.thumbnailUrl ?? g.image.previewUrl ?? g.image.url}
                       alt={g.name}
-                      width={400}
-                      height={400}
                       loading="lazy"
-                      decoding="async"
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                     />
                   ) : null}

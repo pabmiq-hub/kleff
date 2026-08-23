@@ -14,7 +14,6 @@ import {
   klefferLabelOf,
   klefferLabelsOf,
 } from "@/i18n/app/community";
-import { getOptimizedImageUrl } from "@/lib/image-delivery";
 
 export const Route = createFileRoute("/app/kleffers")({
   head: () => ({
@@ -75,7 +74,7 @@ function GameThumb({
       className={`relative shrink-0 overflow-hidden rounded-lg bg-cream-deep ring-1 ring-ink/10 ${className}`}
     >
       {imageUrl ? (
-        <img src={getOptimizedImageUrl(imageUrl, { width: 160, height: 160 })} alt={name} width={80} height={80} loading="lazy" decoding="async" className="h-full w-full object-cover" />
+        <img src={imageUrl} alt={name} loading="lazy" className="h-full w-full object-cover" />
       ) : (
         <div className="flex h-full w-full items-center justify-center text-base">🎲</div>
       )}
@@ -304,8 +303,8 @@ function KleffersPage() {
                 className="group flex items-center gap-3 rounded-2xl border border-ink/10 bg-card p-4 text-left transition-colors hover:border-coral"
               >
                 {k.avatar_url || k.ludoya_avatar_url ? (
-                  <img width={48} height={48} loading="lazy" decoding="async"
-                    src={getOptimizedImageUrl(k.avatar_url ?? k.ludoya_avatar_url ?? "", { width: 96, height: 96 })}
+                  <img loading="lazy" decoding="async"
+                    src={k.avatar_url ?? k.ludoya_avatar_url ?? ""}
                     alt={`@${k.username}`}
                     className="h-12 w-12 shrink-0 rounded-full border-2 border-coral object-cover"
                   />
@@ -346,8 +345,8 @@ function KleffersPage() {
                 <MemberBadgesRow userId={selected.id} />
                 <div className="flex items-center gap-4">
                   {selected.avatar_url || selected.ludoya_avatar_url ? (
-                    <img width={80} height={80} loading="lazy" decoding="async"
-                      src={getOptimizedImageUrl(selected.avatar_url ?? selected.ludoya_avatar_url ?? "", { width: 160, height: 160 })}
+                    <img loading="lazy" decoding="async"
+                      src={selected.avatar_url ?? selected.ludoya_avatar_url ?? ""}
                       alt=""
                       className="h-20 w-20 rounded-full border-2 border-coral object-cover"
                     />

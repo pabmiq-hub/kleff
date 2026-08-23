@@ -11,7 +11,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { getOptimizedImageUrl } from "@/lib/image-delivery";
 
 export const Route = createFileRoute("/admin/content/$pageKey")({
   loader: ({ params }) => {
@@ -284,8 +283,8 @@ function ImageField({
       {field.help && <p className="text-xs text-ink/50 mt-0.5">{field.help}</p>}
       <div className="mt-1.5 flex items-start gap-3">
         {value && (
-          <img width={96} height={96} loading="lazy" decoding="async"
-            src={getOptimizedImageUrl(value, { width: 192, height: 192 })}
+          <img loading="lazy" decoding="async"
+            src={value}
             alt=""
             className="h-24 w-24 object-cover rounded-lg border border-ink/15"
           />

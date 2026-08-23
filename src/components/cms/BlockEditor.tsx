@@ -59,7 +59,6 @@ import {
 } from "@/components/ui/select";
 import { RichTextEditor } from "@/components/cms/RichTextEditor";
 import { ImagePicker } from "@/components/cms/ImagePicker";
-import { getOptimizedImageUrl } from "@/lib/image-delivery";
 
 const ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
   Heading2,
@@ -698,10 +697,8 @@ function GalleryForm({
           <div key={i} className="space-y-1 border border-cream/10 rounded p-1">
             <div className="relative">
               <img loading="lazy" decoding="async"
-                src={getOptimizedImageUrl(img.url, { width: 320, height: 320 })}
+                src={img.url}
                 alt={img.alt}
-                width={320}
-                height={320}
                 className="w-full aspect-square object-cover rounded"
               />
               <Button

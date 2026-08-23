@@ -182,8 +182,6 @@ type CmsImageProps = {
   width?: number | string;
   height?: number | string;
   loading?: "lazy" | "eager";
-  fetchPriority?: "high" | "low" | "auto";
-  sizes?: string;
   /** Wrap the image in a button overlay so users see the upload action. */
   emptyLabel?: string;
 };
@@ -197,8 +195,6 @@ export function CmsImage({
   width,
   height,
   loading,
-  fetchPriority,
-  sizes,
   emptyLabel = "Subir imagen",
 }: CmsImageProps) {
   const { editMode, overrides, selected, setSelected } = useEditor();
@@ -274,13 +270,11 @@ export function CmsImage({
             quality: 80,
             resize: "contain",
           })}
-          sizes={sizes ?? "100vw"}
+          sizes="100vw"
           alt={alt}
           width={width}
           height={height}
-          loading={loading ?? "lazy"}
-          fetchPriority={fetchPriority}
-          decoding={fetchPriority === "high" ? "sync" : "async"}
+          loading={loading}
           className={className}
         />
       ) : showEmpty && editMode ? (

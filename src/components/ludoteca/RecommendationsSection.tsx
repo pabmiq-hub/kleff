@@ -4,7 +4,6 @@ import { recommendSimilar } from "@/lib/ludoteca.functions";
 import { Sparkles, Search, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { getOptimizedImageUrl } from "@/lib/image-delivery";
 
 interface Game {
   id: string;
@@ -96,7 +95,7 @@ export function RecommendationsSection({ games }: { games: Game[] }) {
                 className="w-full flex items-center gap-3 px-3 py-2 hover:bg-cream-deep text-left"
               >
                 {g.image_url || g.thumbnail_url ? (
-                  <img width={32} height={32} loading="lazy" decoding="async" src={getOptimizedImageUrl(g.thumbnail_url ?? g.image_url ?? "", { width: 64, height: 64 })} alt="" className="h-8 w-8 rounded object-cover" />
+                  <img loading="lazy" decoding="async" src={g.thumbnail_url ?? g.image_url ?? ""} alt="" className="h-8 w-8 rounded object-cover" />
                 ) : (
                   <div className="h-8 w-8 rounded bg-primary-soft" />
                 )}
@@ -123,10 +122,8 @@ export function RecommendationsSection({ games }: { games: Game[] }) {
               <div className="aspect-square bg-cream-deep">
                 {game.image_url || game.thumbnail_url ? (
                   <img
-                    src={getOptimizedImageUrl(game.thumbnail_url ?? game.image_url ?? "", { width: 480, height: 480 })}
+                    src={game.thumbnail_url ?? game.image_url ?? ""}
                     alt={game.title}
-                    width={480}
-                    height={480}
                     loading="lazy"
                     decoding="async"
                     className="w-full h-full object-cover"

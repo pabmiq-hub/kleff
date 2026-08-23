@@ -19,7 +19,6 @@ import { useEditor } from "@/editor/EditorProvider";
 import { useI18n } from "@/i18n/I18nProvider";
 import clocktowerLogo from "@/assets/clocktower-logo.webp";
 import clocktowerHero from "@/assets/clocktower-hero.webp";
-import { getOptimizedImageUrl } from "@/lib/image-delivery";
 
 /** Convert any Instagram reel URL to its `/embed` equivalent. */
 function reelToEmbed(url: string): string | null {
@@ -93,7 +92,7 @@ function HeroSection() {
     <section className="relative bg-ink text-cream overflow-hidden border-b-2 border-ink/20">
       <div className="absolute inset-0 opacity-30">
         <img
-          src={getOptimizedImageUrl(heroImg, { width: 1200, height: 1200 })}
+          src={heroImg}
           alt=""
           className="absolute inset-0 h-full w-full object-cover"
           loading="eager"
@@ -155,7 +154,7 @@ function HeroSection() {
           <div className="relative max-w-[420px] w-full">
             <div className="absolute inset-0 bg-coral/30 blur-2xl rounded-full scale-90" aria-hidden />
             <img
-              src={getOptimizedImageUrl(clocktowerLogo, { width: 1200, height: 1200 })}
+              src={clocktowerLogo}
               alt="Blood on the Clocktower"
               width={1024}
               height={1024}
@@ -529,12 +528,9 @@ function Gallery({ images }: { images: string[] }) {
     return (
       <div className="aspect-[16/9] bg-cream-deep/40 overflow-hidden border-b-2 border-ink/10">
         <img
-          src={getOptimizedImageUrl(images[0], { width: 960, height: 540 })}
+          src={images[0]}
           alt=""
-          width={960}
-          height={540}
           loading="lazy"
-          decoding="async"
           className="h-full w-full object-cover"
         />
       </div>
@@ -544,14 +540,14 @@ function Gallery({ images }: { images: string[] }) {
   return (
     <div className="grid grid-cols-3 grid-rows-2 gap-1 aspect-[16/9] bg-cream-deep/40 border-b-2 border-ink/10">
       <div className="col-span-2 row-span-2 overflow-hidden">
-        <img src={getOptimizedImageUrl(images[0], { width: 640, height: 480 })} alt="" width={640} height={480} loading="lazy" decoding="async" className="h-full w-full object-cover" />
+        <img src={images[0]} alt="" loading="lazy" className="h-full w-full object-cover" />
       </div>
       <div className="overflow-hidden">
-        <img src={getOptimizedImageUrl(images[1], { width: 320, height: 240 })} alt="" width={320} height={240} loading="lazy" decoding="async" className="h-full w-full object-cover" />
+        <img src={images[1]} alt="" loading="lazy" className="h-full w-full object-cover" />
       </div>
       {images[2] ? (
         <div className="overflow-hidden">
-          <img src={getOptimizedImageUrl(images[2], { width: 320, height: 240 })} alt="" width={320} height={240} loading="lazy" decoding="async" className="h-full w-full object-cover" />
+          <img src={images[2]} alt="" loading="lazy" className="h-full w-full object-cover" />
         </div>
       ) : (
         <div className="bg-cream-deep/60 flex items-center justify-center text-foreground/30">

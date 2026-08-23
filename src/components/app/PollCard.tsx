@@ -13,7 +13,6 @@ import { CheckCircle2, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { useAppLocale, pickLocalized } from "@/i18n/app-i18n";
 import { pollsDict } from "@/i18n/app/polls";
-import { getOptimizedImageUrl } from "@/lib/image-delivery";
 
 const DATE_LOCALE: Record<string, string> = { es: "es-ES", ca: "ca-ES", en: "en-GB" };
 
@@ -139,7 +138,7 @@ export function PollCard({ poll, onDone }: { poll: MemberPoll; onDone: () => voi
                   >
                     <Checkbox checked={checked} onCheckedChange={() => toggle(o.id)} disabled={!poll.open} />
                     {o.imageUrl && (
-                      <img width={48} height={48} loading="lazy" decoding="async" src={getOptimizedImageUrl(o.imageUrl, { width: 96, height: 96 })} alt="" className="h-12 w-12 rounded-lg object-cover border border-ink/10" />
+                      <img loading="lazy" decoding="async" src={o.imageUrl} alt="" className="h-12 w-12 rounded-lg object-cover border border-ink/10" />
                     )}
                     <div className="min-w-0 flex-1">
                       <p className="font-semibold text-sm">

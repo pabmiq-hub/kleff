@@ -17,10 +17,9 @@ import {
 } from "lucide-react";
 import { useI18n } from "@/i18n/I18nProvider";
 import { SiteLayout } from "@/components/site/SiteLayout";
-import slfLogo from "@/assets/slow-friending-logo.webp";
+import logoAsset from "@/assets/slow-friending-ludico-logo.png.asset.json";
 import estacioAsset from "@/assets/slf-estacio.jpg.asset.json";
 import hugosAsset from "@/assets/slf-hugos-diner.webp.asset.json";
-import { getOptimizedImageUrl, getResponsiveImageSrcSet } from "@/lib/image-delivery";
 
 const MEETUP_URL = "https://www.meetup.com/es-ES/kleff-bcn/events/?type=upcoming";
 
@@ -391,14 +390,10 @@ export function SlowFriendingPage() {
               <div className="absolute inset-0 rounded-3xl bg-coral/20 rotate-3" aria-hidden />
               <div className="relative bg-cream border-2 border-ink rounded-3xl p-6 shadow-tactile-lg">
                 <img
-                  src={slfLogo}
+                  src={logoAsset.url}
                   alt="Slow Friending Lúdico"
                   className="w-full h-auto"
-                  width={384}
-                  height={384}
                   loading="eager"
-                  fetchPriority="high"
-                  decoding="async"
                 />
               </div>
             </div>
@@ -560,12 +555,8 @@ export function SlowFriendingPage() {
               >
                 <div className="relative aspect-[16/10] overflow-hidden border-b-2 border-ink">
                   <img
-                    src={getOptimizedImageUrl(i === 0 ? estacioAsset.url : hugosAsset.url, { width: 800, height: 500 })}
-                    srcSet={getResponsiveImageSrcSet(i === 0 ? estacioAsset.url : hugosAsset.url, [480, 800, 1200], { height: 500 })}
-                    sizes="(min-width: 768px) 45vw, 100vw"
+                    src={i === 0 ? estacioAsset.url : hugosAsset.url}
                     alt={v.name}
-                    width={800}
-                    height={500}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                     loading="lazy"
                     decoding="async"
@@ -590,11 +581,9 @@ export function SlowFriendingPage() {
         <div className="absolute -bottom-16 -left-16 size-80 rounded-full bg-coral/10 blur-3xl pointer-events-none" />
         <div className="relative mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 text-center">
           <img loading="lazy" decoding="async"
-            src={slfLogo}
+            src={logoAsset.url}
             alt=""
             aria-hidden
-            width={224}
-            height={112}
             className="mx-auto h-28 w-auto opacity-90 [filter:brightness(0)_invert(1)]"
           />
           <h2 className="mt-6 text-4xl sm:text-5xl font-display font-semibold leading-tight">{c.finalTitle}</h2>

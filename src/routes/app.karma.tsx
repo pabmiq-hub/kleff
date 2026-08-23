@@ -39,7 +39,6 @@ import { useAppLocale, pickLocalized } from "@/i18n/app-i18n";
 import { commonDict } from "@/i18n/app/common";
 import { karmaDict } from "@/i18n/app/karma";
 import { getMyReferrals, createMyReferral } from "@/lib/karma-referrals.functions";
-import { getOptimizedImageUrl } from "@/lib/image-delivery";
 
 export const Route = createFileRoute("/app/karma")({
   head: () => ({
@@ -494,7 +493,7 @@ function KarmaPage() {
           {ranking.length > 0 ? (
             <div className="rounded-2xl border-2 border-coral/40 bg-coral/10 p-5 flex items-center gap-4">
               {ranking[0].avatarUrl ? (
-                <img width={56} height={56} loading="lazy" decoding="async" src={getOptimizedImageUrl(ranking[0].avatarUrl, { width: 112, height: 112 })} alt="" className="h-14 w-14 rounded-full object-cover" />
+                <img loading="lazy" decoding="async" src={ranking[0].avatarUrl} alt="" className="h-14 w-14 rounded-full object-cover" />
               ) : (
                 <div className="h-14 w-14 rounded-full bg-ink/10" />
               )}
@@ -515,7 +514,7 @@ function KarmaPage() {
                 <div key={r.userId} className="p-3 flex items-center gap-3">
                   <span className="w-6 text-center font-display font-bold text-ink/50">{i + 1}</span>
                   {r.avatarUrl ? (
-                    <img width={32} height={32} loading="lazy" decoding="async" src={getOptimizedImageUrl(r.avatarUrl, { width: 64, height: 64 })} alt="" className="h-8 w-8 rounded-full object-cover" />
+                    <img loading="lazy" decoding="async" src={r.avatarUrl} alt="" className="h-8 w-8 rounded-full object-cover" />
                   ) : (
                     <div className="h-8 w-8 rounded-full bg-ink/10" />
                   )}

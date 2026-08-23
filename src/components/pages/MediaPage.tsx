@@ -98,8 +98,6 @@ export function MediaCard({
               src={getOptimizedImageUrl(image, { width: 720, height: 405 })}
               srcSet={getResponsiveImageSrcSet(image, [360, 540, 720, 1080], { height: 405 })}
               sizes="(min-width: 1024px) 30vw, (min-width: 640px) 45vw, 100vw"
-              width={720}
-              height={405}
               alt={title ?? ""}
               loading="lazy"
               className="absolute inset-0 h-full w-full object-cover group-hover:scale-105 transition-transform duration-500"
@@ -334,10 +332,7 @@ export function MediaPage() {
                           <img
                             src={post.thumbnailUrl}
                             alt={post.caption.slice(0, 120) || "@kleff.bcn"}
-                            width={400}
-                            height={400}
                             loading="lazy"
-                            decoding="async"
                             className="absolute inset-0 h-full w-full object-cover group-hover:scale-105 transition-transform duration-500"
                           />
                         ) : (

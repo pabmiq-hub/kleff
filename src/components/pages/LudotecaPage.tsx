@@ -13,7 +13,6 @@ import { or } from "@/cms/or";
 
 import { LocationBadge, LocationLegend } from "@/components/ludoteca/LocationBadge";
 import { RecommendationsSection } from "@/components/ludoteca/RecommendationsSection";
-import { getOptimizedImageUrl } from "@/lib/image-delivery";
 
 interface BggGame {
   id: string;
@@ -518,7 +517,7 @@ export function LudotecaPage() {
                   <div className="relative aspect-square bg-cream-deep overflow-hidden border-b-2 border-ink">
                     {g.image_url || g.thumbnail_url ? (
                       <img
-                        src={getOptimizedImageUrl(g.thumbnail_url ?? g.image_url ?? "", { width: 800, height: 800 })}
+                        src={g.thumbnail_url ?? g.image_url ?? ""}
                         alt={g.title}
                         loading="lazy"
                         decoding="async"

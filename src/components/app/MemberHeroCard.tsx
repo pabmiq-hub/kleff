@@ -7,7 +7,6 @@ import { getMyKarmaSummary } from "@/lib/karma.functions";
 import { getMyKlefferProfile } from "@/lib/kleffer-profile.functions";
 import { levelForKarma, nextLevelForKarma } from "@/lib/karma-levels";
 import { useAppLocale } from "@/i18n/app-i18n";
-import { getOptimizedImageUrl } from "@/lib/image-delivery";
 
 const TEXT = {
   es: {
@@ -137,7 +136,7 @@ export function MemberHeroCard() {
         <div className="flex items-center gap-4 min-w-0">
           <div className="h-16 w-16 shrink-0 rounded-2xl border-2 border-cream/30 bg-cream/10 overflow-hidden flex items-center justify-center font-display text-xl font-bold">
             {profile?.avatar_url ? (
-              <img loading="lazy" decoding="async" src={getOptimizedImageUrl(profile.avatar_url, { width: 128, height: 128 })} alt="" width={64} height={64} className="h-full w-full object-cover" />
+              <img loading="lazy" decoding="async" src={profile.avatar_url} alt="" className="h-full w-full object-cover" />
             ) : (
               initials
             )}

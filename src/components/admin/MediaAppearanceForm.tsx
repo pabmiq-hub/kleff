@@ -18,7 +18,6 @@ import {
 import { uploadMedia } from "@/lib/media.functions";
 import { optimizeToUploadPayload } from "@/lib/image-optimize";
 import { MediaCard } from "@/components/pages/MediaPage";
-import { getOptimizedImageUrl } from "@/lib/image-delivery";
 
 const MONTH_LABELS = [
   "ENE",
@@ -444,11 +443,9 @@ export function MediaAppearanceForm({ initial }: Props) {
           </div>
           {imageUrl && (
             <img loading="lazy" decoding="async"
-              src={getOptimizedImageUrl(imageUrl, { width: 640, resize: "contain" })}
+              src={imageUrl}
               alt="vista previa"
-              width={320}
-              height={160}
-              className="mt-3 max-h-40 w-auto rounded-md border border-ink/10"
+              className="mt-3 max-h-40 rounded-md border border-ink/10"
               onError={(e) => ((e.currentTarget.style.opacity = "0.3"))}
             />
           )}

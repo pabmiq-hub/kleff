@@ -4,7 +4,6 @@ import { useServerFn } from "@tanstack/react-start";
 import { listAllRentals, markRentalReturned } from "@/lib/rental.functions";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { getOptimizedImageUrl } from "@/lib/image-delivery";
 
 export const Route = createFileRoute("/admin/rentals/active")({
   component: ActivePage,
@@ -62,7 +61,7 @@ function ActivePage() {
         return (
           <div key={r.id} className={`border rounded-2xl p-4 flex flex-wrap items-start gap-4 ${overdue ? "border-coral bg-coral/10" : "border-ink/15 bg-ink/5"}`}>
             {r.bgg_games?.image_url ? (
-              <img width={64} height={64} loading="lazy" decoding="async" src={getOptimizedImageUrl(r.bgg_games.image_url, { width: 128, height: 128 })} alt="" className="h-16 w-16 rounded-lg object-cover border border-ink/20" />
+              <img loading="lazy" decoding="async" src={r.bgg_games.image_url} alt="" className="h-16 w-16 rounded-lg object-cover border border-ink/20" />
             ) : (
               <div className="h-16 w-16 rounded-lg bg-coral/30 flex items-center justify-center font-bold text-ink">🎲</div>
             )}

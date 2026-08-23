@@ -5,7 +5,6 @@ import { optimizeToUploadPayload } from "@/lib/image-optimize";
 import { Button } from "@/components/ui/button";
 import { Image as ImageIcon, X } from "lucide-react";
 import { toast } from "sonner";
-import { getOptimizedImageUrl } from "@/lib/image-delivery";
 
 type Props = {
   url?: string;
@@ -47,7 +46,7 @@ export function ImagePicker({ url, onChange, className = "", height = "h-32", la
   if (url) {
     return (
       <div className={`relative group ${className}`}>
-        <img loading="lazy" decoding="async" src={getOptimizedImageUrl(url, { width: 800, resize: "contain" })} alt="" width={800} height={450} className={`rounded-lg w-full object-cover ${height}`} />
+        <img loading="lazy" decoding="async" src={url} alt="" className={`rounded-lg w-full object-cover ${height}`} />
         <div className="absolute top-1.5 right-1.5 flex gap-1">
           <Button size="sm" variant="ghost" onClick={pickFile} disabled={uploading} className="bg-ink/80 text-cream hover:bg-ink h-7 px-2 text-xs">
             Cambiar

@@ -10,7 +10,6 @@ import { toast } from "sonner";
 import { LayoutGrid, List, Search, Eye, CheckCircle2, XCircle, Mail, Calendar, User as UserIcon, IdCard, Shield, Sparkles, Trash2 } from "lucide-react";
 import { adminGetMemberKarma } from "@/lib/karma-admin.functions";
 import { levelForKarma, KARMA_ENTRY_STATUS_LABELS } from "@/lib/karma-levels";
-import { getOptimizedImageUrl } from "@/lib/image-delivery";
 
 export const Route = createFileRoute("/admin/members")({
   component: MembersPage,
@@ -204,7 +203,7 @@ function MembersPage() {
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-3">
                       {m.avatar_url ? (
-                        <img width={36} height={36} loading="lazy" decoding="async" src={getOptimizedImageUrl(m.avatar_url, { width: 72, height: 72 })} alt="" className="h-9 w-9 rounded-full object-cover border border-ink/20" />
+                        <img loading="lazy" decoding="async" src={m.avatar_url} alt="" className="h-9 w-9 rounded-full object-cover border border-ink/20" />
                       ) : (
                         <div className="h-9 w-9 rounded-full bg-coral/30 flex items-center justify-center font-bold text-ink">
                           {m.full_name.charAt(0).toUpperCase()}
@@ -260,7 +259,7 @@ function MembersPage() {
             >
               <div className="flex items-center gap-3 mb-3">
                 {m.avatar_url ? (
-                  <img width={56} height={56} loading="lazy" decoding="async" src={getOptimizedImageUrl(m.avatar_url, { width: 112, height: 112 })} alt="" className="h-14 w-14 rounded-full object-cover border-2 border-coral" />
+                  <img loading="lazy" decoding="async" src={m.avatar_url} alt="" className="h-14 w-14 rounded-full object-cover border-2 border-coral" />
                 ) : (
                   <div className="h-14 w-14 rounded-full bg-coral/30 flex items-center justify-center font-bold text-ink text-xl">
                     {m.full_name.charAt(0).toUpperCase()}
@@ -312,7 +311,7 @@ function MembersPage() {
               <div className="mt-6 space-y-6">
                 <div className="flex items-center gap-4">
                   {selected.avatar_url ? (
-                    <img width={80} height={80} loading="lazy" decoding="async" src={getOptimizedImageUrl(selected.avatar_url, { width: 160, height: 160 })} alt="" className="h-20 w-20 rounded-full object-cover border-2 border-coral" />
+                    <img loading="lazy" decoding="async" src={selected.avatar_url} alt="" className="h-20 w-20 rounded-full object-cover border-2 border-coral" />
                   ) : (
                     <div className="h-20 w-20 rounded-full bg-coral/30 flex items-center justify-center font-bold text-ink text-3xl">
                       {selected.full_name.charAt(0).toUpperCase()}

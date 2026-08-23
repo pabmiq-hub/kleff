@@ -16,7 +16,6 @@ import { SectionProvider, useSectionValue } from "@/cms/SectionContext";
 import { CmsImage, CmsList, CmsText } from "@/cms/Editable";
 import { useEditor } from "@/editor/EditorProvider";
 import catanLogo from "@/assets/catan-logo.webp";
-import { getOptimizedImageUrl } from "@/lib/image-delivery";
 
 const RESOURCE_ICONS = [
   { icon: Trees, label: "Madera", color: "bg-emerald-700" },
@@ -102,7 +101,7 @@ function HeroSection() {
           <div className="relative max-w-[420px] w-full">
             <div className="absolute inset-0 bg-amber-300/40 blur-2xl rounded-full scale-90" aria-hidden />
             <img
-              src={getOptimizedImageUrl(catanLogo, { width: 1200, height: 1000 })}
+              src={catanLogo}
               alt="Catan"
               width={900}
               height={500}
