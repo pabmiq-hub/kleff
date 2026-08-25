@@ -411,9 +411,11 @@ function TeamFlipCard({
               <OptimizedImg
                 src={member.photo}
                 alt={member.name}
-                width={450}
-                height={600}
-                className="absolute inset-0 h-full w-full object-cover"
+                width={600}
+                widths={[300, 450, 600, 900]}
+                sizes="(min-width: 1024px) 300px, (min-width: 640px) 45vw, 90vw"
+                quality={72}
+                className="absolute inset-0 h-full w-full object-cover object-[center_18%]"
               />
             ) : (
               <div className="absolute inset-0 flex items-center justify-center">
