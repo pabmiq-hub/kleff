@@ -12,6 +12,7 @@ import { HistoryTimeline } from "@/components/about/HistoryTimeline";
 import { EditableText, EditableImage } from "@/editor/Editable";
 import { useSectionContent } from "@/cms/useSectionContent";
 import { or } from "@/cms/or";
+import { OptimizedImg } from "@/components/ui/optimized-img";
 
 type TeamMember = {
   name: string;
