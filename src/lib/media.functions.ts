@@ -152,6 +152,25 @@ export const uploadMedia = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     await assertSuperAdmin(context.userId);
+
+    const ALLOWED_TYPES = [
+      "image/webp",
+      "image/jpeg",
+      "image/png",
+      "image/gif",
+      "image/svg+xml",
+    ];
+    const baseType = data.contentType.split(";")[0]!.trim().toLowerCase();
+    if (!ALLOWED_TYPES.includes(baseType)) {
+      throw new Error(
+        `Tipo de archivo no permitido (${baseType}). Solo se aceptan imágenes WebP, JPEG, PNG, GIF o SVG.`,
+      );
+    }
+    const MAX_BASE64_LENGTH = 11 * 1024 * 1024; // ~8MB reales
+    if (data.base64.length > MAX_BASE64_LENGTH) {
+      throw new Error("La imagen es demasiado grande. El máximo permitido es 8MB.");
+    }
+
     // Preserve the original filename for SEO ("blood-on-the-clocktower.jpg"
     // stays meaningful) but slugify minimally and append a short random suffix
     // so two uploads with the same name don't collide.
