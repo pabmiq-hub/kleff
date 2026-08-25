@@ -7,6 +7,7 @@ import {
   useState,
 } from "react";
 import { useEditor } from "./EditorProvider";
+import { getOptimizedImageUrl, getResponsiveImageSrcSet } from "@/lib/image-delivery";
 import type { StyleProps } from "./types";
 
 function styleToCss(s: StyleProps | undefined): CSSProperties {
@@ -190,6 +191,10 @@ type EditableImageProps = CommonProps & {
   loading?: "lazy" | "eager";
   fetchPriority?: "high" | "low" | "auto";
   decoding?: "sync" | "async" | "auto";
+  widths?: number[];
+  sizes?: string;
+  quality?: number;
+  resize?: "cover" | "contain" | "fill";
 };
 
 export function EditableImage({
@@ -203,6 +208,10 @@ export function EditableImage({
   loading,
   fetchPriority,
   decoding,
+  widths,
+  sizes = "100vw",
+  quality,
+  resize = "cover",
 }: EditableImageProps) {
   const { editMode, overrides, selected, setSelected } = useEditor();
   const ref = useRef<HTMLImageElement | null>(null);
@@ -236,11 +245,26 @@ export function EditableImage({
     ? { pointerEvents: "auto", position: "relative", zIndex: 5 }
     : {};
 
+  const targetWidth = typeof width === "number" ? width : 1600;
+  const displaySrc = getOptimizedImageUrl(finalSrc, {
+    width: targetWidth,
+    height: typeof height === "number" ? height : undefined,
+    quality,
+    resize,
+  });
+  const srcSet = getResponsiveImageSrcSet(
+    finalSrc,
+    widths ?? [480, 768, 1080, 1600, 2000],
+    { quality, resize },
+  );
+
   return (
     <img
       ref={ref}
       data-edit-id={id}
-      src={finalSrc}
+      src={displaySrc}
+      srcSet={srcSet}
+      sizes={srcSet ? sizes : undefined}
       alt={finalAlt}
       width={width}
       height={height}

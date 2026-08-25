@@ -12,6 +12,7 @@ import { HistoryTimeline } from "@/components/about/HistoryTimeline";
 import { EditableText, EditableImage } from "@/editor/Editable";
 import { useSectionContent } from "@/cms/useSectionContent";
 import { or } from "@/cms/or";
+import { OptimizedImg } from "@/components/ui/optimized-img";
 
 type TeamMember = {
   name: string;
@@ -407,11 +408,11 @@ function TeamFlipCard({
         <div className="flip-card-face bg-card border-2 border-ink shadow-tactile-sm rounded-3xl flex flex-col">
           <div className="relative flex-1 bg-gradient-to-br from-coral/25 via-cream-deep/60 to-coral/35 overflow-hidden">
             {member.photo ? (
-              <img loading="lazy" decoding="async"
+              <OptimizedImg
                 src={member.photo}
                 alt={member.name}
-                width="450"
-                height="600"
+                width={450}
+                height={600}
                 className="absolute inset-0 h-full w-full object-cover"
               />
             ) : (

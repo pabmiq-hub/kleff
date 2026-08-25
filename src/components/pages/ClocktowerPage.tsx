@@ -19,6 +19,7 @@ import { useEditor } from "@/editor/EditorProvider";
 import { useI18n } from "@/i18n/I18nProvider";
 import clocktowerLogo from "@/assets/clocktower-logo.webp";
 import clocktowerHero from "@/assets/clocktower-hero.webp";
+import { OptimizedImg } from "@/components/ui/optimized-img";
 
 /** Convert any Instagram reel URL to its `/embed` equivalent. */
 function reelToEmbed(url: string): string | null {
@@ -527,7 +528,7 @@ function Gallery({ images }: { images: string[] }) {
   if (images.length === 1) {
     return (
       <div className="aspect-[16/9] bg-cream-deep/40 overflow-hidden border-b-2 border-ink/10">
-        <img
+        <OptimizedImg
           src={images[0]}
           alt=""
           loading="lazy"
@@ -540,14 +541,14 @@ function Gallery({ images }: { images: string[] }) {
   return (
     <div className="grid grid-cols-3 grid-rows-2 gap-1 aspect-[16/9] bg-cream-deep/40 border-b-2 border-ink/10">
       <div className="col-span-2 row-span-2 overflow-hidden">
-        <img src={images[0]} alt="" loading="lazy" className="h-full w-full object-cover" />
+        <OptimizedImg src={images[0]} alt="" loading="lazy" className="h-full w-full object-cover" />
       </div>
       <div className="overflow-hidden">
-        <img src={images[1]} alt="" loading="lazy" className="h-full w-full object-cover" />
+        <OptimizedImg src={images[1]} alt="" loading="lazy" className="h-full w-full object-cover" />
       </div>
       {images[2] ? (
         <div className="overflow-hidden">
-          <img src={images[2]} alt="" loading="lazy" className="h-full w-full object-cover" />
+          <OptimizedImg src={images[2]} alt="" loading="lazy" className="h-full w-full object-cover" />
         </div>
       ) : (
         <div className="bg-cream-deep/60 flex items-center justify-center text-foreground/30">
