@@ -388,6 +388,9 @@ export function HomePage() {
                   alt="Comunidad KLEFF jugando juegos de mesa"
                   width={1600}
                   height={2000}
+                  loading="eager"
+                  fetchPriority="high"
+                  sizes="(min-width: 1024px) 40vw, 100vw"
                   className="absolute inset-0 h-full w-full object-cover"
                 />
               </div>
