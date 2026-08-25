@@ -44,7 +44,7 @@ export function OptimizedImg({
   // When an explicit height is given, keep the same aspect ratio across breakpoints,
   // otherwise the transform service returns stretched variants.
   const srcSet =
-    height && width
+    height && width && src?.includes("/storage/v1/")
       ? responsiveWidths
           .map(
             (w) =>
