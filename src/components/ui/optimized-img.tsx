@@ -41,7 +41,18 @@ export function OptimizedImg({
   const targetWidth = width ?? 1600;
   const responsiveWidths = widths ?? DEFAULT_RESPONSIVE_WIDTHS;
   const displaySrc = getOptimizedImageUrl(src, { width: targetWidth, height, quality, resize });
-  const srcSet = getResponsiveImageSrcSet(src, responsiveWidths, { quality, resize });
+  // When an explicit height is given, keep the same aspect ratio across breakpoints,
+  // otherwise the transform service returns stretched variants.
+  const srcSet =
+    height && width && src?.includes("/storage/v1/")
+      ? responsiveWidths
+          .map(
+            (w) =>
+              `${getOptimizedImageUrl(src, { width: w, height: Math.round((height / width) * w), quality, resize })} ${w}w`,
+          )
+          .join(", ")
+      : getResponsiveImageSrcSet(src, responsiveWidths, { quality, resize });
+
 
   return (
     <img

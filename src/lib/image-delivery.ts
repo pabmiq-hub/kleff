@@ -30,7 +30,9 @@ export function getOptimizedImageUrl(
   url.pathname = url.pathname.replace(PUBLIC_STORAGE_MARKER, RENDER_STORAGE_MARKER);
   url.searchParams.set("width", String(Math.max(1, Math.round(width))));
   if (height) url.searchParams.set("height", String(Math.max(1, Math.round(height))));
-  url.searchParams.set("resize", resize);
+  // Without an explicit height, "cover"/"fill" stretch the image to the original
+  // height (e.g. 300x4096). "contain" keeps the source aspect ratio.
+  url.searchParams.set("resize", height ? resize : "contain");
   url.searchParams.set("quality", String(quality));
   return url.toString();
 }
