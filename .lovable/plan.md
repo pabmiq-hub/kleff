@@ -1,54 +1,32 @@
-# Integración de Match Maker Pro en KLEFF
+# Optimización de la base de datos de KLEFF
 
-## Resumen
+## Diagnóstico (verificado con consultas directas)
 
-Integrar completamente Match Maker Pro (speed dating / matchmaking de eventos) dentro de kleff.es: su base de datos se fusiona con la de KLEFF, sus 38 edge functions se reescriben como server functions de TanStack Start, y sus 23 páginas se portan a rutas de la app actual. El super admin de KLEFF pasa a ser el administrador de Match Maker Pro.
+- **Tamaño total: 1,22 GB**, pero los datos reales de la app (todas las tablas públicas) suman solo **~9 MB**.
+- **El 99% del espacio lo ocupa `cron.job_run_details` (1.231 MB)**: el historial de la tarea programada `process-email-queue`, que se ejecuta cada 5 segundos mientras hay emails en cola y registra cada ejecución.
+- El WAL (128 MB) y la memoria (60%) están en niveles normales.
+- Las consultas son rápidas en general; las más costosas: listado de juegos de la ludoteca (media 58 ms) y listados del blog (media 4–8 ms).
 
-## Datos clave del análisis
+## Cambios propuestos
 
-- **BD actual KLEFF: 1,22 GB** (disco al 52%, memoria 58%, conexiones bajas). Hay capacidad de sobra; no hace falta ampliar recursos.
-- **Match Maker Pro**: ~30 tablas, ~50 migraciones, 38 edge functions (~10.700 líneas), 23 páginas (~17.000 líneas), React Router + SPA (stack distinto al de KLEFF).
-- **Conflictos detectados**: ambos proyectos tienen tabla `user_roles` y enum de roles propio; MMP usa Stripe en el panel de super admin (planes/suscripciones); participantes acceden sin cuenta (flujo por códigos/email), solo hay 2 usuarios reales (super admin + 1 admin de evento).
+### 1. Purgar el historial de tareas programadas (recupera ~1,2 GB)
+- Borrar el contenido acumulado de `cron.job_run_details` (es solo historial de ejecuciones; no afecta a la cola de emails ni a los correos pendientes).
+- Crear una limpieza automática semanal que conserve solo los últimos 7 días de historial, para que no vuelva a crecer.
+- Ejecutar `VACUUM` sobre esa tabla para devolver el espacio al disco (la métrica de 1,22 GB bajará de forma visible).
 
-## Estimación de créditos
+### 2. Reducir el ruido de logs de la cola de email (opcional pero recomendado)
+- Ajustar la función `email_queue_dispatch` para que siga funcionando igual pero genere menos registros de historial (misma lógica, menos escritura).
 
-No se puede conocer el coste exacto por adelantado, pero una estimación honesta por bloques:
+### 3. Índices para las consultas más frecuentes
+- `blog_posts(status, published_at DESC)`: acelera el listado público del blog y el sitemap.
+- `bgg_games` índice parcial sobre `bgg_rating DESC` cuando `is_active = true`: acelera el listado de la ludoteca (~58 ms → ~5 ms esperado).
+- Impacto: lecturas más rápidas; escrituras imperceptiblemente más lentas; +~100 KB de espacio.
 
-| Bloque | Estimación orientativa |
-|---|---|
-| 1. Esquema + migración de datos | 10–20 créditos |
-| 2. Backend (38 funciones → server functions) | 30–45 créditos |
-| 3. Frontend (23 páginas → rutas TanStack) | 30–45 créditos |
-| 4. Emails, ajustes y pruebas end-to-end | 10–15 créditos |
-| **Total** | **~80–120 créditos**, repartidos en varias sesiones |
+### 4. Verificación
+- Re-ejecutar el análisis de salud de la BD para confirmar la reducción de tamaño.
+- Confirmar con EXPLAIN que las consultas del blog y la ludoteca usan los nuevos índices.
 
-El coste real depende de las iteraciones de ajuste. Se puede pausar entre bloques y cada bloque queda funcional por sí mismo.
-
-## Plan de ejecución
-
-### Bloque 1 — Esquema y datos
-- Crear las ~30 tablas de MMP en la BD de KLEFF con prefijo/lógica unificada, resolviendo conflictos:
-  - `user_roles`: reutilizar la de KLEFF; añadir rol `organizer` al enum `app_role` (MMP tiene "organizador de evento").
-  - Resto de tablas (events, participants, participant_selections, crush_requests, repeat_requests, wrapped_*, event_waitlist, game_votes, game_rewards, email_logs, organizers, etc.) se crean con sus GRANT + RLS adaptados al modelo de KLEFF.
-- **Decisión incluida**: el módulo de planes de suscripción/Stripe de MMP NO se migra (KLEFF no vende suscripciones; se omite `subscription_plans`, `plan_features`, `features`, `modules` salvo que se indique lo contrario).
-- Migración de datos: tú exportas los datos desde el proyecto Match Maker Pro (Cloud → Advanced settings → Export data) y me los subes; yo los importo tabla a tabla mapeando los 2 usuarios existentes a la cuenta de admin de KLEFF.
-
-### Bloque 2 — Backend
-- Reescribir las 38 edge functions como `createServerFn` (lógica interna) y rutas `/api/public/*` (webhooks/cron): códigos de acceso, check-in, selecciones, matches, crushes, repeats, wrapped, waitlist, recordatorios, remarketing.
-- Reutilizar la infraestructura de email ya existente en KLEFF (Resend + cola de emails + plantillas), en lugar del sistema de plantillas por organizador de MMP.
-
-### Bloque 3 — Frontend
-- Portar las 23 páginas a rutas TanStack:
-  - Públicas (sin cuenta): acceso de participante, selección de matches, crush/repeat response, cancelación, check-in, mesas.
-  - Admin: panel de eventos dentro de `/admin` de KLEFF (reutilizando el layout y auth actuales).
-- Idiomas: se portan en castellano primero (MMP es monolingüe); las versiones ca/en se añaden al final si lo deseas.
-
-### Bloque 4 — Verificación
-- Pruebas end-to-end del flujo completo: crear evento → registro participante → códigos → selecciones → emails de match.
-- Escaneo de seguridad final y publicación.
-
-## Notas técnicas
-- Participantes de MMP no tienen cuenta (acceso por código/email): se mantiene ese modelo, no se crean usuarios auth para ellos.
-- El super admin de KLEFF hereda el acceso de administración de eventos; el admin de evento existente recibe rol `organizer`.
-- RLS estricto en todas las tablas nuevas; lecturas públicas solo vía políticas `TO anon` muy acotadas (datos de evento públicos).
-- Nada toca el proyecto original de Match Maker Pro: la copia es de solo lectura; MMP seguirá funcionando hasta que decidamos apagarlo.
+## Notas
+- No se toca ningún dato de la aplicación (socios, blog, karma, alquileres, etc.).
+- No hace falta ampliar disco ni instancia: tras la limpieza el uso de disco bajará del 52% a un dígito.
+- El plan de integración de Match Maker Pro queda pendiente y se puede retomar después; con la BD limpia, la absorción de sus datos será trivial en espacio.
