@@ -85,6 +85,7 @@ import { Route as AdminRentalsRouteImport } from './routes/admin.rentals'
 import { Route as AdminRegistrationsRouteImport } from './routes/admin.registrations'
 import { Route as AdminPollsRouteImport } from './routes/admin.polls'
 import { Route as AdminMembersRouteImport } from './routes/admin.members'
+import { Route as AdminKonektumRouteImport } from './routes/admin.konektum'
 import { Route as AdminKarmaRouteImport } from './routes/admin.karma'
 import { Route as AdminInvitationsRouteImport } from './routes/admin.invitations'
 import { Route as AdminContentRouteImport } from './routes/admin.content'
@@ -93,6 +94,7 @@ import { Route as AppRentalsIndexRouteImport } from './routes/app.rentals.index'
 import { Route as AdminRentalsIndexRouteImport } from './routes/admin.rentals.index'
 import { Route as AdminRegistrationsIndexRouteImport } from './routes/admin.registrations.index'
 import { Route as AdminMediaIndexRouteImport } from './routes/admin.media.index'
+import { Route as AdminKonektumIndexRouteImport } from './routes/admin.konektum.index'
 import { Route as AdminContentIndexRouteImport } from './routes/admin.content.index'
 import { Route as AdminBlogIndexRouteImport } from './routes/admin.blog.index'
 import { Route as AuthLudoyaCallbackRouteImport } from './routes/auth.ludoya.callback'
@@ -112,6 +114,12 @@ import { Route as AdminRegistrationsIdRouteImport } from './routes/admin.registr
 import { Route as AdminPagesPageIdRouteImport } from './routes/admin.pages.$pageId'
 import { Route as AdminMediaNewRouteImport } from './routes/admin.media.new'
 import { Route as AdminMediaIdRouteImport } from './routes/admin.media.$id'
+import { Route as AdminKonektumUsuariosRouteImport } from './routes/admin.konektum.usuarios'
+import { Route as AdminKonektumPlantillasRouteImport } from './routes/admin.konektum.plantillas'
+import { Route as AdminKonektumEventosRouteImport } from './routes/admin.konektum.eventos'
+import { Route as AdminKonektumEmailRouteImport } from './routes/admin.konektum.email'
+import { Route as AdminKonektumConfiguracionRouteImport } from './routes/admin.konektum.configuracion'
+import { Route as AdminKonektumAnaliticaRouteImport } from './routes/admin.konektum.analitica'
 import { Route as AdminContentUrlsRouteImport } from './routes/admin.content.urls'
 import { Route as AdminContentRedirectsRouteImport } from './routes/admin.content.redirects'
 import { Route as AdminContentPageKeyRouteImport } from './routes/admin.content.$pageKey'
@@ -501,6 +509,11 @@ const AdminMembersRoute = AdminMembersRouteImport.update({
   path: '/members',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminKonektumRoute = AdminKonektumRouteImport.update({
+  id: '/konektum',
+  path: '/konektum',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminKarmaRoute = AdminKarmaRouteImport.update({
   id: '/karma',
   path: '/karma',
@@ -540,6 +553,11 @@ const AdminMediaIndexRoute = AdminMediaIndexRouteImport.update({
   id: '/media/',
   path: '/media/',
   getParentRoute: () => AdminRoute,
+} as any)
+const AdminKonektumIndexRoute = AdminKonektumIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminKonektumRoute,
 } as any)
 const AdminContentIndexRoute = AdminContentIndexRouteImport.update({
   id: '/',
@@ -637,6 +655,37 @@ const AdminMediaIdRoute = AdminMediaIdRouteImport.update({
   path: '/media/$id',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminKonektumUsuariosRoute = AdminKonektumUsuariosRouteImport.update({
+  id: '/usuarios',
+  path: '/usuarios',
+  getParentRoute: () => AdminKonektumRoute,
+} as any)
+const AdminKonektumPlantillasRoute = AdminKonektumPlantillasRouteImport.update({
+  id: '/plantillas',
+  path: '/plantillas',
+  getParentRoute: () => AdminKonektumRoute,
+} as any)
+const AdminKonektumEventosRoute = AdminKonektumEventosRouteImport.update({
+  id: '/eventos',
+  path: '/eventos',
+  getParentRoute: () => AdminKonektumRoute,
+} as any)
+const AdminKonektumEmailRoute = AdminKonektumEmailRouteImport.update({
+  id: '/email',
+  path: '/email',
+  getParentRoute: () => AdminKonektumRoute,
+} as any)
+const AdminKonektumConfiguracionRoute =
+  AdminKonektumConfiguracionRouteImport.update({
+    id: '/configuracion',
+    path: '/configuracion',
+    getParentRoute: () => AdminKonektumRoute,
+  } as any)
+const AdminKonektumAnaliticaRoute = AdminKonektumAnaliticaRouteImport.update({
+  id: '/analitica',
+  path: '/analitica',
+  getParentRoute: () => AdminKonektumRoute,
+} as any)
 const AdminContentUrlsRoute = AdminContentUrlsRouteImport.update({
   id: '/urls',
   path: '/urls',
@@ -704,6 +753,7 @@ export interface FileRoutesByFullPath {
   '/admin/content': typeof AdminContentRouteWithChildren
   '/admin/invitations': typeof AdminInvitationsRoute
   '/admin/karma': typeof AdminKarmaRoute
+  '/admin/konektum': typeof AdminKonektumRouteWithChildren
   '/admin/members': typeof AdminMembersRoute
   '/admin/polls': typeof AdminPollsRoute
   '/admin/registrations': typeof AdminRegistrationsRouteWithChildren
@@ -761,6 +811,12 @@ export interface FileRoutesByFullPath {
   '/admin/content/$pageKey': typeof AdminContentPageKeyRoute
   '/admin/content/redirects': typeof AdminContentRedirectsRoute
   '/admin/content/urls': typeof AdminContentUrlsRoute
+  '/admin/konektum/analitica': typeof AdminKonektumAnaliticaRoute
+  '/admin/konektum/configuracion': typeof AdminKonektumConfiguracionRoute
+  '/admin/konektum/email': typeof AdminKonektumEmailRoute
+  '/admin/konektum/eventos': typeof AdminKonektumEventosRoute
+  '/admin/konektum/plantillas': typeof AdminKonektumPlantillasRoute
+  '/admin/konektum/usuarios': typeof AdminKonektumUsuariosRoute
   '/admin/media/$id': typeof AdminMediaIdRoute
   '/admin/media/new': typeof AdminMediaNewRoute
   '/admin/pages/$pageId': typeof AdminPagesPageIdRoute
@@ -780,6 +836,7 @@ export interface FileRoutesByFullPath {
   '/auth/ludoya/callback': typeof AuthLudoyaCallbackRoute
   '/admin/blog/': typeof AdminBlogIndexRoute
   '/admin/content/': typeof AdminContentIndexRoute
+  '/admin/konektum/': typeof AdminKonektumIndexRoute
   '/admin/media/': typeof AdminMediaIndexRoute
   '/admin/registrations/': typeof AdminRegistrationsIndexRoute
   '/admin/rentals/': typeof AdminRentalsIndexRoute
@@ -866,6 +923,12 @@ export interface FileRoutesByTo {
   '/admin/content/$pageKey': typeof AdminContentPageKeyRoute
   '/admin/content/redirects': typeof AdminContentRedirectsRoute
   '/admin/content/urls': typeof AdminContentUrlsRoute
+  '/admin/konektum/analitica': typeof AdminKonektumAnaliticaRoute
+  '/admin/konektum/configuracion': typeof AdminKonektumConfiguracionRoute
+  '/admin/konektum/email': typeof AdminKonektumEmailRoute
+  '/admin/konektum/eventos': typeof AdminKonektumEventosRoute
+  '/admin/konektum/plantillas': typeof AdminKonektumPlantillasRoute
+  '/admin/konektum/usuarios': typeof AdminKonektumUsuariosRoute
   '/admin/media/$id': typeof AdminMediaIdRoute
   '/admin/media/new': typeof AdminMediaNewRoute
   '/admin/pages/$pageId': typeof AdminPagesPageIdRoute
@@ -885,6 +948,7 @@ export interface FileRoutesByTo {
   '/auth/ludoya/callback': typeof AuthLudoyaCallbackRoute
   '/admin/blog': typeof AdminBlogIndexRoute
   '/admin/content': typeof AdminContentIndexRoute
+  '/admin/konektum': typeof AdminKonektumIndexRoute
   '/admin/media': typeof AdminMediaIndexRoute
   '/admin/registrations': typeof AdminRegistrationsIndexRoute
   '/admin/rentals': typeof AdminRentalsIndexRoute
@@ -922,6 +986,7 @@ export interface FileRoutesById {
   '/admin/content': typeof AdminContentRouteWithChildren
   '/admin/invitations': typeof AdminInvitationsRoute
   '/admin/karma': typeof AdminKarmaRoute
+  '/admin/konektum': typeof AdminKonektumRouteWithChildren
   '/admin/members': typeof AdminMembersRoute
   '/admin/polls': typeof AdminPollsRoute
   '/admin/registrations': typeof AdminRegistrationsRouteWithChildren
@@ -979,6 +1044,12 @@ export interface FileRoutesById {
   '/admin/content/$pageKey': typeof AdminContentPageKeyRoute
   '/admin/content/redirects': typeof AdminContentRedirectsRoute
   '/admin/content/urls': typeof AdminContentUrlsRoute
+  '/admin/konektum/analitica': typeof AdminKonektumAnaliticaRoute
+  '/admin/konektum/configuracion': typeof AdminKonektumConfiguracionRoute
+  '/admin/konektum/email': typeof AdminKonektumEmailRoute
+  '/admin/konektum/eventos': typeof AdminKonektumEventosRoute
+  '/admin/konektum/plantillas': typeof AdminKonektumPlantillasRoute
+  '/admin/konektum/usuarios': typeof AdminKonektumUsuariosRoute
   '/admin/media/$id': typeof AdminMediaIdRoute
   '/admin/media/new': typeof AdminMediaNewRoute
   '/admin/pages/$pageId': typeof AdminPagesPageIdRoute
@@ -998,6 +1069,7 @@ export interface FileRoutesById {
   '/auth/ludoya/callback': typeof AuthLudoyaCallbackRoute
   '/admin/blog/': typeof AdminBlogIndexRoute
   '/admin/content/': typeof AdminContentIndexRoute
+  '/admin/konektum/': typeof AdminKonektumIndexRoute
   '/admin/media/': typeof AdminMediaIndexRoute
   '/admin/registrations/': typeof AdminRegistrationsIndexRoute
   '/admin/rentals/': typeof AdminRentalsIndexRoute
@@ -1036,6 +1108,7 @@ export interface FileRouteTypes {
     | '/admin/content'
     | '/admin/invitations'
     | '/admin/karma'
+    | '/admin/konektum'
     | '/admin/members'
     | '/admin/polls'
     | '/admin/registrations'
@@ -1093,6 +1166,12 @@ export interface FileRouteTypes {
     | '/admin/content/$pageKey'
     | '/admin/content/redirects'
     | '/admin/content/urls'
+    | '/admin/konektum/analitica'
+    | '/admin/konektum/configuracion'
+    | '/admin/konektum/email'
+    | '/admin/konektum/eventos'
+    | '/admin/konektum/plantillas'
+    | '/admin/konektum/usuarios'
     | '/admin/media/$id'
     | '/admin/media/new'
     | '/admin/pages/$pageId'
@@ -1112,6 +1191,7 @@ export interface FileRouteTypes {
     | '/auth/ludoya/callback'
     | '/admin/blog/'
     | '/admin/content/'
+    | '/admin/konektum/'
     | '/admin/media/'
     | '/admin/registrations/'
     | '/admin/rentals/'
@@ -1198,6 +1278,12 @@ export interface FileRouteTypes {
     | '/admin/content/$pageKey'
     | '/admin/content/redirects'
     | '/admin/content/urls'
+    | '/admin/konektum/analitica'
+    | '/admin/konektum/configuracion'
+    | '/admin/konektum/email'
+    | '/admin/konektum/eventos'
+    | '/admin/konektum/plantillas'
+    | '/admin/konektum/usuarios'
     | '/admin/media/$id'
     | '/admin/media/new'
     | '/admin/pages/$pageId'
@@ -1217,6 +1303,7 @@ export interface FileRouteTypes {
     | '/auth/ludoya/callback'
     | '/admin/blog'
     | '/admin/content'
+    | '/admin/konektum'
     | '/admin/media'
     | '/admin/registrations'
     | '/admin/rentals'
@@ -1253,6 +1340,7 @@ export interface FileRouteTypes {
     | '/admin/content'
     | '/admin/invitations'
     | '/admin/karma'
+    | '/admin/konektum'
     | '/admin/members'
     | '/admin/polls'
     | '/admin/registrations'
@@ -1310,6 +1398,12 @@ export interface FileRouteTypes {
     | '/admin/content/$pageKey'
     | '/admin/content/redirects'
     | '/admin/content/urls'
+    | '/admin/konektum/analitica'
+    | '/admin/konektum/configuracion'
+    | '/admin/konektum/email'
+    | '/admin/konektum/eventos'
+    | '/admin/konektum/plantillas'
+    | '/admin/konektum/usuarios'
     | '/admin/media/$id'
     | '/admin/media/new'
     | '/admin/pages/$pageId'
@@ -1329,6 +1423,7 @@ export interface FileRouteTypes {
     | '/auth/ludoya/callback'
     | '/admin/blog/'
     | '/admin/content/'
+    | '/admin/konektum/'
     | '/admin/media/'
     | '/admin/registrations/'
     | '/admin/rentals/'
@@ -1943,6 +2038,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminMembersRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/konektum': {
+      id: '/admin/konektum'
+      path: '/konektum'
+      fullPath: '/admin/konektum'
+      preLoaderRoute: typeof AdminKonektumRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/karma': {
       id: '/admin/karma'
       path: '/karma'
@@ -1998,6 +2100,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/media/'
       preLoaderRoute: typeof AdminMediaIndexRouteImport
       parentRoute: typeof AdminRoute
+    }
+    '/admin/konektum/': {
+      id: '/admin/konektum/'
+      path: '/'
+      fullPath: '/admin/konektum/'
+      preLoaderRoute: typeof AdminKonektumIndexRouteImport
+      parentRoute: typeof AdminKonektumRoute
     }
     '/admin/content/': {
       id: '/admin/content/'
@@ -2132,6 +2241,48 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminMediaIdRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/konektum/usuarios': {
+      id: '/admin/konektum/usuarios'
+      path: '/usuarios'
+      fullPath: '/admin/konektum/usuarios'
+      preLoaderRoute: typeof AdminKonektumUsuariosRouteImport
+      parentRoute: typeof AdminKonektumRoute
+    }
+    '/admin/konektum/plantillas': {
+      id: '/admin/konektum/plantillas'
+      path: '/plantillas'
+      fullPath: '/admin/konektum/plantillas'
+      preLoaderRoute: typeof AdminKonektumPlantillasRouteImport
+      parentRoute: typeof AdminKonektumRoute
+    }
+    '/admin/konektum/eventos': {
+      id: '/admin/konektum/eventos'
+      path: '/eventos'
+      fullPath: '/admin/konektum/eventos'
+      preLoaderRoute: typeof AdminKonektumEventosRouteImport
+      parentRoute: typeof AdminKonektumRoute
+    }
+    '/admin/konektum/email': {
+      id: '/admin/konektum/email'
+      path: '/email'
+      fullPath: '/admin/konektum/email'
+      preLoaderRoute: typeof AdminKonektumEmailRouteImport
+      parentRoute: typeof AdminKonektumRoute
+    }
+    '/admin/konektum/configuracion': {
+      id: '/admin/konektum/configuracion'
+      path: '/configuracion'
+      fullPath: '/admin/konektum/configuracion'
+      preLoaderRoute: typeof AdminKonektumConfiguracionRouteImport
+      parentRoute: typeof AdminKonektumRoute
+    }
+    '/admin/konektum/analitica': {
+      id: '/admin/konektum/analitica'
+      path: '/analitica'
+      fullPath: '/admin/konektum/analitica'
+      preLoaderRoute: typeof AdminKonektumAnaliticaRouteImport
+      parentRoute: typeof AdminKonektumRoute
+    }
     '/admin/content/urls': {
       id: '/admin/content/urls'
       path: '/urls'
@@ -2218,6 +2369,30 @@ const AdminContentRouteWithChildren = AdminContentRoute._addFileChildren(
   AdminContentRouteChildren,
 )
 
+interface AdminKonektumRouteChildren {
+  AdminKonektumAnaliticaRoute: typeof AdminKonektumAnaliticaRoute
+  AdminKonektumConfiguracionRoute: typeof AdminKonektumConfiguracionRoute
+  AdminKonektumEmailRoute: typeof AdminKonektumEmailRoute
+  AdminKonektumEventosRoute: typeof AdminKonektumEventosRoute
+  AdminKonektumPlantillasRoute: typeof AdminKonektumPlantillasRoute
+  AdminKonektumUsuariosRoute: typeof AdminKonektumUsuariosRoute
+  AdminKonektumIndexRoute: typeof AdminKonektumIndexRoute
+}
+
+const AdminKonektumRouteChildren: AdminKonektumRouteChildren = {
+  AdminKonektumAnaliticaRoute: AdminKonektumAnaliticaRoute,
+  AdminKonektumConfiguracionRoute: AdminKonektumConfiguracionRoute,
+  AdminKonektumEmailRoute: AdminKonektumEmailRoute,
+  AdminKonektumEventosRoute: AdminKonektumEventosRoute,
+  AdminKonektumPlantillasRoute: AdminKonektumPlantillasRoute,
+  AdminKonektumUsuariosRoute: AdminKonektumUsuariosRoute,
+  AdminKonektumIndexRoute: AdminKonektumIndexRoute,
+}
+
+const AdminKonektumRouteWithChildren = AdminKonektumRoute._addFileChildren(
+  AdminKonektumRouteChildren,
+)
+
 interface AdminRegistrationsRouteChildren {
   AdminRegistrationsIdRoute: typeof AdminRegistrationsIdRoute
   AdminRegistrationsIndexRoute: typeof AdminRegistrationsIndexRoute
@@ -2256,6 +2431,7 @@ interface AdminRouteChildren {
   AdminContentRoute: typeof AdminContentRouteWithChildren
   AdminInvitationsRoute: typeof AdminInvitationsRoute
   AdminKarmaRoute: typeof AdminKarmaRoute
+  AdminKonektumRoute: typeof AdminKonektumRouteWithChildren
   AdminMembersRoute: typeof AdminMembersRoute
   AdminPollsRoute: typeof AdminPollsRoute
   AdminRegistrationsRoute: typeof AdminRegistrationsRouteWithChildren
@@ -2273,6 +2449,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminContentRoute: AdminContentRouteWithChildren,
   AdminInvitationsRoute: AdminInvitationsRoute,
   AdminKarmaRoute: AdminKarmaRoute,
+  AdminKonektumRoute: AdminKonektumRouteWithChildren,
   AdminMembersRoute: AdminMembersRoute,
   AdminPollsRoute: AdminPollsRoute,
   AdminRegistrationsRoute: AdminRegistrationsRouteWithChildren,
