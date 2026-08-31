@@ -16,6 +16,7 @@ import {
   UserCircle2,
   Sparkles,
   Vote,
+  Heart,
 } from "lucide-react";
 
 export const Route = createFileRoute("/admin")({
