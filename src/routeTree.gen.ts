@@ -114,6 +114,7 @@ import { Route as AdminRegistrationsIdRouteImport } from './routes/admin.registr
 import { Route as AdminPagesPageIdRouteImport } from './routes/admin.pages.$pageId'
 import { Route as AdminMediaNewRouteImport } from './routes/admin.media.new'
 import { Route as AdminMediaIdRouteImport } from './routes/admin.media.$id'
+import { Route as AdminKonektumEventosRouteImport } from './routes/admin.konektum.eventos'
 import { Route as AdminContentUrlsRouteImport } from './routes/admin.content.urls'
 import { Route as AdminContentRedirectsRouteImport } from './routes/admin.content.redirects'
 import { Route as AdminContentPageKeyRouteImport } from './routes/admin.content.$pageKey'
@@ -649,6 +650,11 @@ const AdminMediaIdRoute = AdminMediaIdRouteImport.update({
   path: '/media/$id',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminKonektumEventosRoute = AdminKonektumEventosRouteImport.update({
+  id: '/eventos',
+  path: '/eventos',
+  getParentRoute: () => AdminKonektumRoute,
+} as any)
 const AdminContentUrlsRoute = AdminContentUrlsRouteImport.update({
   id: '/urls',
   path: '/urls',
@@ -774,6 +780,7 @@ export interface FileRoutesByFullPath {
   '/admin/content/$pageKey': typeof AdminContentPageKeyRoute
   '/admin/content/redirects': typeof AdminContentRedirectsRoute
   '/admin/content/urls': typeof AdminContentUrlsRoute
+  '/admin/konektum/eventos': typeof AdminKonektumEventosRoute
   '/admin/media/$id': typeof AdminMediaIdRoute
   '/admin/media/new': typeof AdminMediaNewRoute
   '/admin/pages/$pageId': typeof AdminPagesPageIdRoute
@@ -880,6 +887,7 @@ export interface FileRoutesByTo {
   '/admin/content/$pageKey': typeof AdminContentPageKeyRoute
   '/admin/content/redirects': typeof AdminContentRedirectsRoute
   '/admin/content/urls': typeof AdminContentUrlsRoute
+  '/admin/konektum/eventos': typeof AdminKonektumEventosRoute
   '/admin/media/$id': typeof AdminMediaIdRoute
   '/admin/media/new': typeof AdminMediaNewRoute
   '/admin/pages/$pageId': typeof AdminPagesPageIdRoute
@@ -995,6 +1003,7 @@ export interface FileRoutesById {
   '/admin/content/$pageKey': typeof AdminContentPageKeyRoute
   '/admin/content/redirects': typeof AdminContentRedirectsRoute
   '/admin/content/urls': typeof AdminContentUrlsRoute
+  '/admin/konektum/eventos': typeof AdminKonektumEventosRoute
   '/admin/media/$id': typeof AdminMediaIdRoute
   '/admin/media/new': typeof AdminMediaNewRoute
   '/admin/pages/$pageId': typeof AdminPagesPageIdRoute
@@ -1111,6 +1120,7 @@ export interface FileRouteTypes {
     | '/admin/content/$pageKey'
     | '/admin/content/redirects'
     | '/admin/content/urls'
+    | '/admin/konektum/eventos'
     | '/admin/media/$id'
     | '/admin/media/new'
     | '/admin/pages/$pageId'
@@ -1217,6 +1227,7 @@ export interface FileRouteTypes {
     | '/admin/content/$pageKey'
     | '/admin/content/redirects'
     | '/admin/content/urls'
+    | '/admin/konektum/eventos'
     | '/admin/media/$id'
     | '/admin/media/new'
     | '/admin/pages/$pageId'
@@ -1331,6 +1342,7 @@ export interface FileRouteTypes {
     | '/admin/content/$pageKey'
     | '/admin/content/redirects'
     | '/admin/content/urls'
+    | '/admin/konektum/eventos'
     | '/admin/media/$id'
     | '/admin/media/new'
     | '/admin/pages/$pageId'
@@ -2168,6 +2180,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminMediaIdRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/konektum/eventos': {
+      id: '/admin/konektum/eventos'
+      path: '/eventos'
+      fullPath: '/admin/konektum/eventos'
+      preLoaderRoute: typeof AdminKonektumEventosRouteImport
+      parentRoute: typeof AdminKonektumRoute
+    }
     '/admin/content/urls': {
       id: '/admin/content/urls'
       path: '/urls'
@@ -2255,10 +2274,12 @@ const AdminContentRouteWithChildren = AdminContentRoute._addFileChildren(
 )
 
 interface AdminKonektumRouteChildren {
+  AdminKonektumEventosRoute: typeof AdminKonektumEventosRoute
   AdminKonektumIndexRoute: typeof AdminKonektumIndexRoute
 }
 
 const AdminKonektumRouteChildren: AdminKonektumRouteChildren = {
+  AdminKonektumEventosRoute: AdminKonektumEventosRoute,
   AdminKonektumIndexRoute: AdminKonektumIndexRoute,
 }
 
