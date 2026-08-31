@@ -94,6 +94,7 @@ import { Route as AppRentalsIndexRouteImport } from './routes/app.rentals.index'
 import { Route as AdminRentalsIndexRouteImport } from './routes/admin.rentals.index'
 import { Route as AdminRegistrationsIndexRouteImport } from './routes/admin.registrations.index'
 import { Route as AdminMediaIndexRouteImport } from './routes/admin.media.index'
+import { Route as AdminKonektumIndexRouteImport } from './routes/admin.konektum.index'
 import { Route as AdminContentIndexRouteImport } from './routes/admin.content.index'
 import { Route as AdminBlogIndexRouteImport } from './routes/admin.blog.index'
 import { Route as AuthLudoyaCallbackRouteImport } from './routes/auth.ludoya.callback'
@@ -547,6 +548,11 @@ const AdminMediaIndexRoute = AdminMediaIndexRouteImport.update({
   path: '/media/',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminKonektumIndexRoute = AdminKonektumIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminKonektumRoute,
+} as any)
 const AdminContentIndexRoute = AdminContentIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -710,7 +716,7 @@ export interface FileRoutesByFullPath {
   '/admin/content': typeof AdminContentRouteWithChildren
   '/admin/invitations': typeof AdminInvitationsRoute
   '/admin/karma': typeof AdminKarmaRoute
-  '/admin/konektum': typeof AdminKonektumRoute
+  '/admin/konektum': typeof AdminKonektumRouteWithChildren
   '/admin/members': typeof AdminMembersRoute
   '/admin/polls': typeof AdminPollsRoute
   '/admin/registrations': typeof AdminRegistrationsRouteWithChildren
@@ -787,6 +793,7 @@ export interface FileRoutesByFullPath {
   '/auth/ludoya/callback': typeof AuthLudoyaCallbackRoute
   '/admin/blog/': typeof AdminBlogIndexRoute
   '/admin/content/': typeof AdminContentIndexRoute
+  '/admin/konektum/': typeof AdminKonektumIndexRoute
   '/admin/media/': typeof AdminMediaIndexRoute
   '/admin/registrations/': typeof AdminRegistrationsIndexRoute
   '/admin/rentals/': typeof AdminRentalsIndexRoute
@@ -819,7 +826,6 @@ export interface FileRoutesByTo {
   '/torneos': typeof TorneosRoute
   '/admin/invitations': typeof AdminInvitationsRoute
   '/admin/karma': typeof AdminKarmaRoute
-  '/admin/konektum': typeof AdminKonektumRoute
   '/admin/members': typeof AdminMembersRoute
   '/admin/polls': typeof AdminPollsRoute
   '/admin/team': typeof AdminTeamRoute
@@ -893,6 +899,7 @@ export interface FileRoutesByTo {
   '/auth/ludoya/callback': typeof AuthLudoyaCallbackRoute
   '/admin/blog': typeof AdminBlogIndexRoute
   '/admin/content': typeof AdminContentIndexRoute
+  '/admin/konektum': typeof AdminKonektumIndexRoute
   '/admin/media': typeof AdminMediaIndexRoute
   '/admin/registrations': typeof AdminRegistrationsIndexRoute
   '/admin/rentals': typeof AdminRentalsIndexRoute
@@ -930,7 +937,7 @@ export interface FileRoutesById {
   '/admin/content': typeof AdminContentRouteWithChildren
   '/admin/invitations': typeof AdminInvitationsRoute
   '/admin/karma': typeof AdminKarmaRoute
-  '/admin/konektum': typeof AdminKonektumRoute
+  '/admin/konektum': typeof AdminKonektumRouteWithChildren
   '/admin/members': typeof AdminMembersRoute
   '/admin/polls': typeof AdminPollsRoute
   '/admin/registrations': typeof AdminRegistrationsRouteWithChildren
@@ -1007,6 +1014,7 @@ export interface FileRoutesById {
   '/auth/ludoya/callback': typeof AuthLudoyaCallbackRoute
   '/admin/blog/': typeof AdminBlogIndexRoute
   '/admin/content/': typeof AdminContentIndexRoute
+  '/admin/konektum/': typeof AdminKonektumIndexRoute
   '/admin/media/': typeof AdminMediaIndexRoute
   '/admin/registrations/': typeof AdminRegistrationsIndexRoute
   '/admin/rentals/': typeof AdminRentalsIndexRoute
@@ -1122,6 +1130,7 @@ export interface FileRouteTypes {
     | '/auth/ludoya/callback'
     | '/admin/blog/'
     | '/admin/content/'
+    | '/admin/konektum/'
     | '/admin/media/'
     | '/admin/registrations/'
     | '/admin/rentals/'
@@ -1154,7 +1163,6 @@ export interface FileRouteTypes {
     | '/torneos'
     | '/admin/invitations'
     | '/admin/karma'
-    | '/admin/konektum'
     | '/admin/members'
     | '/admin/polls'
     | '/admin/team'
@@ -1228,6 +1236,7 @@ export interface FileRouteTypes {
     | '/auth/ludoya/callback'
     | '/admin/blog'
     | '/admin/content'
+    | '/admin/konektum'
     | '/admin/media'
     | '/admin/registrations'
     | '/admin/rentals'
@@ -1341,6 +1350,7 @@ export interface FileRouteTypes {
     | '/auth/ludoya/callback'
     | '/admin/blog/'
     | '/admin/content/'
+    | '/admin/konektum/'
     | '/admin/media/'
     | '/admin/registrations/'
     | '/admin/rentals/'
@@ -2018,6 +2028,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminMediaIndexRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/konektum/': {
+      id: '/admin/konektum/'
+      path: '/'
+      fullPath: '/admin/konektum/'
+      preLoaderRoute: typeof AdminKonektumIndexRouteImport
+      parentRoute: typeof AdminKonektumRoute
+    }
     '/admin/content/': {
       id: '/admin/content/'
       path: '/'
@@ -2237,6 +2254,18 @@ const AdminContentRouteWithChildren = AdminContentRoute._addFileChildren(
   AdminContentRouteChildren,
 )
 
+interface AdminKonektumRouteChildren {
+  AdminKonektumIndexRoute: typeof AdminKonektumIndexRoute
+}
+
+const AdminKonektumRouteChildren: AdminKonektumRouteChildren = {
+  AdminKonektumIndexRoute: AdminKonektumIndexRoute,
+}
+
+const AdminKonektumRouteWithChildren = AdminKonektumRoute._addFileChildren(
+  AdminKonektumRouteChildren,
+)
+
 interface AdminRegistrationsRouteChildren {
   AdminRegistrationsIdRoute: typeof AdminRegistrationsIdRoute
   AdminRegistrationsIndexRoute: typeof AdminRegistrationsIndexRoute
@@ -2275,7 +2304,7 @@ interface AdminRouteChildren {
   AdminContentRoute: typeof AdminContentRouteWithChildren
   AdminInvitationsRoute: typeof AdminInvitationsRoute
   AdminKarmaRoute: typeof AdminKarmaRoute
-  AdminKonektumRoute: typeof AdminKonektumRoute
+  AdminKonektumRoute: typeof AdminKonektumRouteWithChildren
   AdminMembersRoute: typeof AdminMembersRoute
   AdminPollsRoute: typeof AdminPollsRoute
   AdminRegistrationsRoute: typeof AdminRegistrationsRouteWithChildren
@@ -2293,7 +2322,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminContentRoute: AdminContentRouteWithChildren,
   AdminInvitationsRoute: AdminInvitationsRoute,
   AdminKarmaRoute: AdminKarmaRoute,
-  AdminKonektumRoute: AdminKonektumRoute,
+  AdminKonektumRoute: AdminKonektumRouteWithChildren,
   AdminMembersRoute: AdminMembersRoute,
   AdminPollsRoute: AdminPollsRoute,
   AdminRegistrationsRoute: AdminRegistrationsRouteWithChildren,
