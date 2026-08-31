@@ -85,6 +85,7 @@ import { Route as AdminRentalsRouteImport } from './routes/admin.rentals'
 import { Route as AdminRegistrationsRouteImport } from './routes/admin.registrations'
 import { Route as AdminPollsRouteImport } from './routes/admin.polls'
 import { Route as AdminMembersRouteImport } from './routes/admin.members'
+import { Route as AdminKonektumRouteImport } from './routes/admin.konektum'
 import { Route as AdminKarmaRouteImport } from './routes/admin.karma'
 import { Route as AdminInvitationsRouteImport } from './routes/admin.invitations'
 import { Route as AdminContentRouteImport } from './routes/admin.content'
@@ -501,6 +502,11 @@ const AdminMembersRoute = AdminMembersRouteImport.update({
   path: '/members',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminKonektumRoute = AdminKonektumRouteImport.update({
+  id: '/konektum',
+  path: '/konektum',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminKarmaRoute = AdminKarmaRouteImport.update({
   id: '/karma',
   path: '/karma',
@@ -704,6 +710,7 @@ export interface FileRoutesByFullPath {
   '/admin/content': typeof AdminContentRouteWithChildren
   '/admin/invitations': typeof AdminInvitationsRoute
   '/admin/karma': typeof AdminKarmaRoute
+  '/admin/konektum': typeof AdminKonektumRoute
   '/admin/members': typeof AdminMembersRoute
   '/admin/polls': typeof AdminPollsRoute
   '/admin/registrations': typeof AdminRegistrationsRouteWithChildren
@@ -812,6 +819,7 @@ export interface FileRoutesByTo {
   '/torneos': typeof TorneosRoute
   '/admin/invitations': typeof AdminInvitationsRoute
   '/admin/karma': typeof AdminKarmaRoute
+  '/admin/konektum': typeof AdminKonektumRoute
   '/admin/members': typeof AdminMembersRoute
   '/admin/polls': typeof AdminPollsRoute
   '/admin/team': typeof AdminTeamRoute
@@ -922,6 +930,7 @@ export interface FileRoutesById {
   '/admin/content': typeof AdminContentRouteWithChildren
   '/admin/invitations': typeof AdminInvitationsRoute
   '/admin/karma': typeof AdminKarmaRoute
+  '/admin/konektum': typeof AdminKonektumRoute
   '/admin/members': typeof AdminMembersRoute
   '/admin/polls': typeof AdminPollsRoute
   '/admin/registrations': typeof AdminRegistrationsRouteWithChildren
@@ -1036,6 +1045,7 @@ export interface FileRouteTypes {
     | '/admin/content'
     | '/admin/invitations'
     | '/admin/karma'
+    | '/admin/konektum'
     | '/admin/members'
     | '/admin/polls'
     | '/admin/registrations'
@@ -1144,6 +1154,7 @@ export interface FileRouteTypes {
     | '/torneos'
     | '/admin/invitations'
     | '/admin/karma'
+    | '/admin/konektum'
     | '/admin/members'
     | '/admin/polls'
     | '/admin/team'
@@ -1253,6 +1264,7 @@ export interface FileRouteTypes {
     | '/admin/content'
     | '/admin/invitations'
     | '/admin/karma'
+    | '/admin/konektum'
     | '/admin/members'
     | '/admin/polls'
     | '/admin/registrations'
@@ -1943,6 +1955,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminMembersRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/konektum': {
+      id: '/admin/konektum'
+      path: '/konektum'
+      fullPath: '/admin/konektum'
+      preLoaderRoute: typeof AdminKonektumRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/karma': {
       id: '/admin/karma'
       path: '/karma'
@@ -2256,6 +2275,7 @@ interface AdminRouteChildren {
   AdminContentRoute: typeof AdminContentRouteWithChildren
   AdminInvitationsRoute: typeof AdminInvitationsRoute
   AdminKarmaRoute: typeof AdminKarmaRoute
+  AdminKonektumRoute: typeof AdminKonektumRoute
   AdminMembersRoute: typeof AdminMembersRoute
   AdminPollsRoute: typeof AdminPollsRoute
   AdminRegistrationsRoute: typeof AdminRegistrationsRouteWithChildren
@@ -2273,6 +2293,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminContentRoute: AdminContentRouteWithChildren,
   AdminInvitationsRoute: AdminInvitationsRoute,
   AdminKarmaRoute: AdminKarmaRoute,
+  AdminKonektumRoute: AdminKonektumRoute,
   AdminMembersRoute: AdminMembersRoute,
   AdminPollsRoute: AdminPollsRoute,
   AdminRegistrationsRoute: AdminRegistrationsRouteWithChildren,
