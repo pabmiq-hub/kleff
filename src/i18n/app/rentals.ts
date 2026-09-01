@@ -85,8 +85,12 @@ export const rentalsDict = {
       legendShelfExample: "Estantería A, forma triángulo, color verde, nº 3",
       legendDrawerExample: "Cajón 2, letra A",
       legendOnDemandExample: "No está en la ludoteca fija — se puede pedir para próximos eventos",
+      legendRestockingExample: "Temporalmente fuera de circulación — volverá pronto a la estantería",
+      legendShapeRules:
+        "Estantería A: círculo (verde) y triángulo (azul) · Estantería B: estrella (amarillo) · Estantería C: cuadrado (rosa) · Estantería D: pentágono (morado) y corazón (rojo).",
       legendFooter:
-        "Cada juego lleva un chip de color: la letra indica la estantería (A-D), el icono la forma del separador, el color del chip el color del separador y la cifra la posición (1-5). Los cajones usan número (1-4) + letra (A-D).",
+        "Cada juego lleva un chip de color: la letra indica la estantería (A-D), el icono la forma del separador, el color del chip el color del separador y la cifra la posición (1-5). Los cajones usan número (1-4) + letra (A-D). Los juegos bajo pedido no están en la ludoteca fija y los que están en reposición no se pueden coger temporalmente.",
+
     },
   },
   ca: {
