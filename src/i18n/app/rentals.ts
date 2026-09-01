@@ -170,8 +170,12 @@ export const rentalsDict = {
       legendShelfExample: "Prestatgeria A, forma triangle, color verd, núm. 3",
       legendDrawerExample: "Calaix 2, lletra A",
       legendOnDemandExample: "No és a la ludoteca fixa — es pot demanar per a propers esdeveniments",
+      legendRestockingExample: "Temporalment fora de circulació — aviat tornarà a la prestatgeria",
+      legendShapeRules:
+        "Prestatgeria A: cercle (verd) i triangle (blau) · Prestatgeria B: estrella (groc) · Prestatgeria C: quadrat (rosa) · Prestatgeria D: pentàgon (lila) i cor (vermell).",
       legendFooter:
-        "Cada joc porta un xip de color: la lletra indica la prestatgeria (A-D), la icona la forma del separador, el color del xip el color del separador i la xifra la posició (1-5). Els calaixos fan servir número (1-4) + lletra (A-D).",
+        "Cada joc porta un xip de color: la lletra indica la prestatgeria (A-D), la icona la forma del separador, el color del xip el color del separador i la xifra la posició (1-5). Els calaixos fan servir número (1-4) + lletra (A-D). Els jocs sota demanda no són a la ludoteca fixa i els jocs en reposició estan temporalment no disponibles.",
+
     },
   },
   en: {
