@@ -303,6 +303,8 @@ function LocationDialog({
     shelf === "1" || shelf === "2" || shelf === "3" || shelf === "4";
   const isDrawer = shelf === "drawer";
   const drawerInShelf = isShelfAD && inDrawer;
+  const shapeOptions: ShapeOption[] = SHELF_SHAPES[normalizeShelfKey(shelf)] ?? [];
+
 
   const save = async () => {
     try {
