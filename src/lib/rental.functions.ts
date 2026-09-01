@@ -24,10 +24,11 @@ const locationSchema = z
       .enum(["A", "B", "C", "D", "1", "2", "3", "4", "on_demand", "drawer"])
       .nullable()
       .optional(),
-    shape: z.enum(["triangle", "heart", "square"]).nullable().optional(),
+    shape: z.enum(["triangle", "heart", "square", "circle", "star"]).nullable().optional(),
     shelfColor: z.enum(["green", "pink", "red", "yellow", "blue"]).nullable().optional(),
     slotNumber: z.number().int().min(1).max(5).nullable().optional(),
-    drawerNumber: z.number().int().min(1).max(4).nullable().optional(),
+    inDrawer: z.boolean().nullable().optional(),
+    drawerNumber: z.number().int().min(1).max(9).nullable().optional(),
     drawerLetter: z.enum(["a", "b", "c", "d"]).nullable().optional(),
     notesAdmin: z.string().max(500).nullable().optional(),
   })
