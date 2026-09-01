@@ -2340,6 +2340,7 @@ export type Database = {
         | "C"
         | "D"
         | "restocking"
+        | "especiales"
       shelf_shape:
         | "triangle"
         | "heart"
@@ -2534,6 +2535,7 @@ export const Constants = {
         "C",
         "D",
         "restocking",
+        "especiales",
       ],
       shelf_shape: [
         "triangle",
