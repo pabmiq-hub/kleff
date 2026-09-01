@@ -453,7 +453,7 @@ export function LudotecaPage() {
               <div className="flex flex-wrap gap-2">
                 {PLAYER_BUCKETS.map((b) => (
                   <FilterChip key={b.key} active={players === b.key} onClick={() => setPlayers(players === b.key ? null : b.key)}>
-                    {"labelKey" in b && b.labelKey ? t[b.labelKey] : b.label
+                    {"labelKey" in b && b.labelKey ? t[b.labelKey] : b.label}
                   </FilterChip>
                 ))}
               </div>
