@@ -53,7 +53,7 @@ interface Game {
   max_rental_days: number;
   total_copies: number;
   is_active: boolean;
-  shelf: "A" | "B" | "C" | "D" | "1" | "2" | "3" | "4" | "on_demand" | "drawer" | "restocking" | null;
+  shelf: "A" | "B" | "C" | "D" | "1" | "2" | "3" | "4" | "on_demand" | "drawer" | "restocking" | "especiales" | null;
   shape: "triangle" | "heart" | "square" | "circle" | "star" | "pentagon" | null;
   slot_number: number | null;
   drawer_number: number | null;
@@ -363,7 +363,8 @@ function LocationDialog({
                 <SelectItem value="D">Estantería D</SelectItem>
                 <SelectItem value="drawer">Cajón</SelectItem>
                 <SelectItem value="on_demand">Bajo pedido</SelectItem>
-            <SelectItem value="restocking">En reposición</SelectItem>
+                <SelectItem value="restocking">En reposición</SelectItem>
+                <SelectItem value="especiales">Especiales</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -480,6 +481,8 @@ function FeaturedDialog({
   const [saving, setSaving] = useState(false);
   const today = toISODate(new Date());
   const hasActive = current.some((c) => c.start_date <= today && c.end_date >= today);
+  const hasUpcoming = current.some((c) => c.start_date > today);
+  const highlighted = hasActive || hasUpcoming;
 
   const save = async () => {
     if (!range?.from) {
@@ -509,13 +512,13 @@ function FeaturedDialog({
           className={
             hasActive
               ? "text-coral-deep hover:bg-coral/30"
-              : current.length > 0
+              : hasUpcoming
                 ? "text-coral hover:bg-coral/20"
                 : "text-ink/60 hover:text-coral hover:bg-coral/20"
           }
-          title={hasActive ? "Destacado activo" : current.length > 0 ? "Destacado programado" : "Destacar"}
+          title={hasActive ? "Destacado activo" : hasUpcoming ? "Destacado programado" : "Destacar"}
         >
-          <Star className={`h-4 w-4 ${hasActive || current.length > 0 ? "fill-current" : ""}`} />
+          <Star className={`h-4 w-4 ${highlighted ? "fill-current" : ""}`} />
         </Button>
       </DialogTrigger>
       <DialogContent className="max-w-md">
