@@ -172,10 +172,18 @@ export function LocationLegend() {
           <LocationBadge loc={{ shelf: "on_demand", shape: null, slot_number: null, drawer_number: null, drawer_letter: null }} />
           {t.legendOnDemandExample}
         </span>
+        <span className="inline-flex items-center gap-2">
+          <LocationBadge loc={{ shelf: "restocking", shape: null, slot_number: null, drawer_number: null, drawer_letter: null }} />
+          {t.legendRestockingExample}
+        </span>
       </div>
       <p className="mt-3 text-[11px] text-foreground/55">
+        {t.legendShapeRules}
+      </p>
+      <p className="mt-2 text-[11px] text-foreground/55">
         {t.legendFooter}
       </p>
+
     </div>
   );
 }

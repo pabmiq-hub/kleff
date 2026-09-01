@@ -85,8 +85,12 @@ export const rentalsDict = {
       legendShelfExample: "Estantería A, forma triángulo, color verde, nº 3",
       legendDrawerExample: "Cajón 2, letra A",
       legendOnDemandExample: "No está en la ludoteca fija — se puede pedir para próximos eventos",
+      legendRestockingExample: "Temporalmente fuera de circulación — volverá pronto a la estantería",
+      legendShapeRules:
+        "Estantería A: círculo (verde) y triángulo (azul) · Estantería B: estrella (amarillo) · Estantería C: cuadrado (rosa) · Estantería D: pentágono (morado) y corazón (rojo).",
       legendFooter:
-        "Cada juego lleva un chip de color: la letra indica la estantería (A-D), el icono la forma del separador, el color del chip el color del separador y la cifra la posición (1-5). Los cajones usan número (1-4) + letra (A-D).",
+        "Cada juego lleva un chip de color: la letra indica la estantería (A-D), el icono la forma del separador, el color del chip el color del separador y la cifra la posición (1-5). Los cajones usan número (1-4) + letra (A-D). Los juegos bajo pedido no están en la ludoteca fija y los que están en reposición no se pueden coger temporalmente.",
+
     },
   },
   ca: {
@@ -170,8 +174,12 @@ export const rentalsDict = {
       legendShelfExample: "Prestatgeria A, forma triangle, color verd, núm. 3",
       legendDrawerExample: "Calaix 2, lletra A",
       legendOnDemandExample: "No és a la ludoteca fixa — es pot demanar per a propers esdeveniments",
+      legendRestockingExample: "Temporalment fora de circulació — aviat tornarà a la prestatgeria",
+      legendShapeRules:
+        "Prestatgeria A: cercle (verd) i triangle (blau) · Prestatgeria B: estrella (groc) · Prestatgeria C: quadrat (rosa) · Prestatgeria D: pentàgon (lila) i cor (vermell).",
       legendFooter:
-        "Cada joc porta un xip de color: la lletra indica la prestatgeria (A-D), la icona la forma del separador, el color del xip el color del separador i la xifra la posició (1-5). Els calaixos fan servir número (1-4) + lletra (A-D).",
+        "Cada joc porta un xip de color: la lletra indica la prestatgeria (A-D), la icona la forma del separador, el color del xip el color del separador i la xifra la posició (1-5). Els calaixos fan servir número (1-4) + lletra (A-D). Els jocs sota demanda no són a la ludoteca fixa i els jocs en reposició estan temporalment no disponibles.",
+
     },
   },
   en: {
@@ -255,8 +263,12 @@ export const rentalsDict = {
       legendShelfExample: "Shelf A, triangle shape, green, no. 3",
       legendDrawerExample: "Drawer 2, letter A",
       legendOnDemandExample: "Not on the shelves — can be requested for upcoming events",
+      legendRestockingExample: "Temporarily out of circulation — back on the shelves soon",
+      legendShapeRules:
+        "Shelf A: circle (green) and triangle (blue) · Shelf B: star (yellow) · Shelf C: square (pink) · Shelf D: pentagon (purple) and heart (red).",
       legendFooter:
-        "Each game has a colour chip: the letter shows the shelf (A-D), the icon the divider shape, the chip colour the divider colour, and the number the slot (1-5). Drawers use number (1-4) + letter (A-D).",
+        "Each game has a colour chip: the letter shows the shelf (A-D), the icon the divider shape, the chip colour the divider colour, and the number the slot (1-5). Drawers use number (1-4) + letter (A-D). Games marked as on request are not on the shelves, and restocking ones are temporarily unavailable.",
+
     },
   },
 } satisfies Record<AppLocale, unknown>;

@@ -58,6 +58,8 @@ const T = {
     clear: "Limpiar",
     results: (n: number) => `${n} juego${n === 1 ? "" : "s"}`,
     players: "Jugadores",
+    playersSolo: "Solitario",
+    playersDuo: "Solo 2",
     duration: "Duración",
     weight: "Dificultad",
     type: "Tipo",
@@ -90,6 +92,8 @@ const T = {
     clear: "Clear",
     results: (n: number) => `${n} game${n === 1 ? "" : "s"}`,
     players: "Players",
+    playersSolo: "Solo",
+    playersDuo: "2 only",
     duration: "Length",
     weight: "Weight",
     type: "Type",
@@ -122,6 +126,8 @@ const T = {
     clear: "Neteja",
     results: (n: number) => `${n} joc${n === 1 ? "" : "s"}`,
     players: "Jugadors",
+    playersSolo: "Solitari",
+    playersDuo: "Només 2",
     duration: "Durada",
     weight: "Dificultat",
     type: "Tipus",
@@ -172,6 +178,16 @@ const PLAYER_BUCKETS = [
   { key: "3-4", label: "3–4", test: (g: BggGame) => (g.min_players ?? 99) <= 4 && (g.max_players ?? 0) >= 3 },
   { key: "5-6", label: "5–6", test: (g: BggGame) => (g.min_players ?? 99) <= 6 && (g.max_players ?? 0) >= 5 },
   { key: "7+", label: "7+", test: (g: BggGame) => (g.max_players ?? 0) >= 7 },
+  {
+    key: "solo",
+    labelKey: "playersSolo" as const,
+    test: (g: BggGame) => (g.max_players ?? 0) === 1,
+  },
+  {
+    key: "duo",
+    labelKey: "playersDuo" as const,
+    test: (g: BggGame) => (g.min_players ?? 0) === 2 && (g.max_players ?? 0) === 2,
+  },
 ];
 
 const DURATION_BUCKETS = [
@@ -437,7 +453,7 @@ export function LudotecaPage() {
               <div className="flex flex-wrap gap-2">
                 {PLAYER_BUCKETS.map((b) => (
                   <FilterChip key={b.key} active={players === b.key} onClick={() => setPlayers(players === b.key ? null : b.key)}>
-                    {b.label}
+                    {"labelKey" in b && b.labelKey ? t[b.labelKey] : b.label}
                   </FilterChip>
                 ))}
               </div>

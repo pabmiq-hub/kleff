@@ -249,7 +249,38 @@ function CatalogPage() {
   );
 }
 
+type ShapeOption = { shape: NonNullable<Game["shape"]>; color: NonNullable<Game["shelf_color"]>; label: string };
+
+const SHELF_SHAPES: Record<string, ShapeOption[]> = {
+  A: [
+    { shape: "circle", color: "green", label: "Círculo (verde)" },
+    { shape: "triangle", color: "blue", label: "Triángulo (azul)" },
+  ],
+  B: [{ shape: "star", color: "yellow", label: "Estrella (amarillo)" }],
+  C: [{ shape: "square", color: "pink", label: "Cuadrado (rosa)" }],
+  D: [
+    { shape: "pentagon", color: "purple", label: "Pentágono (morado)" },
+    { shape: "heart", color: "red", label: "Corazón (rojo)" },
+  ],
+};
+
+const COLOR_LABEL: Record<string, string> = {
+  green: "verde",
+  pink: "rosa",
+  red: "rojo",
+  yellow: "amarillo",
+  blue: "azul",
+  purple: "morado",
+};
+
+function normalizeShelfKey(s: Game["shelf"]): string {
+  const map: Record<string, string> = { "1": "A", "2": "B", "3": "C", "4": "D" };
+  if (!s) return "";
+  return map[s] ?? s;
+}
+
 function LocationDialog({
+
   game,
   onSaved,
   updateFn,
@@ -272,6 +303,8 @@ function LocationDialog({
     shelf === "1" || shelf === "2" || shelf === "3" || shelf === "4";
   const isDrawer = shelf === "drawer";
   const drawerInShelf = isShelfAD && inDrawer;
+  const shapeOptions: ShapeOption[] = SHELF_SHAPES[normalizeShelfKey(shelf)] ?? [];
+
 
   const save = async () => {
     try {
@@ -309,7 +342,19 @@ function LocationDialog({
         <div className="space-y-4">
           <div className="space-y-1">
             <Label>Estantería</Label>
-            <Select value={shelf ?? ""} onValueChange={(v) => setShelf((v || null) as Game["shelf"])}>
+            <Select
+              value={shelf ?? ""}
+              onValueChange={(v) => {
+                const next = (v || null) as Game["shelf"];
+                setShelf(next);
+                const allowed = SHELF_SHAPES[normalizeShelfKey(next)] ?? [];
+                if (!allowed.some((o) => o.shape === shape)) {
+                  const first = allowed[0];
+                  setShape(first ? first.shape : null);
+                  setColor(first ? first.color : null);
+                }
+              }}
+            >
               <SelectTrigger><SelectValue placeholder="Seleccionar…" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="A">Estantería A</SelectItem>
@@ -327,32 +372,30 @@ function LocationDialog({
             <>
               <div className="space-y-1">
                 <Label>Forma</Label>
-                <Select value={shape ?? ""} onValueChange={(v) => setShape((v || null) as Game["shape"])}>
+                <Select
+                  value={shape ?? ""}
+                  onValueChange={(v) => {
+                    const next = (v || null) as Game["shape"];
+                    setShape(next);
+                    const opt = shapeOptions.find((o) => o.shape === next);
+                    setColor(opt ? opt.color : null);
+                  }}
+                >
                   <SelectTrigger><SelectValue placeholder="Seleccionar…" /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="triangle">Triángulo</SelectItem>
-                    <SelectItem value="heart">Corazón</SelectItem>
-                    <SelectItem value="square">Cuadrado</SelectItem>
-                    <SelectItem value="circle">Círculo</SelectItem>
-                    <SelectItem value="star">Estrella</SelectItem>
-                    <SelectItem value="pentagon">Pentágono</SelectItem>
+                    {shapeOptions.map((o) => (
+                      <SelectItem key={o.shape} value={o.shape as string}>
+                        {o.label}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
+                <p className="text-xs text-ink/60">
+                  Color asignado automáticamente:{" "}
+                  {color ? COLOR_LABEL[color] : "—"}
+                </p>
               </div>
-              <div className="space-y-1">
-                <Label>Color</Label>
-                <Select value={color ?? ""} onValueChange={(v) => setColor((v || null) as Game["shelf_color"])}>
-                  <SelectTrigger><SelectValue placeholder="Seleccionar…" /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="green">Verde</SelectItem>
-                    <SelectItem value="pink">Rosa</SelectItem>
-                    <SelectItem value="red">Rojo</SelectItem>
-                    <SelectItem value="yellow">Amarillo</SelectItem>
-                    <SelectItem value="blue">Azul</SelectItem>
-                    <SelectItem value="purple">Morado</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+
               <label className="flex items-center gap-2 text-sm">
                 <input
                   type="checkbox"
