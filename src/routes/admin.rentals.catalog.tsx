@@ -249,7 +249,38 @@ function CatalogPage() {
   );
 }
 
+type ShapeOption = { shape: NonNullable<Game["shape"]>; color: NonNullable<Game["shelf_color"]>; label: string };
+
+const SHELF_SHAPES: Record<string, ShapeOption[]> = {
+  A: [
+    { shape: "circle", color: "green", label: "Círculo (verde)" },
+    { shape: "triangle", color: "blue", label: "Triángulo (azul)" },
+  ],
+  B: [{ shape: "star", color: "yellow", label: "Estrella (amarillo)" }],
+  C: [{ shape: "square", color: "pink", label: "Cuadrado (rosa)" }],
+  D: [
+    { shape: "pentagon", color: "purple", label: "Pentágono (morado)" },
+    { shape: "heart", color: "red", label: "Corazón (rojo)" },
+  ],
+};
+
+const COLOR_LABEL: Record<string, string> = {
+  green: "verde",
+  pink: "rosa",
+  red: "rojo",
+  yellow: "amarillo",
+  blue: "azul",
+  purple: "morado",
+};
+
+function normalizeShelfKey(s: Game["shelf"]): string {
+  const map: Record<string, string> = { "1": "A", "2": "B", "3": "C", "4": "D" };
+  if (!s) return "";
+  return map[s] ?? s;
+}
+
 function LocationDialog({
+
   game,
   onSaved,
   updateFn,
