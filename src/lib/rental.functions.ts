@@ -21,11 +21,11 @@ async function assertSuperAdmin(userId: string): Promise<void> {
 const locationSchema = z
   .object({
     shelf: z
-      .enum(["A", "B", "C", "D", "1", "2", "3", "4", "on_demand", "drawer"])
+      .enum(["A", "B", "C", "D", "1", "2", "3", "4", "on_demand", "drawer", "restocking"])
       .nullable()
       .optional(),
-    shape: z.enum(["triangle", "heart", "square", "circle", "star"]).nullable().optional(),
-    shelfColor: z.enum(["green", "pink", "red", "yellow", "blue"]).nullable().optional(),
+    shape: z.enum(["triangle", "heart", "square", "circle", "star", "pentagon"]).nullable().optional(),
+    shelfColor: z.enum(["green", "pink", "red", "yellow", "blue", "purple"]).nullable().optional(),
     slotNumber: z.number().int().min(1).max(5).nullable().optional(),
     inDrawer: z.boolean().nullable().optional(),
     drawerNumber: z.number().int().min(1).max(9).nullable().optional(),

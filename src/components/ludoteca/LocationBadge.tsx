@@ -1,10 +1,10 @@
-import { Triangle, Heart, Square, Circle, Star, Archive, Package } from "lucide-react";
+import { Triangle, Heart, Square, Circle, Star, Pentagon, Archive, Package, RotateCcw } from "lucide-react";
 import { useAppLocale, type AppLocale } from "@/i18n/app-i18n";
 import { rentalsDict } from "@/i18n/app/rentals";
 
-export type ShelfLocation = "A" | "B" | "C" | "D" | "on_demand" | "drawer";
-export type ShelfShape = "triangle" | "heart" | "square" | "circle" | "star";
-export type ShelfColor = "green" | "pink" | "red" | "yellow" | "blue";
+export type ShelfLocation = "A" | "B" | "C" | "D" | "on_demand" | "drawer" | "restocking";
+export type ShelfShape = "triangle" | "heart" | "square" | "circle" | "star" | "pentagon";
+export type ShelfColor = "green" | "pink" | "red" | "yellow" | "blue" | "purple";
 export type DrawerLetter = "a" | "b" | "c" | "d";
 
 export interface LocationFields {
@@ -23,6 +23,7 @@ const COLOR_BG: Record<ShelfColor, string> = {
   red: "bg-red-400 text-ink border-ink",
   yellow: "bg-amber-300 text-ink border-ink",
   blue: "bg-sky-400 text-ink border-ink",
+  purple: "bg-purple-400 text-ink border-ink",
 };
 
 function ShapeIcon({ shape, className }: { shape: ShelfShape; className?: string }) {
@@ -30,6 +31,7 @@ function ShapeIcon({ shape, className }: { shape: ShelfShape; className?: string
   if (shape === "heart") return <Heart className={className} />;
   if (shape === "circle") return <Circle className={className} />;
   if (shape === "star") return <Star className={className} />;
+  if (shape === "pentagon") return <Pentagon className={className} />;
   return <Square className={className} />;
 }
 
@@ -45,6 +47,7 @@ export function describeLocation(loc: LocationFields, locale: AppLocale = "es"):
   const shelf = normalizeShelf(loc.shelf as string | null);
   if (!shelf) return t.undefined;
   if (shelf === "on_demand") return t.onDemand;
+  if (shelf === "restocking") return t.restocking;
   if (shelf === "drawer") {
     const n = loc.drawer_number ?? "?";
     const l = loc.drawer_letter ?? "?";
@@ -91,6 +94,17 @@ export function LocationBadge({ loc, size = "sm" }: { loc: LocationFields; size?
         className={`inline-flex items-center gap-1 rounded-full border-2 ${pad} ${text} font-bold uppercase tracking-wider bg-ink text-cream border-ink`}
       >
         <Package className={icon} /> {t.onDemandShort}
+      </span>
+    );
+  }
+
+  if (shelf === "restocking") {
+    return (
+      <span
+        title={tooltip}
+        className={`inline-flex items-center gap-1 rounded-full border-2 ${pad} ${text} font-bold uppercase tracking-wider bg-amber-200 text-ink border-ink`}
+      >
+        <RotateCcw className={icon} /> {t.restockingShort}
       </span>
     );
   }

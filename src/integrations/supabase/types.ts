@@ -2327,7 +2327,7 @@ export type Database = {
         | "cancelled"
         | "waitlisted"
       rental_status: "active" | "returned" | "overdue" | "lost"
-      shelf_color: "green" | "pink" | "red" | "yellow" | "blue"
+      shelf_color: "green" | "pink" | "red" | "yellow" | "blue" | "purple"
       shelf_location:
         | "1"
         | "2"
@@ -2339,7 +2339,14 @@ export type Database = {
         | "B"
         | "C"
         | "D"
-      shelf_shape: "triangle" | "heart" | "square" | "circle" | "star"
+        | "restocking"
+      shelf_shape:
+        | "triangle"
+        | "heart"
+        | "square"
+        | "circle"
+        | "star"
+        | "pentagon"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -2514,7 +2521,7 @@ export const Constants = {
         "waitlisted",
       ],
       rental_status: ["active", "returned", "overdue", "lost"],
-      shelf_color: ["green", "pink", "red", "yellow", "blue"],
+      shelf_color: ["green", "pink", "red", "yellow", "blue", "purple"],
       shelf_location: [
         "1",
         "2",
@@ -2526,8 +2533,16 @@ export const Constants = {
         "B",
         "C",
         "D",
+        "restocking",
       ],
-      shelf_shape: ["triangle", "heart", "square", "circle", "star"],
+      shelf_shape: [
+        "triangle",
+        "heart",
+        "square",
+        "circle",
+        "star",
+        "pentagon",
+      ],
     },
   },
 } as const

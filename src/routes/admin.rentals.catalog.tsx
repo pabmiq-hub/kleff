@@ -53,13 +53,13 @@ interface Game {
   max_rental_days: number;
   total_copies: number;
   is_active: boolean;
-  shelf: "A" | "B" | "C" | "D" | "1" | "2" | "3" | "4" | "on_demand" | "drawer" | null;
-  shape: "triangle" | "heart" | "square" | "circle" | "star" | null;
+  shelf: "A" | "B" | "C" | "D" | "1" | "2" | "3" | "4" | "on_demand" | "drawer" | "restocking" | null;
+  shape: "triangle" | "heart" | "square" | "circle" | "star" | "pentagon" | null;
   slot_number: number | null;
   drawer_number: number | null;
   drawer_letter: "a" | "b" | "c" | "d" | null;
   in_drawer: boolean | null;
-  shelf_color: "green" | "pink" | "red" | "yellow" | "blue" | null;
+  shelf_color: "green" | "pink" | "red" | "yellow" | "blue" | "purple" | null;
 }
 
 
@@ -175,6 +175,7 @@ function CatalogPage() {
             <SelectItem value="D">Estantería D</SelectItem>
             <SelectItem value="drawer">Cajón</SelectItem>
             <SelectItem value="on_demand">Bajo pedido</SelectItem>
+            <SelectItem value="restocking">En reposición</SelectItem>
           </SelectContent>
 
         </Select>
@@ -317,6 +318,7 @@ function LocationDialog({
                 <SelectItem value="D">Estantería D</SelectItem>
                 <SelectItem value="drawer">Cajón</SelectItem>
                 <SelectItem value="on_demand">Bajo pedido</SelectItem>
+            <SelectItem value="restocking">En reposición</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -333,6 +335,7 @@ function LocationDialog({
                     <SelectItem value="square">Cuadrado</SelectItem>
                     <SelectItem value="circle">Círculo</SelectItem>
                     <SelectItem value="star">Estrella</SelectItem>
+                    <SelectItem value="pentagon">Pentágono</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -346,6 +349,7 @@ function LocationDialog({
                     <SelectItem value="red">Rojo</SelectItem>
                     <SelectItem value="yellow">Amarillo</SelectItem>
                     <SelectItem value="blue">Azul</SelectItem>
+                    <SelectItem value="purple">Morado</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
