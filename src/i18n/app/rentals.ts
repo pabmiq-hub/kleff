@@ -77,7 +77,7 @@ export const rentalsDict = {
       shelf: (shelf: string, shape: string, color: string, slot: string | number) =>
         `Estantería ${shelf} · ${shape}${color} · nº ${slot}`,
       colorSuffix: (color: string) => `, color ${color}`,
-      shapeLabel: { triangle: "triángulo", heart: "corazón", square: "cuadrado" } as Record<string, string>,
+      shapeLabel: { triangle: "triángulo", heart: "corazón", square: "cuadrado", circle: "círculo", star: "estrella" } as Record<string, string>,
       colorLabel: { green: "verde", pink: "rosa", red: "rojo", yellow: "amarillo", blue: "azul" } as Record<string, string>,
       legendTitle: "Cómo encontrar un juego",
       legendShelfExample: "Estantería A, forma triángulo, color verde, nº 3",
@@ -160,7 +160,7 @@ export const rentalsDict = {
       shelf: (shelf: string, shape: string, color: string, slot: string | number) =>
         `Prestatgeria ${shelf} · ${shape}${color} · núm. ${slot}`,
       colorSuffix: (color: string) => `, color ${color}`,
-      shapeLabel: { triangle: "triangle", heart: "cor", square: "quadrat" } as Record<string, string>,
+      shapeLabel: { triangle: "triangle", heart: "cor", square: "quadrat", circle: "cercle", star: "estrella" } as Record<string, string>,
       colorLabel: { green: "verd", pink: "rosa", red: "vermell", yellow: "groc", blue: "blau" } as Record<string, string>,
       legendTitle: "Com trobar un joc",
       legendShelfExample: "Prestatgeria A, forma triangle, color verd, núm. 3",
@@ -243,7 +243,7 @@ export const rentalsDict = {
       shelf: (shelf: string, shape: string, color: string, slot: string | number) =>
         `Shelf ${shelf} · ${shape}${color} · no. ${slot}`,
       colorSuffix: (color: string) => `, ${color}`,
-      shapeLabel: { triangle: "triangle", heart: "heart", square: "square" } as Record<string, string>,
+      shapeLabel: { triangle: "triangle", heart: "heart", square: "square", circle: "circle", star: "star" } as Record<string, string>,
       colorLabel: { green: "green", pink: "pink", red: "red", yellow: "yellow", blue: "blue" } as Record<string, string>,
       legendTitle: "How to find a game",
       legendShelfExample: "Shelf A, triangle shape, green, no. 3",
