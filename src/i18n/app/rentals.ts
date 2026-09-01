@@ -75,6 +75,8 @@ export const rentalsDict = {
       onDemandShort: "Bajo pedido",
       restocking: "En reposición — temporalmente fuera de circulación",
       restockingShort: "En reposición",
+      especiales: "Especiales — no están en las estanterías por su tamaño o estilo (narrativos, rol…), pero se pueden jugar en los eventos, normalmente con inscripción previa",
+      especialesShort: "Especiales",
       drawer: (n: string | number, l: string) => `Cajón ${n}${l.toUpperCase()}`,
       shelf: (shelf: string, shape: string, color: string, slot: string | number) =>
         `Estantería ${shelf} · ${shape}${color} · nº ${slot}`,
@@ -86,6 +88,7 @@ export const rentalsDict = {
       legendDrawerExample: "Cajón 2, letra A",
       legendOnDemandExample: "No está en la ludoteca fija — se puede pedir para próximos eventos",
       legendRestockingExample: "Temporalmente fuera de circulación — volverá pronto a la estantería",
+      legendEspecialesExample: "Narrativos, de rol o de gran formato — se juegan en eventos, normalmente con inscripción previa",
       legendShapeRules:
         "Estantería A: círculo (verde) y triángulo (azul) · Estantería B: estrella (amarillo) · Estantería C: cuadrado (rosa) · Estantería D: pentágono (morado) y corazón (rojo).",
       legendFooter:
@@ -164,6 +167,8 @@ export const rentalsDict = {
       onDemandShort: "Sota demanda",
       restocking: "En reposició — temporalment fora de circulació",
       restockingShort: "En reposició",
+      especiales: "Especials — no són a les prestatgeries per la seva mida o estil (narratius, rol…), però es poden jugar als esdeveniments, normalment amb inscripció prèvia",
+      especialesShort: "Especials",
       drawer: (n: string | number, l: string) => `Calaix ${n}${l.toUpperCase()}`,
       shelf: (shelf: string, shape: string, color: string, slot: string | number) =>
         `Prestatgeria ${shelf} · ${shape}${color} · núm. ${slot}`,
@@ -175,6 +180,7 @@ export const rentalsDict = {
       legendDrawerExample: "Calaix 2, lletra A",
       legendOnDemandExample: "No és a la ludoteca fixa — es pot demanar per a propers esdeveniments",
       legendRestockingExample: "Temporalment fora de circulació — aviat tornarà a la prestatgeria",
+      legendEspecialesExample: "Narratius, de rol o de gran format — es juguen a esdeveniments, normalment amb inscripció prèvia",
       legendShapeRules:
         "Prestatgeria A: cercle (verd) i triangle (blau) · Prestatgeria B: estrella (groc) · Prestatgeria C: quadrat (rosa) · Prestatgeria D: pentàgon (lila) i cor (vermell).",
       legendFooter:
@@ -253,6 +259,8 @@ export const rentalsDict = {
       onDemandShort: "On request",
       restocking: "Being restocked — temporarily out of circulation",
       restockingShort: "Restocking",
+      especiales: "Specials — not on the shelves due to their size or style (narrative, roleplaying…), but playable at events, usually with prior registration",
+      especialesShort: "Specials",
       drawer: (n: string | number, l: string) => `Drawer ${n}${l.toUpperCase()}`,
       shelf: (shelf: string, shape: string, color: string, slot: string | number) =>
         `Shelf ${shelf} · ${shape}${color} · no. ${slot}`,
@@ -264,6 +272,7 @@ export const rentalsDict = {
       legendDrawerExample: "Drawer 2, letter A",
       legendOnDemandExample: "Not on the shelves — can be requested for upcoming events",
       legendRestockingExample: "Temporarily out of circulation — back on the shelves soon",
+      legendEspecialesExample: "Narrative, roleplaying or oversized games — played at events, usually with prior registration",
       legendShapeRules:
         "Shelf A: circle (green) and triangle (blue) · Shelf B: star (yellow) · Shelf C: square (pink) · Shelf D: pentagon (purple) and heart (red).",
       legendFooter:

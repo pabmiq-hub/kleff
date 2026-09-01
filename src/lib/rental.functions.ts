@@ -21,7 +21,7 @@ async function assertSuperAdmin(userId: string): Promise<void> {
 const locationSchema = z
   .object({
     shelf: z
-      .enum(["A", "B", "C", "D", "1", "2", "3", "4", "on_demand", "drawer", "restocking"])
+      .enum(["A", "B", "C", "D", "1", "2", "3", "4", "on_demand", "drawer", "restocking", "especiales"])
       .nullable()
       .optional(),
     shape: z.enum(["triangle", "heart", "square", "circle", "star", "pentagon"]).nullable().optional(),

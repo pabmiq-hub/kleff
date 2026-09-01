@@ -38,7 +38,7 @@ interface BggGame {
   mechanics: string[];
   bgg_url: string | null;
   total_copies: number | null;
-  shelf: "A" | "B" | "C" | "D" | "1" | "2" | "3" | "4" | "on_demand" | "drawer" | null;
+  shelf: "A" | "B" | "C" | "D" | "1" | "2" | "3" | "4" | "on_demand" | "drawer" | "restocking" | "especiales" | null;
   shape: "triangle" | "heart" | "square" | null;
   slot_number: number | null;
   drawer_number: number | null;

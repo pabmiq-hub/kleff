@@ -1,8 +1,8 @@
-import { Triangle, Heart, Square, Circle, Star, Pentagon, Archive, Package, RotateCcw } from "lucide-react";
+import { Triangle, Heart, Square, Circle, Star, Pentagon, Archive, Package, RotateCcw, Sparkles } from "lucide-react";
 import { useAppLocale, type AppLocale } from "@/i18n/app-i18n";
 import { rentalsDict } from "@/i18n/app/rentals";
 
-export type ShelfLocation = "A" | "B" | "C" | "D" | "on_demand" | "drawer" | "restocking";
+export type ShelfLocation = "A" | "B" | "C" | "D" | "on_demand" | "drawer" | "restocking" | "especiales";
 export type ShelfShape = "triangle" | "heart" | "square" | "circle" | "star" | "pentagon";
 export type ShelfColor = "green" | "pink" | "red" | "yellow" | "blue" | "purple";
 export type DrawerLetter = "a" | "b" | "c" | "d";
@@ -48,6 +48,7 @@ export function describeLocation(loc: LocationFields, locale: AppLocale = "es"):
   if (!shelf) return t.undefined;
   if (shelf === "on_demand") return t.onDemand;
   if (shelf === "restocking") return t.restocking;
+  if (shelf === "especiales") return t.especiales;
   if (shelf === "drawer") {
     const n = loc.drawer_number ?? "?";
     const l = loc.drawer_letter ?? "?";
@@ -105,6 +106,17 @@ export function LocationBadge({ loc, size = "sm" }: { loc: LocationFields; size?
         className={`inline-flex items-center gap-1 rounded-full border-2 ${pad} ${text} font-bold uppercase tracking-wider bg-amber-200 text-ink border-ink`}
       >
         <RotateCcw className={icon} /> {t.restockingShort}
+      </span>
+    );
+  }
+
+  if (shelf === "especiales") {
+    return (
+      <span
+        title={tooltip}
+        className={`inline-flex items-center gap-1 rounded-full border-2 ${pad} ${text} font-bold uppercase tracking-wider bg-purple-200 text-ink border-ink`}
+      >
+        <Sparkles className={icon} /> {t.especialesShort}
       </span>
     );
   }
@@ -175,6 +187,10 @@ export function LocationLegend() {
         <span className="inline-flex items-center gap-2">
           <LocationBadge loc={{ shelf: "restocking", shape: null, slot_number: null, drawer_number: null, drawer_letter: null }} />
           {t.legendRestockingExample}
+        </span>
+        <span className="inline-flex items-center gap-2">
+          <LocationBadge loc={{ shelf: "especiales", shape: null, slot_number: null, drawer_number: null, drawer_letter: null }} />
+          {t.legendEspecialesExample}
         </span>
       </div>
       <p className="mt-3 text-[11px] text-foreground/55">
