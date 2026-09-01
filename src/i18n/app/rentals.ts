@@ -255,8 +255,12 @@ export const rentalsDict = {
       legendShelfExample: "Shelf A, triangle shape, green, no. 3",
       legendDrawerExample: "Drawer 2, letter A",
       legendOnDemandExample: "Not on the shelves — can be requested for upcoming events",
+      legendRestockingExample: "Temporarily out of circulation — back on the shelves soon",
+      legendShapeRules:
+        "Shelf A: circle (green) and triangle (blue) · Shelf B: star (yellow) · Shelf C: square (pink) · Shelf D: pentagon (purple) and heart (red).",
       legendFooter:
-        "Each game has a colour chip: the letter shows the shelf (A-D), the icon the divider shape, the chip colour the divider colour, and the number the slot (1-5). Drawers use number (1-4) + letter (A-D).",
+        "Each game has a colour chip: the letter shows the shelf (A-D), the icon the divider shape, the chip colour the divider colour, and the number the slot (1-5). Drawers use number (1-4) + letter (A-D). Games marked as on request are not on the shelves, and restocking ones are temporarily unavailable.",
+
     },
   },
 } satisfies Record<AppLocale, unknown>;
