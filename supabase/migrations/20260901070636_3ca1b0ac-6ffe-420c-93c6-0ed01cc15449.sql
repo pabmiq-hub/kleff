@@ -1,0 +1,1 @@
+ALTER FUNCTION public.validate_bgg_game_location() SET search_path = '';

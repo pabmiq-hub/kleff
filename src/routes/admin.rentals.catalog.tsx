@@ -54,10 +54,11 @@ interface Game {
   total_copies: number;
   is_active: boolean;
   shelf: "A" | "B" | "C" | "D" | "1" | "2" | "3" | "4" | "on_demand" | "drawer" | null;
-  shape: "triangle" | "heart" | "square" | null;
+  shape: "triangle" | "heart" | "square" | "circle" | "star" | null;
   slot_number: number | null;
   drawer_number: number | null;
   drawer_letter: "a" | "b" | "c" | "d" | null;
+  in_drawer: boolean | null;
   shelf_color: "green" | "pink" | "red" | "yellow" | "blue" | null;
 }
 
@@ -263,11 +264,13 @@ function LocationDialog({
   const [slot, setSlot] = useState<number | null>(game.slot_number);
   const [drawerNum, setDrawerNum] = useState<number | null>(game.drawer_number);
   const [drawerLet, setDrawerLet] = useState<Game["drawer_letter"]>(game.drawer_letter);
+  const [inDrawer, setInDrawer] = useState<boolean>(Boolean(game.in_drawer) || game.shelf === "drawer");
 
   const isShelfAD =
     shelf === "A" || shelf === "B" || shelf === "C" || shelf === "D" ||
     shelf === "1" || shelf === "2" || shelf === "3" || shelf === "4";
   const isDrawer = shelf === "drawer";
+  const drawerInShelf = isShelfAD && inDrawer;
 
   const save = async () => {
     try {
@@ -277,9 +280,10 @@ function LocationDialog({
           shelf: shelf ?? null,
           shape: isShelfAD ? shape ?? null : null,
           shelfColor: isShelfAD ? color ?? null : null,
-          slotNumber: isShelfAD ? slot ?? null : null,
-          drawerNumber: isDrawer ? drawerNum ?? null : null,
-          drawerLetter: isDrawer ? drawerLet ?? null : null,
+          slotNumber: isShelfAD && !inDrawer ? slot ?? null : null,
+          inDrawer: isShelfAD ? inDrawer : isDrawer,
+          drawerNumber: drawerInShelf || isDrawer ? drawerNum ?? null : null,
+          drawerLetter: drawerInShelf || isDrawer ? drawerLet ?? null : null,
         },
       });
       toast.success("Ubicación guardada");
@@ -327,6 +331,8 @@ function LocationDialog({
                     <SelectItem value="triangle">Triángulo</SelectItem>
                     <SelectItem value="heart">Corazón</SelectItem>
                     <SelectItem value="square">Cuadrado</SelectItem>
+                    <SelectItem value="circle">Círculo</SelectItem>
+                    <SelectItem value="star">Estrella</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -343,10 +349,40 @@ function LocationDialog({
                   </SelectContent>
                 </Select>
               </div>
-              <div className="space-y-1">
-                <Label>Número (1-5)</Label>
-                <Input type="number" min={1} max={5} value={slot ?? ""} onChange={(e) => setSlot(e.target.value ? Number(e.target.value) : null)} />
-              </div>
+              <label className="flex items-center gap-2 text-sm">
+                <input
+                  type="checkbox"
+                  checked={inDrawer}
+                  onChange={(e) => setInDrawer(e.target.checked)}
+                  className="h-4 w-4 accent-current"
+                />
+                Está en un cajón de esta estantería
+              </label>
+              {inDrawer ? (
+                <div className="flex gap-2">
+                  <div className="space-y-1 flex-1">
+                    <Label>Nº de cajón (1-9)</Label>
+                    <Input type="number" min={1} max={9} value={drawerNum ?? ""} onChange={(e) => setDrawerNum(e.target.value ? Number(e.target.value) : null)} />
+                  </div>
+                  <div className="space-y-1 flex-1">
+                    <Label>Letra</Label>
+                    <Select value={drawerLet ?? ""} onValueChange={(v) => setDrawerLet((v || null) as Game["drawer_letter"])}>
+                      <SelectTrigger><SelectValue placeholder="—" /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="a">A</SelectItem>
+                        <SelectItem value="b">B</SelectItem>
+                        <SelectItem value="c">C</SelectItem>
+                        <SelectItem value="d">D</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-1">
+                  <Label>Número (1-5)</Label>
+                  <Input type="number" min={1} max={5} value={slot ?? ""} onChange={(e) => setSlot(e.target.value ? Number(e.target.value) : null)} />
+                </div>
+              )}
             </>
           )}
 

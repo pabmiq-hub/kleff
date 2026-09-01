@@ -1,9 +1,9 @@
-import { Triangle, Heart, Square, Archive, Package } from "lucide-react";
+import { Triangle, Heart, Square, Circle, Star, Archive, Package } from "lucide-react";
 import { useAppLocale, type AppLocale } from "@/i18n/app-i18n";
 import { rentalsDict } from "@/i18n/app/rentals";
 
 export type ShelfLocation = "A" | "B" | "C" | "D" | "on_demand" | "drawer";
-export type ShelfShape = "triangle" | "heart" | "square";
+export type ShelfShape = "triangle" | "heart" | "square" | "circle" | "star";
 export type ShelfColor = "green" | "pink" | "red" | "yellow" | "blue";
 export type DrawerLetter = "a" | "b" | "c" | "d";
 
@@ -14,6 +14,7 @@ export interface LocationFields {
   drawer_number: number | null;
   drawer_letter: DrawerLetter | null;
   shelf_color?: ShelfColor | null;
+  in_drawer?: boolean | null;
 }
 
 const COLOR_BG: Record<ShelfColor, string> = {
@@ -27,6 +28,8 @@ const COLOR_BG: Record<ShelfColor, string> = {
 function ShapeIcon({ shape, className }: { shape: ShelfShape; className?: string }) {
   if (shape === "triangle") return <Triangle className={className} />;
   if (shape === "heart") return <Heart className={className} />;
+  if (shape === "circle") return <Circle className={className} />;
+  if (shape === "star") return <Star className={className} />;
   return <Square className={className} />;
 }
 
@@ -46,6 +49,13 @@ export function describeLocation(loc: LocationFields, locale: AppLocale = "es"):
     const n = loc.drawer_number ?? "?";
     const l = loc.drawer_letter ?? "?";
     return t.drawer(n, l);
+  }
+  if (loc.in_drawer) {
+    const n = loc.drawer_number ?? "?";
+    const l = loc.drawer_letter ?? "?";
+    const shapeD = loc.shape ? t.shapeLabel[loc.shape] : "—";
+    const colorD = loc.shelf_color ? t.colorSuffix(t.colorLabel[loc.shelf_color]) : "";
+    return `${t.shelf(shelf, shapeD, colorD, "")} · ${t.drawer(n, l)}`.replace(/ · $/, "");
   }
   const shape = loc.shape ? t.shapeLabel[loc.shape] : "—";
   const slot = loc.slot_number ?? "?";
@@ -92,6 +102,22 @@ export function LocationBadge({ loc, size = "sm" }: { loc: LocationFields; size?
         className={`inline-flex items-center gap-1 rounded-full border-2 ${pad} ${text} font-bold uppercase tracking-wider bg-cream-deep text-ink border-ink`}
       >
         <Archive className={icon} /> C{loc.drawer_number ?? "?"}·{(loc.drawer_letter ?? "?").toUpperCase()}
+      </span>
+    );
+  }
+
+  if (loc.in_drawer) {
+    const clsD = loc.shelf_color ? COLOR_BG[loc.shelf_color] : "bg-cream-deep text-ink border-ink";
+    return (
+      <span
+        title={tooltip}
+        className={`inline-flex items-center gap-1 rounded-full border-2 ${pad} ${text} font-bold uppercase tracking-wider ${clsD}`}
+      >
+        {shelf}
+        {loc.shape ? <ShapeIcon shape={loc.shape} className={icon} /> : null}
+        <Archive className={icon} />
+        {loc.drawer_number ?? "?"}
+        {(loc.drawer_letter ?? "?").toUpperCase()}
       </span>
     );
   }

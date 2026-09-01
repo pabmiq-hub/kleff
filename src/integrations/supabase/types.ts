@@ -103,6 +103,7 @@ export type Database = {
           families: string[] | null
           id: string
           image_url: string | null
+          in_drawer: boolean
           is_active: boolean
           last_synced_at: string | null
           max_players: number | null
@@ -143,6 +144,7 @@ export type Database = {
           families?: string[] | null
           id?: string
           image_url?: string | null
+          in_drawer?: boolean
           is_active?: boolean
           last_synced_at?: string | null
           max_players?: number | null
@@ -183,6 +185,7 @@ export type Database = {
           families?: string[] | null
           id?: string
           image_url?: string | null
+          in_drawer?: boolean
           is_active?: boolean
           last_synced_at?: string | null
           max_players?: number | null
@@ -2336,7 +2339,7 @@ export type Database = {
         | "B"
         | "C"
         | "D"
-      shelf_shape: "triangle" | "heart" | "square"
+      shelf_shape: "triangle" | "heart" | "square" | "circle" | "star"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -2524,7 +2527,7 @@ export const Constants = {
         "C",
         "D",
       ],
-      shelf_shape: ["triangle", "heart", "square"],
+      shelf_shape: ["triangle", "heart", "square", "circle", "star"],
     },
   },
 } as const
