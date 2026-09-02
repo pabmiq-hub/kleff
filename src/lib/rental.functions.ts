@@ -124,8 +124,26 @@ export const deleteRentalGame = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => z.object({ id: z.string().uuid() }).parse(input))
   .handler(async ({ data, context }) => {
     await assertSuperAdmin(context.userId);
+    // Remember the BGG id so the collection sync never re-imports it.
+    const { data: game } = await supabaseAdmin
+      .from("bgg_games")
+      .select("bgg_id, title")
+      .eq("id", data.id)
+      .maybeSingle();
     const { error } = await supabaseAdmin.from("bgg_games").delete().eq("id", data.id);
     if (error) throw new Error(error.message);
+    if (game?.bgg_id != null) {
+      await supabaseAdmin
+        .from("bgg_sync_exclusions")
+        .upsert(
+          {
+            bgg_id: game.bgg_id,
+            title: game.title ?? null,
+            excluded_by: context.userId,
+          } as never,
+          { onConflict: "bgg_id" },
+        );
+    }
     return { success: true };
   });
 
