@@ -388,7 +388,7 @@ type ExistingRow = {
 
 
 function buildRecord(
-  g: LudoyaGame,
+  g: Partial<LudoyaGame>,
   bggId: number | null,
   extra: BggThingExtras | undefined,
   prev: ExistingRow | undefined,
