@@ -27,7 +27,12 @@ const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 // We scrape the public HTML collection page through Firecrawl to recover
 // the user-collection display name per bgg_id.
 
-async function fetchBggDisplayNames(): Promise<Map<number, string>> {
+// Returns ONLY the games flagged as "owned" on the BGG collection
+// (own=1). This map is the authoritative catalogue: anything not in it must
+// never end up in the ludoteca. The value is the collection display name,
+// i.e. the edition/language title the owner sees ("Las Leyendas de Andor:
+// Tierras Lejanas" instead of "Die Legenden von Andor: Das ferne Land").
+async function fetchBggOwnedCollection(): Promise<Map<number, string>> {
   const apiKey = process.env.FIRECRAWL_API_KEY;
   const map = new Map<number, string>();
   if (!apiKey) {
@@ -35,7 +40,7 @@ async function fetchBggDisplayNames(): Promise<Map<number, string>> {
     return map;
   }
   for (let page = 1; page <= 10; page++) {
-    const url = `${BGG_COLLECTION_URL}?pageID=${page}`;
+    const url = `${BGG_COLLECTION_URL}?own=1&pageID=${page}`;
     try {
       const res = await fetch("https://api.firecrawl.dev/v1/scrape", {
         method: "POST",
