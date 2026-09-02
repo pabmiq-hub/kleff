@@ -137,6 +137,9 @@ interface LudoyaGame {
   complexity?: number | null;
   bggRating?: number | null;
   image?: LudoyaImage | null;
+  annotations?: {
+    copies?: Array<{ ownership?: string | null } | null> | null;
+  } | null;
 }
 
 async function fetchLudoyaCollection(): Promise<LudoyaGame[]> {
