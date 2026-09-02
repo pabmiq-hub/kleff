@@ -209,6 +209,27 @@ export type Database = {
         }
         Relationships: []
       }
+      bgg_sync_exclusions: {
+        Row: {
+          bgg_id: number
+          created_at: string
+          excluded_by: string | null
+          title: string | null
+        }
+        Insert: {
+          bgg_id: number
+          created_at?: string
+          excluded_by?: string | null
+          title?: string | null
+        }
+        Update: {
+          bgg_id?: number
+          created_at?: string
+          excluded_by?: string | null
+          title?: string | null
+        }
+        Relationships: []
+      }
       blog_posts: {
         Row: {
           author_name: string | null
