@@ -44,8 +44,9 @@ function AppLayout() {
   };
 
   return (
-    <div className="h-screen bg-cream-deep flex flex-col md:flex-row overflow-hidden">
-      <aside className="md:w-64 md:shrink-0 bg-card border-b-2 md:border-b-0 md:border-r-2 border-ink p-4 md:p-6 flex md:flex-col gap-2 md:h-screen z-30 md:overflow-y-auto">
+    <div className="min-h-screen bg-cream-deep flex flex-col md:flex-row">
+      <aside className="md:w-64 md:shrink-0 bg-card border-b-2 md:border-b-0 md:border-r-2 border-ink p-4 md:p-6 flex md:flex-col gap-2 md:sticky md:top-0 md:h-screen z-30 md:overflow-y-auto">
+
         <Link to="/app" className="font-display font-bold text-xl tracking-tight mb-0 md:mb-6">
           KLEFF <span className="text-coral-deep text-sm font-sans font-semibold">socios</span>
         </Link>
