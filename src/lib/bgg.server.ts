@@ -39,49 +39,54 @@ async function fetchBggOwnedCollection(): Promise<Map<number, string>> {
     console.warn("[bgg-names] FIRECRAWL_API_KEY missing → skip");
     return map;
   }
-  for (let page = 1; page <= 10; page++) {
-    const url = `${BGG_COLLECTION_URL}?own=1&pageID=${page}`;
-    try {
-      const res = await fetch("https://api.firecrawl.dev/v1/scrape", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${apiKey}`,
-        },
-        body: JSON.stringify({
-          url,
-          formats: ["markdown"],
-          onlyMainContent: true,
-        }),
-      });
-      if (!res.ok) {
-        console.warn(`[bgg-names] page ${page} → ${res.status}`);
+  // Base games AND expansions flagged as owned. BGG's collection page filters
+  // by subtype, so both passes are required to get the full catalogue.
+  for (const subtype of ["boardgame", "boardgameexpansion"] as const) {
+    for (let page = 1; page <= 10; page++) {
+      const url = `${BGG_COLLECTION_URL}?own=1&subtype=${subtype}&pageID=${page}`;
+      try {
+        const res = await fetch("https://api.firecrawl.dev/v1/scrape", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${apiKey}`,
+          },
+          body: JSON.stringify({
+            url,
+            formats: ["markdown"],
+            onlyMainContent: true,
+          }),
+        });
+        if (!res.ok) {
+          console.warn(`[bgg-names] ${subtype} page ${page} → ${res.status}`);
+          break;
+        }
+        const json = (await res.json()) as { data?: { markdown?: string } };
+        const md = json.data?.markdown ?? "";
+        const re =
+          /\[([^\]]+)\]\(https:\/\/boardgamegeek\.com\/boardgame(?:expansion)?\/(\d+)/g;
+        let count = 0;
+        let m: RegExpExecArray | null;
+        while ((m = re.exec(md))) {
+          const name = m[1].trim();
+          const id = parseInt(m[2], 10);
+          if (!Number.isFinite(id) || !name) continue;
+          if (!map.has(id)) map.set(id, name);
+          count++;
+        }
+        console.log(`[bgg-names] ${subtype} page ${page}: ${count} matches`);
+        if (count < 300) break;
+        await sleep(400);
+      } catch (e) {
+        console.warn(
+          `[bgg-names] ${subtype} page ${page} failed:`,
+          e instanceof Error ? e.message : String(e),
+        );
         break;
       }
-      const json = (await res.json()) as { data?: { markdown?: string } };
-      const md = json.data?.markdown ?? "";
-      const re =
-        /\[([^\]]+)\]\(https:\/\/boardgamegeek\.com\/boardgame(?:expansion)?\/(\d+)/g;
-      let count = 0;
-      let m: RegExpExecArray | null;
-      while ((m = re.exec(md))) {
-        const name = m[1].trim();
-        const id = parseInt(m[2], 10);
-        if (!Number.isFinite(id) || !name) continue;
-        if (!map.has(id)) map.set(id, name);
-        count++;
-      }
-      console.log(`[bgg-names] page ${page}: ${count} matches`);
-      if (count < 300) break;
-      await sleep(400);
-    } catch (e) {
-      console.warn(
-        `[bgg-names] page ${page} failed:`,
-        e instanceof Error ? e.message : String(e),
-      );
-      break;
     }
   }
+
   console.log(`[bgg-names] total ${map.size} display names`);
   return map;
 }
