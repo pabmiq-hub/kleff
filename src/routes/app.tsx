@@ -44,8 +44,9 @@ function AppLayout() {
   };
 
   return (
-    <div className="h-screen bg-cream-deep flex flex-col md:flex-row overflow-hidden">
-      <aside className="md:w-64 md:shrink-0 bg-card border-b-2 md:border-b-0 md:border-r-2 border-ink p-4 md:p-6 flex md:flex-col gap-2 md:h-screen z-30 md:overflow-y-auto">
+    <div className="min-h-screen bg-cream-deep flex flex-col md:flex-row">
+      <aside className="md:w-64 md:shrink-0 bg-card border-b-2 md:border-b-0 md:border-r-2 border-ink p-4 md:p-6 flex md:flex-col gap-2 md:sticky md:top-0 md:h-screen z-30 md:overflow-y-auto">
+
         <Link to="/app" className="font-display font-bold text-xl tracking-tight mb-0 md:mb-6">
           KLEFF <span className="text-coral-deep text-sm font-sans font-semibold">socios</span>
         </Link>
@@ -66,8 +67,8 @@ function AppLayout() {
           </Button>
         </div>
       </aside>
-      <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
-        <div className="shrink-0 z-20 bg-cream-deep/95 backdrop-blur border-b border-ink/10">
+      <div className="flex-1 flex flex-col min-w-0">
+        <div className="sticky top-0 shrink-0 z-20 bg-cream-deep/95 backdrop-blur border-b border-ink/10">
           <div className="max-w-5xl w-full mx-auto md:mx-0 px-4 md:px-8 py-3 flex items-center justify-between gap-3">
             <div>
               {isSuperAdmin && (
@@ -88,13 +89,14 @@ function AppLayout() {
             <AppLanguageSwitcher />
           </div>
         </div>
-        <main className="flex-1 overflow-y-auto p-4 md:p-8">
+        <main className="flex-1 p-4 md:p-8">
           <div className="max-w-5xl w-full">
             <Outlet />
           </div>
         </main>
       </div>
     </div>
+
   );
 }
 
