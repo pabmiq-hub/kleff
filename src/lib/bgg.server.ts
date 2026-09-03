@@ -392,6 +392,7 @@ type ExistingRow = {
   image_url: string | null;
   thumbnail_url: string | null;
   last_synced_at: string | null;
+  shelf: string | null;
 };
 
 
@@ -505,7 +506,7 @@ export async function syncBggCollection(): Promise<{
   const { data: existing, error: exErr } = await supabaseAdmin
     .from("bgg_games")
     .select(
-      "id, bgg_id, title, bgg_type, categories, mechanics, families, designers, publishers, description, bgg_rating, bgg_rating_users, bgg_weight, bgg_weight_users, bgg_rank, image_url, thumbnail_url, last_synced_at",
+      "id, bgg_id, title, bgg_type, categories, mechanics, families, designers, publishers, description, bgg_rating, bgg_rating_users, bgg_weight, bgg_weight_users, bgg_rank, image_url, thumbnail_url, last_synced_at, shelf",
     );
   if (exErr) throw new Error(exErr.message);
 
@@ -603,6 +604,9 @@ export async function syncBggCollection(): Promise<{
   for (const row of existingRows) {
     if (matchedIds.has(row.id)) continue;
     if (row.bgg_id == null) continue;
+    // Curated rows (a shelf/location assigned by an admin, e.g. "en reposición")
+    // stay in the catalogue even if BGG no longer lists them as owned.
+    if (row.shelf != null) continue;
     const { error } = await supabaseAdmin
       .from("bgg_games")
       .update({ is_active: false } as never)
