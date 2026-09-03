@@ -78,6 +78,8 @@ function CatalogPage() {
   const [syncing, setSyncing] = useState(false);
   const [search, setSearch] = useState("");
   const [shelfFilter, setShelfFilter] = useState<string>("all");
+  const [statusFilter, setStatusFilter] = useState<string>("active");
+
 
   const refresh = async () => {
     const [r, f] = await Promise.all([
@@ -144,8 +146,30 @@ function CatalogPage() {
     }
   };
 
+  const inactiveCount = games.filter((g) => !g.is_active).length;
+
+  const purgeInactive = async () => {
+    const targets = games.filter((g) => !g.is_active);
+    if (targets.length === 0) return;
+    if (
+      !confirm(
+        `¿Eliminar definitivamente ${targets.length} juegos desactivados? No volverán a importarse desde BGG.`,
+      )
+    )
+      return;
+    try {
+      for (const g of targets) await deleteFn({ data: { id: g.id } });
+      toast.success(`${targets.length} juegos eliminados`);
+      await refresh();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Error");
+    }
+  };
+
   const filtered = games.filter((g) => {
     if (search && !g.title.toLowerCase().includes(search.toLowerCase())) return false;
+    if (statusFilter === "active" && !g.is_active) return false;
+    if (statusFilter === "inactive" && g.is_active) return false;
     if (shelfFilter === "all") return true;
     if (shelfFilter === "unset") return !g.shelf;
     return g.shelf === shelfFilter;
@@ -162,6 +186,16 @@ function CatalogPage() {
           placeholder="Buscar…"
           className="bg-ink/10 border-ink/20 text-ink max-w-xs"
         />
+        <Select value={statusFilter} onValueChange={setStatusFilter}>
+          <SelectTrigger className="bg-ink/10 border-ink/20 text-ink w-40">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="active">Activos</SelectItem>
+            <SelectItem value="inactive">Desactivados</SelectItem>
+            <SelectItem value="all">Todos</SelectItem>
+          </SelectContent>
+        </Select>
         <Select value={shelfFilter} onValueChange={setShelfFilter}>
           <SelectTrigger className="bg-ink/10 border-ink/20 text-ink w-44">
             <SelectValue />
@@ -180,7 +214,17 @@ function CatalogPage() {
 
         </Select>
         <span className="text-xs text-ink/60">{filtered.length} / {games.length}</span>
-        <div className="ml-auto">
+        <div className="ml-auto flex items-center gap-2">
+          {inactiveCount > 0 && (
+            <Button
+              variant="outline"
+              className="border-coral/50 text-coral hover:bg-coral/10"
+              onClick={purgeInactive}
+            >
+              <Trash2 className="h-4 w-4 mr-1" />
+              Eliminar desactivados ({inactiveCount})
+            </Button>
+          )}
           <Button
             variant="outline"
             className="border-ink/30 text-ink hover:bg-ink/10"
@@ -192,6 +236,7 @@ function CatalogPage() {
           </Button>
         </div>
       </div>
+
 
       <div className="space-y-2">
         {filtered.map((g) => (
