@@ -67,33 +67,9 @@ function AppLayout() {
           </Button>
         </div>
       </aside>
-      <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
-        <div className="shrink-0 z-20 bg-cream-deep/95 backdrop-blur border-b border-ink/10">
-          <div className="max-w-5xl w-full mx-auto md:mx-0 px-4 md:px-8 py-3 flex items-center justify-between gap-3">
-            <div>
-              {isSuperAdmin && (
-                <Link
-                  to="/admin"
-                  className="flex items-center gap-2 text-sm bg-ink text-cream rounded-lg px-3 py-2 w-fit hover:bg-ink/90"
-                >
-                  <Shield className="h-4 w-4" /> <span className="hidden sm:inline">{t.layout.superAdminFull}</span><span className="sm:hidden">{t.layout.superAdminShort}</span>
-                </Link>
-              )}
-            </div>
-            <div className="flex items-center gap-2">
-              <AppLanguageSwitcher className="hidden sm:flex" />
-              <NotificationsBell />
-            </div>
-          </div>
-          <div className="sm:hidden px-4 pb-2 flex justify-end">
-            <AppLanguageSwitcher />
-          </div>
-        </div>
-        <main className="flex-1 overflow-y-auto p-4 md:p-8">
-          <div className="max-w-5xl w-full">
-            <Outlet />
-          </div>
-        </main>
+      <div className="flex-1 flex flex-col min-w-0">
+        <div className="sticky top-0 shrink-0 z-20 bg-cream-deep/95 backdrop-blur border-b border-ink/10">
+
       </div>
     </div>
   );
