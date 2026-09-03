@@ -78,6 +78,8 @@ function CatalogPage() {
   const [syncing, setSyncing] = useState(false);
   const [search, setSearch] = useState("");
   const [shelfFilter, setShelfFilter] = useState<string>("all");
+  const [statusFilter, setStatusFilter] = useState<string>("active");
+
 
   const refresh = async () => {
     const [r, f] = await Promise.all([
