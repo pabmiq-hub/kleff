@@ -58,7 +58,19 @@ export const Route = createFileRoute("/$")({
         // 3) Blog post (WordPress slug).
         const { post } = await getBlogPostBySlug({ data: { slug: slugCandidate, locale } });
         if (post) return { kind: "post" as const, post, locale };
+
+        // 4) Konektum event slug at root -> public registration page.
+        if (locale === "es") {
+          const konEvent = await resolveKonEvent({ data: { slug: slugCandidate } });
+          if (konEvent) {
+            throw redirect({
+              to: "/$eventSlug/registro",
+              params: { eventSlug: konEvent.slug || slugCandidate },
+            });
+          }
+        }
       }
+
 
       // Fall back to redirect lookup
       const { to } = await lookupRedirect({ data: { path: pathname } });
