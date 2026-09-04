@@ -78,8 +78,10 @@ export const Route = createFileRoute("/$")({
       if (to) throw redirect({ href: to, statusCode: 301, reloadDocument: true });
     } catch (e) {
       // Re-throw redirects so TanStack handles them.
+      if (e instanceof Response) throw e;
       if (e && typeof e === "object" && "isRedirect" in (e as object)) throw e;
       console.error("[$.tsx] catch-all loader failed", e);
+
     }
 
     return { kind: "not-found" as const, path: pathname };
