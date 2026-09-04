@@ -1,0 +1,2 @@
+ALTER TABLE public.kon_event_series DROP CONSTRAINT IF EXISTS kon_event_series_organizer_id_fkey;
+ALTER TABLE public.kon_global_participants DROP CONSTRAINT IF EXISTS kon_global_participants_organizer_id_fkey;

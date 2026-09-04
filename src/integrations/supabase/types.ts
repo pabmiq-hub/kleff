@@ -1311,15 +1311,7 @@ export type Database = {
           slug?: string
           updated_at?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "kon_event_series_organizer_id_fkey"
-            columns: ["organizer_id"]
-            isOneToOne: false
-            referencedRelation: "kon_organizers"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       kon_event_waitlist: {
         Row: {
@@ -1879,15 +1871,7 @@ export type Database = {
           status?: string
           updated_at?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "kon_global_participants_organizer_id_fkey"
-            columns: ["organizer_id"]
-            isOneToOne: false
-            referencedRelation: "kon_organizers"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       kon_modules: {
         Row: {
