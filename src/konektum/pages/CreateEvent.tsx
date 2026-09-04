@@ -42,6 +42,7 @@ type ParticipantMode = "manual" | "excel" | "both";
 type EventModule = "social" | "professional";
 import EventSeriesManager from "@/konektum/components/event/EventSeriesManager";
 import { createSeriesEventsFromBase, type SeriesDateEntry } from "@/konektum/lib/eventSeries";
+import { slugifyEventName } from "@/konektum/lib/publicUrls";
 
 type B2BRotationType = "client_fixed" | "provider_fixed";
 type RegistrationFormMode = "auto" | "template" | "custom";
@@ -185,6 +186,8 @@ const CreateEvent = () => {
   
   // Common fields
   const [eventName, setEventName] = useState("");
+  const [eventSlug, setEventSlug] = useState("");
+  const [slugTouched, setSlugTouched] = useState(false);
   const [eventDate, setEventDate] = useState("");
   const [seriesId, setSeriesId] = useState<string | null>(null);
   const [seriesDates, setSeriesDates] = useState<SeriesDateEntry[]>([]);
@@ -389,6 +392,7 @@ const CreateEvent = () => {
     // Create event in database with organizer_id
     const eventInsertData = {
       name: eventName,
+      slug: (eventSlug || slugifyEventName(eventName)) || null,
       date: eventDate.split('T')[0],
       event_time: eventDate.includes('T') ? eventDate.split('T')[1] : null,
       event_location: eventLocation.trim() || null,
