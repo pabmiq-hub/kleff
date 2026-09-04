@@ -292,7 +292,6 @@ export async function updateKonektumEvent(eventId: string, patch: Record<string,
 
 const PARTICIPANT_EDITABLE = new Set([
   "name",
-  "slug",
   "email",
   "phone",
   "gender",
