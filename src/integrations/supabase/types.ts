@@ -4411,6 +4411,7 @@ export type Database = {
       }
       kon_organizers_public: {
         Row: {
+          active_modules: string[] | null
           company_name: string | null
           id: string | null
           logo_url: string | null
@@ -4419,6 +4420,7 @@ export type Database = {
           user_id: string | null
         }
         Insert: {
+          active_modules?: never
           company_name?: string | null
           id?: string | null
           logo_url?: string | null
@@ -4427,6 +4429,7 @@ export type Database = {
           user_id?: string | null
         }
         Update: {
+          active_modules?: never
           company_name?: string | null
           id?: string | null
           logo_url?: string | null
