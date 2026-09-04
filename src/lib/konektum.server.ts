@@ -1,48 +1,13 @@
-// Server-only access layer to the Konektum (Match Maker Pro) backend.
-// Phase 1 of the integration: KLEFF reads/writes Konektum data in its own
-// project, signing in server-side as the organizer account.
-import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+// Server-only access layer to the Konektum data, now living inside the KLEFF
+// database under the `kon_` table prefix.
 
-type AnyClient = SupabaseClient<any, "public", any>;
+const KONEKTUM_ORGANIZER_USER_ID = "e68889b2-a7c8-4bbc-84d9-501786ad10fa";
 
-let cached: { client: AnyClient; userId: string; expiresAt: number } | null = null;
-
-export async function getKonektumClient(): Promise<{ client: AnyClient; organizerId: string }> {
-  const now = Date.now();
-  if (cached && cached.expiresAt > now + 60_000) {
-    return { client: cached.client, organizerId: cached.userId };
-  }
-
-  const url = process.env["KONEKTUM_SUPABASE_URL"];
-  const key = process.env["KONEKTUM_SUPABASE_PUBLISHABLE_KEY"];
-  const email = process.env["KONEKTUM_ADMIN_EMAIL"];
-  const password = process.env["KONEKTUM_ADMIN_PASSWORD"];
-
-  if (!url || !key || !email || !password) {
-    throw new Error("Konektum no está configurado (faltan credenciales).");
-  }
-
-  const client = createClient(url, key, {
-    auth: { storage: undefined, persistSession: false, autoRefreshToken: false },
-  });
-
-  const { data, error } = await client.auth.signInWithPassword({ email, password });
-  if (error || !data.session || !data.user) {
-    throw new Error(`No se pudo conectar con Konektum: ${error?.message ?? "sesión no disponible"}`);
-  }
-
-  const authed = createClient(url, key, {
-    global: { headers: { Authorization: `Bearer ${data.session.access_token}` } },
-    auth: { storage: undefined, persistSession: false, autoRefreshToken: false },
-  });
-
-  cached = {
-    client: authed,
-    userId: data.user.id,
-    expiresAt: (data.session.expires_at ?? Math.floor(now / 1000) + 3600) * 1000,
+async function getClient() {
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  return supabaseAdmin as unknown as {
+    from: (t: string) => any;
   };
-
-  return { client: authed, organizerId: data.user.id };
 }
 
 export interface KonektumEvent {
@@ -68,16 +33,17 @@ export interface KonektumOverview {
 }
 
 export async function loadKonektumOverview(): Promise<KonektumOverview> {
-  const { client, organizerId } = await getKonektumClient();
+  const client = await getClient();
+  const organizerId = KONEKTUM_ORGANIZER_USER_ID;
 
   const { data: organizer } = await client
-    .from("organizers")
+    .from("kon_organizers")
     .select("company_name")
     .eq("user_id", organizerId)
     .maybeSingle();
 
   const { data: eventRows, error: eventsError } = await client
-    .from("events")
+    .from("kon_events")
     .select("id, name, date, status, module, participants_count, is_test_event")
     .eq("organizer_id", organizerId)
     .order("date", { ascending: false });
@@ -87,7 +53,7 @@ export async function loadKonektumOverview(): Promise<KonektumOverview> {
   const realEventIds = events.filter((e) => !e.is_test_event).map((e) => e.id);
 
   const { count: uniqueParticipants } = await client
-    .from("global_participants")
+    .from("kon_global_participants")
     .select("*", { count: "exact", head: true })
     .eq("organizer_id", organizerId);
 
@@ -97,12 +63,12 @@ export async function loadKonektumOverview(): Promise<KonektumOverview> {
 
   if (realEventIds.length > 0) {
     const { count: tp } = await client
-      .from("participants")
+      .from("kon_participants")
       .select("*", { count: "exact", head: true })
       .in("event_id", realEventIds)
       .eq("is_fake", false);
     const { count: sc } = await client
-      .from("participants")
+      .from("kon_participants")
       .select("*", { count: "exact", head: true })
       .in("event_id", realEventIds)
       .eq("is_fake", false)
@@ -111,13 +77,17 @@ export async function loadKonektumOverview(): Promise<KonektumOverview> {
     submitted = sc ?? 0;
 
     const { data: selections } = await client
-      .from("participant_selections")
+      .from("kon_participant_selections")
       .select("selector_id, selected_id")
       .in("event_id", realEventIds);
     if (selections) {
-      const set = new Set(selections.map((s) => `${s.selector_id}->${s.selected_id}`));
+      const set = new Set(
+        (selections as { selector_id: string; selected_id: string }[]).map(
+          (s) => `${s.selector_id}->${s.selected_id}`,
+        ),
+      );
       const counted = new Set<string>();
-      for (const s of selections) {
+      for (const s of selections as { selector_id: string; selected_id: string }[]) {
         const pair = [s.selector_id, s.selected_id].sort().join(":");
         if (set.has(`${s.selected_id}->${s.selector_id}`) && !counted.has(pair)) {
           counted.add(pair);
