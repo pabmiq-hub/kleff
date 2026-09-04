@@ -116,7 +116,6 @@ import { Route as AdminMediaNewRouteImport } from './routes/admin.media.new'
 import { Route as AdminMediaIdRouteImport } from './routes/admin.media.$id'
 import { Route as AdminKonektumUsuariosRouteImport } from './routes/admin.konektum.usuarios'
 import { Route as AdminKonektumPlantillasRouteImport } from './routes/admin.konektum.plantillas'
-import { Route as AdminKonektumEventosRouteImport } from './routes/admin.konektum.eventos'
 import { Route as AdminKonektumEmailRouteImport } from './routes/admin.konektum.email'
 import { Route as AdminKonektumConfiguracionRouteImport } from './routes/admin.konektum.configuracion'
 import { Route as AdminKonektumAnaliticaRouteImport } from './routes/admin.konektum.analitica'
@@ -665,11 +664,6 @@ const AdminKonektumPlantillasRoute = AdminKonektumPlantillasRouteImport.update({
   path: '/plantillas',
   getParentRoute: () => AdminKonektumRoute,
 } as any)
-const AdminKonektumEventosRoute = AdminKonektumEventosRouteImport.update({
-  id: '/eventos',
-  path: '/eventos',
-  getParentRoute: () => AdminKonektumRoute,
-} as any)
 const AdminKonektumEmailRoute = AdminKonektumEmailRouteImport.update({
   id: '/email',
   path: '/email',
@@ -814,7 +808,6 @@ export interface FileRoutesByFullPath {
   '/admin/konektum/analitica': typeof AdminKonektumAnaliticaRoute
   '/admin/konektum/configuracion': typeof AdminKonektumConfiguracionRoute
   '/admin/konektum/email': typeof AdminKonektumEmailRoute
-  '/admin/konektum/eventos': typeof AdminKonektumEventosRoute
   '/admin/konektum/plantillas': typeof AdminKonektumPlantillasRoute
   '/admin/konektum/usuarios': typeof AdminKonektumUsuariosRoute
   '/admin/media/$id': typeof AdminMediaIdRoute
@@ -926,7 +919,6 @@ export interface FileRoutesByTo {
   '/admin/konektum/analitica': typeof AdminKonektumAnaliticaRoute
   '/admin/konektum/configuracion': typeof AdminKonektumConfiguracionRoute
   '/admin/konektum/email': typeof AdminKonektumEmailRoute
-  '/admin/konektum/eventos': typeof AdminKonektumEventosRoute
   '/admin/konektum/plantillas': typeof AdminKonektumPlantillasRoute
   '/admin/konektum/usuarios': typeof AdminKonektumUsuariosRoute
   '/admin/media/$id': typeof AdminMediaIdRoute
@@ -1047,7 +1039,6 @@ export interface FileRoutesById {
   '/admin/konektum/analitica': typeof AdminKonektumAnaliticaRoute
   '/admin/konektum/configuracion': typeof AdminKonektumConfiguracionRoute
   '/admin/konektum/email': typeof AdminKonektumEmailRoute
-  '/admin/konektum/eventos': typeof AdminKonektumEventosRoute
   '/admin/konektum/plantillas': typeof AdminKonektumPlantillasRoute
   '/admin/konektum/usuarios': typeof AdminKonektumUsuariosRoute
   '/admin/media/$id': typeof AdminMediaIdRoute
@@ -1169,7 +1160,6 @@ export interface FileRouteTypes {
     | '/admin/konektum/analitica'
     | '/admin/konektum/configuracion'
     | '/admin/konektum/email'
-    | '/admin/konektum/eventos'
     | '/admin/konektum/plantillas'
     | '/admin/konektum/usuarios'
     | '/admin/media/$id'
@@ -1281,7 +1271,6 @@ export interface FileRouteTypes {
     | '/admin/konektum/analitica'
     | '/admin/konektum/configuracion'
     | '/admin/konektum/email'
-    | '/admin/konektum/eventos'
     | '/admin/konektum/plantillas'
     | '/admin/konektum/usuarios'
     | '/admin/media/$id'
@@ -1401,7 +1390,6 @@ export interface FileRouteTypes {
     | '/admin/konektum/analitica'
     | '/admin/konektum/configuracion'
     | '/admin/konektum/email'
-    | '/admin/konektum/eventos'
     | '/admin/konektum/plantillas'
     | '/admin/konektum/usuarios'
     | '/admin/media/$id'
@@ -2255,13 +2243,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminKonektumPlantillasRouteImport
       parentRoute: typeof AdminKonektumRoute
     }
-    '/admin/konektum/eventos': {
-      id: '/admin/konektum/eventos'
-      path: '/eventos'
-      fullPath: '/admin/konektum/eventos'
-      preLoaderRoute: typeof AdminKonektumEventosRouteImport
-      parentRoute: typeof AdminKonektumRoute
-    }
     '/admin/konektum/email': {
       id: '/admin/konektum/email'
       path: '/email'
@@ -2373,7 +2354,6 @@ interface AdminKonektumRouteChildren {
   AdminKonektumAnaliticaRoute: typeof AdminKonektumAnaliticaRoute
   AdminKonektumConfiguracionRoute: typeof AdminKonektumConfiguracionRoute
   AdminKonektumEmailRoute: typeof AdminKonektumEmailRoute
-  AdminKonektumEventosRoute: typeof AdminKonektumEventosRoute
   AdminKonektumPlantillasRoute: typeof AdminKonektumPlantillasRoute
   AdminKonektumUsuariosRoute: typeof AdminKonektumUsuariosRoute
   AdminKonektumIndexRoute: typeof AdminKonektumIndexRoute
@@ -2383,7 +2363,6 @@ const AdminKonektumRouteChildren: AdminKonektumRouteChildren = {
   AdminKonektumAnaliticaRoute: AdminKonektumAnaliticaRoute,
   AdminKonektumConfiguracionRoute: AdminKonektumConfiguracionRoute,
   AdminKonektumEmailRoute: AdminKonektumEmailRoute,
-  AdminKonektumEventosRoute: AdminKonektumEventosRoute,
   AdminKonektumPlantillasRoute: AdminKonektumPlantillasRoute,
   AdminKonektumUsuariosRoute: AdminKonektumUsuariosRoute,
   AdminKonektumIndexRoute: AdminKonektumIndexRoute,
