@@ -1,17 +1,21 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { DashboardSettings } from "@/konektum/components/admin/DashboardSettings";
+import { useAdminData } from "@/konektum/AdminData";
 
 export const Route = createFileRoute("/admin/konektum/configuracion")({
   component: Page,
 });
 
 function Page() {
+  const { user, organizer, plan, limits, branding, refreshOrganizer } = useAdminData();
   return (
-    <div className="space-y-4">
-      <h1 className="font-display text-3xl font-bold">Configuración</h1>
-      <p className="text-ink/60">
-        Esta sección de Konektum se integrará en la siguiente entrega. Los datos siguen disponibles
-        y funcionando en el panel actual de Konektum.
-      </p>
-    </div>
+    <DashboardSettings
+      user={user}
+      organizer={organizer}
+      plan={plan}
+      limits={limits}
+      branding={branding}
+      onRefresh={refreshOrganizer}
+    />
   );
 }

@@ -1,17 +1,22 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { DashboardTemplates } from "@/konektum/components/admin/DashboardTemplates";
+import { UpgradePrompt } from "@/konektum/components/UpgradePrompt";
+import { useAdminData } from "@/konektum/AdminData";
 
 export const Route = createFileRoute("/admin/konektum/plantillas")({
   component: Page,
 });
 
 function Page() {
-  return (
-    <div className="space-y-4">
-      <h1 className="font-display text-3xl font-bold">Plantillas</h1>
-      <p className="text-ink/60">
-        Esta sección de Konektum se integrará en la siguiente entrega. Los datos siguen disponibles
-        y funcionando en el panel actual de Konektum.
-      </p>
-    </div>
-  );
+  const { hasFeature, isSuperAdmin } = useAdminData();
+  if (!hasFeature("templates") && !isSuperAdmin) {
+    return (
+      <UpgradePrompt
+        title="Plantillas"
+        description="Crea y gestiona plantillas reutilizables de formularios, correos electrónicos y eventos"
+        onUpgrade={() => window.open("/#pricing", "_blank")}
+      />
+    );
+  }
+  return <DashboardTemplates />;
 }
