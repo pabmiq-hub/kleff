@@ -15,7 +15,14 @@ export function useAuth() {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
         setSession(session);
-        setUser(session?.user ?? null);
+        // Keep the same user object reference when the identity did not change
+        // (token refresh on tab focus) so dependent effects don't reload and
+        // remount the admin screens.
+        setUser((prev) => {
+          const next = session?.user ?? null;
+          if (prev && next && prev.id === next.id) return prev;
+          return next;
+        });
         // Only set loading false for subsequent auth changes, not initial load
         if (initialLoadDone) {
           // Auth state changed after initial load - no need to update loading

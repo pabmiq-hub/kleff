@@ -5,6 +5,7 @@ import { BlogPostPage } from "@/components/pages/BlogPostPage";
 import { resolveCustomPage, getPageBlocks } from "@/lib/blocks.functions";
 import { CustomPage } from "@/components/pages/CustomPage";
 import { getPublishedForm } from "@/lib/registrations.functions";
+import { resolveKonEvent } from "@/lib/kon-public.functions";
 import { PublicRegistrationPage } from "@/components/pages/PublicRegistrationPage";
 
 type Locale = "es" | "ca" | "en";
