@@ -131,3 +131,39 @@ export const createKonektumEventFn = createServerFn({ method: "POST" })
     const { createKonektumEvent } = await import("@/lib/konektum.server");
     return createKonektumEvent(data);
   });
+
+export const getKonektumAnalytics = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await guard(context.userId);
+    const { loadKonektumAnalytics } = await import("@/lib/konektum.server");
+    return loadKonektumAnalytics();
+  });
+
+export const getKonektumPeople = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await guard(context.userId);
+    const { loadKonektumPeople } = await import("@/lib/konektum.server");
+    return loadKonektumPeople();
+  });
+
+export const getKonektumPerson = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) => z.object({ personId: z.string().uuid() }).parse(d))
+  .handler(async ({ data, context }) => {
+    await guard(context.userId);
+    const { loadKonektumPerson } = await import("@/lib/konektum.server");
+    return loadKonektumPerson(data.personId);
+  });
+
+export const saveKonektumPerson = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) =>
+    z.object({ personId: z.string().uuid(), patch: z.record(z.string(), z.unknown()) }).parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    await guard(context.userId);
+    const { updateKonektumPerson } = await import("@/lib/konektum.server");
+    return updateKonektumPerson(data.personId, data.patch);
+  });

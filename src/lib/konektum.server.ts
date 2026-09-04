@@ -530,3 +530,221 @@ export async function createKonektumEvent(values: {
   if (error) throw new Error(error.message);
   return { id: data?.id as string };
 }
+
+/* ------------------------------------------------------------------ *
+ * Analytics
+ * ------------------------------------------------------------------ */
+
+export interface KonAnalytics {
+  monthly: { month: string; events: number; participants: number }[];
+  totals: {
+    events: number;
+    participants: number;
+    checkedIn: number;
+    submitted: number;
+    selections: number;
+    superLikes: number;
+    matches: number;
+    cancelled: number;
+  };
+  genders: { label: string; count: number }[];
+  retention: { attended: number; people: number }[];
+  topEvents: { id: string; name: string; date: string; participants: number; matches: number }[];
+}
+
+export async function loadKonektumAnalytics(): Promise<KonAnalytics> {
+  const client = await getClient();
+  const organizerId = KONEKTUM_ORGANIZER_USER_ID;
+
+  const { data: eventRows } = await client
+    .from("kon_events")
+    .select("id, name, date, is_test_event")
+    .eq("organizer_id", organizerId)
+    .order("date");
+  const events = ((eventRows ?? []) as { id: string; name: string; date: string; is_test_event: boolean | null }[])
+    .filter((e) => !e.is_test_event);
+  const ids = events.map((e) => e.id);
+
+  if (ids.length === 0) {
+    return {
+      monthly: [],
+      totals: {
+        events: 0,
+        participants: 0,
+        checkedIn: 0,
+        submitted: 0,
+        selections: 0,
+        superLikes: 0,
+        matches: 0,
+        cancelled: 0,
+      },
+      genders: [],
+      retention: [],
+      topEvents: [],
+    };
+  }
+
+  const { data: pRows } = await client
+    .from("kon_participants")
+    .select("id, event_id, gender, email, checked_in, selection_submitted_at, cancelled_at, is_fake")
+    .in("event_id", ids);
+  const participants = ((pRows ?? []) as {
+    id: string;
+    event_id: string;
+    gender: string | null;
+    email: string | null;
+    checked_in: boolean | null;
+    selection_submitted_at: string | null;
+    cancelled_at: string | null;
+    is_fake: boolean | null;
+  }[]).filter((p) => !p.is_fake);
+
+  const { data: sRows } = await client
+    .from("kon_participant_selections")
+    .select("event_id, selector_id, selected_id, is_super_like")
+    .in("event_id", ids);
+  const selections = (sRows ?? []) as {
+    event_id: string;
+    selector_id: string;
+    selected_id: string;
+    is_super_like: boolean | null;
+  }[];
+
+  const pairSet = new Set(selections.map((s) => `${s.selector_id}->${s.selected_id}`));
+  const counted = new Set<string>();
+  const matchesByEvent = new Map<string, number>();
+  let matches = 0;
+  for (const s of selections) {
+    const key = [s.selector_id, s.selected_id].sort().join(":");
+    if (counted.has(key)) continue;
+    if (pairSet.has(`${s.selected_id}->${s.selector_id}`)) {
+      counted.add(key);
+      matches++;
+      matchesByEvent.set(s.event_id, (matchesByEvent.get(s.event_id) ?? 0) + 1);
+    }
+  }
+
+  const monthlyMap = new Map<string, { events: number; participants: number }>();
+  for (const e of events) {
+    const month = e.date.slice(0, 7);
+    const cur = monthlyMap.get(month) ?? { events: 0, participants: 0 };
+    cur.events++;
+    cur.participants += participants.filter((p) => p.event_id === e.id && !p.cancelled_at).length;
+    monthlyMap.set(month, cur);
+  }
+
+  const genderMap = new Map<string, number>();
+  for (const p of participants) {
+    const g = p.gender ?? "sin indicar";
+    genderMap.set(g, (genderMap.get(g) ?? 0) + 1);
+  }
+
+  const byEmail = new Map<string, number>();
+  for (const p of participants) {
+    if (!p.email) continue;
+    const k = p.email.toLowerCase();
+    byEmail.set(k, (byEmail.get(k) ?? 0) + 1);
+  }
+  const retentionMap = new Map<number, number>();
+  for (const n of byEmail.values()) retentionMap.set(n, (retentionMap.get(n) ?? 0) + 1);
+
+  return {
+    monthly: [...monthlyMap.entries()]
+      .sort((a, b) => a[0].localeCompare(b[0]))
+      .map(([month, v]) => ({ month, ...v })),
+    totals: {
+      events: events.length,
+      participants: participants.filter((p) => !p.cancelled_at).length,
+      checkedIn: participants.filter((p) => p.checked_in).length,
+      submitted: participants.filter((p) => p.selection_submitted_at).length,
+      selections: selections.length,
+      superLikes: selections.filter((s) => s.is_super_like).length,
+      matches,
+      cancelled: participants.filter((p) => p.cancelled_at).length,
+    },
+    genders: [...genderMap.entries()]
+      .map(([label, count]) => ({ label, count }))
+      .sort((a, b) => b.count - a.count),
+    retention: [...retentionMap.entries()]
+      .sort((a, b) => a[0] - b[0])
+      .map(([attended, people]) => ({ attended, people })),
+    topEvents: events
+      .map((e) => ({
+        id: e.id,
+        name: e.name,
+        date: e.date,
+        participants: participants.filter((p) => p.event_id === e.id && !p.cancelled_at).length,
+        matches: matchesByEvent.get(e.id) ?? 0,
+      }))
+      .sort((a, b) => b.participants - a.participants)
+      .slice(0, 10),
+  };
+}
+
+/* ------------------------------------------------------------------ *
+ * CRM / users
+ * ------------------------------------------------------------------ */
+
+export interface KonCrmPerson {
+  id: string;
+  display_name: string | null;
+  email: string | null;
+  phone: string | null;
+  status: string | null;
+  events_attended: number | null;
+  source_notes: string | null;
+  created_at: string;
+}
+
+export async function loadKonektumPeople(): Promise<KonCrmPerson[]> {
+  const client = await getClient();
+  const { data, error } = await client
+    .from("kon_global_participants")
+    .select("id, display_name, email, phone, status, events_attended, source_notes, created_at")
+    .eq("organizer_id", KONEKTUM_ORGANIZER_USER_ID)
+    .order("events_attended", { ascending: false });
+  if (error) throw new Error(error.message);
+  return (data ?? []) as KonCrmPerson[];
+}
+
+export async function loadKonektumPerson(personId: string) {
+  const client = await getClient();
+  const { data: person } = await client
+    .from("kon_global_participants")
+    .select("*")
+    .eq("id", personId)
+    .maybeSingle();
+  const { data: rows } = await client
+    .from("kon_participants")
+    .select("id, event_id, checked_in, selection_submitted_at, cancelled_at, created_at")
+    .eq("global_participant_id", personId);
+  const eventIds = ((rows ?? []) as { event_id: string }[]).map((r) => r.event_id);
+  let events: { id: string; name: string; date: string }[] = [];
+  if (eventIds.length) {
+    const { data: evs } = await client.from("kon_events").select("id, name, date").in("id", eventIds);
+    events = (evs ?? []) as typeof events;
+  }
+  return {
+    person: (person ?? null) as Record<string, unknown> | null,
+    attendances: (rows ?? []) as {
+      id: string;
+      event_id: string;
+      checked_in: boolean | null;
+      selection_submitted_at: string | null;
+      cancelled_at: string | null;
+      created_at: string;
+    }[],
+    events,
+  };
+}
+
+export async function updateKonektumPerson(personId: string, patch: Record<string, unknown>) {
+  const client = await getClient();
+  const allowed = new Set(["display_name", "email", "phone", "status", "source_notes"]);
+  const clean: Record<string, unknown> = {};
+  for (const [k, v] of Object.entries(patch)) if (allowed.has(k)) clean[k] = v;
+  if (!Object.keys(clean).length) return { ok: true };
+  const { error } = await client.from("kon_global_participants").update(clean).eq("id", personId);
+  if (error) throw new Error(error.message);
+  return { ok: true };
+}
