@@ -44,6 +44,9 @@ function KonektumEvents() {
   const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState<Filter>("upcoming");
   const [q, setQ] = useState("");
+  const [creating, setCreating] = useState(false);
+  const navigate = useNavigate();
+  const create = useServerFn(createKonektumEventFn);
 
   useEffect(() => {
     void fn({ data: undefined as never })
@@ -66,9 +69,14 @@ function KonektumEvents() {
 
   return (
     <div className="space-y-6">
-      <header>
-        <h1 className="font-display text-3xl font-bold">Eventos</h1>
-        <p className="text-ink/60 mt-1">Todos los eventos de Konektum.</p>
+      <header className="flex flex-wrap items-end gap-4">
+        <div>
+          <h1 className="font-display text-3xl font-bold">Eventos</h1>
+          <p className="text-ink/60 mt-1">Todos los eventos de Konektum.</p>
+        </div>
+        <Button className="ml-auto" onClick={() => setCreating(true)}>
+          <Plus className="h-4 w-4" /> Nuevo evento
+        </Button>
       </header>
 
       {error && (
@@ -139,6 +147,88 @@ function KonektumEvents() {
         )}
         {!error && !data && <p className="text-sm text-ink/60">Cargando…</p>}
       </div>
+
+      {creating && (
+        <NewEventDialog
+          onClose={() => setCreating(false)}
+          onCreate={async (values) => {
+            const res = await create({ data: values });
+            toast.success("Evento creado");
+            setCreating(false);
+            await navigate({ to: "/admin/konektum/eventos/$id", params: { id: res.id } });
+          }}
+        />
+      )}
     </div>
+  );
+}
+
+function NewEventDialog({
+  onClose,
+  onCreate,
+}: {
+  onClose: () => void;
+  onCreate: (values: {
+    name: string;
+    date: string;
+    event_time: string | null;
+    event_location: string | null;
+  }) => Promise<void>;
+}) {
+  const [name, setName] = useState("");
+  const [date, setDate] = useState(new Date().toISOString().slice(0, 10));
+  const [time, setTime] = useState("19:00");
+  const [place, setPlace] = useState("");
+  const [saving, setSaving] = useState(false);
+
+  return (
+    <Dialog open onOpenChange={(o) => !o && onClose()}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Nuevo evento</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-3">
+          <div className="space-y-1">
+            <Label className="text-xs">Nombre</Label>
+            <Input value={name} onChange={(e) => setName(e.target.value)} />
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1">
+              <Label className="text-xs">Fecha</Label>
+              <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
+            </div>
+            <div className="space-y-1">
+              <Label className="text-xs">Hora</Label>
+              <Input value={time} onChange={(e) => setTime(e.target.value)} />
+            </div>
+          </div>
+          <div className="space-y-1">
+            <Label className="text-xs">Lugar</Label>
+            <Input value={place} onChange={(e) => setPlace(e.target.value)} />
+          </div>
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={onClose}>
+            Cancelar
+          </Button>
+          <Button
+            disabled={saving || !name.trim()}
+            onClick={() => {
+              setSaving(true);
+              void onCreate({
+                name: name.trim(),
+                date,
+                event_time: time || null,
+                event_location: place || null,
+              })
+                .catch((e: unknown) => toast.error(e instanceof Error ? e.message : "Error"))
+                .finally(() => setSaving(false));
+            }}
+          >
+            {saving && <Loader2 className="h-4 w-4 animate-spin" />} Crear
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }
