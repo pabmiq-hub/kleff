@@ -504,3 +504,29 @@ function interleaveByGender(pool: KonParticipant[]): KonParticipant[] {
   }
   return [...out, ...rest];
 }
+
+export async function createKonektumEvent(values: {
+  name: string;
+  date: string;
+  event_time?: string | null;
+  event_location?: string | null;
+  module?: string | null;
+}) {
+  const client = await getClient();
+  const { data, error } = await client
+    .from("kon_events")
+    .insert({
+      organizer_id: KONEKTUM_ORGANIZER_USER_ID,
+      name: values.name,
+      date: values.date,
+      event_time: values.event_time ?? null,
+      event_location: values.event_location ?? null,
+      module: values.module ?? "social",
+      status: "pending",
+      participants_count: 0,
+    })
+    .select("id")
+    .maybeSingle();
+  if (error) throw new Error(error.message);
+  return { id: data?.id as string };
+}

@@ -113,3 +113,21 @@ export const generateKonektumTablesFn = createServerFn({ method: "POST" })
     const { generateKonektumTables } = await import("@/lib/konektum.server");
     return generateKonektumTables(data.eventId);
   });
+
+export const createKonektumEventFn = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) =>
+    z
+      .object({
+        name: z.string().min(1),
+        date: z.string().min(4),
+        event_time: z.string().nullable().default(null),
+        event_location: z.string().nullable().default(null),
+      })
+      .parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    await guard(context.userId);
+    const { createKonektumEvent } = await import("@/lib/konektum.server");
+    return createKonektumEvent(data);
+  });
