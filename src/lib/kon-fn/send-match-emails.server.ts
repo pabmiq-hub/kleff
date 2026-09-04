@@ -795,7 +795,7 @@ const handler = async (req: Request): Promise<Response> => {
 serve(handler);
 
 
-export default async function handler(req: Request): Promise<Response> {
+export default async function konHandler(req: Request): Promise<Response> {
   if (!__handler) throw new Error("handler not registered");
   return await __handler(req);
 }
