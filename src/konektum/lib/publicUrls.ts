@@ -26,9 +26,14 @@ export function eventPublicUrl(slugOrId: string, kind: PublicEventLink, extra?: 
   return `${origin}${eventPublicPath(slugOrId, kind, extra)}`;
 }
 
-/** Normalizes free text into a URL-safe slug. */
+/** Normalizes free text (or a pasted full URL) into a URL-safe slug. */
 export function slugifyEventName(value: string): string {
-  return value
+  let raw = value.trim();
+  // Accept pasted URLs like https://kleff.es/mi-evento/registro
+  const urlMatch = raw.match(/^(?:https?:\/\/)?[^/\s]*\.[^/\s]+\/(.+)$/i);
+  if (urlMatch) raw = urlMatch[1];
+  raw = raw.split("/").filter(Boolean)[0] ?? "";
+  return raw
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
     .toLowerCase()
@@ -36,3 +41,4 @@ export function slugifyEventName(value: string): string {
     .replace(/^-+|-+$/g, "")
     .slice(0, 60);
 }
+
