@@ -725,7 +725,8 @@ export async function loadKonektumPerson(personId: string) {
     events = (evs ?? []) as typeof events;
   }
   return {
-    person: (person ?? null) as Record<string, unknown> | null,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    person: (person ?? null) as Record<string, any> | null,
     attendances: (rows ?? []) as {
       id: string;
       event_id: string;
