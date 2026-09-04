@@ -1,13 +1,24 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { getKonektumOverview } from "@/lib/konektum.functions";
-import { CalendarDays, ArrowRight, Search } from "lucide-react";
+import { toast } from "sonner";
+import { getKonektumOverview, createKonektumEventFn } from "@/lib/konektum.functions";
+import { CalendarDays, ArrowRight, Search, Plus, Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 export const Route = createFileRoute("/admin/konektum/eventos/")({
   component: KonektumEvents,
 });
+
 
 type Overview = Awaited<ReturnType<typeof getKonektumOverview>>;
 type Filter = "upcoming" | "past" | "test" | "all";
