@@ -1,0 +1,298 @@
+// @ts-nocheck
+import { useEffect, useMemo, useState } from "react";
+import { supabase } from "@/konektum/supabase";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/konektum/ui/card";
+import { Badge } from "@/konektum/ui/badge";
+import { Input } from "@/konektum/ui/input";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/konektum/ui/collapsible";
+import { Loader2, Sparkles, Search, ChevronDown } from "lucide-react";
+import {
+  computeCompatibility,
+  getWrappedQuestions,
+  DEFAULT_WRAPPED_QUESTIONS,
+  type WrappedAnswers,
+  type WrappedQuestion,
+} from "@/konektum/lib/wrappedQuestions";
+
+interface Props {
+  eventId: string;
+  wrappedQuestions: unknown;
+}
+
+interface Row {
+  id: string;
+  name: string;
+  gender: string | null;
+  profileId: string | null;
+  answers: WrappedAnswers | null;
+  topHobbyKey: string | null;
+}
+
+interface RankedMatch {
+  otherId: string;
+  otherName: string;
+  otherGender: string | null;
+  score: number;
+}
+
+function normalizeGenderBucket(g: string | null | undefined): "male" | "female" | "other" {
+  const s = String(g || "").toLowerCase().trim();
+  if (!s) return "other";
+  if (s === "m" || s.startsWith("hom") || s.startsWith("masc") || s === "male") return "male";
+  if (s.startsWith("muj") || s.startsWith("fem") || s === "f" || s === "female") return "female";
+  return "other";
+}
+
+const HOBBY_LABEL_ES: Record<string, string> = (() => {
+  const map: Record<string, string> = {};
+  const q = DEFAULT_WRAPPED_QUESTIONS.find(x => x.id === "top_hobbies");
+  if (q?.options_key && q.i18n.es.options) {
+    q.options_key.forEach((k, i) => { map[k] = q.i18n.es.options![i] || k; });
+  }
+  return map;
+})();
+
+export default function EventCompatibilityTab({ eventId, wrappedQuestions }: Props) {
+  const [loading, setLoading] = useState(true);
+  const [rows, setRows] = useState<Row[]>([]);
+  const [search, setSearch] = useState("");
+  const [openId, setOpenId] = useState<string | null>(null);
+  const questions: WrappedQuestion[] = useMemo(
+    () => getWrappedQuestions(wrappedQuestions),
+    [wrappedQuestions]
+  );
+
+  useEffect(() => {
+    let cancel = false;
+    const load = async () => {
+      const { data: parts } = await (supabase as any)
+        .from("participants")
+        .select("id, name, gender, wrapped_profile_id, cancelled_at")
+        .eq("event_id", eventId)
+        .is("cancelled_at", null);
+
+      const profileIds = Array.from(
+        new Set((parts || []).map((p: any) => p.wrapped_profile_id).filter(Boolean))
+      ) as string[];
+
+      const profilesMap = new Map<string, { answers: WrappedAnswers | null; hobbies_ranked: string[] | null }>();
+      if (profileIds.length > 0) {
+        const { data: profs } = await supabase
+          .from("wrapped_profiles")
+          .select("id, answers, hobbies_ranked")
+          .in("id", profileIds);
+        for (const p of (profs || []) as any[]) {
+          profilesMap.set(p.id, { answers: p.answers, hobbies_ranked: p.hobbies_ranked });
+        }
+      }
+
+      const mapped: Row[] = (parts || []).map((p: any) => {
+        const prof = p.wrapped_profile_id ? profilesMap.get(p.wrapped_profile_id) : undefined;
+        return {
+          id: p.id,
+          name: p.name,
+          gender: p.gender || null,
+          profileId: p.wrapped_profile_id || null,
+          answers: prof?.answers || null,
+          topHobbyKey: Array.isArray(prof?.hobbies_ranked) && prof!.hobbies_ranked!.length > 0 ? prof!.hobbies_ranked![0] : null,
+        };
+      });
+
+      mapped.sort((a, b) => a.name.localeCompare(b.name, "es", { sensitivity: "base" }));
+
+      if (!cancel) {
+        setRows(mapped);
+        setLoading(false);
+      }
+    };
+
+    setLoading(true);
+    load();
+
+    const channel = supabase
+      .channel(`compat-${eventId}`)
+      .on("postgres_changes", { event: "*", schema: "public", table: "participants", filter: `event_id=eq.${eventId}` }, () => load())
+      .on("postgres_changes", { event: "*", schema: "public", table: "wrapped_profiles" }, () => load())
+      .subscribe();
+
+    const interval = setInterval(load, 15000);
+
+    return () => {
+      cancel = true;
+      clearInterval(interval);
+      supabase.removeChannel(channel);
+    };
+  }, [eventId]);
+
+  const withProfile = useMemo(() => rows.filter(r => r.answers), [rows]);
+
+  const topByGender = useMemo(() => {
+    const result = new Map<string, { male: RankedMatch[]; female: RankedMatch[]; other: RankedMatch[] }>();
+    for (const a of withProfile) {
+      const list: RankedMatch[] = [];
+      for (const b of withProfile) {
+        if (b.id === a.id) continue;
+        const score = computeCompatibility(a.answers, b.answers, questions);
+        list.push({ otherId: b.id, otherName: b.name, otherGender: b.gender, score });
+      }
+      list.sort((x, y) => y.score - x.score);
+      const buckets = { male: [] as RankedMatch[], female: [] as RankedMatch[], other: [] as RankedMatch[] };
+      for (const m of list) {
+        const b = normalizeGenderBucket(m.otherGender);
+        if (buckets[b].length < 10) buckets[b].push(m);
+      }
+      result.set(a.id, buckets);
+    }
+    return result;
+  }, [withProfile, questions]);
+
+  const filtered = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    const base = q ? rows.filter(r => r.name.toLowerCase().includes(q)) : rows;
+    return base;
+  }, [rows, search]);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+
+  return (
+    <Card>
+      <CardHeader>
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div>
+            <CardTitle className="flex items-center gap-2">
+              <Sparkles className="w-5 h-5 text-primary" /> Compatibilidad
+            </CardTitle>
+            <CardDescription>
+              Top 10 de personas más compatibles con cada participante según sus respuestas Wrapped.
+              {withProfile.length > 0 && (
+                <> · {withProfile.length} con perfil de {rows.length}</>
+              )}
+            </CardDescription>
+          </div>
+          <div className="relative sm:w-64">
+            <Search className="w-4 h-4 absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              placeholder="Buscar participante..."
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              className="pl-8"
+            />
+          </div>
+        </div>
+      </CardHeader>
+      <CardContent>
+        {rows.length === 0 ? (
+          <p className="text-sm text-muted-foreground text-center py-6">No hay participantes.</p>
+        ) : withProfile.length === 0 ? (
+          <p className="text-sm text-muted-foreground text-center py-6">
+            Aún no hay participantes con perfil Wrapped completo.
+          </p>
+        ) : (
+          <div className="space-y-2">
+            {filtered.map(r => {
+              const buckets = topByGender.get(r.id) || { male: [], female: [], other: [] };
+              const merged = [...buckets.male, ...buckets.female, ...buckets.other].sort((a, b) => b.score - a.score);
+              const best = merged[0];
+              const hasProfile = !!r.answers;
+              const isOpen = openId === r.id;
+
+              if (!hasProfile) {
+                return (
+                  <div
+                    key={r.id}
+                    className="flex items-center justify-between gap-3 p-3 rounded-lg border bg-card"
+                  >
+                    <div className="min-w-0 flex-1">
+                      <p className="font-medium truncate">{r.name}</p>
+                    </div>
+                    <Badge variant="outline" className="text-xs">Sin perfil</Badge>
+                  </div>
+                );
+              }
+
+              const cols: Array<{ key: "male" | "female" | "other"; title: string; list: RankedMatch[] }> = [
+                { key: "male", title: "Hombres", list: buckets.male },
+                { key: "female", title: "Mujeres", list: buckets.female },
+              ];
+              if (buckets.other.length > 0) cols.push({ key: "other", title: "Otro", list: buckets.other });
+
+              return (
+                <Collapsible
+                  key={r.id}
+                  open={isOpen}
+                  onOpenChange={(o) => setOpenId(o ? r.id : null)}
+                  className="rounded-lg border bg-card"
+                >
+                  <CollapsibleTrigger className="w-full flex items-center justify-between gap-3 p-3 hover:bg-muted/30 transition-colors text-left">
+                    <div className="min-w-0 flex-1">
+                      <p className="font-medium truncate">{r.name}</p>
+                      {r.topHobbyKey && (
+                        <p className="text-xs text-muted-foreground truncate">
+                          Top hobby: {HOBBY_LABEL_ES[r.topHobbyKey] || r.topHobbyKey}
+                        </p>
+                      )}
+                    </div>
+                    {best ? (
+                      <div className="flex items-center gap-2 shrink-0">
+                        <div className="text-right">
+                          <p className="text-xs text-muted-foreground">Más compatible</p>
+                          <p className="text-sm font-medium truncate max-w-[160px]">{best.otherName}</p>
+                        </div>
+                        <Badge className="bg-primary/10 text-primary border-primary/30" variant="outline">
+                          {best.score}%
+                        </Badge>
+                        <ChevronDown className={`w-4 h-4 text-muted-foreground transition-transform ${isOpen ? "rotate-180" : ""}`} />
+                      </div>
+                    ) : (
+                      <Badge variant="outline" className="text-xs">—</Badge>
+                    )}
+                  </CollapsibleTrigger>
+                  <CollapsibleContent>
+                    <div className={`border-t px-3 py-3 grid gap-4 ${cols.length === 3 ? "md:grid-cols-3" : "md:grid-cols-2"}`}>
+                      {cols.map(({ key, title, list }) => (
+                        <div key={key} className="space-y-1">
+                          <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground px-1">
+                            {title} · {list.length}
+                          </div>
+                          {list.length === 0 ? (
+                            <p className="text-xs text-muted-foreground py-2 px-1">—</p>
+                          ) : (
+                            list.map((m, i) => (
+                              <div
+                                key={m.otherId}
+                                className={`flex items-center justify-between gap-2 py-1.5 px-2 rounded ${i === 0 ? "bg-primary/5" : ""}`}
+                              >
+                                <div className="flex items-center gap-2 min-w-0">
+                                  <span className={`text-xs w-5 text-center ${i === 0 ? "font-semibold text-primary" : "text-muted-foreground"}`}>
+                                    {i + 1}
+                                  </span>
+                                  <span className={`text-sm truncate ${i === 0 ? "font-medium" : ""}`}>{m.otherName}</span>
+                                </div>
+                                <Badge
+                                  variant="outline"
+                                  className={i === 0 ? "bg-primary/10 text-primary border-primary/30" : ""}
+                                >
+                                  {m.score}%
+                                </Badge>
+                              </div>
+                            ))
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </CollapsibleContent>
+                </Collapsible>
+              );
+            })}
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}

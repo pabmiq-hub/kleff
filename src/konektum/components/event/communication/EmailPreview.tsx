@@ -1,0 +1,292 @@
+// @ts-nocheck
+import { StructuredTemplate, MatchesWithoutTemplate, TemplateKey, ReminderOptions } from "./types";
+
+interface EmailPreviewProps {
+  template: StructuredTemplate;
+  templateKey: TemplateKey;
+  primaryColor: string;
+  logoUrl: string;
+  logoHeight?: number;
+  brandName: string;
+  headerTitle?: string;
+  eventName: string;
+  matchesVariant?: "with" | "without";
+  matchesWithoutTemplate?: MatchesWithoutTemplate;
+  reminderOptions?: ReminderOptions;
+}
+
+const SAMPLE_DATA: Record<string, string> = {
+  "{{nombre}}": "María García",
+  "{{evento}}": "",
+  "{{fecha}}": "sábado, 15 de marzo de 2026",
+  "{{ubicacion}}": "Hotel Palace, Madrid",
+  "{{hora}}": "19:00",
+  "{{codigo}}": "847291",
+};
+
+const replaceVars = (text: string, eventName: string) => {
+  let result = text;
+  for (const [key, val] of Object.entries(SAMPLE_DATA)) {
+    const replacement = key === "{{evento}}" ? (eventName || "Mi Evento") : val;
+    result = result.split(key).join(replacement);
+  }
+  return result;
+};
+
+const EmailPreview = ({
+  template,
+  templateKey,
+  primaryColor,
+  logoUrl,
+  logoHeight = 48,
+  brandName,
+  headerTitle,
+  eventName,
+  matchesVariant = "with",
+  matchesWithoutTemplate,
+  reminderOptions,
+}: EmailPreviewProps) => {
+  const r = (t: string) => replaceVars(t, eventName);
+  const headerText = headerTitle?.trim() || brandName;
+  const safeLogoHeight = Math.min(120, Math.max(24, Number(logoHeight) || 48));
+
+  // Render "sin matches" preview
+  if (templateKey === "matches" && matchesVariant === "without" && matchesWithoutTemplate) {
+    return (
+      <div className="bg-muted/30 rounded-lg p-4 min-h-[400px]">
+        <div className="bg-background rounded-lg border overflow-hidden shadow-sm">
+          <div
+            className="p-6 text-center"
+            style={{ background: `linear-gradient(135deg, ${primaryColor}, ${adjustColor(primaryColor, 30)})` }}
+          >
+            {logoUrl && (
+              <img
+                src={logoUrl}
+                alt={brandName}
+                className="max-w-[220px] mx-auto mb-2 object-contain"
+                style={{ maxHeight: `${safeLogoHeight}px` }}
+                onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+              />
+            )}
+            <h2 className="text-white font-bold text-lg">{headerText}</h2>
+          </div>
+          <div className="p-6 space-y-3">
+            <h1 className="text-xl font-bold">{r(matchesWithoutTemplate.greeting)}</h1>
+            <p className="text-muted-foreground whitespace-pre-line text-sm leading-relaxed">{r(matchesWithoutTemplate.message)}</p>
+            <p className="text-muted-foreground text-sm">{r(matchesWithoutTemplate.closing)}</p>
+            <div className="border-t pt-3 mt-4">
+              <p className="text-xs text-muted-foreground whitespace-pre-line">{r(matchesWithoutTemplate.signature)}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  const renderExtraContent = () => {
+    switch (templateKey) {
+      case "checkin_code":
+        return (
+          <>
+            <div className="rounded-lg p-5 my-4 text-center" style={{ backgroundColor: "#f8f9fa" }}>
+              <p className="text-xs text-muted-foreground mb-2">Tu código personal de acceso:</p>
+              <div
+                className="text-3xl font-bold tracking-[8px] py-4 px-6 rounded-lg text-white font-mono"
+                style={{ background: primaryColor }}
+              >
+                847291
+              </div>
+            </div>
+            <p className="font-semibold text-sm mt-4">Con este código puedes:</p>
+            <ul className="text-sm text-muted-foreground space-y-2 pl-2 mb-4">
+              <li>✅ <strong>Hacer check-in</strong> al llegar al evento (escanea el QR)</li>
+              <li>🪑 <strong>Ver tus mesas</strong> asignadas en cada ronda</li>
+              <li>💕 <strong>Enviar tus selecciones</strong> después del evento</li>
+            </ul>
+            <div className="border-t pt-4 mt-4">
+              <p className="font-semibold text-sm mb-3">Accede a tu panel:</p>
+              <div className="text-center">
+                <span
+                  className="inline-block py-3 px-6 rounded-lg text-white font-bold text-sm"
+                  style={{ background: primaryColor }}
+                >
+                  🎫 Mi panel del evento
+                </span>
+              </div>
+            </div>
+          </>
+        );
+      case "matches":
+        return (
+          <div className="space-y-3 my-4">
+            <div className="rounded-lg p-4" style={{ backgroundColor: `${primaryColor}10` }}>
+              <h4 className="font-semibold text-sm mb-2">{template.extraFields?.friendshipTitle || "🤝 Tus matches de amistad:"}</h4>
+              <ul className="text-sm text-muted-foreground list-disc list-inside space-y-1">
+                <li>Carlos López - 📞 +34 612 345 678</li>
+                <li>Ana Martínez - 📞 +34 698 765 432</li>
+              </ul>
+            </div>
+            <div className="rounded-lg p-4" style={{ backgroundColor: `${primaryColor}10` }}>
+              <h4 className="font-semibold text-sm mb-2">{template.extraFields?.datingTitle || "❤️ Tus matches de ligue:"}</h4>
+              <ul className="text-sm text-muted-foreground list-disc list-inside space-y-1">
+                <li>Pablo Ruiz - 📞 +34 654 321 987</li>
+              </ul>
+            </div>
+          </div>
+        );
+      case "reminder":
+        return (
+          <div className="space-y-4 my-4">
+            {reminderOptions?.showCalendarLinks && (
+              <div className="flex justify-center gap-3 mt-3">
+                <a className="inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-md border" style={{ color: primaryColor }}>
+                  📅 Google Calendar
+                </a>
+                <a className="inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-md border" style={{ color: primaryColor }}>
+                  🍎 iCalendar
+                </a>
+              </div>
+            )}
+            {reminderOptions?.showCountdown && (
+              <div className="rounded-lg overflow-hidden border my-2" style={{ borderColor: `${primaryColor}30` }}>
+                <div className="text-center py-2 text-white text-xs font-semibold tracking-wide" style={{ background: primaryColor }}>
+                  📅 DETALLES DEL EVENTO
+                </div>
+                <div className="p-4 space-y-2 text-center" style={{ backgroundColor: `${primaryColor}08` }}>
+                  <p className="text-base font-bold" style={{ color: primaryColor }}>sábado, 15 de marzo de 2026</p>
+                  <p className="text-sm text-muted-foreground">🕐 19:00</p>
+                  <p className="text-sm text-muted-foreground">📍 Hotel Palace, Madrid</p>
+                </div>
+              </div>
+            )}
+            {reminderOptions?.showUnsubscribe && (
+              <p className="text-center text-xs text-muted-foreground mt-2">
+                <a className="underline" style={{ color: primaryColor }}>{reminderOptions.unsubscribeText || "Si no puedes asistir, haz clic aquí"}</a>
+              </p>
+            )}
+          </div>
+        );
+      case "selection_reminder":
+        return (
+          <div className="space-y-4 my-4">
+            <div className="text-center">
+              <a
+                className="inline-block py-3 px-7 rounded-lg text-white font-bold text-sm no-underline"
+                style={{ background: `linear-gradient(135deg, ${primaryColor}, ${adjustColor(primaryColor, 30)})` }}
+              >
+                Enviar mis selecciones
+              </a>
+            </div>
+          </div>
+        );
+      case "registration_confirmation":
+        return (
+          <div className="text-center my-5">
+            <div className="inline-block rounded-lg p-5" style={{ backgroundColor: "#f8f9fa" }}>
+              <div className="text-4xl mb-2">🎉</div>
+              <p className="text-sm font-medium text-muted-foreground">¡Ya tienes tu plaza reservada!</p>
+            </div>
+          </div>
+        );
+      case "registration_with_code":
+        return (
+          <>
+            <div className="rounded-lg p-5 my-4 text-center" style={{ backgroundColor: "#f8f9fa" }}>
+              <p className="text-xs text-muted-foreground mb-2">Tu código personal de acceso:</p>
+              <div
+                className="text-3xl font-bold tracking-[8px] py-4 px-6 rounded-lg text-white font-mono"
+                style={{ background: primaryColor }}
+              >
+                847291
+              </div>
+            </div>
+            <p className="font-semibold text-sm mt-4">Con este código puedes:</p>
+            <ul className="text-sm text-muted-foreground space-y-2 pl-2 mb-4">
+              <li>✅ <strong>Hacer check-in</strong> al llegar al evento (escanea el QR)</li>
+              <li>🪑 <strong>Ver tus mesas</strong> asignadas en cada ronda</li>
+              <li>💕 <strong>Enviar tus selecciones</strong> después del evento</li>
+            </ul>
+            <div className="border-t pt-4 mt-4">
+              <p className="font-semibold text-sm mb-3">Accede a tu panel:</p>
+              <div className="text-center">
+                <span
+                  className="inline-block py-3 px-6 rounded-lg text-white font-bold text-sm"
+                  style={{ background: primaryColor }}
+                >
+                  🎫 Mi panel del evento
+                </span>
+              </div>
+            </div>
+          </>
+        );
+      case "super_like":
+        return (
+          <div className="text-center my-5">
+            <div className="inline-block rounded-lg p-5" style={{ backgroundColor: "#f8f9fa" }}>
+              <div className="text-4xl mb-2">⭐</div>
+              <p className="text-sm font-medium text-muted-foreground">¡Alguien te ha dado un Super Like!</p>
+            </div>
+            <a
+              className="inline-block mt-4 py-3 px-7 rounded-lg text-white font-bold text-sm no-underline"
+              style={{ background: `linear-gradient(135deg, ${primaryColor}, ${adjustColor(primaryColor, 30)})` }}
+            >
+              Enviar mis selecciones
+            </a>
+          </div>
+        );
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <div className="bg-muted/30 rounded-lg p-4 min-h-[400px]">
+      <div className="bg-background rounded-lg border overflow-hidden shadow-sm">
+        {/* Header */}
+        <div
+          className="p-6 text-center"
+          style={{ background: `linear-gradient(135deg, ${primaryColor}, ${adjustColor(primaryColor, 30)})` }}
+        >
+          {logoUrl && (
+            <img
+              src={logoUrl}
+              alt={brandName}
+              className="max-w-[220px] mx-auto mb-2 object-contain"
+              style={{ maxHeight: `${safeLogoHeight}px` }}
+              onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+            />
+          )}
+          <h2 className="text-white font-bold text-lg">{headerText}</h2>
+        </div>
+
+        {/* Body */}
+        <div className="p-6 space-y-3">
+          <h1 className="text-xl font-bold">{r(template.greeting)}</h1>
+          <p className="text-muted-foreground whitespace-pre-line text-sm leading-relaxed">{r(template.intro)}</p>
+
+          {renderExtraContent()}
+
+          <p className="text-muted-foreground text-sm">{r(template.closing)}</p>
+
+          <div className="border-t pt-3 mt-4">
+            <p className="text-xs text-muted-foreground whitespace-pre-line">{r(template.signature)}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+function adjustColor(hex: string, amount: number): string {
+  try {
+    const num = parseInt(hex.replace("#", ""), 16);
+    const r = Math.min(255, ((num >> 16) & 0xff) + amount);
+    const g = Math.min(255, ((num >> 8) & 0xff) + amount);
+    const b = Math.min(255, (num & 0xff) + amount);
+    return `#${((r << 16) | (g << 8) | b).toString(16).padStart(6, "0")}`;
+  } catch {
+    return hex;
+  }
+}
+
+export default EmailPreview;
