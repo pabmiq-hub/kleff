@@ -1,0 +1,1564 @@
+// @ts-nocheck
+import { useState, useEffect } from "react";
+import { useParams } from "@/konektum/router";
+import { Button } from "@/konektum/ui/button";
+import { Input } from "@/konektum/ui/input";
+import { Label } from "@/konektum/ui/label";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/konektum/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/konektum/ui/select";
+import { RadioGroup, RadioGroupItem } from "@/konektum/ui/radio-group";
+import { CheckCircle2, Loader2, Heart, AlertCircle, Mail, Users, Clock } from "lucide-react";
+import { BrandedHeader, BrandedLogo } from "@/konektum/components/BrandedHeader";
+import GDPRConsent from "@/konektum/components/registration/GDPRConsent";
+import { useEventBranding } from "@/konektum/hooks/useEventBranding";
+import { useToast } from "@/konektum/hooks/use-toast";
+import MultiSelectAge from "@/konektum/ui/multi-select-age";
+import { supabase } from "@/konektum/supabase";
+import { translations, Language } from "@/konektum/i18n/translations";
+import { AGE_RANGES } from "@/konektum/lib/excelParser";
+import B2BRegistrationForm, { B2BFormData } from "@/konektum/components/registration/B2BRegistrationForm";
+import DynamicRegistrationForm from "@/konektum/components/registration/DynamicRegistrationForm";
+import type { FormField } from "@/konektum/components/event/RegistrationFormEditor";
+import { RichTextRenderer } from "@/konektum/ui/rich-text-renderer";
+import { normalizeUpcomingEventDate } from "@/konektum/lib/eventDate";
+import WrappedInterestsForm from "@/konektum/components/registration/WrappedInterestsForm";
+import { getWrappedQuestions, type WrappedQuestion, type WrappedAnswers } from "@/konektum/lib/wrappedQuestions";
+import SocialGameForm from "@/konektum/components/registration/SocialGameForm";
+import { normalizeSocialGame, missingSocialGameAnswers, type SocialGameAnswers, type SocialGameQuestion } from "@/konektum/lib/socialGame";
+import { requiresGameAnswers, normalizeIcebreakers } from "@/konektum/lib/icebreakers";
+import { Checkbox } from "@/konektum/ui/checkbox";
+import { FieldError } from "@/konektum/ui/field-error";
+import { errorInputClass, fieldErrorMessage, scrollToFirstError } from "@/konektum/lib/formErrors";
+
+const LANGUAGE_LABELS: Record<string, { es: string; en: string }> = {
+  es: { es: "Castellano", en: "Spanish" },
+  ca: { es: "Català", en: "Catalan" },
+  en: { es: "English", en: "English" },
+  pt: { es: "Português", en: "Portuguese" },
+  fr: { es: "Français", en: "French" },
+};
+
+// Default dropdown values per language
+const GENDERS_ES = ["Hombre", "Mujer", "No binario", "Prefiero no decirlo"];
+const GENDERS_EN = ["Man", "Woman", "Non-binary", "Prefer not to say"];
+
+const PREFERENCES_ES = ["Amistad y ligue", "Solo amistad"];
+const PREFERENCES_EN = ["Friendship & dating", "Friendship only"];
+
+const DATING_PREFS_ES = [
+  "Soy un hombre y busco una mujer",
+  "Soy un hombre y busco un hombre",
+  "Soy una mujer y busco un hombre",
+  "Soy una mujer y busco una mujer",
+  "No binario",
+  "Estoy abierto a todo",
+  "Prefiero no contestar",
+];
+const DATING_PREFS_EN = [
+  "I'm a man looking for a woman",
+  "I'm a man looking for a man",
+  "I'm a woman looking for a man",
+  "I'm a woman looking for a woman",
+  "Non-binary",
+  "Open to all",
+  "Prefer not to say",
+];
+
+interface SlotQuota {
+  gender: string;
+  ageRange: string;
+  maxSlots: number;
+}
+
+interface QuotaStatus {
+  gender: string;
+  ageRange: string;
+  current: number;
+  max: number;
+  available: number;
+}
+
+const ParticipantJoin = ({ eventIdOverride }: { eventIdOverride?: string } = {}) => {
+  const { id: routeEventId } = useParams();
+  const eventId = eventIdOverride || routeEventId;
+  const eb = useEventBranding(eventId);
+  const { toast } = useToast();
+  
+  const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
+  const [birthDate, setBirthDate] = useState("");
+  const [selectedAgeRanges, setSelectedAgeRanges] = useState<string[]>([]);
+  const [preference, setPreference] = useState("");
+  const [datingPreference, setDatingPreference] = useState("");
+  const [gender, setGender] = useState("");
+  const [isReturningParticipant, setIsReturningParticipant] = useState<string>("");
+  const [dataConsent, setDataConsent] = useState(false);
+  const [marketingConsent, setMarketingConsent] = useState(false);
+  /** Ids of fields (and question ids) flagged as missing after a failed submit */
+  const [fieldErrors, setFieldErrors] = useState<string[]>([]);
+  const hasErr = (id: string) => fieldErrors.includes(id);
+  const clearErr = (id: string) => setFieldErrors((prev) => prev.filter((e) => e !== id));
+  
+  
+  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [autoCheckedIn, setAutoCheckedIn] = useState(false);
+  const [verificationCode, setVerificationCode] = useState<string | null>(null);
+  
+  const [eventExists, setEventExists] = useState<boolean | null>(null);
+  const [eventName, setEventName] = useState("");
+  const [eventDate, setEventDate] = useState<Date | null>(null);
+  const [eventTime, setEventTime] = useState<string | null>(null);
+  const [eventLocation, setEventLocation] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [registrationClosed, setRegistrationClosed] = useState(false);
+  const [waitlistEnabled, setWaitlistEnabled] = useState(false);
+  const [quotaWaitlistEnabled, setQuotaWaitlistEnabled] = useState(true);
+  const [isWaitlistSubmission, setIsWaitlistSubmission] = useState(false);
+
+  // Event module type
+  const [eventModule, setEventModule] = useState<string>("social");
+  const [professionalConfig, setProfessionalConfig] = useState<any>(null);
+  const [customRegistrationForm, setCustomRegistrationForm] = useState<{ fields: FormField[]; formMode: string } | null>(null);
+
+  // Event language
+  const [eventLang, setEventLang] = useState<Language>("es");
+  const t = translations[eventLang];
+
+  // Event registration customization
+  const [registrationSubtitle, setRegistrationSubtitle] = useState<string | null>(null);
+  const [registrationDescription, setRegistrationDescription] = useState<string | null>(null);
+
+  // Event preferences (custom or default)
+  const [eventAgeRanges, setEventAgeRanges] = useState<string[]>([...AGE_RANGES]);
+  const [eventGenders, setEventGenders] = useState<string[]>(GENDERS_ES);
+  const [eventPreferences, setEventPreferences] = useState<string[]>(PREFERENCES_ES);
+  const [eventDatingPreferences, setEventDatingPreferences] = useState<string[]>(DATING_PREFS_ES);
+
+  // Filter dating preferences based on selected gender
+  const getFilteredDatingPreferences = (selectedGender: string, allPrefs: string[]): string[] => {
+    if (!selectedGender) return allPrefs;
+    const genderNorm = selectedGender.toLowerCase();
+    return allPrefs.filter(pref => {
+      const prefLower = pref.toLowerCase();
+      // Spanish filters
+      if (prefLower.startsWith("soy un hombre")) return genderNorm === "hombre" || genderNorm === "man";
+      if (prefLower.startsWith("soy una mujer")) return genderNorm === "mujer" || genderNorm === "woman";
+      // English filters
+      if (prefLower.startsWith("i'm a man")) return genderNorm === "man" || genderNorm === "hombre";
+      if (prefLower.startsWith("i'm a woman")) return genderNorm === "woman" || genderNorm === "mujer";
+      // Non-binary
+      if (prefLower === "no binario" || prefLower === "non-binary") {
+        return genderNorm === "no binario" || genderNorm === "non-binary" || genderNorm === "prefiero no decirlo" || genderNorm === "prefer not to say";
+      }
+      return true;
+    });
+  };
+
+  const filteredDatingPreferences = getFilteredDatingPreferences(gender, eventDatingPreferences);
+  
+  // Quota system
+  const [quotasEnabled, setQuotasEnabled] = useState(false);
+  const [slotQuotas, setSlotQuotas] = useState<SlotQuota[]>([]);
+  const [quotaStatuses, setQuotaStatuses] = useState<QuotaStatus[]>([]);
+  const [calculatedAgeRange, setCalculatedAgeRange] = useState<string>("");
+
+  // 2-step wizard when quotas are enabled
+  const [wizardStep, setWizardStep] = useState<1 | 2>(1);
+  const [wizardForceWaitlist, setWizardForceWaitlist] = useState(false);
+
+  // Wrapped submode
+  const [wrappedEnabled, setWrappedEnabled] = useState(false);
+  const [wrappedQuestions, setWrappedQuestions] = useState<WrappedQuestion[]>([]);
+  const [wrappedAnswers, setWrappedAnswers] = useState<WrappedAnswers>({});
+  const [hasWrappedProfile, setHasWrappedProfile] = useState(false);
+
+  // Social game «¿Quién es quién?»
+  const [socialGameEnabled, setSocialGameEnabled] = useState(false);
+  const [socialGameQuestions, setSocialGameQuestions] = useState<SocialGameQuestion[]>([]);
+  const [gameAnswers, setGameAnswers] = useState<SocialGameAnswers>({});
+  const [checkingEligibility, setCheckingEligibility] = useState(false);
+
+  // Languages
+  const [languagesEnabled, setLanguagesEnabled] = useState(false);
+  const [availableLanguages, setAvailableLanguages] = useState<string[]>([]);
+  const [spokenLanguages, setSpokenLanguages] = useState<string[]>([]);
+
+
+  // Normalize for tolerant comparisons (dashes, case, whitespace)
+  const normalizeKey = (v: any) =>
+    String(v ?? '').toLowerCase().trim().replace(/–/g, '-').replace(/\s+/g, '');
+
+  useEffect(() => {
+    const checkEvent = async () => {
+      if (!eventId) {
+        setEventExists(false);
+        setIsLoading(false);
+        return;
+      }
+
+      const { data, error } = await (supabase as any)
+        .from("events_public")
+        .select("id, name, date, status, language, event_time, event_location, custom_age_ranges, custom_genders, custom_preferences, custom_dating_preferences, registration_requirements_enabled, slot_quotas, quota_waitlist_enabled, registration_subtitle, registration_description, module, professional_config, custom_registration_form, registration_open, waitlist_enabled, wrapped_enabled, wrapped_questions, social_game, languages_enabled, available_languages")
+        .eq("id", eventId)
+        .single();
+
+      if (error || !data) {
+        setEventExists(false);
+        setIsLoading(false);
+        return;
+      }
+
+      if (data.status !== 'pending' && data.status !== 'active') {
+        setEventExists(false);
+        setIsLoading(false);
+        return;
+      }
+
+      // Check registration status
+      const regOpen = (data as any).registration_open ?? true;
+      const wlEnabled = (data as any).waitlist_enabled ?? false;
+      
+      if (!regOpen && !wlEnabled) {
+        // Registration fully closed, no waitlist
+        setEventExists(false);
+        setIsLoading(false);
+        return;
+      }
+      
+      if (!regOpen && wlEnabled) {
+        setRegistrationClosed(true);
+        setWaitlistEnabled(true);
+      }
+      setQuotaWaitlistEnabled(((data as any).quota_waitlist_enabled ?? true) === true);
+
+      setEventExists(true);
+      setEventName(data.name);
+      setEventDate(normalizeUpcomingEventDate(data.date, data.status));
+      setEventTime((data as any).event_time || null);
+      setEventLocation((data as any).event_location || null);
+      setRegistrationSubtitle(data.registration_subtitle || null);
+      setRegistrationDescription(data.registration_description || null);
+      
+      // Set module type
+      setEventModule(data.module || "social");
+      if (data.professional_config) {
+        setProfessionalConfig(data.professional_config);
+      }
+      if ((data as any).custom_registration_form) {
+        setCustomRegistrationForm((data as any).custom_registration_form);
+      }
+      
+      // Set event language
+      const lang: Language = (data.language === 'en' || data.language === 'es') ? data.language as Language : 'es';
+      setEventLang(lang);
+      const isEn = lang === 'en';
+      
+      // Load custom preferences if they exist, otherwise use language defaults
+      // Also detect if stored values are just the Spanish defaults (bug from earlier saves)
+      const isDefaultSpanishGenders = (arr: string[]) => JSON.stringify(arr) === JSON.stringify(GENDERS_ES) || JSON.stringify(arr) === JSON.stringify(["Hombre", "Mujer", "No binario"]);
+      const isDefaultSpanishPrefs = (arr: string[]) => JSON.stringify(arr) === JSON.stringify(PREFERENCES_ES) || JSON.stringify(arr) === JSON.stringify(["Sólo amistad", "Amistad y ligue"]);
+      const isDefaultSpanishDating = (arr: string[]) => JSON.stringify(arr) === JSON.stringify(DATING_PREFS_ES) || arr.some(v => v.startsWith("Soy un hombre"));
+
+      if (data.custom_age_ranges && Array.isArray(data.custom_age_ranges)) {
+        setEventAgeRanges(data.custom_age_ranges as string[]);
+      }
+      if (data.custom_genders && Array.isArray(data.custom_genders)) {
+        const arr = data.custom_genders as string[];
+        if (isEn && isDefaultSpanishGenders(arr)) {
+          setEventGenders(GENDERS_EN);
+        } else {
+          setEventGenders(arr);
+        }
+      } else {
+        setEventGenders(isEn ? GENDERS_EN : GENDERS_ES);
+      }
+      if (data.custom_preferences && Array.isArray(data.custom_preferences)) {
+        const arr = data.custom_preferences as string[];
+        if (isEn && isDefaultSpanishPrefs(arr)) {
+          setEventPreferences(PREFERENCES_EN);
+        } else {
+          setEventPreferences(arr);
+        }
+      } else {
+        setEventPreferences(isEn ? PREFERENCES_EN : PREFERENCES_ES);
+      }
+      if (data.custom_dating_preferences && Array.isArray(data.custom_dating_preferences)) {
+        const arr = data.custom_dating_preferences as string[];
+        if (isEn && isDefaultSpanishDating(arr)) {
+          setEventDatingPreferences(DATING_PREFS_EN);
+        } else {
+          setEventDatingPreferences(arr);
+        }
+      } else {
+        setEventDatingPreferences(isEn ? DATING_PREFS_EN : DATING_PREFS_ES);
+      }
+      
+      // Load quota configuration and current counts
+      if (data.registration_requirements_enabled && data.slot_quotas) {
+        setQuotasEnabled(true);
+        const quotas = data.slot_quotas as unknown as SlotQuota[];
+        setSlotQuotas(quotas);
+        
+        await loadAllQuotaCounts(eventId, quotas);
+      }
+
+      // Wrapped mode
+      if ((data as any).wrapped_enabled) {
+        setWrappedEnabled(true);
+        setWrappedQuestions(getWrappedQuestions((data as any).wrapped_questions));
+      }
+
+      // Social game
+      if (requiresGameAnswers((data as any).social_game)) {
+        setSocialGameEnabled(true);
+        setSocialGameQuestions(normalizeIcebreakers((data as any).social_game).games.who_is_who.questions);
+      }
+
+      // Languages
+      if ((data as any).languages_enabled) {
+        setLanguagesEnabled(true);
+        const rawLangs = Array.isArray((data as any).available_languages) && (data as any).available_languages.length > 0
+          ? (data as any).available_languages
+          : ["es", "ca", "en"];
+        // Normalize legacy labels to codes and dedupe (some events stored "Castellano" etc.)
+        const labelToCode: Record<string, string> = {
+          castellano: "es", "español": "es", spanish: "es",
+          "català": "ca", catala: "ca", catalan: "ca",
+          english: "en", inglés: "en", ingles: "en",
+          "português": "pt", portugues: "pt", portuguese: "pt", portugués: "pt",
+          "français": "fr", francais: "fr", french: "fr", francés: "fr", frances: "fr",
+        };
+        const validCodes = new Set(Object.keys(LANGUAGE_LABELS));
+        const langs = Array.from(new Set(
+          (rawLangs as string[])
+            .map((v) => {
+              const s = String(v).trim();
+              if (validCodes.has(s)) return s;
+              return labelToCode[s.toLowerCase()] || null;
+            })
+            .filter((v): v is string => !!v)
+        ));
+        setAvailableLanguages(langs);
+      }
+
+      setIsLoading(false);
+    };
+
+    checkEvent();
+  }, [eventId]);
+
+  // Load ALL quota counts upfront with tolerant matching
+  const loadAllQuotaCounts = async (eventId: string, quotas: SlotQuota[]) => {
+    const { data: allParts } = await supabase
+      .from('participants')
+      .select('id, gender, age_range')
+      .eq('event_id', eventId);
+
+    const statuses: QuotaStatus[] = quotas.map((quota) => {
+      const current = (allParts || []).filter(
+        (p: any) =>
+          normalizeKey(p.gender) === normalizeKey(quota.gender) &&
+          normalizeKey(p.age_range) === normalizeKey(quota.ageRange)
+      ).length;
+      return {
+        gender: quota.gender,
+        ageRange: quota.ageRange,
+        current,
+        max: quota.maxSlots,
+        available: Math.max(0, quota.maxSlots - current),
+      };
+    });
+
+    setQuotaStatuses(statuses);
+    return statuses;
+  };
+
+  const getAvailableSlotsFromStatuses = (statuses: QuotaStatus[]): { available: boolean; remaining: number; total: number } | null => {
+    if (!quotasEnabled || !gender || !calculatedAgeRange) return null;
+
+    const status = statuses.find(
+      (q) =>
+        normalizeKey(q.gender) === normalizeKey(gender) &&
+        normalizeKey(q.ageRange) === normalizeKey(calculatedAgeRange)
+    );
+    if (!status) return null;
+
+    return { available: status.available > 0, remaining: status.available, total: status.max };
+  };
+
+  // Calculate age range from birth date
+  const calculateAgeRange = (dateString: string): string => {
+    if (!dateString) return "";
+    
+    const today = new Date();
+    const birth = new Date(dateString);
+    let age = today.getFullYear() - birth.getFullYear();
+    const monthDiff = today.getMonth() - birth.getMonth();
+    
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+      age--;
+    }
+    
+    // Find matching age range
+    for (const range of eventAgeRanges) {
+      if (range.includes('+')) {
+        const num = parseInt(range.replace(/[^0-9]/g, ''));
+        if (!isNaN(num) && age >= num) return range;
+        continue;
+      }
+      const parts = range.replace(/–/g, '-').split('-').map(n => parseInt(n.trim()));
+      if (parts.length === 2 && !isNaN(parts[0]) && !isNaN(parts[1]) && age >= parts[0] && age <= parts[1]) {
+        return range;
+      }
+    }
+    
+    return "Otro";
+  };
+
+  useEffect(() => {
+    if (birthDate) {
+      const range = calculateAgeRange(birthDate);
+      setCalculatedAgeRange(range);
+    } else {
+      setCalculatedAgeRange("");
+    }
+  }, [birthDate, eventAgeRanges]);
+
+  const getAvailableSlots = (): { available: boolean; remaining: number; total: number } | null => {
+    if (!quotasEnabled || !gender || !calculatedAgeRange) return null;
+
+    const status = quotaStatuses.find(
+      (q) =>
+        normalizeKey(q.gender) === normalizeKey(gender) &&
+        normalizeKey(q.ageRange) === normalizeKey(calculatedAgeRange)
+    );
+    if (!status) return null;
+
+    return { available: status.available > 0, remaining: status.available, total: status.max };
+  };
+
+  const preferredAgeRanges = [...eventAgeRanges, eventLang === "en" ? "Any age range" : "Cualquier rango de edad"];
+
+  // Step 1 → Step 2 transition (when quotas or wrapped are enabled)
+  const handleWizardContinue = async () => {
+    const stepMissing: string[] = [];
+    if (!birthDate) stepMissing.push("birthDate");
+    if (!gender) stepMissing.push("gender");
+    if (wrappedEnabled && !email.trim()) stepMissing.push("email");
+    setFieldErrors(stepMissing);
+    if (stepMissing.length > 0) {
+      scrollToFirstError();
+      toast({
+        title: "Error",
+        description: eventLang === 'en'
+          ? 'Please fill in email, gender and date of birth'
+          : 'Completa email, género y fecha de nacimiento',
+        variant: "destructive",
+      });
+      return;
+    }
+    const today = new Date();
+    const birth = new Date(birthDate);
+    let age = today.getFullYear() - birth.getFullYear();
+    const monthDiff = today.getMonth() - birth.getMonth();
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) age--;
+    if (age < 18) {
+      toast({ title: "Error", description: t.join.errorMinAge, variant: "destructive" });
+      return;
+    }
+
+    // Wrapped eligibility check (quota + existing profile)
+    if (wrappedEnabled && eventId) {
+      setCheckingEligibility(true);
+      const { data: elig, error: eligErr } = await supabase.functions.invoke('check-wrapped-eligibility', {
+        body: { eventId, email: email.trim(), gender, birthDate },
+      });
+      setCheckingEligibility(false);
+      if (eligErr || elig?.error) {
+        toast({
+          title: "Error",
+          description: elig?.error || (eventLang === 'en' ? 'Could not validate your data' : 'No pudimos validar tus datos'),
+          variant: "destructive",
+        });
+        return;
+      }
+      setHasWrappedProfile(!!elig?.hasWrappedProfile);
+      if (elig?.quotaFull) {
+        if (!waitlistEnabled && !quotaWaitlistEnabled) {
+          toast({
+            title: eventLang === 'en' ? 'No spots available' : 'Sin plazas disponibles',
+            description: eventLang === 'en'
+              ? `Registration for ${gender} (${calculatedAgeRange}) is full.`
+              : `Las plazas para ${gender} (${calculatedAgeRange}) están completas.`,
+            variant: 'destructive',
+          });
+          return;
+        }
+        // Quota full but waitlist available: continue to step 2 so we still collect
+        // wrapped answers + preferences. Submission will be flagged as forceWaitlist.
+        setWizardForceWaitlist(true);
+        setWizardStep(2);
+        return;
+      }
+    }
+
+    // Refresh quotas before checking
+    if (quotasEnabled) {
+      const freshStatuses = eventId ? await loadAllQuotaCounts(eventId, slotQuotas) : quotaStatuses;
+      const slots = getAvailableSlotsFromStatuses(freshStatuses);
+      if (slots && !slots.available) {
+        if (!waitlistEnabled && !quotaWaitlistEnabled) {
+          toast({
+            title: eventLang === 'en' ? 'No spots available' : 'Sin plazas disponibles',
+            description: eventLang === 'en'
+              ? `Registration for ${gender} (${calculatedAgeRange}) is full and the waitlist is not enabled for this event.`
+              : `Las plazas para ${gender} (${calculatedAgeRange}) están completas y la lista de espera no está activa en este evento.`,
+            variant: 'destructive',
+          });
+          return;
+        }
+        setWizardForceWaitlist(true);
+        setWizardStep(2);
+        return;
+      }
+    }
+
+    setWizardForceWaitlist(false);
+    setWizardStep(2);
+  };
+
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    // Note: waitlist submissions (when quota is full) go through the normal path
+    // with `forceWaitlist: true` so we still collect wrapped answers and preferences.
+
+
+
+    // Collect every missing/invalid field so they can all be highlighted at once
+    const missingFields: string[] = [];
+    if (!name.trim()) missingFields.push("name");
+    if (!email.trim()) missingFields.push("email");
+    if (!phone.trim()) missingFields.push("phone");
+    if (!birthDate) missingFields.push("birthDate");
+    if (!gender) missingFields.push("gender");
+    const inWaitlistMode = wizardForceWaitlist;
+    if (!inWaitlistMode) {
+      if (selectedAgeRanges.length === 0) missingFields.push("preferredAge");
+      if (!preference) missingFields.push("preference");
+      if (!isReturningParticipant) missingFields.push("returning");
+    }
+
+    // Social game: all questions are mandatory
+    if (socialGameEnabled && socialGameQuestions.length > 0) {
+      missingFields.push(...missingSocialGameAnswers(socialGameQuestions, gameAnswers));
+    }
+
+    // Wrapped: validate required interest questions
+    if (wrappedEnabled && !hasWrappedProfile) {
+      for (const q of wrappedQuestions) {
+        if (!q.required) continue;
+        const v = wrappedAnswers[q.id];
+        const missing =
+          v === undefined || v === null ||
+          (Array.isArray(v) && v.length === 0) ||
+          (q.type === 'ranked_top3' && (!(v as any)?.top1 || !(v as any)?.top2 || !(v as any)?.top3));
+        if (missing) missingFields.push(q.id);
+      }
+    }
+
+    if (!dataConsent) missingFields.push("dataConsent");
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const invalidEmail = !!email.trim() && !emailRegex.test(email.trim());
+    if (invalidEmail && !missingFields.includes("email")) missingFields.push("email");
+
+    setFieldErrors(missingFields);
+
+    if (missingFields.length > 0) {
+      scrollToFirstError();
+      toast({
+        title: "Error",
+        description: invalidEmail && missingFields.length === 1
+          ? t.join.errorInvalidEmail
+          : !dataConsent && missingFields.length === 1
+          ? (eventLang === "en" ? "You must accept the privacy policy to register" : "Debes aceptar la política de privacidad para inscribirte")
+          : t.join.errorMissingFields,
+        variant: "destructive",
+      });
+      return;
+    }
+
+
+    const today = new Date();
+    const birth = new Date(birthDate);
+    let age = today.getFullYear() - birth.getFullYear();
+    const monthDiff = today.getMonth() - birth.getMonth();
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+      age--;
+    }
+    if (age < 18) {
+      toast({
+        title: "Error",
+        description: t.join.errorMinAge,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const isDatingPref = preference === "Amistad y ligue" || preference === "Friendship & dating";
+    if (isDatingPref && !datingPreference) {
+      toast({
+        title: "Error",
+        description: t.join.errorDatingPref,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Refresh quotas and re-check just before submitting
+    if (quotasEnabled && eventId) {
+        const freshStatuses = await loadAllQuotaCounts(eventId, slotQuotas);
+        const slots = getAvailableSlotsFromStatuses(freshStatuses);
+      if (slots && !slots.available) {
+          if (waitlistEnabled || quotaWaitlistEnabled) {
+            // Enforce Wrapped required answers before sending to waitlist
+            if (wrappedEnabled && !hasWrappedProfile) {
+              for (const q of wrappedQuestions) {
+                if (!q.required) continue;
+                const v = wrappedAnswers[q.id];
+                const missing =
+                  v === undefined || v === null ||
+                  (Array.isArray(v) && v.length === 0) ||
+                  (q.type === 'ranked_top3' && (!(v as any)?.top1 || !(v as any)?.top2 || !(v as any)?.top3));
+                if (missing) {
+                  setWizardForceWaitlist(true);
+                  setWizardStep(2);
+                  toast({
+                    title: "Error",
+                    description: eventLang === 'en'
+                      ? 'Please answer all required interest questions.'
+                      : 'Responde todas las preguntas de intereses obligatorias.',
+                    variant: "destructive",
+                  });
+                  return;
+                }
+              }
+            }
+            setWizardForceWaitlist(true);
+            setIsSubmitting(true);
+            const { data, error } = await supabase.functions.invoke('register-participant', {
+              body: {
+                eventId,
+                name: name.trim(),
+                email: email.trim(),
+                phone: phone.trim(),
+                gender,
+                birthDate,
+                preference,
+                datingPreference: (preference === "Amistad y ligue" || preference === "Friendship & dating") ? datingPreference : null,
+                preferredAgeRange: selectedAgeRanges.join(', '),
+                isReturningParticipant: isReturningParticipant === "yes",
+                marketingConsent,
+                wrappedAnswers: wrappedEnabled && !hasWrappedProfile ? wrappedAnswers : undefined,
+                spokenLanguages: languagesEnabled ? spokenLanguages : undefined,
+                gameAnswers: socialGameEnabled ? gameAnswers : undefined,
+                forceWaitlist: true,
+              }
+            });
+
+            if (error || data?.error) {
+              toast({ title: "Error", description: data?.error || t.join.errorRegister, variant: "destructive" });
+              setIsSubmitting(false);
+              return;
+            }
+
+            try {
+              await supabase.functions.invoke('send-waitlist-confirmation', {
+                body: { eventId, name: data.name || name.trim(), email: data.email || email.trim(), position: data.position }
+              });
+            } catch (e) {
+              console.error('Error sending waitlist confirmation email:', e);
+            }
+            setIsWaitlistSubmission(true);
+            setIsSubmitted(true);
+            setIsSubmitting(false);
+            return;
+          }
+        setWizardForceWaitlist(true);
+        toast({
+          title: t.join.errorNoSlots,
+          description: eventLang === 'en'
+            ? 'Spot just filled up. You can join the waitlist instead.'
+            : 'La plaza se acaba de llenar. Puedes apuntarte a la lista de espera.',
+          variant: "destructive",
+        });
+        return;
+      }
+    }
+    setIsSubmitting(true);
+    const preferredAgeRange = selectedAgeRanges.join(', ');
+    const isDating = preference === "Amistad y ligue" || preference === "Friendship & dating";
+
+    const { data, error } = await supabase.functions.invoke('register-participant', {
+      body: {
+        eventId,
+        name: name.trim(),
+        email: email.trim(),
+        phone: phone.trim(),
+        gender,
+        birthDate,
+        preference,
+        datingPreference: isDating ? datingPreference : null,
+        preferredAgeRange,
+        isReturningParticipant: isReturningParticipant === "yes",
+        marketingConsent,
+        wrappedAnswers: wrappedEnabled && !hasWrappedProfile ? wrappedAnswers : undefined,
+        spokenLanguages: languagesEnabled ? spokenLanguages : undefined,
+                gameAnswers: socialGameEnabled ? gameAnswers : undefined,
+        forceWaitlist: wizardForceWaitlist || undefined,
+      }
+
+    });
+
+    if (error || data?.error) {
+      // Extract the specific error message from the edge function response
+      let errorMessage = t.join.errorRegister;
+      if (data?.error) {
+        errorMessage = data.error;
+      } else if (error) {
+        try {
+          // FunctionsHttpError contains the response context
+          const errorContext = (error as any)?.context;
+          if (errorContext && typeof errorContext.json === 'function') {
+            const errorBody = await errorContext.json();
+            if (errorBody?.error) {
+              errorMessage = errorBody.error;
+            }
+          } else if (error.message) {
+            errorMessage = error.message;
+          }
+        } catch {
+          // fallback to generic message
+        }
+      }
+      toast({
+        title: "Error",
+        description: errorMessage,
+        variant: "destructive",
+      });
+      setIsSubmitting(false);
+      return;
+    }
+
+    // Check if added to waitlist
+    if (data.waitlisted) {
+      // Send waitlist confirmation email
+      try {
+        await supabase.functions.invoke('send-waitlist-confirmation', {
+          body: { eventId, name: data.name || name.trim(), email: data.email || email.trim(), position: data.position }
+        });
+      } catch (e) {
+        console.error('Error sending waitlist confirmation email:', e);
+      }
+      setIsWaitlistSubmission(true);
+      setIsSubmitted(true);
+      setIsSubmitting(false);
+      return;
+    }
+
+    const baseUrl = window.location.origin;
+    if (data.autoCheckedIn && data.verificationCode) {
+      await supabase.functions.invoke('send-checkin-code', {
+        body: {
+          participantId: data.participantId,
+          eventId,
+          baseUrl
+        }
+      });
+      setVerificationCode(data.verificationCode);
+    } else if ((data.codeSendMode === 'on_registration' || (data.codeSendMode === 'automatic')) && data.verificationCode) {
+      await supabase.functions.invoke('send-registration-confirmation', {
+        body: { participantId: data.participantId, eventId, withCode: true }
+      });
+    } else {
+      await supabase.functions.invoke('send-registration-confirmation', {
+        body: {
+          participantId: data.participantId,
+          eventId
+        }
+      });
+    }
+
+    setAutoCheckedIn(data.autoCheckedIn);
+    setIsSubmitted(true);
+    setIsSubmitting(false);
+  };
+
+  // B2B professional submit handler
+  const handleB2BSubmit = async (data: B2BFormData) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const b2b = (t as any).b2b || translations.es.b2b;
+    
+    if (!data.name || !data.email || !data.phone || !data.entityType || !data.companyName || !data.sector || !data.companySize) {
+      toast({ title: "Error", description: b2b.errorMissingFields, variant: "destructive" });
+      return;
+    }
+    if (!emailRegex.test(data.email)) {
+      toast({ title: "Error", description: b2b.errorInvalidEmail, variant: "destructive" });
+      return;
+    }
+
+    setIsSubmitting(true);
+    setEmail(data.email); // for success screen
+
+    const { data: result, error } = await supabase.functions.invoke('register-participant', {
+      body: {
+        eventId,
+        name: data.name,
+        email: data.email,
+        phone: data.phone,
+        entityType: data.entityType,
+        companyName: data.companyName,
+        sector: data.sector,
+        companySize: data.companySize,
+        needs: data.needs,
+        solutions: data.solutions,
+        isProfessional: true,
+        marketingConsent: data.marketingConsent || false,
+      }
+    });
+
+    if (error || result?.error) {
+      let errorMessage = b2b.errorMissingFields;
+      if (result?.error) errorMessage = result.error;
+      toast({ title: "Error", description: errorMessage, variant: "destructive" });
+      setIsSubmitting(false);
+      return;
+    }
+
+    // Check if added to waitlist (B2B)
+    if (result.waitlisted) {
+      try {
+        await supabase.functions.invoke('send-waitlist-confirmation', {
+          body: { eventId, name: result.name || data.name, email: result.email || data.email, position: result.position }
+        });
+      } catch (e) {
+        console.error('Error sending waitlist confirmation email:', e);
+      }
+      setIsWaitlistSubmission(true);
+      setIsSubmitted(true);
+      setIsSubmitting(false);
+      return;
+    }
+
+    const baseUrl = window.location.origin;
+    if (result.autoCheckedIn && result.verificationCode) {
+      await supabase.functions.invoke('send-checkin-code', {
+        body: { participantId: result.participantId, eventId, baseUrl }
+      });
+      setVerificationCode(result.verificationCode);
+    } else if ((result.codeSendMode === 'on_registration' || (result.codeSendMode === 'automatic')) && result.verificationCode) {
+      await supabase.functions.invoke('send-registration-confirmation', {
+        body: { participantId: result.participantId, eventId, withCode: true }
+      });
+    } else {
+      await supabase.functions.invoke('send-registration-confirmation', {
+        body: { participantId: result.participantId, eventId }
+      });
+    }
+
+    setAutoCheckedIn(result.autoCheckedIn);
+    setIsSubmitted(true);
+    setIsSubmitting(false);
+  };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center p-4">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+  if (!eventExists) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center p-4">
+        <Card className="w-full max-w-md text-center">
+          <CardContent className="pt-6">
+            <div className="w-16 h-16 rounded-full bg-destructive/10 flex items-center justify-center mx-auto mb-4">
+              <Heart className="w-8 h-8 text-destructive" />
+            </div>
+            <h2 className="font-display text-xl font-semibold mb-2">{t.join.eventNotAvailable}</h2>
+            <p className="text-muted-foreground">{t.join.eventNotAvailableDesc}</p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  if (isSubmitted && isWaitlistSubmission) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center p-4">
+        <Card className="w-full max-w-md text-center animate-scale-in">
+          <CardContent className="pt-6 space-y-6">
+            <div className="w-16 h-16 rounded-full bg-amber-500/10 flex items-center justify-center mx-auto">
+              <Clock className="w-8 h-8 text-amber-500" />
+            </div>
+            <div>
+              <h2 className="font-display text-xl font-semibold mb-2">
+                {eventLang === 'en' ? 'You\'re on the waitlist!' : '¡Estás en la lista de espera!'}
+              </h2>
+              <p className="text-muted-foreground">
+                {eventLang === 'en' 
+                  ? 'We\'ve received your registration. If a spot opens up, you\'ll be automatically registered and notified at '
+                  : 'Hemos recibido tu inscripción. Si se produce una baja, serás inscrito automáticamente y recibirás un email en '
+                }
+                <strong>{email}</strong>
+              </p>
+            </div>
+            <div className="bg-muted/50 rounded-lg p-4">
+              <div className="text-4xl mb-2">⏳</div>
+              <p className="text-sm text-muted-foreground">
+                {eventLang === 'en' 
+                  ? 'You\'ll receive an email confirmation if your spot is confirmed.'
+                  : 'Recibirás un email de confirmación si tu plaza es confirmada.'
+                }
+              </p>
+            </div>
+            <BrandedLogo logoUrl={eb.logoUrl} companyName={eb.companyName} isWhiteLabel={eb.isWhiteLabel} className="h-10 w-auto mx-auto" />
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  if (isSubmitted) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center p-4">
+        <Card className="w-full max-w-md text-center animate-scale-in">
+          <CardContent className="pt-6 space-y-6">
+            <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto">
+              <CheckCircle2 className="w-8 h-8 text-primary" />
+            </div>
+            
+            <div>
+              <h2 className="font-display text-xl font-semibold mb-2">{t.join.registrationComplete}</h2>
+              <p className="text-muted-foreground">
+                {t.join.emailConfirmation} <strong>{email}</strong> {t.join.emailConfirmationSuffix}
+              </p>
+            </div>
+
+            {autoCheckedIn && verificationCode ? (
+              <>
+                <div className="bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-900 rounded-lg p-3 flex items-start gap-2">
+                  <CheckCircle2 className="w-5 h-5 text-green-600 mt-0.5" />
+                  <p className="text-sm text-green-700 dark:text-green-400 text-left">
+                    {t.join.autoCheckinMsg}
+                  </p>
+                </div>
+
+                <div className="bg-muted/50 rounded-lg p-4 space-y-3">
+                  <div className="flex items-center justify-center gap-2 text-sm">
+                    <span>{t.join.yourAccessCode}</span>
+                  </div>
+                  <div className="text-3xl font-mono font-bold tracking-widest text-primary">
+                    {verificationCode}
+                  </div>
+                </div>
+
+                <div className="text-left space-y-2 text-sm text-muted-foreground">
+                  <p className="font-medium text-foreground">{t.join.withCodeYouCan}</p>
+                  <ul className="space-y-1 ml-4">
+                    <li>🪑 {t.join.seeYourTables}</li>
+                    <li>💕 {t.join.sendSelections}</li>
+                  </ul>
+                </div>
+
+                <div className="bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900 rounded-lg p-3 flex items-start gap-2">
+                  <AlertCircle className="w-5 h-5 text-amber-600 mt-0.5" />
+                  <p className="text-sm text-amber-700 dark:text-amber-400 text-left">
+                    <strong>{t.join.important}</strong> {t.join.saveCode}
+                  </p>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="bg-muted/50 rounded-lg p-4 space-y-3">
+                  <div className="text-5xl mb-2">🎉</div>
+                  <p className="text-foreground font-medium">{t.join.placeReserved}</p>
+                </div>
+
+                <div className="bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-900 rounded-lg p-4 text-left">
+                  <p className="font-medium text-blue-800 dark:text-blue-300 mb-2 flex items-center gap-2">
+                    <Clock className="w-4 h-4" />
+                    {t.join.dayOfEvent}
+                  </p>
+                  <ol className="text-sm text-blue-700 dark:text-blue-400 space-y-2 ml-4 list-decimal">
+                    <li>{t.join.dayOfEventStep1}</li>
+                    <li>{t.join.dayOfEventStep2}</li>
+                    <li>{t.join.dayOfEventStep3}</li>
+                  </ol>
+                </div>
+              </>
+            )}
+
+            <div className="flex items-center justify-center gap-2 pt-2">
+              <Mail className="w-4 h-4 text-muted-foreground" />
+              <span className="text-sm text-muted-foreground">{t.join.checkEmail}</span>
+            </div>
+            
+            <BrandedLogo logoUrl={eb.logoUrl} companyName={eb.companyName} isWhiteLabel={eb.isWhiteLabel} className="h-10 w-auto mx-auto" />
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  // Custom registration form (takes priority over default forms)
+  if (customRegistrationForm && customRegistrationForm.formMode === "custom" && customRegistrationForm.fields?.length > 0) {
+    const handleDynamicSubmit = async (formValues: Record<string, any>) => {
+      setIsSubmitting(true);
+      const emailVal = formValues.email || "";
+      setEmail(emailVal);
+
+      // Map known system fields to the edge function expected format
+      const body: Record<string, any> = {
+        eventId,
+        name: formValues.name || "",
+        email: emailVal,
+        phone: formValues.phone || "",
+        isProfessional: eventModule === "professional",
+      };
+
+      // Social system fields
+      if (formValues.birth_date) body.birthDate = formValues.birth_date;
+      if (formValues.gender) body.gender = formValues.gender;
+      if (formValues.preference) body.preference = formValues.preference;
+      if (formValues.dating_preference) body.datingPreference = formValues.dating_preference;
+
+      // Professional system fields
+      if (formValues.entity_type) {
+        body.entityType = formValues.entity_type.toLowerCase() === "cliente" || formValues.entity_type.toLowerCase() === "client" ? "client" : "provider";
+      }
+      if (formValues.company_name) body.companyName = formValues.company_name;
+      if (formValues.sector) body.sector = formValues.sector;
+      if (formValues.company_size) body.companySize = formValues.company_size;
+      if (formValues.needs) body.needs = formValues.needs;
+      if (formValues.solutions) body.solutions = formValues.solutions;
+      body.marketingConsent = formValues.marketingConsent === true;
+
+      // Custom fields stored as metadata
+      const customFields: Record<string, any> = {};
+      customRegistrationForm.fields.forEach((f) => {
+        if (!f.system && formValues[f.id] !== undefined) {
+          customFields[f.id] = formValues[f.id];
+        }
+      });
+      if (Object.keys(customFields).length > 0) {
+        body.customFields = customFields;
+      }
+
+      const { data, error } = await supabase.functions.invoke("register-participant", { body });
+
+      if (error || data?.error) {
+        let errorMessage = eventLang === "en" ? "Registration failed" : "Error al registrarse";
+        if (data?.error) errorMessage = data.error;
+        toast({ title: "Error", description: errorMessage, variant: "destructive" });
+        setIsSubmitting(false);
+        return;
+      }
+
+      const baseUrl = window.location.origin;
+      if (data.autoCheckedIn && data.verificationCode) {
+        await supabase.functions.invoke("send-checkin-code", {
+          body: { participantId: data.participantId, eventId, baseUrl },
+        });
+        setVerificationCode(data.verificationCode);
+      } else if ((data.codeSendMode === 'on_registration' || (data.codeSendMode === 'automatic')) && data.verificationCode) {
+        await supabase.functions.invoke("send-registration-confirmation", {
+          body: { participantId: data.participantId, eventId, withCode: true },
+        });
+      } else {
+        await supabase.functions.invoke("send-registration-confirmation", {
+          body: { participantId: data.participantId, eventId },
+        });
+      }
+
+      setAutoCheckedIn(data.autoCheckedIn);
+      setIsSubmitted(true);
+      setIsSubmitting(false);
+    };
+
+    return (
+      <div className="min-h-screen bg-background">
+        <BrandedHeader logoUrl={eb.logoUrl} companyName={eb.companyName} isWhiteLabel={eb.isWhiteLabel} centered />
+        <main className="container mx-auto px-4 py-8 max-w-md">
+          <DynamicRegistrationForm
+            fields={customRegistrationForm.fields}
+            eventName={eventName}
+            eventDate={eventDate}
+            eventTime={eventTime}
+            eventLocation={eventLocation}
+            registrationSubtitle={registrationSubtitle}
+            registrationDescription={registrationDescription}
+            eventLang={eventLang}
+            isSubmitting={isSubmitting}
+            onSubmit={handleDynamicSubmit}
+          />
+        </main>
+      </div>
+    );
+  }
+
+  // B2B Professional form
+  if (eventModule === "professional") {
+    return (
+      <div className="min-h-screen bg-background">
+        <BrandedHeader logoUrl={eb.logoUrl} companyName={eb.companyName} isWhiteLabel={eb.isWhiteLabel} centered />
+        <main className="container mx-auto px-4 py-8 max-w-md">
+          <B2BRegistrationForm
+            eventName={eventName}
+            eventDate={eventDate}
+            eventTime={eventTime}
+            eventLocation={eventLocation}
+            eventLang={eventLang}
+            registrationSubtitle={registrationSubtitle}
+            registrationDescription={registrationDescription}
+            professionalConfig={professionalConfig}
+            isSubmitting={isSubmitting}
+            onSubmit={handleB2BSubmit}
+          />
+        </main>
+      </div>
+    );
+  }
+
+
+  return (
+    <div className="min-h-screen bg-background">
+      <BrandedHeader logoUrl={eb.logoUrl} companyName={eb.companyName} isWhiteLabel={eb.isWhiteLabel} centered />
+
+      <main className="container mx-auto px-4 py-8 max-w-md">
+        {/* Quota availability display removed from participant form — tracked in admin dashboard */}
+
+        <Card className="animate-fade-in">
+          <CardHeader className="text-center">
+            <CardTitle className="font-display text-2xl">{t.join.joinEvent} {eventName}</CardTitle>
+            <CardDescription>
+              {registrationSubtitle || t.join.formSubtitle}
+              {registrationDescription && (
+                <div className="block mt-2 text-sm text-foreground/80">
+                  <RichTextRenderer content={registrationDescription} />
+                </div>
+              )}
+              {eventDate && (
+                <span className="block mt-2 text-primary font-medium">
+                  📅 {eventDate.toLocaleDateString(eventLang === 'en' ? 'en-US' : 'es-ES', { weekday: 'long', day: 'numeric', month: 'long' })}
+                  {eventTime && ` · 🕐 ${eventTime}`}
+                </span>
+              )}
+              {eventLocation && (
+                <span className="block mt-1 text-foreground/70 font-medium">
+                  📍 {eventLocation}
+                </span>
+              )}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {registrationClosed && waitlistEnabled && (
+              <div className="mb-4 p-4 rounded-lg border border-amber-200 bg-amber-50 dark:bg-amber-950/30 dark:border-amber-900">
+                <div className="flex items-start gap-2">
+                  <Clock className="w-5 h-5 text-amber-600 dark:text-amber-400 mt-0.5 shrink-0" />
+                  <div>
+                    <p className="font-medium text-amber-800 dark:text-amber-300 text-sm">
+                      {eventLang === 'en' ? 'Registration is full' : 'Las inscripciones están completas'}
+                    </p>
+                    <p className="text-xs text-amber-700 dark:text-amber-400 mt-1">
+                      {eventLang === 'en' 
+                        ? 'You can fill out the form to join the waitlist. If a spot opens up, you\'ll be automatically registered and notified by email.'
+                        : 'Puedes rellenar el formulario para entrar en la lista de espera. Si se produce una baja, serás inscrito automáticamente y recibirás un email de confirmación.'
+                      }
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+            {(() => {
+              const isWizard = quotasEnabled || wrappedEnabled || socialGameEnabled;
+              const showStep1Only = isWizard && wizardStep === 1 && !wizardForceWaitlist;
+              const showWaitlistMode = isWizard && wizardForceWaitlist;
+              const showStep2 = !isWizard || wizardStep === 2;
+
+              return (
+                <form onSubmit={handleSubmit} className="space-y-4" noValidate>
+                  {fieldErrors.length > 0 && (
+                    <div className="flex items-start gap-2 p-3 rounded-lg border border-destructive/50 bg-destructive/10 text-sm text-destructive">
+                      <AlertCircle className="w-4 h-4 mt-0.5 shrink-0" />
+                      <span>
+                        {eventLang === "en"
+                          ? "Please complete the highlighted fields below."
+                          : "Por favor, completa los campos destacados en rojo."}
+                      </span>
+                    </div>
+                  )}
+                  {isWizard && (
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground mb-2">
+                      <span className={`px-2 py-1 rounded-full font-medium ${showStep1Only || showWaitlistMode ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}>
+                        {eventLang === 'en' ? '1. Profile' : '1. Perfil'}
+                      </span>
+                      <span>→</span>
+                      <span className={`px-2 py-1 rounded-full font-medium ${showStep2 ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}>
+                        {showWaitlistMode
+                          ? (eventLang === 'en' ? '2. Waitlist' : '2. Lista de espera')
+                          : (eventLang === 'en' ? '2. Details' : '2. Datos')}
+                      </span>
+                    </div>
+                  )}
+
+                  {showWaitlistMode && (
+                    <div className="p-4 rounded-lg border border-amber-200 bg-amber-50 dark:bg-amber-950/30 dark:border-amber-900">
+                      <div className="flex items-start gap-2">
+                        <Clock className="w-5 h-5 text-amber-600 dark:text-amber-400 mt-0.5 shrink-0" />
+                        <div>
+                          <p className="font-medium text-amber-800 dark:text-amber-300 text-sm">
+                            {eventLang === 'en'
+                              ? `No spots available for ${gender} (${calculatedAgeRange})`
+                              : `No hay plazas disponibles para ${gender} (${calculatedAgeRange})`}
+                          </p>
+                          <p className="text-xs text-amber-700 dark:text-amber-400 mt-1">
+                            {eventLang === 'en'
+                              ? 'You can join the waitlist. If a spot opens up, we will notify you by email.'
+                              : 'Puedes apuntarte a la lista de espera. Si se produce una baja, te avisaremos por email.'}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Step 1 fields: gender + birthDate (always visible when wizard active in step 1 or waitlist; in step 2 also visible at top but disabled) */}
+                  {isWizard && (
+                    <>
+                      <div className="space-y-2" data-field-error={hasErr("birthDate") ? "true" : undefined}>
+                        <Label htmlFor="birthDate" className={hasErr("birthDate") ? "text-destructive" : undefined}>{t.join.birthDateLabel}</Label>
+                        <Input
+                          id="birthDate"
+                          type="date"
+                          value={birthDate}
+                          onChange={(e) => { setBirthDate(e.target.value); clearErr("birthDate"); }}
+                          max={new Date(new Date().setFullYear(new Date().getFullYear() - 18)).toISOString().split('T')[0]}
+                          disabled={showStep2 || showWaitlistMode}
+                          aria-invalid={hasErr("birthDate")}
+                          className={hasErr("birthDate") ? errorInputClass : undefined}
+                        />
+                        <FieldError show={hasErr("birthDate")} message={fieldErrorMessage(eventLang)} />
+                        {calculatedAgeRange && (
+                          <p className="text-xs text-muted-foreground">
+                            {t.join.ageRangeHint} <span className="font-medium text-foreground">{calculatedAgeRange}</span>
+                          </p>
+                        )}
+                      </div>
+
+                      <div className="space-y-2" data-field-error={hasErr("gender") ? "true" : undefined}>
+                        <Label className={hasErr("gender") ? "text-destructive" : undefined}>{t.join.genderLabel}</Label>
+                        <Select value={gender} onValueChange={(val) => {
+                          setGender(val);
+                          clearErr("gender");
+                          if (datingPreference) {
+                            const newFiltered = getFilteredDatingPreferences(val, eventDatingPreferences);
+                            if (!newFiltered.includes(datingPreference)) setDatingPreference("");
+                          }
+                        }} disabled={showStep2 || showWaitlistMode}>
+                          <SelectTrigger className={hasErr("gender") ? errorInputClass : undefined}>
+                            <SelectValue placeholder={t.join.genderPlaceholder} />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {eventGenders.map((g) => (
+                              <SelectItem key={g} value={g}>{g}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FieldError show={hasErr("gender")} message={fieldErrorMessage(eventLang)} />
+                      </div>
+
+                      {wrappedEnabled && (
+                        <div className="space-y-2" data-field-error={hasErr("email") ? "true" : undefined}>
+                          <Label htmlFor="wrapped-email" className={hasErr("email") ? "text-destructive" : undefined}>{t.join.emailLabel}</Label>
+                          <Input
+                            id="wrapped-email"
+                            type="email"
+                            value={email}
+                            onChange={(e) => { setEmail(e.target.value); clearErr("email"); }}
+                            placeholder={t.join.emailPlaceholder}
+                            disabled={showStep2 || showWaitlistMode}
+                            aria-invalid={hasErr("email")}
+                            className={hasErr("email") ? errorInputClass : undefined}
+                          />
+                          <FieldError show={hasErr("email")} message={fieldErrorMessage(eventLang)} />
+                        </div>
+                      )}
+
+                      {(showStep2 || showWaitlistMode) && (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => { setWizardStep(1); setWizardForceWaitlist(false); }}
+                        >
+                          ← {eventLang === 'en' ? 'Edit profile' : 'Editar perfil'}
+                        </Button>
+                      )}
+                    </>
+                  )}
+
+                  {/* Common contact fields (visible in step 2 OR waitlist OR when wizard is off) */}
+                  {(showStep2 || showWaitlistMode) && (
+                    <>
+                      <div className="space-y-2" data-field-error={hasErr("name") ? "true" : undefined}>
+                        <Label htmlFor="name" className={hasErr("name") ? "text-destructive" : undefined}>{t.join.nameLabel}</Label>
+                        <Input id="name" value={name} onChange={(e) => { setName(e.target.value); clearErr("name"); }} placeholder={t.join.namePlaceholder} aria-invalid={hasErr("name")} className={hasErr("name") ? errorInputClass : undefined} />
+                        <FieldError show={hasErr("name")} message={fieldErrorMessage(eventLang)} />
+                      </div>
+
+                      <div className="space-y-2" data-field-error={hasErr("email") ? "true" : undefined}>
+                        <Label htmlFor="email" className={hasErr("email") ? "text-destructive" : undefined}>{t.join.emailLabel}</Label>
+                        <Input id="email" type="email" value={email} onChange={(e) => { setEmail(e.target.value); clearErr("email"); }} placeholder={t.join.emailPlaceholder} aria-invalid={hasErr("email")} className={hasErr("email") ? errorInputClass : undefined} />
+                        <FieldError show={hasErr("email")} message={fieldErrorMessage(eventLang)} />
+                        <p className="text-xs text-muted-foreground">{t.join.emailHint}</p>
+                      </div>
+
+                      <div className="space-y-2" data-field-error={hasErr("phone") ? "true" : undefined}>
+                        <Label htmlFor="phone" className={hasErr("phone") ? "text-destructive" : undefined}>{t.join.phoneLabel} *</Label>
+                        <Input id="phone" type="tel" value={phone} onChange={(e) => { setPhone(e.target.value); clearErr("phone"); }} placeholder={t.join.phonePlaceholder} aria-invalid={hasErr("phone")} className={hasErr("phone") ? errorInputClass : undefined} />
+                        <FieldError show={hasErr("phone")} message={fieldErrorMessage(eventLang)} />
+                      </div>
+                    </>
+                  )}
+
+                  {/* Non-wizard mode: original birthDate + gender placement */}
+                  {!isWizard && (
+                    <>
+                      <div className="space-y-2" data-field-error={hasErr("birthDate") ? "true" : undefined}>
+                        <Label htmlFor="birthDate" className={hasErr("birthDate") ? "text-destructive" : undefined}>{t.join.birthDateLabel}</Label>
+                        <Input
+                          id="birthDate"
+                          type="date"
+                          value={birthDate}
+                          onChange={(e) => { setBirthDate(e.target.value); clearErr("birthDate"); }}
+                          max={new Date(new Date().setFullYear(new Date().getFullYear() - 18)).toISOString().split('T')[0]}
+                          aria-invalid={hasErr("birthDate")}
+                          className={hasErr("birthDate") ? errorInputClass : undefined}
+                        />
+                        <FieldError show={hasErr("birthDate")} message={fieldErrorMessage(eventLang)} />
+                        {calculatedAgeRange && (
+                          <p className="text-xs text-muted-foreground">
+                            {t.join.ageRangeHint} <span className="font-medium text-foreground">{calculatedAgeRange}</span>
+                          </p>
+                        )}
+                      </div>
+
+                      <div className="space-y-2" data-field-error={hasErr("gender") ? "true" : undefined}>
+                        <Label className={hasErr("gender") ? "text-destructive" : undefined}>{t.join.genderLabel}</Label>
+                        <Select value={gender} onValueChange={(val) => {
+                          setGender(val);
+                          clearErr("gender");
+                          if (datingPreference) {
+                            const newFiltered = getFilteredDatingPreferences(val, eventDatingPreferences);
+                            if (!newFiltered.includes(datingPreference)) setDatingPreference("");
+                          }
+                        }}>
+                          <SelectTrigger className={hasErr("gender") ? errorInputClass : undefined}>
+                            <SelectValue placeholder={t.join.genderPlaceholder} />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {eventGenders.map((g) => (
+                              <SelectItem key={g} value={g}>{g}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FieldError show={hasErr("gender")} message={fieldErrorMessage(eventLang)} />
+                      </div>
+                    </>
+                  )}
+
+                  {/* Preference / dating / preferredAge / returning — only in full registration step 2 (not waitlist) */}
+                  {showStep2 && (
+                    <>
+                      <div className="space-y-2" data-field-error={hasErr("preferredAge") ? "true" : undefined}>
+                        <Label className={hasErr("preferredAge") ? "text-destructive" : undefined}>{t.join.preferredAgeLabel}</Label>
+                        <div className={hasErr("preferredAge") ? "rounded-md ring-2 ring-destructive/30" : undefined}>
+                          <MultiSelectAge
+                            options={preferredAgeRanges}
+                            selected={selectedAgeRanges}
+                            onChange={(v) => { setSelectedAgeRanges(v); clearErr("preferredAge"); }}
+                            placeholder={t.join.preferredAgePlaceholder}
+                          />
+                        </div>
+                        <FieldError show={hasErr("preferredAge")} message={fieldErrorMessage(eventLang)} />
+                      </div>
+
+                      <div className="space-y-2" data-field-error={hasErr("preference") ? "true" : undefined}>
+                        <Label className={hasErr("preference") ? "text-destructive" : undefined}>{t.join.preferenceLabel}</Label>
+                        <Select value={preference} onValueChange={(v) => { setPreference(v); clearErr("preference"); }}>
+                          <SelectTrigger className={hasErr("preference") ? errorInputClass : undefined}>
+                            <SelectValue placeholder={t.join.preferencePlaceholder} />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {eventPreferences.map((pref) => (
+                              <SelectItem key={pref} value={pref}>{pref}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FieldError show={hasErr("preference")} message={fieldErrorMessage(eventLang)} />
+                      </div>
+
+                      {(preference === "Amistad y ligue" || preference === "Friendship & dating") && (
+                        <div className="space-y-2 animate-fade-in" data-field-error={hasErr("datingPreference") ? "true" : undefined}>
+                          <Label className={hasErr("datingPreference") ? "text-destructive" : undefined}>{t.join.datingPrefLabel}</Label>
+                          <Select value={datingPreference} onValueChange={(v) => { setDatingPreference(v); clearErr("datingPreference"); }}>
+                            <SelectTrigger className={hasErr("datingPreference") ? errorInputClass : undefined}>
+                              <SelectValue placeholder={t.join.datingPrefPlaceholder} />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {filteredDatingPreferences.map((pref) => (
+                                <SelectItem key={pref} value={pref}>{pref}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <FieldError show={hasErr("datingPreference")} message={fieldErrorMessage(eventLang)} />
+                        </div>
+                      )}
+
+                      <div
+                        className={`space-y-3 ${hasErr("returning") ? "rounded-lg border border-destructive/50 bg-destructive/5 p-3" : ""}`}
+                        data-field-error={hasErr("returning") ? "true" : undefined}
+                      >
+                        <Label className={hasErr("returning") ? "text-destructive" : undefined}>{t.join.returningLabel}</Label>
+                        <RadioGroup value={isReturningParticipant} onValueChange={(v) => { setIsReturningParticipant(v); clearErr("returning"); }}>
+                          <div className="flex items-center space-x-2">
+                            <RadioGroupItem value="yes" id="returning-yes" />
+                            <Label htmlFor="returning-yes" className="font-normal cursor-pointer">{t.join.returningYes}</Label>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <RadioGroupItem value="no" id="returning-no" />
+                            <Label htmlFor="returning-no" className="font-normal cursor-pointer">{t.join.returningNo}</Label>
+                          </div>
+                        </RadioGroup>
+                        <FieldError show={hasErr("returning")} message={fieldErrorMessage(eventLang)} />
+                      </div>
+                    </>
+                  )}
+
+                  {showStep2 && languagesEnabled && availableLanguages.length > 0 && (
+                    <div className="space-y-2">
+                      <Label>
+                        {eventLang === "en" ? "Languages you speak" : "Idiomas que hablas"}{" "}
+                        <span className="text-muted-foreground text-xs">
+                          ({eventLang === "en" ? "select all that apply" : "selecciona los que hablas"})
+                        </span>
+                      </Label>
+                      <div className="grid grid-cols-2 gap-2">
+                        {availableLanguages.map((code) => {
+                          const label = LANGUAGE_LABELS[code]?.[eventLang] || code.toUpperCase();
+                          const checked = spokenLanguages.includes(code);
+                          return (
+                            <label
+                              key={code}
+                              className="flex items-center gap-2 p-2 rounded-md border cursor-pointer hover:bg-muted/50"
+                            >
+                              <Checkbox
+                                checked={checked}
+                                onCheckedChange={(v) => {
+                                  setSpokenLanguages((prev) =>
+                                    v ? Array.from(new Set([...prev, code])) : prev.filter((c) => c !== code)
+                                  );
+                                }}
+                              />
+                              <span className="text-sm">{label}</span>
+                            </label>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+
+
+                  {(showStep2 || showWaitlistMode) && wrappedEnabled && !hasWrappedProfile && wrappedQuestions.length > 0 && (
+                    <WrappedInterestsForm
+                      questions={wrappedQuestions}
+                      lang={eventLang}
+                      values={wrappedAnswers}
+                      onChange={(v) => { setWrappedAnswers(v); setFieldErrors((prev) => prev.filter((id) => !wrappedQuestions.some((q) => q.id === id))); }}
+                      errors={fieldErrors}
+                    />
+                  )}
+
+                  {(showStep2 || showWaitlistMode) && socialGameEnabled && socialGameQuestions.length > 0 && (
+                    <SocialGameForm
+                      questions={socialGameQuestions}
+                      lang={eventLang}
+                      values={gameAnswers}
+                      onChange={(v) => { setGameAnswers(v); setFieldErrors((prev) => prev.filter((id) => !socialGameQuestions.some((q) => q.id === id))); }}
+                      errors={fieldErrors}
+                    />
+                  )}
+
+                  {(showStep2 || showWaitlistMode) && wrappedEnabled && hasWrappedProfile && (
+                    <div className="p-3 rounded-lg border bg-primary/5 text-sm text-foreground/80">
+                      {eventLang === 'en'
+                        ? '✨ We already have your interests from a previous Wrapped event — no need to fill them in again.'
+                        : '✨ Ya tenemos tus intereses de un evento Wrapped anterior — no hace falta que los rellenes de nuevo.'}
+                    </div>
+                  )}
+
+                  {(showStep2 || showWaitlistMode) && (
+                    <GDPRConsent
+                      lang={eventLang}
+                      dataConsent={dataConsent}
+                      marketingConsent={marketingConsent}
+                      onDataConsentChange={(v) => { setDataConsent(v); if (v) clearErr("dataConsent"); }}
+                      onMarketingConsentChange={setMarketingConsent}
+                      error={hasErr("dataConsent")}
+                    />
+                  )}
+
+                  {showStep1Only ? (
+                    <Button type="button" variant="hero" className="w-full mt-6" onClick={handleWizardContinue} disabled={checkingEligibility}>
+                      {checkingEligibility ? (
+                        <><Loader2 className="w-4 h-4 mr-2 animate-spin" />{eventLang === 'en' ? 'Checking...' : 'Comprobando...'}</>
+                      ) : (
+                        eventLang === 'en' ? 'Continue' : 'Continuar'
+                      )}
+                    </Button>
+                  ) : (
+                    <Button
+                      type="submit"
+                      variant="hero"
+                      className="w-full mt-6"
+                      disabled={isSubmitting}
+                    >
+                      {isSubmitting ? (
+                        <>
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          {t.join.submitting}
+                        </>
+                      ) : showWaitlistMode ? (
+                        eventLang === 'en' ? 'Join waitlist' : 'Apuntarme a la lista de espera'
+                      ) : (
+                        t.join.submitButton
+                      )}
+                    </Button>
+                  )}
+                </form>
+              );
+            })()}
+          </CardContent>
+        </Card>
+      </main>
+    </div>
+  );
+};
+
+export default ParticipantJoin;

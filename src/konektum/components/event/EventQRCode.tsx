@@ -4,33 +4,21 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/kon
 import { Button } from "@/konektum/ui/button";
 import { Download, X } from "lucide-react";
 import { useRef } from "react";
+import { eventPublicUrl } from "@/konektum/lib/publicUrls";
 
 interface EventQRCodeProps {
   eventId: string;
+  eventSlug?: string | null;
   onClose: () => void;
   type?: "join" | "select" | "checkin" | "tables" | "access"; // join = registration, select = match selection, checkin = attendance, tables = view seating, access = unified panel
 }
 
-const EventQRCode = ({ eventId, onClose, type = "select" }: EventQRCodeProps) => {
+const EventQRCode = ({ eventId, eventSlug, onClose, type = "select" }: EventQRCodeProps) => {
   const qrRef = useRef<HTMLDivElement>(null);
-  
-  // Generate the URL based on type
-  const getUrl = () => {
-    switch (type) {
-      case "join":
-        return `${window.location.origin}/event/${eventId}/join`;
-      case "checkin":
-        return `${window.location.origin}/event/${eventId}/checkin`;
-      case "tables":
-        return `${window.location.origin}/event/${eventId}/tables`;
-      case "access":
-        return `${window.location.origin}/event/${eventId}/access`;
-      default:
-        return `${window.location.origin}/event/${eventId}/select`;
-    }
-  };
-  
-  const participantUrl = getUrl();
+
+  // Public URL: friendly slug when available, event id otherwise
+  const participantUrl = eventPublicUrl(eventSlug || eventId, type);
+
   
   const getTitle = () => {
     switch (type) {

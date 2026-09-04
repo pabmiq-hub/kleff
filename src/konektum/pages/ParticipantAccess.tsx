@@ -1,0 +1,2026 @@
+// @ts-nocheck
+import { useState, useEffect, useRef } from "react";
+import { useParams, useSearchParams, Link } from "@/konektum/router";
+import { Button } from "@/konektum/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/konektum/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/konektum/ui/tabs";
+import { ArrowLeft, Sparkles, AlertCircle, Loader2, Users, Smile, CheckCircle, Clock, Heart, KeyRound, Table2, Lock, MinusCircle, HelpCircle, Repeat2, Pencil, Send, Gamepad2 } from "lucide-react";
+import ParticipantRoundTimer from "@/konektum/components/event/ParticipantRoundTimer";
+import EventCountdown from "@/konektum/components/event/EventCountdown";
+import { useToast } from "@/konektum/hooks/use-toast";
+import { supabase } from "@/konektum/supabase";
+import { Checkbox } from "@/konektum/ui/checkbox";
+import { Badge } from "@/konektum/ui/badge";
+import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/konektum/ui/input-otp";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/konektum/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/konektum/ui/alert-dialog";
+import konektumLogo from "@/assets/konektum-logo.png";
+import { translations, Language } from "@/konektum/i18n/translations";
+import SuperLikeBanner from "@/konektum/ui/super-like-banner";
+import SuperLikeConfirmDialog from "@/konektum/ui/super-like-confirm-dialog";
+import { Star } from "lucide-react";
+import confetti from "canvas-confetti";
+import WrappedCompatibilityTab from "@/konektum/components/event/WrappedCompatibilityTab";
+import IcebreakersTab from "@/konektum/components/participant/IcebreakersTab";
+import type { IcebreakerGameCode } from "@/konektum/lib/icebreakers";
+import EventHeroCard from "@/konektum/components/participant/EventHeroCard";
+
+interface MatchSelection {
+  participantId: string;
+  friendship: boolean;
+  dating: boolean;
+  canShowDating: boolean;
+  alreadySelected: boolean;
+  previousSelectionType?: string;
+  superLikedByMe?: boolean;
+  superLikedMe?: boolean;
+  round: number;
+  table: number;
+}
+
+interface TableAssignment {
+  round: number;
+  table: number;
+  tablemates: { id: string; name: string; preference?: string | null; dating_preference?: string | null; gender?: string | null }[];
+}
+
+interface ExistingSelection {
+  selected_id: string;
+  selection_type: string;
+  is_super_like?: boolean;
+}
+
+type Step = "verify_code" | "confirm_identity" | "panel" | "done" | "error" | "not_started" | "expired";
+
+const SESSION_EXPIRY_BUFFER_MS = 60 * 60 * 1000; // 1 hour after event
+
+// Detects if a participant's connection preference includes romance/dating interest.
+// Used to gate the Flechazo action (must be reciprocal).
+const wantsRomance = (pref?: string | null): boolean => {
+  const s = (pref || '').toLowerCase().trim();
+  if (!s) return false;
+  const friendshipOnly = ['solo amistad', 'amistad', 'friendship', 'friendship only', 'nuevas amistades', 'nuevas amistades.'];
+  if (friendshipOnly.includes(s)) return false;
+  return /(ligue|dating|romance|pareja|amistad y|friendship and|friendship &)/.test(s);
+};
+
+
+/**
+ * Check bilateral dating preference compatibility based on gender and orientation.
+ * Both participants must match each other's search criteria.
+ */
+const areDatingPreferencesCompatible = (pref1: string, gender1: string | null, pref2: string, gender2: string | null): boolean => {
+  const openPrefs = ["Estoy abierto a todo", "Estoy abierta a todo", "Estoy abierto/a a todo", "No binario", "I'm open to all", "I am open to all", "Non-binary"];
+  const p1IsOpen = openPrefs.some(o => pref1.includes(o));
+  const p2IsOpen = openPrefs.some(o => pref2.includes(o));
+
+  const p1LookingForWoman = pref1.includes("busco una mujer") || pref1.includes("looking for a woman");
+  const p1LookingForMan = pref1.includes("busco un hombre") || pref1.includes("looking for a man");
+  const p2LookingForWoman = pref2.includes("busco una mujer") || pref2.includes("looking for a woman");
+  const p2LookingForMan = pref2.includes("busco un hombre") || pref2.includes("looking for a man");
+
+  const p1IsWoman = gender1 === "Mujer" || gender1 === "Woman" || pref1.includes("Soy una mujer") || pref1.includes("I'm a woman") || pref1.includes("I am a woman");
+  const p1IsMan = gender1 === "Hombre" || gender1 === "Man" || pref1.includes("Soy un hombre") || pref1.includes("I'm a man") || pref1.includes("I am a man");
+  const p2IsWoman = gender2 === "Mujer" || gender2 === "Woman" || pref2.includes("Soy una mujer") || pref2.includes("I'm a woman") || pref2.includes("I am a woman");
+  const p2IsMan = gender2 === "Hombre" || gender2 === "Man" || pref2.includes("Soy un hombre") || pref2.includes("I'm a man") || pref2.includes("I am a man");
+
+  // Both open → compatible
+  if (p1IsOpen && p2IsOpen) return true;
+  // p1 open: p2 must accept p1's gender
+  if (p1IsOpen) {
+    if (p1IsMan && p2LookingForMan) return true;
+    if (p1IsWoman && p2LookingForWoman) return true;
+    return false;
+  }
+  // p2 open: p1 must accept p2's gender
+  if (p2IsOpen) {
+    if (p2IsMan && p1LookingForMan) return true;
+    if (p2IsWoman && p1LookingForWoman) return true;
+    return false;
+  }
+
+  // Hetero
+  if (p1IsMan && p1LookingForWoman && p2IsWoman && p2LookingForMan) return true;
+  if (p1IsWoman && p1LookingForMan && p2IsMan && p2LookingForWoman) return true;
+  // Gay
+  if (p1IsMan && p1LookingForMan && p2IsMan && p2LookingForMan) return true;
+  // Lesbian
+  if (p1IsWoman && p1LookingForWoman && p2IsWoman && p2LookingForWoman) return true;
+
+  return false;
+};
+
+const ParticipantAccess = () => {
+  const { id: eventId } = useParams();
+  const [searchParams] = useSearchParams();
+  const [step, setStep] = useState<Step>("verify_code");
+  const [verificationCode, setVerificationCode] = useState("");
+  const [verifiedParticipant, setVerifiedParticipant] = useState<{ id: string; name: string; email?: string; preference?: string; dating_preference?: string; gender?: string } | null>(null);
+  const [isVerifying, setIsVerifying] = useState(false);
+  const [sessionRestored, setSessionRestored] = useState(false);
+  const [pendingUrlCode, setPendingUrlCode] = useState(false);
+
+  const [matchSelections, setMatchSelections] = useState<MatchSelection[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [eventStatus, setEventStatus] = useState<string>("");
+  const [currentRound, setCurrentRound] = useState<number>(0);
+
+  const [tableAssignments, setTableAssignments] = useState<TableAssignment[]>([]);
+  const [totalRounds, setTotalRounds] = useState<number>(0);
+  const [participantName, setParticipantName] = useState("");
+  const [hasReceivedSuperLike, setHasReceivedSuperLike] = useState(false);
+  const [receivedSuperLikeSenderIds, setReceivedSuperLikeSenderIds] = useState<string[]>([]);
+  const [superLikesUsed, setSuperLikesUsed] = useState(0);
+  const [superLikeAllowance, setSuperLikeAllowance] = useState(1);
+  // Super Likes marked locally but not yet submitted to the server
+  const pendingSuperLikesRef = useRef(0);
+  const hasSentSuperLike = superLikesUsed >= superLikeAllowance;
+
+
+  const [superLikeTarget, setSuperLikeTarget] = useState<{ id: string; name: string; round: number } | null>(null);
+  const [isSendingSuperLike, setIsSendingSuperLike] = useState(false);
+
+  // Timer state
+  const [timerData, setTimerData] = useState<{
+    roundDuration: number;
+    roundStartedAt: string | null;
+    roundPausedAt: string | null;
+    roundElapsedSeconds: number;
+    completedRounds: number[];
+  } | null>(null);
+
+  const [eventDate, setEventDate] = useState<string>("");
+  const [eventName, setEventName] = useState<string>("");
+  const [eventTime, setEventTime] = useState<string | null>(null);
+  const [eventLocation, setEventLocation] = useState<string | null>(null);
+  const [participantsCount, setParticipantsCount] = useState<number | null>(null);
+  const [checkinMinutes, setCheckinMinutes] = useState<number>(60);
+  const [selectionDeadline, setSelectionDeadline] = useState<Date | null>(null);
+  const [timeRemaining, setTimeRemaining] = useState<string>("");
+
+  // Preliminary round confirmation
+  const [preliminaryConfirmation, setPreliminaryConfirmation] = useState<boolean | null>(null);
+  const [showPreliminaryModal, setShowPreliminaryModal] = useState(false);
+  const [isConfirmingPreliminary, setIsConfirmingPreliminary] = useState(false);
+
+  // Active tab control (for guiding user after prelim confirmation)
+  const [activeTab, setActiveTab] = useState<"tables" | "selections" | "compatibility" | "info" | "game">("info");
+  const [highlightSelectionsTab, setHighlightSelectionsTab] = useState(false);
+
+  // Repeat request feature
+  const [repeatEnabled, setRepeatEnabled] = useState(false);
+  const [repeatRequestUsed, setRepeatRequestUsed] = useState<{ status: string; targetId?: string } | null>(null);
+  const [repeatTarget, setRepeatTarget] = useState<{ id: string; name: string; round: number } | null>(null);
+  const [isSendingRepeat, setIsSendingRepeat] = useState(false);
+
+  // Crush/Flechazo feature
+  const [crushEnabled, setCrushEnabled] = useState(false);
+  const [crushesSent, setCrushesSent] = useState<{ status: string; targetId?: string }[]>([]);
+  const [crushAllowance, setCrushAllowance] = useState(1);
+  const crushSlotsLeft = Math.max(0, crushAllowance - crushesSent.length);
+
+  const [crushTarget, setCrushTarget] = useState<{ id: string; name: string; round: number } | null>(null);
+  const [isSendingCrush, setIsSendingCrush] = useState(false);
+  // Flechazos received and pending an answer (shown as a banner in the panel)
+  const [crushesReceived, setCrushesReceived] = useState<{ id: string; token: string; requesterId: string; requesterName: string }[]>([]);
+  const [respondingCrushId, setRespondingCrushId] = useState<string | null>(null);
+  const [wrappedEnabled, setWrappedEnabled] = useState(false);
+  const [socialGameEnabled, setSocialGameEnabled] = useState(false);
+  const [icebreakerGames, setIcebreakerGames] = useState<IcebreakerGameCode[]>([]);
+
+  // Edit-existing-selection feature (key = `${participantId}-${round}`)
+  const [editingKeys, setEditingKeys] = useState<Set<string>>(new Set());
+  const [pendingEdits, setPendingEdits] = useState<Map<string, { friendship: boolean; dating: boolean; originalType?: string; participantId: string }>>(new Map());
+  const [confirmEditSubmit, setConfirmEditSubmit] = useState(false);
+
+  // Game mode (Modo lúdico) — dynamics per table number
+  const [gameMode, setGameMode] = useState<{
+    enabled: boolean;
+    dynamics: { id: string; name: string; table_numbers: number[] }[];
+  } | null>(null);
+
+  const getDynamicForTable = (tableNumber: number) => {
+    if (!gameMode?.enabled) return null;
+    return gameMode.dynamics.find(d => d.table_numbers.includes(tableNumber)) || null;
+  };
+
+  const [eventLang, setEventLang] = useState<Language>("es");
+  const t = translations[eventLang];
+
+  const { toast } = useToast();
+
+  const sessionKey = eventId ? `participant_session_${eventId}` : '';
+
+  const saveSession = (participantId: string, name: string, email: string | undefined, code: string) => {
+    if (!sessionKey) return;
+    localStorage.setItem(sessionKey, JSON.stringify({
+      participantId, name, email, verificationCode: code, timestamp: new Date().toISOString()
+    }));
+  };
+
+  const clearSession = () => {
+    if (sessionKey) localStorage.removeItem(sessionKey);
+  };
+
+  const isSessionExpired = (eventDateStr: string): boolean => {
+    if (!eventDateStr) return false;
+    const eventEnd = new Date(eventDateStr);
+    eventEnd.setHours(23, 59, 59); // end of event day
+    return new Date().getTime() > eventEnd.getTime() + SESSION_EXPIRY_BUFFER_MS;
+  };
+
+  useEffect(() => {
+    const checkEventStatus = async () => {
+      if (!eventId) {
+        setStep("error");
+        setIsLoading(false);
+        return;
+      }
+      try {
+        const { data: event, error } = await (supabase as any)
+          .from('events_public')
+          .select('status, current_round, selection_deadline_hours, selection_closed_at, scheduled_email_at, language, date, name, event_time, event_location, participants_count, checkin_opens_minutes_before, has_preliminary_tables, checkin_open, repeat_request_enabled, crush_enabled, wrapped_enabled')
+          .eq('id', eventId)
+          .single();
+
+        if (error || !event) {
+          setStep("error");
+          setIsLoading(false);
+          return;
+        }
+
+        if (event.language === 'en' || event.language === 'es') {
+          setEventLang(event.language as Language);
+        }
+
+        setEventStatus(event.status);
+        setCurrentRound(event.current_round || 0);
+        setEventDate(event.date);
+        setEventName(event.name);
+        setEventTime(event.event_time || null);
+        setEventLocation((event as any).event_location || null);
+        setParticipantsCount((event as any).participants_count ?? null);
+        setCheckinMinutes(event.checkin_opens_minutes_before ?? 60);
+
+        // Resolve repeat-request feature: trust event-level toggle as source of truth.
+        // The organizer can only enable it from the dashboard if their plan supports it,
+        // and the request-repeat edge function re-validates the event flag server-side.
+        setRepeatEnabled(!!(event as any).repeat_request_enabled);
+        setCrushEnabled(!!(event as any).crush_enabled);
+        setWrappedEnabled(!!(event as any).wrapped_enabled);
+
+        if (event.selection_closed_at) {
+          clearSession();
+          setStep("expired");
+          setIsLoading(false);
+          return;
+        }
+
+        if (event.status === 'completed' && event.scheduled_email_at) {
+          const deadline = new Date(event.scheduled_email_at);
+          setSelectionDeadline(deadline);
+          if (new Date() > deadline) {
+            clearSession();
+            setStep("expired");
+            setIsLoading(false);
+            return;
+          }
+        }
+
+        // Allow access if preliminary round has tables (even if event is pending)
+        const hasPrelimTables = !!(event as any).has_preliminary_tables;
+        const isCheckinOpen = !!(event as any).checkin_open;
+        
+        // Allow verify_code when checkin is open OR event is active/completed
+        // Only block with "not_started" when event is pending, checkin is closed, and no prelim tables
+        if ((event.status === 'pending' || event.current_round === 0) && !hasPrelimTables && !isCheckinOpen) {
+          setStep("not_started");
+          setIsLoading(false);
+          return;
+        }
+
+        // Try to restore session from localStorage
+        const savedSession = sessionKey ? localStorage.getItem(sessionKey) : null;
+        if (savedSession) {
+          try {
+            const session = JSON.parse(savedSession);
+            if (session.verificationCode && !isSessionExpired(event.date)) {
+              setVerificationCode(session.verificationCode);
+              setVerifiedParticipant({ id: session.participantId, name: session.name, email: session.email });
+              setSessionRestored(true);
+              setIsLoading(false);
+              return;
+            } else {
+              clearSession();
+            }
+          } catch {
+            clearSession();
+          }
+        }
+
+        // Code passed in the URL (e.g. coming from the check-in confirmation)
+        const urlCode = (searchParams.get('code') || '').replace(/\D/g, '');
+        if (urlCode.length === 6) {
+          setVerificationCode(urlCode);
+          setPendingUrlCode(true);
+        }
+
+        setIsLoading(false);
+      } catch (err) {
+        console.error('Error checking event status:', err);
+        setStep("error");
+        setIsLoading(false);
+      }
+    };
+
+    checkEventStatus();
+  }, [eventId]);
+
+  // Auto-restore session: once session data is set, auto-confirm identity
+  useEffect(() => {
+    if (sessionRestored && verifiedParticipant && verificationCode) {
+      handleConfirmIdentity();
+      setSessionRestored(false);
+    }
+  }, [sessionRestored, verifiedParticipant, verificationCode]);
+
+  // Keep the panel in sync while the event runs: new rounds and tables published
+  // by the organizer appear automatically without the participant reloading.
+  useEffect(() => {
+    if (step !== "panel" || !verificationCode || !eventId) return;
+    const interval = setInterval(() => {
+      if (document.visibilityState === "hidden") return;
+      handleConfirmIdentity(true);
+    }, 25000);
+    return () => clearInterval(interval);
+  }, [step, verificationCode, eventId]);
+
+  // Auto-verify when the code arrives in the URL (link from the check-in screen)
+  useEffect(() => {
+    if (pendingUrlCode && verificationCode.length === 6 && !verifiedParticipant) {
+      setPendingUrlCode(false);
+      handleVerifyCode();
+    }
+  }, [pendingUrlCode, verificationCode, verifiedParticipant]);
+
+  useEffect(() => {
+    if (!selectionDeadline) return;
+    const update = () => {
+      const now = new Date();
+      const diff = selectionDeadline.getTime() - now.getTime();
+      if (diff <= 0) {
+        setTimeRemaining(t.access.timeExpired);
+        setStep("expired");
+        return;
+      }
+      const hours = Math.floor(diff / 3600000);
+      const minutes = Math.floor((diff % 3600000) / 60000);
+      setTimeRemaining(t.access.timeRemaining.replace('{hours}', String(hours)).replace('{minutes}', String(minutes)));
+    };
+    update();
+    const interval = setInterval(update, 60000);
+    return () => clearInterval(interval);
+  }, [selectionDeadline, t]);
+
+  const handleVerifyCode = async () => {
+    if (verificationCode.length !== 6) {
+      toast({ title: t.access.incompleteCode, description: t.access.incompleteCodeDesc, variant: "destructive" });
+      return;
+    }
+
+    setIsVerifying(true);
+
+    try {
+      const { data, error } = await supabase.functions.invoke('get-event-participants', {
+        body: { eventId, type: 'verify', verificationCode }
+      });
+
+      if (error || data?.error || !data?.participant) {
+        toast({ title: t.access.invalidCode, description: t.access.invalidCodeDesc, variant: "destructive" });
+        setIsVerifying(false);
+        return;
+      }
+
+      setVerifiedParticipant(data.participant);
+      setStep("confirm_identity");
+    } catch (err) {
+      console.error('Error verifying code:', err);
+      toast({ title: t.access.error, description: t.access.errorSaving, variant: "destructive" });
+    } finally {
+      setIsVerifying(false);
+    }
+  };
+
+  // Latest values readable from the polling interval (avoids stale closures).
+  const roundStateRef = useRef({ assignments: 0, currentRound: 0 });
+
+  const handleConfirmIdentity = async (silent = false) => {
+    if (!verifiedParticipant || !eventId) return;
+
+    if (!silent) setIsLoading(true);
+
+    try {
+      const { data, error } = await supabase.functions.invoke('get-table-assignments', {
+        body: { eventId, verificationCode }
+      });
+
+      if (error || !data || data.error) {
+        console.error('Error fetching table assignments:', data?.error || error);
+        if (silent) return;
+        setStep("error");
+        setIsLoading(false);
+        return;
+      }
+
+      const assignments: TableAssignment[] = data.assignments || [];
+      const nextRound = data.currentRound ?? currentRound;
+
+      // Silent refresh: if nothing structural changed, only sync the timer so
+      // local (unsaved) selections are preserved.
+      if (
+        silent &&
+        assignments.length === roundStateRef.current.assignments &&
+        nextRound === roundStateRef.current.currentRound
+      ) {
+        if (data.timer) setTimerData(data.timer);
+        if (typeof data.superLikeAllowance === 'number') setSuperLikeAllowance(data.superLikeAllowance);
+        return;
+      }
+      roundStateRef.current = { assignments: assignments.length, currentRound: nextRound };
+
+      setParticipantName(data.participantName);
+      setTableAssignments(assignments);
+      setTotalRounds(data.totalRounds);
+      setEventStatus(data.eventStatus || eventStatus);
+      setCurrentRound(data.currentRound ?? currentRound);
+      // Do not overwrite the event-level flag with false when an older cached
+      // Edge Function response does not include the field yet.
+      if (Object.prototype.hasOwnProperty.call(data, 'socialGameEnabled')) {
+        setSocialGameEnabled(!!data.socialGameEnabled);
+      }
+      if (Array.isArray(data.icebreakerGames)) {
+        setIcebreakerGames(data.icebreakerGames as IcebreakerGameCode[]);
+      }
+      // Anonymous participants never filled the game/affinity forms: hide both tabs.
+      if (data.isAnonymous) {
+        setIcebreakerGames([]);
+        setSocialGameEnabled(false);
+        setWrappedEnabled(false);
+      }
+      if (Object.prototype.hasOwnProperty.call(data, 'crushEnabled')) {
+        setCrushEnabled(!!data.crushEnabled);
+      }
+      setCrushesSent(
+        Array.isArray(data.crushes)
+          ? data.crushes
+          : (data.existingCrush ? [data.existingCrush] : [])
+      );
+      setCrushAllowance(typeof data.crushAllowance === 'number' ? data.crushAllowance : 1);
+      if (Array.isArray(data.crushesReceived)) {
+        setCrushesReceived(data.crushesReceived);
+      }
+
+
+      // Store timer data
+      if (data.timer) {
+        setTimerData(data.timer);
+      }
+
+      const existingSelections: ExistingSelection[] = data.existingSelections || [];
+      const existingMap = new Map<string, string>();
+      const superLikedMap = new Map<string, boolean>();
+      existingSelections.forEach(s => {
+        existingMap.set(s.selected_id, s.selection_type);
+        if (s.is_super_like) superLikedMap.set(s.selected_id, true);
+      });
+
+      // Read super-like allowance/usage returned by edge function
+      pendingSuperLikesRef.current = 0;
+      setSuperLikeAllowance(typeof data.superLikeAllowance === 'number' ? data.superLikeAllowance : 1);
+      setSuperLikesUsed(
+        typeof data.superLikesUsed === 'number'
+          ? data.superLikesUsed
+          : (data.hasSentSuperLike ? 1 : 0)
+      );
+
+
+      setHasReceivedSuperLike(!!data.hasReceivedSuperLike);
+      const senderIds: string[] = Array.isArray(data.receivedSuperLikeSenderIds) ? data.receivedSuperLikeSenderIds : [];
+      setReceivedSuperLikeSenderIds(senderIds);
+      const superLikedMeSet = new Set(senderIds);
+
+      // Game mode payload (no `played` map sent to clients)
+      setGameMode(data.gameMode || null);
+
+      // Handle preliminary round confirmation status
+      const prelimConfirm = data.preliminaryConfirmation;
+      setPreliminaryConfirmation(prelimConfirm);
+      const hasRound0 = assignments.some((a: TableAssignment) => a.round === 0);
+      if (hasRound0 && prelimConfirm === null && !silent) {
+        // Participant hasn't answered yet - show modal
+        setShowPreliminaryModal(true);
+      }
+
+      const participantPreference = data.participantPreference || verifiedParticipant.preference || '';
+      const userDatingPref = data.participantDatingPreference || verifiedParticipant.dating_preference || '';
+      const userGender = data.participantGender || verifiedParticipant.gender || null;
+      const userInterestedInDating = participantPreference.toLowerCase().includes('sentimental') ||
+        participantPreference.toLowerCase().includes('pareja') ||
+        participantPreference.toLowerCase().includes('ligue');
+
+      const allSelections: MatchSelection[] = [];
+      assignments.forEach((assignment: TableAssignment) => {
+        assignment.tablemates.forEach((tm) => {
+          const targetPreference = (tm.preference || '').toLowerCase();
+          const targetInterestedInDating = targetPreference.includes('sentimental') ||
+            targetPreference.includes('pareja') ||
+            targetPreference.includes('ligue');
+
+          // Check bilateral dating compatibility (gender/orientation).
+          // Unknown orientation on either side (anonymous/legacy) → allow dating.
+          let datingCompatible = false;
+          if (userInterestedInDating && targetInterestedInDating) {
+            datingCompatible = !userDatingPref || !tm.dating_preference
+              ? true
+              : areDatingPreferencesCompatible(
+                userDatingPref, userGender,
+                tm.dating_preference, tm.gender || null
+              );
+          }
+
+          const existingType = existingMap.get(tm.id);
+
+          allSelections.push({
+            participantId: tm.id,
+            friendship: false,
+            dating: false,
+            canShowDating: datingCompatible,
+            alreadySelected: !!existingType,
+            previousSelectionType: existingType,
+            superLikedByMe: superLikedMap.get(tm.id) || false,
+            superLikedMe: superLikedMeSet.has(tm.id),
+            round: assignment.round,
+            table: assignment.table,
+          });
+        });
+      });
+
+      setMatchSelections(allSelections);
+      setStep("panel");
+
+      // Fetch existing repeat request for this participant (if feature enabled)
+      try {
+        const { data: existingRepeat } = await (supabase as any)
+          .from('repeat_requests')
+          .select('status, target_id')
+          .eq('event_id', eventId)
+          .eq('requester_id', verifiedParticipant.id)
+          .maybeSingle();
+        if (existingRepeat) {
+          setRepeatRequestUsed({ status: existingRepeat.status, targetId: existingRepeat.target_id });
+        }
+      } catch (e) {
+        console.warn('Could not fetch repeat request:', e);
+      }
+
+      if (!Array.isArray(data.crushes) && !data.existingCrush) {
+        try {
+          const { data: fallbackCrushes } = await (supabase as any)
+            .from('crush_requests')
+            .select('status, target_id')
+            .eq('event_id', eventId)
+            .eq('requester_id', verifiedParticipant.id);
+          if (Array.isArray(fallbackCrushes) && fallbackCrushes.length > 0) {
+            setCrushesSent(fallbackCrushes.map((c: any) => ({ status: c.status, targetId: c.target_id })));
+          }
+        } catch (e) {
+          console.warn('Could not fetch crush request:', e);
+        }
+      }
+
+
+      // Save session to localStorage
+      saveSession(verifiedParticipant.id, data.participantName || verifiedParticipant.name, verifiedParticipant.email, verificationCode);
+    } catch (err) {
+      console.error('Error loading data:', err);
+      setStep("error");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const toggleSelection = (participantId: string, round: number, type: 'friendship' | 'dating') => {
+    setMatchSelections(prev =>
+      prev.map(ms =>
+        ms.participantId === participantId && ms.round === round && !ms.alreadySelected
+          ? { ...ms, [type]: !ms[type] }
+          : ms
+      )
+    );
+  };
+
+  const openSuperLikeDialog = (participantId: string, name: string, round: number) => {
+    if (hasSentSuperLike) return;
+    const ms = matchSelections.find(s => s.participantId === participantId && s.round === round);
+    if (!ms || ms.alreadySelected) return;
+    setSuperLikeTarget({ id: participantId, name, round });
+  };
+
+  const confirmSuperLike = () => {
+    if (!superLikeTarget) return;
+    setIsSendingSuperLike(true);
+    // Mark as super-liked locally + force friendship as base selection
+    setMatchSelections(prev =>
+      prev.map(ms =>
+        ms.participantId === superLikeTarget.id
+          ? { ...ms, superLikedByMe: true, friendship: true }
+          : ms
+      )
+    );
+    pendingSuperLikesRef.current += 1;
+    setSuperLikesUsed(prev => prev + 1);
+
+
+    // Confetti burst (golden)
+    try {
+      confetti({
+        particleCount: 90,
+        spread: 70,
+        origin: { y: 0.6 },
+        colors: ['#fbbf24', '#f59e0b', '#fcd34d', '#fde68a'],
+        scalar: 1.1,
+      });
+    } catch {}
+
+    toast({
+      title: eventLang === 'en' ? '⭐ Super Like marked' : '⭐ Super Like marcado',
+      description: eventLang === 'en'
+        ? "It will be sent when you submit your selections."
+        : "Se enviará cuando confirmes tus selecciones.",
+    });
+
+    setSuperLikeTarget(null);
+    setIsSendingSuperLike(false);
+  };
+
+
+  const getPreviousSelectionLabel = (type?: string): string => {
+    switch (type) {
+      case 'friendship': return t.access.friendship;
+      case 'dating': return t.access.dating;
+      case 'both': return `${t.access.friendship} & ${t.access.dating}`;
+      default: return t.access.alreadySelected;
+    }
+  };
+
+  // ---- Edit existing selection helpers ----
+  const editKey = (participantId: string, round: number) => `${participantId}-${round}`;
+
+  const startEditingSelection = (participantId: string, round: number, prevType?: string) => {
+    const k = editKey(participantId, round);
+    setEditingKeys(prev => new Set(prev).add(k));
+    setPendingEdits(prev => {
+      const next = new Map(prev);
+      next.set(k, {
+        friendship: prevType === 'friendship' || prevType === 'both',
+        dating: prevType === 'dating' || prevType === 'both',
+        originalType: prevType,
+        participantId,
+      });
+      return next;
+    });
+  };
+
+  const cancelEditingSelection = (participantId: string, round: number) => {
+    const k = editKey(participantId, round);
+    setEditingKeys(prev => { const n = new Set(prev); n.delete(k); return n; });
+    setPendingEdits(prev => { const n = new Map(prev); n.delete(k); return n; });
+  };
+
+  const toggleEditOption = (participantId: string, round: number, type: 'friendship' | 'dating') => {
+    const k = editKey(participantId, round);
+    setPendingEdits(prev => {
+      const next = new Map(prev);
+      const cur = next.get(k);
+      if (!cur) return prev;
+      next.set(k, { ...cur, [type]: !cur[type] });
+      return next;
+    });
+  };
+
+  const computePendingType = (edit: { friendship: boolean; dating: boolean }): string | null => {
+    if (edit.friendship && edit.dating) return 'both';
+    if (edit.dating) return 'dating';
+    if (edit.friendship) return 'friendship';
+    return null;
+  };
+
+  // Distinct participants with meaningful changes (deduplicated across rounds)
+  const getMeaningfulEdits = (): { participantId: string; newType: string | null }[] => {
+    const byParticipant = new Map<string, { newType: string | null; original: string | undefined }>();
+    for (const [, edit] of pendingEdits.entries()) {
+      const newType = computePendingType(edit);
+      if (newType !== (edit.originalType || null)) {
+        // If the same participant appears in multiple rounds, last write wins
+        // (the edit form per-row pre-fills from existingType, so they stay in sync).
+        byParticipant.set(edit.participantId, { newType, original: edit.originalType });
+      }
+    }
+    return Array.from(byParticipant.entries()).map(([participantId, v]) => ({
+      participantId, newType: v.newType,
+    }));
+  };
+
+  const hasMeaningfulEdits = (): boolean => getMeaningfulEdits().length > 0;
+
+  const selectionsByRound = tableAssignments.map(assignment => {
+    const roundSelections = matchSelections.filter(ms => ms.round === assignment.round);
+    return { round: assignment.round, table: assignment.table, selections: roundSelections };
+  });
+
+  const newSelectionsCount = matchSelections.filter(ms => !ms.alreadySelected && (ms.friendship || ms.dating)).length;
+
+  const performSubmit = async () => {
+    if (!verifiedParticipant || !eventId) return;
+    setIsSubmitting(true);
+
+    // 1) Apply edits to previously-submitted selections
+    const edits = getMeaningfulEdits();
+    for (const e of edits) {
+      const { data, error } = await supabase.functions.invoke('update-selection', {
+        body: { eventId, verificationCode, selectedId: e.participantId, selectionType: e.newType },
+      });
+      if (error || data?.error) {
+        toast({
+          title: t.access.error,
+          description: data?.error || (eventLang === 'es' ? 'No se pudo actualizar la selección' : 'Could not update the selection'),
+          variant: "destructive",
+        });
+        setIsSubmitting(false);
+        return;
+      }
+    }
+
+    // 2) New selections
+    const activeSelections = matchSelections.filter(ms => !ms.alreadySelected && (ms.friendship || ms.dating));
+
+    const deduped = new Map<string, MatchSelection>();
+    activeSelections.forEach(ms => {
+      const existing = deduped.get(ms.participantId);
+      if (existing) {
+        deduped.set(ms.participantId, {
+          ...existing,
+          friendship: existing.friendship || ms.friendship,
+          dating: existing.dating || ms.dating,
+        });
+      } else {
+        deduped.set(ms.participantId, ms);
+      }
+    });
+
+    const selections = Array.from(deduped.values()).map(ms => {
+      let selectionType = 'friendship';
+      if (ms.friendship && ms.dating) selectionType = 'both';
+      else if (ms.dating) selectionType = 'dating';
+      return { selected_id: ms.participantId, selection_type: selectionType };
+    });
+
+    const superLikeIds = Array.from(deduped.values())
+      .filter(ms => !ms.alreadySelected && ms.superLikedByMe)
+      .map(ms => ms.participantId);
+    const superLikeId = superLikeIds[0];
+
+    if (selections.length > 0) {
+      const { data, error } = await supabase.functions.invoke('submit-selections', {
+        body: { eventId, verificationCode, selections, superLikeId, superLikeIds }
+      });
+
+
+      if (error || data?.error) {
+        toast({ title: t.access.error, description: data?.error || t.access.errorSaving, variant: "destructive" });
+        setIsSubmitting(false);
+        return;
+      }
+
+      toast({ title: t.access.selectionsSaved, description: data?.message || `${selections.length} ${t.access.selectionsCount}` });
+    } else if (edits.length > 0) {
+      toast({
+        title: eventLang === 'es' ? 'Selecciones actualizadas' : 'Selections updated',
+        description: eventLang === 'es'
+          ? `${edits.length} cambio${edits.length === 1 ? '' : 's'} guardado${edits.length === 1 ? '' : 's'}`
+          : `${edits.length} change${edits.length === 1 ? '' : 's'} saved`,
+      });
+    }
+
+    setIsSubmitting(false);
+    clearSession();
+    setStep("done");
+  };
+
+  const handleSubmit = async () => {
+    if (hasMeaningfulEdits()) {
+      setConfirmEditSubmit(true);
+      return;
+    }
+    await performSubmit();
+  };
+
+
+  const handleSubmitEmpty = async () => {
+    if (!verifiedParticipant || !eventId) return;
+    setIsSubmitting(true);
+
+    const { data, error } = await supabase.functions.invoke('submit-selections', {
+      body: { eventId, verificationCode, selections: [] }
+    });
+
+    if (error || data?.error) {
+      toast({ title: t.access.error, description: data?.error || t.access.errorSaving, variant: "destructive" });
+      setIsSubmitting(false);
+      return;
+    }
+
+    toast({ title: t.access.selectionsSaved, description: "Tu respuesta ha sido registrada" });
+    setIsSubmitting(false);
+    clearSession();
+    setStep("done");
+  };
+
+  const handlePreliminaryConfirmation = async (confirmed: boolean) => {
+    if (!eventId || !verificationCode) return;
+    setIsConfirmingPreliminary(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('confirm-preliminary', {
+        body: { eventId, verificationCode, confirmed }
+      });
+      
+      if (error || data?.error) {
+        toast({ title: t.access.error, description: data?.error || 'Error', variant: "destructive" });
+        setIsConfirmingPreliminary(false);
+        return;
+      }
+
+      setPreliminaryConfirmation(confirmed);
+      setShowPreliminaryModal(false);
+
+      if (!confirmed) {
+        // Remove round 0 assignments from state
+        setTableAssignments(prev => prev.filter(a => a.round !== 0));
+        setMatchSelections(prev => prev.filter(ms => ms.round !== 0));
+      } else {
+        // User confirmed they were at the prelim → guide them to the Selecciones tab
+        // so they can rate their tablemates from the welcome round.
+        setActiveTab("selections");
+        setHighlightSelectionsTab(true);
+        toast({
+          title: eventLang === 'es' ? '¡Genial! 🎉' : 'Awesome! 🎉',
+          description: eventLang === 'es'
+            ? 'Ya puedes seleccionar a tus compañeros de la mesa de bienvenida.'
+            : 'You can now rate your tablemates from the welcome round.',
+        });
+        // Stop the highlight after a few seconds
+        setTimeout(() => setHighlightSelectionsTab(false), 6000);
+      }
+    } catch (err) {
+      console.error('Error confirming preliminary:', err);
+      toast({ title: t.access.error, description: t.access.errorSaving, variant: "destructive" });
+    } finally {
+      setIsConfirmingPreliminary(false);
+    }
+  };
+
+  // ===== Repeat request handlers (1 per event) =====
+  const openRepeatDialog = (participantId: string, name: string, round: number) => {
+    if (repeatRequestUsed) return;
+    if (eventStatus === 'completed' || currentRound >= totalRounds) return;
+    const ms = matchSelections.find(s => s.participantId === participantId && s.round === round);
+    if (!ms) return;
+    setRepeatTarget({ id: participantId, name, round });
+  };
+
+  const confirmRepeat = async () => {
+    if (!repeatTarget || !verifiedParticipant || !eventId) return;
+    setIsSendingRepeat(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('request-repeat', {
+        body: {
+          event_id: eventId,
+          requester_id: verifiedParticipant.id,
+          target_id: repeatTarget.id,
+        },
+      });
+      if (error || data?.error) {
+        toast({
+          title: t.access.error,
+          description: data?.error || (eventLang === 'es' ? 'No se pudo enviar la solicitud' : 'Could not send the request'),
+          variant: 'destructive',
+        });
+        return;
+      }
+      setRepeatRequestUsed({ status: 'pending', targetId: repeatTarget.id });
+      toast({
+        title: eventLang === 'es' ? '🔁 Solicitud enviada' : '🔁 Request sent',
+        description: eventLang === 'es'
+          ? 'La otra persona recibirá un email para aceptar o rechazar tu solicitud.'
+          : 'The other person will receive an email to accept or decline your request.',
+      });
+      setRepeatTarget(null);
+    } catch (err) {
+      console.error('Error sending repeat request:', err);
+      toast({ title: t.access.error, description: String(err), variant: 'destructive' });
+    } finally {
+      setIsSendingRepeat(false);
+    }
+  };
+
+  // Re-read allowances (extra Super Like / Flechazo earned in the social game)
+  // without reloading the whole page.
+  const refreshAllowances = async () => {
+    if (!eventId || !verificationCode) return;
+    try {
+      const { data, error } = await supabase.functions.invoke('get-table-assignments', {
+        body: { eventId, verificationCode },
+      });
+      if (error || !data || data.error) return;
+      if (typeof data.superLikeAllowance === 'number') setSuperLikeAllowance(data.superLikeAllowance);
+      if (typeof data.superLikesUsed === 'number') {
+        setSuperLikesUsed(data.superLikesUsed + pendingSuperLikesRef.current);
+      }
+
+      if (typeof data.crushAllowance === 'number') setCrushAllowance(data.crushAllowance);
+      if (Array.isArray(data.crushes)) setCrushesSent(data.crushes);
+    } catch {
+      /* non-blocking */
+    }
+  };
+
+
+  const openCrushDialog = (participantId: string, name: string, round: number) => {
+    if (crushSlotsLeft <= 0) return;
+    if (crushesSent.some(c => c.targetId === participantId)) return;
+
+    setCrushTarget({ id: participantId, name, round });
+  };
+
+  const confirmCrush = async () => {
+    if (!crushTarget || !verifiedParticipant || !eventId) return;
+    setIsSendingCrush(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('request-crush', {
+        body: {
+          event_id: eventId,
+          requester_id: verifiedParticipant.id,
+          target_id: crushTarget.id,
+        },
+      });
+      if (error || data?.error) {
+        toast({
+          title: t.access.error,
+          description: data?.error || (eventLang === 'es' ? 'No se pudo enviar el flechazo' : 'Could not send the Flechazo'),
+          variant: 'destructive',
+        });
+        return;
+      }
+      setCrushesSent(prev => [...prev, { status: 'pending', targetId: crushTarget.id }]);
+      toast({
+        title: eventLang === 'es' ? '💘 Flechazo enviado' : '💘 Flechazo sent',
+        description: eventLang === 'es'
+          ? 'La otra persona recibirá un email para aceptar o rechazar tu flechazo.'
+          : 'The other person will receive an email to accept or decline your Flechazo.',
+      });
+      setCrushTarget(null);
+    } catch (err) {
+      console.error('Error sending crush request:', err);
+      toast({ title: t.access.error, description: String(err), variant: 'destructive' });
+    } finally {
+      setIsSendingCrush(false);
+    }
+  };
+
+  const respondToCrush = async (crush: { id: string; token: string }, action: 'accept' | 'decline') => {
+    setRespondingCrushId(crush.id);
+    try {
+      const { data, error } = await supabase.functions.invoke('respond-crush', {
+        body: { request_id: crush.id, token: crush.token, action },
+      });
+      if (error || data?.error) {
+        toast({
+          title: t.access.error,
+          description: data?.error || (eventLang === 'es' ? 'No se pudo responder al flechazo' : 'Could not answer the Flechazo'),
+          variant: 'destructive',
+        });
+        return;
+      }
+      setCrushesReceived(prev => prev.filter(c => c.id !== crush.id));
+      toast({
+        title: action === 'accept'
+          ? (eventLang === 'es' ? '💘 Flechazo aceptado' : '💘 Flechazo accepted')
+          : (eventLang === 'es' ? 'Flechazo rechazado' : 'Flechazo declined'),
+        description: action === 'accept'
+          ? (eventLang === 'es' ? 'Compartiremos vuestros datos de contacto con ambos.' : "We'll share your contact details with both of you.")
+          : (eventLang === 'es' ? 'No se compartirá ningún dato de contacto.' : 'No contact details will be shared.'),
+      });
+    } catch (err) {
+      console.error('Error responding to crush:', err);
+      toast({ title: t.access.error, description: String(err), variant: 'destructive' });
+    } finally {
+      setRespondingCrushId(null);
+    }
+  };
+
+
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-hero flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  return (
+    <div
+      className={`bg-gradient-hero flex flex-col items-center p-4 ${
+        step === "panel"
+          ? "h-[100dvh] overflow-hidden justify-start lg:h-auto lg:min-h-screen lg:overflow-visible lg:justify-center"
+          : "min-h-screen justify-start lg:justify-center"
+      }`}
+    >
+
+      {/* Preliminary Round Confirmation Modal */}
+      <Dialog open={showPreliminaryModal} onOpenChange={setShowPreliminaryModal}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <div className="w-14 h-14 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center mx-auto mb-2">
+              <HelpCircle className="w-7 h-7 text-amber-600 dark:text-amber-400" />
+            </div>
+            <DialogTitle className="text-center">{t.access.preliminaryQuestion}</DialogTitle>
+            <DialogDescription className="text-center">
+              {t.access.preliminaryQuestionDesc}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="flex flex-col sm:flex-row gap-2">
+            <Button 
+              variant="outline" 
+              className="flex-1" 
+              onClick={() => handlePreliminaryConfirmation(false)}
+              disabled={isConfirmingPreliminary}
+            >
+              {t.access.preliminaryNo}
+            </Button>
+            <Button 
+              variant="hero" 
+              className="flex-1" 
+              onClick={() => handlePreliminaryConfirmation(true)}
+              disabled={isConfirmingPreliminary}
+            >
+              {isConfirmingPreliminary ? <Loader2 className="w-4 h-4 animate-spin" /> : t.access.preliminaryYes}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      <button onClick={() => { clearSession(); setStep("verify_code"); setVerificationCode(""); setVerifiedParticipant(null); }} className="absolute top-6 left-6 flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors">
+        <ArrowLeft className="w-4 h-4" />
+        {t.access.back}
+      </button>
+
+      <div className={`animate-fade-in shrink-0 ${step === "panel" ? "mb-3 lg:mb-6" : "mb-8"}`}>
+        <img src={konektumLogo} alt="Konektum" className="h-8 w-auto lg:h-10" />
+      </div>
+
+
+      {step === "not_started" && eventDate && (
+        <EventCountdown
+          eventName={eventName}
+          eventDate={eventDate}
+          eventTime={eventTime}
+          language={eventLang}
+          checkinOpensMinutesBefore={checkinMinutes}
+        />
+      )}
+
+      {step === "expired" && (
+        <Card className="w-full max-w-md animate-scale-in bg-card/80 backdrop-blur-sm text-center">
+          <CardContent className="pt-8 pb-8">
+            <div className="w-16 h-16 rounded-full bg-destructive/10 flex items-center justify-center mx-auto mb-4">
+              <Lock className="w-8 h-8 text-destructive" />
+            </div>
+            <h2 className="font-display text-xl font-bold mb-2">{t.access.expiredTitle}</h2>
+            <p className="text-muted-foreground mb-6">{t.access.expiredDesc}</p>
+            <Button variant="outline" className="w-full" onClick={() => { clearSession(); setStep("verify_code"); setVerificationCode(""); setVerifiedParticipant(null); }}>{t.access.backToHome}</Button>
+          </CardContent>
+        </Card>
+      )}
+
+      {step === "error" && (
+        <Card className="w-full max-w-md animate-scale-in bg-card/80 backdrop-blur-sm text-center">
+          <CardContent className="pt-8 pb-8">
+            <div className="w-16 h-16 rounded-full bg-destructive/10 flex items-center justify-center mx-auto mb-4">
+              <AlertCircle className="w-8 h-8 text-destructive" />
+            </div>
+            <h2 className="font-display text-xl font-bold mb-2">{t.access.errorTitle}</h2>
+            <p className="text-muted-foreground mb-6">{t.access.errorDesc}</p>
+            <Button variant="outline" className="w-full" onClick={() => { clearSession(); setStep("verify_code"); setVerificationCode(""); setVerifiedParticipant(null); }}>{t.access.backToHome}</Button>
+          </CardContent>
+        </Card>
+      )}
+
+      {step === "verify_code" && (
+        <Card className="w-full max-w-md animate-scale-in bg-card/80 backdrop-blur-sm">
+          <CardHeader className="text-center">
+            <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
+              <KeyRound className="w-8 h-8 text-primary" />
+            </div>
+            <CardTitle className="text-2xl">{t.access.panelTitle}</CardTitle>
+            <CardDescription>{t.access.panelDesc}</CardDescription>
+            {currentRound > 0 && (
+              <Badge variant="secondary" className="mx-auto mt-2">{t.access.round} {currentRound} {t.access.inProgress}</Badge>
+            )}
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="flex justify-center">
+              <InputOTP maxLength={6} value={verificationCode} onChange={setVerificationCode}>
+                <InputOTPGroup>
+                  <InputOTPSlot index={0} />
+                  <InputOTPSlot index={1} />
+                  <InputOTPSlot index={2} />
+                  <InputOTPSlot index={3} />
+                  <InputOTPSlot index={4} />
+                  <InputOTPSlot index={5} />
+                </InputOTPGroup>
+              </InputOTP>
+            </div>
+            <Button variant="hero" className="w-full" onClick={handleVerifyCode} disabled={verificationCode.length !== 6 || isVerifying}>
+              {isVerifying ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />{t.access.verifying}</> : t.access.access}
+            </Button>
+            <p className="text-xs text-center text-muted-foreground">{t.access.noCodeHint}</p>
+          </CardContent>
+        </Card>
+      )}
+
+      {step === "confirm_identity" && verifiedParticipant && (
+        <Card className="w-full max-w-md animate-scale-in bg-card/80 backdrop-blur-sm">
+          <CardHeader className="text-center">
+            <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
+              <Users className="w-8 h-8 text-primary" />
+            </div>
+            <CardTitle className="text-2xl">{t.access.areYouThis}</CardTitle>
+            <CardDescription>{t.access.confirmDesc}</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="p-4 rounded-lg bg-muted space-y-2">
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">{t.access.name}</span>
+                <span className="font-medium">{verifiedParticipant.name}</span>
+              </div>
+              {verifiedParticipant.email && (
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">{t.access.email}</span>
+                  <span className="font-medium">{verifiedParticipant.email}</span>
+                </div>
+              )}
+            </div>
+            <div className="flex gap-3">
+              <Button variant="outline" className="flex-1" onClick={() => { setStep("verify_code"); setVerificationCode(""); setVerifiedParticipant(null); }}>
+                {t.access.no}
+              </Button>
+              <Button variant="hero" className="flex-1" onClick={() => handleConfirmIdentity()} disabled={isLoading}>
+                {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : t.access.yes}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {step === "panel" && (
+        <div className="w-full max-w-lg flex-1 min-h-0 flex flex-col animate-scale-in lg:flex-none lg:min-h-0 lg:block">
+          {/* Static header */}
+          <div className="shrink-0">
+            <EventHeroCard
+              participantsCount={participantsCount}
+              rounds={totalRounds}
+              currentRound={currentRound}
+              lang={eventLang === 'en' ? 'en' : 'es'}
+            />
+          </div>
+
+          <Tabs
+            value={activeTab}
+            onValueChange={(v) => setActiveTab(v as any)}
+            className="w-full flex-1 min-h-0 flex flex-col mt-4 lg:mt-4 lg:block"
+          >
+
+              {/* Desktop: single inline tab row */}
+              <div className="hidden lg:block">
+                <TabsList className="flex w-full h-auto gap-1">
+                  <TabsTrigger value="info" className="flex-1 flex items-center justify-center gap-1.5 text-sm py-2 whitespace-nowrap">
+                    <HelpCircle className="w-4 h-4 shrink-0" />
+                    {eventLang === 'es' ? 'Inicio' : 'Home'}
+                  </TabsTrigger>
+                  {wrappedEnabled && (
+                    <TabsTrigger value="compatibility" className="flex-1 flex items-center justify-center gap-1.5 text-sm py-2 whitespace-nowrap">
+                      <Sparkles className="w-4 h-4 shrink-0" />
+                      {eventLang === 'es' ? 'Afinidad' : 'Match'}
+                    </TabsTrigger>
+                  )}
+                  {socialGameEnabled && (
+                    <TabsTrigger value="game" className="flex-1 flex items-center justify-center gap-1.5 text-sm py-2 whitespace-nowrap">
+                      <Gamepad2 className="w-4 h-4 shrink-0" />
+                      {eventLang === 'es' ? 'Juegos' : 'Games'}
+                    </TabsTrigger>
+                  )}
+                  <TabsTrigger value="tables" className="flex-1 flex items-center justify-center gap-1.5 text-sm py-2 whitespace-nowrap">
+                    <Table2 className="w-4 h-4 shrink-0" />
+                    {t.access.myTables}
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="selections"
+                    className={`flex-1 flex items-center justify-center gap-1.5 text-sm py-2 whitespace-nowrap transition-all ${
+                      highlightSelectionsTab ? "ring-2 ring-primary ring-offset-2 animate-pulse" : ""
+                    }`}
+                  >
+                    <Heart className="w-4 h-4 shrink-0" />
+                    {t.access.selections}
+                  </TabsTrigger>
+                </TabsList>
+              </div>
+
+              {/* Mobile / tablet: fixed bottom navigation bar (icon + label) */}
+              <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50 border-t border-border/60 bg-card/90 backdrop-blur-2xl pb-[env(safe-area-inset-bottom)]">
+                {(() => {
+                  const navItemCount = 3 + (wrappedEnabled ? 1 : 0) + (socialGameEnabled ? 1 : 0);
+                  const itemBase = `flex flex-col items-center justify-center gap-1 py-2.5 rounded-none bg-transparent text-muted-foreground data-[state=active]:bg-transparent data-[state=active]:text-primary data-[state=active]:shadow-none transition-colors ${
+                    navItemCount >= 5 ? 'text-[10px]' : 'text-[11px]'
+                  }`;
+                  const iconBase = navItemCount >= 5 ? 'w-[22px] h-[22px] shrink-0' : 'w-6 h-6 shrink-0';
+                  return (
+                    <TabsList
+                      className={`w-full h-auto bg-transparent p-0 rounded-none grid ${
+                        navItemCount === 5 ? 'grid-cols-5' : navItemCount === 4 ? 'grid-cols-4' : navItemCount === 3 ? 'grid-cols-3' : 'grid-cols-2'
+                      }`}
+                    >
+                      <TabsTrigger value="info" className={itemBase}>
+                        <HelpCircle className={iconBase} />
+                        {eventLang === 'es' ? 'Inicio' : 'Home'}
+                      </TabsTrigger>
+                      {wrappedEnabled && (
+                        <TabsTrigger value="compatibility" className={itemBase}>
+                          <Sparkles className={iconBase} />
+                          {eventLang === 'es' ? 'Afinidad' : 'Match'}
+                        </TabsTrigger>
+                      )}
+                      {socialGameEnabled && (
+                        <TabsTrigger value="game" className={itemBase}>
+                          <Gamepad2 className={iconBase} />
+                          {eventLang === 'es' ? 'Juegos' : 'Games'}
+                        </TabsTrigger>
+                      )}
+                      <TabsTrigger value="tables" className={itemBase}>
+                        <Table2 className={iconBase} />
+                        {eventLang === 'es' ? 'Mesas' : 'Tables'}
+                      </TabsTrigger>
+                      <TabsTrigger
+                        value="selections"
+                        className={`${itemBase} ${highlightSelectionsTab ? 'text-primary animate-pulse' : ''}`}
+                      >
+                        <Heart className={`${iconBase} ${activeTab === 'selections' ? 'fill-current' : ''}`} />
+                        {eventLang === 'es' ? 'Selección' : 'Picks'}
+                      </TabsTrigger>
+                    </TabsList>
+                  );
+                })()}
+              </div>
+
+              {/* Scrollable content area (header and bottom nav stay static) */}
+              <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain pb-28 lg:pb-0 lg:overflow-visible lg:flex-none">
+                {/* Flechazos received and pending an answer */}
+                {crushesReceived.length > 0 && (
+                  <div className="mt-4 space-y-3">
+                    {crushesReceived.map((crush) => (
+                      <div
+                        key={crush.id}
+                        className="rounded-xl border-2 border-rose-300 bg-rose-50 dark:bg-rose-950/20 dark:border-rose-700/40 p-4"
+                      >
+                        <div className="flex items-start gap-2">
+                          <Heart className="w-5 h-5 mt-0.5 shrink-0 fill-rose-500 text-rose-500" />
+                          <div className="min-w-0">
+                            <p className="font-semibold text-rose-800 dark:text-rose-200">
+                              {eventLang === 'es'
+                                ? `💘 ${crush.requesterName} te ha enviado un Flechazo`
+                                : `💘 ${crush.requesterName} sent you a Flechazo`}
+                            </p>
+                            <p className="text-sm text-rose-700/80 dark:text-rose-300/80 mt-1">
+                              {eventLang === 'es'
+                                ? 'Si aceptas, compartiremos vuestros datos de contacto con ambos.'
+                                : "If you accept, we'll share your contact details with both of you."}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex gap-2 mt-3">
+                          <Button
+                            size="sm"
+                            disabled={respondingCrushId === crush.id}
+                            onClick={() => respondToCrush(crush, 'accept')}
+                            className="flex-1 bg-rose-600 hover:bg-rose-700 text-white"
+                          >
+                            {respondingCrushId === crush.id && <Loader2 className="w-4 h-4 mr-1 animate-spin" />}
+                            {eventLang === 'es' ? '💘 Aceptar' : '💘 Accept'}
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            disabled={respondingCrushId === crush.id}
+                            onClick={() => respondToCrush(crush, 'decline')}
+                            className="flex-1"
+                          >
+                            {eventLang === 'es' ? 'Rechazar' : 'Decline'}
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                {/* Round timer / status card (moved out of the fixed header to keep it compact) */}
+                {eventStatus === 'completed' ? (
+                  timeRemaining ? (
+                    <div className="flex justify-center mt-4">
+                      <Badge variant="secondary">
+                        <Clock className="w-3 h-3 mr-1" />
+                        {timeRemaining}
+                      </Badge>
+                    </div>
+                  ) : null
+                ) : currentRound > 0 && timerData ? (
+                  <div className="mt-4">
+                    <ParticipantRoundTimer
+                      roundDuration={timerData.roundDuration}
+                      activeRound={currentRound}
+                      totalRounds={totalRounds}
+                      roundStartedAt={timerData.roundStartedAt}
+                      roundPausedAt={timerData.roundPausedAt}
+                      roundElapsedSeconds={timerData.roundElapsedSeconds}
+                      completedRounds={timerData.completedRounds}
+                      lang={eventLang}
+                      variant="embedded"
+                    />
+                  </div>
+                ) : tableAssignments.some(a => a.round === 0) ? (
+                  <div className="text-center mt-4 rounded-lg border border-primary/20 bg-primary/5 p-3">
+                    <p className="text-sm font-medium text-primary">
+                      {eventLang === 'es' ? 'Ronda preliminar' : 'Preliminary round'}
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {eventLang === 'es'
+                        ? `Antes de empezar las ${totalRounds || 0} rondas oficiales`
+                        : `Before the ${totalRounds || 0} official rounds start`}
+                    </p>
+                  </div>
+                ) : null}
+
+
+
+              <TabsContent value="tables" className="space-y-3 mt-4">
+                {tableAssignments.length === 0 ? (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <p>{t.access.noTablesYet}</p>
+                    <p className="text-sm mt-2">{t.access.waitForOrganizer}</p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {tableAssignments.map((assignment) => (
+                      <div key={assignment.round} className={`rounded-lg border overflow-hidden ${
+                        currentRound === assignment.round ? 'border-primary' : 'border-border'
+                      }`}>
+                        <div className={`flex items-center justify-between p-4 ${
+                          currentRound === assignment.round ? 'bg-primary/10' : 'bg-muted/50'
+                        }`}>
+                          <div className="flex items-center gap-3 flex-wrap">
+                            <span className={`text-sm font-medium ${currentRound === assignment.round ? 'text-primary' : 'text-muted-foreground'}`}>
+                              {assignment.round === 0 ? (eventLang === 'es' ? 'Ronda de bienvenida' : 'Welcome round') : `${t.access.round} ${assignment.round}`}
+                            </span>
+                            {currentRound === assignment.round && (
+                              <span className="bg-primary text-primary-foreground text-xs px-2 py-0.5 rounded-full animate-pulse">{t.access.now}</span>
+                            )}
+                            {(() => {
+                              const dyn = getDynamicForTable(assignment.table);
+                              return dyn ? (
+                                <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-300 text-xs">
+                                  🎲 {dyn.name}
+                                </Badge>
+                              ) : null;
+                            })()}
+                          </div>
+                          <div className={`text-2xl font-bold ${currentRound === assignment.round ? 'text-primary' : 'text-foreground'}`}>
+                            {t.access.table} {assignment.table}
+                          </div>
+                        </div>
+                        {assignment.tablemates && assignment.tablemates.length > 0 && (
+                          <div className="px-4 py-2 border-t border-border/50 bg-background/50">
+                            <p className="text-xs text-muted-foreground mb-1">{t.access.tablemates}</p>
+                            <div className="flex flex-wrap gap-1">
+                              {assignment.tablemates.map(tm => (
+                                <Badge key={tm.id} variant="outline" className="text-xs">{tm.name}</Badge>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+                <p className="text-xs text-center text-muted-foreground pt-2">{t.access.findTable}</p>
+              </TabsContent>
+
+              <TabsContent value="selections" className="space-y-4 mt-4">
+                {preliminaryConfirmation === true && tableAssignments.some(a => a.round === 0) && (
+                  <div className="rounded-lg border-2 border-primary/40 bg-primary/5 p-3 text-center animate-fade-in">
+                    <p className="text-sm font-semibold text-primary">
+                      {eventLang === 'es' ? '🎉 ¡Empieza por aquí!' : '🎉 Start here!'}
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {eventLang === 'es'
+                        ? 'Selecciona con quién has conectado en la mesa de bienvenida y, después, en cada ronda.'
+                        : 'Select who you connected with at the welcome table, then for each round.'}
+                    </p>
+                  </div>
+                )}
+                {hasReceivedSuperLike && (
+                  <SuperLikeBanner language={eventLang} variant="received" />
+                )}
+                {hasSentSuperLike && (
+                  <div className="flex items-center justify-center gap-2 text-xs font-medium text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900 rounded-md py-2 px-3">
+                    <Star className="w-3.5 h-3.5 fill-amber-500 text-amber-500" />
+                    {eventLang === 'en' ? 'You have used your Super Like ⭐' : 'Has usado tu Super Like ⭐'}
+                  </div>
+                )}
+                {eventStatus === 'completed' && (
+                  <div className="bg-green-500/10 rounded-lg p-3 text-center">
+                    <p className="text-sm text-green-700 dark:text-green-300 font-medium">{t.access.eventEndedSelect}</p>
+                  </div>
+                )}
+
+                {selectionsByRound.length === 0 ? (
+                  <div className="text-center py-8">
+                    <p className="text-muted-foreground">{t.access.noTablemates}</p>
+                  </div>
+                ) : (
+                  <div className="space-y-4 max-h-[28rem] overflow-y-auto">
+                    {selectionsByRound.map(({ round, table, selections: roundSelections }) => {
+                      if (roundSelections.length === 0) return null;
+                      return (
+                      <div key={round} className="space-y-2">
+                        <div className="flex items-center gap-2 sticky top-0 bg-card/90 backdrop-blur-sm py-1 z-10">
+                          <Badge variant="secondary" className="text-xs">{t.access.round} {round} · {t.access.table} {table}</Badge>
+                          {currentRound === round && (
+                            <Badge className="text-xs bg-primary text-primary-foreground animate-pulse">{t.access.now}</Badge>
+                          )}
+                        </div>
+                        {roundSelections.length === 0 ? (
+                          <p className="text-sm text-muted-foreground text-center py-2">{t.access.noTablematesRound}</p>
+                        ) : (
+                          <div className="grid gap-2">
+                            {roundSelections.map((ms) => {
+                              const tablemate = tableAssignments.find(a => a.round === round)?.tablemates.find(t => t.id === ms.participantId);
+                              if (!tablemate) return null;
+
+                              return (
+                                <div
+                                  key={`${ms.participantId}-${round}`}
+                                  className={`p-3 rounded-lg transition-all ${ms.superLikedByMe
+                                    ? 'bg-gradient-to-r from-amber-50 to-yellow-50 dark:from-amber-950/30 dark:to-yellow-950/30 border-2 border-amber-400 shadow-md'
+                                    : ms.superLikedMe
+                                      ? 'bg-blue-50 dark:bg-blue-950/30 border-2 border-blue-400 shadow-md'
+                                    : ms.alreadySelected
+                                      ? 'bg-green-50 dark:bg-green-950/20 border-2 border-green-500/50'
+                                      : (ms.friendship || ms.dating)
+                                        ? 'bg-primary/10 border-2 border-primary shadow-soft'
+                                        : 'bg-muted hover:bg-muted/80 border-2 border-transparent'
+                                  }`}
+                                >
+                                  <div className="flex items-center justify-between mb-1 gap-2">
+                                    <span className="font-medium text-sm flex items-center gap-1.5">
+                                      {tablemate.name}
+                                      {ms.superLikedByMe && (
+                                        <Star className="w-3.5 h-3.5 text-amber-500 fill-amber-400" />
+                                      )}
+                                      {ms.superLikedMe && (
+                                        <Badge className="bg-blue-500 hover:bg-blue-500 text-white text-[10px] px-1.5 py-0 h-4">
+                                          <Star className="w-2.5 h-2.5 fill-white text-white mr-1" />
+                                          {eventLang === 'en' ? 'Super Like received' : 'Te ha dado Super Like'}
+                                        </Badge>
+                                      )}
+                                    </span>
+                                    {ms.alreadySelected && (
+                                      <div className="flex items-center gap-1.5">
+                                        <Badge variant="secondary" className="bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300 text-xs">
+                                          <CheckCircle className="w-3 h-3 mr-1" />
+                                          {getPreviousSelectionLabel(ms.previousSelectionType)}
+                                        </Badge>
+                                        {!editingKeys.has(editKey(ms.participantId, round)) && (
+                                          <button
+                                            type="button"
+                                            onClick={() => startEditingSelection(ms.participantId, round, ms.previousSelectionType)}
+                                            aria-label={eventLang === 'es' ? 'Modificar selección' : 'Modify selection'}
+                                            title={eventLang === 'es' ? 'Modificar' : 'Modify'}
+                                            className="p-0.5 rounded text-muted-foreground/60 hover:text-foreground hover:bg-muted transition-colors"
+                                          >
+                                            <Pencil className="w-3 h-3" />
+                                          </button>
+                                        )}
+                                      </div>
+                                    )}
+                                  </div>
+
+                                  {ms.alreadySelected && !editingKeys.has(editKey(ms.participantId, round)) ? (
+                                    <p className="text-xs text-muted-foreground">{t.access.alreadySelected}</p>
+                                  ) : ms.alreadySelected && editingKeys.has(editKey(ms.participantId, round)) ? (
+                                    <div className="space-y-2">
+                                      <div className="flex gap-4 flex-wrap">
+                                        <label className="flex items-center gap-2 cursor-pointer">
+                                          <Checkbox
+                                            checked={pendingEdits.get(editKey(ms.participantId, round))?.friendship || false}
+                                            onCheckedChange={() => toggleEditOption(ms.participantId, round, 'friendship')}
+                                          />
+                                          <span className="text-sm flex items-center gap-1"><Smile className="w-3.5 h-3.5" /> {t.access.friendship}</span>
+                                        </label>
+                                        {ms.canShowDating && (
+                                          <label className="flex items-center gap-2 cursor-pointer">
+                                            <Checkbox
+                                              checked={pendingEdits.get(editKey(ms.participantId, round))?.dating || false}
+                                              onCheckedChange={() => toggleEditOption(ms.participantId, round, 'dating')}
+                                            />
+                                            <span className="text-sm flex items-center gap-1"><Heart className="w-3.5 h-3.5" /> {t.access.dating}</span>
+                                          </label>
+                                        )}
+                                      </div>
+                                      <button
+                                        type="button"
+                                        onClick={() => cancelEditingSelection(ms.participantId, round)}
+                                        className="text-xs text-muted-foreground hover:text-foreground underline underline-offset-2"
+                                      >
+                                        {eventLang === 'es' ? 'Descartar cambios' : 'Discard changes'}
+                                      </button>
+                                    </div>
+                                  ) : (
+                                    <div className="space-y-2">
+                                      <div className="flex gap-4 flex-wrap">
+                                        <label className="flex items-center gap-2 cursor-pointer">
+                                          <Checkbox checked={ms.friendship} onCheckedChange={() => toggleSelection(ms.participantId, round, 'friendship')} />
+                                          <span className="text-sm flex items-center gap-1"><Smile className="w-3.5 h-3.5" /> {t.access.friendship}</span>
+                                        </label>
+                                        {ms.canShowDating && (
+                                          <label className="flex items-center gap-2 cursor-pointer">
+                                            <Checkbox checked={ms.dating} onCheckedChange={() => toggleSelection(ms.participantId, round, 'dating')} />
+                                            <span className="text-sm flex items-center gap-1"><Heart className="w-3.5 h-3.5" /> {t.access.dating}</span>
+                                          </label>
+                                        )}
+                                      </div>
+                                    </div>
+                                  )}
+                                  <div className="space-y-2 mt-2">
+                                    {!ms.alreadySelected && !hasSentSuperLike && !ms.superLikedByMe && (
+                                      <button
+                                        type="button"
+                                        onClick={() => openSuperLikeDialog(ms.participantId, tablemate.name, round)}
+                                        className="w-full inline-flex items-center justify-center gap-1.5 text-xs font-semibold py-1.5 px-3 rounded-md border border-amber-300 bg-gradient-to-r from-amber-50 to-yellow-50 dark:from-amber-950/40 dark:to-yellow-950/40 text-amber-700 dark:text-amber-300 hover:from-amber-100 hover:to-yellow-100 transition-all"
+                                      >
+                                        <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-500" />
+                                        {eventLang === 'en' ? 'Give Super Like' : 'Dar Super Like'}
+                                      </button>
+                                    )}
+                                    {ms.superLikedByMe && (
+                                      <div className="text-xs font-semibold text-amber-700 dark:text-amber-300 inline-flex items-center gap-1">
+                                        <Star className="w-3.5 h-3.5 fill-amber-500 text-amber-500" />
+                                        {eventLang === 'en' ? 'Super Like ready to send' : 'Super Like listo para enviar'}
+                                      </div>
+                                    )}
+                                    {repeatEnabled && (() => {
+                                      const isThisRepeat = repeatRequestUsed?.targetId === ms.participantId;
+                                      const repeatDisabled = !!repeatRequestUsed && !isThisRepeat;
+                                      const hasRemainingRounds = eventStatus !== 'completed' && currentRound < totalRounds;
+                                      // Hide the action button if the event has no upcoming rounds, but still show "accepted/pending" status badge.
+                                      if (!isThisRepeat && !hasRemainingRounds) return null;
+                                      if (isThisRepeat) {
+                                        return (
+                                          <div className="w-full flex items-center justify-center gap-2 px-3 py-1.5 rounded-md bg-violet-50 dark:bg-violet-950/30 border border-violet-300 text-violet-800 dark:text-violet-200 text-xs font-semibold">
+                                            <Repeat2 className="w-3.5 h-3.5" />
+                                            {eventLang === 'es'
+                                              ? (repeatRequestUsed?.status === 'accepted'
+                                                  ? 'Repetición aceptada ✓'
+                                                  : repeatRequestUsed?.status === 'declined'
+                                                    ? 'Repetición rechazada'
+                                                    : repeatRequestUsed?.status === 'expired'
+                                                      ? 'Repetición caducada'
+                                                      : 'Repetición pendiente')
+                                              : (repeatRequestUsed?.status === 'accepted'
+                                                  ? 'Repeat accepted ✓'
+                                                  : repeatRequestUsed?.status === 'declined'
+                                                    ? 'Repeat declined'
+                                                    : repeatRequestUsed?.status === 'expired'
+                                                      ? 'Repeat expired'
+                                                      : 'Repeat pending')}
+                                          </div>
+                                        );
+                                      }
+                                      return (
+                                        <button
+                                          type="button"
+                                          disabled={repeatDisabled}
+                                          onClick={() => openRepeatDialog(ms.participantId, tablemate.name, round)}
+                                          title={eventLang === 'en' ? "Request to be seated again with this person in an upcoming round. They'll get an email to accept or decline." : 'Solicita volver a coincidir con esta persona en una próxima ronda. Recibirá un email para aceptar o rechazar.'}
+                                          className="w-full inline-flex items-center justify-center gap-1.5 text-xs font-semibold py-1.5 px-3 rounded-md border border-violet-300 bg-violet-50 hover:bg-violet-100 dark:bg-violet-950/20 dark:border-violet-700/40 text-violet-700 dark:text-violet-300 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                                        >
+                                          <Repeat2 className="w-3.5 h-3.5" />
+                                          {eventLang === 'en' ? '🔁 Repeat with this person' : '🔁 Repetir con esta persona'}
+                                        </button>
+                                      );
+                                    })()}
+                                    {crushEnabled && wantsRomance(verifiedParticipant?.preference) && wantsRomance(tablemate.preference) && (() => {
+                                      const thisCrush = crushesSent.find(c => c.targetId === ms.participantId);
+                                      if (!thisCrush && crushSlotsLeft <= 0) return null;
+                                      if (thisCrush) {
+                                        return (
+                                          <div className="w-full flex items-center justify-center gap-2 px-3 py-1.5 rounded-md bg-rose-50 dark:bg-rose-950/30 border border-rose-300 text-rose-800 dark:text-rose-200 text-xs font-semibold">
+                                            <Heart className="w-3.5 h-3.5 fill-rose-500 text-rose-500" />
+                                            {eventLang === 'es'
+                                              ? (thisCrush.status === 'accepted' ? 'Flechazo aceptado 💘' : thisCrush.status === 'declined' ? 'Flechazo rechazado' : 'Flechazo pendiente')
+                                              : (thisCrush.status === 'accepted' ? 'Flechazo accepted 💘' : thisCrush.status === 'declined' ? 'Flechazo declined' : 'Flechazo pending')}
+
+                                          </div>
+                                        );
+                                      }
+                                      return (
+                                        <button
+                                          type="button"
+                                          onClick={() => openCrushDialog(ms.participantId, tablemate.name, round)}
+                                          title={eventLang === 'en' ? 'Send a direct Flechazo.' : 'Envía un Flechazo directo.'}
+                                          className="w-full inline-flex items-center justify-center gap-1.5 text-xs font-semibold py-1.5 px-3 rounded-md border border-rose-300 bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/20 dark:border-rose-700/40 text-rose-700 dark:text-rose-300 transition-all"
+                                        >
+                                          <Send className="w-3.5 h-3.5" />
+                                          {eventLang === 'en' ? '💘 Send Flechazo' : '💘 Enviar Flechazo'}
+                                        </button>
+                                      );
+                                    })()}
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        )}
+                      </div>
+                      );
+                    })}
+                  </div>
+                )}
+
+                <p className="text-sm text-center text-muted-foreground">{t.access.matchHint}</p>
+
+                <Button variant="hero" className="w-full" onClick={handleSubmit} disabled={isSubmitting}>
+                  {isSubmitting ? (
+                    <><Loader2 className="w-4 h-4 mr-2 animate-spin" />{t.access.saving}</>
+                  ) : hasMeaningfulEdits() && newSelectionsCount === 0 ? (
+                    <><Heart className="w-4 h-4 mr-2" />{eventLang === 'es' ? 'Guardar cambios' : 'Save changes'}</>
+                  ) : (
+                    <><Heart className="w-4 h-4 mr-2" />{newSelectionsCount > 0 ? `${t.access.send} ${newSelectionsCount} ${t.access.selectionsCount}` : t.access.continueWithout}</>
+                  )}
+                </Button>
+
+                {newSelectionsCount === 0 && !hasMeaningfulEdits() && (
+                  <Button 
+                    variant="outline" 
+                    className="w-full mt-2" 
+                    onClick={handleSubmitEmpty} 
+                    disabled={isSubmitting}
+                  >
+                    <MinusCircle className="w-4 h-4 mr-2" />
+                    No conecté con nadie
+                  </Button>
+                )}
+              </TabsContent>
+
+              {socialGameEnabled && verifiedParticipant && (
+                <TabsContent value="game" className="mt-4">
+                  <IcebreakersTab
+                    eventId={eventId!}
+                    verificationCode={verificationCode}
+                    lang={eventLang}
+                    games={icebreakerGames.length > 0 ? icebreakerGames : ['who_is_who']}
+                    onRewardsChange={refreshAllowances}
+                  />
+
+                </TabsContent>
+              )}
+
+              {wrappedEnabled && verifiedParticipant && (
+                <TabsContent value="compatibility" className="mt-4">
+                  <WrappedCompatibilityTab
+                    eventId={eventId!}
+                    participantId={verifiedParticipant.id}
+                    verificationCode={verificationCode}
+                    lang={eventLang}
+                  />
+                </TabsContent>
+              )}
+
+              <TabsContent value="info" className="mt-4 space-y-3">
+                <div className="rounded-lg border p-4 bg-primary/5 border-primary/20">
+                  <p className="text-sm font-semibold mb-1">
+                    {eventLang === 'es' ? '👋 ¡Bienvenido/a!' : '👋 Welcome!'}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {eventLang === 'es'
+                      ? 'Aquí tienes cómo funciona el evento. Toca cada sección para acceder.'
+                      : 'Here is how the event works. Tap any section to open it.'}
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('tables')}
+                  className="w-full text-left rounded-lg border p-4 bg-muted/30 hover:bg-muted/60 transition-colors"
+                >
+                  <div className="flex items-start gap-2">
+                    <Table2 className="w-4 h-4 text-primary mt-0.5" />
+                    <div className="flex-1">
+                      <p className="text-sm font-semibold">
+                        {eventLang === 'es' ? 'Mesas' : 'Tables'}
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        {eventLang === 'es'
+                          ? `El evento se compone de ${totalRounds || 'varias'} ronda${(totalRounds || 2) === 1 ? '' : 's'}. En cada ronda te sentarás en una mesa distinta con nuevos compañeros. Toca aquí para ver tu mesa en cada momento.`
+                          : `The event has ${totalRounds || 'several'} round${(totalRounds || 2) === 1 ? '' : 's'}. In each round you'll sit at a different table with new people. Tap here to see your current table.`}
+                      </p>
+                    </div>
+                  </div>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('selections')}
+                  className="w-full text-left rounded-lg border p-4 bg-muted/30 hover:bg-muted/60 transition-colors"
+                >
+                  <div className="flex items-start gap-2">
+                    <Heart className="w-4 h-4 text-primary mt-0.5" />
+                    <div className="flex-1">
+                      <p className="text-sm font-semibold">
+                        {eventLang === 'es' ? 'Selecciones y coincidencias' : 'Selections and matches'}
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        {eventLang === 'es'
+                          ? 'Al terminar cada ronda marca con quién te gustaría volver a hablar (Amistad o Ligue). Si el interés es mutuo, recibiréis un email con vuestros datos de contacto tras el evento.'
+                          : 'After each round mark who you would like to meet again (Friendship or Dating). If the interest is mutual, you will both receive an email with contact details after the event.'}
+                      </p>
+                    </div>
+                  </div>
+                </button>
+
+                {wrappedEnabled && (
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab('compatibility')}
+                    className="w-full text-left rounded-lg border p-4 bg-muted/30 hover:bg-muted/60 transition-colors"
+                  >
+                    <div className="flex items-start gap-2">
+                      <Sparkles className="w-4 h-4 text-primary mt-0.5" />
+                      <div className="flex-1">
+                        <p className="text-sm font-semibold">
+                          {eventLang === 'es' ? 'Afinidad' : 'Affinity'}
+                        </p>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          {eventLang === 'es'
+                            ? 'Consulta tu Top 10 anónimo por afinidad de intereses. Puedes pedir coincidir en mesa con hasta 3 personas.'
+                            : 'Check your anonymous Top 10 by shared interests. You can request to share a table with up to 3 people.'}
+                        </p>
+                      </div>
+                    </div>
+                  </button>
+                )}
+
+                {socialGameEnabled && (
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab('game')}
+                    className="w-full text-left rounded-xl border-2 border-primary/40 p-4 bg-gradient-primary/10 bg-primary/10 hover:bg-primary/15 transition-colors shadow-sm"
+                  >
+                    <div className="flex items-start gap-2">
+                      <Gamepad2 className="w-5 h-5 text-primary mt-0.5" />
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <p className="text-sm font-bold">
+                            {eventLang === 'es' ? 'Juegos' : 'Games'}
+                          </p>
+                          <Badge className="text-[10px] px-2 py-0">
+                            {eventLang === 'es' ? 'Gana premios' : 'Win rewards'}
+                          </Badge>
+                        </div>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          {eventLang === 'es'
+                            ? 'Juegos para romper el hielo con las personas de tu mesa en cada ronda. Cuantos más aciertos, más premios desbloqueas (Super Likes extra, repetir mesa o Flechazo).'
+                            : 'Games to break the ice with the people at your table each round. The more correct guesses, the more rewards you unlock (extra Super Likes, table repeat or Crush).'}
+                        </p>
+                      </div>
+                    </div>
+                  </button>
+                )}
+
+
+                <div className="pt-2">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-2">
+                    {eventLang === 'es' ? 'Acciones especiales' : 'Special actions'}
+                  </p>
+                </div>
+
+                <div className="rounded-lg border p-4 bg-muted/30">
+                  <div className="flex items-start gap-2">
+                    <Star className="w-4 h-4 text-amber-500 mt-0.5" />
+                    <div>
+                      <p className="text-sm font-semibold">
+                        {eventLang === 'es' ? 'Super Like' : 'Super Like'}
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        {eventLang === 'es'
+                          ? 'Tienes 1 Super Like por evento. Se envía una notificación por correo electrónico de forma anónima a esa persona (no sabrá quién ha sido). Si además marcáis Amistad o Ligue, se genera una coincidencia.'
+                          : 'You have 1 Super Like per event. An anonymous email notification is sent to that person (they will not know who sent it). If either of you also marks Friendship or Dating, a match is created.'}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {repeatEnabled && (
+                  <div className="rounded-lg border p-4 bg-muted/30">
+                    <div className="flex items-start gap-2">
+                      <Repeat2 className="w-4 h-4 text-primary mt-0.5" />
+                      <div>
+                        <p className="text-sm font-semibold">
+                          {eventLang === 'es' ? 'Repetir' : 'Repeat'}
+                        </p>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          {eventLang === 'es'
+                            ? 'Tienes 1 solicitud de "Repetir" por evento. Se envía una solicitud no anónima por correo electrónico (verá tu nombre): si acepta, os agruparemos en la siguiente ronda disponible.'
+                            : 'You have 1 "Repeat" request per event. A non-anonymous email request is sent (they will see your name): if they accept, we will group you together in the next available round.'}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {crushEnabled && (
+                  <div className="rounded-lg border p-4 bg-muted/30">
+                    <div className="flex items-start gap-2">
+                      <Heart className="w-4 h-4 text-rose-500 fill-rose-500 mt-0.5" />
+                      <div>
+                        <p className="text-sm font-semibold">
+                          {eventLang === 'es' ? 'Flechazo' : 'Flechazo'}
+                        </p>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          {eventLang === 'es'
+                            ? 'Solo disponible si buscas ligue/romance y con personas que también lo buscan. Tienes 1 Flechazo por evento: se envía una solicitud no anónima por correo electrónico (verá tu nombre). Si acepta, os intercambiaremos los teléfonos por email y coincidiréis en la próxima ronda.'
+                            : 'Only available if you and the other person are looking for dating/romance. You have 1 Flechazo per event: a non-anonymous email request is sent (they will see your name). If accepted, we will share phone numbers by email and pair you in the next round.'}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                <div className="rounded-lg border p-4 bg-primary/5 border-primary/20">
+                  <div className="flex items-start gap-2">
+                    <Lock className="w-4 h-4 text-primary mt-0.5" />
+                    <p className="text-xs text-muted-foreground">
+                      {eventLang === 'es'
+                        ? 'Tus datos son confidenciales: solo compartimos tu contacto cuando hay coincidencia mutua o aceptas un Flechazo.'
+                        : 'Your data is confidential: we only share your contact info when there is a mutual match or you accept a Flechazo.'}
+                    </p>
+                  </div>
+                </div>
+              </TabsContent>
+              </div>
+            </Tabs>
+        </div>
+      )}
+
+      {step === "done" && (
+        <Card className="w-full max-w-md animate-scale-in bg-card/80 backdrop-blur-sm text-center">
+          <CardContent className="pt-8 pb-8">
+            <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-6">
+              <Sparkles className="w-10 h-10 text-primary" />
+            </div>
+            <h2 className="font-display text-2xl font-bold mb-2">{t.access.thanks}</h2>
+            <p className="text-muted-foreground mb-6">
+              {eventStatus === 'completed' ? t.access.thanksCompleted : t.access.thanksActive}
+            </p>
+            <Button variant="outline" className="w-full" onClick={() => { clearSession(); setStep("verify_code"); setVerificationCode(""); setVerifiedParticipant(null); }}>{t.access.backToHome}</Button>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Super Like Confirmation Dialog */}
+      {superLikeTarget && (
+        <SuperLikeConfirmDialog
+          open={!!superLikeTarget}
+          onClose={() => !isSendingSuperLike && setSuperLikeTarget(null)}
+          onConfirm={confirmSuperLike}
+          recipientName={superLikeTarget.name}
+          language={eventLang}
+        />
+      )}
+
+      {/* Repeat Request Confirmation Dialog */}
+      <Dialog open={!!repeatTarget} onOpenChange={(open) => { if (!open && !isSendingRepeat) setRepeatTarget(null); }}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <div className="w-14 h-14 rounded-full bg-violet-100 dark:bg-violet-900/30 flex items-center justify-center mx-auto mb-2">
+              <Repeat2 className="w-7 h-7 text-violet-600 dark:text-violet-400" />
+            </div>
+            <DialogTitle className="text-center">
+              {eventLang === 'es' ? `¿Solicitar repetir con ${repeatTarget?.name || ''}?` : `Request a repeat with ${repeatTarget?.name || ''}?`}
+            </DialogTitle>
+            <DialogDescription className="text-center">
+              {eventLang === 'es'
+                ? 'Solo puedes solicitar repetir con UNA persona en todo el evento. La otra persona recibirá un email para aceptar o rechazar la solicitud.'
+                : 'You can only request a repeat with ONE person per event. The other person will receive an email to accept or decline the request.'}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="flex flex-col sm:flex-row gap-2">
+            <Button variant="outline" className="flex-1" onClick={() => setRepeatTarget(null)} disabled={isSendingRepeat}>
+              {eventLang === 'es' ? 'Cancelar' : 'Cancel'}
+            </Button>
+            <Button variant="hero" className="flex-1" onClick={confirmRepeat} disabled={isSendingRepeat}>
+              {isSendingRepeat ? <Loader2 className="w-4 h-4 animate-spin" /> : (eventLang === 'es' ? 'Enviar' : 'Send')}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Flechazo Confirmation Dialog */}
+      <Dialog open={!!crushTarget} onOpenChange={(open) => { if (!open && !isSendingCrush) setCrushTarget(null); }}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <div className="w-14 h-14 rounded-full bg-rose-100 dark:bg-rose-900/30 flex items-center justify-center mx-auto mb-2">
+              <Heart className="w-7 h-7 text-rose-600 dark:text-rose-400 fill-rose-500" />
+            </div>
+            <DialogTitle className="text-center">
+              {eventLang === 'es' ? `¿Enviar Flechazo a ${crushTarget?.name || ''}?` : `Send a Flechazo to ${crushTarget?.name || ''}?`}
+            </DialogTitle>
+            <DialogDescription className="text-center">
+              {eventLang === 'es'
+                ? 'Solo puedes enviar UN Flechazo por evento. La otra persona recibirá un email con tu nombre para aceptar o rechazar. Si acepta, ambos recibiréis vuestros datos de contacto.'
+                : 'You can only send ONE Flechazo per event. The other person will receive an email with your name to accept or decline. If accepted, you will both receive each other\'s contact details.'}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="flex flex-col sm:flex-row gap-2">
+            <Button variant="outline" className="flex-1" onClick={() => setCrushTarget(null)} disabled={isSendingCrush}>
+              {eventLang === 'es' ? 'Cancelar' : 'Cancel'}
+            </Button>
+            <Button variant="hero" className="flex-1" onClick={confirmCrush} disabled={isSendingCrush}>
+              {isSendingCrush ? <Loader2 className="w-4 h-4 animate-spin" /> : (eventLang === 'es' ? 'Enviar Flechazo' : 'Send Flechazo')}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <AlertDialog open={confirmEditSubmit} onOpenChange={(open) => !open && !isSubmitting && setConfirmEditSubmit(false)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <Pencil className="w-5 h-5 text-primary" />
+              {eventLang === "es" ? "¿Modificar tus selecciones previas?" : "Modify your previous selections?"}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {eventLang === "es"
+                ? "Estás a punto de cambiar selecciones que ya habías enviado. Esto reemplazará lo que enviaste antes y será definitivo. ¿Quieres continuar?"
+                : "You're about to change selections you already submitted. This will replace what you sent before and will be final. Do you want to continue?"}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isSubmitting}>{eventLang === "es" ? "Cancelar" : "Cancel"}</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={async () => { setConfirmEditSubmit(false); await performSubmit(); }}
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : (eventLang === "es" ? "Sí, guardar cambios" : "Yes, save changes")}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </div>
+  );
+};
+
+export default ParticipantAccess;

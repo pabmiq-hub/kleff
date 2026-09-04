@@ -1,0 +1,476 @@
+// @ts-nocheck
+// Ported from the original Konektum edge function `submit-selections`.
+let __handler: any = null;
+const serve = (h: any) => { __handler = h; };
+const Deno = {
+  env: { get: (k: string) => (globalThis as any).process?.env?.[k] },
+  serve: (h: any) => { __handler = h; },
+};
+
+import { createClient } from "@/lib/kon-fn/client.server";
+
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+};
+
+/**
+ * Server-side bilateral dating preference compatibility check.
+ */
+function areDatingCompatible(pref1: string, gender1: string | null, pref2: string, gender2: string | null): boolean {
+  const openPrefs = ["abierto a todo", "abierta a todo", "abierto/a a todo", "open to all"];
+  const p1Lower = pref1.toLowerCase();
+  const p2Lower = pref2.toLowerCase();
+  const p1IsOpen = openPrefs.some(o => p1Lower.includes(o));
+  const p2IsOpen = openPrefs.some(o => p2Lower.includes(o));
+
+  const p1LookingForWoman = p1Lower.includes("busco una mujer") || p1Lower.includes("looking for a woman");
+  const p1LookingForMan = p1Lower.includes("busco un hombre") || p1Lower.includes("looking for a man");
+  const p2LookingForWoman = p2Lower.includes("busco una mujer") || p2Lower.includes("looking for a woman");
+  const p2LookingForMan = p2Lower.includes("busco un hombre") || p2Lower.includes("looking for a man");
+
+  const g1 = (gender1 || '').toLowerCase();
+  const g2 = (gender2 || '').toLowerCase();
+  const p1IsMan = g1 === 'hombre' || g1 === 'man' || p1Lower.includes("soy un hombre");
+  const p1IsWoman = g1 === 'mujer' || g1 === 'woman' || p1Lower.includes("soy una mujer");
+  const p2IsMan = g2 === 'hombre' || g2 === 'man' || p2Lower.includes("soy un hombre");
+  const p2IsWoman = g2 === 'mujer' || g2 === 'woman' || p2Lower.includes("soy una mujer");
+
+  // Both open → compatible
+  if (p1IsOpen && p2IsOpen) return true;
+  // p1 open: p2 must accept p1's gender
+  if (p1IsOpen) {
+    if (p1IsMan && p2LookingForMan) return true;
+    if (p1IsWoman && p2LookingForWoman) return true;
+    return false;
+  }
+  // p2 open: p1 must accept p2's gender
+  if (p2IsOpen) {
+    if (p2IsMan && p1LookingForMan) return true;
+    if (p2IsWoman && p1LookingForWoman) return true;
+    return false;
+  }
+
+  if (p1IsMan && p1LookingForWoman && p2IsWoman && p2LookingForMan) return true;
+  if (p1IsWoman && p1LookingForMan && p2IsMan && p2LookingForWoman) return true;
+  if (p1IsMan && p1LookingForMan && p2IsMan && p2LookingForMan) return true;
+  if (p1IsWoman && p1LookingForWoman && p2IsWoman && p2LookingForWoman) return true;
+
+  return false;
+}
+
+// Simple rate limiting - 10 submissions per IP per 10 minutes (increased for incremental selections)
+const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
+const RATE_LIMIT_WINDOW = 10 * 60 * 1000; // 10 minutes
+const MAX_SUBMISSIONS = 10;
+
+function isRateLimited(ip: string): boolean {
+  const now = Date.now();
+  const record = rateLimitMap.get(ip);
+  
+  if (!record || now > record.resetTime) {
+    rateLimitMap.set(ip, { count: 1, resetTime: now + RATE_LIMIT_WINDOW });
+    return false;
+  }
+  
+  if (record.count >= MAX_SUBMISSIONS) {
+    return true;
+  }
+  
+  record.count++;
+  return false;
+}
+
+// Cleanup old entries periodically
+setInterval(() => {
+  const now = Date.now();
+  for (const [ip, record] of rateLimitMap.entries()) {
+    if (now > record.resetTime) {
+      rateLimitMap.delete(ip);
+    }
+  }
+}, 60000);
+
+serve(async (req) => {
+  // Handle CORS preflight requests
+  if (req.method === 'OPTIONS') {
+    return new Response(null, { headers: corsHeaders });
+  }
+
+  try {
+    // Get client IP for rate limiting
+    const clientIP = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 
+                     req.headers.get('x-real-ip') || 
+                     'unknown';
+
+    // Check rate limit
+    if (isRateLimited(clientIP)) {
+      console.log(`[submit-selections] Rate limit exceeded for IP: ${clientIP}`);
+      return new Response(
+        JSON.stringify({ error: 'Has enviado demasiadas selecciones. Por favor, espera unos minutos.' }),
+        { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const { eventId, selectorId: rawSelectorId, verificationCode, selections, superLikeId, superLikeIds: rawSuperLikeIds } = await req.json();
+
+    // Accept either a single superLikeId (legacy) or an array of superLikeIds (game rewards allow extras)
+    const superLikeIdList: string[] = Array.from(new Set(
+      (Array.isArray(rawSuperLikeIds) ? rawSuperLikeIds : (superLikeId ? [superLikeId] : []))
+        .filter((id: unknown): id is string => typeof id === 'string')
+    ));
+
+    console.log(`[submit-selections] Request for event: ${eventId}, selectorId: ${rawSelectorId || 'N/A'}, verificationCode: ${verificationCode ? '****' : 'N/A'}, selections count: ${selections?.length || 0}, superLikes: ${superLikeIdList.length}`);
+
+
+    // Validate required fields
+    if (!eventId || (!rawSelectorId && !verificationCode)) {
+      console.error('[submit-selections] Missing eventId or (selectorId/verificationCode)');
+      return new Response(
+        JSON.stringify({ error: 'Datos incompletos' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Validate UUID format for eventId
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (!uuidRegex.test(eventId)) {
+      console.error('[submit-selections] Invalid UUID format for eventId');
+      return new Response(
+        JSON.stringify({ error: 'Formato de solicitud inválido' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // If selectorId is provided, validate UUID format
+    let selectorId = rawSelectorId;
+    if (selectorId && !uuidRegex.test(selectorId)) {
+      console.error('[submit-selections] Invalid UUID format for selectorId');
+      return new Response(
+        JSON.stringify({ error: 'Formato de solicitud inválido' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Validate verification code format (6 digits)
+    if (verificationCode && !/^\d{6}$/.test(verificationCode)) {
+      console.error('[submit-selections] Invalid verification code format');
+      return new Response(
+        JSON.stringify({ error: 'Código de verificación inválido' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Create Supabase client with service role to bypass RLS
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+    // Resolve selectorId from verification code if needed
+    if (verificationCode && !selectorId) {
+      console.log('[submit-selections] Resolving selectorId from verification code');
+      const { data: participant, error: codeError } = await supabase
+        .from('participants')
+        .select('id, name')
+        .eq('event_id', eventId)
+        .eq('verification_code', verificationCode)
+        .single();
+      
+      if (codeError || !participant) {
+        console.error('[submit-selections] Invalid verification code:', codeError);
+        return new Response(
+          JSON.stringify({ error: 'Código de verificación incorrecto' }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+      
+      selectorId = participant.id;
+      console.log(`[submit-selections] Resolved participant: ${participant.name} (${selectorId})`);
+    }
+
+    // Validate selections array
+    if (!Array.isArray(selections)) {
+      console.error('[submit-selections] Selections is not an array');
+      return new Response(
+        JSON.stringify({ error: 'Formato de selecciones inválido' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Validate each selection
+    for (const selection of selections) {
+      if (!selection.selected_id || !uuidRegex.test(selection.selected_id)) {
+        console.error('[submit-selections] Invalid selected_id in selections');
+        return new Response(
+          JSON.stringify({ error: 'Formato de selección inválido' }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+      if (!['friendship', 'dating', 'both'].includes(selection.selection_type)) {
+        console.error('[submit-selections] Invalid selection_type');
+        return new Response(
+          JSON.stringify({ error: 'Tipo de selección inválido' }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+    }
+
+    // Supabase client already created above
+
+    // Verify the event exists and check super_like_enabled
+    const { data: event, error: eventError } = await supabase
+      .from('events')
+      .select('id, status, super_like_enabled')
+      .eq('id', eventId)
+      .single();
+
+    if (eventError || !event) {
+      console.error('[submit-selections] Event not found:', eventError);
+      return new Response(
+        JSON.stringify({ error: 'Evento no encontrado' }),
+        { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Verify the selector is a participant of this event and get their dating info
+    const { data: selectorParticipant, error: selectorError } = await supabase
+      .from('participants')
+      .select('id, name, event_id, preference, dating_preference, gender')
+      .eq('id', selectorId)
+      .eq('event_id', eventId)
+      .single();
+
+    if (selectorError || !selectorParticipant) {
+      console.error('[submit-selections] Selector is not a valid participant:', selectorError);
+      return new Response(
+        JSON.stringify({ error: 'Participante no encontrado en este evento' }),
+        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Get existing selections for this selector (for incremental selection)
+    const { data: existingSelections, error: existingError } = await supabase
+      .from('participant_selections')
+      .select('selected_id')
+      .eq('event_id', eventId)
+      .eq('selector_id', selectorId);
+
+    if (existingError) {
+      console.error('[submit-selections] Error checking existing selections:', existingError);
+      return new Response(
+        JSON.stringify({ error: 'Error al verificar selecciones existentes' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Create set of already selected participant IDs
+    const alreadySelectedIds = new Set(existingSelections?.map(s => s.selected_id) || []);
+    console.log(`[submit-selections] Selector already has ${alreadySelectedIds.size} selections`);
+
+    // Filter out already selected participants (only add new ones)
+    const newSelections = selections.filter(
+      (s: { selected_id: string }) => !alreadySelectedIds.has(s.selected_id)
+    );
+
+    console.log(`[submit-selections] New selections to add: ${newSelections.length}`);
+
+    // If no new selections, still mark as submitted and return success
+    if (newSelections.length === 0) {
+      console.log('[submit-selections] No new selections to add, marking as submitted');
+      // Update selection_submitted_at even for empty submissions
+      await supabase
+        .from('participants')
+        .update({ selection_submitted_at: new Date().toISOString() })
+        .eq('id', selectorId);
+      
+      return new Response(
+        JSON.stringify({ success: true, count: 0, message: 'Selecciones registradas correctamente' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Verify all selected participants belong to this event
+    const selectedIds = newSelections.map((s: { selected_id: string }) => s.selected_id);
+    
+    const { data: validParticipants, error: validError } = await supabase
+      .from('participants')
+      .select('id, preference, dating_preference, gender')
+      .eq('event_id', eventId)
+      .in('id', selectedIds);
+
+    if (validError) {
+      console.error('[submit-selections] Error validating selected participants:', validError);
+      return new Response(
+        JSON.stringify({ error: 'Error al validar participantes seleccionados' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const validParticipantIds = new Set(validParticipants?.map(p => p.id) || []);
+    
+    if (validParticipantIds.size < selectedIds.length) {
+      const invalidIds = selectedIds.filter(id => !validParticipantIds.has(id));
+      console.warn(`[submit-selections] Filtering out ${invalidIds.length} invalid participant IDs: ${invalidIds.join(', ')}`);
+      // Filter newSelections to only include valid participants instead of rejecting the whole request
+      const filteredSelections = newSelections.filter(
+        (s: { selected_id: string }) => validParticipantIds.has(s.selected_id)
+      );
+      
+      if (filteredSelections.length === 0) {
+        console.log('[submit-selections] No valid selections remaining after filtering, marking as submitted');
+        await supabase
+          .from('participants')
+          .update({ selection_submitted_at: new Date().toISOString() })
+          .eq('id', selectorId);
+        
+        return new Response(
+          JSON.stringify({ success: true, count: 0, message: 'Selecciones registradas correctamente' }),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+      
+      // Replace newSelections with filtered ones for the rest of the flow
+      newSelections.length = 0;
+      newSelections.push(...filteredSelections);
+    }
+
+    // Verify selector is not selecting themselves
+    if (selectedIds.includes(selectorId)) {
+      console.error('[submit-selections] Selector cannot select themselves');
+      return new Response(
+        JSON.stringify({ error: 'No puedes seleccionarte a ti mismo' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Server-side dating compatibility validation
+    // Build a map of selected participants' dating info for validation
+    const selectedParticipantMap = new Map<string, { preference: string | null; dating_preference: string | null; gender: string | null }>();
+    if (validParticipants) {
+      for (const vp of validParticipants) {
+        selectedParticipantMap.set(vp.id, { preference: vp.preference, dating_preference: vp.dating_preference, gender: vp.gender });
+      }
+    }
+
+    const selectorDatingPref = selectorParticipant.dating_preference || '';
+    const selectorGender = selectorParticipant.gender || null;
+
+    // Super like allowance = 1 base + extras earned in the social game
+    const { data: superLikeRewards } = await supabase
+      .from('game_rewards')
+      .select('id')
+      .eq('event_id', eventId)
+      .eq('participant_id', selectorId)
+      .eq('reward_type', 'super_like');
+    const superLikeAllowance = 1 + (superLikeRewards || []).length;
+
+    const { data: previousSuperLikes } = await supabase
+      .from('participant_selections')
+      .select('id')
+      .eq('event_id', eventId)
+      .eq('selector_id', selectorId)
+      .eq('is_super_like', true);
+    const remainingSuperLikes = Math.max(0, superLikeAllowance - (previousSuperLikes || []).length);
+
+    // Keep only the super likes that fit within the remaining allowance and are part of this batch
+    const newSelectionIds = new Set(newSelections.map((s: { selected_id: string }) => s.selected_id));
+    const allowedSuperLikeIds = new Set(
+      superLikeIdList.filter((id) => newSelectionIds.has(id)).slice(0, remainingSuperLikes)
+    );
+
+    // Validate and downgrade incompatible dating selections to friendship
+
+    const selectionsToInsert = newSelections.map((s: { selected_id: string; selection_type: string }) => {
+      let selectionType = s.selection_type;
+      
+      if (selectionType === 'dating' || selectionType === 'both') {
+        const target = selectedParticipantMap.get(s.selected_id);
+        const targetDatingPref = target?.dating_preference || '';
+        const targetGender = target?.gender || null;
+        
+        // Unknown orientation on either side → cannot prove incompatibility, keep the dating selection.
+        const bothDeclared = !!selectorDatingPref && !!targetDatingPref;
+        if (bothDeclared && !areDatingCompatible(selectorDatingPref, selectorGender, targetDatingPref, targetGender)) {
+          console.warn(`[submit-selections] Downgrading incompatible dating selection: ${selectorId} → ${s.selected_id}`);
+          selectionType = selectionType === 'both' ? 'friendship' : 'friendship';
+        }
+      }
+
+      return {
+        event_id: eventId,
+        selector_id: selectorId,
+        selected_id: s.selected_id,
+        selection_type: selectionType,
+        is_super_like: allowedSuperLikeIds.has(s.selected_id),
+      };
+    });
+
+    const { error: insertError } = await supabase
+      .from('participant_selections')
+      .insert(selectionsToInsert);
+
+    if (insertError) {
+      console.error('[submit-selections] Error inserting selections:', insertError);
+      return new Response(
+        JSON.stringify({ error: 'Error al guardar las selecciones' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Update participant's selection_submitted_at
+    await supabase
+      .from('participants')
+      .update({ selection_submitted_at: new Date().toISOString() })
+      .eq('id', selectorId);
+
+    // Trigger super like notifications for every super like actually stored
+    if (allowedSuperLikeIds.size > 0 && event.super_like_enabled) {
+      const notifyUrl = Deno.env.get('SUPABASE_URL')!;
+      const notifyKey = Deno.env.get('SUPABASE_ANON_KEY')!;
+      for (const recipientId of allowedSuperLikeIds) {
+        try {
+          await fetch(`${notifyUrl}/functions/v1/send-super-like-notification`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${notifyKey}`,
+            },
+            body: JSON.stringify({ eventId, recipientId }),
+          });
+          console.log(`[submit-selections] Super like notification triggered for recipient: ${recipientId}`);
+        } catch (notifError) {
+          console.error('[submit-selections] Error sending super like notification:', notifError);
+          // Don't fail the whole request for a notification error
+        }
+      }
+    }
+
+
+
+    const totalSelections = alreadySelectedIds.size + newSelections.length;
+    console.log(`[submit-selections] Successfully saved ${newSelections.length} new selections. Total: ${totalSelections}`);
+    
+    return new Response(
+      JSON.stringify({ 
+        success: true, 
+        count: newSelections.length, 
+        total: totalSelections,
+        message: `Guardadas ${newSelections.length} nuevas selecciones` 
+      }),
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
+
+  } catch (error) {
+    console.error('[submit-selections] Unexpected error:', error);
+    return new Response(
+      JSON.stringify({ error: 'Error interno del servidor' }),
+      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
+  }
+});
+
+
+export default async function handler(req: Request): Promise<Response> {
+  if (!__handler) throw new Error("handler not registered");
+  return await __handler(req);
+}

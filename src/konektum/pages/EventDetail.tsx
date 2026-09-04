@@ -6011,17 +6011,17 @@ const EventDetail = () => {
 
         {/* QR Modal - Unified Access Panel (active/completed) */}
         {showQR && (
-          <EventQRCode eventId={id || ""} onClose={() => setShowQR(false)} type="access" />
+          <EventQRCode eventId={id || ""} eventSlug={event?.slug} onClose={() => setShowQR(false)} type="access" />
         )}
 
         {/* QR Modal - Join/Registration */}
         {showJoinQR && (
-          <EventQRCode eventId={id || ""} onClose={() => setShowJoinQR(false)} type="join" />
+          <EventQRCode eventId={id || ""} eventSlug={event?.slug} onClose={() => setShowJoinQR(false)} type="join" />
         )}
 
         {/* QR Modal - Check-in */}
         {showCheckinQR && (
-          <EventQRCode eventId={id || ""} onClose={() => setShowCheckinQR(false)} type="checkin" />
+          <EventQRCode eventId={id || ""} eventSlug={event?.slug} onClose={() => setShowCheckinQR(false)} type="checkin" />
         )}
 
         {/* Add Participant Modal */}

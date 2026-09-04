@@ -1,0 +1,414 @@
+// @ts-nocheck
+// Ported from the original Konektum edge function `get-table-assignments`.
+let __handler: any = null;
+const serve = (h: any) => { __handler = h; };
+const Deno = {
+  env: { get: (k: string) => (globalThis as any).process?.env?.[k] },
+  serve: (h: any) => { __handler = h; },
+};
+
+import { createClient } from "@/lib/kon-fn/client.server";
+
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+};
+
+// Rate limiter
+const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
+const RATE_LIMIT_WINDOW_MS = 60000;
+const MAX_REQUESTS_PER_WINDOW = 20;
+
+function isRateLimited(ip: string): boolean {
+  const now = Date.now();
+  const entry = rateLimitMap.get(ip);
+  
+  if (!entry || now > entry.resetTime) {
+    rateLimitMap.set(ip, { count: 1, resetTime: now + RATE_LIMIT_WINDOW_MS });
+    return false;
+  }
+  
+  if (entry.count >= MAX_REQUESTS_PER_WINDOW) {
+    return true;
+  }
+  
+  entry.count++;
+  return false;
+}
+
+/** Returns "FirstName L." from a full name */
+function anonymizeName(fullName: string): string {
+  const parts = fullName.trim().split(/\s+/);
+  if (parts.length <= 1) return fullName;
+  const firstName = parts[0];
+  const lastInitial = parts[parts.length - 1][0];
+  return `${firstName} ${lastInitial.toUpperCase()}.`;
+}
+
+interface TableAssignmentRequest {
+  eventId: string;
+  verificationCode: string;
+}
+
+serve(async (req) => {
+  if (req.method === 'OPTIONS') {
+    return new Response(null, { headers: corsHeaders });
+  }
+
+  try {
+    const clientIP = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() 
+      || req.headers.get('x-real-ip') 
+      || 'unknown';
+    
+    if (isRateLimited(clientIP)) {
+      return new Response(
+        JSON.stringify({ error: 'Demasiadas solicitudes. Espera un minuto.' }),
+        { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const { eventId, verificationCode }: TableAssignmentRequest = await req.json();
+    
+    console.log(`[get-table-assignments] Request for event: ${eventId}`);
+
+    if (!eventId || !verificationCode) {
+      return new Response(
+        JSON.stringify({ error: 'Faltan campos obligatorios' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (!uuidRegex.test(eventId)) {
+      return new Response(
+        JSON.stringify({ error: 'Formato de evento inválido' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const codeRegex = /^\d{6}$/;
+    if (!codeRegex.test(verificationCode)) {
+      return new Response(
+        JSON.stringify({ error: 'Código de verificación inválido' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+    // Verify event exists and is active or completed
+    const { data: event, error: eventError } = await supabase
+      .from('events')
+      .select('id, status, tables, current_round, rounds, selection_deadline_hours, selection_closed_at, round_duration, round_started_at, round_paused_at, round_elapsed_seconds, completed_rounds, preliminary_round, game_mode, crush_enabled, social_game, draft_round')
+      .eq('id', eventId)
+      .single();
+
+    if (eventError || !event) {
+      console.error('[get-table-assignments] Event not found:', eventError);
+      return new Response(
+        JSON.stringify({ error: 'Evento no encontrado' }),
+        { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Allow access for pending events if there's a preliminary round with tables
+    const hasPreliminaryTables = (event as any).preliminary_round?.enabled && 
+      Array.isArray((event as any).preliminary_round?.tables) && 
+      (event as any).preliminary_round.tables.length > 0;
+
+    if (event.status !== 'active' && event.status !== 'completed' && !hasPreliminaryTables) {
+      return new Response(
+        JSON.stringify({ 
+          error: 'Las asignaciones de mesa solo están disponibles cuando el evento ha comenzado',
+          eventStatus: event.status
+        }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Find participant by verification code
+    const { data: participant, error: participantError } = await supabase
+      .from('participants')
+      .select('id, name, checked_in, preference, dating_preference, gender, is_anonymous')
+      .eq('event_id', eventId)
+      .eq('verification_code', verificationCode)
+      .maybeSingle();
+
+    if (participantError || !participant) {
+      return new Response(
+        JSON.stringify({ error: 'Código de verificación incorrecto' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    if (!participant.checked_in) {
+      return new Response(
+        JSON.stringify({ error: 'Debes hacer check-in primero para ver tus mesas' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const completedRounds: number[] = event.completed_rounds || [];
+    const tables = event.tables as any;
+    const maxTableRound = Array.isArray(tables)
+      ? tables.reduce((max: number, roundData: any) => {
+          const roundNumber = Number(roundData?.round) || 0;
+          return Math.max(max, roundNumber);
+        }, 0)
+      : 0;
+    const maxCompletedRound = completedRounds.reduce((max, round) => Math.max(max, Number(round) || 0), 0);
+    const storedCurrentRound = event.current_round || 0;
+    const currentRound = event.status === 'completed'
+      ? Math.max(storedCurrentRound, maxTableRound)
+      : Math.min(
+          Math.max(event.rounds || maxTableRound || 0, maxTableRound),
+          Math.max(storedCurrentRound, maxCompletedRound > 0 ? maxCompletedRound + 1 : 0)
+        );
+    const totalRounds = Math.max(event.rounds || 0, maxTableRound);
+
+    // Collect all tablemate IDs to fetch their preferences in bulk
+    // Only include rounds up to current_round (or completed rounds)
+    const tablemateIds = new Set<string>();
+    const assignments: { round: number; table: number; tablemateEntries: { id: string; name: string }[] }[] = [];
+
+    // NOTE: even when no main rounds exist yet (event still pending with only the
+    // preliminary round running) we continue, so round 0 assignments + tablemates
+    // are returned instead of an empty payload.
+    const roundsList: any[] = Array.isArray(tables) ? tables : [];
+
+    // For completed events, show all stored rounds regardless of current_round
+    // (protects against desync where current_round didn't advance while rounds were played)
+    const isCompleted = event.status === 'completed';
+    const draftRound = (event as any).draft_round ?? null;
+    for (const roundData of roundsList) {
+
+      const roundNumber = roundData.round;
+      
+      // Only include rounds that are completed or currently active
+      if (!isCompleted && roundNumber > currentRound) continue;
+      // Skip rounds that are still in DRAFT (not yet published by the organizer)
+      if (draftRound !== null && roundNumber === draftRound) continue;
+      
+      
+      
+      const roundTables = roundData.tables;
+      if (!roundTables || !Array.isArray(roundTables)) continue;
+      
+      for (let tableIndex = 0; tableIndex < roundTables.length; tableIndex++) {
+        const table = roundTables[tableIndex];
+        if (!Array.isArray(table)) continue;
+        
+        const isInTable = table.some((p: any) => p.id === participant.id);
+        
+        if (isInTable) {
+          const mates = table
+            .filter((p: any) => p.id !== participant.id)
+            .map((p: any) => ({ id: p.id, name: p.name }));
+          mates.forEach((m: any) => tablemateIds.add(m.id));
+          assignments.push({
+            round: roundNumber,
+            table: tableIndex + 1,
+            tablemateEntries: mates
+          });
+          break;
+        }
+      }
+    }
+
+    // Also process preliminary round if exists
+    const preliminaryRound = (event as any).preliminary_round;
+    const dismissedTables: number[] = preliminaryRound?.dismissed_tables || [];
+    const prelimConfirmations: Record<string, boolean> = preliminaryRound?.confirmations || {};
+    let preliminaryConfirmation: boolean | null = null;
+    
+    if (preliminaryRound?.enabled && Array.isArray(preliminaryRound.tables)) {
+      // Check participant's confirmation status
+      if (participant.id in prelimConfirmations) {
+        preliminaryConfirmation = prelimConfirmations[participant.id];
+      }
+      
+      // Only show round 0 if participant hasn't explicitly denied AND table not dismissed
+      if (preliminaryConfirmation !== false) {
+        for (let tableIndex = 0; tableIndex < preliminaryRound.tables.length; tableIndex++) {
+          // Skip dismissed tables
+          if (dismissedTables.includes(tableIndex)) continue;
+          
+          const table = preliminaryRound.tables[tableIndex];
+          if (!Array.isArray(table)) continue;
+          const isInTable = table.some((p: any) => p.id === participant.id);
+          if (isInTable) {
+            const mates = table
+              .filter((p: any) => p.id !== participant.id)
+              .map((p: any) => ({ id: p.id, name: p.name }));
+            mates.forEach((m: any) => tablemateIds.add(m.id));
+            assignments.push({
+              round: 0,
+              table: tableIndex + 1,
+              tablemateEntries: mates
+            });
+            break;
+          }
+        }
+      }
+    }
+
+    // Fetch preferences for all tablemates + existing selections + super like/crush info in parallel
+    const [preferencesResult, selectionsResult, sentSuperLikeResult, receivedSuperLikeResult, existingCrushResult, superLikeRewardsResult, crushRewardsResult, receivedCrushResult] = await Promise.all([
+      tablemateIds.size > 0
+        ? supabase.from('participants').select('id, preference, dating_preference, gender').in('id', Array.from(tablemateIds))
+        : Promise.resolve({ data: [], error: null }),
+      supabase.from('participant_selections').select('selected_id, selection_type, is_super_like').eq('event_id', eventId).eq('selector_id', participant.id),
+      // Has this participant already sent a super like?
+      supabase.from('participant_selections').select('id').eq('event_id', eventId).eq('selector_id', participant.id).eq('is_super_like', true),
+      // Has this participant RECEIVED any super like? Include sender IDs.
+      supabase.from('participant_selections').select('selector_id').eq('event_id', eventId).eq('selected_id', participant.id).eq('is_super_like', true),
+      // Flechazos already sent (can be more than one when extras are earned in the game)
+      supabase.from('crush_requests').select('status, target_id, created_at').eq('event_id', eventId).eq('requester_id', participant.id).order('created_at', { ascending: true }),
+      // Extra Super Likes earned in the social game
+      supabase.from('game_rewards').select('id').eq('event_id', eventId).eq('participant_id', participant.id).eq('reward_type', 'super_like'),
+      // Extra Flechazos earned in the social game
+      supabase.from('game_rewards').select('id').eq('event_id', eventId).eq('participant_id', participant.id).eq('reward_type', 'crush'),
+      // Flechazos RECEIVED and still pending (shown in the participant panel)
+      supabase.from('crush_requests').select('id, token, status, requester_id, created_at').eq('event_id', eventId).eq('target_id', participant.id).eq('status', 'pending').order('created_at', { ascending: true }),
+    ]);
+
+
+    const preferencesMap = new Map<string, { preference: string | null; dating_preference: string | null; gender: string | null }>();
+    if (preferencesResult.data) {
+      for (const p of preferencesResult.data) {
+        preferencesMap.set(p.id, { preference: p.preference, dating_preference: p.dating_preference, gender: p.gender });
+      }
+    }
+
+    // Build final assignments with anonymized names and preferences
+    const finalAssignments = assignments.map(a => ({
+      round: a.round,
+      table: a.table,
+      tablemates: a.tablemateEntries.map(tm => ({
+        id: tm.id,
+        name: anonymizeName(tm.name),
+        preference: preferencesMap.get(tm.id)?.preference || null,
+        dating_preference: preferencesMap.get(tm.id)?.dating_preference || null,
+        gender: preferencesMap.get(tm.id)?.gender || null,
+      }))
+    }));
+
+    const existingSelections = (selectionsResult.data || []).map((s: any) => ({
+      selected_id: s.selected_id,
+      selection_type: s.selection_type,
+      is_super_like: !!s.is_super_like,
+    }));
+
+    const superLikesUsed = (sentSuperLikeResult.data || []).length;
+    const superLikeAllowance = 1 + ((superLikeRewardsResult as any)?.data || []).length;
+    const hasSentSuperLike = superLikesUsed >= superLikeAllowance;
+    const crushesSent = (((existingCrushResult as any)?.data || []) as any[]).map((c: any) => ({
+      status: c.status,
+      targetId: c.target_id,
+    }));
+    const crushAllowance = 1 + ((crushRewardsResult as any)?.data || []).length;
+
+    // Pending Flechazos received: expose id + token so the panel can accept/decline them
+    const pendingCrushRows = (((receivedCrushResult as any)?.data || []) as any[]);
+    let crushesReceived: { id: string; token: string; requesterId: string; requesterName: string; createdAt: string }[] = [];
+    if (pendingCrushRows.length > 0) {
+      const requesterIds = Array.from(new Set(pendingCrushRows.map((c: any) => c.requester_id).filter(Boolean)));
+      const { data: requesters } = await supabase.from('participants').select('id, name').in('id', requesterIds);
+      const nameMap = new Map<string, string>((requesters || []).map((r: any) => [r.id, anonymizeName(r.name)]));
+      crushesReceived = pendingCrushRows.map((c: any) => ({
+        id: c.id,
+        token: c.token,
+        requesterId: c.requester_id,
+        requesterName: nameMap.get(c.requester_id) || '',
+        createdAt: c.created_at,
+      }));
+    }
+
+    const receivedSuperLikeSenderIds = Array.from(new Set(((receivedSuperLikeResult.data || []) as any[]).map((r: any) => r.selector_id).filter(Boolean)));
+    const hasReceivedSuperLike = receivedSuperLikeSenderIds.length > 0;
+
+    console.log(`[get-table-assignments] Found ${finalAssignments.length} assignments for participant ${participant.id} (filtered to round ${currentRound})`);
+
+    // Build a lightweight game_mode payload for the participant UI (no `played` map sent to clients)
+    const gmRaw = (event as any).game_mode;
+    const gameModePayload = gmRaw && gmRaw.enabled && Array.isArray(gmRaw.dynamics)
+      ? {
+          enabled: true,
+          dynamics: gmRaw.dynamics
+            .filter((d: any) => d && typeof d.id === 'string' && Array.isArray(d.table_numbers))
+            .map((d: any) => ({
+              id: String(d.id),
+              name: String(d.name || ''),
+              table_numbers: d.table_numbers
+                .map((n: any) => Number(n))
+                .filter((n: number) => Number.isFinite(n) && n > 0),
+            })),
+        }
+      : null;
+
+        const icebreakerCfg = (event as any).social_game;
+    const icebreakerGames: string[] = icebreakerCfg?.enabled
+      ? (icebreakerCfg.games
+          ? ["who_is_who", "build_yourself", "timeline", "emoji_story"].filter(
+              (c) => !!icebreakerCfg.games?.[c]?.enabled,
+            )
+          : ["who_is_who"])
+      : [];
+
+
+return new Response(
+      JSON.stringify({ 
+        participantName: anonymizeName(participant.name),
+        participantPreference: participant.preference,
+        participantDatingPreference: participant.dating_preference,
+        participantGender: participant.gender,
+        assignments: finalAssignments,
+        existingSelections,
+        currentRound,
+        totalRounds,
+        eventStatus: event.status,
+        preliminaryConfirmation,
+        hasSentSuperLike,
+        superLikesUsed,
+        superLikeAllowance,
+        hasReceivedSuperLike,
+        receivedSuperLikeSenderIds,
+        crushEnabled: !!(event as any).crush_enabled,
+        isAnonymous: !!(participant as any).is_anonymous,
+        socialGameEnabled: icebreakerGames.length > 0 && !(participant as any).is_anonymous,
+        icebreakerGames: (participant as any).is_anonymous ? [] : icebreakerGames,
+        crushes: crushesSent,
+        crushAllowance,
+        crushesUsed: crushesSent.length,
+        hasSentCrush: crushesSent.length >= crushAllowance,
+        existingCrush: crushesSent[0] || null,
+        crushesReceived,
+
+        gameMode: gameModePayload,
+        timer: {
+          roundDuration: Math.floor((event.round_duration || 300) / 60),
+          roundStartedAt: event.round_started_at,
+          roundPausedAt: event.round_paused_at,
+          roundElapsedSeconds: event.round_elapsed_seconds || 0,
+          completedRounds,
+        }
+      }),
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
+
+  } catch (error) {
+    console.error('[get-table-assignments] Unexpected error:', error);
+    return new Response(
+      JSON.stringify({ error: 'Error interno del servidor' }),
+      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
+  }
+});
+
+
+export default async function handler(req: Request): Promise<Response> {
+  if (!__handler) throw new Error("handler not registered");
+  return await __handler(req);
+}
