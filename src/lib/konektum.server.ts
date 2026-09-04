@@ -181,7 +181,8 @@ export interface KonWaitlistEntry {
 }
 
 export interface KonEventDetail {
-  event: Record<string, unknown> & { id: string; name: string; date: string; status: string };
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  event: Record<string, any> & { id: string; name: string; date: string; status: string };
   participants: KonParticipant[];
   selections: KonSelection[];
   waitlist: KonWaitlistEntry[];
