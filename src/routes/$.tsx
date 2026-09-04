@@ -5,6 +5,7 @@ import { BlogPostPage } from "@/components/pages/BlogPostPage";
 import { resolveCustomPage, getPageBlocks } from "@/lib/blocks.functions";
 import { CustomPage } from "@/components/pages/CustomPage";
 import { getPublishedForm } from "@/lib/registrations.functions";
+import { resolveKonEvent } from "@/lib/kon-public.functions";
 import { PublicRegistrationPage } from "@/components/pages/PublicRegistrationPage";
 
 type Locale = "es" | "ca" | "en";
@@ -58,15 +59,29 @@ export const Route = createFileRoute("/$")({
         // 3) Blog post (WordPress slug).
         const { post } = await getBlogPostBySlug({ data: { slug: slugCandidate, locale } });
         if (post) return { kind: "post" as const, post, locale };
+
+        // 4) Konektum event slug at root -> public registration page.
+        if (locale === "es") {
+          const konEvent = await resolveKonEvent({ data: { slug: slugCandidate } });
+          if (konEvent) {
+            throw redirect({
+              to: "/$eventSlug/registro",
+              params: { eventSlug: konEvent.slug || slugCandidate },
+            });
+          }
+        }
       }
+
 
       // Fall back to redirect lookup
       const { to } = await lookupRedirect({ data: { path: pathname } });
       if (to) throw redirect({ href: to, statusCode: 301, reloadDocument: true });
     } catch (e) {
       // Re-throw redirects so TanStack handles them.
+      if (e instanceof Response) throw e;
       if (e && typeof e === "object" && "isRedirect" in (e as object)) throw e;
       console.error("[$.tsx] catch-all loader failed", e);
+
     }
 
     return { kind: "not-found" as const, path: pathname };
