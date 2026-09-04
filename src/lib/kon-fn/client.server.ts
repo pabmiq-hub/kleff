@@ -40,13 +40,18 @@ const KON_TABLES = new Set([
   "wrapped_table_requests",
 ]);
 
-const VIEW_ALIASES: Record<string, string> = {
-  events_public: "events",
-  organizers_public: "organizers",
-  organizer_branding_public: "organizer_branding",
+// Public (anon-readable) views live under their own `kon_*_public` names.
+const PUBLIC_VIEWS: Record<string, string> = {
+  events_public: "kon_events_public",
+  organizers_public: "kon_organizers_public",
+  organizer_branding_public: "kon_organizer_branding_public",
 };
 
+const VIEW_ALIASES: Record<string, string> = {};
+
 export function konTable(name: string): string {
+  const publicView = PUBLIC_VIEWS[name];
+  if (publicView) return publicView;
   const resolved = VIEW_ALIASES[name] ?? name;
   return KON_TABLES.has(resolved) ? `kon_${resolved}` : resolved;
 }
