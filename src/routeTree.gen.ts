@@ -116,7 +116,6 @@ import { Route as AdminMediaNewRouteImport } from './routes/admin.media.new'
 import { Route as AdminMediaIdRouteImport } from './routes/admin.media.$id'
 import { Route as AdminKonektumUsuariosRouteImport } from './routes/admin.konektum.usuarios'
 import { Route as AdminKonektumPlantillasRouteImport } from './routes/admin.konektum.plantillas'
-import { Route as AdminKonektumEventosRouteImport } from './routes/admin.konektum.eventos'
 import { Route as AdminKonektumEmailRouteImport } from './routes/admin.konektum.email'
 import { Route as AdminKonektumConfiguracionRouteImport } from './routes/admin.konektum.configuracion'
 import { Route as AdminKonektumAnaliticaRouteImport } from './routes/admin.konektum.analitica'
@@ -125,8 +124,10 @@ import { Route as AdminContentRedirectsRouteImport } from './routes/admin.conten
 import { Route as AdminContentPageKeyRouteImport } from './routes/admin.content.$pageKey'
 import { Route as AdminBlogNewRouteImport } from './routes/admin.blog.new'
 import { Route as AdminBlogIdRouteImport } from './routes/admin.blog.$id'
+import { Route as AdminKonektumEventosIndexRouteImport } from './routes/admin.konektum.eventos.index'
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
 import { Route as ApiPublicHooksFeaturedDispatchRouteImport } from './routes/api.public.hooks.featured-dispatch'
+import { Route as AdminKonektumEventosIdRouteImport } from './routes/admin.konektum.eventos.$id'
 
 const TorneosRoute = TorneosRouteImport.update({
   id: '/torneos',
@@ -665,11 +666,6 @@ const AdminKonektumPlantillasRoute = AdminKonektumPlantillasRouteImport.update({
   path: '/plantillas',
   getParentRoute: () => AdminKonektumRoute,
 } as any)
-const AdminKonektumEventosRoute = AdminKonektumEventosRouteImport.update({
-  id: '/eventos',
-  path: '/eventos',
-  getParentRoute: () => AdminKonektumRoute,
-} as any)
 const AdminKonektumEmailRoute = AdminKonektumEmailRouteImport.update({
   id: '/email',
   path: '/email',
@@ -711,6 +707,12 @@ const AdminBlogIdRoute = AdminBlogIdRouteImport.update({
   path: '/$id',
   getParentRoute: () => AdminBlogRoute,
 } as any)
+const AdminKonektumEventosIndexRoute =
+  AdminKonektumEventosIndexRouteImport.update({
+    id: '/eventos/',
+    path: '/eventos/',
+    getParentRoute: () => AdminKonektumRoute,
+  } as any)
 const LovableEmailQueueProcessRoute =
   LovableEmailQueueProcessRouteImport.update({
     id: '/lovable/email/queue/process',
@@ -723,6 +725,11 @@ const ApiPublicHooksFeaturedDispatchRoute =
     path: '/api/public/hooks/featured-dispatch',
     getParentRoute: () => rootRouteImport,
   } as any)
+const AdminKonektumEventosIdRoute = AdminKonektumEventosIdRouteImport.update({
+  id: '/eventos/$id',
+  path: '/eventos/$id',
+  getParentRoute: () => AdminKonektumRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -814,7 +821,6 @@ export interface FileRoutesByFullPath {
   '/admin/konektum/analitica': typeof AdminKonektumAnaliticaRoute
   '/admin/konektum/configuracion': typeof AdminKonektumConfiguracionRoute
   '/admin/konektum/email': typeof AdminKonektumEmailRoute
-  '/admin/konektum/eventos': typeof AdminKonektumEventosRoute
   '/admin/konektum/plantillas': typeof AdminKonektumPlantillasRoute
   '/admin/konektum/usuarios': typeof AdminKonektumUsuariosRoute
   '/admin/media/$id': typeof AdminMediaIdRoute
@@ -841,8 +847,10 @@ export interface FileRoutesByFullPath {
   '/admin/registrations/': typeof AdminRegistrationsIndexRoute
   '/admin/rentals/': typeof AdminRentalsIndexRoute
   '/app/rentals/': typeof AppRentalsIndexRoute
+  '/admin/konektum/eventos/$id': typeof AdminKonektumEventosIdRoute
   '/api/public/hooks/featured-dispatch': typeof ApiPublicHooksFeaturedDispatchRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
+  '/admin/konektum/eventos/': typeof AdminKonektumEventosIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -926,7 +934,6 @@ export interface FileRoutesByTo {
   '/admin/konektum/analitica': typeof AdminKonektumAnaliticaRoute
   '/admin/konektum/configuracion': typeof AdminKonektumConfiguracionRoute
   '/admin/konektum/email': typeof AdminKonektumEmailRoute
-  '/admin/konektum/eventos': typeof AdminKonektumEventosRoute
   '/admin/konektum/plantillas': typeof AdminKonektumPlantillasRoute
   '/admin/konektum/usuarios': typeof AdminKonektumUsuariosRoute
   '/admin/media/$id': typeof AdminMediaIdRoute
@@ -953,8 +960,10 @@ export interface FileRoutesByTo {
   '/admin/registrations': typeof AdminRegistrationsIndexRoute
   '/admin/rentals': typeof AdminRentalsIndexRoute
   '/app/rentals': typeof AppRentalsIndexRoute
+  '/admin/konektum/eventos/$id': typeof AdminKonektumEventosIdRoute
   '/api/public/hooks/featured-dispatch': typeof ApiPublicHooksFeaturedDispatchRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
+  '/admin/konektum/eventos': typeof AdminKonektumEventosIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -1047,7 +1056,6 @@ export interface FileRoutesById {
   '/admin/konektum/analitica': typeof AdminKonektumAnaliticaRoute
   '/admin/konektum/configuracion': typeof AdminKonektumConfiguracionRoute
   '/admin/konektum/email': typeof AdminKonektumEmailRoute
-  '/admin/konektum/eventos': typeof AdminKonektumEventosRoute
   '/admin/konektum/plantillas': typeof AdminKonektumPlantillasRoute
   '/admin/konektum/usuarios': typeof AdminKonektumUsuariosRoute
   '/admin/media/$id': typeof AdminMediaIdRoute
@@ -1074,8 +1082,10 @@ export interface FileRoutesById {
   '/admin/registrations/': typeof AdminRegistrationsIndexRoute
   '/admin/rentals/': typeof AdminRentalsIndexRoute
   '/app/rentals/': typeof AppRentalsIndexRoute
+  '/admin/konektum/eventos/$id': typeof AdminKonektumEventosIdRoute
   '/api/public/hooks/featured-dispatch': typeof ApiPublicHooksFeaturedDispatchRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
+  '/admin/konektum/eventos/': typeof AdminKonektumEventosIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -1169,7 +1179,6 @@ export interface FileRouteTypes {
     | '/admin/konektum/analitica'
     | '/admin/konektum/configuracion'
     | '/admin/konektum/email'
-    | '/admin/konektum/eventos'
     | '/admin/konektum/plantillas'
     | '/admin/konektum/usuarios'
     | '/admin/media/$id'
@@ -1196,8 +1205,10 @@ export interface FileRouteTypes {
     | '/admin/registrations/'
     | '/admin/rentals/'
     | '/app/rentals/'
+    | '/admin/konektum/eventos/$id'
     | '/api/public/hooks/featured-dispatch'
     | '/lovable/email/queue/process'
+    | '/admin/konektum/eventos/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -1281,7 +1292,6 @@ export interface FileRouteTypes {
     | '/admin/konektum/analitica'
     | '/admin/konektum/configuracion'
     | '/admin/konektum/email'
-    | '/admin/konektum/eventos'
     | '/admin/konektum/plantillas'
     | '/admin/konektum/usuarios'
     | '/admin/media/$id'
@@ -1308,8 +1318,10 @@ export interface FileRouteTypes {
     | '/admin/registrations'
     | '/admin/rentals'
     | '/app/rentals'
+    | '/admin/konektum/eventos/$id'
     | '/api/public/hooks/featured-dispatch'
     | '/lovable/email/queue/process'
+    | '/admin/konektum/eventos'
   id:
     | '__root__'
     | '/'
@@ -1401,7 +1413,6 @@ export interface FileRouteTypes {
     | '/admin/konektum/analitica'
     | '/admin/konektum/configuracion'
     | '/admin/konektum/email'
-    | '/admin/konektum/eventos'
     | '/admin/konektum/plantillas'
     | '/admin/konektum/usuarios'
     | '/admin/media/$id'
@@ -1428,8 +1439,10 @@ export interface FileRouteTypes {
     | '/admin/registrations/'
     | '/admin/rentals/'
     | '/app/rentals/'
+    | '/admin/konektum/eventos/$id'
     | '/api/public/hooks/featured-dispatch'
     | '/lovable/email/queue/process'
+    | '/admin/konektum/eventos/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -2255,13 +2268,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminKonektumPlantillasRouteImport
       parentRoute: typeof AdminKonektumRoute
     }
-    '/admin/konektum/eventos': {
-      id: '/admin/konektum/eventos'
-      path: '/eventos'
-      fullPath: '/admin/konektum/eventos'
-      preLoaderRoute: typeof AdminKonektumEventosRouteImport
-      parentRoute: typeof AdminKonektumRoute
-    }
     '/admin/konektum/email': {
       id: '/admin/konektum/email'
       path: '/email'
@@ -2318,6 +2324,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminBlogIdRouteImport
       parentRoute: typeof AdminBlogRoute
     }
+    '/admin/konektum/eventos/': {
+      id: '/admin/konektum/eventos/'
+      path: '/eventos'
+      fullPath: '/admin/konektum/eventos/'
+      preLoaderRoute: typeof AdminKonektumEventosIndexRouteImport
+      parentRoute: typeof AdminKonektumRoute
+    }
     '/lovable/email/queue/process': {
       id: '/lovable/email/queue/process'
       path: '/lovable/email/queue/process'
@@ -2331,6 +2344,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/api/public/hooks/featured-dispatch'
       preLoaderRoute: typeof ApiPublicHooksFeaturedDispatchRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/admin/konektum/eventos/$id': {
+      id: '/admin/konektum/eventos/$id'
+      path: '/eventos/$id'
+      fullPath: '/admin/konektum/eventos/$id'
+      preLoaderRoute: typeof AdminKonektumEventosIdRouteImport
+      parentRoute: typeof AdminKonektumRoute
     }
   }
 }
@@ -2373,20 +2393,22 @@ interface AdminKonektumRouteChildren {
   AdminKonektumAnaliticaRoute: typeof AdminKonektumAnaliticaRoute
   AdminKonektumConfiguracionRoute: typeof AdminKonektumConfiguracionRoute
   AdminKonektumEmailRoute: typeof AdminKonektumEmailRoute
-  AdminKonektumEventosRoute: typeof AdminKonektumEventosRoute
   AdminKonektumPlantillasRoute: typeof AdminKonektumPlantillasRoute
   AdminKonektumUsuariosRoute: typeof AdminKonektumUsuariosRoute
   AdminKonektumIndexRoute: typeof AdminKonektumIndexRoute
+  AdminKonektumEventosIdRoute: typeof AdminKonektumEventosIdRoute
+  AdminKonektumEventosIndexRoute: typeof AdminKonektumEventosIndexRoute
 }
 
 const AdminKonektumRouteChildren: AdminKonektumRouteChildren = {
   AdminKonektumAnaliticaRoute: AdminKonektumAnaliticaRoute,
   AdminKonektumConfiguracionRoute: AdminKonektumConfiguracionRoute,
   AdminKonektumEmailRoute: AdminKonektumEmailRoute,
-  AdminKonektumEventosRoute: AdminKonektumEventosRoute,
   AdminKonektumPlantillasRoute: AdminKonektumPlantillasRoute,
   AdminKonektumUsuariosRoute: AdminKonektumUsuariosRoute,
   AdminKonektumIndexRoute: AdminKonektumIndexRoute,
+  AdminKonektumEventosIdRoute: AdminKonektumEventosIdRoute,
+  AdminKonektumEventosIndexRoute: AdminKonektumEventosIndexRoute,
 }
 
 const AdminKonektumRouteWithChildren = AdminKonektumRoute._addFileChildren(
