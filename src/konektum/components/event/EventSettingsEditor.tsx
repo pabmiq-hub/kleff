@@ -243,7 +243,7 @@ const EventSettingsEditor = ({
     const loadExtras = async () => {
       const { data } = await supabase
         .from("events")
-        .select("custom_registration_form, wrapped_enabled, wrapped_questions, social_game, languages_enabled, available_languages")
+        .select("slug, custom_registration_form, wrapped_enabled, wrapped_questions, social_game, languages_enabled, available_languages")
         .eq("id", eventId)
         .single();
 
