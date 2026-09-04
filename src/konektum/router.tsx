@@ -56,9 +56,30 @@ export function useNavigate() {
   );
 }
 
-export function useParams<T extends Record<string, string | undefined>>(): T {
-  return useTanstackParams({ strict: false } as never) as T;
+/**
+ * Lets slug-based public routes inject the resolved event id so the ported
+ * participant pages keep reading `useParams().id`.
+ */
+const ParamsOverrideContext = React.createContext<Record<string, string | undefined>>({});
+
+export function ParamsOverrideProvider({
+  value,
+  children,
+}: {
+  value: Record<string, string | undefined>;
+  children: React.ReactNode;
+}) {
+  const parent = React.useContext(ParamsOverrideContext);
+  const merged = React.useMemo(() => ({ ...parent, ...value }), [parent, value]);
+  return <ParamsOverrideContext.Provider value={merged}>{children}</ParamsOverrideContext.Provider>;
 }
+
+export function useParams<T extends Record<string, string | undefined>>(): T {
+  const routeParams = useTanstackParams({ strict: false } as never) as Record<string, string | undefined>;
+  const overrides = React.useContext(ParamsOverrideContext);
+  return React.useMemo(() => ({ ...routeParams, ...overrides }), [routeParams, overrides]) as T;
+}
+
 
 export function useSearchParams(): [
   URLSearchParams,

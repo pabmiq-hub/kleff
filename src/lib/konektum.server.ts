@@ -250,6 +250,7 @@ export async function loadKonektumEvent(eventId: string): Promise<KonEventDetail
 
 const EVENT_EDITABLE = new Set([
   "name",
+  "slug",
   "date",
   "event_time",
   "event_location",

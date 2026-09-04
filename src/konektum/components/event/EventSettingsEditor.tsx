@@ -29,6 +29,7 @@ import { Checkbox } from "@/konektum/ui/checkbox";
 import WrappedQuestionsEditor from "./WrappedQuestionsEditor";
 import IcebreakersEditor from "./IcebreakersEditor";
 import { normalizeIcebreakers, serializeIcebreakers, type IcebreakersConfig } from "@/konektum/lib/icebreakers";
+import { slugifyEventName } from "@/konektum/lib/publicUrls";
 import { DEFAULT_WRAPPED_QUESTIONS, getWrappedQuestions, type WrappedQuestion } from "@/konektum/lib/wrappedQuestions";
 
 const AVAILABLE_LANGUAGE_OPTIONS: { code: string; label: string }[] = [
@@ -138,6 +139,7 @@ const EventSettingsEditor = ({
 
 
   const [formName, setFormName] = useState(name);
+  const [formSlug, setFormSlug] = useState("");
   const [formDate, setFormDate] = useState(date);
   const [formEventTime, setFormEventTime] = useState(eventTime || "");
   const [formEventLocation, setFormEventLocation] = useState(eventLocation || "");
@@ -241,7 +243,7 @@ const EventSettingsEditor = ({
     const loadExtras = async () => {
       const { data } = await supabase
         .from("events")
-        .select("custom_registration_form, wrapped_enabled, wrapped_questions, social_game, languages_enabled, available_languages")
+        .select("slug, custom_registration_form, wrapped_enabled, wrapped_questions, social_game, languages_enabled, available_languages")
         .eq("id", eventId)
         .single();
 
@@ -252,6 +254,7 @@ const EventSettingsEditor = ({
           setCustomFormFields(formConfig.fields);
         }
       }
+      if ((data as any)?.slug) setFormSlug((data as any).slug);
       if ((data as any)?.wrapped_enabled) setFormWrappedEnabled(true);
       setFormSocialGame(normalizeIcebreakers((data as any)?.social_game));
       setFormWrappedQuestions(getWrappedQuestions((data as any)?.wrapped_questions));
@@ -286,6 +289,7 @@ const EventSettingsEditor = ({
     try {
       const updates: Record<string, any> = {
         name: formName,
+        slug: slugifyEventName(formSlug || formName) || null,
         date: formDate,
         event_time: formEventTime.trim() || null,
         event_location: formEventLocation.trim() || null,
@@ -429,6 +433,23 @@ const EventSettingsEditor = ({
                 value={formName}
                 onChange={(e) => setFormName(e.target.value)}
               />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="event-slug">Enlace público</Label>
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-muted-foreground whitespace-nowrap">
+                  {typeof window !== "undefined" ? window.location.host : "kleff.es"}/
+                </span>
+                <Input
+                  id="event-slug"
+                  value={formSlug}
+                  placeholder="mi-evento"
+                  onChange={(e) => setFormSlug(slugifyEventName(e.target.value))}
+                />
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Enlaces: /{formSlug || "mi-evento"}/registro · /check-in · /usuario · /mesas · /seleccion
+              </p>
             </div>
             <div className="space-y-2">
               <Label htmlFor="event-date">Fecha</Label>

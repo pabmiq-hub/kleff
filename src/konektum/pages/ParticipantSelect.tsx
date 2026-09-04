@@ -1,0 +1,1494 @@
+// @ts-nocheck
+import { useState, useEffect } from "react";
+import { useParams, Link } from "@/konektum/router";
+import { Button } from "@/konektum/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/konektum/ui/card";
+import { ArrowLeft, Sparkles, AlertCircle, Loader2, Users, Smile, CheckCircle, Clock, Heart, KeyRound, Star, Repeat2, Pencil, Send, X } from "lucide-react";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/konektum/ui/alert-dialog";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/konektum/ui/accordion";
+import { useToast } from "@/konektum/hooks/use-toast";
+import { supabase } from "@/konektum/supabase";
+import { Checkbox } from "@/konektum/ui/checkbox";
+import { formatAnonymousName } from "@/konektum/lib/utils";
+import { Badge } from "@/konektum/ui/badge";
+import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/konektum/ui/input-otp";
+import { BrandedLogo } from "@/konektum/components/BrandedHeader";
+import { useEventBranding } from "@/konektum/hooks/useEventBranding";
+import { translations, Language } from "@/konektum/i18n/translations";
+import confetti from "canvas-confetti";
+import SuperLikeOnboarding from "@/konektum/ui/super-like-onboarding";
+import SuperLikeBanner from "@/konektum/ui/super-like-banner";
+import SuperLikeConfirmDialog from "@/konektum/ui/super-like-confirm-dialog";
+
+interface Participant {
+  id: string;
+  name: string;
+  email?: string;
+  phone?: string;
+  preference?: string;
+  dating_preference?: string;
+  gender?: string;
+}
+
+// Detects if a participant's connection preference includes romance/dating interest.
+// Used to gate the Flechazo action (must be reciprocal).
+const wantsRomance = (pref?: string | null): boolean => {
+  const s = (pref || '').toLowerCase().trim();
+  if (!s) return false;
+  const friendshipOnly = ['solo amistad', 'amistad', 'friendship', 'friendship only', 'nuevas amistades', 'nuevas amistades.'];
+  if (friendshipOnly.includes(s)) return false;
+  return /(ligue|dating|romance|pareja|amistad y|friendship and|friendship &)/.test(s);
+};
+
+interface MatchSelection {
+  participantId: string;
+  friendship: boolean;
+  dating: boolean;
+  canShowDating: boolean;
+  alreadySelected: boolean;
+  previousSelectionType?: string;
+}
+
+interface TableData {
+  round: number;
+  tables: { id: string; name: string }[][];
+}
+
+interface ExistingSelection {
+  selector_id: string;
+  selected_id: string;
+  selection_type: string;
+}
+
+type Step = "verify_code" | "confirm_identity" | "select" | "done" | "error" | "not_started" | "completed";
+
+const areDatingPreferencesCompatible = (pref1: string, gender1: string | null, pref2: string, gender2: string | null): boolean => {
+  const openPrefs = ["Estoy abierto a todo", "Estoy abierta a todo", "Estoy abierto/a a todo", "No binario", "I'm open to all", "I am open to all", "Non-binary"];
+  const p1IsOpen = openPrefs.some(o => pref1.includes(o));
+  const p2IsOpen = openPrefs.some(o => pref2.includes(o));
+
+  const p1LookingForWoman = pref1.includes("busco una mujer") || pref1.includes("looking for a woman");
+  const p1LookingForMan = pref1.includes("busco un hombre") || pref1.includes("looking for a man");
+  const p2LookingForWoman = pref2.includes("busco una mujer") || pref2.includes("looking for a woman");
+  const p2LookingForMan = pref2.includes("busco un hombre") || pref2.includes("looking for a man");
+
+  const p1IsWoman = gender1 === "Mujer" || gender1 === "Woman" || pref1.includes("Soy una mujer") || pref1.includes("I'm a woman") || pref1.includes("I am a woman");
+  const p1IsMan = gender1 === "Hombre" || gender1 === "Man" || pref1.includes("Soy un hombre") || pref1.includes("I'm a man") || pref1.includes("I am a man");
+  const p2IsWoman = gender2 === "Mujer" || gender2 === "Woman" || pref2.includes("Soy una mujer") || pref2.includes("I'm a woman") || pref2.includes("I am a woman");
+  const p2IsMan = gender2 === "Hombre" || gender2 === "Man" || pref2.includes("Soy un hombre") || pref2.includes("I'm a man") || pref2.includes("I am a man");
+
+  // Both open → compatible
+  if (p1IsOpen && p2IsOpen) return true;
+  // p1 open: p2 must accept p1's gender
+  if (p1IsOpen) {
+    if (p1IsMan && p2LookingForMan) return true;
+    if (p1IsWoman && p2LookingForWoman) return true;
+    return false;
+  }
+  // p2 open: p1 must accept p2's gender
+  if (p2IsOpen) {
+    if (p2IsMan && p1LookingForMan) return true;
+    if (p2IsWoman && p1LookingForWoman) return true;
+    return false;
+  }
+
+  // Hetero: man→woman & woman→man
+  if (p1IsMan && p1LookingForWoman && p2IsWoman && p2LookingForMan) return true;
+  if (p1IsWoman && p1LookingForMan && p2IsMan && p2LookingForWoman) return true;
+  // Gay: man→man & man→man
+  if (p1IsMan && p1LookingForMan && p2IsMan && p2LookingForMan) return true;
+  // Lesbian: woman→woman & woman→woman
+  if (p1IsWoman && p1LookingForWoman && p2IsWoman && p2LookingForWoman) return true;
+
+  return false;
+};
+
+const ParticipantSelect = () => {
+  const { id: eventId } = useParams();
+  const eb = useEventBranding(eventId);
+  const [step, setStep] = useState<Step>("verify_code");
+  const [verificationCode, setVerificationCode] = useState("");
+  const [verifiedParticipant, setVerifiedParticipant] = useState<Participant | null>(null);
+  const [isVerifying, setIsVerifying] = useState(false);
+  
+  const [participants, setParticipants] = useState<Participant[]>([]);
+  const [matchSelections, setMatchSelections] = useState<MatchSelection[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [currentUserPreference, setCurrentUserPreference] = useState<string | null>(null);
+  const [tablesData, setTablesData] = useState<TableData[]>([]);
+  const [existingSelections, setExistingSelections] = useState<ExistingSelection[]>([]);
+  const [eventStatus, setEventStatus] = useState<string>("");
+  const [currentRound, setCurrentRound] = useState<number>(0);
+  const [superLikeEnabled, setSuperLikeEnabled] = useState(false);
+  const [superLikeId, setSuperLikeId] = useState<string | null>(null);
+  const [existingSuperLike, setExistingSuperLike] = useState(false);
+  const [hasReceivedSuperLike, setHasReceivedSuperLike] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState(false);
+  const [confirmSuperLikeFor, setConfirmSuperLikeFor] = useState<{ id: string; name: string } | null>(null);
+  const [repeatRequestUsed, setRepeatRequestUsed] = useState<{ status: string; targetId?: string } | null>(null);
+  const [confirmRepeatFor, setConfirmRepeatFor] = useState<{ id: string; name: string } | null>(null);
+  const [isSendingRepeat, setIsSendingRepeat] = useState(false);
+  const [repeatEnabled, setRepeatEnabled] = useState(false);
+  const [crushEnabled, setCrushEnabled] = useState(false);
+  const [crushUsed, setCrushUsed] = useState<{ status: string; targetId?: string } | null>(null);
+  const [confirmCrushFor, setConfirmCrushFor] = useState<{ id: string; name: string } | null>(null);
+  const [isSendingCrush, setIsSendingCrush] = useState(false);
+  const [totalRounds, setTotalRounds] = useState<number>(0);
+  const [editingIds, setEditingIds] = useState<Set<string>>(new Set());
+  const [pendingEdits, setPendingEdits] = useState<Map<string, { friendship: boolean; dating: boolean; originalType?: string }>>(new Map());
+  const [confirmEditSubmit, setConfirmEditSubmit] = useState(false);
+  const [reviewedRounds, setReviewedRounds] = useState<Set<number>>(new Set());
+  const [submittingRound, setSubmittingRound] = useState<number | null>(null);
+  const [openRound, setOpenRound] = useState<string>("");
+  const { toast } = useToast();
+
+  const [eventLang, setEventLang] = useState<Language>("es");
+  const t = translations[eventLang];
+
+  useEffect(() => {
+    const checkEventStatus = async () => {
+      if (!eventId) {
+        setStep("error");
+        setIsLoading(false);
+        return;
+      }
+
+      try {
+        const { data: event, error } = await (supabase as any)
+          .from('events_public')
+          .select('status, current_round, rounds, language, super_like_enabled, repeat_request_enabled, crush_enabled')
+          .eq('id', eventId)
+          .single();
+
+        if (error || !event) {
+          setStep("error");
+          setIsLoading(false);
+          return;
+        }
+
+        if (event.language === 'en' || event.language === 'es') {
+          setEventLang(event.language as Language);
+        }
+
+        setEventStatus(event.status);
+        setCurrentRound(event.current_round || 0);
+        setTotalRounds(event.rounds || 0);
+        setSuperLikeEnabled(event.super_like_enabled || false);
+
+        // "Repetir" — trust event-level toggle as source of truth.
+        // Plan-level enforcement happens at toggle time in the dashboard,
+        // and the request-repeat edge function re-validates server-side.
+        setRepeatEnabled(!!event.repeat_request_enabled);
+        setCrushEnabled(!!event.crush_enabled);
+
+        if (event.status === 'completed') {
+          setStep("completed");
+        } else if (event.status === 'pending' || event.current_round === 0) {
+          setStep("not_started");
+        }
+        
+        setIsLoading(false);
+      } catch (err) {
+        console.error('Error checking event status:', err);
+        setStep("error");
+        setIsLoading(false);
+      }
+    };
+
+    checkEventStatus();
+  }, [eventId]);
+
+  // Load reviewed-rounds (per participant per event) from localStorage
+  useEffect(() => {
+    if (!eventId || !verifiedParticipant?.id) return;
+    try {
+      const raw = localStorage.getItem(`reviewed_rounds_${eventId}_${verifiedParticipant.id}`);
+      if (raw) {
+        const arr = JSON.parse(raw);
+        if (Array.isArray(arr)) setReviewedRounds(new Set(arr.filter((n) => typeof n === "number")));
+      }
+    } catch (e) {
+      // ignore corrupted entries
+    }
+  }, [eventId, verifiedParticipant?.id]);
+
+  const persistReviewedRounds = (next: Set<number>) => {
+    setReviewedRounds(next);
+    if (eventId && verifiedParticipant?.id) {
+      try {
+        localStorage.setItem(
+          `reviewed_rounds_${eventId}_${verifiedParticipant.id}`,
+          JSON.stringify(Array.from(next))
+        );
+      } catch (e) {
+        // ignore quota errors
+      }
+    }
+  };
+
+  // Verify the code and get participant info
+  const handleVerifyCode = async () => {
+    if (verificationCode.length !== 6) {
+      toast({
+        title: t.select.incompleteCode,
+        description: t.select.incompleteCodeDesc,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsVerifying(true);
+
+    try {
+      const { data, error } = await supabase.functions.invoke('get-event-participants', {
+        body: { eventId, type: 'verify', verificationCode }
+      });
+
+      if (error || data?.error || !data?.participant) {
+        toast({
+          title: t.select.invalidCode,
+          description: t.select.invalidCodeDesc,
+          variant: "destructive",
+        });
+        setIsVerifying(false);
+        return;
+      }
+
+      setVerifiedParticipant(data.participant);
+      setStep("confirm_identity");
+    } catch (err) {
+      console.error('Error verifying code:', err);
+      toast({
+        title: "Error",
+        description: "Error",
+        variant: "destructive",
+      });
+    } finally {
+      setIsVerifying(false);
+    }
+  };
+
+  // Confirm identity and load full data
+  const handleConfirmIdentity = async () => {
+    if (!verifiedParticipant || !eventId) return;
+
+    setIsLoading(true);
+
+    try {
+      const { data, error } = await supabase.functions.invoke('get-event-participants', {
+        body: { eventId, type: 'select' }
+      });
+
+      if (error || data?.error || !data?.participants) {
+        setStep("error");
+        setIsLoading(false);
+        return;
+      }
+
+      const participantsData = data.participants;
+      const tables = data.tables || [];
+      const allExistingSelections = data.existingSelections || [];
+      if (data.featureFlags) {
+        setSuperLikeEnabled(!!data.featureFlags.superLikeEnabled);
+        setRepeatEnabled(!!data.featureFlags.repeatRequestEnabled);
+        setCrushEnabled(!!data.featureFlags.crushEnabled);
+      }
+
+      setParticipants(participantsData);
+      setTablesData(tables);
+      setExistingSelections(allExistingSelections);
+
+      // Check if participant already used their super like + received any
+      if (superLikeEnabled && verifiedParticipant) {
+        const [sentRes, receivedRes] = await Promise.all([
+          supabase
+            .from('participant_selections')
+            .select('id')
+            .eq('event_id', eventId)
+            .eq('selector_id', verifiedParticipant.id)
+            .eq('is_super_like', true)
+            .limit(1),
+          supabase
+            .from('participant_selections')
+            .select('id')
+            .eq('event_id', eventId)
+            .eq('selected_id', verifiedParticipant.id)
+            .eq('is_super_like', true)
+            .limit(1),
+        ]);
+        if (sentRes.data && sentRes.data.length > 0) setExistingSuperLike(true);
+        if (receivedRes.data && receivedRes.data.length > 0) setHasReceivedSuperLike(true);
+
+        // Show onboarding once per event
+        const onboardingKey = `superlike_onboarded_${eventId}`;
+        if (!localStorage.getItem(onboardingKey)) {
+          setShowOnboarding(true);
+          localStorage.setItem(onboardingKey, "1");
+        }
+      }
+
+      // Check existing repeat request for this participant
+      if (verifiedParticipant) {
+        const { data: existingRepeat } = await supabase
+          .from('repeat_requests')
+          .select('status, target_id')
+          .eq('event_id', eventId)
+          .eq('requester_id', verifiedParticipant.id)
+          .maybeSingle();
+        if (existingRepeat) {
+          setRepeatRequestUsed({ status: existingRepeat.status, targetId: existingRepeat.target_id });
+        }
+
+        // Check existing crush (Flechazo) for this participant
+        const { data: existingCrush } = await supabase
+          .from('crush_requests')
+          .select('status, target_id')
+          .eq('event_id', eventId)
+          .eq('requester_id', verifiedParticipant.id)
+          .maybeSingle();
+        if (existingCrush) {
+          setCrushUsed({ status: existingCrush.status, targetId: existingCrush.target_id });
+        }
+      }
+
+      const userPreference = verifiedParticipant.preference || null;
+      setCurrentUserPreference(userPreference);
+
+      const tablemates = getTablemates(verifiedParticipant.id, tables, participantsData);
+      const userExistingSelections = getUserExistingSelections(verifiedParticipant.id, allExistingSelections);
+
+      const userInterestedInDating = userPreference?.toLowerCase().includes('sentimental') ||
+        userPreference?.toLowerCase().includes('pareja') ||
+        userPreference?.toLowerCase().includes('ligue');
+
+      const userDatingPref = verifiedParticipant.dating_preference || '';
+      const userGender = verifiedParticipant.gender || null;
+
+      setMatchSelections(tablemates.map(p => {
+        const targetPreference = p.preference?.toLowerCase() || '';
+        const targetInterestedInDating = targetPreference.includes('sentimental') ||
+          targetPreference.includes('pareja') ||
+          targetPreference.includes('ligue');
+
+        // Check dating preference compatibility (gender/orientation match).
+        // If either side has no declared orientation (anonymous or legacy participants),
+        // we cannot prove incompatibility → allow the dating option.
+        let datingCompatible = false;
+        if (userInterestedInDating && targetInterestedInDating) {
+          datingCompatible = !userDatingPref || !p.dating_preference
+            ? true
+            : areDatingPreferencesCompatible(
+              userDatingPref, userGender,
+              p.dating_preference, p.gender || null
+            );
+        }
+
+
+        const existingSelection = userExistingSelections.get(p.id);
+        const alreadySelected = !!existingSelection;
+
+        return {
+          participantId: p.id,
+          friendship: false,
+          dating: false,
+          canShowDating: userInterestedInDating && targetInterestedInDating && datingCompatible,
+          alreadySelected,
+          previousSelectionType: existingSelection,
+        };
+      }));
+
+      setStep("select");
+    } catch (err) {
+      console.error('Error loading data:', err);
+      setStep("error");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Helper functions
+  const getTablemates = (participantId: string, tables: TableData[], allParticipants: Participant[]): Participant[] => {
+    const tablematesIds = new Set<string>();
+    tables.forEach(round => {
+      round.tables.forEach(table => {
+        const participantAtTable = table.some(p => p.id === participantId);
+        if (participantAtTable) {
+          table.forEach(p => {
+            if (p.id !== participantId) tablematesIds.add(p.id);
+          });
+        }
+      });
+    });
+    if (tablematesIds.size === 0 && tables.length === 0) {
+      return allParticipants.filter(p => p.id !== participantId);
+    }
+    return allParticipants.filter(p => tablematesIds.has(p.id));
+  };
+
+  const getUserExistingSelections = (participantId: string, selections: ExistingSelection[]): Map<string, string> => {
+    const userSelections = new Map<string, string>();
+    selections.filter(s => s.selector_id === participantId).forEach(s => {
+      userSelections.set(s.selected_id, s.selection_type);
+    });
+    return userSelections;
+  };
+
+  const toggleSelection = (participantId: string, type: 'friendship' | 'dating') => {
+    setMatchSelections(prev =>
+      prev.map(ms =>
+        ms.participantId === participantId && !ms.alreadySelected
+          ? { ...ms, [type]: !ms[type] }
+          : ms
+      )
+    );
+  };
+
+  const getSelectionState = (participantId: string): MatchSelection => {
+    return matchSelections.find(ms => ms.participantId === participantId) || {
+      participantId, friendship: false, dating: false, canShowDating: false, alreadySelected: false
+    };
+  };
+
+  const hasAnySelection = (participantId: string) => {
+    const state = getSelectionState(participantId);
+    return state.friendship || state.dating || state.alreadySelected;
+  };
+
+  const requestSuperLike = (participantId: string, name: string) => {
+    if (existingSuperLike || superLikeId) {
+      toast({
+        title: eventLang === "es" ? "Super Like ya asignado" : "Super Like already assigned",
+        description: eventLang === "es" ? "Solo puedes dar 1 Super Like por evento" : "You can only give 1 Super Like per event",
+        variant: "destructive",
+      });
+      return;
+    }
+    setConfirmSuperLikeFor({ id: participantId, name: formatAnonymousName(name) });
+  };
+
+  const confirmSuperLike = () => {
+    if (!confirmSuperLikeFor) return;
+    setSuperLikeId(confirmSuperLikeFor.id);
+    // Confetti burst
+    confetti({
+      particleCount: 80,
+      spread: 70,
+      origin: { y: 0.6 },
+      colors: ["#fbbf24", "#f59e0b", "#fde68a", "#ffffff"],
+    });
+    toast({
+      title: eventLang === "es" ? "⭐ Super Like asignado" : "⭐ Super Like assigned",
+      description: eventLang === "es"
+        ? "Se enviará al confirmar tus selecciones"
+        : "It will be sent when you confirm your selections",
+    });
+    setConfirmSuperLikeFor(null);
+  };
+
+  const requestRepeat = (participantId: string, name: string) => {
+    if (repeatRequestUsed) {
+      toast({
+        title: eventLang === "es" ? "Ya has usado tu repetición" : "You already used your repeat",
+        description: eventLang === "es"
+          ? "Solo puedes solicitar repetir con una persona por evento"
+          : "You can only request to repeat with one person per event",
+        variant: "destructive",
+      });
+      return;
+    }
+    setConfirmRepeatFor({ id: participantId, name: formatAnonymousName(name) });
+  };
+
+  const confirmRepeat = async () => {
+    if (!confirmRepeatFor || !verifiedParticipant || !eventId) return;
+    setIsSendingRepeat(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('request-repeat', {
+        body: {
+          event_id: eventId,
+          requester_id: verifiedParticipant.id,
+          target_id: confirmRepeatFor.id,
+        },
+      });
+      if (error || data?.error) {
+        toast({
+          title: "Error",
+          description: data?.error || (eventLang === "es" ? "No se pudo enviar la solicitud" : "Could not send the request"),
+          variant: "destructive",
+        });
+        return;
+      }
+      setRepeatRequestUsed({ status: "pending", targetId: confirmRepeatFor.id });
+      toast({
+        title: eventLang === "es" ? "🔁 Solicitud enviada" : "🔁 Request sent",
+        description: eventLang === "es"
+          ? "La otra persona recibirá un email para aceptar o rechazar tu solicitud"
+          : "The other person will receive an email to accept or decline your request",
+      });
+      setConfirmRepeatFor(null);
+    } catch (err) {
+      console.error('Error sending repeat request:', err);
+      toast({ title: "Error", description: String(err), variant: "destructive" });
+    } finally {
+      setIsSendingRepeat(false);
+    }
+  };
+
+  const requestCrush = (participantId: string, name: string) => {
+    if (crushUsed) {
+      toast({
+        title: eventLang === "es" ? "Ya has enviado tu flechazo" : "You already sent your Flechazo",
+        description: eventLang === "es"
+          ? "Solo puedes enviar un Flechazo por evento"
+          : "You can only send one Flechazo per event",
+        variant: "destructive",
+      });
+      return;
+    }
+    setConfirmCrushFor({ id: participantId, name: formatAnonymousName(name) });
+  };
+
+  const confirmCrush = async () => {
+    if (!confirmCrushFor || !verifiedParticipant || !eventId) return;
+    setIsSendingCrush(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('request-crush', {
+        body: {
+          event_id: eventId,
+          requester_id: verifiedParticipant.id,
+          target_id: confirmCrushFor.id,
+        },
+      });
+      if (error || data?.error) {
+        toast({
+          title: "Error",
+          description: data?.error || (eventLang === "es" ? "No se pudo enviar el flechazo" : "Could not send the Flechazo"),
+          variant: "destructive",
+        });
+        return;
+      }
+      setCrushUsed({ status: "pending", targetId: confirmCrushFor.id });
+      toast({
+        title: eventLang === "es" ? "💘 Flechazo enviado" : "💘 Flechazo sent",
+        description: eventLang === "es"
+          ? "La otra persona recibirá un email para aceptar o rechazar tu flechazo"
+          : "The other person will receive an email to accept or decline your Flechazo",
+      });
+      setConfirmCrushFor(null);
+    } catch (err) {
+      console.error('Error sending crush:', err);
+      toast({ title: "Error", description: String(err), variant: "destructive" });
+    } finally {
+      setIsSendingCrush(false);
+    }
+  };
+
+  const getPreviousSelectionLabel = (type?: string): string => {
+    switch (type) {
+      case 'friendship': return t.select.friendship;
+      case 'dating': return t.select.dating;
+      case 'both': return `${t.select.friendship} & ${t.select.dating}`;
+      default: return t.select.alreadySelected;
+    }
+  };
+
+  // Enable inline editing for a previously-submitted selection
+  const startEditing = (participantId: string) => {
+    const ms = matchSelections.find(s => s.participantId === participantId);
+    if (!ms) return;
+    const prevType = ms.previousSelectionType;
+    setEditingIds(prev => new Set(prev).add(participantId));
+    setPendingEdits(prev => {
+      const next = new Map(prev);
+      next.set(participantId, {
+        friendship: prevType === 'friendship' || prevType === 'both',
+        dating: prevType === 'dating' || prevType === 'both',
+        originalType: prevType,
+      });
+      return next;
+    });
+  };
+
+  const cancelEditing = (participantId: string) => {
+    setEditingIds(prev => {
+      const next = new Set(prev);
+      next.delete(participantId);
+      return next;
+    });
+    setPendingEdits(prev => {
+      const next = new Map(prev);
+      next.delete(participantId);
+      return next;
+    });
+  };
+
+  const toggleEditOption = (participantId: string, type: 'friendship' | 'dating') => {
+    setPendingEdits(prev => {
+      const next = new Map(prev);
+      const cur = next.get(participantId);
+      if (!cur) return prev;
+      next.set(participantId, { ...cur, [type]: !cur[type] });
+      return next;
+    });
+  };
+
+  const computePendingType = (edit: { friendship: boolean; dating: boolean }): string | null => {
+    if (edit.friendship && edit.dating) return 'both';
+    if (edit.dating) return 'dating';
+    if (edit.friendship) return 'friendship';
+    return null; // means: remove selection entirely
+  };
+
+  // Returns true if there are pending edits that actually differ from original.
+  const hasMeaningfulEdits = (): boolean => {
+    for (const [, edit] of pendingEdits.entries()) {
+      const newType = computePendingType(edit);
+      if (newType !== (edit.originalType || null)) return true;
+    }
+    return false;
+  };
+
+
+  const getTablematesForSelection = (): Participant[] => {
+    if (!verifiedParticipant) return [];
+    return getTablemates(verifiedParticipant.id, tablesData, participants);
+  };
+
+  // Build per-round buckets of tablemates for the verified participant.
+  // Only includes rounds that have already occurred (round <= currentRound)
+  // and where the participant was actually seated.
+  type RoundBucket = { round: number; tablemates: Participant[] };
+  const getRoundBuckets = (): RoundBucket[] => {
+    if (!verifiedParticipant) return [];
+    const buckets: RoundBucket[] = [];
+    const sorted = [...tablesData].sort((a, b) => a.round - b.round);
+    const seenPairs = new Set<string>();
+    for (const r of sorted) {
+      if (r.round > currentRound) continue;
+      const myTable = r.tables.find(t => t.some(p => p.id === verifiedParticipant.id));
+      if (!myTable) continue;
+      const ids = new Set(myTable.map(m => m.id).filter(id => id !== verifiedParticipant.id));
+      const tablemates: Participant[] = [];
+      for (const p of participants) {
+        if (!ids.has(p.id)) continue;
+        // Dedupe across rounds: don't show same person twice in same round bucket,
+        // but allow them to appear in multiple rounds (rare).
+        const key = `${r.round}:${p.id}`;
+        if (seenPairs.has(key)) continue;
+        seenPairs.add(key);
+        tablemates.push(p);
+      }
+      if (tablemates.length > 0) buckets.push({ round: r.round, tablemates });
+    }
+    return buckets;
+  };
+
+  const tablematesForSelection = getTablematesForSelection();
+  const roundBuckets = getRoundBuckets();
+  const newSelectionsCount = matchSelections.filter(ms => !ms.alreadySelected && (ms.friendship || ms.dating)).length;
+  const alreadySelectedCount = matchSelections.filter(ms => ms.alreadySelected).length;
+
+  // Round-state helpers
+  const isRoundCompleted = (round: number, tablemates: Participant[]): boolean => {
+    if (reviewedRounds.has(round)) return true;
+    if (tablemates.length === 0) return true;
+    return tablemates.every(p => {
+      const ms = matchSelections.find(s => s.participantId === p.id);
+      return !!ms?.alreadySelected;
+    });
+  };
+
+  const countNewSelectionsForRound = (tablemates: Participant[]): number => {
+    return tablemates.filter(p => {
+      const ms = matchSelections.find(s => s.participantId === p.id);
+      return ms && !ms.alreadySelected && (ms.friendship || ms.dating);
+    }).length;
+  };
+
+  const countPendingEditsForRound = (tablemates: Participant[]): number => {
+    let n = 0;
+    for (const p of tablemates) {
+      const edit = pendingEdits.get(p.id);
+      if (!edit) continue;
+      const newType = computePendingType(edit);
+      if (newType !== (edit.originalType || null)) n++;
+    }
+    return n;
+  };
+
+  const submitRound = async (round: number, tablemates: Participant[]) => {
+    if (!verifiedParticipant || !eventId) return;
+    setSubmittingRound(round);
+
+    const ids = new Set(tablemates.map(p => p.id));
+
+    // 1) Apply pending edits scoped to this round
+    const editEntries = Array.from(pendingEdits.entries()).filter(([pid, edit]) => {
+      if (!ids.has(pid)) return false;
+      const newType = computePendingType(edit);
+      return newType !== (edit.originalType || null);
+    });
+
+    for (const [participantId, edit] of editEntries) {
+      const newType = computePendingType(edit);
+      const { data, error } = await supabase.functions.invoke('update-selection', {
+        body: { eventId, verificationCode, selectedId: participantId, selectionType: newType },
+      });
+      if (error || data?.error) {
+        toast({
+          title: "Error",
+          description: data?.error || (eventLang === "es" ? "No se pudo actualizar la selección" : "Could not update the selection"),
+          variant: "destructive",
+        });
+        setSubmittingRound(null);
+        return;
+      }
+    }
+
+    // 2) New selections (people of this round not previously selected)
+    const activeSelections = matchSelections.filter(ms =>
+      ids.has(ms.participantId) && !ms.alreadySelected && (ms.friendship || ms.dating)
+    );
+
+    if (activeSelections.length > 0) {
+      const selections = activeSelections.map(ms => {
+        let selectionType = 'friendship';
+        if (ms.friendship && ms.dating) selectionType = 'both';
+        else if (ms.dating) selectionType = 'dating';
+        return { selected_id: ms.participantId, selection_type: selectionType };
+      });
+
+      // Include superLikeId only if it belongs to this round
+      const slForRound = superLikeId && ids.has(superLikeId) ? superLikeId : null;
+
+      const { data, error } = await supabase.functions.invoke('submit-selections', {
+        body: { eventId, verificationCode, selections, superLikeId: slForRound }
+      });
+
+      if (error || data?.error) {
+        toast({
+          title: "Error",
+          description: data?.error || t.select.noTablemates,
+          variant: "destructive",
+        });
+        setSubmittingRound(null);
+        return;
+      }
+    }
+
+    // Update local state: mark these participants as already selected so they
+    // render with the pencil-edit affordance.
+    setMatchSelections(prev =>
+      prev.map(ms => {
+        if (!ids.has(ms.participantId)) return ms;
+        const edit = pendingEdits.get(ms.participantId);
+        let newType: string | undefined = ms.previousSelectionType;
+        if (edit) {
+          const t = computePendingType(edit);
+          newType = t ?? undefined;
+        } else if (!ms.alreadySelected && (ms.friendship || ms.dating)) {
+          if (ms.friendship && ms.dating) newType = 'both';
+          else if (ms.dating) newType = 'dating';
+          else newType = 'friendship';
+        }
+        if (newType === undefined) {
+          // removed via edit
+          return { ...ms, alreadySelected: false, friendship: false, dating: false, previousSelectionType: undefined };
+        }
+        return {
+          ...ms,
+          alreadySelected: true,
+          friendship: false,
+          dating: false,
+          previousSelectionType: newType,
+        };
+      })
+    );
+
+    // Clear pending edits + editing flags for this round
+    setEditingIds(prev => {
+      const next = new Set(prev);
+      tablemates.forEach(p => next.delete(p.id));
+      return next;
+    });
+    setPendingEdits(prev => {
+      const next = new Map(prev);
+      tablemates.forEach(p => next.delete(p.id));
+      return next;
+    });
+
+    // Mark round as reviewed
+    const nextReviewed = new Set(reviewedRounds);
+    nextReviewed.add(round);
+    persistReviewedRounds(nextReviewed);
+
+    if (activeSelections.length > 0 || editEntries.length > 0) {
+      toast({
+        title: eventLang === "es" ? `✓ Ronda ${round} enviada` : `✓ Round ${round} sent`,
+        description: eventLang === "es"
+          ? `${activeSelections.length} selección(es) · ${editEntries.length} edición(es)`
+          : `${activeSelections.length} selection(s) · ${editEntries.length} edit(s)`,
+      });
+    } else {
+      toast({
+        title: eventLang === "es" ? `Ronda ${round} marcada` : `Round ${round} marked`,
+        description: eventLang === "es" ? "Sin conexiones en esta ronda" : "No connections in this round",
+      });
+    }
+
+    setSubmittingRound(null);
+    // Auto-collapse the just-submitted round
+    setOpenRound(prev => prev === `round-${round}` ? "" : prev);
+  };
+
+  const markRoundNoConnections = (round: number) => {
+    const nextReviewed = new Set(reviewedRounds);
+    nextReviewed.add(round);
+    persistReviewedRounds(nextReviewed);
+    setOpenRound("");
+    toast({
+      title: eventLang === "es" ? `Ronda ${round} marcada` : `Round ${round} marked`,
+      description: eventLang === "es"
+        ? "Has indicado que no conectaste con nadie en esta ronda"
+        : "You indicated that you didn't connect with anyone in this round",
+    });
+  };
+
+  // Legacy single-submit flow — kept for events without round data (e.g. preliminary-only)
+  const performSubmit = async () => {
+    if (!verifiedParticipant || !eventId) return;
+    setIsSubmitting(true);
+
+    const editEntries = Array.from(pendingEdits.entries()).filter(([, edit]) => {
+      const newType = computePendingType(edit);
+      return newType !== (edit.originalType || null);
+    });
+
+    for (const [participantId, edit] of editEntries) {
+      const newType = computePendingType(edit);
+      const { data, error } = await supabase.functions.invoke('update-selection', {
+        body: { eventId, verificationCode, selectedId: participantId, selectionType: newType },
+      });
+      if (error || data?.error) {
+        toast({
+          title: "Error",
+          description: data?.error || (eventLang === "es" ? "No se pudo actualizar la selección" : "Could not update the selection"),
+          variant: "destructive",
+        });
+        setIsSubmitting(false);
+        return;
+      }
+    }
+
+    const activeSelections = matchSelections.filter(ms => !ms.alreadySelected && (ms.friendship || ms.dating));
+
+    if (activeSelections.length === 0 && editEntries.length === 0) {
+      toast({
+        title: t.select.noTablemates,
+        description: t.select.continueWithout,
+      });
+      setIsSubmitting(false);
+      setStep("done");
+      return;
+    }
+
+    if (activeSelections.length > 0) {
+      const selections = activeSelections.map(ms => {
+        let selectionType = 'friendship';
+        if (ms.friendship && ms.dating) selectionType = 'both';
+        else if (ms.dating) selectionType = 'dating';
+        return { selected_id: ms.participantId, selection_type: selectionType };
+      });
+
+      const { data, error } = await supabase.functions.invoke('submit-selections', {
+        body: { eventId, verificationCode, selections, superLikeId }
+      });
+
+      if (error || data?.error) {
+        toast({
+          title: "Error",
+          description: data?.error || t.select.noTablemates,
+          variant: "destructive",
+        });
+        setIsSubmitting(false);
+        return;
+      }
+
+      toast({
+        title: t.access.selectionsSaved,
+        description: data?.message || `${selections.length} ${t.select.selections}`,
+      });
+    } else {
+      toast({
+        title: eventLang === "es" ? "Selecciones actualizadas" : "Selections updated",
+        description: eventLang === "es"
+          ? `${editEntries.length} cambio${editEntries.length === 1 ? '' : 's'} guardado${editEntries.length === 1 ? '' : 's'}`
+          : `${editEntries.length} change${editEntries.length === 1 ? '' : 's'} saved`,
+      });
+    }
+
+    setIsSubmitting(false);
+    setStep("done");
+  };
+
+  const handleSubmit = async () => {
+    if (hasMeaningfulEdits()) {
+      setConfirmEditSubmit(true);
+      return;
+    }
+    await performSubmit();
+  };
+
+
+
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-hero flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-hero flex flex-col items-center justify-center p-4">
+      <SuperLikeOnboarding open={showOnboarding} onClose={() => setShowOnboarding(false)} language={eventLang} />
+      <SuperLikeConfirmDialog
+        open={!!confirmSuperLikeFor}
+        onClose={() => setConfirmSuperLikeFor(null)}
+        onConfirm={confirmSuperLike}
+        recipientName={confirmSuperLikeFor?.name || ""}
+        language={eventLang}
+      />
+      <Link to={`/event/${eventId}/access`} className="absolute top-6 left-6 flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors">
+        <ArrowLeft className="w-4 h-4" />
+        {t.access.back}
+      </Link>
+
+      <div className="mb-8 animate-fade-in">
+        <BrandedLogo logoUrl={eb.logoUrl} companyName={eb.companyName} isWhiteLabel={eb.isWhiteLabel} />
+      </div>
+
+      {step === "select" && hasReceivedSuperLike && (
+        <div className="w-full max-w-md mb-4">
+          <SuperLikeBanner language={eventLang} variant="received" />
+        </div>
+      )}
+
+      {step === "completed" && (
+        <Card className="w-full max-w-md animate-scale-in bg-card/80 backdrop-blur-sm text-center">
+          <CardContent className="pt-8 pb-8">
+            <div className="w-16 h-16 rounded-full bg-green-500/10 flex items-center justify-center mx-auto mb-4">
+              <CheckCircle className="w-8 h-8 text-green-500" />
+            </div>
+            <h2 className="font-display text-xl font-bold mb-2">{t.select.eventCompleted}</h2>
+            <p className="text-muted-foreground">{t.select.eventCompletedDesc}</p>
+          </CardContent>
+        </Card>
+      )}
+
+      {step === "not_started" && (
+        <Card className="w-full max-w-md animate-scale-in bg-card/80 backdrop-blur-sm text-center">
+          <CardContent className="pt-8 pb-8">
+            <div className="w-16 h-16 rounded-full bg-amber-500/10 flex items-center justify-center mx-auto mb-4">
+              <Clock className="w-8 h-8 text-amber-500" />
+            </div>
+            <h2 className="font-display text-xl font-bold mb-2">{t.select.notStarted}</h2>
+            <p className="text-muted-foreground mb-6">{t.select.notStartedDesc}</p>
+            <Link to={`/event/${eventId}/access`}><Button variant="outline" className="w-full">{t.select.backToHome}</Button></Link>
+          </CardContent>
+        </Card>
+      )}
+
+      {step === "error" && (
+        <Card className="w-full max-w-md animate-scale-in bg-card/80 backdrop-blur-sm text-center">
+          <CardContent className="pt-8 pb-8">
+            <div className="w-16 h-16 rounded-full bg-destructive/10 flex items-center justify-center mx-auto mb-4">
+              <AlertCircle className="w-8 h-8 text-destructive" />
+            </div>
+            <h2 className="font-display text-xl font-bold mb-2">{t.select.eventNotAvailable}</h2>
+            <p className="text-muted-foreground mb-6">{t.select.eventNotAvailableDesc}</p>
+            <Link to={`/event/${eventId}/access`}><Button variant="outline" className="w-full">{t.select.backToHome}</Button></Link>
+          </CardContent>
+        </Card>
+      )}
+
+      {step === "verify_code" && (
+        <Card className="w-full max-w-md animate-scale-in bg-card/80 backdrop-blur-sm">
+          <CardHeader className="text-center">
+            <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
+              <KeyRound className="w-8 h-8 text-primary" />
+            </div>
+            <CardTitle className="text-2xl">{t.select.enterCode}</CardTitle>
+            <CardDescription>{t.select.enterCodeDesc}</CardDescription>
+            {currentRound > 0 && (
+              <Badge variant="secondary" className="mx-auto mt-2">{t.select.round} {currentRound} {t.select.inProgress}</Badge>
+            )}
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="flex justify-center">
+              <InputOTP maxLength={6} value={verificationCode} onChange={setVerificationCode}>
+                <InputOTPGroup>
+                  <InputOTPSlot index={0} />
+                  <InputOTPSlot index={1} />
+                  <InputOTPSlot index={2} />
+                  <InputOTPSlot index={3} />
+                  <InputOTPSlot index={4} />
+                  <InputOTPSlot index={5} />
+                </InputOTPGroup>
+              </InputOTP>
+            </div>
+            <Button variant="hero" className="w-full" onClick={handleVerifyCode} disabled={verificationCode.length !== 6 || isVerifying}>
+              {isVerifying ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />{t.select.verifying}</> : t.select.verify}
+            </Button>
+            <p className="text-xs text-center text-muted-foreground">{t.select.noCodeHint}</p>
+          </CardContent>
+        </Card>
+      )}
+
+      {step === "confirm_identity" && verifiedParticipant && (
+        <Card className="w-full max-w-md animate-scale-in bg-card/80 backdrop-blur-sm">
+          <CardHeader className="text-center">
+            <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
+              <Users className="w-8 h-8 text-primary" />
+            </div>
+            <CardTitle className="text-2xl">{t.select.areYouThis}</CardTitle>
+            <CardDescription>{t.select.confirmBeforeContinuing}</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="p-4 rounded-lg bg-muted space-y-2">
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">{t.select.name}</span>
+                <span className="font-medium">{verifiedParticipant.name}</span>
+              </div>
+              {verifiedParticipant.email && (
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">{t.select.email}</span>
+                  <span className="font-medium">{verifiedParticipant.email}</span>
+                </div>
+              )}
+            </div>
+            <div className="flex gap-3">
+              <Button variant="outline" className="flex-1" onClick={() => { setStep("verify_code"); setVerificationCode(""); setVerifiedParticipant(null); }}>
+                {t.select.no}
+              </Button>
+              <Button variant="hero" className="flex-1" onClick={handleConfirmIdentity} disabled={isLoading}>
+                {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : t.select.yes}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {step === "select" && (() => {
+        // Per-person card renderer reused inside each round bucket
+        const renderPersonCard = (person: Participant) => {
+          const selectionState = getSelectionState(person.id);
+          const isSelected = hasAnySelection(person.id);
+          const isAlreadySelected = selectionState.alreadySelected;
+          const renderActionButtons = () => (
+            <div className="space-y-2">
+              {superLikeEnabled && (
+                superLikeId === person.id ? (
+                  <div className="flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-gradient-to-r from-amber-100 to-yellow-100 dark:from-amber-950/40 dark:to-yellow-950/40 border-2 border-amber-400 text-amber-900 dark:text-amber-100 text-sm font-semibold">
+                    <Star className="w-4 h-4 fill-amber-500 text-amber-500" />
+                    {eventLang === "es" ? "Super Like asignado" : "Super Like assigned"}
+                  </div>
+                ) : (!existingSuperLike && !superLikeId) ? (
+                  <button
+                    type="button"
+                    onClick={() => requestSuperLike(person.id, person.name)}
+                    className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg border-2 border-amber-300 hover:border-amber-500 bg-amber-50 hover:bg-gradient-to-r hover:from-amber-100 hover:to-yellow-100 dark:bg-amber-950/20 dark:border-amber-700/40 text-amber-700 dark:text-amber-300 text-sm font-semibold transition-all hover:scale-[1.02] hover:shadow-md"
+                  >
+                    <Star className="w-4 h-4" />
+                    {eventLang === "es" ? "⭐ Dar Super Like" : "⭐ Give Super Like"}
+                  </button>
+                ) : null
+              )}
+              {repeatEnabled && (() => {
+                const isThisRepeat = repeatRequestUsed?.targetId === person.id;
+                const repeatDisabled = !!repeatRequestUsed && !isThisRepeat;
+                const hasRemainingRounds = eventStatus !== 'completed' && currentRound < totalRounds;
+                if (!isThisRepeat && !hasRemainingRounds) return null;
+                return isThisRepeat ? (
+                  <div className="flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-violet-50 dark:bg-violet-950/30 border-2 border-violet-300 text-violet-800 dark:text-violet-200 text-sm font-semibold">
+                    <Repeat2 className="w-4 h-4" />
+                    {eventLang === "es"
+                      ? (repeatRequestUsed?.status === "accepted" ? "Repetición aceptada ✓" : repeatRequestUsed?.status === "declined" ? "Repetición rechazada" : repeatRequestUsed?.status === "expired" ? "Repetición caducada" : "Repetición pendiente")
+                      : (repeatRequestUsed?.status === "accepted" ? "Repeat accepted ✓" : repeatRequestUsed?.status === "declined" ? "Repeat declined" : repeatRequestUsed?.status === "expired" ? "Repeat expired" : "Repeat pending")}
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    disabled={repeatDisabled}
+                    onClick={() => requestRepeat(person.id, person.name)}
+                    title={eventLang === "es" ? "Solicita volver a coincidir con esta persona en una próxima ronda." : "Request to be seated again with this person in an upcoming round."}
+                    className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg border-2 border-violet-300 hover:border-violet-500 bg-violet-50 hover:bg-violet-100 dark:bg-violet-950/20 dark:border-violet-700/40 text-violet-700 dark:text-violet-300 text-sm font-semibold transition-all hover:scale-[1.02] hover:shadow-md disabled:opacity-40 disabled:hover:scale-100 disabled:cursor-not-allowed"
+                  >
+                    <Repeat2 className="w-4 h-4" />
+                    {eventLang === "es" ? "🔁 Repetir con esta persona" : "🔁 Repeat with this person"}
+                  </button>
+                );
+              })()}
+              {crushEnabled && wantsRomance(verifiedParticipant?.preference) && wantsRomance(person.preference) && (() => {
+                const isThisCrush = crushUsed?.targetId === person.id;
+                if (!isThisCrush && crushUsed) return null;
+                return isThisCrush ? (
+                  <div className="flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-rose-50 dark:bg-rose-950/30 border-2 border-rose-300 text-rose-800 dark:text-rose-200 text-sm font-semibold">
+                    <Heart className="w-4 h-4 fill-rose-500 text-rose-500" />
+                    {eventLang === "es"
+                      ? (crushUsed?.status === "accepted" ? "Flechazo aceptado 💘" : crushUsed?.status === "declined" ? "Flechazo rechazado" : "Flechazo pendiente")
+                      : (crushUsed?.status === "accepted" ? "Flechazo accepted 💘" : crushUsed?.status === "declined" ? "Flechazo declined" : "Flechazo pending")}
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => requestCrush(person.id, person.name)}
+                    title={eventLang === "es" ? "Envía un Flechazo directo." : "Send a direct Flechazo."}
+                    className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg border-2 border-rose-300 hover:border-rose-500 bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/20 dark:border-rose-700/40 text-rose-700 dark:text-rose-300 text-sm font-semibold transition-all hover:scale-[1.02] hover:shadow-md"
+                  >
+                    <Send className="w-4 h-4" />
+                    {eventLang === "es" ? "💘 Enviar Flechazo" : "💘 Send Flechazo"}
+                  </button>
+                );
+              })()}
+            </div>
+          );
+          return (
+            <div
+              key={person.id}
+              className={`p-4 rounded-lg transition-all ${isAlreadySelected
+                  ? 'bg-green-50 dark:bg-green-950/20 border-2 border-green-500/50'
+                  : isSelected
+                    ? 'bg-primary/10 border-2 border-primary shadow-soft'
+                    : 'bg-muted hover:bg-muted/80 border-2 border-transparent'
+                }`}
+            >
+              <div className="flex items-center justify-between mb-3">
+                <span className="font-medium">{formatAnonymousName(person.name, person.phone)}</span>
+                {isAlreadySelected && (
+                  <div className="flex items-center gap-2">
+                    <Badge variant="secondary" className="bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300">
+                      <CheckCircle className="w-3 h-3 mr-1" />
+                      {getPreviousSelectionLabel(selectionState.previousSelectionType)}
+                    </Badge>
+                    {!editingIds.has(person.id) && (
+                      <button
+                        type="button"
+                        onClick={() => startEditing(person.id)}
+                        aria-label={eventLang === "es" ? "Modificar selección" : "Modify selection"}
+                        title={eventLang === "es" ? "Modificar" : "Modify"}
+                        className="p-1 rounded-md text-muted-foreground/60 hover:text-foreground hover:bg-muted transition-colors"
+                      >
+                        <Pencil className="w-3.5 h-3.5" />
+                      </button>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              <div className="space-y-3">
+                {isAlreadySelected && !editingIds.has(person.id) ? (
+                  <p className="text-xs text-muted-foreground">{t.select.alreadySelected}</p>
+                ) : isAlreadySelected && editingIds.has(person.id) ? (
+                  <div className="space-y-3">
+                    <div className="flex gap-4 items-center flex-wrap">
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <Checkbox
+                          checked={pendingEdits.get(person.id)?.friendship || false}
+                          onCheckedChange={() => toggleEditOption(person.id, 'friendship')}
+                        />
+                        <span className="text-sm flex items-center gap-1"><Smile className="w-4 h-4" /> {t.select.friendship}</span>
+                      </label>
+                      {selectionState.canShowDating && (
+                        <label className="flex items-center gap-2 cursor-pointer">
+                          <Checkbox
+                            checked={pendingEdits.get(person.id)?.dating || false}
+                            onCheckedChange={() => toggleEditOption(person.id, 'dating')}
+                          />
+                          <span className="text-sm flex items-center gap-1"><Heart className="w-4 h-4" /> {t.select.dating}</span>
+                        </label>
+                      )}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => cancelEditing(person.id)}
+                      className="text-xs text-muted-foreground hover:text-foreground underline underline-offset-2"
+                    >
+                      {eventLang === "es" ? "Descartar cambios" : "Discard changes"}
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex gap-4 items-center flex-wrap">
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <Checkbox checked={selectionState.friendship} onCheckedChange={() => toggleSelection(person.id, 'friendship')} />
+                      <span className="text-sm flex items-center gap-1"><Smile className="w-4 h-4" /> {t.select.friendship}</span>
+                    </label>
+                    {selectionState.canShowDating && (
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <Checkbox checked={selectionState.dating} onCheckedChange={() => toggleSelection(person.id, 'dating')} />
+                        <span className="text-sm flex items-center gap-1"><Heart className="w-4 h-4" /> {t.select.dating}</span>
+                      </label>
+                    )}
+                  </div>
+                )}
+                {renderActionButtons()}
+              </div>
+
+
+
+            </div>
+          );
+        };
+
+        const useRoundView = roundBuckets.length > 0;
+        const allRoundsComplete = useRoundView && roundBuckets.every(b => isRoundCompleted(b.round, b.tablemates));
+
+        return (
+          <Card className="w-full max-w-md animate-scale-in bg-card/80 backdrop-blur-sm">
+            <CardHeader className="text-center">
+              <CardTitle className="text-2xl">{t.select.whoDidYouConnect}</CardTitle>
+              <CardDescription>
+                {useRoundView
+                  ? (eventLang === "es"
+                      ? "Revisa cada ronda y envía tus selecciones por separado"
+                      : "Review each round and send your selections separately")
+                  : t.select.selectPeople}
+              </CardDescription>
+              {alreadySelectedCount > 0 && (
+                <p className="text-sm text-muted-foreground mt-2">
+                  {t.select.previousSelections} {alreadySelectedCount} {t.select.previousSelectionsSuffix}
+                </p>
+              )}
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {tablematesForSelection.length === 0 ? (
+                <div className="text-center py-8">
+                  <p className="text-muted-foreground">{t.select.noTablemates}</p>
+                </div>
+              ) : useRoundView ? (
+                <Accordion type="single" collapsible value={openRound} onValueChange={setOpenRound} className="w-full">
+                  {roundBuckets.map(({ round, tablemates }) => {
+                    const completed = isRoundCompleted(round, tablemates);
+                    const newCount = countNewSelectionsForRound(tablemates);
+                    const editCount = countPendingEditsForRound(tablemates);
+                    const isSubmittingThis = submittingRound === round;
+                    return (
+                      <AccordionItem key={round} value={`round-${round}`} className="border rounded-lg mb-2 px-3 bg-muted/40">
+                        <AccordionTrigger className="hover:no-underline py-3">
+                          <div className="flex items-center justify-between w-full pr-2">
+                            <div className="flex items-center gap-2 text-left">
+                              {completed ? (
+                                <CheckCircle className="w-4 h-4 text-green-600 shrink-0" />
+                              ) : (
+                                <Users className="w-4 h-4 text-primary shrink-0" />
+                              )}
+                              <span className="font-semibold">
+                                {eventLang === "es" ? `Ronda ${round}` : `Round ${round}`}
+                              </span>
+                              <span className="text-xs text-muted-foreground">
+                                · {tablemates.length} {tablemates.length === 1 ? (eventLang === "es" ? "persona" : "person") : (eventLang === "es" ? "personas" : "people")}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-1">
+                              {completed && (
+                                <Badge variant="secondary" className="bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300 text-xs">
+                                  {eventLang === "es" ? "✓ Revisada" : "✓ Reviewed"}
+                                </Badge>
+                              )}
+                              {!completed && (newCount > 0 || editCount > 0) && (
+                                <Badge variant="secondary" className="text-xs">
+                                  {newCount + editCount} {eventLang === "es" ? "pend." : "pend."}
+                                </Badge>
+                              )}
+                            </div>
+                          </div>
+                        </AccordionTrigger>
+                        <AccordionContent>
+                          <div className="grid gap-3 pt-2 pb-3">
+                            {tablemates.map(person => renderPersonCard(person))}
+                          </div>
+                          <div className="flex flex-col gap-2 pb-3">
+                            <Button
+                              variant="hero"
+                              className="w-full"
+                              onClick={() => submitRound(round, tablemates)}
+                              disabled={isSubmittingThis || (newCount === 0 && editCount === 0)}
+                            >
+                              {isSubmittingThis ? (
+                                <><Loader2 className="w-4 h-4 mr-2 animate-spin" />{t.select.saving}</>
+                              ) : (
+                                <><Send className="w-4 h-4 mr-2" />
+                                  {eventLang === "es"
+                                    ? `Enviar selecciones de esta ronda${newCount + editCount > 0 ? ` (${newCount + editCount})` : ""}`
+                                    : `Send selections for this round${newCount + editCount > 0 ? ` (${newCount + editCount})` : ""}`}
+                                </>
+                              )}
+                            </Button>
+                            <Button
+                              variant="outline"
+                              className="w-full"
+                              onClick={() => markRoundNoConnections(round)}
+                              disabled={isSubmittingThis || completed}
+                            >
+                              <X className="w-4 h-4 mr-2" />
+                              {eventLang === "es"
+                                ? "No he conectado con nadie de esta ronda"
+                                : "I didn't connect with anyone in this round"}
+                            </Button>
+                          </div>
+                        </AccordionContent>
+                      </AccordionItem>
+                    );
+                  })}
+                </Accordion>
+              ) : (
+                <div className="grid gap-3 max-h-96 overflow-y-auto">
+                  {tablematesForSelection.map((person) => renderPersonCard(person))}
+                </div>
+              )}
+
+              <p className="text-sm text-center text-muted-foreground">{t.select.matchHint}</p>
+              {repeatEnabled && (() => {
+                const hasRemainingRounds = eventStatus !== 'completed' && currentRound < totalRounds;
+                if (!hasRemainingRounds && !repeatRequestUsed) return null;
+                return (
+                  <div className="text-xs text-center text-violet-700 dark:text-violet-400 flex items-center justify-center gap-1.5 font-medium">
+                    <Repeat2 className="w-3.5 h-3.5" />
+                    {repeatRequestUsed
+                      ? (eventLang === "es" ? "Repetición usada 🔁" : "Repeat used 🔁")
+                      : (eventLang === "es" ? "Te queda 1 Repetición 🔁" : "1 Repeat remaining 🔁")}
+                  </div>
+                );
+              })()}
+              {crushEnabled && (
+                <div className="text-xs text-center text-rose-700 dark:text-rose-400 flex items-center justify-center gap-1.5 font-medium">
+                  <Heart className="w-3.5 h-3.5 fill-rose-500 text-rose-500" />
+                  {crushUsed
+                    ? (eventLang === "es" ? "Flechazo enviado 💘" : "Flechazo sent 💘")
+                    : (eventLang === "es" ? "Te queda 1 Flechazo 💘" : "1 Flechazo remaining 💘")}
+                </div>
+              )}
+              {superLikeEnabled && (
+                <div className="text-xs text-center text-amber-700 dark:text-amber-400 flex items-center justify-center gap-1.5 font-medium">
+                  <Star className="w-3.5 h-3.5 fill-amber-500 text-amber-500" />
+                  {existingSuperLike || superLikeId
+                    ? (eventLang === "es" ? "Super Like usado ✓" : "Super Like used ✓")
+                    : (eventLang === "es" ? "Te queda 1 Super Like ⭐" : "1 Super Like remaining ⭐")}
+                </div>
+              )}
+
+              {useRoundView ? (
+                allRoundsComplete && (
+                  <Button variant="outline" className="w-full" onClick={() => setStep("done")}>
+                    <CheckCircle className="w-4 h-4 mr-2" />
+                    {eventLang === "es" ? "He revisado todas las rondas" : "I've reviewed all rounds"}
+                  </Button>
+                )
+              ) : (
+                <Button variant="hero" className="w-full" onClick={handleSubmit} disabled={isSubmitting}>
+                  {isSubmitting ? (
+                    <><Loader2 className="w-4 h-4 mr-2 animate-spin" />{t.select.saving}</>
+                  ) : hasMeaningfulEdits() && newSelectionsCount === 0 ? (
+                    <><Heart className="w-4 h-4 mr-2" />{eventLang === "es" ? "Guardar cambios" : "Save changes"}</>
+                  ) : (
+                    <><Heart className="w-4 h-4 mr-2" />{newSelectionsCount > 0 ? `${t.select.submit} ${newSelectionsCount} ${t.select.selections}` : t.select.continueWithout}</>
+                  )}
+                </Button>
+              )}
+            </CardContent>
+          </Card>
+        );
+      })()}
+
+
+      {step === "done" && (
+        <Card className="w-full max-w-md animate-scale-in bg-card/80 backdrop-blur-sm text-center">
+          <CardContent className="pt-8 pb-8">
+            <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-6">
+              <Sparkles className="w-10 h-10 text-primary" />
+            </div>
+            <h2 className="font-display text-2xl font-bold mb-2">{t.select.thanks}</h2>
+            <p className="text-muted-foreground mb-6">
+              {eventStatus === 'completed' ? t.select.thanksCompleted : t.select.thanksActive}
+            </p>
+            <Link to={`/event/${eventId}/access`}><Button variant="outline" className="w-full">{t.select.backToHome}</Button></Link>
+          </CardContent>
+        </Card>
+      )}
+
+      <AlertDialog open={!!confirmRepeatFor} onOpenChange={(open) => !open && setConfirmRepeatFor(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <Repeat2 className="w-5 h-5 text-violet-600" />
+              {eventLang === "es" ? "¿Solicitar repetir con esta persona?" : "Request to repeat with this person?"}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {eventLang === "es"
+                ? `Enviaremos un email anónimo a ${confirmRepeatFor?.name} para que decida si quiere volver a coincidir contigo en una próxima ronda. Solo puedes usar esta opción una vez por evento.`
+                : `We'll send an anonymous email to ${confirmRepeatFor?.name} so they can decide whether to meet you again in an upcoming round. You can only use this option once per event.`}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isSendingRepeat}>{eventLang === "es" ? "Cancelar" : "Cancel"}</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmRepeat} disabled={isSendingRepeat} className="bg-violet-600 hover:bg-violet-700 text-white">
+              {isSendingRepeat ? <Loader2 className="w-4 h-4 animate-spin" /> : (eventLang === "es" ? "Enviar solicitud" : "Send request")}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={!!confirmCrushFor} onOpenChange={(open) => !open && setConfirmCrushFor(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <Heart className="w-5 h-5 text-rose-600 fill-rose-500" />
+              {eventLang === "es" ? "¿Enviar un Flechazo a esta persona?" : "Send a Flechazo to this person?"}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {eventLang === "es"
+                ? `Enviaremos un email a ${confirmCrushFor?.name} para que decida si acepta tu Flechazo. Si acepta, ambos recibiréis los datos de contacto del otro y, si quedan rondas, os sentaremos en la misma mesa. Solo puedes enviar un Flechazo por evento.`
+                : `We'll send an email to ${confirmCrushFor?.name} so they can decide whether to accept your Flechazo. If accepted, you'll both receive each other's contact details and, if any rounds remain, you'll be seated together. You can only send one Flechazo per event.`}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isSendingCrush}>{eventLang === "es" ? "Cancelar" : "Cancel"}</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmCrush} disabled={isSendingCrush} className="bg-rose-600 hover:bg-rose-700 text-white">
+              {isSendingCrush ? <Loader2 className="w-4 h-4 animate-spin" /> : (eventLang === "es" ? "Enviar Flechazo" : "Send Flechazo")}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+
+      <AlertDialog open={confirmEditSubmit} onOpenChange={(open) => !open && !isSubmitting && setConfirmEditSubmit(false)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <Pencil className="w-5 h-5 text-primary" />
+              {eventLang === "es" ? "¿Modificar tus selecciones previas?" : "Modify your previous selections?"}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {eventLang === "es"
+                ? "Estás a punto de cambiar selecciones que ya habías enviado. Esto reemplazará lo que enviaste antes y será definitivo. ¿Quieres continuar?"
+                : "You're about to change selections you already submitted. This will replace what you sent before and will be final. Do you want to continue?"}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isSubmitting}>{eventLang === "es" ? "Cancelar" : "Cancel"}</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={async () => { setConfirmEditSubmit(false); await performSubmit(); }}
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : (eventLang === "es" ? "Sí, guardar cambios" : "Yes, save changes")}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </div>
+  );
+};
+
+export default ParticipantSelect;

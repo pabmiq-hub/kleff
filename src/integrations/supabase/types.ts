@@ -1223,6 +1223,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "kon_crush_requests_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "kon_events_public"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "kon_crush_requests_requester_id_fkey"
             columns: ["requester_id"]
             isOneToOne: false
@@ -1275,6 +1282,13 @@ export type Database = {
             columns: ["event_id"]
             isOneToOne: false
             referencedRelation: "kon_events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kon_email_logs_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "kon_events_public"
             referencedColumns: ["id"]
           },
           {
@@ -1406,6 +1420,13 @@ export type Database = {
             referencedRelation: "kon_events"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "kon_event_waitlist_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "kon_events_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       kon_events: {
@@ -1471,6 +1492,7 @@ export type Database = {
           selection_deadline_hours: number | null
           series_id: string | null
           slot_quotas: Json | null
+          slug: string | null
           social_game: Json | null
           status: string
           super_like_enabled: boolean
@@ -1545,6 +1567,7 @@ export type Database = {
           selection_deadline_hours?: number | null
           series_id?: string | null
           slot_quotas?: Json | null
+          slug?: string | null
           social_game?: Json | null
           status?: string
           super_like_enabled?: boolean
@@ -1619,6 +1642,7 @@ export type Database = {
           selection_deadline_hours?: number | null
           series_id?: string | null
           slot_quotas?: Json | null
+          slug?: string | null
           social_game?: Json | null
           status?: string
           super_like_enabled?: boolean
@@ -1708,6 +1732,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "kon_game_rewards_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "kon_events_public"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "kon_game_rewards_participant_id_fkey"
             columns: ["participant_id"]
             isOneToOne: false
@@ -1764,6 +1795,13 @@ export type Database = {
             referencedRelation: "kon_events"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "kon_game_sessions_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "kon_events_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       kon_game_votes: {
@@ -1809,6 +1847,13 @@ export type Database = {
             columns: ["event_id"]
             isOneToOne: false
             referencedRelation: "kon_events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kon_game_votes_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "kon_events_public"
             referencedColumns: ["id"]
           },
           {
@@ -1954,6 +1999,13 @@ export type Database = {
             referencedRelation: "kon_organizers"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "kon_organizer_branding_organizer_id_fkey"
+            columns: ["organizer_id"]
+            isOneToOne: true
+            referencedRelation: "kon_organizers_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       kon_organizer_email_connections: {
@@ -2001,6 +2053,13 @@ export type Database = {
             referencedRelation: "kon_organizers"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "kon_organizer_email_connections_organizer_id_fkey"
+            columns: ["organizer_id"]
+            isOneToOne: false
+            referencedRelation: "kon_organizers_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       kon_organizer_features: {
@@ -2031,6 +2090,13 @@ export type Database = {
             columns: ["organizer_id"]
             isOneToOne: false
             referencedRelation: "kon_organizers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kon_organizer_features_organizer_id_fkey"
+            columns: ["organizer_id"]
+            isOneToOne: false
+            referencedRelation: "kon_organizers_public"
             referencedColumns: ["id"]
           },
         ]
@@ -2072,6 +2138,13 @@ export type Database = {
             columns: ["organizer_id"]
             isOneToOne: true
             referencedRelation: "kon_organizers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kon_organizer_resend_config_organizer_id_fkey"
+            columns: ["organizer_id"]
+            isOneToOne: true
+            referencedRelation: "kon_organizers_public"
             referencedColumns: ["id"]
           },
         ]
@@ -2124,6 +2197,13 @@ export type Database = {
             referencedRelation: "kon_organizers"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "kon_organizer_templates_organizer_id_fkey"
+            columns: ["organizer_id"]
+            isOneToOne: false
+            referencedRelation: "kon_organizers_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       kon_organizer_verified_domains: {
@@ -2169,6 +2249,13 @@ export type Database = {
             columns: ["organizer_id"]
             isOneToOne: true
             referencedRelation: "kon_organizers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kon_organizer_verified_domains_organizer_id_fkey"
+            columns: ["organizer_id"]
+            isOneToOne: true
+            referencedRelation: "kon_organizers_public"
             referencedColumns: ["id"]
           },
         ]
@@ -2308,6 +2395,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "kon_participant_encounters_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "kon_events_public"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "kon_participant_encounters_global_participant_1_id_fkey"
             columns: ["global_participant_1_id"]
             isOneToOne: false
@@ -2357,6 +2451,13 @@ export type Database = {
             columns: ["event_id"]
             isOneToOne: false
             referencedRelation: "kon_events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kon_participant_exclusions_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "kon_events_public"
             referencedColumns: ["id"]
           },
           {
@@ -2412,6 +2513,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "kon_participant_inclusions_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "kon_events_public"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "kon_participant_inclusions_participant_1_id_fkey"
             columns: ["participant_1_id"]
             isOneToOne: false
@@ -2461,6 +2569,13 @@ export type Database = {
             columns: ["event_id"]
             isOneToOne: false
             referencedRelation: "kon_events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kon_participant_selections_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "kon_events_public"
             referencedColumns: ["id"]
           },
           {
@@ -2606,6 +2721,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "kon_participants_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "kon_events_public"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "kon_participants_global_participant_id_fkey"
             columns: ["global_participant_id"]
             isOneToOne: false
@@ -2701,6 +2823,13 @@ export type Database = {
             referencedRelation: "kon_events"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "kon_remarketing_campaigns_target_event_id_fkey"
+            columns: ["target_event_id"]
+            isOneToOne: false
+            referencedRelation: "kon_events_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       kon_remarketing_recipients: {
@@ -2794,6 +2923,13 @@ export type Database = {
             columns: ["event_id"]
             isOneToOne: false
             referencedRelation: "kon_events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kon_repeat_requests_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "kon_events_public"
             referencedColumns: ["id"]
           },
           {
@@ -2968,6 +3104,13 @@ export type Database = {
             columns: ["event_id"]
             isOneToOne: false
             referencedRelation: "kon_events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kon_wrapped_table_requests_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "kon_events_public"
             referencedColumns: ["id"]
           },
           {
@@ -4056,7 +4199,246 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      kon_events_public: {
+        Row: {
+          available_languages: string[] | null
+          checkin_open: boolean | null
+          checkin_opens_minutes_before: number | null
+          crush_enabled: boolean | null
+          current_round: number | null
+          custom_age_ranges: Json | null
+          custom_dating_preferences: Json | null
+          custom_genders: Json | null
+          custom_preferences: Json | null
+          custom_registration_form: Json | null
+          date: string | null
+          draft_round: number | null
+          event_location: string | null
+          event_time: string | null
+          group_rounds: Json | null
+          has_preliminary_tables: boolean | null
+          id: string | null
+          language: string | null
+          languages_enabled: boolean | null
+          module: string | null
+          name: string | null
+          organizer_id: string | null
+          organizer_profile_id: string | null
+          participants_count: number | null
+          payment_tracking_enabled: boolean | null
+          professional_config: Json | null
+          quota_waitlist_enabled: boolean | null
+          registration_description: string | null
+          registration_open: boolean | null
+          registration_requirements_enabled: boolean | null
+          registration_subtitle: string | null
+          repeat_request_enabled: boolean | null
+          round_duration: number | null
+          round_elapsed_seconds: number | null
+          round_paused_at: string | null
+          round_started_at: string | null
+          rounds: number | null
+          scheduled_email_at: string | null
+          selection_closed_at: string | null
+          selection_deadline_hours: number | null
+          slot_quotas: Json | null
+          slug: string | null
+          social_game: Json | null
+          status: string | null
+          super_like_enabled: boolean | null
+          table_size: number | null
+          waitlist_enabled: boolean | null
+          wrapped_enabled: boolean | null
+          wrapped_questions: Json | null
+        }
+        Insert: {
+          available_languages?: string[] | null
+          checkin_open?: boolean | null
+          checkin_opens_minutes_before?: number | null
+          crush_enabled?: boolean | null
+          current_round?: number | null
+          custom_age_ranges?: Json | null
+          custom_dating_preferences?: Json | null
+          custom_genders?: Json | null
+          custom_preferences?: Json | null
+          custom_registration_form?: Json | null
+          date?: string | null
+          draft_round?: number | null
+          event_location?: string | null
+          event_time?: string | null
+          group_rounds?: Json | null
+          has_preliminary_tables?: boolean | null
+          id?: string | null
+          language?: string | null
+          languages_enabled?: boolean | null
+          module?: string | null
+          name?: string | null
+          organizer_id?: string | null
+          organizer_profile_id?: string | null
+          participants_count?: number | null
+          payment_tracking_enabled?: boolean | null
+          professional_config?: Json | null
+          quota_waitlist_enabled?: boolean | null
+          registration_description?: string | null
+          registration_open?: boolean | null
+          registration_requirements_enabled?: boolean | null
+          registration_subtitle?: string | null
+          repeat_request_enabled?: boolean | null
+          round_duration?: number | null
+          round_elapsed_seconds?: number | null
+          round_paused_at?: string | null
+          round_started_at?: string | null
+          rounds?: number | null
+          scheduled_email_at?: string | null
+          selection_closed_at?: string | null
+          selection_deadline_hours?: number | null
+          slot_quotas?: Json | null
+          slug?: string | null
+          social_game?: Json | null
+          status?: string | null
+          super_like_enabled?: boolean | null
+          table_size?: number | null
+          waitlist_enabled?: boolean | null
+          wrapped_enabled?: boolean | null
+          wrapped_questions?: Json | null
+        }
+        Update: {
+          available_languages?: string[] | null
+          checkin_open?: boolean | null
+          checkin_opens_minutes_before?: number | null
+          crush_enabled?: boolean | null
+          current_round?: number | null
+          custom_age_ranges?: Json | null
+          custom_dating_preferences?: Json | null
+          custom_genders?: Json | null
+          custom_preferences?: Json | null
+          custom_registration_form?: Json | null
+          date?: string | null
+          draft_round?: number | null
+          event_location?: string | null
+          event_time?: string | null
+          group_rounds?: Json | null
+          has_preliminary_tables?: boolean | null
+          id?: string | null
+          language?: string | null
+          languages_enabled?: boolean | null
+          module?: string | null
+          name?: string | null
+          organizer_id?: string | null
+          organizer_profile_id?: string | null
+          participants_count?: number | null
+          payment_tracking_enabled?: boolean | null
+          professional_config?: Json | null
+          quota_waitlist_enabled?: boolean | null
+          registration_description?: string | null
+          registration_open?: boolean | null
+          registration_requirements_enabled?: boolean | null
+          registration_subtitle?: string | null
+          repeat_request_enabled?: boolean | null
+          round_duration?: number | null
+          round_elapsed_seconds?: number | null
+          round_paused_at?: string | null
+          round_started_at?: string | null
+          rounds?: number | null
+          scheduled_email_at?: string | null
+          selection_closed_at?: string | null
+          selection_deadline_hours?: number | null
+          slot_quotas?: Json | null
+          slug?: string | null
+          social_game?: Json | null
+          status?: string | null
+          super_like_enabled?: boolean | null
+          table_size?: number | null
+          waitlist_enabled?: boolean | null
+          wrapped_enabled?: boolean | null
+          wrapped_questions?: Json | null
+        }
+        Relationships: []
+      }
+      kon_organizer_branding_public: {
+        Row: {
+          background_color: string | null
+          custom_footer_text: string | null
+          custom_welcome_text: string | null
+          font_family: string | null
+          hide_konektum_branding: boolean | null
+          id: string | null
+          is_white_label: boolean | null
+          organizer_id: string | null
+          primary_color: string | null
+          secondary_color: string | null
+        }
+        Insert: {
+          background_color?: string | null
+          custom_footer_text?: string | null
+          custom_welcome_text?: string | null
+          font_family?: string | null
+          hide_konektum_branding?: boolean | null
+          id?: string | null
+          is_white_label?: boolean | null
+          organizer_id?: string | null
+          primary_color?: string | null
+          secondary_color?: string | null
+        }
+        Update: {
+          background_color?: string | null
+          custom_footer_text?: string | null
+          custom_welcome_text?: string | null
+          font_family?: string | null
+          hide_konektum_branding?: boolean | null
+          id?: string | null
+          is_white_label?: boolean | null
+          organizer_id?: string | null
+          primary_color?: string | null
+          secondary_color?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "kon_organizer_branding_organizer_id_fkey"
+            columns: ["organizer_id"]
+            isOneToOne: true
+            referencedRelation: "kon_organizers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kon_organizer_branding_organizer_id_fkey"
+            columns: ["organizer_id"]
+            isOneToOne: true
+            referencedRelation: "kon_organizers_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      kon_organizers_public: {
+        Row: {
+          active_modules: string[] | null
+          company_name: string | null
+          id: string | null
+          logo_url: string | null
+          slug: string | null
+          status: string | null
+          user_id: string | null
+        }
+        Insert: {
+          active_modules?: never
+          company_name?: string | null
+          id?: string | null
+          logo_url?: string | null
+          slug?: string | null
+          status?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          active_modules?: never
+          company_name?: string | null
+          id?: string | null
+          logo_url?: string | null
+          slug?: string | null
+          status?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       delete_email: {

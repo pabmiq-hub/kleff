@@ -17,10 +17,12 @@ import { Route as SobreNosotrosRouteImport } from './routes/sobre-nosotros'
 import { Route as SlowFriendingLudicoRouteImport } from './routes/slow-friending-ludico'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as RolesOcultosRouteImport } from './routes/roles-ocultos'
+import { Route as RepeatResponseRouteImport } from './routes/repeat-response'
 import { Route as PrivacidadRouteImport } from './routes/privacidad'
 import { Route as MediosRouteImport } from './routes/medios'
 import { Route as LudotecaRouteImport } from './routes/ludoteca'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as CrushResponseRouteImport } from './routes/crush-response'
 import { Route as CookiesRouteImport } from './routes/cookies'
 import { Route as ContactoRouteImport } from './routes/contacto'
 import { Route as ComoFuncionaRouteImport } from './routes/como-funciona'
@@ -90,6 +92,12 @@ import { Route as AdminKarmaRouteImport } from './routes/admin.karma'
 import { Route as AdminInvitationsRouteImport } from './routes/admin.invitations'
 import { Route as AdminContentRouteImport } from './routes/admin.content'
 import { Route as AdminBlogRouteImport } from './routes/admin.blog'
+import { Route as EventSlugUsuarioRouteImport } from './routes/$eventSlug.usuario'
+import { Route as EventSlugSeleccionRouteImport } from './routes/$eventSlug.seleccion'
+import { Route as EventSlugRegistroRouteImport } from './routes/$eventSlug.registro'
+import { Route as EventSlugMesasRouteImport } from './routes/$eventSlug.mesas'
+import { Route as EventSlugCheckInRouteImport } from './routes/$eventSlug.check-in'
+import { Route as SSeriesSlugIndexRouteImport } from './routes/s.$seriesSlug.index'
 import { Route as AppRentalsIndexRouteImport } from './routes/app.rentals.index'
 import { Route as AdminRentalsIndexRouteImport } from './routes/admin.rentals.index'
 import { Route as AdminRegistrationsIndexRouteImport } from './routes/admin.registrations.index'
@@ -97,6 +105,12 @@ import { Route as AdminMediaIndexRouteImport } from './routes/admin.media.index'
 import { Route as AdminKonektumIndexRouteImport } from './routes/admin.konektum.index'
 import { Route as AdminContentIndexRouteImport } from './routes/admin.content.index'
 import { Route as AdminBlogIndexRouteImport } from './routes/admin.blog.index'
+import { Route as SSeriesSlugJoinRouteImport } from './routes/s.$seriesSlug.join'
+import { Route as EventIdTablesRouteImport } from './routes/event.$id.tables'
+import { Route as EventIdSelectRouteImport } from './routes/event.$id.select'
+import { Route as EventIdJoinRouteImport } from './routes/event.$id.join'
+import { Route as EventIdCheckinRouteImport } from './routes/event.$id.checkin'
+import { Route as EventIdAccessRouteImport } from './routes/event.$id.access'
 import { Route as AuthLudoyaCallbackRouteImport } from './routes/auth.ludoya.callback'
 import { Route as AppRentalsRequestsRouteImport } from './routes/app.rentals.requests'
 import { Route as AppRentalsHistoryRouteImport } from './routes/app.rentals.history'
@@ -124,8 +138,11 @@ import { Route as AdminContentRedirectsRouteImport } from './routes/admin.conten
 import { Route as AdminContentPageKeyRouteImport } from './routes/admin.content.$pageKey'
 import { Route as AdminBlogNewRouteImport } from './routes/admin.blog.new'
 import { Route as AdminBlogIdRouteImport } from './routes/admin.blog.$id'
+import { Route as EventSlugCancelarParticipantIdRouteImport } from './routes/$eventSlug.cancelar.$participantId'
 import { Route as AdminKonektumEventosIndexRouteImport } from './routes/admin.konektum.eventos.index'
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
+import { Route as EventIdCancelParticipantIdRouteImport } from './routes/event.$id.cancel.$participantId'
+import { Route as ApiPublicKonFnRouteImport } from './routes/api.public.kon.$fn'
 import { Route as ApiPublicHooksFeaturedDispatchRouteImport } from './routes/api.public.hooks.featured-dispatch'
 import { Route as AdminKonektumEventosNuevoRouteImport } from './routes/admin.konektum.eventos.nuevo'
 import { Route as AdminKonektumEventosIdRouteImport } from './routes/admin.konektum.eventos.$id'
@@ -171,6 +188,11 @@ const RolesOcultosRoute = RolesOcultosRouteImport.update({
   path: '/roles-ocultos',
   getParentRoute: () => rootRouteImport,
 } as any)
+const RepeatResponseRoute = RepeatResponseRouteImport.update({
+  id: '/repeat-response',
+  path: '/repeat-response',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PrivacidadRoute = PrivacidadRouteImport.update({
   id: '/privacidad',
   path: '/privacidad',
@@ -189,6 +211,11 @@ const LudotecaRoute = LudotecaRouteImport.update({
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CrushResponseRoute = CrushResponseRouteImport.update({
+  id: '/crush-response',
+  path: '/crush-response',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CookiesRoute = CookiesRouteImport.update({
@@ -536,6 +563,36 @@ const AdminBlogRoute = AdminBlogRouteImport.update({
   path: '/blog',
   getParentRoute: () => AdminRoute,
 } as any)
+const EventSlugUsuarioRoute = EventSlugUsuarioRouteImport.update({
+  id: '/$eventSlug/usuario',
+  path: '/$eventSlug/usuario',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EventSlugSeleccionRoute = EventSlugSeleccionRouteImport.update({
+  id: '/$eventSlug/seleccion',
+  path: '/$eventSlug/seleccion',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EventSlugRegistroRoute = EventSlugRegistroRouteImport.update({
+  id: '/$eventSlug/registro',
+  path: '/$eventSlug/registro',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EventSlugMesasRoute = EventSlugMesasRouteImport.update({
+  id: '/$eventSlug/mesas',
+  path: '/$eventSlug/mesas',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EventSlugCheckInRoute = EventSlugCheckInRouteImport.update({
+  id: '/$eventSlug/check-in',
+  path: '/$eventSlug/check-in',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SSeriesSlugIndexRoute = SSeriesSlugIndexRouteImport.update({
+  id: '/s/$seriesSlug/',
+  path: '/s/$seriesSlug/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AppRentalsIndexRoute = AppRentalsIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -570,6 +627,36 @@ const AdminBlogIndexRoute = AdminBlogIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => AdminBlogRoute,
+} as any)
+const SSeriesSlugJoinRoute = SSeriesSlugJoinRouteImport.update({
+  id: '/s/$seriesSlug/join',
+  path: '/s/$seriesSlug/join',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EventIdTablesRoute = EventIdTablesRouteImport.update({
+  id: '/event/$id/tables',
+  path: '/event/$id/tables',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EventIdSelectRoute = EventIdSelectRouteImport.update({
+  id: '/event/$id/select',
+  path: '/event/$id/select',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EventIdJoinRoute = EventIdJoinRouteImport.update({
+  id: '/event/$id/join',
+  path: '/event/$id/join',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EventIdCheckinRoute = EventIdCheckinRouteImport.update({
+  id: '/event/$id/checkin',
+  path: '/event/$id/checkin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EventIdAccessRoute = EventIdAccessRouteImport.update({
+  id: '/event/$id/access',
+  path: '/event/$id/access',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AuthLudoyaCallbackRoute = AuthLudoyaCallbackRouteImport.update({
   id: '/auth/ludoya/callback',
@@ -708,6 +795,12 @@ const AdminBlogIdRoute = AdminBlogIdRouteImport.update({
   path: '/$id',
   getParentRoute: () => AdminBlogRoute,
 } as any)
+const EventSlugCancelarParticipantIdRoute =
+  EventSlugCancelarParticipantIdRouteImport.update({
+    id: '/$eventSlug/cancelar/$participantId',
+    path: '/$eventSlug/cancelar/$participantId',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const AdminKonektumEventosIndexRoute =
   AdminKonektumEventosIndexRouteImport.update({
     id: '/eventos/',
@@ -720,6 +813,17 @@ const LovableEmailQueueProcessRoute =
     path: '/lovable/email/queue/process',
     getParentRoute: () => rootRouteImport,
   } as any)
+const EventIdCancelParticipantIdRoute =
+  EventIdCancelParticipantIdRouteImport.update({
+    id: '/event/$id/cancel/$participantId',
+    path: '/event/$id/cancel/$participantId',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicKonFnRoute = ApiPublicKonFnRouteImport.update({
+  id: '/api/public/kon/$fn',
+  path: '/api/public/kon/$fn',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicHooksFeaturedDispatchRoute =
   ApiPublicHooksFeaturedDispatchRouteImport.update({
     id: '/api/public/hooks/featured-dispatch',
@@ -751,10 +855,12 @@ export interface FileRoutesByFullPath {
   '/como-funciona': typeof ComoFuncionaRoute
   '/contacto': typeof ContactoRoute
   '/cookies': typeof CookiesRoute
+  '/crush-response': typeof CrushResponseRoute
   '/login': typeof LoginRoute
   '/ludoteca': typeof LudotecaRoute
   '/medios': typeof MediosRoute
   '/privacidad': typeof PrivacidadRoute
+  '/repeat-response': typeof RepeatResponseRoute
   '/roles-ocultos': typeof RolesOcultosRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/slow-friending-ludico': typeof SlowFriendingLudicoRoute
@@ -763,6 +869,11 @@ export interface FileRoutesByFullPath {
   '/tarda-de-jocs-i-cuina-japonesa': typeof TardaDeJocsICuinaJaponesaRoute
   '/terminos': typeof TerminosRoute
   '/torneos': typeof TorneosRoute
+  '/$eventSlug/check-in': typeof EventSlugCheckInRoute
+  '/$eventSlug/mesas': typeof EventSlugMesasRoute
+  '/$eventSlug/registro': typeof EventSlugRegistroRoute
+  '/$eventSlug/seleccion': typeof EventSlugSeleccionRoute
+  '/$eventSlug/usuario': typeof EventSlugUsuarioRoute
   '/admin/blog': typeof AdminBlogRouteWithChildren
   '/admin/content': typeof AdminContentRouteWithChildren
   '/admin/invitations': typeof AdminInvitationsRoute
@@ -820,6 +931,7 @@ export interface FileRoutesByFullPath {
   '/app/': typeof AppIndexRoute
   '/ca/': typeof CaIndexRoute
   '/en/': typeof EnIndexRoute
+  '/$eventSlug/cancelar/$participantId': typeof EventSlugCancelarParticipantIdRoute
   '/admin/blog/$id': typeof AdminBlogIdRoute
   '/admin/blog/new': typeof AdminBlogNewRoute
   '/admin/content/$pageKey': typeof AdminContentPageKeyRoute
@@ -847,6 +959,12 @@ export interface FileRoutesByFullPath {
   '/app/rentals/history': typeof AppRentalsHistoryRoute
   '/app/rentals/requests': typeof AppRentalsRequestsRoute
   '/auth/ludoya/callback': typeof AuthLudoyaCallbackRoute
+  '/event/$id/access': typeof EventIdAccessRoute
+  '/event/$id/checkin': typeof EventIdCheckinRoute
+  '/event/$id/join': typeof EventIdJoinRoute
+  '/event/$id/select': typeof EventIdSelectRoute
+  '/event/$id/tables': typeof EventIdTablesRoute
+  '/s/$seriesSlug/join': typeof SSeriesSlugJoinRoute
   '/admin/blog/': typeof AdminBlogIndexRoute
   '/admin/content/': typeof AdminContentIndexRoute
   '/admin/konektum/': typeof AdminKonektumIndexRoute
@@ -854,9 +972,12 @@ export interface FileRoutesByFullPath {
   '/admin/registrations/': typeof AdminRegistrationsIndexRoute
   '/admin/rentals/': typeof AdminRentalsIndexRoute
   '/app/rentals/': typeof AppRentalsIndexRoute
+  '/s/$seriesSlug/': typeof SSeriesSlugIndexRoute
   '/admin/konektum/eventos/$id': typeof AdminKonektumEventosIdRoute
   '/admin/konektum/eventos/nuevo': typeof AdminKonektumEventosNuevoRoute
   '/api/public/hooks/featured-dispatch': typeof ApiPublicHooksFeaturedDispatchRoute
+  '/api/public/kon/$fn': typeof ApiPublicKonFnRoute
+  '/event/$id/cancel/$participantId': typeof EventIdCancelParticipantIdRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/admin/konektum/eventos/': typeof AdminKonektumEventosIndexRoute
 }
@@ -871,10 +992,12 @@ export interface FileRoutesByTo {
   '/como-funciona': typeof ComoFuncionaRoute
   '/contacto': typeof ContactoRoute
   '/cookies': typeof CookiesRoute
+  '/crush-response': typeof CrushResponseRoute
   '/login': typeof LoginRoute
   '/ludoteca': typeof LudotecaRoute
   '/medios': typeof MediosRoute
   '/privacidad': typeof PrivacidadRoute
+  '/repeat-response': typeof RepeatResponseRoute
   '/roles-ocultos': typeof RolesOcultosRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/slow-friending-ludico': typeof SlowFriendingLudicoRoute
@@ -883,6 +1006,11 @@ export interface FileRoutesByTo {
   '/tarda-de-jocs-i-cuina-japonesa': typeof TardaDeJocsICuinaJaponesaRoute
   '/terminos': typeof TerminosRoute
   '/torneos': typeof TorneosRoute
+  '/$eventSlug/check-in': typeof EventSlugCheckInRoute
+  '/$eventSlug/mesas': typeof EventSlugMesasRoute
+  '/$eventSlug/registro': typeof EventSlugRegistroRoute
+  '/$eventSlug/seleccion': typeof EventSlugSeleccionRoute
+  '/$eventSlug/usuario': typeof EventSlugUsuarioRoute
   '/admin/invitations': typeof AdminInvitationsRoute
   '/admin/karma': typeof AdminKarmaRoute
   '/admin/members': typeof AdminMembersRoute
@@ -934,6 +1062,7 @@ export interface FileRoutesByTo {
   '/app': typeof AppIndexRoute
   '/ca': typeof CaIndexRoute
   '/en': typeof EnIndexRoute
+  '/$eventSlug/cancelar/$participantId': typeof EventSlugCancelarParticipantIdRoute
   '/admin/blog/$id': typeof AdminBlogIdRoute
   '/admin/blog/new': typeof AdminBlogNewRoute
   '/admin/content/$pageKey': typeof AdminContentPageKeyRoute
@@ -961,6 +1090,12 @@ export interface FileRoutesByTo {
   '/app/rentals/history': typeof AppRentalsHistoryRoute
   '/app/rentals/requests': typeof AppRentalsRequestsRoute
   '/auth/ludoya/callback': typeof AuthLudoyaCallbackRoute
+  '/event/$id/access': typeof EventIdAccessRoute
+  '/event/$id/checkin': typeof EventIdCheckinRoute
+  '/event/$id/join': typeof EventIdJoinRoute
+  '/event/$id/select': typeof EventIdSelectRoute
+  '/event/$id/tables': typeof EventIdTablesRoute
+  '/s/$seriesSlug/join': typeof SSeriesSlugJoinRoute
   '/admin/blog': typeof AdminBlogIndexRoute
   '/admin/content': typeof AdminContentIndexRoute
   '/admin/konektum': typeof AdminKonektumIndexRoute
@@ -968,9 +1103,12 @@ export interface FileRoutesByTo {
   '/admin/registrations': typeof AdminRegistrationsIndexRoute
   '/admin/rentals': typeof AdminRentalsIndexRoute
   '/app/rentals': typeof AppRentalsIndexRoute
+  '/s/$seriesSlug': typeof SSeriesSlugIndexRoute
   '/admin/konektum/eventos/$id': typeof AdminKonektumEventosIdRoute
   '/admin/konektum/eventos/nuevo': typeof AdminKonektumEventosNuevoRoute
   '/api/public/hooks/featured-dispatch': typeof ApiPublicHooksFeaturedDispatchRoute
+  '/api/public/kon/$fn': typeof ApiPublicKonFnRoute
+  '/event/$id/cancel/$participantId': typeof EventIdCancelParticipantIdRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/admin/konektum/eventos': typeof AdminKonektumEventosIndexRoute
 }
@@ -988,10 +1126,12 @@ export interface FileRoutesById {
   '/como-funciona': typeof ComoFuncionaRoute
   '/contacto': typeof ContactoRoute
   '/cookies': typeof CookiesRoute
+  '/crush-response': typeof CrushResponseRoute
   '/login': typeof LoginRoute
   '/ludoteca': typeof LudotecaRoute
   '/medios': typeof MediosRoute
   '/privacidad': typeof PrivacidadRoute
+  '/repeat-response': typeof RepeatResponseRoute
   '/roles-ocultos': typeof RolesOcultosRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/slow-friending-ludico': typeof SlowFriendingLudicoRoute
@@ -1000,6 +1140,11 @@ export interface FileRoutesById {
   '/tarda-de-jocs-i-cuina-japonesa': typeof TardaDeJocsICuinaJaponesaRoute
   '/terminos': typeof TerminosRoute
   '/torneos': typeof TorneosRoute
+  '/$eventSlug/check-in': typeof EventSlugCheckInRoute
+  '/$eventSlug/mesas': typeof EventSlugMesasRoute
+  '/$eventSlug/registro': typeof EventSlugRegistroRoute
+  '/$eventSlug/seleccion': typeof EventSlugSeleccionRoute
+  '/$eventSlug/usuario': typeof EventSlugUsuarioRoute
   '/admin/blog': typeof AdminBlogRouteWithChildren
   '/admin/content': typeof AdminContentRouteWithChildren
   '/admin/invitations': typeof AdminInvitationsRoute
@@ -1057,6 +1202,7 @@ export interface FileRoutesById {
   '/app/': typeof AppIndexRoute
   '/ca/': typeof CaIndexRoute
   '/en/': typeof EnIndexRoute
+  '/$eventSlug/cancelar/$participantId': typeof EventSlugCancelarParticipantIdRoute
   '/admin/blog/$id': typeof AdminBlogIdRoute
   '/admin/blog/new': typeof AdminBlogNewRoute
   '/admin/content/$pageKey': typeof AdminContentPageKeyRoute
@@ -1084,6 +1230,12 @@ export interface FileRoutesById {
   '/app/rentals/history': typeof AppRentalsHistoryRoute
   '/app/rentals/requests': typeof AppRentalsRequestsRoute
   '/auth/ludoya/callback': typeof AuthLudoyaCallbackRoute
+  '/event/$id/access': typeof EventIdAccessRoute
+  '/event/$id/checkin': typeof EventIdCheckinRoute
+  '/event/$id/join': typeof EventIdJoinRoute
+  '/event/$id/select': typeof EventIdSelectRoute
+  '/event/$id/tables': typeof EventIdTablesRoute
+  '/s/$seriesSlug/join': typeof SSeriesSlugJoinRoute
   '/admin/blog/': typeof AdminBlogIndexRoute
   '/admin/content/': typeof AdminContentIndexRoute
   '/admin/konektum/': typeof AdminKonektumIndexRoute
@@ -1091,9 +1243,12 @@ export interface FileRoutesById {
   '/admin/registrations/': typeof AdminRegistrationsIndexRoute
   '/admin/rentals/': typeof AdminRentalsIndexRoute
   '/app/rentals/': typeof AppRentalsIndexRoute
+  '/s/$seriesSlug/': typeof SSeriesSlugIndexRoute
   '/admin/konektum/eventos/$id': typeof AdminKonektumEventosIdRoute
   '/admin/konektum/eventos/nuevo': typeof AdminKonektumEventosNuevoRoute
   '/api/public/hooks/featured-dispatch': typeof ApiPublicHooksFeaturedDispatchRoute
+  '/api/public/kon/$fn': typeof ApiPublicKonFnRoute
+  '/event/$id/cancel/$participantId': typeof EventIdCancelParticipantIdRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/admin/konektum/eventos/': typeof AdminKonektumEventosIndexRoute
 }
@@ -1112,10 +1267,12 @@ export interface FileRouteTypes {
     | '/como-funciona'
     | '/contacto'
     | '/cookies'
+    | '/crush-response'
     | '/login'
     | '/ludoteca'
     | '/medios'
     | '/privacidad'
+    | '/repeat-response'
     | '/roles-ocultos'
     | '/sitemap.xml'
     | '/slow-friending-ludico'
@@ -1124,6 +1281,11 @@ export interface FileRouteTypes {
     | '/tarda-de-jocs-i-cuina-japonesa'
     | '/terminos'
     | '/torneos'
+    | '/$eventSlug/check-in'
+    | '/$eventSlug/mesas'
+    | '/$eventSlug/registro'
+    | '/$eventSlug/seleccion'
+    | '/$eventSlug/usuario'
     | '/admin/blog'
     | '/admin/content'
     | '/admin/invitations'
@@ -1181,6 +1343,7 @@ export interface FileRouteTypes {
     | '/app/'
     | '/ca/'
     | '/en/'
+    | '/$eventSlug/cancelar/$participantId'
     | '/admin/blog/$id'
     | '/admin/blog/new'
     | '/admin/content/$pageKey'
@@ -1208,6 +1371,12 @@ export interface FileRouteTypes {
     | '/app/rentals/history'
     | '/app/rentals/requests'
     | '/auth/ludoya/callback'
+    | '/event/$id/access'
+    | '/event/$id/checkin'
+    | '/event/$id/join'
+    | '/event/$id/select'
+    | '/event/$id/tables'
+    | '/s/$seriesSlug/join'
     | '/admin/blog/'
     | '/admin/content/'
     | '/admin/konektum/'
@@ -1215,9 +1384,12 @@ export interface FileRouteTypes {
     | '/admin/registrations/'
     | '/admin/rentals/'
     | '/app/rentals/'
+    | '/s/$seriesSlug/'
     | '/admin/konektum/eventos/$id'
     | '/admin/konektum/eventos/nuevo'
     | '/api/public/hooks/featured-dispatch'
+    | '/api/public/kon/$fn'
+    | '/event/$id/cancel/$participantId'
     | '/lovable/email/queue/process'
     | '/admin/konektum/eventos/'
   fileRoutesByTo: FileRoutesByTo
@@ -1232,10 +1404,12 @@ export interface FileRouteTypes {
     | '/como-funciona'
     | '/contacto'
     | '/cookies'
+    | '/crush-response'
     | '/login'
     | '/ludoteca'
     | '/medios'
     | '/privacidad'
+    | '/repeat-response'
     | '/roles-ocultos'
     | '/sitemap.xml'
     | '/slow-friending-ludico'
@@ -1244,6 +1418,11 @@ export interface FileRouteTypes {
     | '/tarda-de-jocs-i-cuina-japonesa'
     | '/terminos'
     | '/torneos'
+    | '/$eventSlug/check-in'
+    | '/$eventSlug/mesas'
+    | '/$eventSlug/registro'
+    | '/$eventSlug/seleccion'
+    | '/$eventSlug/usuario'
     | '/admin/invitations'
     | '/admin/karma'
     | '/admin/members'
@@ -1295,6 +1474,7 @@ export interface FileRouteTypes {
     | '/app'
     | '/ca'
     | '/en'
+    | '/$eventSlug/cancelar/$participantId'
     | '/admin/blog/$id'
     | '/admin/blog/new'
     | '/admin/content/$pageKey'
@@ -1322,6 +1502,12 @@ export interface FileRouteTypes {
     | '/app/rentals/history'
     | '/app/rentals/requests'
     | '/auth/ludoya/callback'
+    | '/event/$id/access'
+    | '/event/$id/checkin'
+    | '/event/$id/join'
+    | '/event/$id/select'
+    | '/event/$id/tables'
+    | '/s/$seriesSlug/join'
     | '/admin/blog'
     | '/admin/content'
     | '/admin/konektum'
@@ -1329,9 +1515,12 @@ export interface FileRouteTypes {
     | '/admin/registrations'
     | '/admin/rentals'
     | '/app/rentals'
+    | '/s/$seriesSlug'
     | '/admin/konektum/eventos/$id'
     | '/admin/konektum/eventos/nuevo'
     | '/api/public/hooks/featured-dispatch'
+    | '/api/public/kon/$fn'
+    | '/event/$id/cancel/$participantId'
     | '/lovable/email/queue/process'
     | '/admin/konektum/eventos'
   id:
@@ -1348,10 +1537,12 @@ export interface FileRouteTypes {
     | '/como-funciona'
     | '/contacto'
     | '/cookies'
+    | '/crush-response'
     | '/login'
     | '/ludoteca'
     | '/medios'
     | '/privacidad'
+    | '/repeat-response'
     | '/roles-ocultos'
     | '/sitemap.xml'
     | '/slow-friending-ludico'
@@ -1360,6 +1551,11 @@ export interface FileRouteTypes {
     | '/tarda-de-jocs-i-cuina-japonesa'
     | '/terminos'
     | '/torneos'
+    | '/$eventSlug/check-in'
+    | '/$eventSlug/mesas'
+    | '/$eventSlug/registro'
+    | '/$eventSlug/seleccion'
+    | '/$eventSlug/usuario'
     | '/admin/blog'
     | '/admin/content'
     | '/admin/invitations'
@@ -1417,6 +1613,7 @@ export interface FileRouteTypes {
     | '/app/'
     | '/ca/'
     | '/en/'
+    | '/$eventSlug/cancelar/$participantId'
     | '/admin/blog/$id'
     | '/admin/blog/new'
     | '/admin/content/$pageKey'
@@ -1444,6 +1641,12 @@ export interface FileRouteTypes {
     | '/app/rentals/history'
     | '/app/rentals/requests'
     | '/auth/ludoya/callback'
+    | '/event/$id/access'
+    | '/event/$id/checkin'
+    | '/event/$id/join'
+    | '/event/$id/select'
+    | '/event/$id/tables'
+    | '/s/$seriesSlug/join'
     | '/admin/blog/'
     | '/admin/content/'
     | '/admin/konektum/'
@@ -1451,9 +1654,12 @@ export interface FileRouteTypes {
     | '/admin/registrations/'
     | '/admin/rentals/'
     | '/app/rentals/'
+    | '/s/$seriesSlug/'
     | '/admin/konektum/eventos/$id'
     | '/admin/konektum/eventos/nuevo'
     | '/api/public/hooks/featured-dispatch'
+    | '/api/public/kon/$fn'
+    | '/event/$id/cancel/$participantId'
     | '/lovable/email/queue/process'
     | '/admin/konektum/eventos/'
   fileRoutesById: FileRoutesById
@@ -1471,10 +1677,12 @@ export interface RootRouteChildren {
   ComoFuncionaRoute: typeof ComoFuncionaRoute
   ContactoRoute: typeof ContactoRoute
   CookiesRoute: typeof CookiesRoute
+  CrushResponseRoute: typeof CrushResponseRoute
   LoginRoute: typeof LoginRoute
   LudotecaRoute: typeof LudotecaRoute
   MediosRoute: typeof MediosRoute
   PrivacidadRoute: typeof PrivacidadRoute
+  RepeatResponseRoute: typeof RepeatResponseRoute
   RolesOcultosRoute: typeof RolesOcultosRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   SlowFriendingLudicoRoute: typeof SlowFriendingLudicoRoute
@@ -1483,6 +1691,11 @@ export interface RootRouteChildren {
   TardaDeJocsICuinaJaponesaRoute: typeof TardaDeJocsICuinaJaponesaRoute
   TerminosRoute: typeof TerminosRoute
   TorneosRoute: typeof TorneosRoute
+  EventSlugCheckInRoute: typeof EventSlugCheckInRoute
+  EventSlugMesasRoute: typeof EventSlugMesasRoute
+  EventSlugRegistroRoute: typeof EventSlugRegistroRoute
+  EventSlugSeleccionRoute: typeof EventSlugSeleccionRoute
+  EventSlugUsuarioRoute: typeof EventSlugUsuarioRoute
   CaActivitatsRoute: typeof CaActivitatsRoute
   CaAvisLegalRoute: typeof CaAvisLegalRoute
   CaBlogRoute: typeof CaBlogRoute
@@ -1520,13 +1733,23 @@ export interface RootRouteChildren {
   VerificarIdRoute: typeof VerificarIdRoute
   CaIndexRoute: typeof CaIndexRoute
   EnIndexRoute: typeof EnIndexRoute
+  EventSlugCancelarParticipantIdRoute: typeof EventSlugCancelarParticipantIdRoute
   ApiPublicContactRoute: typeof ApiPublicContactRoute
   ApiPublicLudoyaImageRoute: typeof ApiPublicLudoyaImageRoute
   ApiPublicSyncBggRoute: typeof ApiPublicSyncBggRoute
   ApiPublicUploadInviteAvatarRoute: typeof ApiPublicUploadInviteAvatarRoute
   ApiPublicUploadMyAvatarRoute: typeof ApiPublicUploadMyAvatarRoute
   AuthLudoyaCallbackRoute: typeof AuthLudoyaCallbackRoute
+  EventIdAccessRoute: typeof EventIdAccessRoute
+  EventIdCheckinRoute: typeof EventIdCheckinRoute
+  EventIdJoinRoute: typeof EventIdJoinRoute
+  EventIdSelectRoute: typeof EventIdSelectRoute
+  EventIdTablesRoute: typeof EventIdTablesRoute
+  SSeriesSlugJoinRoute: typeof SSeriesSlugJoinRoute
+  SSeriesSlugIndexRoute: typeof SSeriesSlugIndexRoute
   ApiPublicHooksFeaturedDispatchRoute: typeof ApiPublicHooksFeaturedDispatchRoute
+  ApiPublicKonFnRoute: typeof ApiPublicKonFnRoute
+  EventIdCancelParticipantIdRoute: typeof EventIdCancelParticipantIdRoute
   LovableEmailQueueProcessRoute: typeof LovableEmailQueueProcessRoute
 }
 
@@ -1588,6 +1811,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RolesOcultosRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/repeat-response': {
+      id: '/repeat-response'
+      path: '/repeat-response'
+      fullPath: '/repeat-response'
+      preLoaderRoute: typeof RepeatResponseRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/privacidad': {
       id: '/privacidad'
       path: '/privacidad'
@@ -1614,6 +1844,13 @@ declare module '@tanstack/react-router' {
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/crush-response': {
+      id: '/crush-response'
+      path: '/crush-response'
+      fullPath: '/crush-response'
+      preLoaderRoute: typeof CrushResponseRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/cookies': {
@@ -2099,6 +2336,48 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminBlogRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/$eventSlug/usuario': {
+      id: '/$eventSlug/usuario'
+      path: '/$eventSlug/usuario'
+      fullPath: '/$eventSlug/usuario'
+      preLoaderRoute: typeof EventSlugUsuarioRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/$eventSlug/seleccion': {
+      id: '/$eventSlug/seleccion'
+      path: '/$eventSlug/seleccion'
+      fullPath: '/$eventSlug/seleccion'
+      preLoaderRoute: typeof EventSlugSeleccionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/$eventSlug/registro': {
+      id: '/$eventSlug/registro'
+      path: '/$eventSlug/registro'
+      fullPath: '/$eventSlug/registro'
+      preLoaderRoute: typeof EventSlugRegistroRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/$eventSlug/mesas': {
+      id: '/$eventSlug/mesas'
+      path: '/$eventSlug/mesas'
+      fullPath: '/$eventSlug/mesas'
+      preLoaderRoute: typeof EventSlugMesasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/$eventSlug/check-in': {
+      id: '/$eventSlug/check-in'
+      path: '/$eventSlug/check-in'
+      fullPath: '/$eventSlug/check-in'
+      preLoaderRoute: typeof EventSlugCheckInRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/s/$seriesSlug/': {
+      id: '/s/$seriesSlug/'
+      path: '/s/$seriesSlug'
+      fullPath: '/s/$seriesSlug/'
+      preLoaderRoute: typeof SSeriesSlugIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/app/rentals/': {
       id: '/app/rentals/'
       path: '/'
@@ -2147,6 +2426,48 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/blog/'
       preLoaderRoute: typeof AdminBlogIndexRouteImport
       parentRoute: typeof AdminBlogRoute
+    }
+    '/s/$seriesSlug/join': {
+      id: '/s/$seriesSlug/join'
+      path: '/s/$seriesSlug/join'
+      fullPath: '/s/$seriesSlug/join'
+      preLoaderRoute: typeof SSeriesSlugJoinRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/event/$id/tables': {
+      id: '/event/$id/tables'
+      path: '/event/$id/tables'
+      fullPath: '/event/$id/tables'
+      preLoaderRoute: typeof EventIdTablesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/event/$id/select': {
+      id: '/event/$id/select'
+      path: '/event/$id/select'
+      fullPath: '/event/$id/select'
+      preLoaderRoute: typeof EventIdSelectRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/event/$id/join': {
+      id: '/event/$id/join'
+      path: '/event/$id/join'
+      fullPath: '/event/$id/join'
+      preLoaderRoute: typeof EventIdJoinRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/event/$id/checkin': {
+      id: '/event/$id/checkin'
+      path: '/event/$id/checkin'
+      fullPath: '/event/$id/checkin'
+      preLoaderRoute: typeof EventIdCheckinRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/event/$id/access': {
+      id: '/event/$id/access'
+      path: '/event/$id/access'
+      fullPath: '/event/$id/access'
+      preLoaderRoute: typeof EventIdAccessRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/auth/ludoya/callback': {
       id: '/auth/ludoya/callback'
@@ -2337,6 +2658,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminBlogIdRouteImport
       parentRoute: typeof AdminBlogRoute
     }
+    '/$eventSlug/cancelar/$participantId': {
+      id: '/$eventSlug/cancelar/$participantId'
+      path: '/$eventSlug/cancelar/$participantId'
+      fullPath: '/$eventSlug/cancelar/$participantId'
+      preLoaderRoute: typeof EventSlugCancelarParticipantIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/konektum/eventos/': {
       id: '/admin/konektum/eventos/'
       path: '/eventos'
@@ -2349,6 +2677,20 @@ declare module '@tanstack/react-router' {
       path: '/lovable/email/queue/process'
       fullPath: '/lovable/email/queue/process'
       preLoaderRoute: typeof LovableEmailQueueProcessRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/event/$id/cancel/$participantId': {
+      id: '/event/$id/cancel/$participantId'
+      path: '/event/$id/cancel/$participantId'
+      fullPath: '/event/$id/cancel/$participantId'
+      preLoaderRoute: typeof EventIdCancelParticipantIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/kon/$fn': {
+      id: '/api/public/kon/$fn'
+      path: '/api/public/kon/$fn'
+      fullPath: '/api/public/kon/$fn'
+      preLoaderRoute: typeof ApiPublicKonFnRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/hooks/featured-dispatch': {
@@ -2565,10 +2907,12 @@ const rootRouteChildren: RootRouteChildren = {
   ComoFuncionaRoute: ComoFuncionaRoute,
   ContactoRoute: ContactoRoute,
   CookiesRoute: CookiesRoute,
+  CrushResponseRoute: CrushResponseRoute,
   LoginRoute: LoginRoute,
   LudotecaRoute: LudotecaRoute,
   MediosRoute: MediosRoute,
   PrivacidadRoute: PrivacidadRoute,
+  RepeatResponseRoute: RepeatResponseRoute,
   RolesOcultosRoute: RolesOcultosRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   SlowFriendingLudicoRoute: SlowFriendingLudicoRoute,
@@ -2577,6 +2921,11 @@ const rootRouteChildren: RootRouteChildren = {
   TardaDeJocsICuinaJaponesaRoute: TardaDeJocsICuinaJaponesaRoute,
   TerminosRoute: TerminosRoute,
   TorneosRoute: TorneosRoute,
+  EventSlugCheckInRoute: EventSlugCheckInRoute,
+  EventSlugMesasRoute: EventSlugMesasRoute,
+  EventSlugRegistroRoute: EventSlugRegistroRoute,
+  EventSlugSeleccionRoute: EventSlugSeleccionRoute,
+  EventSlugUsuarioRoute: EventSlugUsuarioRoute,
   CaActivitatsRoute: CaActivitatsRoute,
   CaAvisLegalRoute: CaAvisLegalRoute,
   CaBlogRoute: CaBlogRoute,
@@ -2614,13 +2963,23 @@ const rootRouteChildren: RootRouteChildren = {
   VerificarIdRoute: VerificarIdRoute,
   CaIndexRoute: CaIndexRoute,
   EnIndexRoute: EnIndexRoute,
+  EventSlugCancelarParticipantIdRoute: EventSlugCancelarParticipantIdRoute,
   ApiPublicContactRoute: ApiPublicContactRoute,
   ApiPublicLudoyaImageRoute: ApiPublicLudoyaImageRoute,
   ApiPublicSyncBggRoute: ApiPublicSyncBggRoute,
   ApiPublicUploadInviteAvatarRoute: ApiPublicUploadInviteAvatarRoute,
   ApiPublicUploadMyAvatarRoute: ApiPublicUploadMyAvatarRoute,
   AuthLudoyaCallbackRoute: AuthLudoyaCallbackRoute,
+  EventIdAccessRoute: EventIdAccessRoute,
+  EventIdCheckinRoute: EventIdCheckinRoute,
+  EventIdJoinRoute: EventIdJoinRoute,
+  EventIdSelectRoute: EventIdSelectRoute,
+  EventIdTablesRoute: EventIdTablesRoute,
+  SSeriesSlugJoinRoute: SSeriesSlugJoinRoute,
+  SSeriesSlugIndexRoute: SSeriesSlugIndexRoute,
   ApiPublicHooksFeaturedDispatchRoute: ApiPublicHooksFeaturedDispatchRoute,
+  ApiPublicKonFnRoute: ApiPublicKonFnRoute,
+  EventIdCancelParticipantIdRoute: EventIdCancelParticipantIdRoute,
   LovableEmailQueueProcessRoute: LovableEmailQueueProcessRoute,
 }
 export const routeTree = rootRouteImport

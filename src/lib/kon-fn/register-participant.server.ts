@@ -1,0 +1,720 @@
+// @ts-nocheck
+// Ported from the original Konektum edge function `register-participant`.
+let __handler: any = null;
+const serve = (h: any) => { __handler = h; };
+const Deno = {
+  env: { get: (k: string) => (globalThis as any).process?.env?.[k] },
+  serve: (h: any) => { __handler = h; },
+};
+
+import { createClient } from "@/lib/kon-fn/client.server";
+
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+};
+
+// Rate limiter (max 10 registrations per minute per IP)
+const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
+const RATE_LIMIT_WINDOW_MS = 60000;
+const MAX_REQUESTS_PER_WINDOW = 10;
+
+function isRateLimited(ip: string): boolean {
+  const now = Date.now();
+  const entry = rateLimitMap.get(ip);
+  
+  if (!entry || now > entry.resetTime) {
+    rateLimitMap.set(ip, { count: 1, resetTime: now + RATE_LIMIT_WINDOW_MS });
+    return false;
+  }
+  
+  if (entry.count >= MAX_REQUESTS_PER_WINDOW) {
+    return true;
+  }
+  
+  entry.count++;
+  return false;
+}
+
+// Generate unique 6-digit verification code
+async function generateUniqueCode(supabase: any): Promise<string> {
+  let attempts = 0;
+  const maxAttempts = 10;
+  
+  while (attempts < maxAttempts) {
+    const code = Math.floor(100000 + Math.random() * 900000).toString();
+    
+    const { data: existing } = await supabase
+      .from('participants')
+      .select('id')
+      .eq('verification_code', code)
+      .maybeSingle();
+    
+    if (!existing) {
+      return code;
+    }
+    
+    attempts++;
+  }
+  
+  throw new Error('Could not generate unique verification code');
+}
+
+// Calculate age range from birth date
+function parseRange(range: any): { label: string; min: number; max: number } | null {
+  if (typeof range === 'object' && range !== null && range.min !== undefined) {
+    return { label: range.label || String(range.min), min: range.min, max: range.max ?? 100 };
+  }
+  const str = String(range);
+  if (str.includes('+')) {
+    const num = parseInt(str.replace(/[^0-9]/g, ''));
+    if (isNaN(num)) return null;
+    return { label: str, min: num, max: 100 };
+  }
+  const parts = str.replace(/–/g, '-').split('-').map(n => parseInt(n.trim()));
+  if (parts.length === 2 && !isNaN(parts[0]) && !isNaN(parts[1])) {
+    return { label: str, min: parts[0], max: parts[1] };
+  }
+  return null;
+}
+
+function calculateAgeRange(birthDate: string, customAgeRanges: any[] | null): string {
+  const today = new Date();
+  const birth = new Date(birthDate);
+  let age = today.getFullYear() - birth.getFullYear();
+  const monthDiff = today.getMonth() - birth.getMonth();
+  
+  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+    age--;
+  }
+  
+  const defaultRanges = ["18–24", "25–32", "33–40", "41–50", "+ 50"];
+  const rawRanges = customAgeRanges && customAgeRanges.length > 0 ? customAgeRanges : defaultRanges;
+  
+  for (const raw of rawRanges) {
+    const parsed = parseRange(raw);
+    if (parsed && age >= parsed.min && age <= parsed.max) {
+      return parsed.label;
+    }
+  }
+  
+  return "Otro";
+}
+
+function buildEventStartDate(eventDate: string, eventTime?: string | null): Date {
+  const baseDate = new Date(eventDate);
+
+  if (!eventTime) {
+    return baseDate;
+  }
+
+  const [hoursRaw, minutesRaw, secondsRaw] = eventTime.split(':');
+  const hours = Number(hoursRaw);
+  const minutes = Number(minutesRaw ?? '0');
+  const seconds = Number(secondsRaw ?? '0');
+
+  if (Number.isNaN(hours) || Number.isNaN(minutes) || Number.isNaN(seconds)) {
+    return baseDate;
+  }
+
+  const eventStart = new Date(baseDate);
+  eventStart.setHours(hours, minutes, seconds, 0);
+  return eventStart;
+}
+
+function isWithinWindowBeforeStart(eventStart: Date, windowHours: number): boolean {
+  const now = new Date();
+  const windowStart = new Date(eventStart.getTime() - windowHours * 60 * 60 * 1000);
+  return now >= windowStart && now <= eventStart;
+}
+
+serve(async (req) => {
+  if (req.method === 'OPTIONS') {
+    return new Response(null, { headers: corsHeaders });
+  }
+
+  try {
+    const clientIP = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() 
+      || req.headers.get('x-real-ip') 
+      || 'unknown';
+    
+    console.log(`[register-participant] Request from IP: ${clientIP}`);
+    
+    if (isRateLimited(clientIP)) {
+      console.warn(`[register-participant] Rate limit exceeded for IP: ${clientIP}`);
+      return new Response(
+        JSON.stringify({ error: 'Demasiadas solicitudes. Espera un minuto antes de intentarlo de nuevo.' }),
+        { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const body = await req.json();
+    const isProfessional = body.isProfessional === true;
+    const marketingConsent = body.marketingConsent === true;
+
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+    // ─── PROFESSIONAL B2B REGISTRATION ───
+    if (isProfessional) {
+      const { eventId, name, email, phone, entityType, companyName, sector, companySize, needs, solutions } = body;
+
+      console.log(`[register-participant] B2B registration for event: ${eventId}, name: ${name}, type: ${entityType}`);
+
+      if (!eventId || !name || !email || !phone || !entityType || !companyName || !sector || !companySize) {
+        return new Response(
+          JSON.stringify({ error: 'Faltan campos obligatorios' }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+      if (!uuidRegex.test(eventId)) {
+        return new Response(
+          JSON.stringify({ error: 'Formato de evento inválido' }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        return new Response(
+          JSON.stringify({ error: 'Formato de email inválido' }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      if (!['client', 'provider'].includes(entityType)) {
+        return new Response(
+          JSON.stringify({ error: 'Tipo de entidad inválido' }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      // Get event
+      const { data: event, error: eventError } = await supabase
+        .from('events')
+        .select('id, name, status, date, event_time, module, organizer_id, registration_open, waitlist_enabled, code_send_mode, is_test_event')
+        .eq('id', eventId)
+        .single();
+
+      if (eventError || !event) {
+        return new Response(
+          JSON.stringify({ error: 'Evento no encontrado' }),
+          { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      if ((event as any).is_test_event) {
+        return new Response(
+          JSON.stringify({ error: 'Las inscripciones públicas están deshabilitadas para este evento de prueba' }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      if (event.status !== 'pending' && event.status !== 'active') {
+        return new Response(
+          JSON.stringify({ error: 'Las inscripciones para este evento están cerradas' }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      const registrationOpen = event.registration_open ?? true;
+      const waitlistEnabled = event.waitlist_enabled ?? false;
+      const isFromWaitlist = body.fromWaitlist === true;
+
+      if (!registrationOpen && !waitlistEnabled && !isFromWaitlist) {
+        return new Response(
+          JSON.stringify({ error: 'Las inscripciones están cerradas para este evento' }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      // Check duplicate email
+      const { data: existingParticipant } = await supabase
+        .from('participants')
+        .select('id')
+        .eq('event_id', eventId)
+        .eq('email', email.toLowerCase().trim())
+        .maybeSingle();
+
+      if (existingParticipant) {
+        return new Response(
+          JSON.stringify({ error: 'Ya estás registrado en este evento' }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      // If registration is closed and waitlist is enabled, add to waitlist
+      if (!registrationOpen && waitlistEnabled && !isFromWaitlist) {
+        // Get max position
+        const { data: maxPos } = await supabase
+          .from('event_waitlist')
+          .select('position')
+          .eq('event_id', eventId)
+          .order('position', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+
+        const nextPosition = (maxPos?.position || 0) + 1;
+
+        const { error: waitlistError } = await supabase
+          .from('event_waitlist')
+          .insert({
+            event_id: eventId,
+            name: name.trim(),
+            email: email.toLowerCase().trim(),
+            phone: phone.trim(),
+            entity_type: entityType,
+            company_name: companyName.trim(),
+            sector: sector,
+            company_size: companySize,
+            needs: needs || [],
+            solutions: solutions || [],
+            position: nextPosition,
+            marketing_consent: marketingConsent,
+          });
+
+        if (waitlistError) {
+          if (waitlistError.code === '23505') {
+            return new Response(
+              JSON.stringify({ error: 'Ya estás en la lista de espera de este evento' }),
+              { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+            );
+          }
+          console.error('[register-participant] Error adding to waitlist:', waitlistError);
+          return new Response(
+            JSON.stringify({ error: 'Error al añadir a la lista de espera' }),
+            { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
+
+        return new Response(
+          JSON.stringify({ success: true, waitlisted: true, position: nextPosition, name: name.trim(), email: email.toLowerCase().trim() }),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      // Auto check-in if event is within 1 hour
+      const eventStartDate = buildEventStartDate(event.date, event.event_time);
+      const shouldAutoCheckin = isWithinWindowBeforeStart(eventStartDate, 1);
+      const codeSendMode = event.code_send_mode || 'on_registration';
+
+      // For 'automatic' mode: generate code if <24h before event
+      const isWithin24h = isWithinWindowBeforeStart(eventStartDate, 24);
+
+      let verificationCode: string | null = null;
+      if (shouldAutoCheckin || codeSendMode === 'on_registration' || (codeSendMode === 'automatic' && isWithin24h)) {
+        verificationCode = await generateUniqueCode(supabase);
+      }
+
+      // Insert participant with B2B fields
+      const { data: participant, error: insertError } = await supabase
+        .from('participants')
+        .insert({
+          event_id: eventId,
+          name: name.trim(),
+          email: email.toLowerCase().trim(),
+          phone: phone.trim(),
+          entity_type: entityType,
+          company_name: companyName.trim(),
+          sector: sector,
+          company_size: companySize,
+          needs: needs || [],
+          solutions: solutions || [],
+          verification_code: verificationCode,
+          checked_in: shouldAutoCheckin,
+          marketing_consent: marketingConsent,
+        })
+        .select()
+        .single();
+
+      if (insertError) {
+        console.error('[register-participant] Error inserting B2B participant:', insertError);
+        return new Response(
+          JSON.stringify({ error: 'Error al registrar participante' }),
+          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      await supabase.rpc('increment_participants', { event_id: eventId });
+
+      console.log(`[register-participant] B2B participant registered: ${participant.id}, autoCheckin: ${shouldAutoCheckin}`);
+
+      const sendCodeNowB2B = shouldAutoCheckin || codeSendMode === 'on_registration' || (codeSendMode === 'automatic' && isWithin24h);
+
+      return new Response(
+        JSON.stringify({
+          success: true,
+          participantId: participant.id,
+          verificationCode: sendCodeNowB2B ? verificationCode : null,
+          autoCheckedIn: shouldAutoCheckin,
+          codeSendMode,
+        }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // ─── SOCIAL REGISTRATION (existing flow) ───
+    const { eventId, name, email, phone, gender, birthDate, preference, datingPreference, preferredAgeRange, isReturningParticipant, wrappedAnswers, spokenLanguages, gameAnswers } = body;
+    
+    console.log(`[register-participant] Registration for event: ${eventId}, name: ${name}`);
+
+    if (!eventId || !name || !email || !phone || !gender || !birthDate || !preference) {
+      return new Response(
+        JSON.stringify({ error: 'Faltan campos obligatorios (incluyendo preferencia)' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (!uuidRegex.test(eventId)) {
+      return new Response(
+        JSON.stringify({ error: 'Formato de evento inválido' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return new Response(
+        JSON.stringify({ error: 'Formato de email inválido' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const birthDateObj = new Date(birthDate);
+    if (isNaN(birthDateObj.getTime())) {
+      return new Response(
+        JSON.stringify({ error: 'Fecha de nacimiento inválida' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const today = new Date();
+    let age = today.getFullYear() - birthDateObj.getFullYear();
+    const monthDiff = today.getMonth() - birthDateObj.getMonth();
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDateObj.getDate())) {
+      age--;
+    }
+    
+    if (age < 18) {
+      return new Response(
+        JSON.stringify({ error: 'Debes ser mayor de 18 años para registrarte' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const { data: event, error: eventError } = await supabase
+      .from('events')
+      .select('id, name, status, date, event_time, custom_age_ranges, registration_requirements_enabled, slot_quotas, quota_waitlist_enabled, module, organizer_id, registration_open, waitlist_enabled, code_send_mode, is_test_event')
+      .eq('id', eventId)
+      .single();
+
+    if (eventError || !event) {
+      console.error('[register-participant] Event not found:', eventError);
+      return new Response(
+        JSON.stringify({ error: 'Evento no encontrado' }),
+        { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Test events are not open for public registration to avoid CRM contamination
+    if ((event as any).is_test_event) {
+      return new Response(
+        JSON.stringify({ error: 'Las inscripciones públicas están deshabilitadas para este evento de prueba' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    if (event.status !== 'pending' && event.status !== 'active') {
+      return new Response(
+        JSON.stringify({ error: 'Las inscripciones para este evento están cerradas' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const socialRegistrationOpen = event.registration_open ?? true;
+    const socialWaitlistEnabled = event.waitlist_enabled ?? false;
+    const socialQuotaWaitlistEnabled = (event as any).quota_waitlist_enabled ?? true;
+    const socialIsFromWaitlist = body.fromWaitlist === true;
+
+    if (!socialRegistrationOpen && !socialWaitlistEnabled && !socialIsFromWaitlist) {
+      return new Response(
+        JSON.stringify({ error: 'Las inscripciones están cerradas para este evento' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const ageRange = calculateAgeRange(birthDate, event.custom_age_ranges as any[] | null);
+
+    // Tolerant quota matching: normalize dashes, case, whitespace
+    const normalizeKey = (v: any) => String(v ?? '')
+      .toLowerCase()
+      .trim()
+      .replace(/–/g, '-')
+      .replace(/\s+/g, '');
+
+    const socialForceWaitlist = body.forceWaitlist === true;
+    let quotaFullDetected = false;
+
+    if (event.registration_requirements_enabled && event.slot_quotas) {
+      const quotas = event.slot_quotas as any[];
+      const matchingQuota = quotas.find(
+        (q: any) =>
+          normalizeKey(q.gender) === normalizeKey(gender) &&
+          normalizeKey(q.ageRange) === normalizeKey(ageRange)
+      );
+
+      if (matchingQuota) {
+        const { data: allParts } = await supabase
+          .from('participants')
+          .select('id, gender, age_range, cancelled_at, is_fake')
+          .eq('event_id', eventId);
+
+        const currentCount = (allParts || []).filter(
+          (p: any) =>
+            !p.cancelled_at &&
+            !p.is_fake &&
+            normalizeKey(p.gender) === normalizeKey(matchingQuota.gender) &&
+            normalizeKey(p.age_range) === normalizeKey(matchingQuota.ageRange)
+        ).length;
+
+        if (currentCount >= matchingQuota.maxSlots) {
+          quotaFullDetected = true;
+          if (socialIsFromWaitlist) {
+            return new Response(
+              JSON.stringify({
+                error: 'La cuota correspondiente sigue completa. No se puede inscribir desde lista de espera hasta que haya una plaza disponible en ese grupo.',
+                quotaFull: true,
+                gender,
+                ageRange
+              }),
+              { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+            );
+          }
+          // Block only if neither the quota waitlist nor the event waitlist is enabled
+          if (!socialForceWaitlist && !socialQuotaWaitlistEnabled && !socialWaitlistEnabled) {
+            return new Response(
+              JSON.stringify({
+                error: 'No hay plazas disponibles para tu perfil',
+                quotaFull: true,
+                gender,
+                ageRange
+              }),
+              { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+            );
+          }
+        }
+      }
+    }
+
+    const { data: existingParticipant } = await supabase
+      .from('participants')
+      .select('id')
+      .eq('event_id', eventId)
+      .eq('email', email.toLowerCase().trim())
+      .maybeSingle();
+
+    if (existingParticipant) {
+      return new Response(
+        JSON.stringify({ error: 'Ya estás registrado en este evento' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // If registration is closed OR quota is full → add to waitlist
+    if (((!socialRegistrationOpen && socialWaitlistEnabled) || quotaFullDetected || socialForceWaitlist) && !socialIsFromWaitlist) {
+      const { data: maxPos } = await supabase
+        .from('event_waitlist')
+        .select('position')
+        .eq('event_id', eventId)
+        .order('position', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      const nextPosition = (maxPos?.position || 0) + 1;
+
+      const { error: waitlistError } = await supabase
+        .from('event_waitlist')
+        .insert({
+          event_id: eventId,
+          name: name.trim(),
+          email: email.toLowerCase().trim(),
+          phone: phone.trim(),
+          gender,
+          birth_date: birthDate,
+          age_range: ageRange,
+          preference: preference || null,
+          dating_preference: datingPreference || null,
+          preferred_age_range: preferredAgeRange || null,
+          is_returning_participant: isReturningParticipant || false,
+          position: nextPosition,
+          marketing_consent: marketingConsent,
+          wrapped_answers: wrappedAnswers && typeof wrappedAnswers === 'object' ? wrappedAnswers : null,
+          game_answers: gameAnswers && typeof gameAnswers === 'object' ? gameAnswers : null,
+          spoken_languages: Array.isArray(spokenLanguages) ? spokenLanguages : [],
+        });
+
+
+      if (waitlistError) {
+        if (waitlistError.code === '23505') {
+          return new Response(
+            JSON.stringify({ error: 'Ya estás en la lista de espera de este evento' }),
+            { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
+        console.error('[register-participant] Error adding to waitlist:', waitlistError);
+        return new Response(
+          JSON.stringify({ error: 'Error al añadir a la lista de espera' }),
+          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      console.log(`[register-participant] Added to waitlist: ${name}, position: ${nextPosition}`);
+      return new Response(
+        JSON.stringify({ success: true, waitlisted: true, position: nextPosition, name: name.trim(), email: email.toLowerCase().trim() }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const eventStartDate = buildEventStartDate(event.date, event.event_time);
+    const shouldAutoCheckin = isWithinWindowBeforeStart(eventStartDate, 1);
+    const codeSendMode = event.code_send_mode || 'on_registration';
+
+    // For 'automatic' mode: generate code if <24h before event
+    const isWithin24h = isWithinWindowBeforeStart(eventStartDate, 24);
+
+    let verificationCode: string | null = null;
+    if (shouldAutoCheckin || codeSendMode === 'on_registration' || (codeSendMode === 'automatic' && isWithin24h)) {
+      verificationCode = await generateUniqueCode(supabase);
+    }
+
+    let isActuallyReturning = false;
+    if (event.organizer_id) {
+      const { data: globalParticipant } = await supabase
+        .from('global_participants')
+        .select('id, events_attended')
+        .eq('organizer_id', event.organizer_id)
+        .eq('email', email.toLowerCase().trim())
+        .maybeSingle();
+      
+      if (globalParticipant && globalParticipant.events_attended > 0) {
+        isActuallyReturning = true;
+      }
+    }
+
+    // Wrapped: upsert profile per organizer and link to participant
+    let wrappedProfileId: string | null = null;
+    if (event.organizer_id) {
+      const emailLower = email.toLowerCase().trim();
+      const { data: existingProfile } = await supabase
+        .from('wrapped_profiles')
+        .select('id, answers, hobbies_ranked')
+        .eq('organizer_id', event.organizer_id)
+        .eq('email', emailLower)
+        .maybeSingle();
+
+      if (existingProfile) {
+        wrappedProfileId = existingProfile.id;
+        // If new answers arrive, update the profile
+        if (wrappedAnswers && typeof wrappedAnswers === 'object') {
+          const hobbies = wrappedAnswers?.top_hobbies
+            ? [wrappedAnswers.top_hobbies.top1, wrappedAnswers.top_hobbies.top2, wrappedAnswers.top_hobbies.top3].filter(Boolean)
+            : (existingProfile.hobbies_ranked || []);
+          await supabase
+            .from('wrapped_profiles')
+            .update({ answers: wrappedAnswers, hobbies_ranked: hobbies, updated_at: new Date().toISOString() })
+            .eq('id', existingProfile.id);
+        }
+      } else if (wrappedAnswers && typeof wrappedAnswers === 'object') {
+        const hobbies = wrappedAnswers?.top_hobbies
+          ? [wrappedAnswers.top_hobbies.top1, wrappedAnswers.top_hobbies.top2, wrappedAnswers.top_hobbies.top3].filter(Boolean)
+          : [];
+        const { data: newProfile, error: profileErr } = await supabase
+          .from('wrapped_profiles')
+          .insert({
+            organizer_id: event.organizer_id,
+            email: emailLower,
+            answers: wrappedAnswers,
+            hobbies_ranked: hobbies,
+          })
+          .select('id')
+          .single();
+        if (!profileErr) wrappedProfileId = newProfile.id;
+        else console.error('[register-participant] wrapped_profile insert error', profileErr);
+      }
+    }
+
+    const { data: participant, error: insertError } = await supabase
+      .from('participants')
+      .insert({
+        event_id: eventId,
+        name: name.trim(),
+        email: email.toLowerCase().trim(),
+        phone: phone.trim(),
+        gender,
+        birth_date: birthDate,
+        age_range: ageRange,
+        preference: preference || null,
+        dating_preference: datingPreference || null,
+        preferred_age_range: preferredAgeRange || null,
+        is_returning_participant: isReturningParticipant || isActuallyReturning,
+        verification_code: verificationCode,
+        checked_in: shouldAutoCheckin,
+        marketing_consent: marketingConsent,
+        wrapped_profile_id: wrappedProfileId,
+        spoken_languages: Array.isArray(spokenLanguages) ? spokenLanguages : [],
+        game_answers: gameAnswers && typeof gameAnswers === 'object' ? gameAnswers : null,
+      })
+      .select()
+      .single();
+
+    if (insertError) {
+      console.error('[register-participant] Error inserting participant:', insertError);
+      return new Response(
+        JSON.stringify({ error: 'Error al registrar participante' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    await supabase.rpc('increment_participants', { event_id: eventId });
+
+    console.log(`[register-participant] Participant registered: ${participant.id}, autoCheckin: ${shouldAutoCheckin}`);
+
+    const sendCodeNow = shouldAutoCheckin || codeSendMode === 'on_registration' || (codeSendMode === 'automatic' && isWithin24h);
+
+    return new Response(
+      JSON.stringify({ 
+        success: true,
+        participantId: participant.id,
+        verificationCode: sendCodeNow ? verificationCode : null,
+        autoCheckedIn: shouldAutoCheckin,
+        codeSendMode,
+        isReturningParticipant: isActuallyReturning,
+        message: shouldAutoCheckin 
+          ? 'Registro completado. Se ha realizado el check-in automático. Recibirás un email con tu código de acceso.'
+          : sendCodeNow
+            ? 'Registro completado. Recibirás un email con tu código de acceso.'
+            : codeSendMode === 'automatic'
+              ? 'Registro completado. Recibirás tu código de acceso automáticamente 24 horas antes del evento.'
+              : 'Registro completado. Recibirás un email de confirmación. El organizador te enviará tu código de acceso.'
+      }),
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
+
+  } catch (error) {
+    console.error('[register-participant] Unexpected error:', error);
+    return new Response(
+      JSON.stringify({ error: 'Error interno del servidor' }),
+      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
+  }
+});
+
+
+export default async function handler(req: Request): Promise<Response> {
+  if (!__handler) throw new Error("handler not registered");
+  return await __handler(req);
+}
