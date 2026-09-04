@@ -977,9 +977,33 @@ const CreateEvent = () => {
                     : "Ej: Networking Tech Barcelona"
                   }
                   value={eventName}
-                  onChange={(e) => setEventName(e.target.value)}
+                  onChange={(e) => {
+                    setEventName(e.target.value);
+                    if (!slugTouched) setEventSlug(slugifyEventName(e.target.value));
+                  }}
                 />
               </div>
+              <div className="space-y-2">
+                <Label htmlFor="eventSlug">Enlace público</Label>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-muted-foreground whitespace-nowrap">
+                    {typeof window !== "undefined" ? window.location.host : "kleff.es"}/
+                  </span>
+                  <Input
+                    id="eventSlug"
+                    placeholder="mi-evento"
+                    value={eventSlug}
+                    onChange={(e) => {
+                      setSlugTouched(true);
+                      setEventSlug(slugifyEventName(e.target.value));
+                    }}
+                  />
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Los enlaces del evento serán /{eventSlug || "mi-evento"}/registro, /check-in, /usuario, /mesas y /seleccion.
+                </p>
+              </div>
+
               <div className="space-y-2">
                 <Label htmlFor="eventDate">Fecha del evento</Label>
                 <Input
