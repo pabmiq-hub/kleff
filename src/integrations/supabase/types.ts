@@ -1180,6 +1180,1828 @@ export type Database = {
         }
         Relationships: []
       }
+      kon_crush_requests: {
+        Row: {
+          created_at: string
+          event_id: string
+          id: string
+          requester_id: string
+          responded_at: string | null
+          scheduled_round: number | null
+          status: string
+          target_id: string
+          token: string
+        }
+        Insert: {
+          created_at?: string
+          event_id: string
+          id?: string
+          requester_id: string
+          responded_at?: string | null
+          scheduled_round?: number | null
+          status?: string
+          target_id: string
+          token: string
+        }
+        Update: {
+          created_at?: string
+          event_id?: string
+          id?: string
+          requester_id?: string
+          responded_at?: string | null
+          scheduled_round?: number | null
+          status?: string
+          target_id?: string
+          token?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "kon_crush_requests_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "kon_events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kon_crush_requests_requester_id_fkey"
+            columns: ["requester_id"]
+            isOneToOne: false
+            referencedRelation: "kon_participants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kon_crush_requests_target_id_fkey"
+            columns: ["target_id"]
+            isOneToOne: false
+            referencedRelation: "kon_participants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      kon_email_logs: {
+        Row: {
+          created_at: string
+          email_type: string
+          error_message: string | null
+          event_id: string
+          id: string
+          participant_id: string
+          sent_at: string | null
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          email_type: string
+          error_message?: string | null
+          event_id: string
+          id?: string
+          participant_id: string
+          sent_at?: string | null
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          email_type?: string
+          error_message?: string | null
+          event_id?: string
+          id?: string
+          participant_id?: string
+          sent_at?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "kon_email_logs_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "kon_events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kon_email_logs_participant_id_fkey"
+            columns: ["participant_id"]
+            isOneToOne: false
+            referencedRelation: "kon_participants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      kon_event_series: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          organizer_id: string
+          slug: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          organizer_id: string
+          slug: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          organizer_id?: string
+          slug?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "kon_event_series_organizer_id_fkey"
+            columns: ["organizer_id"]
+            isOneToOne: false
+            referencedRelation: "kon_organizers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      kon_event_waitlist: {
+        Row: {
+          age_range: string | null
+          birth_date: string | null
+          company_name: string | null
+          company_size: string | null
+          created_at: string
+          dating_preference: string | null
+          email: string
+          entity_type: string | null
+          event_id: string
+          game_answers: Json | null
+          gender: string | null
+          id: string
+          is_returning_participant: boolean | null
+          marketing_consent: boolean
+          name: string
+          needs: string[] | null
+          phone: string | null
+          position: number
+          preference: string | null
+          preferred_age_range: string | null
+          promoted_at: string | null
+          sector: string | null
+          solutions: string[] | null
+          spoken_languages: string[]
+          status: string
+          wrapped_answers: Json | null
+        }
+        Insert: {
+          age_range?: string | null
+          birth_date?: string | null
+          company_name?: string | null
+          company_size?: string | null
+          created_at?: string
+          dating_preference?: string | null
+          email: string
+          entity_type?: string | null
+          event_id: string
+          game_answers?: Json | null
+          gender?: string | null
+          id?: string
+          is_returning_participant?: boolean | null
+          marketing_consent?: boolean
+          name: string
+          needs?: string[] | null
+          phone?: string | null
+          position?: number
+          preference?: string | null
+          preferred_age_range?: string | null
+          promoted_at?: string | null
+          sector?: string | null
+          solutions?: string[] | null
+          spoken_languages?: string[]
+          status?: string
+          wrapped_answers?: Json | null
+        }
+        Update: {
+          age_range?: string | null
+          birth_date?: string | null
+          company_name?: string | null
+          company_size?: string | null
+          created_at?: string
+          dating_preference?: string | null
+          email?: string
+          entity_type?: string | null
+          event_id?: string
+          game_answers?: Json | null
+          gender?: string | null
+          id?: string
+          is_returning_participant?: boolean | null
+          marketing_consent?: boolean
+          name?: string
+          needs?: string[] | null
+          phone?: string | null
+          position?: number
+          preference?: string | null
+          preferred_age_range?: string | null
+          promoted_at?: string | null
+          sector?: string | null
+          solutions?: string[] | null
+          spoken_languages?: string[]
+          status?: string
+          wrapped_answers?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "kon_event_waitlist_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "kon_events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      kon_events: {
+        Row: {
+          available_languages: string[]
+          avoid_encounters_mode: string
+          avoid_previous_encounters: boolean
+          checkin_open: boolean | null
+          checkin_opens_minutes_before: number | null
+          code_send_mode: string
+          completed_rounds: number[] | null
+          created_at: string
+          crush_enabled: boolean
+          current_round: number | null
+          custom_age_ranges: Json | null
+          custom_dating_preferences: Json | null
+          custom_genders: Json | null
+          custom_preferences: Json | null
+          custom_registration_form: Json | null
+          custom_tables: Json | null
+          date: string
+          draft_round: number | null
+          email_template: Json | null
+          emails_sent_at: string | null
+          event_location: string | null
+          event_time: string | null
+          game_mode: Json | null
+          gender_parity: boolean | null
+          group_rounds: Json | null
+          id: string
+          is_test_event: boolean
+          language: string
+          languages_enabled: boolean
+          module: string | null
+          name: string
+          organizer_id: string | null
+          organizer_profile_id: string | null
+          original_participants_count: number | null
+          participants_count: number
+          payment_reminder_first_hours: number
+          payment_reminder_second_hours: number | null
+          payment_reminders_enabled: boolean
+          payment_tracking_enabled: boolean
+          preliminary_round: Json | null
+          professional_config: Json | null
+          public_preliminary_tables_available: boolean
+          quota_waitlist_enabled: boolean
+          registration_description: string | null
+          registration_open: boolean
+          registration_requirements_enabled: boolean | null
+          registration_subtitle: string | null
+          reminder_mode: string
+          reminder_scheduled_at: string | null
+          repeat_request_enabled: boolean
+          rotation_mode: string
+          round_duration: number
+          round_elapsed_seconds: number | null
+          round_paused_at: string | null
+          round_started_at: string | null
+          rounds: number
+          scheduled_email_at: string | null
+          selection_closed_at: string | null
+          selection_deadline_hours: number | null
+          series_id: string | null
+          slot_quotas: Json | null
+          social_game: Json | null
+          status: string
+          super_like_enabled: boolean
+          table_size: number
+          tables: Json | null
+          tables_generation_mode: string
+          test_config: Json | null
+          updated_at: string
+          waitlist_enabled: boolean
+          wrapped_enabled: boolean
+          wrapped_questions: Json | null
+        }
+        Insert: {
+          available_languages?: string[]
+          avoid_encounters_mode?: string
+          avoid_previous_encounters?: boolean
+          checkin_open?: boolean | null
+          checkin_opens_minutes_before?: number | null
+          code_send_mode?: string
+          completed_rounds?: number[] | null
+          created_at?: string
+          crush_enabled?: boolean
+          current_round?: number | null
+          custom_age_ranges?: Json | null
+          custom_dating_preferences?: Json | null
+          custom_genders?: Json | null
+          custom_preferences?: Json | null
+          custom_registration_form?: Json | null
+          custom_tables?: Json | null
+          date: string
+          draft_round?: number | null
+          email_template?: Json | null
+          emails_sent_at?: string | null
+          event_location?: string | null
+          event_time?: string | null
+          game_mode?: Json | null
+          gender_parity?: boolean | null
+          group_rounds?: Json | null
+          id?: string
+          is_test_event?: boolean
+          language?: string
+          languages_enabled?: boolean
+          module?: string | null
+          name: string
+          organizer_id?: string | null
+          organizer_profile_id?: string | null
+          original_participants_count?: number | null
+          participants_count?: number
+          payment_reminder_first_hours?: number
+          payment_reminder_second_hours?: number | null
+          payment_reminders_enabled?: boolean
+          payment_tracking_enabled?: boolean
+          preliminary_round?: Json | null
+          professional_config?: Json | null
+          public_preliminary_tables_available?: boolean
+          quota_waitlist_enabled?: boolean
+          registration_description?: string | null
+          registration_open?: boolean
+          registration_requirements_enabled?: boolean | null
+          registration_subtitle?: string | null
+          reminder_mode?: string
+          reminder_scheduled_at?: string | null
+          repeat_request_enabled?: boolean
+          rotation_mode?: string
+          round_duration?: number
+          round_elapsed_seconds?: number | null
+          round_paused_at?: string | null
+          round_started_at?: string | null
+          rounds?: number
+          scheduled_email_at?: string | null
+          selection_closed_at?: string | null
+          selection_deadline_hours?: number | null
+          series_id?: string | null
+          slot_quotas?: Json | null
+          social_game?: Json | null
+          status?: string
+          super_like_enabled?: boolean
+          table_size?: number
+          tables?: Json | null
+          tables_generation_mode?: string
+          test_config?: Json | null
+          updated_at?: string
+          waitlist_enabled?: boolean
+          wrapped_enabled?: boolean
+          wrapped_questions?: Json | null
+        }
+        Update: {
+          available_languages?: string[]
+          avoid_encounters_mode?: string
+          avoid_previous_encounters?: boolean
+          checkin_open?: boolean | null
+          checkin_opens_minutes_before?: number | null
+          code_send_mode?: string
+          completed_rounds?: number[] | null
+          created_at?: string
+          crush_enabled?: boolean
+          current_round?: number | null
+          custom_age_ranges?: Json | null
+          custom_dating_preferences?: Json | null
+          custom_genders?: Json | null
+          custom_preferences?: Json | null
+          custom_registration_form?: Json | null
+          custom_tables?: Json | null
+          date?: string
+          draft_round?: number | null
+          email_template?: Json | null
+          emails_sent_at?: string | null
+          event_location?: string | null
+          event_time?: string | null
+          game_mode?: Json | null
+          gender_parity?: boolean | null
+          group_rounds?: Json | null
+          id?: string
+          is_test_event?: boolean
+          language?: string
+          languages_enabled?: boolean
+          module?: string | null
+          name?: string
+          organizer_id?: string | null
+          organizer_profile_id?: string | null
+          original_participants_count?: number | null
+          participants_count?: number
+          payment_reminder_first_hours?: number
+          payment_reminder_second_hours?: number | null
+          payment_reminders_enabled?: boolean
+          payment_tracking_enabled?: boolean
+          preliminary_round?: Json | null
+          professional_config?: Json | null
+          public_preliminary_tables_available?: boolean
+          quota_waitlist_enabled?: boolean
+          registration_description?: string | null
+          registration_open?: boolean
+          registration_requirements_enabled?: boolean | null
+          registration_subtitle?: string | null
+          reminder_mode?: string
+          reminder_scheduled_at?: string | null
+          repeat_request_enabled?: boolean
+          rotation_mode?: string
+          round_duration?: number
+          round_elapsed_seconds?: number | null
+          round_paused_at?: string | null
+          round_started_at?: string | null
+          rounds?: number
+          scheduled_email_at?: string | null
+          selection_closed_at?: string | null
+          selection_deadline_hours?: number | null
+          series_id?: string | null
+          slot_quotas?: Json | null
+          social_game?: Json | null
+          status?: string
+          super_like_enabled?: boolean
+          table_size?: number
+          tables?: Json | null
+          tables_generation_mode?: string
+          test_config?: Json | null
+          updated_at?: string
+          waitlist_enabled?: boolean
+          wrapped_enabled?: boolean
+          wrapped_questions?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "kon_events_series_id_fkey"
+            columns: ["series_id"]
+            isOneToOne: false
+            referencedRelation: "kon_event_series"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      kon_features: {
+        Row: {
+          category: string | null
+          code: string
+          created_at: string | null
+          description: string | null
+          id: string
+          module: string
+          name: string
+        }
+        Insert: {
+          category?: string | null
+          code: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          module?: string
+          name: string
+        }
+        Update: {
+          category?: string | null
+          code?: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          module?: string
+          name?: string
+        }
+        Relationships: []
+      }
+      kon_game_rewards: {
+        Row: {
+          created_at: string
+          event_id: string
+          game_code: string
+          id: string
+          participant_id: string
+          reward_type: string
+          round: number
+        }
+        Insert: {
+          created_at?: string
+          event_id: string
+          game_code?: string
+          id?: string
+          participant_id: string
+          reward_type: string
+          round: number
+        }
+        Update: {
+          created_at?: string
+          event_id?: string
+          game_code?: string
+          id?: string
+          participant_id?: string
+          reward_type?: string
+          round?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "kon_game_rewards_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "kon_events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kon_game_rewards_participant_id_fkey"
+            columns: ["participant_id"]
+            isOneToOne: false
+            referencedRelation: "kon_participants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      kon_game_sessions: {
+        Row: {
+          created_at: string
+          event_id: string
+          game_code: string
+          id: string
+          payload: Json
+          ready_participant_ids: string[]
+          round: number
+          started_at: string | null
+          status: string
+          table_number: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          event_id: string
+          game_code: string
+          id?: string
+          payload?: Json
+          ready_participant_ids?: string[]
+          round: number
+          started_at?: string | null
+          status?: string
+          table_number: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          event_id?: string
+          game_code?: string
+          id?: string
+          payload?: Json
+          ready_participant_ids?: string[]
+          round?: number
+          started_at?: string | null
+          status?: string
+          table_number?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "kon_game_sessions_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "kon_events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      kon_game_votes: {
+        Row: {
+          created_at: string
+          event_id: string
+          game_code: string
+          guessed_participant_id: string
+          id: string
+          is_correct: boolean
+          question_id: string
+          round: number
+          target_participant_id: string
+          voter_participant_id: string
+        }
+        Insert: {
+          created_at?: string
+          event_id: string
+          game_code?: string
+          guessed_participant_id: string
+          id?: string
+          is_correct: boolean
+          question_id: string
+          round: number
+          target_participant_id: string
+          voter_participant_id: string
+        }
+        Update: {
+          created_at?: string
+          event_id?: string
+          game_code?: string
+          guessed_participant_id?: string
+          id?: string
+          is_correct?: boolean
+          question_id?: string
+          round?: number
+          target_participant_id?: string
+          voter_participant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "kon_game_votes_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "kon_events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kon_game_votes_guessed_participant_id_fkey"
+            columns: ["guessed_participant_id"]
+            isOneToOne: false
+            referencedRelation: "kon_participants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kon_game_votes_target_participant_id_fkey"
+            columns: ["target_participant_id"]
+            isOneToOne: false
+            referencedRelation: "kon_participants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kon_game_votes_voter_participant_id_fkey"
+            columns: ["voter_participant_id"]
+            isOneToOne: false
+            referencedRelation: "kon_participants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      kon_global_participants: {
+        Row: {
+          created_at: string
+          display_name: string
+          email: string | null
+          events_attended: number
+          id: string
+          organizer_id: string
+          phone: string | null
+          source_notes: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          display_name: string
+          email?: string | null
+          events_attended?: number
+          id?: string
+          organizer_id: string
+          phone?: string | null
+          source_notes?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          display_name?: string
+          email?: string | null
+          events_attended?: number
+          id?: string
+          organizer_id?: string
+          phone?: string | null
+          source_notes?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "kon_global_participants_organizer_id_fkey"
+            columns: ["organizer_id"]
+            isOneToOne: false
+            referencedRelation: "kon_organizers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      kon_modules: {
+        Row: {
+          code: string
+          created_at: string | null
+          description: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          requires_plans: string[] | null
+        }
+        Insert: {
+          code: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          requires_plans?: string[] | null
+        }
+        Update: {
+          code?: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          requires_plans?: string[] | null
+        }
+        Relationships: []
+      }
+      kon_organizer_branding: {
+        Row: {
+          background_color: string | null
+          created_at: string | null
+          custom_footer_text: string | null
+          custom_welcome_text: string | null
+          font_family: string | null
+          hide_konektum_branding: boolean
+          id: string
+          is_white_label: boolean
+          organizer_id: string
+          primary_color: string | null
+          secondary_color: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          background_color?: string | null
+          created_at?: string | null
+          custom_footer_text?: string | null
+          custom_welcome_text?: string | null
+          font_family?: string | null
+          hide_konektum_branding?: boolean
+          id?: string
+          is_white_label?: boolean
+          organizer_id: string
+          primary_color?: string | null
+          secondary_color?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          background_color?: string | null
+          created_at?: string | null
+          custom_footer_text?: string | null
+          custom_welcome_text?: string | null
+          font_family?: string | null
+          hide_konektum_branding?: boolean
+          id?: string
+          is_white_label?: boolean
+          organizer_id?: string
+          primary_color?: string | null
+          secondary_color?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "kon_organizer_branding_organizer_id_fkey"
+            columns: ["organizer_id"]
+            isOneToOne: true
+            referencedRelation: "kon_organizers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      kon_organizer_email_connections: {
+        Row: {
+          access_token: string | null
+          created_at: string
+          email_address: string
+          id: string
+          is_active: boolean
+          organizer_id: string
+          provider: string
+          refresh_token: string
+          token_expires_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          access_token?: string | null
+          created_at?: string
+          email_address: string
+          id?: string
+          is_active?: boolean
+          organizer_id: string
+          provider?: string
+          refresh_token: string
+          token_expires_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          access_token?: string | null
+          created_at?: string
+          email_address?: string
+          id?: string
+          is_active?: boolean
+          organizer_id?: string
+          provider?: string
+          refresh_token?: string
+          token_expires_at?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "kon_organizer_email_connections_organizer_id_fkey"
+            columns: ["organizer_id"]
+            isOneToOne: false
+            referencedRelation: "kon_organizers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      kon_organizer_features: {
+        Row: {
+          created_at: string | null
+          feature_code: string
+          id: string
+          is_enabled: boolean | null
+          organizer_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          feature_code: string
+          id?: string
+          is_enabled?: boolean | null
+          organizer_id: string
+        }
+        Update: {
+          created_at?: string | null
+          feature_code?: string
+          id?: string
+          is_enabled?: boolean | null
+          organizer_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "kon_organizer_features_organizer_id_fkey"
+            columns: ["organizer_id"]
+            isOneToOne: false
+            referencedRelation: "kon_organizers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      kon_organizer_resend_config: {
+        Row: {
+          created_at: string
+          id: string
+          is_verified: boolean
+          organizer_id: string
+          resend_api_key: string
+          sender_email: string
+          sender_name: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_verified?: boolean
+          organizer_id: string
+          resend_api_key: string
+          sender_email: string
+          sender_name?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_verified?: boolean
+          organizer_id?: string
+          resend_api_key?: string
+          sender_email?: string
+          sender_name?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "kon_organizer_resend_config_organizer_id_fkey"
+            columns: ["organizer_id"]
+            isOneToOne: true
+            referencedRelation: "kon_organizers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      kon_organizer_templates: {
+        Row: {
+          content: Json
+          created_at: string | null
+          description: string | null
+          id: string
+          is_default: boolean | null
+          name: string
+          organizer_id: string
+          subtype: string | null
+          type: string
+          updated_at: string | null
+          version: number | null
+        }
+        Insert: {
+          content?: Json
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_default?: boolean | null
+          name: string
+          organizer_id: string
+          subtype?: string | null
+          type: string
+          updated_at?: string | null
+          version?: number | null
+        }
+        Update: {
+          content?: Json
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_default?: boolean | null
+          name?: string
+          organizer_id?: string
+          subtype?: string | null
+          type?: string
+          updated_at?: string | null
+          version?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "kon_organizer_templates_organizer_id_fkey"
+            columns: ["organizer_id"]
+            isOneToOne: false
+            referencedRelation: "kon_organizers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      kon_organizer_verified_domains: {
+        Row: {
+          created_at: string
+          dns_records: Json | null
+          domain: string
+          id: string
+          organizer_id: string
+          resend_domain_id: string | null
+          sender_email: string | null
+          sender_name: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          dns_records?: Json | null
+          domain: string
+          id?: string
+          organizer_id: string
+          resend_domain_id?: string | null
+          sender_email?: string | null
+          sender_name?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          dns_records?: Json | null
+          domain?: string
+          id?: string
+          organizer_id?: string
+          resend_domain_id?: string | null
+          sender_email?: string | null
+          sender_name?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "kon_organizer_verified_domains_organizer_id_fkey"
+            columns: ["organizer_id"]
+            isOneToOne: true
+            referencedRelation: "kon_organizers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      kon_organizers: {
+        Row: {
+          active_modules: string[] | null
+          company_name: string | null
+          contact_email: string
+          contact_phone: string | null
+          created_at: string | null
+          id: string
+          logo_url: string | null
+          plan_id: string | null
+          slug: string | null
+          status: string
+          stripe_customer_id: string | null
+          subscription_ends_at: string | null
+          subscription_starts_at: string | null
+          trial_ends_at: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          active_modules?: string[] | null
+          company_name?: string | null
+          contact_email: string
+          contact_phone?: string | null
+          created_at?: string | null
+          id?: string
+          logo_url?: string | null
+          plan_id?: string | null
+          slug?: string | null
+          status?: string
+          stripe_customer_id?: string | null
+          subscription_ends_at?: string | null
+          subscription_starts_at?: string | null
+          trial_ends_at?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          active_modules?: string[] | null
+          company_name?: string | null
+          contact_email?: string
+          contact_phone?: string | null
+          created_at?: string | null
+          id?: string
+          logo_url?: string | null
+          plan_id?: string | null
+          slug?: string | null
+          status?: string
+          stripe_customer_id?: string | null
+          subscription_ends_at?: string | null
+          subscription_starts_at?: string | null
+          trial_ends_at?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "kon_organizers_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "kon_subscription_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      kon_participant_avatars: {
+        Row: {
+          created_at: string
+          drawing: string | null
+          email: string
+          id: string
+          layers: Json
+          organizer_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          drawing?: string | null
+          email: string
+          id?: string
+          layers?: Json
+          organizer_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          drawing?: string | null
+          email?: string
+          id?: string
+          layers?: Json
+          organizer_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      kon_participant_encounters: {
+        Row: {
+          encountered_at: string
+          event_id: string
+          global_participant_1_id: string
+          global_participant_2_id: string
+          id: string
+          organizer_id: string
+          round_number: number
+          table_number: number
+        }
+        Insert: {
+          encountered_at?: string
+          event_id: string
+          global_participant_1_id: string
+          global_participant_2_id: string
+          id?: string
+          organizer_id: string
+          round_number: number
+          table_number: number
+        }
+        Update: {
+          encountered_at?: string
+          event_id?: string
+          global_participant_1_id?: string
+          global_participant_2_id?: string
+          id?: string
+          organizer_id?: string
+          round_number?: number
+          table_number?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "kon_participant_encounters_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "kon_events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kon_participant_encounters_global_participant_1_id_fkey"
+            columns: ["global_participant_1_id"]
+            isOneToOne: false
+            referencedRelation: "kon_global_participants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kon_participant_encounters_global_participant_2_id_fkey"
+            columns: ["global_participant_2_id"]
+            isOneToOne: false
+            referencedRelation: "kon_global_participants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      kon_participant_exclusions: {
+        Row: {
+          created_at: string
+          event_id: string
+          group_id: string | null
+          id: string
+          participant_1_id: string
+          participant_2_id: string
+          reason: string | null
+        }
+        Insert: {
+          created_at?: string
+          event_id: string
+          group_id?: string | null
+          id?: string
+          participant_1_id: string
+          participant_2_id: string
+          reason?: string | null
+        }
+        Update: {
+          created_at?: string
+          event_id?: string
+          group_id?: string | null
+          id?: string
+          participant_1_id?: string
+          participant_2_id?: string
+          reason?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "kon_participant_exclusions_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "kon_events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kon_participant_exclusions_participant_1_id_fkey"
+            columns: ["participant_1_id"]
+            isOneToOne: false
+            referencedRelation: "kon_participants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kon_participant_exclusions_participant_2_id_fkey"
+            columns: ["participant_2_id"]
+            isOneToOne: false
+            referencedRelation: "kon_participants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      kon_participant_inclusions: {
+        Row: {
+          created_at: string
+          event_id: string
+          group_id: string | null
+          id: string
+          participant_1_id: string
+          participant_2_id: string
+          reason: string | null
+        }
+        Insert: {
+          created_at?: string
+          event_id: string
+          group_id?: string | null
+          id?: string
+          participant_1_id: string
+          participant_2_id: string
+          reason?: string | null
+        }
+        Update: {
+          created_at?: string
+          event_id?: string
+          group_id?: string | null
+          id?: string
+          participant_1_id?: string
+          participant_2_id?: string
+          reason?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "kon_participant_inclusions_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "kon_events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kon_participant_inclusions_participant_1_id_fkey"
+            columns: ["participant_1_id"]
+            isOneToOne: false
+            referencedRelation: "kon_participants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kon_participant_inclusions_participant_2_id_fkey"
+            columns: ["participant_2_id"]
+            isOneToOne: false
+            referencedRelation: "kon_participants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      kon_participant_selections: {
+        Row: {
+          created_at: string
+          event_id: string
+          id: string
+          is_super_like: boolean
+          selected_id: string
+          selection_type: string | null
+          selector_id: string
+        }
+        Insert: {
+          created_at?: string
+          event_id: string
+          id?: string
+          is_super_like?: boolean
+          selected_id: string
+          selection_type?: string | null
+          selector_id: string
+        }
+        Update: {
+          created_at?: string
+          event_id?: string
+          id?: string
+          is_super_like?: boolean
+          selected_id?: string
+          selection_type?: string | null
+          selector_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "kon_participant_selections_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "kon_events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kon_participant_selections_selected_id_fkey"
+            columns: ["selected_id"]
+            isOneToOne: false
+            referencedRelation: "kon_participants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kon_participant_selections_selector_id_fkey"
+            columns: ["selector_id"]
+            isOneToOne: false
+            referencedRelation: "kon_participants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      kon_participants: {
+        Row: {
+          age: number | null
+          age_range: string | null
+          birth_date: string | null
+          business_interests: string[] | null
+          cancelled_at: string | null
+          checked_in: boolean | null
+          company_name: string | null
+          company_size: string | null
+          created_at: string
+          dating_preference: string | null
+          email: string | null
+          entity_type: string | null
+          event_id: string
+          game_answers: Json | null
+          gender: string | null
+          global_participant_id: string | null
+          id: string
+          is_anonymous: boolean
+          is_fake: boolean
+          is_returning_participant: boolean | null
+          marketing_consent: boolean
+          name: string
+          needs: string[] | null
+          paid_at: string | null
+          payment_last_reminder_at: string | null
+          payment_reminder_count: number
+          payment_status: string
+          phone: string | null
+          preference: string | null
+          preferred_age_range: string | null
+          sector: string | null
+          selection_submitted_at: string | null
+          solutions: string[] | null
+          spoken_languages: string[]
+          verification_code: string | null
+          verification_email_sent_at: string | null
+          wrapped_profile_id: string | null
+        }
+        Insert: {
+          age?: number | null
+          age_range?: string | null
+          birth_date?: string | null
+          business_interests?: string[] | null
+          cancelled_at?: string | null
+          checked_in?: boolean | null
+          company_name?: string | null
+          company_size?: string | null
+          created_at?: string
+          dating_preference?: string | null
+          email?: string | null
+          entity_type?: string | null
+          event_id: string
+          game_answers?: Json | null
+          gender?: string | null
+          global_participant_id?: string | null
+          id?: string
+          is_anonymous?: boolean
+          is_fake?: boolean
+          is_returning_participant?: boolean | null
+          marketing_consent?: boolean
+          name: string
+          needs?: string[] | null
+          paid_at?: string | null
+          payment_last_reminder_at?: string | null
+          payment_reminder_count?: number
+          payment_status?: string
+          phone?: string | null
+          preference?: string | null
+          preferred_age_range?: string | null
+          sector?: string | null
+          selection_submitted_at?: string | null
+          solutions?: string[] | null
+          spoken_languages?: string[]
+          verification_code?: string | null
+          verification_email_sent_at?: string | null
+          wrapped_profile_id?: string | null
+        }
+        Update: {
+          age?: number | null
+          age_range?: string | null
+          birth_date?: string | null
+          business_interests?: string[] | null
+          cancelled_at?: string | null
+          checked_in?: boolean | null
+          company_name?: string | null
+          company_size?: string | null
+          created_at?: string
+          dating_preference?: string | null
+          email?: string | null
+          entity_type?: string | null
+          event_id?: string
+          game_answers?: Json | null
+          gender?: string | null
+          global_participant_id?: string | null
+          id?: string
+          is_anonymous?: boolean
+          is_fake?: boolean
+          is_returning_participant?: boolean | null
+          marketing_consent?: boolean
+          name?: string
+          needs?: string[] | null
+          paid_at?: string | null
+          payment_last_reminder_at?: string | null
+          payment_reminder_count?: number
+          payment_status?: string
+          phone?: string | null
+          preference?: string | null
+          preferred_age_range?: string | null
+          sector?: string | null
+          selection_submitted_at?: string | null
+          solutions?: string[] | null
+          spoken_languages?: string[]
+          verification_code?: string | null
+          verification_email_sent_at?: string | null
+          wrapped_profile_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "kon_participants_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "kon_events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kon_participants_global_participant_id_fkey"
+            columns: ["global_participant_id"]
+            isOneToOne: false
+            referencedRelation: "kon_global_participants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kon_participants_wrapped_profile_id_fkey"
+            columns: ["wrapped_profile_id"]
+            isOneToOne: false
+            referencedRelation: "kon_wrapped_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      kon_plan_features: {
+        Row: {
+          feature_code: string
+          id: string
+          is_limited: boolean | null
+          limit_value: number | null
+          plan_id: string
+        }
+        Insert: {
+          feature_code: string
+          id?: string
+          is_limited?: boolean | null
+          limit_value?: number | null
+          plan_id: string
+        }
+        Update: {
+          feature_code?: string
+          id?: string
+          is_limited?: boolean | null
+          limit_value?: number | null
+          plan_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "kon_plan_features_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "kon_subscription_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      kon_remarketing_campaigns: {
+        Row: {
+          body: string
+          created_at: string | null
+          id: string
+          organizer_id: string
+          recipients_count: number | null
+          recipients_filter: Json | null
+          sent_at: string | null
+          status: string
+          subject: string
+          target_event_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          body: string
+          created_at?: string | null
+          id?: string
+          organizer_id: string
+          recipients_count?: number | null
+          recipients_filter?: Json | null
+          sent_at?: string | null
+          status?: string
+          subject: string
+          target_event_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          body?: string
+          created_at?: string | null
+          id?: string
+          organizer_id?: string
+          recipients_count?: number | null
+          recipients_filter?: Json | null
+          sent_at?: string | null
+          status?: string
+          subject?: string
+          target_event_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "kon_remarketing_campaigns_target_event_id_fkey"
+            columns: ["target_event_id"]
+            isOneToOne: false
+            referencedRelation: "kon_events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      kon_remarketing_recipients: {
+        Row: {
+          campaign_id: string
+          created_at: string | null
+          email: string
+          error_message: string | null
+          global_participant_id: string | null
+          id: string
+          sent_at: string | null
+          status: string
+        }
+        Insert: {
+          campaign_id: string
+          created_at?: string | null
+          email: string
+          error_message?: string | null
+          global_participant_id?: string | null
+          id?: string
+          sent_at?: string | null
+          status?: string
+        }
+        Update: {
+          campaign_id?: string
+          created_at?: string | null
+          email?: string
+          error_message?: string | null
+          global_participant_id?: string | null
+          id?: string
+          sent_at?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "kon_remarketing_recipients_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "kon_remarketing_campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kon_remarketing_recipients_global_participant_id_fkey"
+            columns: ["global_participant_id"]
+            isOneToOne: false
+            referencedRelation: "kon_global_participants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      kon_repeat_requests: {
+        Row: {
+          accepted_at: string | null
+          created_at: string
+          event_id: string
+          expires_at: string | null
+          id: string
+          requester_id: string
+          scheduled_round: number | null
+          status: string
+          target_id: string
+          token: string
+        }
+        Insert: {
+          accepted_at?: string | null
+          created_at?: string
+          event_id: string
+          expires_at?: string | null
+          id?: string
+          requester_id: string
+          scheduled_round?: number | null
+          status?: string
+          target_id: string
+          token: string
+        }
+        Update: {
+          accepted_at?: string | null
+          created_at?: string
+          event_id?: string
+          expires_at?: string | null
+          id?: string
+          requester_id?: string
+          scheduled_round?: number | null
+          status?: string
+          target_id?: string
+          token?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "kon_repeat_requests_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "kon_events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kon_repeat_requests_requester_id_fkey"
+            columns: ["requester_id"]
+            isOneToOne: false
+            referencedRelation: "kon_participants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kon_repeat_requests_target_id_fkey"
+            columns: ["target_id"]
+            isOneToOne: false
+            referencedRelation: "kon_participants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      kon_subscription_plans: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          display_name: string
+          id: string
+          is_active: boolean | null
+          is_default: boolean | null
+          max_active_events: number | null
+          max_events: number | null
+          max_participants_per_event: number | null
+          name: string
+          price_monthly: number | null
+          price_yearly: number | null
+          sort_order: number | null
+          stripe_price_id_monthly: string | null
+          stripe_price_id_yearly: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          display_name: string
+          id?: string
+          is_active?: boolean | null
+          is_default?: boolean | null
+          max_active_events?: number | null
+          max_events?: number | null
+          max_participants_per_event?: number | null
+          name: string
+          price_monthly?: number | null
+          price_yearly?: number | null
+          sort_order?: number | null
+          stripe_price_id_monthly?: string | null
+          stripe_price_id_yearly?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          display_name?: string
+          id?: string
+          is_active?: boolean | null
+          is_default?: boolean | null
+          max_active_events?: number | null
+          max_events?: number | null
+          max_participants_per_event?: number | null
+          name?: string
+          price_monthly?: number | null
+          price_yearly?: number | null
+          sort_order?: number | null
+          stripe_price_id_monthly?: string | null
+          stripe_price_id_yearly?: string | null
+        }
+        Relationships: []
+      }
+      kon_template_versions: {
+        Row: {
+          changed_by: string | null
+          content: Json
+          created_at: string | null
+          id: string
+          template_id: string
+          version: number
+        }
+        Insert: {
+          changed_by?: string | null
+          content: Json
+          created_at?: string | null
+          id?: string
+          template_id: string
+          version: number
+        }
+        Update: {
+          changed_by?: string | null
+          content?: Json
+          created_at?: string | null
+          id?: string
+          template_id?: string
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "kon_template_versions_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "kon_organizer_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      kon_wrapped_profiles: {
+        Row: {
+          answers: Json
+          created_at: string
+          email: string
+          hobbies_ranked: string[]
+          id: string
+          organizer_id: string
+          updated_at: string
+        }
+        Insert: {
+          answers?: Json
+          created_at?: string
+          email: string
+          hobbies_ranked?: string[]
+          id?: string
+          organizer_id: string
+          updated_at?: string
+        }
+        Update: {
+          answers?: Json
+          created_at?: string
+          email?: string
+          hobbies_ranked?: string[]
+          id?: string
+          organizer_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      kon_wrapped_table_requests: {
+        Row: {
+          compatibility_score: number | null
+          created_at: string
+          event_id: string
+          id: string
+          receiver_participant_id: string
+          responded_at: string | null
+          sender_participant_id: string
+          status: string
+        }
+        Insert: {
+          compatibility_score?: number | null
+          created_at?: string
+          event_id: string
+          id?: string
+          receiver_participant_id: string
+          responded_at?: string | null
+          sender_participant_id: string
+          status?: string
+        }
+        Update: {
+          compatibility_score?: number | null
+          created_at?: string
+          event_id?: string
+          id?: string
+          receiver_participant_id?: string
+          responded_at?: string | null
+          sender_participant_id?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "kon_wrapped_table_requests_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "kon_events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kon_wrapped_table_requests_receiver_participant_id_fkey"
+            columns: ["receiver_participant_id"]
+            isOneToOne: false
+            referencedRelation: "kon_participants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kon_wrapped_table_requests_sender_participant_id_fkey"
+            columns: ["sender_participant_id"]
+            isOneToOne: false
+            referencedRelation: "kon_participants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       kv_cache: {
         Row: {
           fetched_at: string
