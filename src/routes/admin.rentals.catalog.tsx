@@ -14,9 +14,9 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Calendar } from "@/components/ui/calendar";
-import { LocationBadge } from "@/components/ludoteca/LocationBadge";
+import { LocationBadge, describeLocation } from "@/components/ludoteca/LocationBadge";
 import { toast } from "sonner";
-import { Trash2, RefreshCw, MapPin, Star } from "lucide-react";
+import { Trash2, RefreshCw, MapPin, Star, FileSpreadsheet } from "lucide-react";
 import type { DateRange } from "react-day-picker";
 
 export const Route = createFileRoute("/admin/rentals/catalog")({
@@ -225,6 +225,14 @@ function CatalogPage() {
               Eliminar desactivados ({inactiveCount})
             </Button>
           )}
+          <Button
+            variant="outline"
+            className="border-ink/30 text-ink hover:bg-ink/10"
+            onClick={handleExport}
+          >
+            <FileSpreadsheet className="h-4 w-4 mr-1" />
+            Exportar catálogo
+          </Button>
           <Button
             variant="outline"
             className="border-ink/30 text-ink hover:bg-ink/10"
