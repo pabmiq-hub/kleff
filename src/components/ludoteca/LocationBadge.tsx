@@ -67,8 +67,9 @@ export function describeLocation(loc: LocationFields, locale: AppLocale = "es"):
   return t.shelf(shelf, shape, color, slot);
 }
 
-export function LocationBadge({ loc, size = "sm" }: { loc: LocationFields; size?: "sm" | "md" }) {
-  const { locale } = useAppLocale();
+export function LocationBadge({ loc, size = "sm", locale: localeProp }: { loc: LocationFields; size?: "sm" | "md"; locale?: AppLocale }) {
+  const { locale: appLocale } = useAppLocale();
+  const locale = localeProp ?? appLocale;
   const t = rentalsDict[locale].location;
   const small = size === "sm";
   const text = small ? "text-[10px]" : "text-xs";
@@ -163,8 +164,9 @@ export function LocationBadge({ loc, size = "sm" }: { loc: LocationFields; size?
   );
 }
 
-export function LocationLegend() {
-  const { locale } = useAppLocale();
+export function LocationLegend({ locale: localeProp }: { locale?: AppLocale } = {}) {
+  const { locale: appLocale } = useAppLocale();
+  const locale = localeProp ?? appLocale;
   const t = rentalsDict[locale].location;
   return (
     <div className="rounded-2xl border-2 border-ink/15 bg-cream-deep/40 p-5">
@@ -173,23 +175,23 @@ export function LocationLegend() {
       </p>
       <div className="flex flex-wrap gap-3 text-xs text-foreground/75">
         <span className="inline-flex items-center gap-2">
-          <LocationBadge loc={{ shelf: "A", shape: "triangle", slot_number: 3, drawer_number: null, drawer_letter: null, shelf_color: "green" }} />
+          <LocationBadge locale={locale} loc={{ shelf: "A", shape: "triangle", slot_number: 3, drawer_number: null, drawer_letter: null, shelf_color: "green" }} />
           {t.legendShelfExample}
         </span>
         <span className="inline-flex items-center gap-2">
-          <LocationBadge loc={{ shelf: "drawer", shape: null, slot_number: null, drawer_number: 2, drawer_letter: "a" }} />
+          <LocationBadge locale={locale} loc={{ shelf: "drawer", shape: null, slot_number: null, drawer_number: 2, drawer_letter: "a" }} />
           {t.legendDrawerExample}
         </span>
         <span className="inline-flex items-center gap-2">
-          <LocationBadge loc={{ shelf: "on_demand", shape: null, slot_number: null, drawer_number: null, drawer_letter: null }} />
+          <LocationBadge locale={locale} loc={{ shelf: "on_demand", shape: null, slot_number: null, drawer_number: null, drawer_letter: null }} />
           {t.legendOnDemandExample}
         </span>
         <span className="inline-flex items-center gap-2">
-          <LocationBadge loc={{ shelf: "restocking", shape: null, slot_number: null, drawer_number: null, drawer_letter: null }} />
+          <LocationBadge locale={locale} loc={{ shelf: "restocking", shape: null, slot_number: null, drawer_number: null, drawer_letter: null }} />
           {t.legendRestockingExample}
         </span>
         <span className="inline-flex items-center gap-2">
-          <LocationBadge loc={{ shelf: "especiales", shape: null, slot_number: null, drawer_number: null, drawer_letter: null }} />
+          <LocationBadge locale={locale} loc={{ shelf: "especiales", shape: null, slot_number: null, drawer_number: null, drawer_letter: null }} />
           {t.legendEspecialesExample}
         </span>
       </div>
