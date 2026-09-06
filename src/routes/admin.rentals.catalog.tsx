@@ -117,6 +117,27 @@ function CatalogPage() {
     }
   };
 
+  const handleExport = async () => {
+    try {
+      const XLSX = await import("xlsx");
+      const rows = [...filtered]
+        .sort((a, b) => a.title.localeCompare(b.title, "es", { sensitivity: "base" }))
+        .map((g) => ({
+          Título: g.title,
+          Ubicación: describeLocation(g, "es"),
+        }));
+      const ws = XLSX.utils.json_to_sheet(rows);
+      ws["!cols"] = [{ wch: 45 }, { wch: 55 }];
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Catálogo");
+      XLSX.writeFile(wb, `catalogo-kleff-${toISODate(new Date())}.xlsx`);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Error al exportar");
+    }
+  };
+
+
+
   const updateCopies = async (g: Game, copies: number) => {
     try {
       await updateFn({ data: { id: g.id, totalCopies: copies } });
