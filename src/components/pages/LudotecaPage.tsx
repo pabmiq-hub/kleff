@@ -414,7 +414,7 @@ export function LudotecaPage() {
           </div>
 
           <div className="mt-5">
-            <LocationLegend />
+            <LocationLegend locale={locale} />
           </div>
         </div>
       </section>
@@ -593,7 +593,7 @@ export function LudotecaPage() {
                       </p>
                     )}
                     <div className="flex items-center justify-between gap-2 mt-auto pt-1">
-                      <LocationBadge loc={g} />
+                      <LocationBadge loc={g} locale={locale} />
                       {g.bgg_url && (
                         <a
                           href={g.bgg_url}
