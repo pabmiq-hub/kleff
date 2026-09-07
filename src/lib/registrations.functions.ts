@@ -42,6 +42,7 @@ export type RegistrationForm = {
   reminder_subject: string | null;
   reminder_body: string | null;
   reminder_sent_at: string | null;
+  reminder_offsets_hours: number[];
   created_at: string;
   updated_at: string;
 };
@@ -453,6 +454,7 @@ export const adminUpdateForm = createServerFn({ method: "POST" })
       reminder_at: z.string().nullable().optional(),
       reminder_subject: z.string().max(200).nullable().optional(),
       reminder_body: z.string().max(5000).nullable().optional(),
+      reminder_offsets_hours: z.array(z.number().int().min(1).max(1440)).max(5).optional(),
     }),
   }))
   .handler(async ({ data, context }) => {

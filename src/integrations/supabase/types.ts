@@ -3685,6 +3685,7 @@ export type Database = {
           reminder_at: string | null
           reminder_body: string | null
           reminder_enabled: boolean
+          reminder_offsets_hours: number[]
           reminder_sent_at: string | null
           reminder_subject: string | null
           send_confirmation_email: boolean
@@ -3720,6 +3721,7 @@ export type Database = {
           reminder_at?: string | null
           reminder_body?: string | null
           reminder_enabled?: boolean
+          reminder_offsets_hours?: number[]
           reminder_sent_at?: string | null
           reminder_subject?: string | null
           send_confirmation_email?: boolean
@@ -3755,6 +3757,7 @@ export type Database = {
           reminder_at?: string | null
           reminder_body?: string | null
           reminder_enabled?: boolean
+          reminder_offsets_hours?: number[]
           reminder_sent_at?: string | null
           reminder_subject?: string | null
           send_confirmation_email?: boolean

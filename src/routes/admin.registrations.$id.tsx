@@ -641,6 +641,16 @@ function parsePosition(pos: string): { x: number; y: number } {
 
 // ----------------- Communication -----------------
 
+const REMINDER_CHOICES: { hours: number; label: string }[] = [
+  { hours: 168, label: "1 semana antes" },
+  { hours: 72, label: "72 h antes" },
+  { hours: 48, label: "48 h antes" },
+  { hours: 24, label: "24 h antes" },
+  { hours: 12, label: "12 h antes" },
+  { hours: 4, label: "4 h antes" },
+  { hours: 2, label: "2 h antes" },
+];
+
 function CommunicationSettings({ form, onSaved }: { form: RegistrationForm; onSaved: (patched: Partial<RegistrationForm>) => void }) {
   const updateFn = useServerFn(adminUpdateForm);
   const previewFn = useServerFn(adminPreviewEmails);
@@ -652,6 +662,9 @@ function CommunicationSettings({ form, onSaved }: { form: RegistrationForm; onSa
   const [tab, setTab] = useState<"confirmation" | "reminder">("confirmation");
 
   const set = <K extends keyof RegistrationForm>(k: K, v: RegistrationForm[K]) => setState((s) => ({ ...s, [k]: v }));
+  const offsets: number[] = Array.isArray(state.reminder_offsets_hours) && state.reminder_offsets_hours.length
+    ? state.reminder_offsets_hours
+    : [72, 48, 24];
 
   const loadPreview = async () => {
     try {
@@ -671,6 +684,7 @@ function CommunicationSettings({ form, onSaved }: { form: RegistrationForm; onSa
         reminder_enabled: state.reminder_enabled,
         reminder_subject: state.reminder_subject,
         reminder_body: state.reminder_body,
+        reminder_offsets_hours: offsets,
       };
       await updateFn({ data: { id: form.id, patch } });
       onSaved(patch);
@@ -712,8 +726,34 @@ function CommunicationSettings({ form, onSaved }: { form: RegistrationForm; onSa
           </div>
         </Row>
         {state.reminder_enabled && (
-          <Row label="Envío automático">
-            <p className="text-sm text-ink/70 flex items-center gap-2"><CalendarClock className="h-4 w-4" /> Se programa al inscribirse y llega <strong>72, 48 y 24 horas antes</strong> del evento. Si la persona se da de baja, sus recordatorios se cancelan.</p>
+          <Row label="¿Cuándo se envía?">
+            <div className="flex flex-wrap gap-2">
+              {REMINDER_CHOICES.map((c) => {
+                const active = offsets.includes(c.hours);
+                return (
+                  <Button
+                    key={c.hours}
+                    type="button"
+                    size="sm"
+                    variant={active ? "default" : "outline"}
+                    className={active ? "bg-coral hover:bg-coral/90" : "border-ink/20 text-ink"}
+                    onClick={() => {
+                      const next = active ? offsets.filter((h) => h !== c.hours) : [...offsets, c.hours];
+                      set("reminder_offsets_hours", next.sort((a, b) => b - a));
+                    }}
+                  >
+                    {c.label}
+                  </Button>
+                );
+              })}
+            </div>
+            <p className="text-xs text-ink/50 mt-2 flex items-center gap-1">
+              <CalendarClock className="h-3 w-3" />
+              {offsets.length
+                ? `Se programa al inscribirse y llega ${offsets.map((h) => (h % 24 === 0 && h >= 24 ? `${h / 24} día(s)` : `${h} h`)).join(", ")} antes del evento.`
+                : "Selecciona al menos un momento de envío."}
+              {" "}Si la persona se da de baja, sus recordatorios se cancelan.
+            </p>
           </Row>
         )}
         <Row label="Asunto"><Input value={state.reminder_subject ?? ""} onChange={(e) => set("reminder_subject", e.target.value || null)} placeholder={`Nos vemos pronto · ${form.title}`} className="bg-white border-ink/15 text-ink" /></Row>

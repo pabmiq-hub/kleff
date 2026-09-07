@@ -18,6 +18,7 @@ export interface EmailFormLike {
   confirmation_email_body?: string | null;
   reminder_subject?: string | null;
   reminder_body?: string | null;
+  reminder_offsets_hours?: number[] | null;
 }
 
 export interface EmailResponseLike {
@@ -133,12 +134,22 @@ export async function sendRegistrationEmail(
   });
 }
 
-/** Fixed reminder offsets (hours before the event). */
+/** Default reminder offsets (hours before the event) when the admin sets none. */
 export const REMINDER_OFFSETS_HOURS = [72, 48, 24] as const;
 
+/** Normalizes an admin-provided list of hours-before-the-event values. */
+export function normalizeReminderOffsets(value: unknown): number[] {
+  const list = Array.isArray(value) ? value : [];
+  const cleaned = list
+    .map((v) => Math.round(Number(v)))
+    .filter((n) => Number.isFinite(n) && n > 0 && n <= 24 * 60);
+  const unique = Array.from(new Set(cleaned)).sort((a, b) => b - a).slice(0, 5);
+  return unique.length ? unique : [...REMINDER_OFFSETS_HOURS];
+}
+
 /**
- * Schedules reminder emails (72h / 48h / 24h before the event) directly with
- * the email provider. Returns the scheduled email IDs for later cancellation.
+ * Schedules reminder emails at the offsets configured by the admin, directly
+ * with the email provider. Returns the scheduled email IDs for later cancellation.
  */
 export async function scheduleReminderEmails(
   form: EmailFormLike,
@@ -153,7 +164,7 @@ export async function scheduleReminderEmails(
   const tpl = registrationEventEmail({ kind: "reminder", formTitle: form.title, ...built });
   const ids: string[] = [];
   const now = Date.now();
-  for (const hours of REMINDER_OFFSETS_HOURS) {
+  for (const hours of normalizeReminderOffsets(form.reminder_offsets_hours)) {
     const at = new Date(start.getTime() - hours * 3600_000);
     if (at.getTime() <= now + 60_000) continue; // already in the past
     const res = await sendEmailSafe({
