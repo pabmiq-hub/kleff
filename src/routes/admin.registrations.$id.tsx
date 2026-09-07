@@ -712,8 +712,34 @@ function CommunicationSettings({ form, onSaved }: { form: RegistrationForm; onSa
           </div>
         </Row>
         {state.reminder_enabled && (
-          <Row label="Envío automático">
-            <p className="text-sm text-ink/70 flex items-center gap-2"><CalendarClock className="h-4 w-4" /> Se programa al inscribirse y llega <strong>72, 48 y 24 horas antes</strong> del evento. Si la persona se da de baja, sus recordatorios se cancelan.</p>
+          <Row label="¿Cuándo se envía?">
+            <div className="flex flex-wrap gap-2">
+              {REMINDER_CHOICES.map((c) => {
+                const active = offsets.includes(c.hours);
+                return (
+                  <Button
+                    key={c.hours}
+                    type="button"
+                    size="sm"
+                    variant={active ? "default" : "outline"}
+                    className={active ? "bg-coral hover:bg-coral/90" : "border-ink/20 text-ink"}
+                    onClick={() => {
+                      const next = active ? offsets.filter((h) => h !== c.hours) : [...offsets, c.hours];
+                      set("reminder_offsets_hours", next.sort((a, b) => b - a));
+                    }}
+                  >
+                    {c.label}
+                  </Button>
+                );
+              })}
+            </div>
+            <p className="text-xs text-ink/50 mt-2 flex items-center gap-1">
+              <CalendarClock className="h-3 w-3" />
+              {offsets.length
+                ? `Se programa al inscribirse y llega ${offsets.map((h) => (h % 24 === 0 && h >= 24 ? `${h / 24} día(s)` : `${h} h`)).join(", ")} antes del evento.`
+                : "Selecciona al menos un momento de envío."}
+              {" "}Si la persona se da de baja, sus recordatorios se cancelan.
+            </p>
           </Row>
         )}
         <Row label="Asunto"><Input value={state.reminder_subject ?? ""} onChange={(e) => set("reminder_subject", e.target.value || null)} placeholder={`Nos vemos pronto · ${form.title}`} className="bg-white border-ink/15 text-ink" /></Row>
