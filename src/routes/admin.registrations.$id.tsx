@@ -8,11 +8,12 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ArrowLeft, Plus, Save, Trash2, GripVertical, Loader2, Mail, X, Eye, Globe, EyeOff } from "lucide-react";
+import { ArrowLeft, Plus, Save, Trash2, GripVertical, Loader2, Mail, X, Eye, Globe, EyeOff, Send, CalendarClock } from "lucide-react";
 import { toast } from "sonner";
 import {
   adminGetForm, adminUpdateForm, adminUpsertQuestion, adminDeleteQuestion,
   adminReorderQuestions, adminListResponses, adminUpdateResponse, adminDeleteResponse,
+  adminSendReminder, adminPreviewEmails,
   type RegistrationQuestion, type RegistrationForm, type RegistrationResponse,
 } from "@/lib/registrations.functions";
 import {
@@ -102,16 +103,20 @@ function RegistrationEditor() {
       <Tabs defaultValue="settings" className="w-full">
         <TabsList className="bg-ink/5 border border-ink/10">
           <TabsTrigger value="settings">Ajustes</TabsTrigger>
-          {form.kind === "form" && <TabsTrigger value="questions">Preguntas</TabsTrigger>}
+          {form.kind === "form" && <TabsTrigger value="comms">Comunicación</TabsTrigger>}
           {form.kind === "form" && <TabsTrigger value="responses">Inscritos</TabsTrigger>}
         </TabsList>
         <TabsContent value="settings" className="mt-4">
-          <FormSettings form={form} onSaved={(patched) => setData((d) => d ? { ...d, form: { ...d.form, ...patched } } : d)} />
+          <FormSettings
+            form={form}
+            questions={questions}
+            onSaved={(patched) => setData((d) => d ? { ...d, form: { ...d.form, ...patched } } : d)}
+          />
         </TabsContent>
         {form.kind === "form" && (
           <>
-            <TabsContent value="questions" className="mt-4">
-              <QuestionsEditor formId={form.id} initial={questions} />
+            <TabsContent value="comms" className="mt-4">
+              <CommunicationSettings form={form} onSaved={(patched) => setData((d) => d ? { ...d, form: { ...d.form, ...patched } } : d)} />
             </TabsContent>
             <TabsContent value="responses" className="mt-4">
               <ResponsesPanel formId={form.id} questions={questions} />
@@ -123,7 +128,14 @@ function RegistrationEditor() {
   );
 }
 
-function FormSettings({ form, onSaved }: { form: RegistrationForm; onSaved: (patched: Partial<RegistrationForm>) => void }) {
+function toLocalInput(iso: string | null) {
+  if (!iso) return "";
+  const d = new Date(iso);
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+function FormSettings({ form, questions, onSaved }: { form: RegistrationForm; questions: RegistrationQuestion[]; onSaved: (patched: Partial<RegistrationForm>) => void }) {
   const updateFn = useServerFn(adminUpdateForm);
   const [state, setState] = useState(form);
   const [saving, setSaving] = useState(false);
@@ -155,6 +167,10 @@ function FormSettings({ form, onSaved }: { form: RegistrationForm; onSaved: (pat
             closes_at: state.closes_at,
             confirmation_message: state.confirmation_message,
             notify_emails: emails,
+            event_date: state.event_date,
+            event_location: state.event_location,
+            allow_guests: state.allow_guests,
+            max_guests_per_response: state.max_guests_per_response,
           },
         },
       });
@@ -235,9 +251,30 @@ function FormSettings({ form, onSaved }: { form: RegistrationForm; onSaved: (pat
 
       {!isExternal && (
         <>
-          <Card title="Plazas y plazo">
-            <Row label="Máximo de inscritos (vacío = sin límite)"><Input type="number" min={1} value={state.max_responses ?? ""} onChange={(e) => set("max_responses", e.target.value ? Number(e.target.value) : null)} className="bg-white border-ink/15 text-ink" /></Row>
-            <Row label="Cierre de inscripciones"><Input type="datetime-local" value={state.closes_at ? state.closes_at.slice(0, 16) : ""} onChange={(e) => set("closes_at", e.target.value ? new Date(e.target.value).toISOString() : null)} className="bg-white border-ink/15 text-ink" /></Row>
+          <Card title="Datos del evento">
+            <Row label="Fecha y hora del evento">
+              <Input type="datetime-local" value={toLocalInput(state.event_date)} onChange={(e) => set("event_date", e.target.value ? new Date(e.target.value).toISOString() : null)} className="bg-white border-ink/15 text-ink" />
+              <p className="text-xs text-ink/50 mt-1">Se usa en los correos, en el botón de calendario y para la pregunta con fecha límite.</p>
+            </Row>
+            <Row label="Ubicación">
+              <Input value={state.event_location ?? ""} onChange={(e) => set("event_location", e.target.value || null)} placeholder="Carrer Exemple 1, Barcelona" className="bg-white border-ink/15 text-ink" />
+            </Row>
+          </Card>
+
+          <Card title="Plazas e invitados">
+            <Row label="Máximo de asistentes (vacío = sin límite)"><Input type="number" min={1} value={state.max_responses ?? ""} onChange={(e) => set("max_responses", e.target.value ? Number(e.target.value) : null)} className="bg-white border-ink/15 text-ink" /></Row>
+            <Row label="Cierre de inscripciones"><Input type="datetime-local" value={toLocalInput(state.closes_at)} onChange={(e) => set("closes_at", e.target.value ? new Date(e.target.value).toISOString() : null)} className="bg-white border-ink/15 text-ink" /></Row>
+            <Row>
+              <div className="flex items-center gap-3">
+                <Switch checked={state.allow_guests} onCheckedChange={(v) => set("allow_guests", v)} />
+                <Label className="text-ink">Permitir invitados (cuentan como plazas)</Label>
+              </div>
+            </Row>
+            {state.allow_guests && (
+              <Row label="Máximo de invitados por inscripción">
+                <Input type="number" min={1} max={20} value={state.max_guests_per_response} onChange={(e) => set("max_guests_per_response", Number(e.target.value) || 1)} className="bg-white border-ink/15 text-ink" />
+              </Row>
+            )}
           </Card>
 
           <Card title="Pago (manual)">
@@ -263,6 +300,12 @@ function FormSettings({ form, onSaved }: { form: RegistrationForm; onSaved: (pat
             </Row>
           </Card>
         </>
+      )}
+
+      {!isExternal && (
+        <Card title="Preguntas del formulario">
+          <QuestionsEditor formId={form.id} initial={questions} eventDate={state.event_date} allowGuests={state.allow_guests} />
+        </Card>
       )}
 
       <div className="sticky bottom-4 flex justify-end">
@@ -300,7 +343,7 @@ const QUESTION_TYPES = [
   { v: "date", l: "Fecha" }, { v: "file", l: "Archivo" },
 ] as const;
 
-function QuestionsEditor({ formId, initial }: { formId: string; initial: RegistrationQuestion[] }) {
+function QuestionsEditor({ formId, initial, eventDate, allowGuests }: { formId: string; initial: RegistrationQuestion[]; eventDate: string | null; allowGuests: boolean }) {
   const [questions, setQuestions] = useState(initial);
   const upsertFn = useServerFn(adminUpsertQuestion);
   const deleteFn = useServerFn(adminDeleteQuestion);
@@ -327,7 +370,7 @@ function QuestionsEditor({ formId, initial }: { formId: string; initial: Registr
           label: "Nueva pregunta", options: [],
         },
       });
-      setQuestions((qs) => [...qs, { id, form_id: formId, position: qs.length, type: "text", required: false, label: "Nueva pregunta", help: null, options: [] }]);
+      setQuestions((qs) => [...qs, { id, form_id: formId, position: qs.length, type: "text", required: false, label: "Nueva pregunta", help: null, options: [], special: null, hide_after_wednesday: false }]);
     } catch (e) { toast.error((e as Error).message); }
   };
 
@@ -338,6 +381,7 @@ function QuestionsEditor({ formId, initial }: { formId: string; initial: Registr
         data: {
           id: q.id, form_id: formId, position: q.position, type: q.type, required: q.required,
           label: q.label, help: q.help, options: q.options,
+          special: q.special, hide_after_wednesday: q.hide_after_wednesday,
         },
       });
     } catch (e) { toast.error((e as Error).message); }
@@ -357,7 +401,7 @@ function QuestionsEditor({ formId, initial }: { formId: string; initial: Registr
         <SortableContext items={questions.map((q) => q.id)} strategy={verticalListSortingStrategy}>
           <div className="space-y-3">
             {questions.map((q) => (
-              <SortableQuestion key={q.id} q={q} onChange={updateQuestion} onRemove={() => removeQuestion(q.id)} />
+              <SortableQuestion key={q.id} q={q} eventDate={eventDate} allowGuests={allowGuests} onChange={updateQuestion} onRemove={() => removeQuestion(q.id)} />
             ))}
           </div>
         </SortableContext>
@@ -369,7 +413,7 @@ function QuestionsEditor({ formId, initial }: { formId: string; initial: Registr
   );
 }
 
-function SortableQuestion({ q, onChange, onRemove }: { q: RegistrationQuestion; onChange: (q: RegistrationQuestion) => void; onRemove: () => void }) {
+function SortableQuestion({ q, eventDate, allowGuests, onChange, onRemove }: { q: RegistrationQuestion; eventDate: string | null; allowGuests: boolean; onChange: (q: RegistrationQuestion) => void; onRemove: () => void }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: q.id });
   const style = { transform: CSS.Transform.toString(transform), transition, opacity: isDragging ? 0.5 : 1 };
   const needsOptions = q.type === "select" || q.type === "radio" || q.type === "checkbox";
@@ -398,6 +442,27 @@ function SortableQuestion({ q, onChange, onRemove }: { q: RegistrationQuestion; 
           {needsOptions && (
             <OptionsEditor value={q.options} onChange={(o) => onChange({ ...q, options: o })} />
           )}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div>
+              <label className="text-xs uppercase tracking-wider text-ink/60 mb-1 block">Pregunta especial</label>
+              <Select value={q.special ?? "none"} onValueChange={(v) => onChange({ ...q, special: v === "none" ? null : (v as "guests" | "game_pick") })}>
+                <SelectTrigger className="bg-white border-ink/15 text-ink"><SelectValue /></SelectTrigger>
+                <SelectContent className="bg-white border-ink/15 text-ink">
+                  <SelectItem value="none">Ninguna (normal)</SelectItem>
+                  <SelectItem value="guests" disabled={!allowGuests}>Número de invitados</SelectItem>
+                  <SelectItem value="game_pick">Buscador del catálogo KLEFF</SelectItem>
+                </SelectContent>
+              </Select>
+              {q.special === "guests" && !allowGuests && <p className="text-xs text-amber-600 mt-1">Activa «Permitir invitados» arriba.</p>}
+            </div>
+            <div className="flex items-end">
+              <div className="flex items-center gap-3 pb-2">
+                <Switch checked={q.hide_after_wednesday} onCheckedChange={(v) => onChange({ ...q, hide_after_wednesday: v })} />
+                <Label className="text-ink text-sm">Ocultar tras el miércoles previo (19:00)</Label>
+              </div>
+            </div>
+          </div>
+          {q.hide_after_wednesday && !eventDate && <p className="text-xs text-amber-600">Necesita una fecha de evento en Ajustes.</p>}
           <div className="flex items-center gap-3">
             <Switch checked={q.required} onCheckedChange={(v) => onChange({ ...q, required: v })} />
             <Label className="text-ink text-sm">Obligatoria</Label>
@@ -572,4 +637,113 @@ function parsePosition(pos: string): { x: number; y: number } {
   const m = pos.match(/(\d+(?:\.\d+)?)%\s+(\d+(?:\.\d+)?)%/);
   if (m) return { x: Number(m[1]), y: Number(m[2]) };
   return { x: 50, y: 50 };
+}
+
+// ----------------- Communication -----------------
+
+function CommunicationSettings({ form, onSaved }: { form: RegistrationForm; onSaved: (patched: Partial<RegistrationForm>) => void }) {
+  const updateFn = useServerFn(adminUpdateForm);
+  const previewFn = useServerFn(adminPreviewEmails);
+  const reminderFn = useServerFn(adminSendReminder);
+  const [state, setState] = useState(form);
+  const [saving, setSaving] = useState(false);
+  const [sending, setSending] = useState(false);
+  const [preview, setPreview] = useState<{ confirmation: { html: string }; reminder: { html: string } } | null>(null);
+  const [tab, setTab] = useState<"confirmation" | "reminder">("confirmation");
+
+  const set = <K extends keyof RegistrationForm>(k: K, v: RegistrationForm[K]) => setState((s) => ({ ...s, [k]: v }));
+
+  const loadPreview = async () => {
+    try {
+      const res = await previewFn({ data: { form_id: form.id } });
+      setPreview(res as { confirmation: { html: string }; reminder: { html: string } });
+    } catch (e) { toast.error((e as Error).message); }
+  };
+  useEffect(() => { void loadPreview(); }, [form.id]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const save = async () => {
+    setSaving(true);
+    try {
+      const patch = {
+        send_confirmation_email: state.send_confirmation_email,
+        confirmation_email_subject: state.confirmation_email_subject,
+        confirmation_email_body: state.confirmation_email_body,
+        reminder_enabled: state.reminder_enabled,
+        reminder_at: state.reminder_at,
+        reminder_subject: state.reminder_subject,
+        reminder_body: state.reminder_body,
+      };
+      await updateFn({ data: { id: form.id, patch } });
+      onSaved(patch);
+      toast.success("Comunicación guardada");
+      await loadPreview();
+    } catch (e) { toast.error((e as Error).message); } finally { setSaving(false); }
+  };
+
+  const sendNow = async () => {
+    if (!confirm("¿Enviar el recordatorio ahora a todos los inscritos activos?")) return;
+    setSending(true);
+    try {
+      const res = await reminderFn({ data: { form_id: form.id } });
+      toast.success(`Recordatorio enviado a ${(res as { sent: number }).sent} persona(s)`);
+    } catch (e) { toast.error((e as Error).message); } finally { setSending(false); }
+  };
+
+  return (
+    <div className="space-y-6">
+      <Card title="Correo de confirmación">
+        <Row>
+          <div className="flex items-center gap-3">
+            <Switch checked={state.send_confirmation_email} onCheckedChange={(v) => set("send_confirmation_email", v)} />
+            <Label className="text-ink">Enviar correo de confirmación al inscribirse</Label>
+          </div>
+        </Row>
+        <Row label="Asunto"><Input value={state.confirmation_email_subject ?? ""} onChange={(e) => set("confirmation_email_subject", e.target.value || null)} placeholder={`Inscripción confirmada · ${form.title}`} className="bg-white border-ink/15 text-ink" /></Row>
+        <Row label="Texto">
+          <Textarea rows={5} value={state.confirmation_email_body ?? ""} onChange={(e) => set("confirmation_email_body", e.target.value || null)} className="bg-white border-ink/15 text-ink" />
+          <p className="text-xs text-ink/50 mt-1">Variables: {"{{nombre}}"}, {"{{titulo}}"}, {"{{fecha}}"}, {"{{ubicacion}}"}, {"{{invitados}}"}</p>
+        </Row>
+      </Card>
+
+      <Card title="Recordatorio del evento">
+        <Row>
+          <div className="flex items-center gap-3">
+            <Switch checked={state.reminder_enabled} onCheckedChange={(v) => set("reminder_enabled", v)} />
+            <Label className="text-ink">Enviar recordatorio automático</Label>
+          </div>
+        </Row>
+        {state.reminder_enabled && (
+          <Row label="Fecha y hora de envío">
+            <Input type="datetime-local" value={toLocalInput(state.reminder_at)} onChange={(e) => set("reminder_at", e.target.value ? new Date(e.target.value).toISOString() : null)} className="bg-white border-ink/15 text-ink" />
+            {state.reminder_sent_at && <p className="text-xs text-ink/50 mt-1 flex items-center gap-1"><CalendarClock className="h-3 w-3" /> Ya enviado el {new Date(state.reminder_sent_at).toLocaleString("es-ES")}</p>}
+          </Row>
+        )}
+        <Row label="Asunto"><Input value={state.reminder_subject ?? ""} onChange={(e) => set("reminder_subject", e.target.value || null)} placeholder={`Nos vemos pronto · ${form.title}`} className="bg-white border-ink/15 text-ink" /></Row>
+        <Row label="Texto"><Textarea rows={5} value={state.reminder_body ?? ""} onChange={(e) => set("reminder_body", e.target.value || null)} className="bg-white border-ink/15 text-ink" /></Row>
+        <Button onClick={sendNow} disabled={sending} variant="outline" className="border-ink/20 text-ink hover:bg-ink/10">
+          {sending ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Send className="h-4 w-4 mr-2" />} Enviar recordatorio ahora
+        </Button>
+      </Card>
+
+      <Card title="Previsualización">
+        <div className="flex gap-2 mb-3">
+          <Button size="sm" variant={tab === "confirmation" ? "default" : "outline"} onClick={() => setTab("confirmation")} className={tab === "confirmation" ? "bg-coral hover:bg-coral/90" : "border-ink/20 text-ink"}>Confirmación</Button>
+          <Button size="sm" variant={tab === "reminder" ? "default" : "outline"} onClick={() => setTab("reminder")} className={tab === "reminder" ? "bg-coral hover:bg-coral/90" : "border-ink/20 text-ink"}>Recordatorio</Button>
+          <Button size="sm" variant="ghost" onClick={loadPreview} className="text-ink/70">Actualizar</Button>
+        </div>
+        {preview ? (
+          <iframe title="Previsualización del correo" srcDoc={preview[tab].html} className="w-full h-[560px] rounded-lg border border-ink/10 bg-white" />
+        ) : (
+          <p className="text-sm text-ink/60 flex items-center gap-2"><Loader2 className="h-4 w-4 animate-spin" /> Generando previsualización…</p>
+        )}
+        <p className="text-xs text-ink/50 mt-2 flex items-center gap-1"><Mail className="h-3 w-3" /> Guarda los cambios para ver la versión actualizada.</p>
+      </Card>
+
+      <div className="sticky bottom-4 flex justify-end">
+        <Button onClick={save} disabled={saving} className="bg-coral hover:bg-coral/90">
+          {saving ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Save className="h-4 w-4 mr-2" />} Guardar cambios
+        </Button>
+      </div>
+    </div>
+  );
 }

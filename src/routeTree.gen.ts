@@ -142,6 +142,7 @@ import { Route as EventSlugCancelarParticipantIdRouteImport } from './routes/$ev
 import { Route as AdminKonektumEventosIndexRouteImport } from './routes/admin.konektum.eventos.index'
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
 import { Route as EventIdCancelParticipantIdRouteImport } from './routes/event.$id.cancel.$participantId'
+import { Route as ApiPublicRegistroIcsTokenRouteImport } from './routes/api.public.registro-ics.$token'
 import { Route as ApiPublicKonFnRouteImport } from './routes/api.public.kon.$fn'
 import { Route as ApiPublicHooksFeaturedDispatchRouteImport } from './routes/api.public.hooks.featured-dispatch'
 import { Route as AdminKonektumEventosNuevoRouteImport } from './routes/admin.konektum.eventos.nuevo'
@@ -819,6 +820,12 @@ const EventIdCancelParticipantIdRoute =
     path: '/event/$id/cancel/$participantId',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicRegistroIcsTokenRoute =
+  ApiPublicRegistroIcsTokenRouteImport.update({
+    id: '/api/public/registro-ics/$token',
+    path: '/api/public/registro-ics/$token',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicKonFnRoute = ApiPublicKonFnRouteImport.update({
   id: '/api/public/kon/$fn',
   path: '/api/public/kon/$fn',
@@ -977,6 +984,7 @@ export interface FileRoutesByFullPath {
   '/admin/konektum/eventos/nuevo': typeof AdminKonektumEventosNuevoRoute
   '/api/public/hooks/featured-dispatch': typeof ApiPublicHooksFeaturedDispatchRoute
   '/api/public/kon/$fn': typeof ApiPublicKonFnRoute
+  '/api/public/registro-ics/$token': typeof ApiPublicRegistroIcsTokenRoute
   '/event/$id/cancel/$participantId': typeof EventIdCancelParticipantIdRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/admin/konektum/eventos/': typeof AdminKonektumEventosIndexRoute
@@ -1108,6 +1116,7 @@ export interface FileRoutesByTo {
   '/admin/konektum/eventos/nuevo': typeof AdminKonektumEventosNuevoRoute
   '/api/public/hooks/featured-dispatch': typeof ApiPublicHooksFeaturedDispatchRoute
   '/api/public/kon/$fn': typeof ApiPublicKonFnRoute
+  '/api/public/registro-ics/$token': typeof ApiPublicRegistroIcsTokenRoute
   '/event/$id/cancel/$participantId': typeof EventIdCancelParticipantIdRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/admin/konektum/eventos': typeof AdminKonektumEventosIndexRoute
@@ -1248,6 +1257,7 @@ export interface FileRoutesById {
   '/admin/konektum/eventos/nuevo': typeof AdminKonektumEventosNuevoRoute
   '/api/public/hooks/featured-dispatch': typeof ApiPublicHooksFeaturedDispatchRoute
   '/api/public/kon/$fn': typeof ApiPublicKonFnRoute
+  '/api/public/registro-ics/$token': typeof ApiPublicRegistroIcsTokenRoute
   '/event/$id/cancel/$participantId': typeof EventIdCancelParticipantIdRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/admin/konektum/eventos/': typeof AdminKonektumEventosIndexRoute
@@ -1389,6 +1399,7 @@ export interface FileRouteTypes {
     | '/admin/konektum/eventos/nuevo'
     | '/api/public/hooks/featured-dispatch'
     | '/api/public/kon/$fn'
+    | '/api/public/registro-ics/$token'
     | '/event/$id/cancel/$participantId'
     | '/lovable/email/queue/process'
     | '/admin/konektum/eventos/'
@@ -1520,6 +1531,7 @@ export interface FileRouteTypes {
     | '/admin/konektum/eventos/nuevo'
     | '/api/public/hooks/featured-dispatch'
     | '/api/public/kon/$fn'
+    | '/api/public/registro-ics/$token'
     | '/event/$id/cancel/$participantId'
     | '/lovable/email/queue/process'
     | '/admin/konektum/eventos'
@@ -1659,6 +1671,7 @@ export interface FileRouteTypes {
     | '/admin/konektum/eventos/nuevo'
     | '/api/public/hooks/featured-dispatch'
     | '/api/public/kon/$fn'
+    | '/api/public/registro-ics/$token'
     | '/event/$id/cancel/$participantId'
     | '/lovable/email/queue/process'
     | '/admin/konektum/eventos/'
@@ -1749,6 +1762,7 @@ export interface RootRouteChildren {
   SSeriesSlugIndexRoute: typeof SSeriesSlugIndexRoute
   ApiPublicHooksFeaturedDispatchRoute: typeof ApiPublicHooksFeaturedDispatchRoute
   ApiPublicKonFnRoute: typeof ApiPublicKonFnRoute
+  ApiPublicRegistroIcsTokenRoute: typeof ApiPublicRegistroIcsTokenRoute
   EventIdCancelParticipantIdRoute: typeof EventIdCancelParticipantIdRoute
   LovableEmailQueueProcessRoute: typeof LovableEmailQueueProcessRoute
 }
@@ -2686,6 +2700,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EventIdCancelParticipantIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/registro-ics/$token': {
+      id: '/api/public/registro-ics/$token'
+      path: '/api/public/registro-ics/$token'
+      fullPath: '/api/public/registro-ics/$token'
+      preLoaderRoute: typeof ApiPublicRegistroIcsTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/kon/$fn': {
       id: '/api/public/kon/$fn'
       path: '/api/public/kon/$fn'
@@ -2979,6 +3000,7 @@ const rootRouteChildren: RootRouteChildren = {
   SSeriesSlugIndexRoute: SSeriesSlugIndexRoute,
   ApiPublicHooksFeaturedDispatchRoute: ApiPublicHooksFeaturedDispatchRoute,
   ApiPublicKonFnRoute: ApiPublicKonFnRoute,
+  ApiPublicRegistroIcsTokenRoute: ApiPublicRegistroIcsTokenRoute,
   EventIdCancelParticipantIdRoute: EventIdCancelParticipantIdRoute,
   LovableEmailQueueProcessRoute: LovableEmailQueueProcessRoute,
 }
