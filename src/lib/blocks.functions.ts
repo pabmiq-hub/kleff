@@ -365,11 +365,7 @@ async function translateJsonForBlocks(
   esContent: Record<string, unknown>,
   targetLanguageName: string,
 ): Promise<Record<string, unknown> | null> {
-  const apiKey = process.env.LOVABLE_API_KEY;
-  if (!apiKey) {
-    console.warn("[blocks] LOVABLE_API_KEY missing — skipping block translation");
-    return null;
-  }
+  const { aiText } = await import("@/lib/ai.server");
 
   const system =
     `You are a professional translator for KLEFF, a Barcelona-based community of board game enthusiasts. ` +
@@ -383,33 +379,12 @@ async function translateJsonForBlocks(
     `6) Keep the same warm, energetic, community-driven tone. ` +
     `Respond with ONE JSON object only, no markdown, no explanation.`;
 
-  const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      model: "google/gemini-2.5-flash",
-      messages: [
-        { role: "system", content: system },
-        {
-          role: "user",
-          content: `Translate this JSON from Spanish to ${targetLanguageName}:\n\n${JSON.stringify(esContent)}`,
-        },
-      ],
-      response_format: { type: "json_object" },
-    }),
+  const content = await aiText({
+    tag: "[blocks]",
+    json: true,
+    system,
+    user: `Translate this JSON from Spanish to ${targetLanguageName}:\n\n${JSON.stringify(esContent)}`,
   });
-
-  if (!res.ok) {
-    const txt = await res.text().catch(() => "");
-    console.error(`[blocks] AI gateway ${res.status}: ${txt.slice(0, 300)}`);
-    return null;
-  }
-
-  const json = (await res.json()) as { choices?: { message?: { content?: string } }[] };
-  const content = json.choices?.[0]?.message?.content;
   if (!content) return null;
 
   try {
