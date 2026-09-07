@@ -43,12 +43,9 @@ async function translateHtml(
   fromLocale: string,
   toLocale: string
 ): Promise<string | null> {
-  const apiKey = process.env.LOVABLE_API_KEY;
-  if (!apiKey) {
-    console.warn("[overrides] LOVABLE_API_KEY missing — skipping translation");
-    return null;
-  }
   if (!source.trim()) return source;
+
+  const { aiText } = await import("@/lib/ai.server");
 
   const system = [
     `You are a professional translator for a board-games community website (KLEFF, Barcelona).`,
@@ -63,30 +60,8 @@ async function translateHtml(
   ].join("\n");
 
   try {
-    const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
-        messages: [
-          { role: "system", content: system },
-          { role: "user", content: source },
-        ],
-      }),
-    });
-    if (!res.ok) {
-      const t = await res.text().catch(() => "");
-      console.error("[overrides] translate failed", res.status, t);
-      return null;
-    }
-    const json = (await res.json()) as {
-      choices?: Array<{ message?: { content?: string } }>;
-    };
-    const out = json.choices?.[0]?.message?.content?.trim();
-    if (!out || out.length === 0) return null;
+    const out = await aiText({ tag: "[overrides]", system, user: source });
+    if (!out) return null;
 
     const normalize = (value: string) =>
       value
