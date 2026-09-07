@@ -641,6 +641,16 @@ function parsePosition(pos: string): { x: number; y: number } {
 
 // ----------------- Communication -----------------
 
+const REMINDER_CHOICES: { hours: number; label: string }[] = [
+  { hours: 168, label: "1 semana antes" },
+  { hours: 72, label: "72 h antes" },
+  { hours: 48, label: "48 h antes" },
+  { hours: 24, label: "24 h antes" },
+  { hours: 12, label: "12 h antes" },
+  { hours: 4, label: "4 h antes" },
+  { hours: 2, label: "2 h antes" },
+];
+
 function CommunicationSettings({ form, onSaved }: { form: RegistrationForm; onSaved: (patched: Partial<RegistrationForm>) => void }) {
   const updateFn = useServerFn(adminUpdateForm);
   const previewFn = useServerFn(adminPreviewEmails);
