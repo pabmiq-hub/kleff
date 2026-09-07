@@ -18,6 +18,7 @@ export interface EmailFormLike {
   confirmation_email_body?: string | null;
   reminder_subject?: string | null;
   reminder_body?: string | null;
+  reminder_offsets_hours?: number[] | null;
 }
 
 export interface EmailResponseLike {
