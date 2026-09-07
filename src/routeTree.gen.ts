@@ -106,6 +106,7 @@ import { Route as AdminKonektumIndexRouteImport } from './routes/admin.konektum.
 import { Route as AdminContentIndexRouteImport } from './routes/admin.content.index'
 import { Route as AdminBlogIndexRouteImport } from './routes/admin.blog.index'
 import { Route as SSeriesSlugJoinRouteImport } from './routes/s.$seriesSlug.join'
+import { Route as InscripcionBajaTokenRouteImport } from './routes/inscripcion.baja.$token'
 import { Route as EventIdTablesRouteImport } from './routes/event.$id.tables'
 import { Route as EventIdSelectRouteImport } from './routes/event.$id.select'
 import { Route as EventIdJoinRouteImport } from './routes/event.$id.join'
@@ -634,6 +635,11 @@ const SSeriesSlugJoinRoute = SSeriesSlugJoinRouteImport.update({
   path: '/s/$seriesSlug/join',
   getParentRoute: () => rootRouteImport,
 } as any)
+const InscripcionBajaTokenRoute = InscripcionBajaTokenRouteImport.update({
+  id: '/inscripcion/baja/$token',
+  path: '/inscripcion/baja/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const EventIdTablesRoute = EventIdTablesRouteImport.update({
   id: '/event/$id/tables',
   path: '/event/$id/tables',
@@ -971,6 +977,7 @@ export interface FileRoutesByFullPath {
   '/event/$id/join': typeof EventIdJoinRoute
   '/event/$id/select': typeof EventIdSelectRoute
   '/event/$id/tables': typeof EventIdTablesRoute
+  '/inscripcion/baja/$token': typeof InscripcionBajaTokenRoute
   '/s/$seriesSlug/join': typeof SSeriesSlugJoinRoute
   '/admin/blog/': typeof AdminBlogIndexRoute
   '/admin/content/': typeof AdminContentIndexRoute
@@ -1103,6 +1110,7 @@ export interface FileRoutesByTo {
   '/event/$id/join': typeof EventIdJoinRoute
   '/event/$id/select': typeof EventIdSelectRoute
   '/event/$id/tables': typeof EventIdTablesRoute
+  '/inscripcion/baja/$token': typeof InscripcionBajaTokenRoute
   '/s/$seriesSlug/join': typeof SSeriesSlugJoinRoute
   '/admin/blog': typeof AdminBlogIndexRoute
   '/admin/content': typeof AdminContentIndexRoute
@@ -1244,6 +1252,7 @@ export interface FileRoutesById {
   '/event/$id/join': typeof EventIdJoinRoute
   '/event/$id/select': typeof EventIdSelectRoute
   '/event/$id/tables': typeof EventIdTablesRoute
+  '/inscripcion/baja/$token': typeof InscripcionBajaTokenRoute
   '/s/$seriesSlug/join': typeof SSeriesSlugJoinRoute
   '/admin/blog/': typeof AdminBlogIndexRoute
   '/admin/content/': typeof AdminContentIndexRoute
@@ -1386,6 +1395,7 @@ export interface FileRouteTypes {
     | '/event/$id/join'
     | '/event/$id/select'
     | '/event/$id/tables'
+    | '/inscripcion/baja/$token'
     | '/s/$seriesSlug/join'
     | '/admin/blog/'
     | '/admin/content/'
@@ -1518,6 +1528,7 @@ export interface FileRouteTypes {
     | '/event/$id/join'
     | '/event/$id/select'
     | '/event/$id/tables'
+    | '/inscripcion/baja/$token'
     | '/s/$seriesSlug/join'
     | '/admin/blog'
     | '/admin/content'
@@ -1658,6 +1669,7 @@ export interface FileRouteTypes {
     | '/event/$id/join'
     | '/event/$id/select'
     | '/event/$id/tables'
+    | '/inscripcion/baja/$token'
     | '/s/$seriesSlug/join'
     | '/admin/blog/'
     | '/admin/content/'
@@ -1758,6 +1770,7 @@ export interface RootRouteChildren {
   EventIdJoinRoute: typeof EventIdJoinRoute
   EventIdSelectRoute: typeof EventIdSelectRoute
   EventIdTablesRoute: typeof EventIdTablesRoute
+  InscripcionBajaTokenRoute: typeof InscripcionBajaTokenRoute
   SSeriesSlugJoinRoute: typeof SSeriesSlugJoinRoute
   SSeriesSlugIndexRoute: typeof SSeriesSlugIndexRoute
   ApiPublicHooksFeaturedDispatchRoute: typeof ApiPublicHooksFeaturedDispatchRoute
@@ -2448,6 +2461,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SSeriesSlugJoinRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/inscripcion/baja/$token': {
+      id: '/inscripcion/baja/$token'
+      path: '/inscripcion/baja/$token'
+      fullPath: '/inscripcion/baja/$token'
+      preLoaderRoute: typeof InscripcionBajaTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/event/$id/tables': {
       id: '/event/$id/tables'
       path: '/event/$id/tables'
@@ -2996,6 +3016,7 @@ const rootRouteChildren: RootRouteChildren = {
   EventIdJoinRoute: EventIdJoinRoute,
   EventIdSelectRoute: EventIdSelectRoute,
   EventIdTablesRoute: EventIdTablesRoute,
+  InscripcionBajaTokenRoute: InscripcionBajaTokenRoute,
   SSeriesSlugJoinRoute: SSeriesSlugJoinRoute,
   SSeriesSlugIndexRoute: SSeriesSlugIndexRoute,
   ApiPublicHooksFeaturedDispatchRoute: ApiPublicHooksFeaturedDispatchRoute,
