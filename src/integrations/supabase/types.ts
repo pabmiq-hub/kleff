@@ -3658,70 +3658,106 @@ export type Database = {
       }
       registration_forms: {
         Row: {
+          allow_guests: boolean
           closes_at: string | null
+          confirmation_email_body: string | null
+          confirmation_email_subject: string | null
           confirmation_message: string | null
           cover_image_url: string | null
           cover_position: string
           created_at: string
           description: string | null
+          event_date: string | null
+          event_location: string | null
           external_iframe_height: number
           external_mode: string | null
           external_url: string | null
           id: string
           is_published: boolean
           kind: string
+          max_guests_per_response: number
           max_responses: number | null
           notify_emails: string[]
           payment_amount_cents: number | null
           payment_currency: string
           payment_instructions: string | null
           payment_required: boolean
+          reminder_at: string | null
+          reminder_body: string | null
+          reminder_enabled: boolean
+          reminder_sent_at: string | null
+          reminder_subject: string | null
+          send_confirmation_email: boolean
           slug: string
           title: string
           updated_at: string
         }
         Insert: {
+          allow_guests?: boolean
           closes_at?: string | null
+          confirmation_email_body?: string | null
+          confirmation_email_subject?: string | null
           confirmation_message?: string | null
           cover_image_url?: string | null
           cover_position?: string
           created_at?: string
           description?: string | null
+          event_date?: string | null
+          event_location?: string | null
           external_iframe_height?: number
           external_mode?: string | null
           external_url?: string | null
           id?: string
           is_published?: boolean
           kind?: string
+          max_guests_per_response?: number
           max_responses?: number | null
           notify_emails?: string[]
           payment_amount_cents?: number | null
           payment_currency?: string
           payment_instructions?: string | null
           payment_required?: boolean
+          reminder_at?: string | null
+          reminder_body?: string | null
+          reminder_enabled?: boolean
+          reminder_sent_at?: string | null
+          reminder_subject?: string | null
+          send_confirmation_email?: boolean
           slug: string
           title?: string
           updated_at?: string
         }
         Update: {
+          allow_guests?: boolean
           closes_at?: string | null
+          confirmation_email_body?: string | null
+          confirmation_email_subject?: string | null
           confirmation_message?: string | null
           cover_image_url?: string | null
           cover_position?: string
           created_at?: string
           description?: string | null
+          event_date?: string | null
+          event_location?: string | null
           external_iframe_height?: number
           external_mode?: string | null
           external_url?: string | null
           id?: string
           is_published?: boolean
           kind?: string
+          max_guests_per_response?: number
           max_responses?: number | null
           notify_emails?: string[]
           payment_amount_cents?: number | null
           payment_currency?: string
           payment_instructions?: string | null
           payment_required?: boolean
+          reminder_at?: string | null
+          reminder_body?: string | null
+          reminder_enabled?: boolean
+          reminder_sent_at?: string | null
+          reminder_subject?: string | null
+          send_confirmation_email?: boolean
           slug?: string
           title?: string
           updated_at?: string
@@ -3733,11 +3769,13 @@ export type Database = {
           created_at: string
           form_id: string
           help: string | null
+          hide_after_wednesday: boolean
           id: string
           label: string
           options: Json
           position: number
           required: boolean
+          special: string | null
           type: string
           updated_at: string
         }
@@ -3745,11 +3783,13 @@ export type Database = {
           created_at?: string
           form_id: string
           help?: string | null
+          hide_after_wednesday?: boolean
           id?: string
           label?: string
           options?: Json
           position?: number
           required?: boolean
+          special?: string | null
           type: string
           updated_at?: string
         }
@@ -3757,11 +3797,13 @@ export type Database = {
           created_at?: string
           form_id?: string
           help?: string | null
+          hide_after_wednesday?: boolean
           id?: string
           label?: string
           options?: Json
           position?: number
           required?: boolean
+          special?: string | null
           type?: string
           updated_at?: string
         }
@@ -3777,10 +3819,13 @@ export type Database = {
       }
       registration_responses: {
         Row: {
+          cancel_token: string
+          cancelled_at: string | null
           created_at: string
           data: Json
           email_contact: string | null
           form_id: string
+          guests_count: number
           id: string
           internal_notes: string | null
           ip_address: string | null
@@ -3789,10 +3834,13 @@ export type Database = {
           user_agent: string | null
         }
         Insert: {
+          cancel_token?: string
+          cancelled_at?: string | null
           created_at?: string
           data?: Json
           email_contact?: string | null
           form_id: string
+          guests_count?: number
           id?: string
           internal_notes?: string | null
           ip_address?: string | null
@@ -3801,10 +3849,13 @@ export type Database = {
           user_agent?: string | null
         }
         Update: {
+          cancel_token?: string
+          cancelled_at?: string | null
           created_at?: string
           data?: Json
           email_contact?: string | null
           form_id?: string
+          guests_count?: number
           id?: string
           internal_notes?: string | null
           ip_address?: string | null

@@ -182,3 +182,94 @@ export function contactTeamAlertEmail(opts: {
   });
   return { subject: `✉️ Contacto web — ${opts.name}`, html };
 }
+
+// ---------- Event registration: confirmation / reminder (to participant) ----------
+export function registrationEventEmail(opts: {
+  kind: "confirmation" | "reminder";
+  formTitle: string;
+  subject: string;
+  intro: string;
+  userName?: string;
+  eventDateLabel?: string | null;
+  eventLocation?: string | null;
+  guests?: number;
+  googleUrl?: string | null;
+  icsUrl?: string | null;
+  cancelUrl?: string | null;
+  eventUrl?: string | null;
+}): { subject: string; html: string } {
+  const name = opts.userName ? escape(opts.userName) : "";
+  const details: string[] = [];
+  if (opts.eventDateLabel) details.push(`<strong>📅 Cuándo:</strong> ${escape(opts.eventDateLabel)}`);
+  if (opts.eventLocation) details.push(`<strong>📍 Dónde:</strong> ${escape(opts.eventLocation)}`);
+  if (opts.guests && opts.guests > 0) {
+    details.push(`<strong>👥 Invitados:</strong> ${opts.guests} (${opts.guests + 1} plazas en total)`);
+  }
+  const detailsHtml = details.length
+    ? `<div style="margin:18px 0;padding:14px 16px;background:#ffffff;border:2px solid ${INK};border-radius:12px;font-size:15px;line-height:1.8;">
+         ${details.join("<br>")}
+       </div>`
+    : "";
+
+  const calendar =
+    opts.googleUrl || opts.icsUrl
+      ? `<p style="margin:18px 0 6px;font-weight:700;">Añádelo a tu calendario</p>
+         <p style="margin:0 0 8px;">
+           ${opts.googleUrl ? `<a href="${escape(opts.googleUrl)}" style="display:inline-block;margin:4px 8px 4px 0;padding:10px 18px;border:2px solid ${INK};border-radius:999px;background:#ffffff;color:${INK};text-decoration:none;font-weight:600;font-size:14px;">Google Calendar</a>` : ""}
+           ${opts.icsUrl ? `<a href="${escape(opts.icsUrl)}" style="display:inline-block;margin:4px 0;padding:10px 18px;border:2px solid ${INK};border-radius:999px;background:#ffffff;color:${INK};text-decoration:none;font-weight:600;font-size:14px;">iCalendar (Apple / Outlook)</a>` : ""}
+         </p>`
+      : "";
+
+  const cancel = opts.cancelUrl
+    ? `<p style="margin:22px 0 0;font-size:13px;color:#6b6b6b;">
+         ¿No puedes venir? <a href="${escape(opts.cancelUrl)}" style="color:${BRAND_CORAL};font-weight:600;">Darme de baja del evento</a>.
+       </p>`
+    : "";
+
+  const introHtml = opts.intro
+    .split(/\n{2,}/)
+    .map((p) => `<p style="margin:0 0 12px;">${escape(p).replace(/\n/g, "<br>")}</p>`)
+    .join("");
+
+  const heading =
+    opts.kind === "confirmation" ? "¡Inscripción confirmada! 🎲" : "Te esperamos muy pronto 🎲";
+
+  const html = layout({
+    title: opts.subject,
+    preview: opts.subject,
+    bodyHtml: `
+      <h1 style="font-family:Georgia,serif;font-size:24px;margin:0 0 12px;">${escape(heading)}</h1>
+      <p style="margin:0 0 12px;">Hola${name ? ` ${name}` : ""},</p>
+      ${introHtml}
+      ${detailsHtml}
+      ${calendar}
+      ${cancel}
+      <p style="margin:18px 0 0;">El equipo de KLEFF</p>
+    `,
+    ...(opts.eventUrl ? { ctaLabel: "Ver el evento", ctaUrl: opts.eventUrl } : {}),
+  });
+  return { subject: opts.subject, html };
+}
+
+// ---------- Registration cancelled (to team) ----------
+export function registrationCancelTeamEmail(opts: {
+  formTitle: string;
+  emailContact?: string | null;
+  userName?: string | null;
+  guests?: number;
+  formId: string;
+}): { subject: string; html: string } {
+  const html = layout({
+    title: `Baja de inscripción — ${opts.formTitle}`,
+    bodyHtml: `
+      <h1 style="font-family:Georgia,serif;font-size:22px;margin:0 0 12px;">Baja de inscripción</h1>
+      <p style="margin:0 0 4px;"><strong>Evento:</strong> ${escape(opts.formTitle)}</p>
+      ${opts.userName ? `<p style="margin:0 0 4px;"><strong>Nombre:</strong> ${escape(opts.userName)}</p>` : ""}
+      ${opts.emailContact ? `<p style="margin:0 0 4px;"><strong>Email:</strong> ${escape(opts.emailContact)}</p>` : ""}
+      <p style="margin:0 0 12px;"><strong>Plazas liberadas:</strong> ${(opts.guests ?? 0) + 1}</p>
+    `,
+    ctaLabel: "Ver inscritos",
+    ctaUrl: `https://www.kleff.es/admin/registrations/${opts.formId}`,
+  });
+  return { subject: `❌ Baja — ${opts.formTitle}`, html };
+}

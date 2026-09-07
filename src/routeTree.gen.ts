@@ -106,6 +106,7 @@ import { Route as AdminKonektumIndexRouteImport } from './routes/admin.konektum.
 import { Route as AdminContentIndexRouteImport } from './routes/admin.content.index'
 import { Route as AdminBlogIndexRouteImport } from './routes/admin.blog.index'
 import { Route as SSeriesSlugJoinRouteImport } from './routes/s.$seriesSlug.join'
+import { Route as InscripcionBajaTokenRouteImport } from './routes/inscripcion.baja.$token'
 import { Route as EventIdTablesRouteImport } from './routes/event.$id.tables'
 import { Route as EventIdSelectRouteImport } from './routes/event.$id.select'
 import { Route as EventIdJoinRouteImport } from './routes/event.$id.join'
@@ -118,6 +119,7 @@ import { Route as AppRentalsActiveRouteImport } from './routes/app.rentals.activ
 import { Route as ApiPublicUploadMyAvatarRouteImport } from './routes/api.public.upload-my-avatar'
 import { Route as ApiPublicUploadInviteAvatarRouteImport } from './routes/api.public.upload-invite-avatar'
 import { Route as ApiPublicSyncBggRouteImport } from './routes/api.public.sync-bgg'
+import { Route as ApiPublicRegistrationRemindersRouteImport } from './routes/api.public.registration-reminders'
 import { Route as ApiPublicLudoyaImageRouteImport } from './routes/api.public.ludoya-image'
 import { Route as ApiPublicContactRouteImport } from './routes/api.public.contact'
 import { Route as AdminRentalsSettingsRouteImport } from './routes/admin.rentals.settings'
@@ -142,6 +144,7 @@ import { Route as EventSlugCancelarParticipantIdRouteImport } from './routes/$ev
 import { Route as AdminKonektumEventosIndexRouteImport } from './routes/admin.konektum.eventos.index'
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
 import { Route as EventIdCancelParticipantIdRouteImport } from './routes/event.$id.cancel.$participantId'
+import { Route as ApiPublicRegistroIcsTokenRouteImport } from './routes/api.public.registro-ics.$token'
 import { Route as ApiPublicKonFnRouteImport } from './routes/api.public.kon.$fn'
 import { Route as ApiPublicHooksFeaturedDispatchRouteImport } from './routes/api.public.hooks.featured-dispatch'
 import { Route as AdminKonektumEventosNuevoRouteImport } from './routes/admin.konektum.eventos.nuevo'
@@ -633,6 +636,11 @@ const SSeriesSlugJoinRoute = SSeriesSlugJoinRouteImport.update({
   path: '/s/$seriesSlug/join',
   getParentRoute: () => rootRouteImport,
 } as any)
+const InscripcionBajaTokenRoute = InscripcionBajaTokenRouteImport.update({
+  id: '/inscripcion/baja/$token',
+  path: '/inscripcion/baja/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const EventIdTablesRoute = EventIdTablesRouteImport.update({
   id: '/event/$id/tables',
   path: '/event/$id/tables',
@@ -694,6 +702,12 @@ const ApiPublicSyncBggRoute = ApiPublicSyncBggRouteImport.update({
   path: '/api/public/sync-bgg',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicRegistrationRemindersRoute =
+  ApiPublicRegistrationRemindersRouteImport.update({
+    id: '/api/public/registration-reminders',
+    path: '/api/public/registration-reminders',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicLudoyaImageRoute = ApiPublicLudoyaImageRouteImport.update({
   id: '/api/public/ludoya-image',
   path: '/api/public/ludoya-image',
@@ -817,6 +831,12 @@ const EventIdCancelParticipantIdRoute =
   EventIdCancelParticipantIdRouteImport.update({
     id: '/event/$id/cancel/$participantId',
     path: '/event/$id/cancel/$participantId',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicRegistroIcsTokenRoute =
+  ApiPublicRegistroIcsTokenRouteImport.update({
+    id: '/api/public/registro-ics/$token',
+    path: '/api/public/registro-ics/$token',
     getParentRoute: () => rootRouteImport,
   } as any)
 const ApiPublicKonFnRoute = ApiPublicKonFnRouteImport.update({
@@ -952,6 +972,7 @@ export interface FileRoutesByFullPath {
   '/admin/rentals/settings': typeof AdminRentalsSettingsRoute
   '/api/public/contact': typeof ApiPublicContactRoute
   '/api/public/ludoya-image': typeof ApiPublicLudoyaImageRoute
+  '/api/public/registration-reminders': typeof ApiPublicRegistrationRemindersRoute
   '/api/public/sync-bgg': typeof ApiPublicSyncBggRoute
   '/api/public/upload-invite-avatar': typeof ApiPublicUploadInviteAvatarRoute
   '/api/public/upload-my-avatar': typeof ApiPublicUploadMyAvatarRoute
@@ -964,6 +985,7 @@ export interface FileRoutesByFullPath {
   '/event/$id/join': typeof EventIdJoinRoute
   '/event/$id/select': typeof EventIdSelectRoute
   '/event/$id/tables': typeof EventIdTablesRoute
+  '/inscripcion/baja/$token': typeof InscripcionBajaTokenRoute
   '/s/$seriesSlug/join': typeof SSeriesSlugJoinRoute
   '/admin/blog/': typeof AdminBlogIndexRoute
   '/admin/content/': typeof AdminContentIndexRoute
@@ -977,6 +999,7 @@ export interface FileRoutesByFullPath {
   '/admin/konektum/eventos/nuevo': typeof AdminKonektumEventosNuevoRoute
   '/api/public/hooks/featured-dispatch': typeof ApiPublicHooksFeaturedDispatchRoute
   '/api/public/kon/$fn': typeof ApiPublicKonFnRoute
+  '/api/public/registro-ics/$token': typeof ApiPublicRegistroIcsTokenRoute
   '/event/$id/cancel/$participantId': typeof EventIdCancelParticipantIdRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/admin/konektum/eventos/': typeof AdminKonektumEventosIndexRoute
@@ -1083,6 +1106,7 @@ export interface FileRoutesByTo {
   '/admin/rentals/settings': typeof AdminRentalsSettingsRoute
   '/api/public/contact': typeof ApiPublicContactRoute
   '/api/public/ludoya-image': typeof ApiPublicLudoyaImageRoute
+  '/api/public/registration-reminders': typeof ApiPublicRegistrationRemindersRoute
   '/api/public/sync-bgg': typeof ApiPublicSyncBggRoute
   '/api/public/upload-invite-avatar': typeof ApiPublicUploadInviteAvatarRoute
   '/api/public/upload-my-avatar': typeof ApiPublicUploadMyAvatarRoute
@@ -1095,6 +1119,7 @@ export interface FileRoutesByTo {
   '/event/$id/join': typeof EventIdJoinRoute
   '/event/$id/select': typeof EventIdSelectRoute
   '/event/$id/tables': typeof EventIdTablesRoute
+  '/inscripcion/baja/$token': typeof InscripcionBajaTokenRoute
   '/s/$seriesSlug/join': typeof SSeriesSlugJoinRoute
   '/admin/blog': typeof AdminBlogIndexRoute
   '/admin/content': typeof AdminContentIndexRoute
@@ -1108,6 +1133,7 @@ export interface FileRoutesByTo {
   '/admin/konektum/eventos/nuevo': typeof AdminKonektumEventosNuevoRoute
   '/api/public/hooks/featured-dispatch': typeof ApiPublicHooksFeaturedDispatchRoute
   '/api/public/kon/$fn': typeof ApiPublicKonFnRoute
+  '/api/public/registro-ics/$token': typeof ApiPublicRegistroIcsTokenRoute
   '/event/$id/cancel/$participantId': typeof EventIdCancelParticipantIdRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/admin/konektum/eventos': typeof AdminKonektumEventosIndexRoute
@@ -1223,6 +1249,7 @@ export interface FileRoutesById {
   '/admin/rentals/settings': typeof AdminRentalsSettingsRoute
   '/api/public/contact': typeof ApiPublicContactRoute
   '/api/public/ludoya-image': typeof ApiPublicLudoyaImageRoute
+  '/api/public/registration-reminders': typeof ApiPublicRegistrationRemindersRoute
   '/api/public/sync-bgg': typeof ApiPublicSyncBggRoute
   '/api/public/upload-invite-avatar': typeof ApiPublicUploadInviteAvatarRoute
   '/api/public/upload-my-avatar': typeof ApiPublicUploadMyAvatarRoute
@@ -1235,6 +1262,7 @@ export interface FileRoutesById {
   '/event/$id/join': typeof EventIdJoinRoute
   '/event/$id/select': typeof EventIdSelectRoute
   '/event/$id/tables': typeof EventIdTablesRoute
+  '/inscripcion/baja/$token': typeof InscripcionBajaTokenRoute
   '/s/$seriesSlug/join': typeof SSeriesSlugJoinRoute
   '/admin/blog/': typeof AdminBlogIndexRoute
   '/admin/content/': typeof AdminContentIndexRoute
@@ -1248,6 +1276,7 @@ export interface FileRoutesById {
   '/admin/konektum/eventos/nuevo': typeof AdminKonektumEventosNuevoRoute
   '/api/public/hooks/featured-dispatch': typeof ApiPublicHooksFeaturedDispatchRoute
   '/api/public/kon/$fn': typeof ApiPublicKonFnRoute
+  '/api/public/registro-ics/$token': typeof ApiPublicRegistroIcsTokenRoute
   '/event/$id/cancel/$participantId': typeof EventIdCancelParticipantIdRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/admin/konektum/eventos/': typeof AdminKonektumEventosIndexRoute
@@ -1364,6 +1393,7 @@ export interface FileRouteTypes {
     | '/admin/rentals/settings'
     | '/api/public/contact'
     | '/api/public/ludoya-image'
+    | '/api/public/registration-reminders'
     | '/api/public/sync-bgg'
     | '/api/public/upload-invite-avatar'
     | '/api/public/upload-my-avatar'
@@ -1376,6 +1406,7 @@ export interface FileRouteTypes {
     | '/event/$id/join'
     | '/event/$id/select'
     | '/event/$id/tables'
+    | '/inscripcion/baja/$token'
     | '/s/$seriesSlug/join'
     | '/admin/blog/'
     | '/admin/content/'
@@ -1389,6 +1420,7 @@ export interface FileRouteTypes {
     | '/admin/konektum/eventos/nuevo'
     | '/api/public/hooks/featured-dispatch'
     | '/api/public/kon/$fn'
+    | '/api/public/registro-ics/$token'
     | '/event/$id/cancel/$participantId'
     | '/lovable/email/queue/process'
     | '/admin/konektum/eventos/'
@@ -1495,6 +1527,7 @@ export interface FileRouteTypes {
     | '/admin/rentals/settings'
     | '/api/public/contact'
     | '/api/public/ludoya-image'
+    | '/api/public/registration-reminders'
     | '/api/public/sync-bgg'
     | '/api/public/upload-invite-avatar'
     | '/api/public/upload-my-avatar'
@@ -1507,6 +1540,7 @@ export interface FileRouteTypes {
     | '/event/$id/join'
     | '/event/$id/select'
     | '/event/$id/tables'
+    | '/inscripcion/baja/$token'
     | '/s/$seriesSlug/join'
     | '/admin/blog'
     | '/admin/content'
@@ -1520,6 +1554,7 @@ export interface FileRouteTypes {
     | '/admin/konektum/eventos/nuevo'
     | '/api/public/hooks/featured-dispatch'
     | '/api/public/kon/$fn'
+    | '/api/public/registro-ics/$token'
     | '/event/$id/cancel/$participantId'
     | '/lovable/email/queue/process'
     | '/admin/konektum/eventos'
@@ -1634,6 +1669,7 @@ export interface FileRouteTypes {
     | '/admin/rentals/settings'
     | '/api/public/contact'
     | '/api/public/ludoya-image'
+    | '/api/public/registration-reminders'
     | '/api/public/sync-bgg'
     | '/api/public/upload-invite-avatar'
     | '/api/public/upload-my-avatar'
@@ -1646,6 +1682,7 @@ export interface FileRouteTypes {
     | '/event/$id/join'
     | '/event/$id/select'
     | '/event/$id/tables'
+    | '/inscripcion/baja/$token'
     | '/s/$seriesSlug/join'
     | '/admin/blog/'
     | '/admin/content/'
@@ -1659,6 +1696,7 @@ export interface FileRouteTypes {
     | '/admin/konektum/eventos/nuevo'
     | '/api/public/hooks/featured-dispatch'
     | '/api/public/kon/$fn'
+    | '/api/public/registro-ics/$token'
     | '/event/$id/cancel/$participantId'
     | '/lovable/email/queue/process'
     | '/admin/konektum/eventos/'
@@ -1736,6 +1774,7 @@ export interface RootRouteChildren {
   EventSlugCancelarParticipantIdRoute: typeof EventSlugCancelarParticipantIdRoute
   ApiPublicContactRoute: typeof ApiPublicContactRoute
   ApiPublicLudoyaImageRoute: typeof ApiPublicLudoyaImageRoute
+  ApiPublicRegistrationRemindersRoute: typeof ApiPublicRegistrationRemindersRoute
   ApiPublicSyncBggRoute: typeof ApiPublicSyncBggRoute
   ApiPublicUploadInviteAvatarRoute: typeof ApiPublicUploadInviteAvatarRoute
   ApiPublicUploadMyAvatarRoute: typeof ApiPublicUploadMyAvatarRoute
@@ -1745,10 +1784,12 @@ export interface RootRouteChildren {
   EventIdJoinRoute: typeof EventIdJoinRoute
   EventIdSelectRoute: typeof EventIdSelectRoute
   EventIdTablesRoute: typeof EventIdTablesRoute
+  InscripcionBajaTokenRoute: typeof InscripcionBajaTokenRoute
   SSeriesSlugJoinRoute: typeof SSeriesSlugJoinRoute
   SSeriesSlugIndexRoute: typeof SSeriesSlugIndexRoute
   ApiPublicHooksFeaturedDispatchRoute: typeof ApiPublicHooksFeaturedDispatchRoute
   ApiPublicKonFnRoute: typeof ApiPublicKonFnRoute
+  ApiPublicRegistroIcsTokenRoute: typeof ApiPublicRegistroIcsTokenRoute
   EventIdCancelParticipantIdRoute: typeof EventIdCancelParticipantIdRoute
   LovableEmailQueueProcessRoute: typeof LovableEmailQueueProcessRoute
 }
@@ -2434,6 +2475,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SSeriesSlugJoinRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/inscripcion/baja/$token': {
+      id: '/inscripcion/baja/$token'
+      path: '/inscripcion/baja/$token'
+      fullPath: '/inscripcion/baja/$token'
+      preLoaderRoute: typeof InscripcionBajaTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/event/$id/tables': {
       id: '/event/$id/tables'
       path: '/event/$id/tables'
@@ -2516,6 +2564,13 @@ declare module '@tanstack/react-router' {
       path: '/api/public/sync-bgg'
       fullPath: '/api/public/sync-bgg'
       preLoaderRoute: typeof ApiPublicSyncBggRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/registration-reminders': {
+      id: '/api/public/registration-reminders'
+      path: '/api/public/registration-reminders'
+      fullPath: '/api/public/registration-reminders'
+      preLoaderRoute: typeof ApiPublicRegistrationRemindersRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/ludoya-image': {
@@ -2684,6 +2739,13 @@ declare module '@tanstack/react-router' {
       path: '/event/$id/cancel/$participantId'
       fullPath: '/event/$id/cancel/$participantId'
       preLoaderRoute: typeof EventIdCancelParticipantIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/registro-ics/$token': {
+      id: '/api/public/registro-ics/$token'
+      path: '/api/public/registro-ics/$token'
+      fullPath: '/api/public/registro-ics/$token'
+      preLoaderRoute: typeof ApiPublicRegistroIcsTokenRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/kon/$fn': {
@@ -2966,6 +3028,7 @@ const rootRouteChildren: RootRouteChildren = {
   EventSlugCancelarParticipantIdRoute: EventSlugCancelarParticipantIdRoute,
   ApiPublicContactRoute: ApiPublicContactRoute,
   ApiPublicLudoyaImageRoute: ApiPublicLudoyaImageRoute,
+  ApiPublicRegistrationRemindersRoute: ApiPublicRegistrationRemindersRoute,
   ApiPublicSyncBggRoute: ApiPublicSyncBggRoute,
   ApiPublicUploadInviteAvatarRoute: ApiPublicUploadInviteAvatarRoute,
   ApiPublicUploadMyAvatarRoute: ApiPublicUploadMyAvatarRoute,
@@ -2975,10 +3038,12 @@ const rootRouteChildren: RootRouteChildren = {
   EventIdJoinRoute: EventIdJoinRoute,
   EventIdSelectRoute: EventIdSelectRoute,
   EventIdTablesRoute: EventIdTablesRoute,
+  InscripcionBajaTokenRoute: InscripcionBajaTokenRoute,
   SSeriesSlugJoinRoute: SSeriesSlugJoinRoute,
   SSeriesSlugIndexRoute: SSeriesSlugIndexRoute,
   ApiPublicHooksFeaturedDispatchRoute: ApiPublicHooksFeaturedDispatchRoute,
   ApiPublicKonFnRoute: ApiPublicKonFnRoute,
+  ApiPublicRegistroIcsTokenRoute: ApiPublicRegistroIcsTokenRoute,
   EventIdCancelParticipantIdRoute: EventIdCancelParticipantIdRoute,
   LovableEmailQueueProcessRoute: LovableEmailQueueProcessRoute,
 }
