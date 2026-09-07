@@ -360,11 +360,7 @@ async function translatePost(
   src: { title: string; excerpt: string; content: string },
   targetLanguage: string,
 ): Promise<{ title: string; excerpt: string; content: string } | null> {
-  const apiKey = process.env.LOVABLE_API_KEY;
-  if (!apiKey) {
-    console.warn("[blog] LOVABLE_API_KEY missing");
-    return null;
-  }
+  const { aiText } = await import("@/lib/ai.server");
 
   const system =
     `You translate KLEFF blog posts (a Barcelona board games community) from English to ${targetLanguage}. ` +
@@ -378,31 +374,12 @@ async function translatePost(
     `- Preserve emojis, numbers, dates. ` +
     `- Respond ONLY with the JSON object. No markdown fence, no commentary.`;
 
-  const user = JSON.stringify(src);
-
-  const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      "Lovable-API-Key": apiKey,
-      "X-Lovable-AIG-SDK": "vercel-ai-sdk",
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      model: "google/gemini-2.5-flash",
-      messages: [
-        { role: "system", content: system },
-        { role: "user", content: user },
-      ],
-      response_format: { type: "json_object" },
-    }),
+  const content = await aiText({
+    tag: "[blog]",
+    json: true,
+    system,
+    user: JSON.stringify(src),
   });
-
-  if (!res.ok) {
-    console.error(`[blog] AI gateway ${res.status}: ${(await res.text()).slice(0, 300)}`);
-    return null;
-  }
-  const json = (await res.json()) as { choices?: { message?: { content?: string } }[] };
-  const content = json.choices?.[0]?.message?.content;
   if (!content) return null;
   try {
     const parsed = JSON.parse(content) as { title?: string; excerpt?: string; content?: string };

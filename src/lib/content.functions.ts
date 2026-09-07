@@ -371,11 +371,7 @@ async function translateContent(
   esContent: Record<string, unknown>,
   targetLanguageName: string,
 ): Promise<Record<string, unknown> | null> {
-  const apiKey = process.env.LOVABLE_API_KEY;
-  if (!apiKey) {
-    console.warn("[content] LOVABLE_API_KEY missing — skipping translation");
-    return null;
-  }
+  const { aiText } = await import("@/lib/ai.server");
 
   const system =
     `You are a professional translator for KLEFF, a Barcelona-based community of board game enthusiasts. ` +
@@ -395,32 +391,7 @@ async function translateContent(
     `Return the same shape with translated string values.\n\n` +
     JSON.stringify(esContent);
 
-  const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      model: "google/gemini-2.5-flash",
-      messages: [
-        { role: "system", content: system },
-        { role: "user", content: userMsg },
-      ],
-      response_format: { type: "json_object" },
-    }),
-  });
-
-  if (!res.ok) {
-    const txt = await res.text().catch(() => "");
-    console.error(`[content] AI gateway ${res.status}: ${txt.slice(0, 300)}`);
-    return null;
-  }
-
-  const json = (await res.json()) as {
-    choices?: { message?: { content?: string } }[];
-  };
-  const content = json.choices?.[0]?.message?.content;
+  const content = await aiText({ tag: "[content]", json: true, system, user: userMsg });
   if (!content) return null;
 
   try {
