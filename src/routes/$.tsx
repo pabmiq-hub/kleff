@@ -46,7 +46,7 @@ export const Route = createFileRoute("/$")({
             if (reg.form.kind === "external" && reg.form.external_mode === "redirect" && reg.form.external_url) {
               throw redirect({ href: reg.form.external_url, statusCode: 302, reloadDocument: true });
             }
-            return { kind: "registration" as const, form: reg.form, questions: reg.questions, responsesCount: reg.responsesCount };
+            return { kind: "registration" as const, form: reg.form, questions: reg.questions, responsesCount: reg.responsesCount, attendeesCount: reg.attendeesCount };
           }
         }
 
@@ -164,7 +164,7 @@ function CatchAll() {
     return <CustomPage title={data.page.title} blocks={data.blocks} />;
   }
   if (data.kind === "registration") {
-    return <PublicRegistrationPage form={data.form} questions={data.questions} responsesCount={data.responsesCount} />;
+    return <PublicRegistrationPage form={data.form} questions={data.questions} responsesCount={data.responsesCount} attendeesCount={data.attendeesCount} />;
   }
   return <NotFound path={data.path} />;
 }
