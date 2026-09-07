@@ -662,6 +662,9 @@ function CommunicationSettings({ form, onSaved }: { form: RegistrationForm; onSa
   const [tab, setTab] = useState<"confirmation" | "reminder">("confirmation");
 
   const set = <K extends keyof RegistrationForm>(k: K, v: RegistrationForm[K]) => setState((s) => ({ ...s, [k]: v }));
+  const offsets: number[] = Array.isArray(state.reminder_offsets_hours) && state.reminder_offsets_hours.length
+    ? state.reminder_offsets_hours
+    : [72, 48, 24];
 
   const loadPreview = async () => {
     try {
