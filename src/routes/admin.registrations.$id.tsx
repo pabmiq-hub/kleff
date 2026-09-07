@@ -669,7 +669,6 @@ function CommunicationSettings({ form, onSaved }: { form: RegistrationForm; onSa
         confirmation_email_subject: state.confirmation_email_subject,
         confirmation_email_body: state.confirmation_email_body,
         reminder_enabled: state.reminder_enabled,
-        reminder_at: state.reminder_at,
         reminder_subject: state.reminder_subject,
         reminder_body: state.reminder_body,
       };
@@ -713,9 +712,8 @@ function CommunicationSettings({ form, onSaved }: { form: RegistrationForm; onSa
           </div>
         </Row>
         {state.reminder_enabled && (
-          <Row label="Fecha y hora de envío">
-            <Input type="datetime-local" value={toLocalInput(state.reminder_at)} onChange={(e) => set("reminder_at", e.target.value ? new Date(e.target.value).toISOString() : null)} className="bg-white border-ink/15 text-ink" />
-            {state.reminder_sent_at && <p className="text-xs text-ink/50 mt-1 flex items-center gap-1"><CalendarClock className="h-3 w-3" /> Ya enviado el {new Date(state.reminder_sent_at).toLocaleString("es-ES")}</p>}
+          <Row label="Envío automático">
+            <p className="text-sm text-ink/70 flex items-center gap-2"><CalendarClock className="h-4 w-4" /> Se programa al inscribirse y llega <strong>72, 48 y 24 horas antes</strong> del evento. Si la persona se da de baja, sus recordatorios se cancelan.</p>
           </Row>
         )}
         <Row label="Asunto"><Input value={state.reminder_subject ?? ""} onChange={(e) => set("reminder_subject", e.target.value || null)} placeholder={`Nos vemos pronto · ${form.title}`} className="bg-white border-ink/15 text-ink" /></Row>
