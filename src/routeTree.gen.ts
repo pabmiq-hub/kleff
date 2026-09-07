@@ -119,6 +119,7 @@ import { Route as AppRentalsActiveRouteImport } from './routes/app.rentals.activ
 import { Route as ApiPublicUploadMyAvatarRouteImport } from './routes/api.public.upload-my-avatar'
 import { Route as ApiPublicUploadInviteAvatarRouteImport } from './routes/api.public.upload-invite-avatar'
 import { Route as ApiPublicSyncBggRouteImport } from './routes/api.public.sync-bgg'
+import { Route as ApiPublicRegistrationRemindersRouteImport } from './routes/api.public.registration-reminders'
 import { Route as ApiPublicLudoyaImageRouteImport } from './routes/api.public.ludoya-image'
 import { Route as ApiPublicContactRouteImport } from './routes/api.public.contact'
 import { Route as AdminRentalsSettingsRouteImport } from './routes/admin.rentals.settings'
@@ -701,6 +702,12 @@ const ApiPublicSyncBggRoute = ApiPublicSyncBggRouteImport.update({
   path: '/api/public/sync-bgg',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicRegistrationRemindersRoute =
+  ApiPublicRegistrationRemindersRouteImport.update({
+    id: '/api/public/registration-reminders',
+    path: '/api/public/registration-reminders',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicLudoyaImageRoute = ApiPublicLudoyaImageRouteImport.update({
   id: '/api/public/ludoya-image',
   path: '/api/public/ludoya-image',
@@ -965,6 +972,7 @@ export interface FileRoutesByFullPath {
   '/admin/rentals/settings': typeof AdminRentalsSettingsRoute
   '/api/public/contact': typeof ApiPublicContactRoute
   '/api/public/ludoya-image': typeof ApiPublicLudoyaImageRoute
+  '/api/public/registration-reminders': typeof ApiPublicRegistrationRemindersRoute
   '/api/public/sync-bgg': typeof ApiPublicSyncBggRoute
   '/api/public/upload-invite-avatar': typeof ApiPublicUploadInviteAvatarRoute
   '/api/public/upload-my-avatar': typeof ApiPublicUploadMyAvatarRoute
@@ -1098,6 +1106,7 @@ export interface FileRoutesByTo {
   '/admin/rentals/settings': typeof AdminRentalsSettingsRoute
   '/api/public/contact': typeof ApiPublicContactRoute
   '/api/public/ludoya-image': typeof ApiPublicLudoyaImageRoute
+  '/api/public/registration-reminders': typeof ApiPublicRegistrationRemindersRoute
   '/api/public/sync-bgg': typeof ApiPublicSyncBggRoute
   '/api/public/upload-invite-avatar': typeof ApiPublicUploadInviteAvatarRoute
   '/api/public/upload-my-avatar': typeof ApiPublicUploadMyAvatarRoute
@@ -1240,6 +1249,7 @@ export interface FileRoutesById {
   '/admin/rentals/settings': typeof AdminRentalsSettingsRoute
   '/api/public/contact': typeof ApiPublicContactRoute
   '/api/public/ludoya-image': typeof ApiPublicLudoyaImageRoute
+  '/api/public/registration-reminders': typeof ApiPublicRegistrationRemindersRoute
   '/api/public/sync-bgg': typeof ApiPublicSyncBggRoute
   '/api/public/upload-invite-avatar': typeof ApiPublicUploadInviteAvatarRoute
   '/api/public/upload-my-avatar': typeof ApiPublicUploadMyAvatarRoute
@@ -1383,6 +1393,7 @@ export interface FileRouteTypes {
     | '/admin/rentals/settings'
     | '/api/public/contact'
     | '/api/public/ludoya-image'
+    | '/api/public/registration-reminders'
     | '/api/public/sync-bgg'
     | '/api/public/upload-invite-avatar'
     | '/api/public/upload-my-avatar'
@@ -1516,6 +1527,7 @@ export interface FileRouteTypes {
     | '/admin/rentals/settings'
     | '/api/public/contact'
     | '/api/public/ludoya-image'
+    | '/api/public/registration-reminders'
     | '/api/public/sync-bgg'
     | '/api/public/upload-invite-avatar'
     | '/api/public/upload-my-avatar'
@@ -1657,6 +1669,7 @@ export interface FileRouteTypes {
     | '/admin/rentals/settings'
     | '/api/public/contact'
     | '/api/public/ludoya-image'
+    | '/api/public/registration-reminders'
     | '/api/public/sync-bgg'
     | '/api/public/upload-invite-avatar'
     | '/api/public/upload-my-avatar'
@@ -1761,6 +1774,7 @@ export interface RootRouteChildren {
   EventSlugCancelarParticipantIdRoute: typeof EventSlugCancelarParticipantIdRoute
   ApiPublicContactRoute: typeof ApiPublicContactRoute
   ApiPublicLudoyaImageRoute: typeof ApiPublicLudoyaImageRoute
+  ApiPublicRegistrationRemindersRoute: typeof ApiPublicRegistrationRemindersRoute
   ApiPublicSyncBggRoute: typeof ApiPublicSyncBggRoute
   ApiPublicUploadInviteAvatarRoute: typeof ApiPublicUploadInviteAvatarRoute
   ApiPublicUploadMyAvatarRoute: typeof ApiPublicUploadMyAvatarRoute
@@ -2552,6 +2566,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicSyncBggRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/registration-reminders': {
+      id: '/api/public/registration-reminders'
+      path: '/api/public/registration-reminders'
+      fullPath: '/api/public/registration-reminders'
+      preLoaderRoute: typeof ApiPublicRegistrationRemindersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/ludoya-image': {
       id: '/api/public/ludoya-image'
       path: '/api/public/ludoya-image'
@@ -3007,6 +3028,7 @@ const rootRouteChildren: RootRouteChildren = {
   EventSlugCancelarParticipantIdRoute: EventSlugCancelarParticipantIdRoute,
   ApiPublicContactRoute: ApiPublicContactRoute,
   ApiPublicLudoyaImageRoute: ApiPublicLudoyaImageRoute,
+  ApiPublicRegistrationRemindersRoute: ApiPublicRegistrationRemindersRoute,
   ApiPublicSyncBggRoute: ApiPublicSyncBggRoute,
   ApiPublicUploadInviteAvatarRoute: ApiPublicUploadInviteAvatarRoute,
   ApiPublicUploadMyAvatarRoute: ApiPublicUploadMyAvatarRoute,
