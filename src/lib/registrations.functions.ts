@@ -42,6 +42,7 @@ export type RegistrationForm = {
   reminder_subject: string | null;
   reminder_body: string | null;
   reminder_sent_at: string | null;
+  reminder_offsets_hours: number[];
   created_at: string;
   updated_at: string;
 };
