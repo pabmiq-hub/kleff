@@ -3830,6 +3830,7 @@ export type Database = {
           internal_notes: string | null
           ip_address: string | null
           payment_status: string
+          reminder_email_ids: Json
           updated_at: string
           user_agent: string | null
         }
@@ -3845,6 +3846,7 @@ export type Database = {
           internal_notes?: string | null
           ip_address?: string | null
           payment_status?: string
+          reminder_email_ids?: Json
           updated_at?: string
           user_agent?: string | null
         }
@@ -3860,6 +3862,7 @@ export type Database = {
           internal_notes?: string | null
           ip_address?: string | null
           payment_status?: string
+          reminder_email_ids?: Json
           updated_at?: string
           user_agent?: string | null
         }

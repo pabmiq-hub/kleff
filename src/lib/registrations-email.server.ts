@@ -132,3 +132,45 @@ export async function sendRegistrationEmail(
     tags: [{ name: "type", value: `registration_${kind}` }],
   });
 }
+
+/** Fixed reminder offsets (hours before the event). */
+export const REMINDER_OFFSETS_HOURS = [72, 48, 24] as const;
+
+/**
+ * Schedules reminder emails (72h / 48h / 24h before the event) directly with
+ * the email provider. Returns the scheduled email IDs for later cancellation.
+ */
+export async function scheduleReminderEmails(
+  form: EmailFormLike,
+  response: EmailResponseLike,
+): Promise<string[]> {
+  if (!response.email_contact || !form.event_date) return [];
+  const start = new Date(form.event_date);
+  if (Number.isNaN(start.getTime())) return [];
+  const { sendEmailSafe } = await import("@/lib/email/send.server");
+  const { registrationEventEmail } = await import("@/lib/email/templates.server");
+  const built = buildRegistrationEmail("reminder", form, response);
+  const tpl = registrationEventEmail({ kind: "reminder", formTitle: form.title, ...built });
+  const ids: string[] = [];
+  const now = Date.now();
+  for (const hours of REMINDER_OFFSETS_HOURS) {
+    const at = new Date(start.getTime() - hours * 3600_000);
+    if (at.getTime() <= now + 60_000) continue; // already in the past
+    const res = await sendEmailSafe({
+      to: response.email_contact,
+      subject: tpl.subject,
+      html: tpl.html,
+      scheduledAt: at.toISOString(),
+      tags: [{ name: "type", value: `registration_reminder_${hours}h` }],
+    });
+    if (res?.id) ids.push(res.id);
+  }
+  return ids;
+}
+
+/** Cancels previously scheduled reminder emails. Never throws. */
+export async function cancelScheduledReminders(ids: string[]): Promise<void> {
+  if (!ids.length) return;
+  const { cancelScheduledEmail } = await import("@/lib/email/send.server");
+  await Promise.all(ids.map((id) => cancelScheduledEmail(id)));
+}

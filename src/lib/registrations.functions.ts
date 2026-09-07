@@ -196,6 +196,22 @@ export const submitRegistration = createServerFn({ method: "POST" })
         });
       }
 
+      if (data.emailContact && f.reminder_enabled) {
+        const { scheduleReminderEmails } = await import("@/lib/registrations-email.server");
+        const ids = await scheduleReminderEmails(f, {
+          cancel_token: row.cancel_token,
+          email_contact: data.emailContact,
+          guests_count: guests,
+          data: data.data as Record<string, unknown>,
+        });
+        if (ids.length) {
+          await supabaseAdmin
+            .from("registration_responses")
+            .update({ reminder_email_ids: ids } as never)
+            .eq("id", responseId);
+        }
+      }
+
 
       const alert = registrationTeamNotificationEmail({
         formTitle: f.title,
@@ -261,17 +277,25 @@ export const cancelRegistration = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const { data: row } = await supabaseAdmin
       .from("registration_responses")
-      .select("id, form_id, guests_count, cancelled_at, email_contact, data")
+      .select("id, form_id, guests_count, cancelled_at, email_contact, data, reminder_email_ids")
       .eq("cancel_token", data.token)
       .maybeSingle();
     if (!row) throw new Error("Inscripción no encontrada");
-    const r = row as { id: string; form_id: string; guests_count: number | null; cancelled_at: string | null; email_contact: string | null; data: Record<string, unknown> };
+    const r = row as { id: string; form_id: string; guests_count: number | null; cancelled_at: string | null; email_contact: string | null; data: Record<string, unknown>; reminder_email_ids: string[] | null };
     if (r.cancelled_at) return { ok: true, alreadyCancelled: true };
     const { error } = await supabaseAdmin
       .from("registration_responses")
-      .update({ cancelled_at: new Date().toISOString() } as never)
+      .update({ cancelled_at: new Date().toISOString(), reminder_email_ids: [] } as never)
       .eq("id", r.id);
     if (error) throw new Error(error.message);
+
+    try {
+      const { cancelScheduledReminders } = await import("@/lib/registrations-email.server");
+      await cancelScheduledReminders(Array.isArray(r.reminder_email_ids) ? r.reminder_email_ids : []);
+    } catch (err) {
+      console.error("[registrations] reminder cancellation error:", err);
+    }
+
 
     try {
       const { data: form } = await supabaseAdmin
