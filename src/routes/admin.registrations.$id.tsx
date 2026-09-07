@@ -684,6 +684,7 @@ function CommunicationSettings({ form, onSaved }: { form: RegistrationForm; onSa
         reminder_enabled: state.reminder_enabled,
         reminder_subject: state.reminder_subject,
         reminder_body: state.reminder_body,
+        reminder_offsets_hours: offsets,
       };
       await updateFn({ data: { id: form.id, patch } });
       onSaved(patch);
