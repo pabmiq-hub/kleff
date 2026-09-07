@@ -196,6 +196,22 @@ export const submitRegistration = createServerFn({ method: "POST" })
         });
       }
 
+      if (data.emailContact && f.reminder_enabled) {
+        const { scheduleReminderEmails } = await import("@/lib/registrations-email.server");
+        const ids = await scheduleReminderEmails(f, {
+          cancel_token: row.cancel_token,
+          email_contact: data.emailContact,
+          guests_count: guests,
+          data: data.data as Record<string, unknown>,
+        });
+        if (ids.length) {
+          await supabaseAdmin
+            .from("registration_responses")
+            .update({ reminder_email_ids: ids } as never)
+            .eq("id", responseId);
+        }
+      }
+
 
       const alert = registrationTeamNotificationEmail({
         formTitle: f.title,

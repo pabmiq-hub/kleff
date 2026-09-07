@@ -17,6 +17,8 @@ export interface SendEmailInput {
   cc?: string | string[];
   bcc?: string | string[];
   tags?: { name: string; value: string }[];
+  /** ISO 8601 datetime to schedule the email for later delivery (Resend). */
+  scheduledAt?: string;
 }
 
 export interface SendEmailResult {
@@ -38,6 +40,7 @@ export async function sendEmail(input: SendEmailInput): Promise<SendEmailResult>
   if (input.cc) body.cc = input.cc;
   if (input.bcc) body.bcc = input.bcc;
   if (input.tags) body.tags = input.tags;
+  if (input.scheduledAt) body.scheduled_at = input.scheduledAt;
 
   const res = await fetch(RESEND_ENDPOINT, {
     method: "POST",
@@ -64,5 +67,21 @@ export async function sendEmailSafe(input: SendEmailInput): Promise<SendEmailRes
   } catch (err) {
     console.error("[email] sendEmailSafe error:", err);
     return null;
+  }
+}
+
+/** Cancels a previously scheduled Resend email. Never throws. */
+export async function cancelScheduledEmail(id: string): Promise<boolean> {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey || !id) return false;
+  try {
+    const res = await fetch(`${RESEND_ENDPOINT}/${id}/cancel`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${apiKey}` },
+    });
+    return res.ok;
+  } catch (err) {
+    console.error("[email] cancelScheduledEmail error:", err);
+    return false;
   }
 }
