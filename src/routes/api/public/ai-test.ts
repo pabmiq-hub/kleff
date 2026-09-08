@@ -9,7 +9,7 @@ export const Route = createFileRoute("/api/public/ai-test")({
         if (!key) {
           return Response.json({ ok: false, error: "GOOGLE_AI_API_KEY no guardada" });
         }
-        const model = process.env.GOOGLE_AI_MODEL || "gemini-2.5-flash";
+        const model = process.env.GOOGLE_AI_MODEL || "gemini-3.6-flash";
         const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`;
         const res = await fetch(url, {
           method: "POST",

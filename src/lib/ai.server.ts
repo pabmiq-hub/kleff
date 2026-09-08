@@ -10,8 +10,8 @@
  * gracefully — a failed translation should never lose the user's content).
  */
 
-const GOOGLE_MODEL = process.env.GOOGLE_AI_MODEL || "gemini-2.5-flash";
-const GATEWAY_MODEL = "google/gemini-2.5-flash";
+const GOOGLE_MODEL = process.env.GOOGLE_AI_MODEL || "gemini-3.6-flash";
+const GATEWAY_MODEL = "google/gemini-3.6-flash";
 
 export type AiTextOptions = {
   system: string;
