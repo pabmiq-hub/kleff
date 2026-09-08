@@ -121,6 +121,7 @@ import { Route as ApiPublicUploadInviteAvatarRouteImport } from './routes/api.pu
 import { Route as ApiPublicSyncBggRouteImport } from './routes/api.public.sync-bgg'
 import { Route as ApiPublicLudoyaImageRouteImport } from './routes/api.public.ludoya-image'
 import { Route as ApiPublicContactRouteImport } from './routes/api.public.contact'
+import { Route as ApiPublicAiTestRouteImport } from './routes/api/public/ai-test'
 import { Route as AdminRentalsSettingsRouteImport } from './routes/admin.rentals.settings'
 import { Route as AdminRentalsHistoryRouteImport } from './routes/admin.rentals.history'
 import { Route as AdminRentalsCatalogRouteImport } from './routes/admin.rentals.catalog'
@@ -711,6 +712,11 @@ const ApiPublicContactRoute = ApiPublicContactRouteImport.update({
   path: '/api/public/contact',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicAiTestRoute = ApiPublicAiTestRouteImport.update({
+  id: '/api/public/ai-test',
+  path: '/api/public/ai-test',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminRentalsSettingsRoute = AdminRentalsSettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
@@ -963,6 +969,7 @@ export interface FileRoutesByFullPath {
   '/admin/rentals/catalog': typeof AdminRentalsCatalogRoute
   '/admin/rentals/history': typeof AdminRentalsHistoryRoute
   '/admin/rentals/settings': typeof AdminRentalsSettingsRoute
+  '/api/public/ai-test': typeof ApiPublicAiTestRoute
   '/api/public/contact': typeof ApiPublicContactRoute
   '/api/public/ludoya-image': typeof ApiPublicLudoyaImageRoute
   '/api/public/sync-bgg': typeof ApiPublicSyncBggRoute
@@ -1096,6 +1103,7 @@ export interface FileRoutesByTo {
   '/admin/rentals/catalog': typeof AdminRentalsCatalogRoute
   '/admin/rentals/history': typeof AdminRentalsHistoryRoute
   '/admin/rentals/settings': typeof AdminRentalsSettingsRoute
+  '/api/public/ai-test': typeof ApiPublicAiTestRoute
   '/api/public/contact': typeof ApiPublicContactRoute
   '/api/public/ludoya-image': typeof ApiPublicLudoyaImageRoute
   '/api/public/sync-bgg': typeof ApiPublicSyncBggRoute
@@ -1238,6 +1246,7 @@ export interface FileRoutesById {
   '/admin/rentals/catalog': typeof AdminRentalsCatalogRoute
   '/admin/rentals/history': typeof AdminRentalsHistoryRoute
   '/admin/rentals/settings': typeof AdminRentalsSettingsRoute
+  '/api/public/ai-test': typeof ApiPublicAiTestRoute
   '/api/public/contact': typeof ApiPublicContactRoute
   '/api/public/ludoya-image': typeof ApiPublicLudoyaImageRoute
   '/api/public/sync-bgg': typeof ApiPublicSyncBggRoute
@@ -1381,6 +1390,7 @@ export interface FileRouteTypes {
     | '/admin/rentals/catalog'
     | '/admin/rentals/history'
     | '/admin/rentals/settings'
+    | '/api/public/ai-test'
     | '/api/public/contact'
     | '/api/public/ludoya-image'
     | '/api/public/sync-bgg'
@@ -1514,6 +1524,7 @@ export interface FileRouteTypes {
     | '/admin/rentals/catalog'
     | '/admin/rentals/history'
     | '/admin/rentals/settings'
+    | '/api/public/ai-test'
     | '/api/public/contact'
     | '/api/public/ludoya-image'
     | '/api/public/sync-bgg'
@@ -1655,6 +1666,7 @@ export interface FileRouteTypes {
     | '/admin/rentals/catalog'
     | '/admin/rentals/history'
     | '/admin/rentals/settings'
+    | '/api/public/ai-test'
     | '/api/public/contact'
     | '/api/public/ludoya-image'
     | '/api/public/sync-bgg'
@@ -1759,6 +1771,7 @@ export interface RootRouteChildren {
   CaIndexRoute: typeof CaIndexRoute
   EnIndexRoute: typeof EnIndexRoute
   EventSlugCancelarParticipantIdRoute: typeof EventSlugCancelarParticipantIdRoute
+  ApiPublicAiTestRoute: typeof ApiPublicAiTestRoute
   ApiPublicContactRoute: typeof ApiPublicContactRoute
   ApiPublicLudoyaImageRoute: typeof ApiPublicLudoyaImageRoute
   ApiPublicSyncBggRoute: typeof ApiPublicSyncBggRoute
@@ -2566,6 +2579,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicContactRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/ai-test': {
+      id: '/api/public/ai-test'
+      path: '/api/public/ai-test'
+      fullPath: '/api/public/ai-test'
+      preLoaderRoute: typeof ApiPublicAiTestRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/rentals/settings': {
       id: '/admin/rentals/settings'
       path: '/settings'
@@ -3005,6 +3025,7 @@ const rootRouteChildren: RootRouteChildren = {
   CaIndexRoute: CaIndexRoute,
   EnIndexRoute: EnIndexRoute,
   EventSlugCancelarParticipantIdRoute: EventSlugCancelarParticipantIdRoute,
+  ApiPublicAiTestRoute: ApiPublicAiTestRoute,
   ApiPublicContactRoute: ApiPublicContactRoute,
   ApiPublicLudoyaImageRoute: ApiPublicLudoyaImageRoute,
   ApiPublicSyncBggRoute: ApiPublicSyncBggRoute,
