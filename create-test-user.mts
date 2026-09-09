@@ -2,11 +2,11 @@ import "@/integrations/supabase/env-override";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 
 const TEST_EMAIL = "kleff-test-admin@example.com";
-const TEST_PASSWORD = process.env.TEST_ADMIN_PASSWORD;
+const TEST_PASSWORD = process.env.TEST_PASSWORD;
 
 async function main() {
   if (!TEST_PASSWORD) {
-    console.error("TEST_ADMIN_PASSWORD env var is required");
+    console.error("TEST_PASSWORD env var is required");
     process.exit(1);
   }
 
@@ -28,7 +28,7 @@ async function main() {
 
   const { data, error } = await supabaseAdmin.auth.admin.createUser({
     email: TEST_EMAIL,
-    password: TEST_ADMIN_PASSWORD,
+    password: TEST_PASSWORD,
     email_confirm: true,
     app_metadata: { provider: "email" },
   });
