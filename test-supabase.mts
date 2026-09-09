@@ -6,7 +6,7 @@ async function main() {
   const projectRef = url?.match(/https:\/\/([^.]+)/)?.[1] ?? "unknown";
   console.log("Using Supabase project:", projectRef);
 
-  const { data, error } = await supabaseAdmin.from("content_pages").select("slug,title").limit(3);
+  const { data, error } = await supabaseAdmin.from("content_pages").select("path,title,page_key").limit(3);
   if (error) {
     console.error("Query failed:", error.message);
     process.exit(1);
