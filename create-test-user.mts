@@ -5,7 +5,7 @@ const TEST_EMAIL = "kleff-test-admin@example.com";
 const TEST_PASSWORD = process.env.TEST_ADMIN_PASSWORD;
 
 async function main() {
-  if (!TEST_ADMIN_PASSWORD) {
+  if (!TEST_PASSWORD) {
     console.error("TEST_ADMIN_PASSWORD env var is required");
     process.exit(1);
   }
