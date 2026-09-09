@@ -1,3 +1,4 @@
+import "@/integrations/supabase/env-override";
 import { createRouter, useRouter } from "@tanstack/react-router";
 import { routeTree } from "./routeTree.gen";
 
