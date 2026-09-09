@@ -16,15 +16,14 @@ function applyOverride() {
 
   const env = process.env;
 
-  // Only override when the owner-provided values are present.
-  // This keeps the app working in environments without APP_SUPABASE_* set.
-  if (env.APP_SUPABASE_URL && !env.SUPABASE_URL) {
+  // Always use the owner-provided values when they exist.
+  if (env.APP_SUPABASE_URL) {
     env.SUPABASE_URL = env.APP_SUPABASE_URL;
   }
-  if (env.APP_SUPABASE_PUBLISHABLE_KEY && !env.SUPABASE_PUBLISHABLE_KEY) {
+  if (env.APP_SUPABASE_PUBLISHABLE_KEY) {
     env.SUPABASE_PUBLISHABLE_KEY = env.APP_SUPABASE_PUBLISHABLE_KEY;
   }
-  if (env.APP_SUPABASE_SERVICE_ROLE_KEY && !env.SUPABASE_SERVICE_ROLE_KEY) {
+  if (env.APP_SUPABASE_SERVICE_ROLE_KEY) {
     env.SUPABASE_SERVICE_ROLE_KEY = env.APP_SUPABASE_SERVICE_ROLE_KEY;
   }
 }
