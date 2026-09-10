@@ -43,6 +43,10 @@ export type RegistrationForm = {
   reminder_body: string | null;
   reminder_sent_at: string | null;
   reminder_offsets_hours: number[];
+  description_html: string | null;
+  highlights: Array<{ emoji: string; label: string; text: string }>;
+  legal_info_html: string | null;
+  legal_info_enabled: boolean;
   created_at: string;
   updated_at: string;
 };
@@ -56,7 +60,7 @@ export type RegistrationQuestion = {
   label: string;
   help: string | null;
   options: Array<{ value: string; label: string }>;
-  special: "guests" | "game_pick" | null;
+  special: "guests" | "game_pick" | "contact_email" | null;
   hide_after_wednesday: boolean;
 };
 
@@ -131,6 +135,64 @@ export const searchCatalogGames = createServerFn({ method: "POST" })
         title: g.title,
       })),
     };
+  });
+
+/**
+ * Public game search for the "game_pick" question. Uses the same boardgame
+ * database as "Juegos favoritos" in the member profile (covers included) and
+ * puts KLEFF catalog matches first.
+ */
+export const searchGamesForPick = createServerFn({ method: "POST" })
+  .inputValidator(z.object({ q: z.string().max(80) }))
+  .handler(async ({ data }) => {
+    const term = data.q.trim();
+    type Game = { id: string; name: string; imageUrl: string | null; inCatalog: boolean };
+    if (term.length < 2) return { games: [] as Game[] };
+
+    const catalogTitles = new Set<string>();
+    const catalogList: string[] = [];
+    try {
+      const { data: rows } = await supabaseAdmin
+        .from("bgg_games")
+        .select("title")
+        .eq("is_active", true)
+        .not("shelf", "is", null)
+        .not("shelf", "in", '("on_demand","restocking","especiales")')
+        .ilike("title", `%${term}%`)
+        .limit(50);
+      for (const r of (rows ?? []) as Array<{ title: string }>) {
+        catalogTitles.add(r.title.trim().toLowerCase());
+        catalogList.push(r.title);
+      }
+    } catch (err) {
+      console.error("[registrations] catalog lookup error:", err);
+    }
+
+    let games: Game[] = [];
+    try {
+      const { searchLudoyaBoardgames } = await import("@/lib/ludoya.server");
+      const results = await searchLudoyaBoardgames(term, 20, 0);
+      games = results.map((g) => ({
+        id: String(g.id),
+        name: g.name,
+        imageUrl: g.imageUrl ?? null,
+        inCatalog: catalogTitles.has(g.name.trim().toLowerCase()),
+      }));
+    } catch (err) {
+      console.error("[registrations] boardgame search error:", err);
+    }
+
+    if (!games.length) {
+      games = catalogList.slice(0, 10).map((t) => ({
+        id: `catalog:${t.toLowerCase()}`,
+        name: t,
+        imageUrl: null,
+        inCatalog: true,
+      }));
+    }
+
+    games.sort((a, b) => Number(b.inCatalog) - Number(a.inCatalog));
+    return { games: games.slice(0, 10) };
   });
 
 
@@ -428,6 +490,14 @@ export const adminUpdateForm = createServerFn({ method: "POST" })
       slug: z.string().min(1).max(120).regex(/^[a-z0-9-]+$/).optional(),
       title: z.string().max(200).optional(),
       description: z.string().max(5000).nullable().optional(),
+      description_html: z.string().max(60000).nullable().optional(),
+      highlights: z.array(z.object({
+        emoji: z.string().max(8).default(""),
+        label: z.string().max(60),
+        text: z.string().max(600),
+      })).max(20).optional(),
+      legal_info_html: z.string().max(60000).nullable().optional(),
+      legal_info_enabled: z.boolean().optional(),
       cover_image_url: z.string().url().nullable().optional(),
       cover_position: z.string().max(50).optional(),
       external_iframe_height: z.number().int().min(400).max(20000).optional(),
@@ -459,8 +529,14 @@ export const adminUpdateForm = createServerFn({ method: "POST" })
   }))
   .handler(async ({ data, context }) => {
     await assertSuperAdmin(context.userId);
+    const patch: Record<string, unknown> = { ...data.patch };
+    if (typeof patch["description_html"] === "string" || typeof patch["legal_info_html"] === "string") {
+      const { sanitizeHtml } = await import("@/lib/sanitize.server");
+      if (typeof patch["description_html"] === "string") patch["description_html"] = sanitizeHtml(patch["description_html"] as string);
+      if (typeof patch["legal_info_html"] === "string") patch["legal_info_html"] = sanitizeHtml(patch["legal_info_html"] as string);
+    }
     const { error } = await supabaseAdmin
-      .from("registration_forms").update(data.patch as never).eq("id", data.id);
+      .from("registration_forms").update(patch as never).eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true };
   });
@@ -489,7 +565,7 @@ export const adminUpsertQuestion = createServerFn({ method: "POST" })
       value: z.string().min(1).max(120),
       label: z.string().max(200),
     })).max(50).default([]),
-    special: z.enum(["guests", "game_pick"]).nullable().optional(),
+    special: z.enum(["guests", "game_pick", "contact_email"]).nullable().optional(),
     hide_after_wednesday: z.boolean().optional(),
   }))
   .handler(async ({ data, context }) => {

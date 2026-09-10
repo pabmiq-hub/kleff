@@ -3667,14 +3667,18 @@ export type Database = {
           cover_position: string
           created_at: string
           description: string | null
+          description_html: string | null
           event_date: string | null
           event_location: string | null
           external_iframe_height: number
           external_mode: string | null
           external_url: string | null
+          highlights: Json
           id: string
           is_published: boolean
           kind: string
+          legal_info_enabled: boolean
+          legal_info_html: string | null
           max_guests_per_response: number
           max_responses: number | null
           notify_emails: string[]
@@ -3703,14 +3707,18 @@ export type Database = {
           cover_position?: string
           created_at?: string
           description?: string | null
+          description_html?: string | null
           event_date?: string | null
           event_location?: string | null
           external_iframe_height?: number
           external_mode?: string | null
           external_url?: string | null
+          highlights?: Json
           id?: string
           is_published?: boolean
           kind?: string
+          legal_info_enabled?: boolean
+          legal_info_html?: string | null
           max_guests_per_response?: number
           max_responses?: number | null
           notify_emails?: string[]
@@ -3739,14 +3747,18 @@ export type Database = {
           cover_position?: string
           created_at?: string
           description?: string | null
+          description_html?: string | null
           event_date?: string | null
           event_location?: string | null
           external_iframe_height?: number
           external_mode?: string | null
           external_url?: string | null
+          highlights?: Json
           id?: string
           is_published?: boolean
           kind?: string
+          legal_info_enabled?: boolean
+          legal_info_html?: string | null
           max_guests_per_response?: number
           max_responses?: number | null
           notify_emails?: string[]
