@@ -373,7 +373,8 @@ function QuestionsEditor({ formId, initial, eventDate, allowGuests }: { formId: 
     if (!over || active.id === over.id) return;
     const oldIndex = questions.findIndex((q) => q.id === active.id);
     const newIndex = questions.findIndex((q) => q.id === over.id);
-    const next = arrayMove(questions, oldIndex, newIndex);
+    // Keep the local `position` in sync, otherwise a later save would resend a stale order.
+    const next = arrayMove(questions, oldIndex, newIndex).map((q, idx) => ({ ...q, position: idx }));
     setQuestions(next);
     try {
       await reorderFn({ data: { form_id: formId, orderedIds: next.map((q) => q.id) } });
