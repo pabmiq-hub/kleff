@@ -336,6 +336,25 @@ function QuestionsEditor({ formId, initial, eventDate, allowGuests }: { formId: 
   const deleteFn = useServerFn(adminDeleteQuestion);
   const reorderFn = useServerFn(adminReorderQuestions);
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }), useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }));
+  const creatingGuests = useRef(false);
+
+  // The guests question is managed automatically by the "Permitir invitados" switch.
+  useEffect(() => {
+    if (!allowGuests || creatingGuests.current) return;
+    if (questions.some((q) => q.special === "guests")) return;
+    creatingGuests.current = true;
+    void (async () => {
+      try {
+        const base = {
+          form_id: formId, position: questions.length, type: "number" as const, required: true,
+          label: "¿Vienes con alguien?", options: [], special: "guests" as const, hide_after_wednesday: false,
+        };
+        const { id } = await upsertFn({ data: base });
+        setQuestions((qs) => qs.some((q) => q.special === "guests") ? qs : [...qs, { id, help: null, ...base }]);
+      } catch (e) { toast.error((e as Error).message); } finally { creatingGuests.current = false; }
+    })();
+  }, [allowGuests, questions, formId, upsertFn]);
+
 
   const onDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
