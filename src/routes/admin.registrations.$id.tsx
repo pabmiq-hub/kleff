@@ -542,16 +542,14 @@ function ResponsesPanel({ formId, questions }: { formId: string; questions: Regi
   useEffect(() => { void reload(); }, [formId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const downloadCsv = () => {
-    const headers = ["fecha", "email", "estado_pago", ...questions.map((q) => q.label || q.id)];
+    const headers = ["fecha", "email", "invitados", "personas", "estado_pago", ...questions.map((q) => q.label || q.id)];
     const rows = responses.map((r) => [
       new Date(r.created_at).toLocaleString("es-ES"),
       r.email_contact ?? "",
+      String(r.guests_count ?? 0),
+      String(1 + (r.guests_count ?? 0)),
       r.payment_status,
-      ...questions.map((q) => {
-        const v = r.data?.[q.id];
-        if (Array.isArray(v)) return v.join("; ");
-        return v == null ? "" : String(v);
-      }),
+      ...questions.map((q) => answerToText(r.data?.[q.id])),
     ]);
     const csv = [headers, ...rows].map((row) => row.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(",")).join("\n");
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
