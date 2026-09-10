@@ -444,12 +444,13 @@ const EventSettingsEditor = ({
                   id="event-slug"
                   value={formSlug}
                   placeholder="mi-evento"
-                  onChange={(e) => setFormSlug(slugifyEventName(e.target.value))}
+                  onChange={(e) => setFormSlug(slugifyEventDraft(e.target.value))}
                 />
               </div>
               <p className="text-xs text-muted-foreground">
-                Enlaces: /{formSlug || "mi-evento"}/registro · /check-in · /usuario · /mesas · /seleccion
+                Enlaces: /{slugifyEventName(formSlug) || "mi-evento"} (registro) · /check-in · /usuario · /mesas · /seleccion
               </p>
+
             </div>
             <div className="space-y-2">
               <Label htmlFor="event-date">Fecha</Label>
