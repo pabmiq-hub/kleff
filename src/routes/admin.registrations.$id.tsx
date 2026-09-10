@@ -341,13 +341,28 @@ function QuestionsEditor({ formId, initial, eventDate, allowGuests }: { formId: 
   // The guests question is managed automatically by the "Permitir invitados" switch.
   useEffect(() => {
     if (creatingGuests.current) return;
-    const existing = questions.find((q) => q.special === "guests");
+    const all = questions.filter((q) => q.special === "guests");
+    const existing = all[0];
+
+    // Remove any duplicates that may have been created before.
+    if (allowGuests && all.length > 1) {
+      creatingGuests.current = true;
+      const extra = all.slice(1);
+      void (async () => {
+        try {
+          for (const q of extra) await deleteFn({ data: { id: q.id } });
+          setQuestions((qs) => qs.filter((q) => !extra.some((e) => e.id === q.id)));
+        } catch (e) { toast.error((e as Error).message); } finally { creatingGuests.current = false; }
+      })();
+      return;
+    }
+
     if (!allowGuests) {
-      if (!existing) return;
+      if (all.length === 0) return;
       creatingGuests.current = true;
       void (async () => {
         try {
-          await deleteFn({ data: { id: existing.id } });
+          for (const q of all) await deleteFn({ data: { id: q.id } });
           setQuestions((qs) => qs.filter((q) => q.special !== "guests"));
         } catch (e) { toast.error((e as Error).message); } finally { creatingGuests.current = false; }
       })();
@@ -365,7 +380,8 @@ function QuestionsEditor({ formId, initial, eventDate, allowGuests }: { formId: 
         setQuestions((qs) => qs.some((q) => q.special === "guests") ? qs : [...qs, { id, help: null, ...base }]);
       } catch (e) { toast.error((e as Error).message); } finally { creatingGuests.current = false; }
     })();
-  }, [allowGuests, questions, formId, upsertFn]);
+  }, [allowGuests, questions, formId, upsertFn, deleteFn]);
+
 
 
   const onDragEnd = async (event: DragEndEvent) => {
