@@ -1,0 +1,1 @@
+REVOKE EXECUTE ON FUNCTION public.kon_sync_event_participants_count() FROM PUBLIC, anon, authenticated;
