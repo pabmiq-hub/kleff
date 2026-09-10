@@ -253,7 +253,7 @@ export const submitRegistration = createServerFn({ method: "POST" })
         emailContact: data.emailContact ?? null,
         data: data.data as Record<string, unknown>,
       });
-      void sendEmailSafe({
+      await sendEmailSafe({
         to: TEAM_INBOX,
         subject: alert.subject,
         html: alert.html,
