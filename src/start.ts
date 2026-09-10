@@ -25,6 +25,7 @@ const authenticatedServerFetch: typeof fetch = async (input, init) => {
 };
 
 export const startInstance = createStart(() => ({
+  requestMiddleware: [supabaseEnvMiddleware],
   functionMiddleware: [attachSupabaseAuth],
   serverFns: {
     fetch: authenticatedServerFetch,
