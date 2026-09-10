@@ -80,8 +80,10 @@ export function PublicRegistrationPage({ form, questions, responsesCount, attend
     const email = contactQuestion ? String(values[contactQuestion.id] ?? "") : emailContact;
     if (!email) { toast.error("Falta el email de contacto"); return; }
     setSubmitting(true);
+    const payload = { ...values };
+    for (const q of questions) if (q.special === "guests") payload[q.id] = guests;
     try {
-      const res = await submitFn({ data: { formId: form.id, emailContact: email, guests, data: values } });
+      const res = await submitFn({ data: { formId: form.id, emailContact: email, guests, data: payload } });
       setCancelToken((res as { cancelToken?: string }).cancelToken ?? null);
       setDone(true);
     } catch (err) {
