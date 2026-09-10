@@ -424,6 +424,20 @@ function SortableQuestion({ q, eventDate, allowGuests, onChange, onRemove }: { q
   const style = { transform: CSS.Transform.toString(transform), transition, opacity: isDragging ? 0.5 : 1 };
   const needsOptions = q.type === "select" || q.type === "radio" || q.type === "checkbox";
 
+  if (q.special === "guests") {
+    return (
+      <div ref={setNodeRef} style={style} className="rounded-lg border border-ink/10 bg-ink/[0.03] p-4">
+        <div className="flex items-start gap-3">
+          <button {...attributes} {...listeners} className="cursor-grab touch-none text-ink/40 hover:text-ink mt-1"><GripVertical className="h-4 w-4" /></button>
+          <div className="flex-1">
+            <p className="text-sm font-medium text-ink">¿Vienes con alguien?</p>
+            <p className="text-xs text-ink/60 mt-1">Pregunta automática con las opciones «Vengo solo/a», «+1», «+2»… Se muestra porque has permitido invitados y no se puede editar. Para quitarla, desactiva «Permitir invitados» en las categorías destacadas.</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div ref={setNodeRef} style={style} className="rounded-lg border border-ink/10 bg-white p-4">
       <div className="flex items-start gap-3">
