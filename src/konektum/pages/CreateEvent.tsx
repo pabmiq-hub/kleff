@@ -999,13 +999,14 @@ const CreateEvent = () => {
                     value={eventSlug}
                     onChange={(e) => {
                       setSlugTouched(true);
-                      setEventSlug(slugifyEventName(e.target.value));
+                      setEventSlug(slugifyEventDraft(e.target.value));
                     }}
                   />
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  Los enlaces del evento serán /{eventSlug || "mi-evento"}/registro, /check-in, /usuario, /mesas y /seleccion.
+                  Los enlaces del evento serán /{slugifyEventName(eventSlug) || "mi-evento"} (registro), /check-in, /usuario, /mesas y /seleccion.
                 </p>
+
               </div>
 
               <div className="space-y-2">
