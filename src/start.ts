@@ -1,3 +1,4 @@
+import "@/integrations/supabase/env-override";
 import { createStart } from "@tanstack/react-start";
 import { attachSupabaseAuth } from "@/integrations/supabase/auth-attacher";
 import { supabase } from "@/integrations/supabase/client";
