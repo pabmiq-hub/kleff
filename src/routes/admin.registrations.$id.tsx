@@ -562,16 +562,20 @@ function ResponsesPanel({ formId, questions }: { formId: string; questions: Regi
 
   if (loading) return <p className="text-ink/60 text-sm">Cargando respuestas…</p>;
 
+  const totalAttendees = responses.reduce((n, r) => n + 1 + (r.guests_count ?? 0), 0);
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <p className="text-sm text-ink/70">{responses.length} respuesta{responses.length === 1 ? "" : "s"}</p>
+        <p className="text-sm text-ink/70">
+          {responses.length} respuesta{responses.length === 1 ? "" : "s"} · {totalAttendees} persona{totalAttendees === 1 ? "" : "s"}
+        </p>
         <Button size="sm" onClick={downloadCsv} variant="outline" className="border-ink/20 text-ink hover:bg-ink/10" disabled={!responses.length}>Descargar CSV</Button>
       </div>
       {responses.length === 0 ? (
         <p className="text-ink/60 text-sm">Aún no hay inscripciones recibidas.</p>
       ) : (
-        <div className="space-y-3">
+        <div className="space-y-2">
           {responses.map((r) => (
             <ResponseCard key={r.id} response={r} questions={questions} onUpdate={async (patch) => {
               try {
@@ -592,18 +596,70 @@ function ResponsesPanel({ formId, questions }: { formId: string; questions: Regi
   );
 }
 
+function answerToText(v: unknown): string {
+  if (v == null || v === "") return "";
+  if (Array.isArray(v)) return v.map((x) => answerToText(x)).filter(Boolean).join(", ");
+  if (typeof v === "object") {
+    const o = v as Record<string, unknown>;
+    return String(o.name ?? o.label ?? o.title ?? JSON.stringify(o));
+  }
+  return String(v);
+}
+
 function ResponseCard({ response, questions, onUpdate, onDelete }: { response: RegistrationResponse; questions: RegistrationQuestion[]; onUpdate: (p: { payment_status?: RegistrationResponse["payment_status"]; internal_notes?: string | null }) => Promise<void>; onDelete: () => void }) {
   const [notes, setNotes] = useState(response.internal_notes ?? "");
+  const [openNotes, setOpenNotes] = useState(Boolean(response.internal_notes));
+
+  const data = (response.data ?? {}) as Record<string, unknown>;
+  const byId = new Map(questions.map((q) => [q.id, q]));
+  const gameQuestion = questions.find((q) => q.special === "game_pick");
+  const gameRaw = gameQuestion ? data[gameQuestion.id] : Object.values(data).find((v) => typeof v === "object" && v !== null && "name" in (v as object));
+  const gameText = answerToText(gameRaw);
+  const gameImage = gameRaw && typeof gameRaw === "object" ? String((gameRaw as Record<string, unknown>).imageUrl ?? "") : "";
+
+  // Every answer stored on the response, labelled when we know the question.
+  const entries = Object.entries(data)
+    .filter(([key]) => !(gameQuestion && key === gameQuestion.id))
+    .map(([key, value]) => {
+      const q = byId.get(key);
+      if (q?.special === "guests" || q?.special === "contact_email") return null;
+      const text = answerToText(value);
+      if (!text) return null;
+      return { key, label: q?.label ?? "Respuesta", text };
+    })
+    .filter(Boolean) as Array<{ key: string; label: string; text: string }>;
+
+  const guests = response.guests_count ?? 0;
+
   return (
-    <div className="rounded-lg border border-ink/10 bg-white p-4">
-      <div className="flex items-start justify-between gap-3 mb-3">
-        <div>
+    <div className="rounded-lg border border-ink/10 bg-white px-4 py-3">
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+        <div className="min-w-[190px]">
           <div className="text-sm font-medium text-ink">{response.email_contact ?? "—"}</div>
           <div className="text-xs text-ink/50">{new Date(response.created_at).toLocaleString("es-ES")}</div>
         </div>
-        <div className="flex items-center gap-2">
+
+        <span className="rounded-full bg-ink/5 px-2.5 py-1 text-xs text-ink/80 whitespace-nowrap">
+          {guests > 0 ? `👥 ${1 + guests} personas (+${guests})` : "👤 Viene solo/a"}
+        </span>
+
+        {gameText && (
+          <span className="inline-flex items-center gap-2 rounded-full border border-amber-400/60 bg-amber-100 px-2.5 py-1 text-xs font-medium text-amber-900 max-w-[320px]">
+            {gameImage ? <img src={gameImage} alt="" className="h-5 w-5 rounded object-cover" loading="lazy" /> : <span>🎲</span>}
+            <span className="truncate">{gameText}</span>
+          </span>
+        )}
+
+        {entries.map((e) => (
+          <span key={e.key} className="text-xs text-ink/80 whitespace-nowrap max-w-[260px] truncate">
+            <span className="uppercase tracking-wider text-ink/45">{e.label}: </span>
+            {e.text}
+          </span>
+        ))}
+
+        <div className="ml-auto flex items-center gap-2">
           <Select value={response.payment_status} onValueChange={(v) => onUpdate({ payment_status: v as RegistrationResponse["payment_status"] })}>
-            <SelectTrigger className="bg-white border-ink/15 text-ink h-8 text-xs w-40"><SelectValue /></SelectTrigger>
+            <SelectTrigger className="bg-white border-ink/15 text-ink h-8 text-xs w-32"><SelectValue /></SelectTrigger>
             <SelectContent className="bg-white border-ink/15 text-ink">
               <SelectItem value="not_required">Sin pago</SelectItem>
               <SelectItem value="pending">Pendiente</SelectItem>
@@ -611,24 +667,16 @@ function ResponseCard({ response, questions, onUpdate, onDelete }: { response: R
               <SelectItem value="refunded">Reembolsado</SelectItem>
             </SelectContent>
           </Select>
+          <Button size="sm" variant="ghost" onClick={() => setOpenNotes((o) => !o)} className="h-8 px-2 text-xs text-ink/60 hover:text-ink">Notas</Button>
           <Button size="sm" variant="ghost" onClick={onDelete} className="text-ink/60 hover:text-red-400 hover:bg-red-500/10 h-8 w-8 p-0"><Trash2 className="h-3.5 w-3.5" /></Button>
         </div>
       </div>
-      <dl className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-2 text-sm">
-        {questions.map((q) => {
-          const v = response.data?.[q.id];
-          const display = Array.isArray(v) ? v.join(", ") : (v == null || v === "" ? "—" : String(v));
-          return (
-            <div key={q.id} className="flex flex-col">
-              <dt className="text-xs uppercase tracking-wider text-ink/50">{q.label || q.id}</dt>
-              <dd className="text-ink/90 break-words">{display}</dd>
-            </div>
-          );
-        })}
-      </dl>
-      <div className="mt-3 pt-3 border-t border-ink/10">
-        <Textarea rows={2} value={notes} onChange={(e) => setNotes(e.target.value)} onBlur={() => notes !== (response.internal_notes ?? "") && onUpdate({ internal_notes: notes || null })} placeholder="Notas internas…" className="bg-white border-ink/15 text-ink text-sm" />
-      </div>
+
+      {openNotes && (
+        <div className="mt-3 pt-3 border-t border-ink/10">
+          <Textarea rows={2} value={notes} onChange={(e) => setNotes(e.target.value)} onBlur={() => notes !== (response.internal_notes ?? "") && onUpdate({ internal_notes: notes || null })} placeholder="Notas internas…" className="bg-white border-ink/15 text-ink text-sm" />
+        </div>
+      )}
     </div>
   );
 }
