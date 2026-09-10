@@ -137,7 +137,7 @@ const replaceVariables = (text: string, variables: Record<string, string>) => {
   return result;
 };
 
-const KONEKTUM_LOGO_URL = "https://konektum.com/konektum-logo.png";
+const KONEKTUM_LOGO_URL = "https://kleff.es/kleff-logo.png";
 
 const generateEmailHtml = (
   template: EmailTemplate,
@@ -152,7 +152,7 @@ const generateEmailHtml = (
   const variables = { nombre: name, evento: eventName };
 
   const resolvedLogoUrl = options?.logoUrl || (orgBranding?.isProfessionalOnly && orgBranding?.logoUrl ? orgBranding.logoUrl : KONEKTUM_LOGO_URL);
-  const resolvedBrandName = options?.brandName || (orgBranding?.isProfessionalOnly && orgBranding?.companyName ? orgBranding.companyName : "Konektum");
+  const resolvedBrandName = options?.brandName || (orgBranding?.isProfessionalOnly && orgBranding?.companyName ? orgBranding.companyName : "KLEFF");
   const logoHeight = Number.isFinite(Number(options?.logoHeight)) ? Math.min(120, Math.max(24, Number(options?.logoHeight))) : 48;
   const primaryColor = options?.primaryColor || template.primaryColor || "#e11d48";
   const headerTitle = options?.headerTitle || resolvedBrandName;
@@ -584,7 +584,7 @@ const handler = async (req: Request): Promise<Response> => {
         }
 
         // Determine sender and API key: organizer's own Resend or platform default
-        let fromAddress = "Konektum <hola@konektum.com>";
+        let fromAddress = "KLEFF <hola@kleff.es>";
         let emailApiKey = resendApiKey;
         const { data: eventOrg } = await supabase
           .from("events")

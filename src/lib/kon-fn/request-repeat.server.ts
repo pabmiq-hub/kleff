@@ -184,7 +184,7 @@ serve(async (req: Request) => {
     await supabase.from("repeat_requests").update({ token }).eq("id", inserted.id);
 
     // Build accept/decline links — they hit a thin frontend page that calls respond-repeat
-    const baseUrl = Deno.env.get("PUBLIC_APP_URL") || "https://konektum.com";
+    const baseUrl = Deno.env.get("PUBLIC_APP_URL") || "https://kleff.es";
     const acceptUrl = `${baseUrl}/repeat-response?id=${inserted.id}&token=${token}&action=accept`;
     const declineUrl = `${baseUrl}/repeat-response?id=${inserted.id}&token=${token}&action=decline`;
 
@@ -238,7 +238,7 @@ serve(async (req: Request) => {
         </div>
       `;
 
-      const senderEmail = "Konektum <hola@konektum.com>";
+      const senderEmail = "KLEFF <hola@kleff.es>";
       try {
         await fetch("https://api.resend.com/emails", {
           method: "POST",

@@ -53,7 +53,7 @@ serve(async (req: Request) => {
     if (!org) throw new Error("Organizer not found");
 
     const canonicalRegistrationLink = target_event_id && org.slug
-      ? `https://konektum.com/o/${org.slug}/join/${target_event_id}`
+      ? `https://kleff.es/o/${org.slug}/join/${target_event_id}`
       : registration_link;
 
     // Check for CRM feature
@@ -65,8 +65,8 @@ serve(async (req: Request) => {
 
     // Get Resend config - organizer's own or platform default
     let resendApiKey = Deno.env.get("RESEND_API_KEY")!;
-    let senderEmail = "hola@konektum.com";
-    let senderName = "Konektum";
+    let senderEmail = "hola@kleff.es";
+    let senderName = "KLEFF";
 
     const { data: resendConfig } = await supabase
       .from("organizer_resend_config")
@@ -78,7 +78,7 @@ serve(async (req: Request) => {
     if (resendConfig) {
       resendApiKey = resendConfig.resend_api_key;
       senderEmail = resendConfig.sender_email;
-      senderName = resendConfig.sender_name || org.company_name || "Konektum";
+      senderName = resendConfig.sender_name || org.company_name || "KLEFF";
     }
 
     // Create campaign record

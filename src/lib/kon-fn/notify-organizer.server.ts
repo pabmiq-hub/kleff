@@ -95,7 +95,7 @@ Deno.serve(async (req) => {
 
     const escapedCompany = (organizer.company_name || "").replace(/[&<>"']/g, (c: string) =>
       ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c] || c));
-    const loginUrl = "https://konektum.com/admin/login";
+    const loginUrl = "https://kleff.es/admin/login";
 
     let subject = "";
     let htmlBody = "";
@@ -146,7 +146,7 @@ Deno.serve(async (req) => {
         Authorization: `Bearer ${resendApiKey}`,
       },
       body: JSON.stringify({
-        from: "Konektum <noreply@konektum.com>",
+        from: "KLEFF <noreply@kleff.es>",
         to: [organizer.contact_email],
         subject,
         html: htmlBody,

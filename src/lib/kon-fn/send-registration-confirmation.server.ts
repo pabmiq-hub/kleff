@@ -144,9 +144,9 @@ serve(async (req) => {
     const formattedDateTime = formattedTime ? `${formattedDate}, ${formattedTime}` : formattedDate;
 
     // Load organizer branding defaults
-    const KONEKTUM_LOGO_URL = "https://konektum.com/konektum-logo.png";
+    const KONEKTUM_LOGO_URL = "https://kleff.es/kleff-logo.png";
     let defaultLogoUrl = KONEKTUM_LOGO_URL;
-    let defaultBrandName = "Konektum";
+    let defaultBrandName = "KLEFF";
     let organizerId: string | null = null;
     
     if (event.organizer_id) {
@@ -162,7 +162,7 @@ serve(async (req) => {
         const isProfessionalOnly = modules.length === 1 && modules[0] === "professional";
         if (isProfessionalOnly && organizer.logo_url) {
           defaultLogoUrl = organizer.logo_url;
-          defaultBrandName = organizer.company_name || "Konektum";
+          defaultBrandName = organizer.company_name || "KLEFF";
         }
       }
     }
@@ -294,7 +294,7 @@ serve(async (req) => {
     `;
 
     // Build access code block HTML (only for withCode variant)
-    const baseUrl = `https://konektum.com`;
+    const baseUrl = `https://kleff.es`;
     const accessUrl = `${baseUrl}/event/${eventId}/access`;
     const codeBlockHtml = useWithCode && verificationCode ? `
       <div style="text-align: center; margin: 25px 0; padding: 20px; background: #f8f9fa; border-radius: 12px;">
@@ -317,7 +317,7 @@ serve(async (req) => {
     ` : '';
 
     const emailPayload = {
-      from: `${brandName} <noreply@konektum.com>`,
+      from: `${brandName} <noreply@kleff.es>`,
       to: [participant.email],
       subject,
       html: `

@@ -110,8 +110,8 @@ serve(async (req) => {
     const communicationTemplate = emailTemplate?.communication_templates_v2 || emailTemplate || {};
     const tpl = communicationTemplate?.super_like;
     const primaryColor = communicationTemplate?.primaryColor || emailTemplate?.primaryColor || '#e11d48';
-    const logoUrl = communicationTemplate?.logoUrl || emailTemplate?.logoUrl || 'https://konektum.com/konektum-logo.png';
-    const brandName = communicationTemplate?.brandName || emailTemplate?.brandName || 'Konektum';
+    const logoUrl = communicationTemplate?.logoUrl || emailTemplate?.logoUrl || 'https://kleff.es/kleff-logo.png';
+    const brandName = communicationTemplate?.brandName || emailTemplate?.brandName || 'KLEFF';
     const headerTitle = communicationTemplate?.headerTitle || (isEn ? "Welcome to the event!" : "¡Bienvenido/a al evento!");
     const rawLogoHeight = Number(communicationTemplate?.logoHeight ?? emailTemplate?.logoHeight ?? 48);
     const logoHeight = Number.isFinite(rawLogoHeight) ? Math.min(120, Math.max(24, rawLogoHeight)) : 48;
@@ -145,7 +145,7 @@ serve(async (req) => {
       : (isEn ? `With love,\nThe ${brandName} Team 💕` : `Con cariño,\nEl equipo de ${brandName} 💕`);
 
     // Determine sender
-    let senderFrom = `${brandName} <noreply@konektum.com>`;
+    let senderFrom = `${brandName} <noreply@kleff.es>`;
     const resendApiKey = Deno.env.get('RESEND_API_KEY') || '';
 
     if (event.organizer_id) {
@@ -169,7 +169,7 @@ serve(async (req) => {
       }
     }
 
-    const accessUrl = `https://konektum.com/event/${eventId}/access`;
+    const accessUrl = `https://kleff.es/event/${eventId}/access`;
 
     const htmlContent = `
 <!DOCTYPE html>

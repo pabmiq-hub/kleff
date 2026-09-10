@@ -98,9 +98,9 @@ serve(async (req) => {
     const isEn = lang === 'en';
 
     // Load organizer branding for logo
-    const KONEKTUM_LOGO_URL = "https://konektum.com/konektum-logo.png";
+    const KONEKTUM_LOGO_URL = "https://kleff.es/kleff-logo.png";
     let logoUrl = KONEKTUM_LOGO_URL;
-    let brandName = "Konektum";
+    let brandName = "KLEFF";
     
     if (event.organizer_id) {
       const { data: organizer } = await supabase
@@ -114,7 +114,7 @@ serve(async (req) => {
         const isProfessionalOnly = modules.length === 1 && modules[0] === "professional";
         if (isProfessionalOnly && organizer.logo_url) {
           logoUrl = organizer.logo_url;
-          brandName = organizer.company_name || "Konektum";
+          brandName = organizer.company_name || "KLEFF";
         }
       }
     }
@@ -130,13 +130,13 @@ serve(async (req) => {
       minute: "2-digit"
     });
 
-    const publishedBaseUrl = "https://konektum.com";
+    const publishedBaseUrl = "https://kleff.es";
     const accessUrl = `${publishedBaseUrl}/event/${eventId}/access`;
     const checkinUrl = `${publishedBaseUrl}/event/${eventId}/checkin?code=${participant.verification_code}`;
 
     // Send email
     const emailResponse = await resend.emails.send({
-      from: "Konektum <noreply@konektum.com>",
+      from: "KLEFF <noreply@kleff.es>",
       to: [participant.email],
       subject: isEn ? `Your access code for ${event.name}` : `Tu código de acceso para ${event.name}`,
       html: `
