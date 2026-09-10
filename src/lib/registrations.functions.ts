@@ -5,6 +5,25 @@ import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { assertSuperAdmin } from "@/lib/assert-role.server";
 import { isQuestionVisible } from "@/lib/registrations-calendar";
 
+/** Turns a stored answer into readable plain text for emails. */
+function formatAnswer(value: unknown): string {
+  if (value === null || value === undefined) return "";
+  if (typeof value === "string") return value;
+  if (typeof value === "number" || typeof value === "boolean") {
+    return typeof value === "boolean" ? (value ? "Sí" : "No") : String(value);
+  }
+  if (Array.isArray(value)) return value.map(formatAnswer).filter(Boolean).join(", ");
+  if (typeof value === "object") {
+    const o = value as Record<string, unknown>;
+    for (const key of ["name", "title", "label", "value"]) {
+      if (typeof o[key] === "string" && (o[key] as string).trim()) return o[key] as string;
+    }
+    return "";
+  }
+  return "";
+}
+
+
 
 const questionTypeSchema = z.enum([
   "text", "textarea", "email", "phone", "number", "select", "checkbox", "radio", "date", "file",
@@ -275,11 +294,27 @@ export const submitRegistration = createServerFn({ method: "POST" })
       }
 
 
+      const { data: qRows } = await supabaseAdmin
+        .from("registration_questions")
+        .select("id, label, position, special")
+        .eq("form_id", f.id)
+        .order("position", { ascending: true });
+      const answers = data.data as Record<string, unknown>;
+      const fields = ((qRows ?? []) as Array<{ id: string; label: string; special: string | null }>)
+        .map((q) => ({
+          label: q.special === "game_pick" ? "Juegos solicitados" : q.label,
+          value: q.special === "guests"
+            ? (guests > 0 ? `+${guests}` : "Viene solo/a")
+            : formatAnswer(answers[q.id]),
+        }));
+
       const alert = registrationTeamNotificationEmail({
         formTitle: f.title,
+        formId: f.id,
         responseId,
         emailContact: data.emailContact ?? null,
-        data: data.data as Record<string, unknown>,
+        guests,
+        fields,
       });
       await sendEmailSafe({
         to: TEAM_INBOX,

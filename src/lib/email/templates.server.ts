@@ -93,31 +93,34 @@ export function registrationConfirmationEmail(opts: {
 // ---------- Registration notification (to team) ----------
 export function registrationTeamNotificationEmail(opts: {
   formTitle: string;
+  formId?: string;
   responseId: string;
   emailContact?: string | null;
-  data: Record<string, unknown>;
+  guests?: number;
+  fields: Array<{ label: string; value: string }>;
 }): { subject: string; html: string } {
-  const rows = Object.entries(opts.data)
+  const rows = opts.fields
+    .filter((f) => f.value.trim() !== "")
     .map(
-      ([k, v]) =>
-        `<tr><td style="padding:6px 12px;background:#f5f1e8;border:1px solid #e5e0d5;font-weight:600;vertical-align:top;">${escape(k)}</td><td style="padding:6px 12px;border:1px solid #e5e0d5;">${escape(
-          typeof v === "string" ? v : JSON.stringify(v),
-        )}</td></tr>`,
+      (f) =>
+        `<tr><td style="padding:8px 12px;background:#f5f1e8;border:1px solid #e5e0d5;font-weight:600;vertical-align:top;width:38%;">${escape(f.label)}</td><td style="padding:8px 12px;border:1px solid #e5e0d5;white-space:pre-wrap;">${escape(f.value)}</td></tr>`,
     )
     .join("");
+  const total = 1 + (opts.guests ?? 0);
   const html = layout({
     title: `Nueva inscripción — ${opts.formTitle}`,
     bodyHtml: `
       <h1 style="font-family:Georgia,serif;font-size:22px;margin:0 0 12px;">Nueva inscripción</h1>
       <p style="margin:0 0 4px;"><strong>Formulario:</strong> ${escape(opts.formTitle)}</p>
       ${opts.emailContact ? `<p style="margin:0 0 4px;"><strong>Email:</strong> ${escape(opts.emailContact)}</p>` : ""}
-      <p style="margin:0 0 12px;font-size:12px;color:#888;">ID: ${escape(opts.responseId)}</p>
+      <p style="margin:0 0 12px;"><strong>Plazas ocupadas:</strong> ${total}${opts.guests ? ` (+${opts.guests} invitados)` : ""}</p>
       <table role="presentation" cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse;font-size:14px;">
-        ${rows}
+        ${rows || `<tr><td style="padding:8px 12px;border:1px solid #e5e0d5;">Sin respuestas adicionales.</td></tr>`}
       </table>
+      <p style="margin:12px 0 0;font-size:12px;color:#888;">ID: ${escape(opts.responseId)}</p>
     `,
-    ctaLabel: "Ver en el panel",
-    ctaUrl: `https://www.kleff.es/admin/registrations/${opts.responseId}`,
+    ctaLabel: "Ver inscritos",
+    ctaUrl: `https://www.kleff.es/admin/registrations/${opts.formId ?? opts.responseId}`,
   });
   return { subject: `📝 Nueva inscripción — ${opts.formTitle}`, html };
 }
