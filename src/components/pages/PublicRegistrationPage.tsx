@@ -9,8 +9,8 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { CheckCircle2, Loader2, CalendarPlus, MapPin, CalendarDays, Search, X } from "lucide-react";
-import { googleCalendarUrl, formatMadrid } from "@/lib/registrations-calendar";
+import { CheckCircle2, Loader2, CalendarPlus, Search, X } from "lucide-react";
+import { googleCalendarUrl } from "@/lib/registrations-calendar";
 import { normalizeHighlights, plainTextToHtml, DEFAULT_LEGAL_HTML } from "@/lib/registrations-content";
 import { useEffect, useRef } from "react";
 import { SiteLayout } from "@/components/site/SiteLayout";
@@ -106,12 +106,6 @@ export function PublicRegistrationPage({ form, questions, responsesCount, attend
       )}
       <div className="max-w-2xl mx-auto px-6 py-12">
         <h1 className="font-display text-3xl md:text-4xl mb-3 text-foreground">{form.title}</h1>
-        {(form.event_date || form.event_location) && (
-          <div className="flex flex-wrap gap-4 mb-4 text-sm text-foreground/80">
-            {form.event_date && <span className="inline-flex items-center gap-1.5"><CalendarDays className="h-4 w-4 text-coral" /> {formatMadrid(form.event_date)}</span>}
-            {form.event_location && <span className="inline-flex items-center gap-1.5"><MapPin className="h-4 w-4 text-coral" /> {form.event_location}</span>}
-          </div>
-        )}
         {descriptionHtml && (
           <div className="blog-content mb-6" dangerouslySetInnerHTML={{ __html: descriptionHtml }} />
         )}
@@ -187,7 +181,7 @@ export function PublicRegistrationPage({ form, questions, responsesCount, attend
                     onChange={(n) => { setGuests(n); setVal(q.id, n); }}
                   />
                 ) : q.special === "game_pick" ? (
-                  <GamePickField value={values[q.id] as PickedGame | string | undefined} onChange={(v) => setVal(q.id, v)} />
+                  <GamePickField value={values[q.id]} onChange={(v) => setVal(q.id, v)} />
                 ) : q.special === "contact_email" ? (
                   <Input type="email" required value={(values[q.id] as string) ?? ""} onChange={(e) => setVal(q.id, e.target.value)} />
                 ) : (
@@ -296,14 +290,20 @@ function GuestsField({ max, value, onChange }: { max: number; value: number; onC
   );
 }
 
-function GamePickField({ value, onChange }: { value: PickedGame | string | undefined; onChange: (v: PickedGame | null) => void }) {
+const MAX_GAMES = 5;
+
+function toPickedList(value: unknown): PickedGame[] {
+  const raw = Array.isArray(value) ? value : value ? [value] : [];
+  return raw.map((v) =>
+    typeof v === "object" && v ? (v as PickedGame) : { id: String(v), name: String(v), imageUrl: null },
+  );
+}
+
+function GamePickField({ value, onChange }: { value: unknown; onChange: (v: PickedGame[]) => void }) {
   const searchFn = useServerFn(searchGamesForPick);
   const searchRef = useRef(searchFn);
   searchRef.current = searchFn;
-  const picked: PickedGame | null =
-    value && typeof value === "object" ? (value as PickedGame)
-    : typeof value === "string" && value ? { id: value, name: value, imageUrl: null }
-    : null;
+  const picked = toPickedList(value);
   const [q, setQ] = useState("");
   const [results, setResults] = useState<Array<PickedGame & { inCatalog: boolean }>>([]);
   const [searching, setSearching] = useState(false);
@@ -322,42 +322,50 @@ function GamePickField({ value, onChange }: { value: PickedGame | string | undef
     return () => { alive = false; clearTimeout(t); };
   }, [q]);
 
-  if (picked) {
-    return (
-      <div className="flex items-center gap-2 rounded-lg border border-border bg-muted/40 p-2">
-        {picked.imageUrl && <img src={picked.imageUrl} alt="" loading="lazy" className="h-8 w-8 rounded object-cover" />}
-        <span className="text-sm text-foreground flex-1">{picked.name}</span>
-        <button type="button" aria-label="Quitar juego" onClick={() => { onChange(null); setQ(""); }}>
-          <X className="h-4 w-4 text-muted-foreground hover:text-coral" />
-        </button>
-      </div>
-    );
-  }
+  const full = picked.length >= MAX_GAMES;
 
   return (
-    <div className="relative">
-      <div className="relative">
-        <Search className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-        <Input className="pl-9" value={q} placeholder="Busca un juego…" onChange={(e) => setQ(e.target.value)} />
-        {searching && <Loader2 className="h-4 w-4 absolute right-3 top-1/2 -translate-y-1/2 animate-spin text-muted-foreground" />}
-      </div>
-      {results.length > 0 && (
-        <ul className="absolute z-20 mt-1 w-full max-h-64 overflow-auto rounded-lg border border-border bg-background shadow-lg">
-          {results.map((g) => (
-            <li key={g.id}>
-              <button
-                type="button"
-                className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm hover:bg-muted"
-                onClick={() => { onChange({ id: g.id, name: g.name, imageUrl: g.imageUrl }); setResults([]); }}
-              >
-                {g.imageUrl && <img src={g.imageUrl} alt="" loading="lazy" className="h-8 w-8 rounded object-cover" />}
-                <span className="flex-1">{g.name}</span>
-                {g.inCatalog && <span className="text-[10px] uppercase tracking-wider text-coral">Ludoteca</span>}
+    <div className="space-y-2">
+      {picked.length > 0 && (
+        <ul className="space-y-1.5">
+          {picked.map((g) => (
+            <li key={g.id} className="flex items-center gap-2 rounded-lg border border-border bg-muted/40 p-2">
+              {g.imageUrl && <img src={g.imageUrl} alt="" loading="lazy" className="h-8 w-8 rounded object-cover" />}
+              <span className="text-sm text-foreground flex-1">{g.name}</span>
+              <button type="button" aria-label={`Quitar ${g.name}`} onClick={() => onChange(picked.filter((p) => p.id !== g.id))}>
+                <X className="h-4 w-4 text-muted-foreground hover:text-coral" />
               </button>
             </li>
           ))}
         </ul>
       )}
+      {!full && (
+        <div className="relative">
+          <div className="relative">
+            <Search className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+            <Input className="pl-9" value={q} placeholder="Busca un juego…" onChange={(e) => setQ(e.target.value)} />
+            {searching && <Loader2 className="h-4 w-4 absolute right-3 top-1/2 -translate-y-1/2 animate-spin text-muted-foreground" />}
+          </div>
+          {results.length > 0 && (
+            <ul className="absolute z-20 mt-1 w-full max-h-64 overflow-auto rounded-lg border border-border bg-background shadow-lg">
+              {results.filter((g) => !picked.some((p) => p.id === g.id)).map((g) => (
+                <li key={g.id}>
+                  <button
+                    type="button"
+                    className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm hover:bg-muted"
+                    onClick={() => { onChange([...picked, { id: g.id, name: g.name, imageUrl: g.imageUrl }]); setResults([]); setQ(""); }}
+                  >
+                    {g.imageUrl && <img src={g.imageUrl} alt="" loading="lazy" className="h-8 w-8 rounded object-cover" />}
+                    <span className="flex-1">{g.name}</span>
+                    {g.inCatalog && <span className="text-[10px] uppercase tracking-wider text-coral">Ludoteca</span>}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
+      <p className="text-xs text-muted-foreground">Puedes seleccionar hasta {MAX_GAMES} juegos.</p>
     </div>
   );
 }

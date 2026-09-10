@@ -371,13 +371,17 @@ function QuestionsEditor({ formId, initial, eventDate, allowGuests }: { formId: 
   const onDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
     if (!over || active.id === over.id) return;
-    const oldIndex = questions.findIndex((q) => q.id === active.id);
-    const newIndex = questions.findIndex((q) => q.id === over.id);
+    const fixed = ["full_name", "contact_email", "phone"];
+    const pinned = questions.filter((q) => fixed.includes(q.special ?? ""));
+    const movable = questions.filter((q) => !fixed.includes(q.special ?? ""));
+    const oldIndex = movable.findIndex((q) => q.id === active.id);
+    const newIndex = movable.findIndex((q) => q.id === over.id);
+    if (oldIndex < 0 || newIndex < 0) return;
     // Keep the local `position` in sync, otherwise a later save would resend a stale order.
-    const next = arrayMove(questions, oldIndex, newIndex).map((q, idx) => ({ ...q, position: idx }));
-    setQuestions(next);
+    const reordered = arrayMove(movable, oldIndex, newIndex).map((q, idx) => ({ ...q, position: idx }));
+    setQuestions([...pinned, ...reordered]);
     try {
-      await reorderFn({ data: { form_id: formId, orderedIds: next.map((q) => q.id) } });
+      await reorderFn({ data: { form_id: formId, orderedIds: reordered.map((q) => q.id) } });
     } catch (e) { toast.error((e as Error).message); }
   };
 
@@ -414,12 +418,25 @@ function QuestionsEditor({ formId, initial, eventDate, allowGuests }: { formId: 
     } catch (e) { toast.error((e as Error).message); }
   };
 
+  const coreOrder = ["full_name", "contact_email", "phone"];
+  const core = coreOrder
+    .map((s) => questions.find((q) => q.special === s))
+    .filter(Boolean) as RegistrationQuestion[];
+  const rest = questions.filter((q) => !coreOrder.includes(q.special ?? ""));
+
   return (
     <div className="space-y-4">
+      <div className="rounded-lg border border-ink/10 bg-ink/[0.03] p-4 space-y-2">
+        <p className="text-sm font-medium text-ink">Preguntas fijas (siempre las primeras, en este orden)</p>
+        <ol className="text-sm text-ink/70 list-decimal pl-5 space-y-0.5">
+          {core.map((q) => <li key={q.id}>{q.label}</li>)}
+        </ol>
+        <p className="text-xs text-ink/50">Se crean automáticamente en todos los formularios y no se pueden borrar ni reordenar.</p>
+      </div>
       <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
-        <SortableContext items={questions.map((q) => q.id)} strategy={verticalListSortingStrategy}>
+        <SortableContext items={rest.map((q) => q.id)} strategy={verticalListSortingStrategy}>
           <div className="space-y-3">
-            {questions.map((q) => (
+            {rest.map((q) => (
               <SortableQuestion key={q.id} q={q} eventDate={eventDate} allowGuests={allowGuests} onChange={updateQuestion} onRemove={() => removeQuestion(q.id)} />
             ))}
           </div>
@@ -478,12 +495,11 @@ function SortableQuestion({ q, eventDate, allowGuests, onChange, onRemove }: { q
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div>
               <label className="text-xs uppercase tracking-wider text-ink/60 mb-1 block">Pregunta especial</label>
-              <Select value={q.special ?? "none"} onValueChange={(v) => onChange({ ...q, special: v === "none" ? null : (v as "guests" | "game_pick" | "contact_email") })}>
+              <Select value={q.special ?? "none"} onValueChange={(v) => onChange({ ...q, special: v === "none" ? null : (v as RegistrationQuestion["special"]) })}>
                 <SelectTrigger className="bg-white border-ink/15 text-ink"><SelectValue /></SelectTrigger>
                 <SelectContent className="bg-white border-ink/15 text-ink">
                   <SelectItem value="none">Ninguna (normal)</SelectItem>
-                  <SelectItem value="game_pick">Buscador de juegos del catálogo</SelectItem>
-                  <SelectItem value="contact_email">Email de contacto</SelectItem>
+                  <SelectItem value="game_pick">Juegos solicitados (buscador del catálogo, hasta 5)</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -573,23 +589,140 @@ function ResponsesPanel({ formId, questions }: { formId: string; questions: Regi
       {responses.length === 0 ? (
         <p className="text-ink/60 text-sm">Aún no hay inscripciones recibidas.</p>
       ) : (
-        <div className="space-y-2">
-          {responses.map((r) => (
-            <ResponseCard key={r.id} response={r} questions={questions} onUpdate={async (patch) => {
-              try {
-                await updateFn({ data: { id: r.id, ...patch } });
-                setResponses((rs) => rs.map((x) => x.id === r.id ? { ...x, ...patch } as RegistrationResponse : x));
-              } catch (e) { toast.error((e as Error).message); }
-            }} onDelete={async () => {
-              if (!confirm("¿Eliminar esta respuesta?")) return;
-              try {
-                await deleteFn({ data: { id: r.id } });
-                setResponses((rs) => rs.filter((x) => x.id !== r.id));
-              } catch (e) { toast.error((e as Error).message); }
-            }} />
-          ))}
-        </div>
+        <ResponsesTable
+          responses={responses}
+          questions={questions}
+          onUpdate={async (id, patch) => {
+            try {
+              await updateFn({ data: { id, ...patch } });
+              setResponses((rs) => rs.map((x) => x.id === id ? { ...x, ...patch } as RegistrationResponse : x));
+            } catch (e) { toast.error((e as Error).message); }
+          }}
+          onDelete={async (id) => {
+            if (!confirm("¿Eliminar esta respuesta?")) return;
+            try {
+              await deleteFn({ data: { id } });
+              setResponses((rs) => rs.filter((x) => x.id !== id));
+            } catch (e) { toast.error((e as Error).message); }
+          }}
+        />
       )}
+    </div>
+  );
+}
+
+function columnLabel(q: RegistrationQuestion) {
+  if (q.special === "game_pick") return "Juegos solicitados";
+  if (q.special === "guests") return "¿Viene con alguien?";
+  return q.label;
+}
+
+function ResponsesTable({ responses, questions, onUpdate, onDelete }: {
+  responses: RegistrationResponse[];
+  questions: RegistrationQuestion[];
+  onUpdate: (id: string, patch: { payment_status?: RegistrationResponse["payment_status"]; internal_notes?: string | null }) => Promise<void>;
+  onDelete: (id: string) => void;
+}) {
+  const [notesFor, setNotesFor] = useState<string | null>(null);
+  const cols = questions.filter((q) => q.special !== "contact_email");
+
+  return (
+    <div className="overflow-x-auto rounded-lg border border-ink/10 bg-white">
+      <table className="w-full text-sm">
+        <thead>
+          <tr className="border-b border-ink/10 bg-ink/[0.03] text-left">
+            <th className="px-3 py-2 text-xs uppercase tracking-wider text-ink/60 font-medium whitespace-nowrap">Fecha</th>
+            <th className="px-3 py-2 text-xs uppercase tracking-wider text-ink/60 font-medium whitespace-nowrap">Email</th>
+            <th className="px-3 py-2 text-xs uppercase tracking-wider text-ink/60 font-medium whitespace-nowrap">Personas</th>
+            {cols.map((q) => (
+              <th key={q.id} className="px-3 py-2 text-xs uppercase tracking-wider text-ink/60 font-medium">{columnLabel(q)}</th>
+            ))}
+            <th className="px-3 py-2 text-xs uppercase tracking-wider text-ink/60 font-medium whitespace-nowrap">Pago</th>
+            <th className="px-3 py-2" />
+          </tr>
+        </thead>
+        <tbody>
+          {responses.map((r) => {
+            const data = (r.data ?? {}) as Record<string, unknown>;
+            const guests = r.guests_count ?? 0;
+            const cancelled = Boolean(r.cancelled_at);
+            return (
+              <>
+                <tr key={r.id} className={`border-b border-ink/5 align-top ${cancelled ? "opacity-50" : ""}`}>
+                  <td className="px-3 py-2 text-xs text-ink/60 whitespace-nowrap">{new Date(r.created_at).toLocaleString("es-ES")}</td>
+                  <td className="px-3 py-2 text-ink font-medium whitespace-nowrap">{r.email_contact ?? "—"}</td>
+                  <td className="px-3 py-2 whitespace-nowrap text-ink/80">{guests > 0 ? `${1 + guests} (+${guests})` : "1"}</td>
+                  {cols.map((q) => (
+                    <td key={q.id} className="px-3 py-2 text-ink/80">
+                      {q.special === "game_pick"
+                        ? <GameCell value={data[q.id]} />
+                        : q.special === "guests"
+                          ? (guests > 0 ? `+${guests}` : "Viene solo/a")
+                          : (answerToText(data[q.id]) || <span className="text-ink/30">—</span>)}
+                    </td>
+                  ))}
+                  <td className="px-3 py-2">
+                    <Select value={r.payment_status} onValueChange={(v) => onUpdate(r.id, { payment_status: v as RegistrationResponse["payment_status"] })}>
+                      <SelectTrigger className="bg-white border-ink/15 text-ink h-8 text-xs w-32"><SelectValue /></SelectTrigger>
+                      <SelectContent className="bg-white border-ink/15 text-ink">
+                        <SelectItem value="not_required">Sin pago</SelectItem>
+                        <SelectItem value="pending">Pendiente</SelectItem>
+                        <SelectItem value="paid">Pagado</SelectItem>
+                        <SelectItem value="refunded">Reembolsado</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </td>
+                  <td className="px-3 py-2 whitespace-nowrap">
+                    <Button size="sm" variant="ghost" onClick={() => setNotesFor((n) => n === r.id ? null : r.id)} className="h-8 px-2 text-xs text-ink/60 hover:text-ink">Notas</Button>
+                    <Button size="sm" variant="ghost" onClick={() => onDelete(r.id)} className="text-ink/60 hover:text-red-400 hover:bg-red-500/10 h-8 w-8 p-0"><Trash2 className="h-3.5 w-3.5" /></Button>
+                  </td>
+                </tr>
+                {notesFor === r.id && (
+                  <tr key={`${r.id}-notes`} className="border-b border-ink/5 bg-ink/[0.02]">
+                    <td colSpan={cols.length + 5} className="px-3 py-2">
+                      <NotesCell response={r} onSave={(notes) => onUpdate(r.id, { internal_notes: notes })} />
+                    </td>
+                  </tr>
+                )}
+              </>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+function NotesCell({ response, onSave }: { response: RegistrationResponse; onSave: (notes: string | null) => void }) {
+  const [notes, setNotes] = useState(response.internal_notes ?? "");
+  return (
+    <Textarea
+      rows={2}
+      value={notes}
+      onChange={(e) => setNotes(e.target.value)}
+      onBlur={() => notes !== (response.internal_notes ?? "") && onSave(notes || null)}
+      placeholder="Notas internas…"
+      className="bg-white border-ink/15 text-ink text-sm"
+    />
+  );
+}
+
+function GameCell({ value }: { value: unknown }) {
+  const list = (Array.isArray(value) ? value : value ? [value] : []) as unknown[];
+  if (!list.length) return <span className="text-ink/30">—</span>;
+  return (
+    <div className="flex flex-wrap gap-1">
+      {list.map((g, i) => {
+        const obj = typeof g === "object" && g ? (g as Record<string, unknown>) : null;
+        const name = obj ? String(obj.name ?? "") : String(g);
+        const img = obj ? String(obj.imageUrl ?? "") : "";
+        return (
+          <span key={i} className="inline-flex items-center gap-1.5 rounded-full border border-amber-400/60 bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-900">
+            {img ? <img src={img} alt="" loading="lazy" className="h-4 w-4 rounded object-cover" /> : <span>🎲</span>}
+            <span className="max-w-[180px] truncate">{name}</span>
+          </span>
+        );
+      })}
     </div>
   );
 }
@@ -602,81 +735,6 @@ function answerToText(v: unknown): string {
     return String(o.name ?? o.label ?? o.title ?? JSON.stringify(o));
   }
   return String(v);
-}
-
-function ResponseCard({ response, questions, onUpdate, onDelete }: { response: RegistrationResponse; questions: RegistrationQuestion[]; onUpdate: (p: { payment_status?: RegistrationResponse["payment_status"]; internal_notes?: string | null }) => Promise<void>; onDelete: () => void }) {
-  const [notes, setNotes] = useState(response.internal_notes ?? "");
-  const [openNotes, setOpenNotes] = useState(Boolean(response.internal_notes));
-
-  const data = (response.data ?? {}) as Record<string, unknown>;
-  const byId = new Map(questions.map((q) => [q.id, q]));
-  const gameQuestion = questions.find((q) => q.special === "game_pick");
-  const gameRaw = gameQuestion ? data[gameQuestion.id] : Object.values(data).find((v) => typeof v === "object" && v !== null && "name" in (v as object));
-  const gameText = answerToText(gameRaw);
-  const gameImage = gameRaw && typeof gameRaw === "object" ? String((gameRaw as Record<string, unknown>).imageUrl ?? "") : "";
-
-  // Every answer stored on the response, labelled when we know the question.
-  const entries = Object.entries(data)
-    .filter(([key]) => !(gameQuestion && key === gameQuestion.id))
-    .map(([key, value]) => {
-      const q = byId.get(key);
-      if (q?.special === "guests" || q?.special === "contact_email") return null;
-      const text = answerToText(value);
-      if (!text) return null;
-      return { key, label: q?.label ?? "Respuesta", text };
-    })
-    .filter(Boolean) as Array<{ key: string; label: string; text: string }>;
-
-  const guests = response.guests_count ?? 0;
-
-  return (
-    <div className="rounded-lg border border-ink/10 bg-white px-4 py-3">
-      <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-        <div className="min-w-[190px]">
-          <div className="text-sm font-medium text-ink">{response.email_contact ?? "—"}</div>
-          <div className="text-xs text-ink/50">{new Date(response.created_at).toLocaleString("es-ES")}</div>
-        </div>
-
-        <span className="rounded-full bg-ink/5 px-2.5 py-1 text-xs text-ink/80 whitespace-nowrap">
-          {guests > 0 ? `👥 ${1 + guests} personas (+${guests})` : "👤 Viene solo/a"}
-        </span>
-
-        {gameText && (
-          <span className="inline-flex items-center gap-2 rounded-full border border-amber-400/60 bg-amber-100 px-2.5 py-1 text-xs font-medium text-amber-900 max-w-[320px]">
-            {gameImage ? <img src={gameImage} alt="" className="h-5 w-5 rounded object-cover" loading="lazy" /> : <span>🎲</span>}
-            <span className="truncate">{gameText}</span>
-          </span>
-        )}
-
-        {entries.map((e) => (
-          <span key={e.key} className="text-xs text-ink/80 whitespace-nowrap max-w-[260px] truncate">
-            <span className="uppercase tracking-wider text-ink/45">{e.label}: </span>
-            {e.text}
-          </span>
-        ))}
-
-        <div className="ml-auto flex items-center gap-2">
-          <Select value={response.payment_status} onValueChange={(v) => onUpdate({ payment_status: v as RegistrationResponse["payment_status"] })}>
-            <SelectTrigger className="bg-white border-ink/15 text-ink h-8 text-xs w-32"><SelectValue /></SelectTrigger>
-            <SelectContent className="bg-white border-ink/15 text-ink">
-              <SelectItem value="not_required">Sin pago</SelectItem>
-              <SelectItem value="pending">Pendiente</SelectItem>
-              <SelectItem value="paid">Pagado</SelectItem>
-              <SelectItem value="refunded">Reembolsado</SelectItem>
-            </SelectContent>
-          </Select>
-          <Button size="sm" variant="ghost" onClick={() => setOpenNotes((o) => !o)} className="h-8 px-2 text-xs text-ink/60 hover:text-ink">Notas</Button>
-          <Button size="sm" variant="ghost" onClick={onDelete} className="text-ink/60 hover:text-red-400 hover:bg-red-500/10 h-8 w-8 p-0"><Trash2 className="h-3.5 w-3.5" /></Button>
-        </div>
-      </div>
-
-      {openNotes && (
-        <div className="mt-3 pt-3 border-t border-ink/10">
-          <Textarea rows={2} value={notes} onChange={(e) => setNotes(e.target.value)} onBlur={() => notes !== (response.internal_notes ?? "") && onUpdate({ internal_notes: notes || null })} placeholder="Notas internas…" className="bg-white border-ink/15 text-ink text-sm" />
-        </div>
-      )}
-    </div>
-  );
 }
 
 function CoverFocusPicker({ url, position, onChange }: { url: string; position: string; onChange: (pos: string) => void }) {
