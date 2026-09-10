@@ -392,7 +392,7 @@ const CreateEvent = () => {
     // Create event in database with organizer_id
     const eventInsertData = {
       name: eventName,
-      slug: (eventSlug || slugifyEventName(eventName)) || null,
+      slug: (slugifyEventName(eventSlug) || slugifyEventName(eventName)) || null,
       date: eventDate.split('T')[0],
       event_time: eventDate.includes('T') ? eventDate.split('T')[1] : null,
       event_location: eventLocation.trim() || null,
