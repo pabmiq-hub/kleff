@@ -275,11 +275,27 @@ export const submitRegistration = createServerFn({ method: "POST" })
       }
 
 
+      const { data: qRows } = await supabaseAdmin
+        .from("registration_questions")
+        .select("id, label, position, special")
+        .eq("form_id", f.id)
+        .order("position", { ascending: true });
+      const answers = data.data as Record<string, unknown>;
+      const fields = ((qRows ?? []) as Array<{ id: string; label: string; special: string | null }>)
+        .map((q) => ({
+          label: q.special === "game_pick" ? "Juegos solicitados" : q.label,
+          value: q.special === "guests"
+            ? (guests > 0 ? `+${guests}` : "Viene solo/a")
+            : formatAnswer(answers[q.id]),
+        }));
+
       const alert = registrationTeamNotificationEmail({
         formTitle: f.title,
+        formId: f.id,
         responseId,
         emailContact: data.emailContact ?? null,
-        data: data.data as Record<string, unknown>,
+        guests,
+        fields,
       });
       await sendEmailSafe({
         to: TEAM_INBOX,
