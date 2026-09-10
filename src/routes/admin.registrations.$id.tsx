@@ -469,12 +469,10 @@ function SortableQuestion({ q, eventDate, allowGuests, onChange, onRemove }: { q
                 <SelectTrigger className="bg-white border-ink/15 text-ink"><SelectValue /></SelectTrigger>
                 <SelectContent className="bg-white border-ink/15 text-ink">
                   <SelectItem value="none">Ninguna (normal)</SelectItem>
-                  <SelectItem value="guests" disabled={!allowGuests}>Número de invitados</SelectItem>
-                  <SelectItem value="game_pick">Buscador de juegos (BoardGameGeek + ludoteca)</SelectItem>
+                  <SelectItem value="game_pick">Buscador de juegos del catálogo</SelectItem>
                   <SelectItem value="contact_email">Email de contacto</SelectItem>
                 </SelectContent>
               </Select>
-              {q.special === "guests" && !allowGuests && <p className="text-xs text-amber-600 mt-1">Activa «Permitir invitados» arriba.</p>}
             </div>
             <div className="flex items-end">
               <div className="flex items-center gap-3 pb-2">
