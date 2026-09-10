@@ -279,47 +279,6 @@ function FormSettings({ form, questions, onSaved }: { form: RegistrationForm; qu
 
       {!isExternal && (
         <>
-          <Card title="Datos del evento">
-            <Row label="Fecha y hora del evento">
-              <Input type="datetime-local" value={toLocalInput(state.event_date)} onChange={(e) => set("event_date", e.target.value ? new Date(e.target.value).toISOString() : null)} className="bg-white border-ink/15 text-ink" />
-              <p className="text-xs text-ink/50 mt-1">Se usa en los correos, en el botón de calendario y para la pregunta con fecha límite.</p>
-            </Row>
-            <Row label="Ubicación">
-              <Input value={state.event_location ?? ""} onChange={(e) => set("event_location", e.target.value || null)} placeholder="Carrer Exemple 1, Barcelona" className="bg-white border-ink/15 text-ink" />
-            </Row>
-          </Card>
-
-          <Card title="Plazas e invitados">
-            <Row label="Máximo de asistentes (vacío = sin límite)"><Input type="number" min={1} value={state.max_responses ?? ""} onChange={(e) => set("max_responses", e.target.value ? Number(e.target.value) : null)} className="bg-white border-ink/15 text-ink" /></Row>
-            <Row label="Cierre de inscripciones"><Input type="datetime-local" value={toLocalInput(state.closes_at)} onChange={(e) => set("closes_at", e.target.value ? new Date(e.target.value).toISOString() : null)} className="bg-white border-ink/15 text-ink" /></Row>
-            <Row>
-              <div className="flex items-center gap-3">
-                <Switch checked={state.allow_guests} onCheckedChange={(v) => set("allow_guests", v)} />
-                <Label className="text-ink">Permitir invitados (cuentan como plazas)</Label>
-              </div>
-            </Row>
-            {state.allow_guests && (
-              <Row label="Máximo de invitados por inscripción">
-                <Input type="number" min={1} max={20} value={state.max_guests_per_response} onChange={(e) => set("max_guests_per_response", Number(e.target.value) || 1)} className="bg-white border-ink/15 text-ink" />
-              </Row>
-            )}
-          </Card>
-
-          <Card title="Pago (manual)">
-            <Row>
-              <div className="flex items-center gap-3">
-                <Switch checked={state.payment_required} onCheckedChange={(v) => set("payment_required", v)} />
-                <Label className="text-ink">Requiere pago</Label>
-              </div>
-            </Row>
-            {state.payment_required && (
-              <>
-                <Row label="Importe (céntimos)"><Input type="number" min={0} value={state.payment_amount_cents ?? ""} onChange={(e) => set("payment_amount_cents", e.target.value ? Number(e.target.value) : null)} className="bg-white border-ink/15 text-ink" placeholder="2500 = 25,00 €" /></Row>
-                <Row label="Moneda"><Input value={state.payment_currency} onChange={(e) => set("payment_currency", e.target.value.toUpperCase())} maxLength={3} className="bg-white border-ink/15 text-ink" /></Row>
-                <Row label="Instrucciones de pago"><Textarea rows={3} value={state.payment_instructions ?? ""} onChange={(e) => set("payment_instructions", e.target.value || null)} placeholder="Bizum / transferencia / pago en local…" className="bg-white border-ink/15 text-ink" /></Row>
-              </>
-            )}
-          </Card>
 
           <Card title="Notificaciones">
             <Row label="Emails para notificar nuevas inscripciones (separados por coma)">
