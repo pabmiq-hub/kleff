@@ -214,6 +214,7 @@ function FormSettings({ form, questions, onSaved }: { form: RegistrationForm; qu
             value={normalizeHighlights(state.highlights)}
             onChange={(rows) => set("highlights", rows as RegistrationForm["highlights"])}
             form={state}
+            setField={set}
           />
         </Row>
         <Row label="Información legal">
