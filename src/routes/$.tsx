@@ -7,6 +7,9 @@ import { CustomPage } from "@/components/pages/CustomPage";
 import { getPublishedForm } from "@/lib/registrations.functions";
 import { resolveKonEvent } from "@/lib/kon-public.functions";
 import { PublicRegistrationPage } from "@/components/pages/PublicRegistrationPage";
+import { PublicEventPage } from "@/konektum/pages/PublicEventPage";
+import ParticipantJoin from "@/konektum/pages/ParticipantJoin";
+
 
 type Locale = "es" | "ca" | "en";
 
