@@ -9,8 +9,8 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { CheckCircle2, Loader2, CalendarPlus, MapPin, CalendarDays, Search, X } from "lucide-react";
-import { googleCalendarUrl, formatMadrid } from "@/lib/registrations-calendar";
+import { CheckCircle2, Loader2, CalendarPlus, Search, X } from "lucide-react";
+import { googleCalendarUrl } from "@/lib/registrations-calendar";
 import { normalizeHighlights, plainTextToHtml, DEFAULT_LEGAL_HTML } from "@/lib/registrations-content";
 import { useEffect, useRef } from "react";
 import { SiteLayout } from "@/components/site/SiteLayout";
@@ -106,12 +106,6 @@ export function PublicRegistrationPage({ form, questions, responsesCount, attend
       )}
       <div className="max-w-2xl mx-auto px-6 py-12">
         <h1 className="font-display text-3xl md:text-4xl mb-3 text-foreground">{form.title}</h1>
-        {(form.event_date || form.event_location) && (
-          <div className="flex flex-wrap gap-4 mb-4 text-sm text-foreground/80">
-            {form.event_date && <span className="inline-flex items-center gap-1.5"><CalendarDays className="h-4 w-4 text-coral" /> {formatMadrid(form.event_date)}</span>}
-            {form.event_location && <span className="inline-flex items-center gap-1.5"><MapPin className="h-4 w-4 text-coral" /> {form.event_location}</span>}
-          </div>
-        )}
         {descriptionHtml && (
           <div className="blog-content mb-6" dangerouslySetInnerHTML={{ __html: descriptionHtml }} />
         )}
@@ -187,7 +181,7 @@ export function PublicRegistrationPage({ form, questions, responsesCount, attend
                     onChange={(n) => { setGuests(n); setVal(q.id, n); }}
                   />
                 ) : q.special === "game_pick" ? (
-                  <GamePickField value={values[q.id] as PickedGame | string | undefined} onChange={(v) => setVal(q.id, v)} />
+                  <GamePickField value={values[q.id]} onChange={(v) => setVal(q.id, v)} />
                 ) : q.special === "contact_email" ? (
                   <Input type="email" required value={(values[q.id] as string) ?? ""} onChange={(e) => setVal(q.id, e.target.value)} />
                 ) : (
@@ -296,14 +290,20 @@ function GuestsField({ max, value, onChange }: { max: number; value: number; onC
   );
 }
 
-function GamePickField({ value, onChange }: { value: PickedGame | string | undefined; onChange: (v: PickedGame | null) => void }) {
+const MAX_GAMES = 5;
+
+function toPickedList(value: unknown): PickedGame[] {
+  const raw = Array.isArray(value) ? value : value ? [value] : [];
+  return raw.map((v) =>
+    typeof v === "object" && v ? (v as PickedGame) : { id: String(v), name: String(v), imageUrl: null },
+  );
+}
+
+function GamePickField({ value, onChange }: { value: unknown; onChange: (v: PickedGame[]) => void }) {
   const searchFn = useServerFn(searchGamesForPick);
   const searchRef = useRef(searchFn);
   searchRef.current = searchFn;
-  const picked: PickedGame | null =
-    value && typeof value === "object" ? (value as PickedGame)
-    : typeof value === "string" && value ? { id: value, name: value, imageUrl: null }
-    : null;
+  const picked = toPickedList(value);
   const [q, setQ] = useState("");
   const [results, setResults] = useState<Array<PickedGame & { inCatalog: boolean }>>([]);
   const [searching, setSearching] = useState(false);

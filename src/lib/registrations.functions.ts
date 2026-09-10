@@ -60,9 +60,37 @@ export type RegistrationQuestion = {
   label: string;
   help: string | null;
   options: Array<{ value: string; label: string }>;
-  special: "guests" | "game_pick" | "contact_email" | null;
+  special: "guests" | "game_pick" | "contact_email" | "full_name" | "phone" | null;
   hide_after_wednesday: boolean;
 };
+
+/** Questions every native form always has, in this exact order, at the very top. */
+export const CORE_QUESTIONS = [
+  { special: "full_name" as const, label: "Nombre y apellidos", type: "text" as const, help: null as string | null, position: -3 },
+  { special: "contact_email" as const, label: "Correo electrónico", type: "email" as const, help: "Aquí te enviaremos las comunicaciones del evento.", position: -2 },
+  { special: "phone" as const, label: "Teléfono de contacto", type: "phone" as const, help: null as string | null, position: -1 },
+];
+
+const CORE_ORDER: Record<string, number> = { full_name: 0, contact_email: 1, phone: 2 };
+
+export function sortQuestions(qs: RegistrationQuestion[]): RegistrationQuestion[] {
+  const rank = (q: RegistrationQuestion) => (q.special && q.special in CORE_ORDER ? CORE_ORDER[q.special]! : 100);
+  return [...qs].sort((a, b) => (rank(a) - rank(b)) || (a.position - b.position));
+}
+
+/** Creates the three mandatory questions when they are missing. */
+async function ensureCoreQuestions(formId: string, existing: RegistrationQuestion[]) {
+  const missing = CORE_QUESTIONS.filter((c) => !existing.some((q) => q.special === c.special));
+  if (!missing.length) return existing;
+  const { data: inserted } = await supabaseAdmin
+    .from("registration_questions")
+    .insert(missing.map((c) => ({
+      form_id: formId, position: c.position, type: c.type, required: true,
+      label: c.label, help: c.help, options: [], special: c.special, hide_after_wednesday: false,
+    })) as never)
+    .select("*");
+  return [...existing, ...((inserted ?? []) as unknown as RegistrationQuestion[])];
+}
 
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -104,7 +132,7 @@ export const getPublishedForm = createServerFn({ method: "GET" })
       .is("cancelled_at", null);
     const active = (rows ?? []) as Array<{ guests_count: number | null }>;
     const attendeesCount = active.reduce((n, r) => n + 1 + (r.guests_count ?? 0), 0);
-    const all = (questions ?? []) as unknown as RegistrationQuestion[];
+    const all = sortQuestions(await ensureCoreQuestions(f.id, (questions ?? []) as unknown as RegistrationQuestion[]));
     const visible = all.filter((q) => isQuestionVisible(q, f.event_date));
     return {
       form: f,
@@ -449,7 +477,7 @@ export const adminGetForm = createServerFn({ method: "POST" })
       .from("registration_questions").select("*").eq("form_id", data.id).order("position", { ascending: true });
     return {
       form: form as unknown as RegistrationForm,
-      questions: (qs ?? []) as unknown as RegistrationQuestion[],
+      questions: sortQuestions(await ensureCoreQuestions(data.id, (qs ?? []) as unknown as RegistrationQuestion[])),
     };
   });
 
@@ -536,7 +564,7 @@ export const adminUpsertQuestion = createServerFn({ method: "POST" })
       value: z.string().min(1).max(120),
       label: z.string().max(200),
     })).max(50).default([]),
-    special: z.enum(["guests", "game_pick", "contact_email"]).nullable().optional(),
+    special: z.enum(["guests", "game_pick", "contact_email", "full_name", "phone"]).nullable().optional(),
     hide_after_wednesday: z.boolean().optional(),
   }))
   .handler(async ({ data, context }) => {
