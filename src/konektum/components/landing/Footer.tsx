@@ -47,7 +47,7 @@ export const Footer = () => {
           <div className="col-span-2 sm:col-span-1">
             <h4 className="font-display font-semibold text-sm sm:text-base mb-3 sm:mb-4">{t.footer.contact}</h4>
             <ul className="space-y-2 sm:space-y-3">
-              <li><a href="mailto:hola@konektum.app" className="text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors">hola@konektum.com</a></li>
+              <li><a href="mailto:hola@kleff.es" className="text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors">hola@kleff.es</a></li>
               <li><Link to="/admin/login" className="text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors">{t.footer.organizerAccess}</Link></li>
             </ul>
           </div>

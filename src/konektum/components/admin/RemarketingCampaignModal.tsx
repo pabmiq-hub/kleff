@@ -57,7 +57,7 @@ export function RemarketingCampaignModal({ open, onOpenChange, selectedUsers, al
   const upcomingEvents = events.filter(e => e.status === 'pending' || e.status === 'active');
 
   const registrationLink = targetEventId && organizer?.slug
-    ? `https://konektum.com/o/${organizer.slug}/join/${targetEventId}`
+    ? `https://kleff.es/o/${organizer.slug}/join/${targetEventId}`
     : '';
 
   // Check for already-sent emails and already-registered participants when reaching confirm step
