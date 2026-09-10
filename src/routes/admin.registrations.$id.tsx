@@ -774,40 +774,119 @@ function CommunicationSettings({ form, onSaved }: { form: RegistrationForm; onSa
   );
 }
 
-function HighlightsEditor({ value, onChange, form }: { value: HighlightRow[]; onChange: (rows: HighlightRow[]) => void; form: RegistrationForm }) {
+function fmtEventDate(iso: string | null) {
+  if (!iso) return "";
+  return new Date(iso).toLocaleString("es-ES", { dateStyle: "full", timeStyle: "short", timeZone: "Europe/Madrid" });
+}
+
+function HighlightsEditor({ value, onChange, form, setField }: {
+  value: HighlightRow[];
+  onChange: (rows: HighlightRow[]) => void;
+  form: RegistrationForm;
+  setField: <K extends keyof RegistrationForm>(k: K, v: RegistrationForm[K]) => void;
+}) {
   const update = (i: number, patch: Partial<HighlightRow>) =>
     onChange(value.map((r, idx) => (idx === i ? { ...r, ...patch } : r)));
 
-  const suggest = () => {
-    const rows: HighlightRow[] = [];
-    if (form.event_date) rows.push({ emoji: "🗓", label: "Fecha", text: new Date(form.event_date).toLocaleString("es-ES", { dateStyle: "full", timeStyle: "short", timeZone: "Europe/Madrid" }) });
-    if (form.event_location) rows.push({ emoji: "📍", label: "Lugar", text: form.event_location });
-    if (form.payment_required && form.payment_amount_cents != null) rows.push({ emoji: "💶", label: "Precio", text: `${(form.payment_amount_cents / 100).toFixed(2)} ${form.payment_currency}` });
-    if (form.max_responses) rows.push({ emoji: "👥", label: "Plazas", text: `${form.max_responses} plazas` });
-    onChange([...value, ...rows.filter((r) => !value.some((v) => v.label === r.label))]);
+  const kindOf = (label: string) => {
+    const l = label.trim().toLowerCase();
+    if (l.startsWith("fecha")) return "date" as const;
+    if (l.startsWith("lugar") || l.startsWith("ubicaci")) return "place" as const;
+    if (l.startsWith("plaza")) return "seats" as const;
+    return "free" as const;
   };
 
   return (
-    <div className="space-y-2">
-      {value.map((row, i) => (
-        <div key={i} className="flex gap-2 items-start">
-          <Input value={row.emoji} onChange={(e) => update(i, { emoji: e.target.value })} className="w-16 text-center bg-white border-ink/15 text-ink" placeholder="📍" />
-          <Input value={row.label} onChange={(e) => update(i, { label: e.target.value })} className="w-40 bg-white border-ink/15 text-ink" placeholder="Lugar" />
-          <Input value={row.text} onChange={(e) => update(i, { text: e.target.value })} className="flex-1 bg-white border-ink/15 text-ink" placeholder="Carrer Exemple 3, Barcelona" />
-          <Button type="button" variant="ghost" size="icon" onClick={() => onChange(value.filter((_, idx) => idx !== i))}>
-            <Trash2 className="h-4 w-4 text-ink/50" />
-          </Button>
-        </div>
-      ))}
+    <div className="space-y-3">
+      {value.map((row, i) => {
+        const kind = kindOf(row.label);
+        return (
+          <div key={i} className="rounded-lg border border-ink/10 bg-ink/[0.02] p-3 space-y-2">
+            <div className="flex gap-2 items-start">
+              <Input value={row.emoji} onChange={(e) => update(i, { emoji: e.target.value })} className="w-16 text-center bg-white border-ink/15 text-ink" placeholder="📍" />
+              <Input value={row.label} onChange={(e) => update(i, { label: e.target.value })} className="w-40 bg-white border-ink/15 text-ink" placeholder="Lugar" />
+              <Input
+                value={row.text}
+                onChange={(e) => {
+                  update(i, { text: e.target.value });
+                  if (kind === "place") setField("event_location", e.target.value || null);
+                }}
+                className="flex-1 bg-white border-ink/15 text-ink"
+                placeholder={kind === "date" ? "Se rellena con la fecha de abajo" : "Carrer Exemple 3, Barcelona"}
+              />
+              <Button type="button" variant="ghost" size="icon" onClick={() => onChange(value.filter((_, idx) => idx !== i))}>
+                <Trash2 className="h-4 w-4 text-ink/50" />
+              </Button>
+            </div>
+
+            {kind === "date" && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1">
+                <Row label="Fecha y hora del evento">
+                  <Input
+                    type="datetime-local"
+                    value={toLocalInput(form.event_date)}
+                    onChange={(e) => {
+                      const iso = e.target.value ? new Date(e.target.value).toISOString() : null;
+                      setField("event_date", iso);
+                      update(i, { text: fmtEventDate(iso) });
+                    }}
+                    className="bg-white border-ink/15 text-ink"
+                  />
+                  <p className="text-xs text-ink/50 mt-1">Se usa en los correos, en el botón de calendario y en la pregunta con fecha límite.</p>
+                </Row>
+                <Row label="Cierre de inscripciones">
+                  <Input
+                    type="datetime-local"
+                    value={toLocalInput(form.closes_at)}
+                    onChange={(e) => setField("closes_at", e.target.value ? new Date(e.target.value).toISOString() : null)}
+                    className="bg-white border-ink/15 text-ink"
+                  />
+                </Row>
+              </div>
+            )}
+
+            {kind === "seats" && (
+              <div className="space-y-3 pt-1">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <Row label="Número de plazas (vacío = sin límite)">
+                    <Input
+                      type="number"
+                      min={1}
+                      value={form.max_responses ?? ""}
+                      onChange={(e) => {
+                        const n = e.target.value ? Number(e.target.value) : null;
+                        setField("max_responses", n);
+                        update(i, { text: n ? `${n} plazas` : "" });
+                      }}
+                      className="bg-white border-ink/15 text-ink"
+                    />
+                  </Row>
+                  {form.allow_guests && (
+                    <Row label="Máximo de invitados por inscripción">
+                      <Input type="number" min={1} max={20} value={form.max_guests_per_response} onChange={(e) => setField("max_guests_per_response", Number(e.target.value) || 1)} className="bg-white border-ink/15 text-ink" />
+                    </Row>
+                  )}
+                </div>
+                <div className="flex items-center gap-3">
+                  <Switch checked={form.allow_guests} onCheckedChange={(v) => setField("allow_guests", v)} />
+                  <Label className="text-ink text-sm">Permitir invitados (cuentan como plazas)</Label>
+                </div>
+                {form.allow_guests && (
+                  <p className="text-xs text-ink/50">Se añade automáticamente la pregunta «¿Vienes con alguien?» (Vengo solo/a, +1, +2…). No se puede editar.</p>
+                )}
+              </div>
+            )}
+          </div>
+        );
+      })}
       <div className="flex flex-wrap gap-2 pt-1">
-        {HIGHLIGHT_PRESETS.map((p) => (
-          <Button key={p.label} type="button" size="sm" variant="outline" onClick={() => onChange([...value, { emoji: p.emoji, label: p.label, text: "" }])}>
-            {p.emoji} {p.label}
+        {HIGHLIGHT_PRESETS.filter((p) => !value.some((v) => v.label.trim().toLowerCase() === p.label.toLowerCase())).map((p) => (
+          <Button key={p.label} type="button" size="sm" variant="outline" onClick={() => onChange([...value, { emoji: p.emoji, label: p.label, text: p.label === "Fecha" ? fmtEventDate(form.event_date) : p.label === "Lugar" ? (form.event_location ?? "") : p.label === "Plazas" && form.max_responses ? `${form.max_responses} plazas` : "" }])}>
+            <Plus className="h-3 w-3 mr-1" /> {p.emoji} {p.label}
           </Button>
         ))}
-        <Button type="button" size="sm" variant="secondary" onClick={suggest}>Rellenar con los datos del evento</Button>
       </div>
-      <p className="text-xs text-ink/50">Aparecen justo debajo de la descripción, en el orden de esta lista.</p>
+      <p className="text-xs text-ink/50">Aparecen justo debajo de la descripción, en el orden de esta lista. Las categorías «Fecha» y «Plazas» incluyen los ajustes del evento.</p>
     </div>
   );
 }
