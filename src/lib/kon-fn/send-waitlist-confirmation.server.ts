@@ -147,7 +147,7 @@ serve(async (req) => {
       : `Estás en la lista de espera - ${event.name}`;
 
     const emailPayload = {
-      from: `${brandName} <noreply@kleff.es>`,
+      from: `${brandName} <hola@kleff.es>`,
       to: [email],
       subject,
       html: `

@@ -198,7 +198,7 @@ serve(async (req) => {
     const accessUrl = `${publishedBaseUrl}/event/${eventId}/access`;
 
     const emailPayload = {
-      from: `${brandName} <noreply@kleff.es>`,
+      from: `${brandName} <hola@kleff.es>`,
       to: [participant.email],
       subject,
       html: `

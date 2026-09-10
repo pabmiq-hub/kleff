@@ -8,6 +8,7 @@ const Deno = {
 };
 
 import { createClient } from "@/lib/kon-fn/client.server";
+import { invokeKonFunction } from "@/lib/kon-fn/registry.server";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -292,14 +293,7 @@ serve(async (req) => {
         let emailSent = false;
         if (sendEmail && participant.email && baseUrl) {
           try {
-            const emailResponse = await fetch(`${supabaseUrl}/functions/v1/send-checkin-code`, {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${supabaseServiceKey}`,
-              },
-              body: JSON.stringify({ participantId: participant.id, eventId, baseUrl })
-            });
+            const emailResponse = await invokeKonFunction("send-checkin-code", { participantId: participant.id, eventId, baseUrl });
             emailSent = emailResponse.ok;
           } catch (e) {
             console.error('[checkin-participant] Error sending email:', e);
@@ -494,18 +488,11 @@ serve(async (req) => {
     let emailSent = false;
     if (sendEmail && participant.email && baseUrl) {
       try {
-        const emailResponse = await fetch(`${supabaseUrl}/functions/v1/send-checkin-code`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${supabaseServiceKey}`,
-          },
-          body: JSON.stringify({
+        const emailResponse = await invokeKonFunction("send-checkin-code", {
             participantId: participant.id,
             eventId,
             baseUrl
-          })
-        });
+          });
 
         if (emailResponse.ok) {
           emailSent = true;

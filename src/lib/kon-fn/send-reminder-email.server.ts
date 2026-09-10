@@ -368,7 +368,7 @@ const handler = async (req: Request): Promise<Response> => {
     const logoHeight = Number.isFinite(rawLogoHeight) ? Math.min(120, Math.max(24, rawLogoHeight)) : 48;
 
     // Determine sender
-    let senderFrom = `${brandName} <noreply@kleff.es>`;
+    let senderFrom = `${brandName} <hola@kleff.es>`;
     if (event.organizer_id) {
       const { data: resendConfig } = await supabase
         .from("organizer_resend_config")

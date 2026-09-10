@@ -136,7 +136,7 @@ serve(async (req) => {
 
     // Send email
     const emailResponse = await resend.emails.send({
-      from: "KLEFF <noreply@kleff.es>",
+      from: "KLEFF <hola@kleff.es>",
       to: [participant.email],
       subject: isEn ? `Your access code for ${event.name}` : `Tu código de acceso para ${event.name}`,
       html: `

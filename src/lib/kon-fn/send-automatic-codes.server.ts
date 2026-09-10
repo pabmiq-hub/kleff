@@ -183,7 +183,7 @@ serve(async (req) => {
         : `⏰ ¡El evento comienza en aproximadamente ${hoursUntil} horas!`;
 
       // Organizer's Resend config
-      let senderFrom = `${brandName} <noreply@kleff.es>`;
+      let senderFrom = `${brandName} <hola@kleff.es>`;
       if (event.organizer_id) {
         const { data: resendConfig } = await supabase
           .from("organizer_resend_config")

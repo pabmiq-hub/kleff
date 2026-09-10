@@ -118,7 +118,7 @@ async function processEvent(
   const logoHeight = Math.min(120, Math.max(24, Number(comm.logoHeight) || 48));
 
   // Resolve organizer branding + resend config
-  let senderFrom = `${brandName} <noreply@kleff.es>`;
+  let senderFrom = `${brandName} <hola@kleff.es>`;
   let apiKey = resendKey;
   if (event.organizer_id) {
     const { data: org } = await supabase
