@@ -583,7 +583,19 @@ export const adminUpsertQuestion = createServerFn({ method: "POST" })
       if (error) throw new Error(error.message);
       return { id: data.id };
     }
+    // Singleton specials must never be duplicated.
+    if (data.special && ["guests", "game_pick", "contact_email", "full_name", "phone"].includes(data.special)) {
+      const { data: dup } = await supabaseAdmin
+        .from("registration_questions")
+        .select("id")
+        .eq("form_id", data.form_id)
+        .eq("special", data.special)
+        .limit(1)
+        .maybeSingle();
+      if (dup) return { id: (dup as { id: string }).id };
+    }
     const { data: row, error } = await supabaseAdmin
+
       .from("registration_questions")
       .insert({
         form_id: data.form_id, position: data.position, type: data.type, required: data.required,
