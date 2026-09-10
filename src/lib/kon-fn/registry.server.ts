@@ -54,3 +54,17 @@ export async function runKonFunction(name: string, req: Request): Promise<Respon
   const mod = await loader();
   return await mod.default(req);
 }
+
+/**
+ * Invoke another ported function in-process (replaces the old
+ * `fetch(`${SUPABASE_URL}/functions/v1/<name>`)` edge-function calls, which no
+ * longer exist now that the backend runs inside the app).
+ */
+export async function invokeKonFunction(name: string, payload: unknown): Promise<Response> {
+  const req = new Request(`https://kleff.es/api/public/kon/${name}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload ?? {}),
+  });
+  return runKonFunction(name, req);
+}

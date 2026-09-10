@@ -6,7 +6,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { listTeamMembersPublic, type TeamMemberRow } from "@/lib/team.functions";
 
 const HERO_IMAGE_DEFAULT =
-  "https://gyecpblbaovmprdvgmct.supabase.co/storage/v1/object/public/media/cms/kleff-estacio-espai-juegos-de-mesa-2-estacio-nk0knd.jpg";
+  "https://vkxogcfrbphhwdwzcnmt.supabase.co/storage/v1/object/public/media/cms/kleff-estacio-espai-juegos-de-mesa-2-estacio-nk0knd.jpg";
 import { SiteLayout } from "@/components/site/SiteLayout";
 import { HistoryTimeline } from "@/components/about/HistoryTimeline";
 import { EditableText, EditableImage } from "@/editor/Editable";

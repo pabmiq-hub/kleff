@@ -317,7 +317,7 @@ serve(async (req) => {
     ` : '';
 
     const emailPayload = {
-      from: `${brandName} <noreply@kleff.es>`,
+      from: `${brandName} <hola@kleff.es>`,
       to: [participant.email],
       subject,
       html: `

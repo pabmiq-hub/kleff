@@ -145,7 +145,7 @@ serve(async (req) => {
       : (isEn ? `With love,\nThe ${brandName} Team 💕` : `Con cariño,\nEl equipo de ${brandName} 💕`);
 
     // Determine sender
-    let senderFrom = `${brandName} <noreply@kleff.es>`;
+    let senderFrom = `${brandName} <hola@kleff.es>`;
     const resendApiKey = Deno.env.get('RESEND_API_KEY') || '';
 
     if (event.organizer_id) {

@@ -8,6 +8,7 @@ const Deno = {
 };
 
 import { createClient } from "@/lib/kon-fn/client.server";
+import { invokeKonFunction } from "@/lib/kon-fn/registry.server";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -425,18 +426,9 @@ serve(async (req) => {
 
     // Trigger super like notifications for every super like actually stored
     if (allowedSuperLikeIds.size > 0 && event.super_like_enabled) {
-      const notifyUrl = Deno.env.get('SUPABASE_URL')!;
-      const notifyKey = Deno.env.get('SUPABASE_ANON_KEY')!;
       for (const recipientId of allowedSuperLikeIds) {
         try {
-          await fetch(`${notifyUrl}/functions/v1/send-super-like-notification`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${notifyKey}`,
-            },
-            body: JSON.stringify({ eventId, recipientId }),
-          });
+          await invokeKonFunction("send-super-like-notification", { eventId, recipientId });
           console.log(`[submit-selections] Super like notification triggered for recipient: ${recipientId}`);
         } catch (notifError) {
           console.error('[submit-selections] Error sending super like notification:', notifError);

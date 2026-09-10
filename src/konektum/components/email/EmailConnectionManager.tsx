@@ -200,7 +200,7 @@ export function EmailConnectionManager() {
               <div>
                 <p className="font-medium text-sm">Sin cuenta de Resend conectada</p>
                 <p className="text-sm text-muted-foreground">
-                  Los emails se envían desde noreply@konektum.com
+                  Los emails se envían desde hola@kleff.es
                 </p>
               </div>
             </div>

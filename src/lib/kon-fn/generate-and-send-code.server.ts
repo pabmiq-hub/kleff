@@ -8,6 +8,7 @@ const Deno = {
 };
 
 import { createClient } from "@/lib/kon-fn/client.server";
+import { invokeKonFunction } from "@/lib/kon-fn/registry.server";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -96,18 +97,11 @@ serve(async (req) => {
     let emailSent = false;
     if (participant.email) {
       try {
-        const emailResponse = await fetch(`${supabaseUrl}/functions/v1/send-checkin-code`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${supabaseServiceKey}`,
-          },
-          body: JSON.stringify({
+        const emailResponse = await invokeKonFunction("send-checkin-code", {
             participantId: participant.id,
             eventId,
             baseUrl: 'https://kleff.es'
-          })
-        });
+          });
         emailSent = emailResponse.ok;
         if (!emailSent) {
           console.warn('[generate-and-send-code] Email send failed');
