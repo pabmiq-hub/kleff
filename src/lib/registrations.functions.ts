@@ -138,9 +138,9 @@ export const searchCatalogGames = createServerFn({ method: "POST" })
   });
 
 /**
- * Public game search for the "game_pick" question. Uses the same boardgame
- * database as "Juegos favoritos" in the member profile (covers included) and
- * puts KLEFF catalog matches first.
+ * Public game search for the "game_pick" question. Searches only the KLEFF
+ * catalog (the games shown in /ludoteca) that have a real shelf location,
+ * excluding "bajo pedido", "en reposición" and "especiales".
  */
 export const searchGamesForPick = createServerFn({ method: "POST" })
   .inputValidator(z.object({ q: z.string().max(80) }))
@@ -149,50 +149,20 @@ export const searchGamesForPick = createServerFn({ method: "POST" })
     type Game = { id: string; name: string; imageUrl: string | null; inCatalog: boolean };
     if (term.length < 2) return { games: [] as Game[] };
 
-    const catalogTitles = new Set<string>();
-    const catalogList: string[] = [];
-    try {
-      const { data: rows } = await supabaseAdmin
-        .from("bgg_games")
-        .select("title")
-        .eq("is_active", true)
-        .not("shelf", "is", null)
-        .not("shelf", "in", '("on_demand","restocking","especiales")')
-        .ilike("title", `%${term}%`)
-        .limit(50);
-      for (const r of (rows ?? []) as Array<{ title: string }>) {
-        catalogTitles.add(r.title.trim().toLowerCase());
-        catalogList.push(r.title);
-      }
-    } catch (err) {
-      console.error("[registrations] catalog lookup error:", err);
-    }
+    const { data: rows, error } = await supabaseAdmin
+      .from("bgg_games")
+      .select("id, title, image_url")
+      .eq("is_active", true)
+      .not("shelf", "is", null)
+      .not("shelf", "in", '("on_demand","restocking","especiales")')
+      .ilike("title", `%${term}%`)
+      .order("title", { ascending: true })
+      .limit(10);
+    if (error) throw new Error(error.message);
 
-    let games: Game[] = [];
-    try {
-      const { searchLudoyaBoardgames } = await import("@/lib/ludoya.server");
-      const results = await searchLudoyaBoardgames(term, 20, 0);
-      games = results.map((g) => ({
-        id: String(g.id),
-        name: g.name,
-        imageUrl: g.imageUrl ?? null,
-        inCatalog: catalogTitles.has(g.name.trim().toLowerCase()),
-      }));
-    } catch (err) {
-      console.error("[registrations] boardgame search error:", err);
-    }
-
-    if (!games.length) {
-      games = catalogList.slice(0, 10).map((t) => ({
-        id: `catalog:${t.toLowerCase()}`,
-        name: t,
-        imageUrl: null,
-        inCatalog: true,
-      }));
-    }
-
-    games.sort((a, b) => Number(b.inCatalog) - Number(a.inCatalog));
-    return { games: games.slice(0, 10) };
+    const games: Game[] = ((rows ?? []) as Array<{ id: string; title: string; image_url: string | null }>)
+      .map((g) => ({ id: g.id, name: g.title, imageUrl: g.image_url, inCatalog: true }));
+    return { games };
   });
 
 
