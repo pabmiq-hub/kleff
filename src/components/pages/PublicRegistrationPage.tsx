@@ -322,42 +322,50 @@ function GamePickField({ value, onChange }: { value: unknown; onChange: (v: Pick
     return () => { alive = false; clearTimeout(t); };
   }, [q]);
 
-  if (picked) {
-    return (
-      <div className="flex items-center gap-2 rounded-lg border border-border bg-muted/40 p-2">
-        {picked.imageUrl && <img src={picked.imageUrl} alt="" loading="lazy" className="h-8 w-8 rounded object-cover" />}
-        <span className="text-sm text-foreground flex-1">{picked.name}</span>
-        <button type="button" aria-label="Quitar juego" onClick={() => { onChange(null); setQ(""); }}>
-          <X className="h-4 w-4 text-muted-foreground hover:text-coral" />
-        </button>
-      </div>
-    );
-  }
+  const full = picked.length >= MAX_GAMES;
 
   return (
-    <div className="relative">
-      <div className="relative">
-        <Search className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-        <Input className="pl-9" value={q} placeholder="Busca un juego…" onChange={(e) => setQ(e.target.value)} />
-        {searching && <Loader2 className="h-4 w-4 absolute right-3 top-1/2 -translate-y-1/2 animate-spin text-muted-foreground" />}
-      </div>
-      {results.length > 0 && (
-        <ul className="absolute z-20 mt-1 w-full max-h-64 overflow-auto rounded-lg border border-border bg-background shadow-lg">
-          {results.map((g) => (
-            <li key={g.id}>
-              <button
-                type="button"
-                className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm hover:bg-muted"
-                onClick={() => { onChange({ id: g.id, name: g.name, imageUrl: g.imageUrl }); setResults([]); }}
-              >
-                {g.imageUrl && <img src={g.imageUrl} alt="" loading="lazy" className="h-8 w-8 rounded object-cover" />}
-                <span className="flex-1">{g.name}</span>
-                {g.inCatalog && <span className="text-[10px] uppercase tracking-wider text-coral">Ludoteca</span>}
+    <div className="space-y-2">
+      {picked.length > 0 && (
+        <ul className="space-y-1.5">
+          {picked.map((g) => (
+            <li key={g.id} className="flex items-center gap-2 rounded-lg border border-border bg-muted/40 p-2">
+              {g.imageUrl && <img src={g.imageUrl} alt="" loading="lazy" className="h-8 w-8 rounded object-cover" />}
+              <span className="text-sm text-foreground flex-1">{g.name}</span>
+              <button type="button" aria-label={`Quitar ${g.name}`} onClick={() => onChange(picked.filter((p) => p.id !== g.id))}>
+                <X className="h-4 w-4 text-muted-foreground hover:text-coral" />
               </button>
             </li>
           ))}
         </ul>
       )}
+      {!full && (
+        <div className="relative">
+          <div className="relative">
+            <Search className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+            <Input className="pl-9" value={q} placeholder="Busca un juego…" onChange={(e) => setQ(e.target.value)} />
+            {searching && <Loader2 className="h-4 w-4 absolute right-3 top-1/2 -translate-y-1/2 animate-spin text-muted-foreground" />}
+          </div>
+          {results.length > 0 && (
+            <ul className="absolute z-20 mt-1 w-full max-h-64 overflow-auto rounded-lg border border-border bg-background shadow-lg">
+              {results.filter((g) => !picked.some((p) => p.id === g.id)).map((g) => (
+                <li key={g.id}>
+                  <button
+                    type="button"
+                    className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm hover:bg-muted"
+                    onClick={() => { onChange([...picked, { id: g.id, name: g.name, imageUrl: g.imageUrl }]); setResults([]); setQ(""); }}
+                  >
+                    {g.imageUrl && <img src={g.imageUrl} alt="" loading="lazy" className="h-8 w-8 rounded object-cover" />}
+                    <span className="flex-1">{g.name}</span>
+                    {g.inCatalog && <span className="text-[10px] uppercase tracking-wider text-coral">Ludoteca</span>}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
+      <p className="text-xs text-muted-foreground">Puedes seleccionar hasta {MAX_GAMES} juegos.</p>
     </div>
   );
 }
