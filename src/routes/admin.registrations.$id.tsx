@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -214,6 +214,7 @@ function FormSettings({ form, questions, onSaved }: { form: RegistrationForm; qu
             value={normalizeHighlights(state.highlights)}
             onChange={(rows) => set("highlights", rows as RegistrationForm["highlights"])}
             form={state}
+            setField={set}
           />
         </Row>
         <Row label="Información legal">
@@ -278,47 +279,6 @@ function FormSettings({ form, questions, onSaved }: { form: RegistrationForm; qu
 
       {!isExternal && (
         <>
-          <Card title="Datos del evento">
-            <Row label="Fecha y hora del evento">
-              <Input type="datetime-local" value={toLocalInput(state.event_date)} onChange={(e) => set("event_date", e.target.value ? new Date(e.target.value).toISOString() : null)} className="bg-white border-ink/15 text-ink" />
-              <p className="text-xs text-ink/50 mt-1">Se usa en los correos, en el botón de calendario y para la pregunta con fecha límite.</p>
-            </Row>
-            <Row label="Ubicación">
-              <Input value={state.event_location ?? ""} onChange={(e) => set("event_location", e.target.value || null)} placeholder="Carrer Exemple 1, Barcelona" className="bg-white border-ink/15 text-ink" />
-            </Row>
-          </Card>
-
-          <Card title="Plazas e invitados">
-            <Row label="Máximo de asistentes (vacío = sin límite)"><Input type="number" min={1} value={state.max_responses ?? ""} onChange={(e) => set("max_responses", e.target.value ? Number(e.target.value) : null)} className="bg-white border-ink/15 text-ink" /></Row>
-            <Row label="Cierre de inscripciones"><Input type="datetime-local" value={toLocalInput(state.closes_at)} onChange={(e) => set("closes_at", e.target.value ? new Date(e.target.value).toISOString() : null)} className="bg-white border-ink/15 text-ink" /></Row>
-            <Row>
-              <div className="flex items-center gap-3">
-                <Switch checked={state.allow_guests} onCheckedChange={(v) => set("allow_guests", v)} />
-                <Label className="text-ink">Permitir invitados (cuentan como plazas)</Label>
-              </div>
-            </Row>
-            {state.allow_guests && (
-              <Row label="Máximo de invitados por inscripción">
-                <Input type="number" min={1} max={20} value={state.max_guests_per_response} onChange={(e) => set("max_guests_per_response", Number(e.target.value) || 1)} className="bg-white border-ink/15 text-ink" />
-              </Row>
-            )}
-          </Card>
-
-          <Card title="Pago (manual)">
-            <Row>
-              <div className="flex items-center gap-3">
-                <Switch checked={state.payment_required} onCheckedChange={(v) => set("payment_required", v)} />
-                <Label className="text-ink">Requiere pago</Label>
-              </div>
-            </Row>
-            {state.payment_required && (
-              <>
-                <Row label="Importe (céntimos)"><Input type="number" min={0} value={state.payment_amount_cents ?? ""} onChange={(e) => set("payment_amount_cents", e.target.value ? Number(e.target.value) : null)} className="bg-white border-ink/15 text-ink" placeholder="2500 = 25,00 €" /></Row>
-                <Row label="Moneda"><Input value={state.payment_currency} onChange={(e) => set("payment_currency", e.target.value.toUpperCase())} maxLength={3} className="bg-white border-ink/15 text-ink" /></Row>
-                <Row label="Instrucciones de pago"><Textarea rows={3} value={state.payment_instructions ?? ""} onChange={(e) => set("payment_instructions", e.target.value || null)} placeholder="Bizum / transferencia / pago en local…" className="bg-white border-ink/15 text-ink" /></Row>
-              </>
-            )}
-          </Card>
 
           <Card title="Notificaciones">
             <Row label="Emails para notificar nuevas inscripciones (separados por coma)">
@@ -376,6 +336,37 @@ function QuestionsEditor({ formId, initial, eventDate, allowGuests }: { formId: 
   const deleteFn = useServerFn(adminDeleteQuestion);
   const reorderFn = useServerFn(adminReorderQuestions);
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }), useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }));
+  const creatingGuests = useRef(false);
+
+  // The guests question is managed automatically by the "Permitir invitados" switch.
+  useEffect(() => {
+    if (creatingGuests.current) return;
+    const existing = questions.find((q) => q.special === "guests");
+    if (!allowGuests) {
+      if (!existing) return;
+      creatingGuests.current = true;
+      void (async () => {
+        try {
+          await deleteFn({ data: { id: existing.id } });
+          setQuestions((qs) => qs.filter((q) => q.special !== "guests"));
+        } catch (e) { toast.error((e as Error).message); } finally { creatingGuests.current = false; }
+      })();
+      return;
+    }
+    if (existing) return;
+    creatingGuests.current = true;
+    void (async () => {
+      try {
+        const base = {
+          form_id: formId, position: questions.length, type: "number" as const, required: true,
+          label: "¿Vienes con alguien?", options: [], special: "guests" as const, hide_after_wednesday: false,
+        };
+        const { id } = await upsertFn({ data: base });
+        setQuestions((qs) => qs.some((q) => q.special === "guests") ? qs : [...qs, { id, help: null, ...base }]);
+      } catch (e) { toast.error((e as Error).message); } finally { creatingGuests.current = false; }
+    })();
+  }, [allowGuests, questions, formId, upsertFn]);
+
 
   const onDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
@@ -445,6 +436,20 @@ function SortableQuestion({ q, eventDate, allowGuests, onChange, onRemove }: { q
   const style = { transform: CSS.Transform.toString(transform), transition, opacity: isDragging ? 0.5 : 1 };
   const needsOptions = q.type === "select" || q.type === "radio" || q.type === "checkbox";
 
+  if (q.special === "guests") {
+    return (
+      <div ref={setNodeRef} style={style} className="rounded-lg border border-ink/10 bg-ink/[0.03] p-4">
+        <div className="flex items-start gap-3">
+          <button {...attributes} {...listeners} className="cursor-grab touch-none text-ink/40 hover:text-ink mt-1"><GripVertical className="h-4 w-4" /></button>
+          <div className="flex-1">
+            <p className="text-sm font-medium text-ink">¿Vienes con alguien?</p>
+            <p className="text-xs text-ink/60 mt-1">Pregunta automática con las opciones «Vengo solo/a», «+1», «+2»… Se muestra porque has permitido invitados y no se puede editar. Para quitarla, desactiva «Permitir invitados» en las categorías destacadas.</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div ref={setNodeRef} style={style} className="rounded-lg border border-ink/10 bg-white p-4">
       <div className="flex items-start gap-3">
@@ -476,12 +481,10 @@ function SortableQuestion({ q, eventDate, allowGuests, onChange, onRemove }: { q
                 <SelectTrigger className="bg-white border-ink/15 text-ink"><SelectValue /></SelectTrigger>
                 <SelectContent className="bg-white border-ink/15 text-ink">
                   <SelectItem value="none">Ninguna (normal)</SelectItem>
-                  <SelectItem value="guests" disabled={!allowGuests}>Número de invitados</SelectItem>
-                  <SelectItem value="game_pick">Buscador de juegos (BoardGameGeek + ludoteca)</SelectItem>
+                  <SelectItem value="game_pick">Buscador de juegos del catálogo</SelectItem>
                   <SelectItem value="contact_email">Email de contacto</SelectItem>
                 </SelectContent>
               </Select>
-              {q.special === "guests" && !allowGuests && <p className="text-xs text-amber-600 mt-1">Activa «Permitir invitados» arriba.</p>}
             </div>
             <div className="flex items-end">
               <div className="flex items-center gap-3 pb-2">
@@ -814,40 +817,119 @@ function CommunicationSettings({ form, onSaved }: { form: RegistrationForm; onSa
   );
 }
 
-function HighlightsEditor({ value, onChange, form }: { value: HighlightRow[]; onChange: (rows: HighlightRow[]) => void; form: RegistrationForm }) {
+function fmtEventDate(iso: string | null) {
+  if (!iso) return "";
+  return new Date(iso).toLocaleString("es-ES", { dateStyle: "full", timeStyle: "short", timeZone: "Europe/Madrid" });
+}
+
+function HighlightsEditor({ value, onChange, form, setField }: {
+  value: HighlightRow[];
+  onChange: (rows: HighlightRow[]) => void;
+  form: RegistrationForm;
+  setField: <K extends keyof RegistrationForm>(k: K, v: RegistrationForm[K]) => void;
+}) {
   const update = (i: number, patch: Partial<HighlightRow>) =>
     onChange(value.map((r, idx) => (idx === i ? { ...r, ...patch } : r)));
 
-  const suggest = () => {
-    const rows: HighlightRow[] = [];
-    if (form.event_date) rows.push({ emoji: "🗓", label: "Fecha", text: new Date(form.event_date).toLocaleString("es-ES", { dateStyle: "full", timeStyle: "short", timeZone: "Europe/Madrid" }) });
-    if (form.event_location) rows.push({ emoji: "📍", label: "Lugar", text: form.event_location });
-    if (form.payment_required && form.payment_amount_cents != null) rows.push({ emoji: "💶", label: "Precio", text: `${(form.payment_amount_cents / 100).toFixed(2)} ${form.payment_currency}` });
-    if (form.max_responses) rows.push({ emoji: "👥", label: "Plazas", text: `${form.max_responses} plazas` });
-    onChange([...value, ...rows.filter((r) => !value.some((v) => v.label === r.label))]);
+  const kindOf = (label: string) => {
+    const l = label.trim().toLowerCase();
+    if (l.startsWith("fecha")) return "date" as const;
+    if (l.startsWith("lugar") || l.startsWith("ubicaci")) return "place" as const;
+    if (l.startsWith("plaza")) return "seats" as const;
+    return "free" as const;
   };
 
   return (
-    <div className="space-y-2">
-      {value.map((row, i) => (
-        <div key={i} className="flex gap-2 items-start">
-          <Input value={row.emoji} onChange={(e) => update(i, { emoji: e.target.value })} className="w-16 text-center bg-white border-ink/15 text-ink" placeholder="📍" />
-          <Input value={row.label} onChange={(e) => update(i, { label: e.target.value })} className="w-40 bg-white border-ink/15 text-ink" placeholder="Lugar" />
-          <Input value={row.text} onChange={(e) => update(i, { text: e.target.value })} className="flex-1 bg-white border-ink/15 text-ink" placeholder="Carrer Exemple 3, Barcelona" />
-          <Button type="button" variant="ghost" size="icon" onClick={() => onChange(value.filter((_, idx) => idx !== i))}>
-            <Trash2 className="h-4 w-4 text-ink/50" />
-          </Button>
-        </div>
-      ))}
+    <div className="space-y-3">
+      {value.map((row, i) => {
+        const kind = kindOf(row.label);
+        return (
+          <div key={i} className="rounded-lg border border-ink/10 bg-ink/[0.02] p-3 space-y-2">
+            <div className="flex gap-2 items-start">
+              <Input value={row.emoji} onChange={(e) => update(i, { emoji: e.target.value })} className="w-16 text-center bg-white border-ink/15 text-ink" placeholder="📍" />
+              <Input value={row.label} onChange={(e) => update(i, { label: e.target.value })} className="w-40 bg-white border-ink/15 text-ink" placeholder="Lugar" />
+              <Input
+                value={row.text}
+                onChange={(e) => {
+                  update(i, { text: e.target.value });
+                  if (kind === "place") setField("event_location", e.target.value || null);
+                }}
+                className="flex-1 bg-white border-ink/15 text-ink"
+                placeholder={kind === "date" ? "Se rellena con la fecha de abajo" : "Carrer Exemple 3, Barcelona"}
+              />
+              <Button type="button" variant="ghost" size="icon" onClick={() => onChange(value.filter((_, idx) => idx !== i))}>
+                <Trash2 className="h-4 w-4 text-ink/50" />
+              </Button>
+            </div>
+
+            {kind === "date" && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1">
+                <Row label="Fecha y hora del evento">
+                  <Input
+                    type="datetime-local"
+                    value={toLocalInput(form.event_date)}
+                    onChange={(e) => {
+                      const iso = e.target.value ? new Date(e.target.value).toISOString() : null;
+                      setField("event_date", iso);
+                      update(i, { text: fmtEventDate(iso) });
+                    }}
+                    className="bg-white border-ink/15 text-ink"
+                  />
+                  <p className="text-xs text-ink/50 mt-1">Se usa en los correos, en el botón de calendario y en la pregunta con fecha límite.</p>
+                </Row>
+                <Row label="Cierre de inscripciones">
+                  <Input
+                    type="datetime-local"
+                    value={toLocalInput(form.closes_at)}
+                    onChange={(e) => setField("closes_at", e.target.value ? new Date(e.target.value).toISOString() : null)}
+                    className="bg-white border-ink/15 text-ink"
+                  />
+                </Row>
+              </div>
+            )}
+
+            {kind === "seats" && (
+              <div className="space-y-3 pt-1">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <Row label="Número de plazas (vacío = sin límite)">
+                    <Input
+                      type="number"
+                      min={1}
+                      value={form.max_responses ?? ""}
+                      onChange={(e) => {
+                        const n = e.target.value ? Number(e.target.value) : null;
+                        setField("max_responses", n);
+                        update(i, { text: n ? `${n} plazas` : "" });
+                      }}
+                      className="bg-white border-ink/15 text-ink"
+                    />
+                  </Row>
+                  {form.allow_guests && (
+                    <Row label="Máximo de invitados por inscripción">
+                      <Input type="number" min={1} max={20} value={form.max_guests_per_response} onChange={(e) => setField("max_guests_per_response", Number(e.target.value) || 1)} className="bg-white border-ink/15 text-ink" />
+                    </Row>
+                  )}
+                </div>
+                <div className="flex items-center gap-3">
+                  <Switch checked={form.allow_guests} onCheckedChange={(v) => setField("allow_guests", v)} />
+                  <Label className="text-ink text-sm">Permitir invitados (cuentan como plazas)</Label>
+                </div>
+                {form.allow_guests && (
+                  <p className="text-xs text-ink/50">Se añade automáticamente la pregunta «¿Vienes con alguien?» (Vengo solo/a, +1, +2…). No se puede editar.</p>
+                )}
+              </div>
+            )}
+          </div>
+        );
+      })}
       <div className="flex flex-wrap gap-2 pt-1">
-        {HIGHLIGHT_PRESETS.map((p) => (
-          <Button key={p.label} type="button" size="sm" variant="outline" onClick={() => onChange([...value, { emoji: p.emoji, label: p.label, text: "" }])}>
-            {p.emoji} {p.label}
+        {HIGHLIGHT_PRESETS.filter((p) => !value.some((v) => v.label.trim().toLowerCase() === p.label.toLowerCase())).map((p) => (
+          <Button key={p.label} type="button" size="sm" variant="outline" onClick={() => onChange([...value, { emoji: p.emoji, label: p.label, text: p.label === "Fecha" ? fmtEventDate(form.event_date) : p.label === "Lugar" ? (form.event_location ?? "") : p.label === "Plazas" && form.max_responses ? `${form.max_responses} plazas` : "" }])}>
+            <Plus className="h-3 w-3 mr-1" /> {p.emoji} {p.label}
           </Button>
         ))}
-        <Button type="button" size="sm" variant="secondary" onClick={suggest}>Rellenar con los datos del evento</Button>
       </div>
-      <p className="text-xs text-ink/50">Aparecen justo debajo de la descripción, en el orden de esta lista.</p>
+      <p className="text-xs text-ink/50">Aparecen justo debajo de la descripción, en el orden de esta lista. Las categorías «Fecha» y «Plazas» incluyen los ajustes del evento.</p>
     </div>
   );
 }

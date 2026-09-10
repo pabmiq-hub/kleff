@@ -289,7 +289,7 @@ function GuestsField({ max, value, onChange }: { max: number; value: number; onC
       <SelectTrigger><SelectValue /></SelectTrigger>
       <SelectContent>
         {Array.from({ length: max + 1 }, (_, i) => (
-          <SelectItem key={i} value={String(i)}>{i === 0 ? "Voy solo/a" : `${i} invitado${i === 1 ? "" : "s"}`}</SelectItem>
+          <SelectItem key={i} value={String(i)}>{i === 0 ? "Vengo solo/a" : `+${i}`}</SelectItem>
         ))}
       </SelectContent>
     </Select>
