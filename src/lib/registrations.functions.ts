@@ -221,7 +221,8 @@ export const submitRegistration = createServerFn({ method: "POST" })
       const { sendRegistrationEmail } = await import("@/lib/registrations-email.server");
 
       if (data.emailContact && f.send_confirmation_email !== false) {
-        void sendRegistrationEmail("confirmation", f, {
+        // Must be awaited: the serverless request ends as soon as we return.
+        await sendRegistrationEmail("confirmation", f, {
           cancel_token: row.cancel_token,
           email_contact: data.emailContact,
           guests_count: guests,
@@ -252,7 +253,7 @@ export const submitRegistration = createServerFn({ method: "POST" })
         emailContact: data.emailContact ?? null,
         data: data.data as Record<string, unknown>,
       });
-      void sendEmailSafe({
+      await sendEmailSafe({
         to: TEAM_INBOX,
         subject: alert.subject,
         html: alert.html,
