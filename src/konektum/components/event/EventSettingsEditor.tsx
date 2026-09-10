@@ -29,7 +29,7 @@ import { Checkbox } from "@/konektum/ui/checkbox";
 import WrappedQuestionsEditor from "./WrappedQuestionsEditor";
 import IcebreakersEditor from "./IcebreakersEditor";
 import { normalizeIcebreakers, serializeIcebreakers, type IcebreakersConfig } from "@/konektum/lib/icebreakers";
-import { slugifyEventName } from "@/konektum/lib/publicUrls";
+import { slugifyEventName, slugifyEventDraft } from "@/konektum/lib/publicUrls";
 import { DEFAULT_WRAPPED_QUESTIONS, getWrappedQuestions, type WrappedQuestion } from "@/konektum/lib/wrappedQuestions";
 
 const AVAILABLE_LANGUAGE_OPTIONS: { code: string; label: string }[] = [
@@ -444,12 +444,13 @@ const EventSettingsEditor = ({
                   id="event-slug"
                   value={formSlug}
                   placeholder="mi-evento"
-                  onChange={(e) => setFormSlug(slugifyEventName(e.target.value))}
+                  onChange={(e) => setFormSlug(slugifyEventDraft(e.target.value))}
                 />
               </div>
               <p className="text-xs text-muted-foreground">
-                Enlaces: /{formSlug || "mi-evento"}/registro · /check-in · /usuario · /mesas · /seleccion
+                Enlaces: /{slugifyEventName(formSlug) || "mi-evento"} (registro) · /check-in · /usuario · /mesas · /seleccion
               </p>
+
             </div>
             <div className="space-y-2">
               <Label htmlFor="event-date">Fecha</Label>

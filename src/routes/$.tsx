@@ -7,6 +7,9 @@ import { CustomPage } from "@/components/pages/CustomPage";
 import { getPublishedForm } from "@/lib/registrations.functions";
 import { resolveKonEvent } from "@/lib/kon-public.functions";
 import { PublicRegistrationPage } from "@/components/pages/PublicRegistrationPage";
+import { PublicEventPage } from "@/konektum/pages/PublicEventPage";
+import ParticipantJoin from "@/konektum/pages/ParticipantJoin";
+
 
 type Locale = "es" | "ca" | "en";
 
@@ -60,16 +63,12 @@ export const Route = createFileRoute("/$")({
         const { post } = await getBlogPostBySlug({ data: { slug: slugCandidate, locale } });
         if (post) return { kind: "post" as const, post, locale };
 
-        // 4) Konektum event slug at root -> public registration page.
+        // 4) Konektum event slug at root -> participant registration page.
         if (locale === "es") {
           const konEvent = await resolveKonEvent({ data: { slug: slugCandidate } });
-          if (konEvent) {
-            throw redirect({
-              to: "/$eventSlug/registro",
-              params: { eventSlug: konEvent.slug || slugCandidate },
-            });
-          }
+          if (konEvent) return { kind: "kon" as const, event: konEvent };
         }
+
       }
 
 
@@ -145,6 +144,19 @@ export const Route = createFileRoute("/$")({
         ],
       };
     }
+    if (loaderData?.kind === "kon") {
+      const title = `Registro · ${loaderData.event.name} · KLEFF`;
+      return {
+        meta: [
+          { title },
+          { name: "description", content: `Registro del evento ${loaderData.event.name}.` },
+          { name: "robots", content: "noindex" },
+          { property: "og:title", content: title },
+          { property: "og:type", content: "website" },
+          { name: "twitter:card", content: "summary" },
+        ],
+      };
+    }
     return {
       meta: [
         { title: "Página no encontrada — KLEFF" },
@@ -166,8 +178,16 @@ function CatchAll() {
   if (data.kind === "registration") {
     return <PublicRegistrationPage form={data.form} questions={data.questions} responsesCount={data.responsesCount} attendeesCount={data.attendeesCount} />;
   }
-  return <NotFound path={data.path} />;
+  if (data.kind === "kon") {
+    return (
+      <PublicEventPage event={data.event}>
+        <ParticipantJoin />
+      </PublicEventPage>
+    );
+  }
+  return <NotFound path={data.kind === "not-found" ? data.path : ""} />;
 }
+
 
 
 function NotFound({ path }: { path: string }) {

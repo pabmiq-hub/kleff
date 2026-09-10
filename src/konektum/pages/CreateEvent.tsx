@@ -42,7 +42,7 @@ type ParticipantMode = "manual" | "excel" | "both";
 type EventModule = "social" | "professional";
 import EventSeriesManager from "@/konektum/components/event/EventSeriesManager";
 import { createSeriesEventsFromBase, type SeriesDateEntry } from "@/konektum/lib/eventSeries";
-import { slugifyEventName } from "@/konektum/lib/publicUrls";
+import { slugifyEventName, slugifyEventDraft } from "@/konektum/lib/publicUrls";
 
 type B2BRotationType = "client_fixed" | "provider_fixed";
 type RegistrationFormMode = "auto" | "template" | "custom";
@@ -392,7 +392,7 @@ const CreateEvent = () => {
     // Create event in database with organizer_id
     const eventInsertData = {
       name: eventName,
-      slug: (eventSlug || slugifyEventName(eventName)) || null,
+      slug: (slugifyEventName(eventSlug) || slugifyEventName(eventName)) || null,
       date: eventDate.split('T')[0],
       event_time: eventDate.includes('T') ? eventDate.split('T')[1] : null,
       event_location: eventLocation.trim() || null,
@@ -999,13 +999,14 @@ const CreateEvent = () => {
                     value={eventSlug}
                     onChange={(e) => {
                       setSlugTouched(true);
-                      setEventSlug(slugifyEventName(e.target.value));
+                      setEventSlug(slugifyEventDraft(e.target.value));
                     }}
                   />
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  Los enlaces del evento serán /{eventSlug || "mi-evento"}/registro, /check-in, /usuario, /mesas y /seleccion.
+                  Los enlaces del evento serán /{slugifyEventName(eventSlug) || "mi-evento"} (registro), /check-in, /usuario, /mesas y /seleccion.
                 </p>
+
               </div>
 
               <div className="space-y-2">
