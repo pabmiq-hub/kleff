@@ -426,8 +426,6 @@ serve(async (req) => {
 
     // Trigger super like notifications for every super like actually stored
     if (allowedSuperLikeIds.size > 0 && event.super_like_enabled) {
-      const notifyUrl = Deno.env.get('SUPABASE_URL')!;
-      const notifyKey = Deno.env.get('SUPABASE_ANON_KEY')!;
       for (const recipientId of allowedSuperLikeIds) {
         try {
           await invokeKonFunction("send-super-like-notification", { eventId, recipientId });
