@@ -29,7 +29,7 @@ import { Checkbox } from "@/konektum/ui/checkbox";
 import WrappedQuestionsEditor from "./WrappedQuestionsEditor";
 import IcebreakersEditor from "./IcebreakersEditor";
 import { normalizeIcebreakers, serializeIcebreakers, type IcebreakersConfig } from "@/konektum/lib/icebreakers";
-import { slugifyEventName } from "@/konektum/lib/publicUrls";
+import { slugifyEventName, slugifyEventDraft } from "@/konektum/lib/publicUrls";
 import { DEFAULT_WRAPPED_QUESTIONS, getWrappedQuestions, type WrappedQuestion } from "@/konektum/lib/wrappedQuestions";
 
 const AVAILABLE_LANGUAGE_OPTIONS: { code: string; label: string }[] = [

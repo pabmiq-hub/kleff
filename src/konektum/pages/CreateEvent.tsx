@@ -42,7 +42,7 @@ type ParticipantMode = "manual" | "excel" | "both";
 type EventModule = "social" | "professional";
 import EventSeriesManager from "@/konektum/components/event/EventSeriesManager";
 import { createSeriesEventsFromBase, type SeriesDateEntry } from "@/konektum/lib/eventSeries";
-import { slugifyEventName } from "@/konektum/lib/publicUrls";
+import { slugifyEventName, slugifyEventDraft } from "@/konektum/lib/publicUrls";
 
 type B2BRotationType = "client_fixed" | "provider_fixed";
 type RegistrationFormMode = "auto" | "template" | "custom";
