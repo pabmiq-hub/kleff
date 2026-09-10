@@ -340,8 +340,20 @@ function QuestionsEditor({ formId, initial, eventDate, allowGuests }: { formId: 
 
   // The guests question is managed automatically by the "Permitir invitados" switch.
   useEffect(() => {
-    if (!allowGuests || creatingGuests.current) return;
-    if (questions.some((q) => q.special === "guests")) return;
+    if (creatingGuests.current) return;
+    const existing = questions.find((q) => q.special === "guests");
+    if (!allowGuests) {
+      if (!existing) return;
+      creatingGuests.current = true;
+      void (async () => {
+        try {
+          await deleteFn({ data: { id: existing.id } });
+          setQuestions((qs) => qs.filter((q) => q.special !== "guests"));
+        } catch (e) { toast.error((e as Error).message); } finally { creatingGuests.current = false; }
+      })();
+      return;
+    }
+    if (existing) return;
     creatingGuests.current = true;
     void (async () => {
       try {
