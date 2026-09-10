@@ -165,8 +165,8 @@ serve(async (req: Request) => {
       `;
 
       const senderFrom = resendConfig?.sender_email
-        ? `${resendConfig.sender_name || organizer.company_name || "Konektum"} <${resendConfig.sender_email}>`
-        : `${organizer?.company_name || "Konektum"} <noreply@konektum.com>`;
+        ? `${resendConfig.sender_name || organizer.company_name || "KLEFF"} <${resendConfig.sender_email}>`
+        : `${organizer?.company_name || "KLEFF"} <noreply@kleff.es>`;
       await fetch("https://api.resend.com/emails", {
         method: "POST",
         headers: { "Authorization": `Bearer ${resendApiKey}`, "Content-Type": "application/json" },

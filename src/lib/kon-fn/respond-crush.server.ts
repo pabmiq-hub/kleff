@@ -123,7 +123,7 @@ const sendCrushEmail = async (args: SendArgs) => {
     await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: { Authorization: `Bearer ${resendApiKey}`, "Content-Type": "application/json" },
-      body: JSON.stringify({ from: "Konektum <hola@konektum.com>", to: [toEmail], subject, html }),
+      body: JSON.stringify({ from: "KLEFF <hola@kleff.es>", to: [toEmail], subject, html }),
     });
   } catch (mailErr) {
     console.error("[respond-crush] email send failed", mailErr);

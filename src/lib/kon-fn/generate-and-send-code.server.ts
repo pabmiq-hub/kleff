@@ -105,7 +105,7 @@ serve(async (req) => {
           body: JSON.stringify({
             participantId: participant.id,
             eventId,
-            baseUrl: 'https://konektum.com'
+            baseUrl: 'https://kleff.es'
           })
         });
         emailSent = emailResponse.ok;

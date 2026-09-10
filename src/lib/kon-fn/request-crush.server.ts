@@ -198,7 +198,7 @@ serve(async (req: Request) => {
     const token = await createCrushToken(inserted.id);
     await supabase.from("crush_requests").update({ token }).eq("id", inserted.id);
 
-    const baseUrl = Deno.env.get("PUBLIC_APP_URL") || "https://konektum.com";
+    const baseUrl = Deno.env.get("PUBLIC_APP_URL") || "https://kleff.es";
     const acceptUrl = `${baseUrl}/crush-response?id=${inserted.id}&token=${token}&action=accept`;
     const declineUrl = `${baseUrl}/crush-response?id=${inserted.id}&token=${token}&action=decline`;
 
@@ -249,7 +249,7 @@ serve(async (req: Request) => {
           method: "POST",
           headers: { Authorization: `Bearer ${resendApiKey}`, "Content-Type": "application/json" },
           body: JSON.stringify({
-            from: "Konektum <hola@konektum.com>",
+            from: "KLEFF <hola@kleff.es>",
             to: [target.email], subject, html,
           }),
         });

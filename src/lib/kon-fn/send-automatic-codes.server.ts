@@ -144,9 +144,9 @@ serve(async (req) => {
       const isEn = lang === 'en';
 
       // Load branding
-      const KONEKTUM_LOGO_URL = "https://konektum.com/konektum-logo.png";
+      const KONEKTUM_LOGO_URL = "https://kleff.es/kleff-logo.png";
       let defaultLogoUrl = KONEKTUM_LOGO_URL;
-      let defaultBrandName = "Konektum";
+      let defaultBrandName = "KLEFF";
       
       if (event.organizer_id) {
         const { data: organizer } = await supabase
@@ -160,7 +160,7 @@ serve(async (req) => {
           const isProfessionalOnly = modules.length === 1 && modules[0] === "professional";
           if (isProfessionalOnly && organizer.logo_url) {
             defaultLogoUrl = organizer.logo_url;
-            defaultBrandName = organizer.company_name || "Konektum";
+            defaultBrandName = organizer.company_name || "KLEFF";
           }
         }
       }
@@ -183,7 +183,7 @@ serve(async (req) => {
         : `⏰ ¡El evento comienza en aproximadamente ${hoursUntil} horas!`;
 
       // Organizer's Resend config
-      let senderFrom = `${brandName} <noreply@konektum.com>`;
+      let senderFrom = `${brandName} <noreply@kleff.es>`;
       if (event.organizer_id) {
         const { data: resendConfig } = await supabase
           .from("organizer_resend_config")
@@ -196,7 +196,7 @@ serve(async (req) => {
         }
       }
 
-      const publishedBaseUrl = "https://konektum.com";
+      const publishedBaseUrl = "https://kleff.es";
 
       for (const participant of participants) {
         if (!participant.email) continue;

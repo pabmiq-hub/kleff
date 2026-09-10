@@ -35,7 +35,7 @@ const DEFAULT_ES = {
   intro:
     "Te recordamos que tu inscripción a {{evento}} aún figura como pendiente de pago.\n\n📅 Fecha: {{fecha}}\n📍 Lugar: {{ubicacion}}\n🕐 Hora: {{hora}}\n\nPor favor, completa el pago para confirmar tu plaza.",
   closing: "Si ya has realizado el pago, ignora este mensaje. ¡Gracias!",
-  signature: "Un saludo,\nEquipo Konektum",
+  signature: "Un saludo,\nEquipo KLEFF",
 };
 
 const DEFAULT_EN = {
@@ -44,7 +44,7 @@ const DEFAULT_EN = {
   intro:
     "Just a reminder that your registration for {{evento}} is still marked as unpaid.\n\n📅 Date: {{fecha}}\n📍 Location: {{ubicacion}}\n🕐 Time: {{hora}}\n\nPlease complete the payment to secure your spot.",
   closing: "If you already paid, please ignore this message. Thank you!",
-  signature: "Best regards,\nKonektum Team",
+  signature: "Best regards,\nKLEFF Team",
 };
 
 function parseEventDate(dateStr?: string | null): Date | null {
@@ -111,14 +111,14 @@ async function processEvent(
   const tpl = comm.payment_reminder || (isEn ? DEFAULT_EN : DEFAULT_ES);
   const defaults = isEn ? DEFAULT_EN : DEFAULT_ES;
   const primaryColor = comm.primaryColor || "#e11d48";
-  const KONEKTUM_LOGO = "https://konektum.com/konektum-logo.png";
+  const KONEKTUM_LOGO = "https://kleff.es/kleff-logo.png";
   let logoUrl = comm.logoUrl || KONEKTUM_LOGO;
-  let brandName = comm.brandName || "Konektum";
+  let brandName = comm.brandName || "KLEFF";
   const headerTitle = comm.headerTitle || (isEn ? "Welcome to the event!" : "¡Bienvenido/a al evento!");
   const logoHeight = Math.min(120, Math.max(24, Number(comm.logoHeight) || 48));
 
   // Resolve organizer branding + resend config
-  let senderFrom = `${brandName} <noreply@konektum.com>`;
+  let senderFrom = `${brandName} <noreply@kleff.es>`;
   let apiKey = resendKey;
   if (event.organizer_id) {
     const { data: org } = await supabase

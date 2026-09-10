@@ -150,7 +150,7 @@ Deno.serve(async (req) => {
         const escapedEmail = email.replace(/[&<>"']/g, (c: string) =>
           ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c] || c));
 
-        const loginUrl = "https://konektum.com/admin/login";
+        const loginUrl = "https://kleff.es/admin/login";
 
         const emailRes = await fetch("https://api.resend.com/emails", {
           method: "POST",
@@ -159,7 +159,7 @@ Deno.serve(async (req) => {
             Authorization: `Bearer ${resendApiKey}`,
           },
           body: JSON.stringify({
-            from: "Konektum <noreply@konektum.com>",
+            from: "KLEFF <noreply@kleff.es>",
             to: [email],
             subject: "Tu cuenta de organizador ha sido creada",
             html: `

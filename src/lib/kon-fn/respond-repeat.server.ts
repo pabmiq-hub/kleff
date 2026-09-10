@@ -79,7 +79,7 @@ const sendRequesterEmail = async (params: {
     await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: { Authorization: `Bearer ${resendApiKey}`, "Content-Type": "application/json" },
-      body: JSON.stringify({ from: "Konektum <hola@konektum.com>", to: [requesterEmail], subject, html }),
+      body: JSON.stringify({ from: "KLEFF <hola@kleff.es>", to: [requesterEmail], subject, html }),
     });
   } catch (mailErr) {
     console.error("[respond-repeat] email send failed", mailErr);

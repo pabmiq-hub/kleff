@@ -107,7 +107,7 @@ export const Route = createRootRoute({
       },
       {
         rel: "preconnect",
-        href: "https://gyecpblbaovmprdvgmct.supabase.co",
+        href: "https://vkxogcfrbphhwdwzcnmt.supabase.co",
       },
     ],
   }),
