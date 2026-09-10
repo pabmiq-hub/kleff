@@ -1,7 +1,7 @@
 import { useServerFn } from "@tanstack/react-start";
 import { AutoResizeIframe } from "@/components/cms/AutoResizeIframe";
 import { useState } from "react";
-import { submitRegistration, searchCatalogGames, type RegistrationForm, type RegistrationQuestion } from "@/lib/registrations.functions";
+import { submitRegistration, searchGamesForPick, type RegistrationForm, type RegistrationQuestion } from "@/lib/registrations.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -9,9 +9,10 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { CheckCircle2, Loader2, CalendarPlus, MapPin, CalendarDays, Search } from "lucide-react";
+import { CheckCircle2, Loader2, CalendarPlus, MapPin, CalendarDays, Search, X } from "lucide-react";
 import { googleCalendarUrl, formatMadrid } from "@/lib/registrations-calendar";
-import { useEffect } from "react";
+import { normalizeHighlights, plainTextToHtml, DEFAULT_LEGAL_HTML } from "@/lib/registrations-content";
+import { useEffect, useRef } from "react";
 import { SiteLayout } from "@/components/site/SiteLayout";
 import { toast } from "sonner";
 
@@ -21,6 +22,8 @@ type Props = {
   responsesCount: number;
   attendeesCount?: number;
 };
+
+type PickedGame = { id: string; name: string; imageUrl: string | null };
 
 export function PublicRegistrationPage({ form, questions, responsesCount, attendeesCount }: Props) {
   const submitFn = useServerFn(submitRegistration);
@@ -51,20 +54,36 @@ export function PublicRegistrationPage({ form, questions, responsesCount, attend
       })
     : null;
   const closed = form.closes_at && new Date(form.closes_at) < new Date();
+  const highlights = normalizeHighlights(form.highlights);
+  const descriptionHtml = form.description_html?.trim()
+    ? form.description_html
+    : form.description
+      ? plainTextToHtml(form.description)
+      : null;
+  const legalHtml = form.legal_info_enabled === false
+    ? null
+    : (form.legal_info_html?.trim() ? form.legal_info_html : DEFAULT_LEGAL_HTML);
 
+  const hasContactQuestion = questions.some((q) => q.special === "contact_email");
   const setVal = (id: string, v: unknown) => setValues((s) => ({ ...s, [id]: v }));
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     for (const q of questions) {
       if (!q.required) continue;
+      if (q.special === "guests") continue; // always has a numeric value (0 = voy solo/a)
       const v = values[q.id];
       const empty = v == null || v === "" || (Array.isArray(v) && v.length === 0);
       if (empty) { toast.error(`Falta: ${q.label}`); return; }
     }
+    const contactQuestion = questions.find((q) => q.special === "contact_email");
+    const email = contactQuestion ? String(values[contactQuestion.id] ?? "") : emailContact;
+    if (!email) { toast.error("Falta el email de contacto"); return; }
     setSubmitting(true);
+    const payload = { ...values };
+    for (const q of questions) if (q.special === "guests") payload[q.id] = guests;
     try {
-      const res = await submitFn({ data: { formId: form.id, emailContact: emailContact || undefined, guests, data: values } });
+      const res = await submitFn({ data: { formId: form.id, emailContact: email, guests, data: payload } });
       setCancelToken((res as { cancelToken?: string }).cancelToken ?? null);
       setDone(true);
     } catch (err) {
@@ -93,7 +112,19 @@ export function PublicRegistrationPage({ form, questions, responsesCount, attend
             {form.event_location && <span className="inline-flex items-center gap-1.5"><MapPin className="h-4 w-4 text-coral" /> {form.event_location}</span>}
           </div>
         )}
-        {form.description && <p className="text-muted-foreground whitespace-pre-line mb-6">{form.description}</p>}
+        {descriptionHtml && (
+          <div className="blog-content mb-6" dangerouslySetInnerHTML={{ __html: descriptionHtml }} />
+        )}
+        {highlights.length > 0 && (
+          <ul className="mb-6 rounded-xl border border-border bg-muted/40 p-4 space-y-2">
+            {highlights.map((h, i) => (
+              <li key={i} className="flex gap-2 text-sm text-foreground">
+                <span aria-hidden className="shrink-0">{h.emoji}</span>
+                <span><strong className="font-medium">{h.label}:</strong> {h.text}</span>
+              </li>
+            ))}
+          </ul>
+        )}
         {seatsLeft !== null && !fullCapacity && (
           <p className="text-sm text-muted-foreground mb-6">Quedan {seatsLeft} plaza{seatsLeft === 1 ? "" : "s"}.</p>
         )}
@@ -142,20 +173,23 @@ export function PublicRegistrationPage({ form, questions, responsesCount, attend
           <div className="rounded-lg border border-border bg-muted p-6 text-center text-foreground">El plazo de inscripción ha finalizado.</div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-5">
-            <FieldRow label="Email de contacto" required>
-              <Input type="email" required value={emailContact} onChange={(e) => setEmailContact(e.target.value)} />
-            </FieldRow>
-            {form.allow_guests && maxGuests > 0 && !questions.some((q) => q.special === "guests") && (
-              <FieldRow label="¿Vienes con invitados?" help={`Máximo ${maxGuests}. Cada invitado ocupa una plaza.`}>
-                <GuestsField max={maxGuests} value={guests} onChange={setGuests} />
+            {!hasContactQuestion && (
+              <FieldRow label="Email de contacto" required>
+                <Input type="email" required value={emailContact} onChange={(e) => setEmailContact(e.target.value)} />
               </FieldRow>
             )}
             {questions.map((q) => (
               <FieldRow key={q.id} label={q.label} required={q.required} help={q.help}>
                 {q.special === "guests" ? (
-                  <GuestsField max={maxGuests} value={guests} onChange={setGuests} />
+                  <GuestsField
+                    max={maxGuests}
+                    value={guests}
+                    onChange={(n) => { setGuests(n); setVal(q.id, n); }}
+                  />
                 ) : q.special === "game_pick" ? (
-                  <GamePickField value={(values[q.id] as string) ?? ""} onChange={(v) => setVal(q.id, v)} />
+                  <GamePickField value={values[q.id] as PickedGame | string | undefined} onChange={(v) => setVal(q.id, v)} />
+                ) : q.special === "contact_email" ? (
+                  <Input type="email" required value={(values[q.id] as string) ?? ""} onChange={(e) => setVal(q.id, e.target.value)} />
                 ) : (
                   <QuestionField q={q} value={values[q.id]} onChange={(v) => setVal(q.id, v)} />
                 )}
@@ -171,6 +205,16 @@ export function PublicRegistrationPage({ form, questions, responsesCount, attend
               {submitting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />} Enviar inscripción
             </Button>
           </form>
+        )}
+
+        {legalHtml && (
+          <details className="mt-10 rounded-xl border border-border bg-muted/30 p-4">
+            <summary className="cursor-pointer text-sm font-medium text-foreground">Información legal</summary>
+            <div
+              className="blog-content mt-3 text-xs text-muted-foreground [&_p]:mb-2"
+              dangerouslySetInnerHTML={{ __html: legalHtml }}
+            />
+          </details>
         )}
       </div>
     </SiteLayout>
@@ -252,35 +296,63 @@ function GuestsField({ max, value, onChange }: { max: number; value: number; onC
   );
 }
 
-function GamePickField({ value, onChange }: { value: string; onChange: (v: string) => void }) {
-  const searchFn = useServerFn(searchCatalogGames);
-  const [q, setQ] = useState(value);
-  const [results, setResults] = useState<{ id: string; title: string }[]>([]);
-  const [open, setOpen] = useState(false);
+function GamePickField({ value, onChange }: { value: PickedGame | string | undefined; onChange: (v: PickedGame | null) => void }) {
+  const searchFn = useServerFn(searchGamesForPick);
+  const searchRef = useRef(searchFn);
+  searchRef.current = searchFn;
+  const picked: PickedGame | null =
+    value && typeof value === "object" ? (value as PickedGame)
+    : typeof value === "string" && value ? { id: value, name: value, imageUrl: null }
+    : null;
+  const [q, setQ] = useState("");
+  const [results, setResults] = useState<Array<PickedGame & { inCatalog: boolean }>>([]);
+  const [searching, setSearching] = useState(false);
 
   useEffect(() => {
-    if (q.trim().length < 2 || q === value) { setResults([]); return; }
+    const term = q.trim();
+    if (term.length < 2) { setResults([]); return; }
     let alive = true;
+    setSearching(true);
     const t = setTimeout(() => {
-      searchFn({ data: { q } })
-        .then((r) => { if (alive) { setResults((r as { games: { id: string; title: string }[] }).games); setOpen(true); } })
-        .catch(() => { if (alive) setResults([]); });
-    }, 250);
+      searchRef.current({ data: { q: term } })
+        .then((r) => { if (alive) setResults((r as { games: Array<PickedGame & { inCatalog: boolean }> }).games); })
+        .catch(() => { if (alive) setResults([]); })
+        .finally(() => { if (alive) setSearching(false); });
+    }, 350);
     return () => { alive = false; clearTimeout(t); };
-  }, [q, value, searchFn]);
+  }, [q]);
+
+  if (picked) {
+    return (
+      <div className="flex items-center gap-2 rounded-lg border border-border bg-muted/40 p-2">
+        {picked.imageUrl && <img src={picked.imageUrl} alt="" loading="lazy" className="h-8 w-8 rounded object-cover" />}
+        <span className="text-sm text-foreground flex-1">{picked.name}</span>
+        <button type="button" aria-label="Quitar juego" onClick={() => { onChange(null); setQ(""); }}>
+          <X className="h-4 w-4 text-muted-foreground hover:text-coral" />
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="relative">
       <div className="relative">
         <Search className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-        <Input className="pl-9" value={q} placeholder="Busca un juego del catálogo…" onChange={(e) => { setQ(e.target.value); onChange(e.target.value); }} />
+        <Input className="pl-9" value={q} placeholder="Busca un juego…" onChange={(e) => setQ(e.target.value)} />
+        {searching && <Loader2 className="h-4 w-4 absolute right-3 top-1/2 -translate-y-1/2 animate-spin text-muted-foreground" />}
       </div>
-      {open && results.length > 0 && (
-        <ul className="absolute z-20 mt-1 w-full max-h-60 overflow-auto rounded-lg border border-border bg-background shadow-lg">
+      {results.length > 0 && (
+        <ul className="absolute z-20 mt-1 w-full max-h-64 overflow-auto rounded-lg border border-border bg-background shadow-lg">
           {results.map((g) => (
             <li key={g.id}>
-              <button type="button" className="w-full text-left px-3 py-2 text-sm hover:bg-muted" onClick={() => { setQ(g.title); onChange(g.title); setOpen(false); }}>
-                {g.title}
+              <button
+                type="button"
+                className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm hover:bg-muted"
+                onClick={() => { onChange({ id: g.id, name: g.name, imageUrl: g.imageUrl }); setResults([]); }}
+              >
+                {g.imageUrl && <img src={g.imageUrl} alt="" loading="lazy" className="h-8 w-8 rounded object-cover" />}
+                <span className="flex-1">{g.name}</span>
+                {g.inCatalog && <span className="text-[10px] uppercase tracking-wider text-coral">Ludoteca</span>}
               </button>
             </li>
           ))}

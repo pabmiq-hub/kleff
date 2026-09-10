@@ -25,6 +25,8 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { ImagePicker } from "@/components/cms/ImagePicker";
+import { RichTextEditor } from "@/components/cms/RichTextEditor";
+import { normalizeHighlights, plainTextToHtml, DEFAULT_LEGAL_HTML, HIGHLIGHT_PRESETS, type HighlightRow } from "@/lib/registrations-content";
 
 export const Route = createFileRoute("/admin/registrations/$id")({
   head: () => ({ meta: [{ title: "Editar inscripción — Admin KLEFF" }, { name: "robots", content: "noindex, nofollow" }] }),
@@ -154,6 +156,10 @@ function FormSettings({ form, questions, onSaved }: { form: RegistrationForm; qu
             slug: state.slug,
             title: state.title,
             description: state.description,
+            description_html: state.description_html,
+            highlights: normalizeHighlights(state.highlights),
+            legal_info_html: state.legal_info_html,
+            legal_info_enabled: state.legal_info_enabled,
             cover_image_url: state.cover_image_url,
             cover_position: state.cover_position,
             external_iframe_height: state.external_iframe_height,
@@ -196,7 +202,28 @@ function FormSettings({ form, questions, onSaved }: { form: RegistrationForm; qu
 
       <Card title="Contenido">
         <Row label="Título"><Input value={state.title} onChange={(e) => set("title", e.target.value)} className="bg-white border-ink/15 text-ink" /></Row>
-        <Row label="Descripción"><Textarea rows={3} value={state.description ?? ""} onChange={(e) => set("description", e.target.value || null)} className="bg-white border-ink/15 text-ink" /></Row>
+        <Row label="Descripción">
+          <RichTextEditor
+            value={state.description_html ?? (state.description ? plainTextToHtml(state.description) : "")}
+            onChange={(html) => set("description_html", html)}
+            placeholder="Describe el evento: qué haremos, para quién es, qué incluye…"
+          />
+        </Row>
+        <Row label="Categorías destacadas">
+          <HighlightsEditor
+            value={normalizeHighlights(state.highlights)}
+            onChange={(rows) => set("highlights", rows as RegistrationForm["highlights"])}
+            form={state}
+          />
+        </Row>
+        <Row label="Información legal">
+          <LegalInfoEditor
+            html={state.legal_info_html}
+            enabled={state.legal_info_enabled !== false}
+            onChangeHtml={(html) => set("legal_info_html", html)}
+            onToggle={(v) => set("legal_info_enabled", v)}
+          />
+        </Row>
         {!isExternal && (
           <Row label="Mensaje de confirmación"><Textarea rows={2} value={state.confirmation_message ?? ""} onChange={(e) => set("confirmation_message", e.target.value || null)} className="bg-white border-ink/15 text-ink" placeholder="Te confirmamos tu plaza por email…" /></Row>
         )}
@@ -445,12 +472,13 @@ function SortableQuestion({ q, eventDate, allowGuests, onChange, onRemove }: { q
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div>
               <label className="text-xs uppercase tracking-wider text-ink/60 mb-1 block">Pregunta especial</label>
-              <Select value={q.special ?? "none"} onValueChange={(v) => onChange({ ...q, special: v === "none" ? null : (v as "guests" | "game_pick") })}>
+              <Select value={q.special ?? "none"} onValueChange={(v) => onChange({ ...q, special: v === "none" ? null : (v as "guests" | "game_pick" | "contact_email") })}>
                 <SelectTrigger className="bg-white border-ink/15 text-ink"><SelectValue /></SelectTrigger>
                 <SelectContent className="bg-white border-ink/15 text-ink">
                   <SelectItem value="none">Ninguna (normal)</SelectItem>
                   <SelectItem value="guests" disabled={!allowGuests}>Número de invitados</SelectItem>
-                  <SelectItem value="game_pick">Buscador del catálogo KLEFF</SelectItem>
+                  <SelectItem value="game_pick">Buscador de juegos (BoardGameGeek + ludoteca)</SelectItem>
+                  <SelectItem value="contact_email">Email de contacto</SelectItem>
                 </SelectContent>
               </Select>
               {q.special === "guests" && !allowGuests && <p className="text-xs text-amber-600 mt-1">Activa «Permitir invitados» arriba.</p>}
@@ -782,6 +810,74 @@ function CommunicationSettings({ form, onSaved }: { form: RegistrationForm; onSa
           {saving ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Save className="h-4 w-4 mr-2" />} Guardar cambios
         </Button>
       </div>
+    </div>
+  );
+}
+
+function HighlightsEditor({ value, onChange, form }: { value: HighlightRow[]; onChange: (rows: HighlightRow[]) => void; form: RegistrationForm }) {
+  const update = (i: number, patch: Partial<HighlightRow>) =>
+    onChange(value.map((r, idx) => (idx === i ? { ...r, ...patch } : r)));
+
+  const suggest = () => {
+    const rows: HighlightRow[] = [];
+    if (form.event_date) rows.push({ emoji: "🗓", label: "Fecha", text: new Date(form.event_date).toLocaleString("es-ES", { dateStyle: "full", timeStyle: "short", timeZone: "Europe/Madrid" }) });
+    if (form.event_location) rows.push({ emoji: "📍", label: "Lugar", text: form.event_location });
+    if (form.payment_required && form.payment_amount_cents != null) rows.push({ emoji: "💶", label: "Precio", text: `${(form.payment_amount_cents / 100).toFixed(2)} ${form.payment_currency}` });
+    if (form.max_responses) rows.push({ emoji: "👥", label: "Plazas", text: `${form.max_responses} plazas` });
+    onChange([...value, ...rows.filter((r) => !value.some((v) => v.label === r.label))]);
+  };
+
+  return (
+    <div className="space-y-2">
+      {value.map((row, i) => (
+        <div key={i} className="flex gap-2 items-start">
+          <Input value={row.emoji} onChange={(e) => update(i, { emoji: e.target.value })} className="w-16 text-center bg-white border-ink/15 text-ink" placeholder="📍" />
+          <Input value={row.label} onChange={(e) => update(i, { label: e.target.value })} className="w-40 bg-white border-ink/15 text-ink" placeholder="Lugar" />
+          <Input value={row.text} onChange={(e) => update(i, { text: e.target.value })} className="flex-1 bg-white border-ink/15 text-ink" placeholder="Carrer Exemple 3, Barcelona" />
+          <Button type="button" variant="ghost" size="icon" onClick={() => onChange(value.filter((_, idx) => idx !== i))}>
+            <Trash2 className="h-4 w-4 text-ink/50" />
+          </Button>
+        </div>
+      ))}
+      <div className="flex flex-wrap gap-2 pt-1">
+        {HIGHLIGHT_PRESETS.map((p) => (
+          <Button key={p.label} type="button" size="sm" variant="outline" onClick={() => onChange([...value, { emoji: p.emoji, label: p.label, text: "" }])}>
+            {p.emoji} {p.label}
+          </Button>
+        ))}
+        <Button type="button" size="sm" variant="secondary" onClick={suggest}>Rellenar con los datos del evento</Button>
+      </div>
+      <p className="text-xs text-ink/50">Aparecen justo debajo de la descripción, en el orden de esta lista.</p>
+    </div>
+  );
+}
+
+function LegalInfoEditor({ html, enabled, onChangeHtml, onToggle }: { html: string | null; enabled: boolean; onChangeHtml: (html: string) => void; onToggle: (v: boolean) => void }) {
+  const [editing, setEditing] = useState(false);
+  const current = html?.trim() ? html : DEFAULT_LEGAL_HTML;
+  return (
+    <div className="space-y-2">
+      <div className="flex items-center gap-3">
+        <Switch checked={enabled} onCheckedChange={onToggle} />
+        <span className="text-sm text-ink/70">Mostrar el bloque de información legal en la página pública</span>
+      </div>
+      {enabled && (
+        <>
+          {editing ? (
+            <RichTextEditor value={current} onChange={onChangeHtml} />
+          ) : (
+            <div className="rounded-lg border border-ink/10 bg-white p-3 text-xs text-ink/70 blog-content" dangerouslySetInnerHTML={{ __html: current }} />
+          )}
+          <div className="flex gap-2">
+            <Button type="button" size="sm" variant="outline" onClick={() => setEditing((v) => !v)}>
+              {editing ? "Ver" : "✏️ Editar texto legal"}
+            </Button>
+            <Button type="button" size="sm" variant="ghost" onClick={() => { onChangeHtml(DEFAULT_LEGAL_HTML); toast.success("Texto legal restaurado"); }}>
+              Restaurar predeterminado
+            </Button>
+          </div>
+        </>
+      )}
     </div>
   );
 }
