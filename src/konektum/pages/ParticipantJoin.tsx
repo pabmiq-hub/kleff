@@ -559,6 +559,7 @@ const ParticipantJoin = ({ eventIdOverride }: { eventIdOverride?: string } = {})
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSubmitting) return;
 
     // Note: waitlist submissions (when quota is full) go through the normal path
     // with `forceWaitlist: true` so we still collect wrapped answers and preferences.

@@ -19,6 +19,14 @@ const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
 const RATE_LIMIT_WINDOW_MS = 60000;
 const MAX_REQUESTS_PER_WINDOW = 10;
 
+const DUPLICATE_EMAIL_MESSAGE = 'Ya hay una inscripción con este correo electrónico en este evento';
+
+function isDuplicateEmailError(error: any): boolean {
+  if (!error) return false;
+  const msg = `${error.message ?? ''} ${error.details ?? ''}`;
+  return error.code === '23505' || msg.includes('DUPLICATE_PARTICIPANT_EMAIL');
+}
+
 function isRateLimited(ip: string): boolean {
   const now = Date.now();
   const entry = rateLimitMap.get(ip);
@@ -231,17 +239,18 @@ serve(async (req) => {
         );
       }
 
-      // Check duplicate email
-      const { data: existingParticipant } = await supabase
+      // Check duplicate email (ignoring cancelled registrations)
+      const { data: existingParticipants } = await supabase
         .from('participants')
         .select('id')
         .eq('event_id', eventId)
         .eq('email', email.toLowerCase().trim())
-        .maybeSingle();
+        .is('cancelled_at', null)
+        .limit(1);
 
-      if (existingParticipant) {
+      if (existingParticipants && existingParticipants.length > 0) {
         return new Response(
-          JSON.stringify({ error: 'Ya estás registrado en este evento' }),
+          JSON.stringify({ error: DUPLICATE_EMAIL_MESSAGE }),
           { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
@@ -331,6 +340,12 @@ serve(async (req) => {
         .single();
 
       if (insertError) {
+        if (isDuplicateEmailError(insertError)) {
+          return new Response(
+            JSON.stringify({ error: DUPLICATE_EMAIL_MESSAGE }),
+            { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
         console.error('[register-participant] Error inserting B2B participant:', insertError);
         return new Response(
           JSON.stringify({ error: 'Error al registrar participante' }),
@@ -510,16 +525,17 @@ serve(async (req) => {
       }
     }
 
-    const { data: existingParticipant } = await supabase
+    const { data: existingParticipants } = await supabase
       .from('participants')
       .select('id')
       .eq('event_id', eventId)
       .eq('email', email.toLowerCase().trim())
-      .maybeSingle();
+      .is('cancelled_at', null)
+      .limit(1);
 
-    if (existingParticipant) {
+    if (existingParticipants && existingParticipants.length > 0) {
       return new Response(
-        JSON.stringify({ error: 'Ya estás registrado en este evento' }),
+        JSON.stringify({ error: DUPLICATE_EMAIL_MESSAGE }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
@@ -672,6 +688,12 @@ serve(async (req) => {
       .single();
 
     if (insertError) {
+      if (isDuplicateEmailError(insertError)) {
+        return new Response(
+          JSON.stringify({ error: DUPLICATE_EMAIL_MESSAGE }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
       console.error('[register-participant] Error inserting participant:', insertError);
       return new Response(
         JSON.stringify({ error: 'Error al registrar participante' }),
