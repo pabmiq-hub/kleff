@@ -1224,11 +1224,18 @@ const ParticipantJoin = ({ eventIdOverride }: { eventIdOverride?: string } = {})
                   {fieldErrors.length > 0 && (
                     <div className="flex items-start gap-2 p-3 rounded-lg border border-destructive/50 bg-destructive/10 text-sm text-destructive">
                       <AlertCircle className="w-4 h-4 mt-0.5 shrink-0" />
-                      <span>
-                        {eventLang === "en"
-                          ? "Please complete the highlighted fields below."
-                          : "Por favor, completa los campos destacados en rojo."}
-                      </span>
+                      <div>
+                        <p className="font-medium">
+                          {eventLang === "en"
+                            ? "Please complete the following required fields:"
+                            : "Completa los siguientes campos obligatorios:"}
+                        </p>
+                        <ul className="list-disc pl-5 mt-1 space-y-0.5">
+                          {fieldErrors.map((id) => (
+                            <li key={id}>{missingFieldLabel(id)}</li>
+                          ))}
+                        </ul>
+                      </div>
                     </div>
                   )}
                   {isWizard && (
