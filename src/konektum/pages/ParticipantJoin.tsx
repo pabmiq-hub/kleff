@@ -687,7 +687,7 @@ const ParticipantJoin = ({ eventIdOverride }: { eventIdOverride?: string } = {})
                 birthDate,
                 preference,
                 datingPreference: (preference === "Amistad y ligue" || preference === "Friendship & dating") ? datingPreference : null,
-                preferredAgeRange: selectedAgeRanges.join(', '),
+                preferredAgeRange: effectivePreferredAgeRange,
                 isReturningParticipant: isReturningParticipant === "yes",
                 marketingConsent,
                 wrappedAnswers: wrappedEnabled && !hasWrappedProfile ? wrappedAnswers : undefined,
@@ -727,7 +727,7 @@ const ParticipantJoin = ({ eventIdOverride }: { eventIdOverride?: string } = {})
       }
     }
     setIsSubmitting(true);
-    const preferredAgeRange = selectedAgeRanges.join(', ');
+    const preferredAgeRange = effectivePreferredAgeRange;
     const isDating = preference === "Amistad y ligue" || preference === "Friendship & dating";
 
     const { data, error } = await supabase.functions.invoke('register-participant', {
