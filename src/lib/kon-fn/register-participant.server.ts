@@ -525,16 +525,17 @@ serve(async (req) => {
       }
     }
 
-    const { data: existingParticipant } = await supabase
+    const { data: existingParticipants } = await supabase
       .from('participants')
       .select('id')
       .eq('event_id', eventId)
       .eq('email', email.toLowerCase().trim())
-      .maybeSingle();
+      .is('cancelled_at', null)
+      .limit(1);
 
-    if (existingParticipant) {
+    if (existingParticipants && existingParticipants.length > 0) {
       return new Response(
-        JSON.stringify({ error: 'Ya estás registrado en este evento' }),
+        JSON.stringify({ error: DUPLICATE_EMAIL_MESSAGE }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
