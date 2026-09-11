@@ -440,6 +440,33 @@ const ParticipantJoin = ({ eventIdOverride }: { eventIdOverride?: string } = {})
   };
 
   const preferredAgeRanges = [...eventAgeRanges, eventLang === "en" ? "Any age range" : "Cualquier rango de edad"];
+  // When the event has a single age range, the preferred-range question is redundant.
+  const singleAgeRange = eventAgeRanges.length === 1 ? eventAgeRanges[0] : null;
+  const effectivePreferredAgeRange = singleAgeRange ?? selectedAgeRanges.join(', ');
+
+  // Human-readable label for each field that can fail validation (used in the error summary).
+  const missingFieldLabel = (id: string): string => {
+    const strip = (s: string) => s.replace(/\s*\*\s*$/, "").replace(/\s*\(.*?$/, "");
+    switch (id) {
+      case "name": return strip(t.join.nameLabel);
+      case "email": return strip(t.join.emailLabel);
+      case "phone": return strip(t.join.phoneLabel);
+      case "birthDate": return strip(t.join.birthDateLabel);
+      case "gender": return strip(t.join.genderLabel);
+      case "preferredAge": return strip(t.join.preferredAgeLabel);
+      case "preference": return strip(t.join.preferenceLabel);
+      case "datingPreference": return strip(t.join.datingPrefLabel);
+      case "returning": return strip(t.join.returningLabel);
+      case "dataConsent": return eventLang === "en" ? "Privacy policy acceptance" : "Aceptación de la política de privacidad";
+      default: {
+        const sq = socialGameQuestions.find((q) => q.id === id);
+        if (sq) return eventLang === "en" ? sq.label_en : sq.label_es;
+        const wq = wrappedQuestions.find((q) => q.id === id);
+        if (wq) return wq.i18n?.[eventLang]?.label || wq.i18n?.es?.label || id;
+        return id;
+      }
+    }
+  };
 
   // Step 1 → Step 2 transition (when quotas or wrapped are enabled)
   const handleWizardContinue = async () => {
@@ -547,7 +574,7 @@ const ParticipantJoin = ({ eventIdOverride }: { eventIdOverride?: string } = {})
     if (!gender) missingFields.push("gender");
     const inWaitlistMode = wizardForceWaitlist;
     if (!inWaitlistMode) {
-      if (selectedAgeRanges.length === 0) missingFields.push("preferredAge");
+      if (!singleAgeRange && selectedAgeRanges.length === 0) missingFields.push("preferredAge");
       if (!preference) missingFields.push("preference");
       if (!isReturningParticipant) missingFields.push("returning");
     }
@@ -660,7 +687,7 @@ const ParticipantJoin = ({ eventIdOverride }: { eventIdOverride?: string } = {})
                 birthDate,
                 preference,
                 datingPreference: (preference === "Amistad y ligue" || preference === "Friendship & dating") ? datingPreference : null,
-                preferredAgeRange: selectedAgeRanges.join(', '),
+                preferredAgeRange: effectivePreferredAgeRange,
                 isReturningParticipant: isReturningParticipant === "yes",
                 marketingConsent,
                 wrappedAnswers: wrappedEnabled && !hasWrappedProfile ? wrappedAnswers : undefined,
@@ -700,7 +727,7 @@ const ParticipantJoin = ({ eventIdOverride }: { eventIdOverride?: string } = {})
       }
     }
     setIsSubmitting(true);
-    const preferredAgeRange = selectedAgeRanges.join(', ');
+    const preferredAgeRange = effectivePreferredAgeRange;
     const isDating = preference === "Amistad y ligue" || preference === "Friendship & dating";
 
     const { data, error } = await supabase.functions.invoke('register-participant', {
@@ -1197,11 +1224,18 @@ const ParticipantJoin = ({ eventIdOverride }: { eventIdOverride?: string } = {})
                   {fieldErrors.length > 0 && (
                     <div className="flex items-start gap-2 p-3 rounded-lg border border-destructive/50 bg-destructive/10 text-sm text-destructive">
                       <AlertCircle className="w-4 h-4 mt-0.5 shrink-0" />
-                      <span>
-                        {eventLang === "en"
-                          ? "Please complete the highlighted fields below."
-                          : "Por favor, completa los campos destacados en rojo."}
-                      </span>
+                      <div>
+                        <p className="font-medium">
+                          {eventLang === "en"
+                            ? "Please complete the following required fields:"
+                            : "Completa los siguientes campos obligatorios:"}
+                        </p>
+                        <ul className="list-disc pl-5 mt-1 space-y-0.5">
+                          {fieldErrors.map((id) => (
+                            <li key={id}>{missingFieldLabel(id)}</li>
+                          ))}
+                        </ul>
+                      </div>
                     </div>
                   )}
                   {isWizard && (
@@ -1386,18 +1420,20 @@ const ParticipantJoin = ({ eventIdOverride }: { eventIdOverride?: string } = {})
                   {/* Preference / dating / preferredAge / returning — only in full registration step 2 (not waitlist) */}
                   {showStep2 && (
                     <>
-                      <div className="space-y-2" data-field-error={hasErr("preferredAge") ? "true" : undefined}>
-                        <Label className={hasErr("preferredAge") ? "text-destructive" : undefined}>{t.join.preferredAgeLabel}</Label>
-                        <div className={hasErr("preferredAge") ? "rounded-md ring-2 ring-destructive/30" : undefined}>
-                          <MultiSelectAge
-                            options={preferredAgeRanges}
-                            selected={selectedAgeRanges}
-                            onChange={(v) => { setSelectedAgeRanges(v); clearErr("preferredAge"); }}
-                            placeholder={t.join.preferredAgePlaceholder}
-                          />
+                      {!singleAgeRange && (
+                        <div className="space-y-2" data-field-error={hasErr("preferredAge") ? "true" : undefined}>
+                          <Label className={hasErr("preferredAge") ? "text-destructive" : undefined}>{t.join.preferredAgeLabel}</Label>
+                          <div className={hasErr("preferredAge") ? "rounded-md ring-2 ring-destructive/30" : undefined}>
+                            <MultiSelectAge
+                              options={preferredAgeRanges}
+                              selected={selectedAgeRanges}
+                              onChange={(v) => { setSelectedAgeRanges(v); clearErr("preferredAge"); }}
+                              placeholder={t.join.preferredAgePlaceholder}
+                            />
+                          </div>
+                          <FieldError show={hasErr("preferredAge")} message={fieldErrorMessage(eventLang)} />
                         </div>
-                        <FieldError show={hasErr("preferredAge")} message={fieldErrorMessage(eventLang)} />
-                      </div>
+                      )}
 
                       <div className="space-y-2" data-field-error={hasErr("preference") ? "true" : undefined}>
                         <Label className={hasErr("preference") ? "text-destructive" : undefined}>{t.join.preferenceLabel}</Label>
