@@ -19,6 +19,14 @@ const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
 const RATE_LIMIT_WINDOW_MS = 60000;
 const MAX_REQUESTS_PER_WINDOW = 10;
 
+const DUPLICATE_EMAIL_MESSAGE = 'Ya hay una inscripción con este correo electrónico en este evento';
+
+function isDuplicateEmailError(error: any): boolean {
+  if (!error) return false;
+  const msg = `${error.message ?? ''} ${error.details ?? ''}`;
+  return error.code === '23505' || msg.includes('DUPLICATE_PARTICIPANT_EMAIL');
+}
+
 function isRateLimited(ip: string): boolean {
   const now = Date.now();
   const entry = rateLimitMap.get(ip);
