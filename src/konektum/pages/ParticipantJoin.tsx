@@ -1413,18 +1413,20 @@ const ParticipantJoin = ({ eventIdOverride }: { eventIdOverride?: string } = {})
                   {/* Preference / dating / preferredAge / returning — only in full registration step 2 (not waitlist) */}
                   {showStep2 && (
                     <>
-                      <div className="space-y-2" data-field-error={hasErr("preferredAge") ? "true" : undefined}>
-                        <Label className={hasErr("preferredAge") ? "text-destructive" : undefined}>{t.join.preferredAgeLabel}</Label>
-                        <div className={hasErr("preferredAge") ? "rounded-md ring-2 ring-destructive/30" : undefined}>
-                          <MultiSelectAge
-                            options={preferredAgeRanges}
-                            selected={selectedAgeRanges}
-                            onChange={(v) => { setSelectedAgeRanges(v); clearErr("preferredAge"); }}
-                            placeholder={t.join.preferredAgePlaceholder}
-                          />
+                      {!singleAgeRange && (
+                        <div className="space-y-2" data-field-error={hasErr("preferredAge") ? "true" : undefined}>
+                          <Label className={hasErr("preferredAge") ? "text-destructive" : undefined}>{t.join.preferredAgeLabel}</Label>
+                          <div className={hasErr("preferredAge") ? "rounded-md ring-2 ring-destructive/30" : undefined}>
+                            <MultiSelectAge
+                              options={preferredAgeRanges}
+                              selected={selectedAgeRanges}
+                              onChange={(v) => { setSelectedAgeRanges(v); clearErr("preferredAge"); }}
+                              placeholder={t.join.preferredAgePlaceholder}
+                            />
+                          </div>
+                          <FieldError show={hasErr("preferredAge")} message={fieldErrorMessage(eventLang)} />
                         </div>
-                        <FieldError show={hasErr("preferredAge")} message={fieldErrorMessage(eventLang)} />
-                      </div>
+                      )}
 
                       <div className="space-y-2" data-field-error={hasErr("preference") ? "true" : undefined}>
                         <Label className={hasErr("preference") ? "text-destructive" : undefined}>{t.join.preferenceLabel}</Label>
