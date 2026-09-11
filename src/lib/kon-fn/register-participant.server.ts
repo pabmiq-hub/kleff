@@ -331,6 +331,12 @@ serve(async (req) => {
         .single();
 
       if (insertError) {
+        if (isDuplicateEmailError(insertError)) {
+          return new Response(
+            JSON.stringify({ error: DUPLICATE_EMAIL_MESSAGE }),
+            { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
         console.error('[register-participant] Error inserting B2B participant:', insertError);
         return new Response(
           JSON.stringify({ error: 'Error al registrar participante' }),
