@@ -708,6 +708,10 @@ serve(async (req) => {
 
     await supabase.rpc('increment_participants', { event_id: eventId });
 
+    if (shouldAutoCheckin) {
+      await seatInPreliminaryRound(supabase, eventId, { id: participant.id, name: participant.name });
+    }
+
     console.log(`[register-participant] Participant registered: ${participant.id}, autoCheckin: ${shouldAutoCheckin}`);
 
     const sendCodeNow = shouldAutoCheckin || codeSendMode === 'on_registration' || (codeSendMode === 'automatic' && isWithin24h);
