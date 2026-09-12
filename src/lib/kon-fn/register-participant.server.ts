@@ -8,6 +8,7 @@ const Deno = {
 };
 
 import { createClient } from "@/lib/kon-fn/client.server";
+import { seatInPreliminaryRound } from "@/lib/kon-fn/_shared/preliminarySeat";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
