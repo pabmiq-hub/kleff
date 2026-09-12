@@ -353,7 +353,17 @@ const EventSettingsEditor = ({
 
       // Handle preliminary round
       if (!isProfessional && formPreliminaryRoundEnabled) {
-        updates.preliminary_round = { enabled: true, tables: [], started_at: null };
+        // Never wipe an ongoing preliminary round: keep tables, start time,
+        // confirmations and dismissed tables if they already exist.
+        const { data: currentEventRow } = await supabase
+          .from("events")
+          .select("preliminary_round")
+          .eq("id", eventId)
+          .maybeSingle();
+        const existingPrelim = (currentEventRow as any)?.preliminary_round;
+        updates.preliminary_round = existingPrelim && typeof existingPrelim === "object"
+          ? { ...existingPrelim, enabled: true }
+          : { enabled: true, tables: [], started_at: null };
       } else if (!formPreliminaryRoundEnabled) {
         updates.preliminary_round = null;
       }

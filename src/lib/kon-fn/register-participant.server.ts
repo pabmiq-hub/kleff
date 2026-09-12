@@ -8,6 +8,7 @@ const Deno = {
 };
 
 import { createClient } from "@/lib/kon-fn/client.server";
+import { seatInPreliminaryRound } from "@/lib/kon-fn/_shared/preliminarySeat";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -354,6 +355,10 @@ serve(async (req) => {
       }
 
       await supabase.rpc('increment_participants', { event_id: eventId });
+
+      if (shouldAutoCheckin) {
+        await seatInPreliminaryRound(supabase, eventId, { id: participant.id, name: participant.name });
+      }
 
       console.log(`[register-participant] B2B participant registered: ${participant.id}, autoCheckin: ${shouldAutoCheckin}`);
 
@@ -702,6 +707,10 @@ serve(async (req) => {
     }
 
     await supabase.rpc('increment_participants', { event_id: eventId });
+
+    if (shouldAutoCheckin) {
+      await seatInPreliminaryRound(supabase, eventId, { id: participant.id, name: participant.name });
+    }
 
     console.log(`[register-participant] Participant registered: ${participant.id}, autoCheckin: ${shouldAutoCheckin}`);
 
