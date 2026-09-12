@@ -353,7 +353,14 @@ const EventSettingsEditor = ({
 
       // Handle preliminary round
       if (!isProfessional && formPreliminaryRoundEnabled) {
-        updates.preliminary_round = { enabled: true, tables: [], started_at: null };
+        // Never wipe an ongoing preliminary round: keep tables, start time,
+        // confirmations and dismissed tables if they already exist.
+        const existingPrelim = (initialPreliminaryRound && typeof initialPreliminaryRound === "object")
+          ? (initialPreliminaryRound as any)
+          : null;
+        updates.preliminary_round = existingPrelim
+          ? { ...existingPrelim, enabled: true }
+          : { enabled: true, tables: [], started_at: null };
       } else if (!formPreliminaryRoundEnabled) {
         updates.preliminary_round = null;
       }
