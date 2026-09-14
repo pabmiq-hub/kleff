@@ -32,6 +32,8 @@ export const Route = createFileRoute("/admin")({
 function AdminLayout() {
   const { session, loading, isSuperAdmin, user, signOut } = useAuth();
   const navigate = useNavigate();
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const wideContent = pathname.startsWith("/admin/registrations/");
 
   if (loading) {
     return (
