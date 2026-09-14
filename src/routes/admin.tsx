@@ -100,7 +100,7 @@ function AdminLayout() {
         <div className="sticky top-0 z-20 flex items-center justify-end gap-2 px-4 md:px-8 py-3 bg-cream/90 backdrop-blur border-b border-ink/10">
           <NotificationsBell />
         </div>
-        <div className="max-w-6xl w-full p-4 md:p-8">
+        <div className="w-full p-4 md:p-8">
           <Outlet />
         </div>
       </main>
