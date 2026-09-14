@@ -17,7 +17,7 @@ export const Route = createFileRoute("/admin/registrations/")({
 type FormRow = {
   id: string; slug: string; title: string; kind: "form" | "external";
   is_published: boolean; external_mode: string | null;
-  created_at: string; max_responses: number | null; closes_at: string | null; responses: number;
+  created_at: string; max_responses: number | null; closes_at: string | null; participants: number;
 };
 
 function AdminRegistrations() {
@@ -195,7 +195,7 @@ function AdminRegistrations() {
             <tr>
               <th className="px-4 py-3">Inscripción</th>
               <th className="px-4 py-3 text-center w-24">Estado</th>
-              <th className="px-4 py-3 text-center w-32">Respuestas</th>
+              <th className="px-4 py-3 text-center w-32">Participantes</th>
               <th className="px-4 py-3 w-56">Acciones</th>
             </tr>
           </thead>
@@ -215,7 +215,7 @@ function AdminRegistrations() {
                 </td>
                 <td className="px-4 py-3 text-center">
                   {f.kind === "form" ? (
-                    <span className="inline-flex items-center gap-1 text-ink/80"><Users className="h-3.5 w-3.5" /> {f.responses}{f.max_responses ? ` / ${f.max_responses}` : ""}</span>
+                    <span className="inline-flex items-center gap-1 text-ink/80"><Users className="h-3.5 w-3.5" /> {f.participants}{f.max_responses ? ` / ${f.max_responses}` : ""}</span>
                   ) : (
                     <span className="text-ink/40 text-xs">—</span>
                   )}
