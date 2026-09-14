@@ -121,7 +121,7 @@ function RegistrationEditor() {
               <CommunicationSettings form={form} onSaved={(patched) => setData((d) => d ? { ...d, form: { ...d.form, ...patched } } : d)} />
             </TabsContent>
             <TabsContent value="responses" className="mt-4">
-              <ResponsesPanel formId={form.id} questions={questions} />
+              <ResponsesPanel formId={form.id} questions={questions} paymentRequired={!!form.payment_required} />
             </TabsContent>
           </>
         )}
@@ -557,7 +557,7 @@ function OptionsEditor({ value, onChange }: { value: RegistrationQuestion["optio
 
 // ----------------- Responses Panel -----------------
 
-function ResponsesPanel({ formId, questions }: { formId: string; questions: RegistrationQuestion[] }) {
+function ResponsesPanel({ formId, questions, paymentRequired }: { formId: string; questions: RegistrationQuestion[]; paymentRequired?: boolean }) {
   const listFn = useServerFn(adminListResponses);
   const updateFn = useServerFn(adminUpdateResponse);
   const deleteFn = useServerFn(adminDeleteResponse);
@@ -608,6 +608,7 @@ function ResponsesPanel({ formId, questions }: { formId: string; questions: Regi
         <ResponsesTable
           responses={responses}
           questions={questions}
+          paymentRequired={paymentRequired}
           onUpdate={async (id, patch) => {
             try {
               await updateFn({ data: { id, ...patch } });
@@ -633,9 +634,10 @@ function columnLabel(q: RegistrationQuestion) {
   return q.label;
 }
 
-function ResponsesTable({ responses, questions, onUpdate, onDelete }: {
+function ResponsesTable({ responses, questions, paymentRequired, onUpdate, onDelete }: {
   responses: RegistrationResponse[];
   questions: RegistrationQuestion[];
+  paymentRequired?: boolean;
   onUpdate: (id: string, patch: { payment_status?: RegistrationResponse["payment_status"]; internal_notes?: string | null }) => Promise<void>;
   onDelete: (id: string) => void;
 }) {
@@ -653,7 +655,7 @@ function ResponsesTable({ responses, questions, onUpdate, onDelete }: {
             {cols.map((q) => (
               <th key={q.id} className="px-3 py-2 text-xs uppercase tracking-wider text-ink/60 font-medium">{columnLabel(q)}</th>
             ))}
-            <th className="px-3 py-2 text-xs uppercase tracking-wider text-ink/60 font-medium whitespace-nowrap">Pago</th>
+            {paymentRequired && <th className="px-3 py-2 text-xs uppercase tracking-wider text-ink/60 font-medium whitespace-nowrap">Pago</th>}
             <th className="px-3 py-2" />
           </tr>
         </thead>
@@ -677,17 +679,19 @@ function ResponsesTable({ responses, questions, onUpdate, onDelete }: {
                           : (answerToText(data[q.id]) || <span className="text-ink/30">—</span>)}
                     </td>
                   ))}
-                  <td className="px-3 py-2">
-                    <Select value={r.payment_status} onValueChange={(v) => onUpdate(r.id, { payment_status: v as RegistrationResponse["payment_status"] })}>
-                      <SelectTrigger className="bg-white border-ink/15 text-ink h-8 text-xs w-32"><SelectValue /></SelectTrigger>
-                      <SelectContent className="bg-white border-ink/15 text-ink">
-                        <SelectItem value="not_required">Sin pago</SelectItem>
-                        <SelectItem value="pending">Pendiente</SelectItem>
-                        <SelectItem value="paid">Pagado</SelectItem>
-                        <SelectItem value="refunded">Reembolsado</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </td>
+                  {paymentRequired && (
+                    <td className="px-3 py-2">
+                      <Select value={r.payment_status} onValueChange={(v) => onUpdate(r.id, { payment_status: v as RegistrationResponse["payment_status"] })}>
+                        <SelectTrigger className="bg-white border-ink/15 text-ink h-8 text-xs w-32"><SelectValue /></SelectTrigger>
+                        <SelectContent className="bg-white border-ink/15 text-ink">
+                          <SelectItem value="not_required">Sin pago</SelectItem>
+                          <SelectItem value="pending">Pendiente</SelectItem>
+                          <SelectItem value="paid">Pagado</SelectItem>
+                          <SelectItem value="refunded">Reembolsado</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </td>
+                  )}
                   <td className="px-3 py-2 whitespace-nowrap">
                     <Button size="sm" variant="ghost" onClick={() => setNotesFor((n) => n === r.id ? null : r.id)} className="h-8 px-2 text-xs text-ink/60 hover:text-ink">Notas</Button>
                     <Button size="sm" variant="ghost" onClick={() => onDelete(r.id)} className="text-ink/60 hover:text-red-400 hover:bg-red-500/10 h-8 w-8 p-0"><Trash2 className="h-3.5 w-3.5" /></Button>
@@ -695,7 +699,7 @@ function ResponsesTable({ responses, questions, onUpdate, onDelete }: {
                 </tr>
                 {notesFor === r.id && (
                   <tr key={`${r.id}-notes`} className="border-b border-ink/5 bg-ink/[0.02]">
-                    <td colSpan={cols.length + 5} className="px-3 py-2">
+                    <td colSpan={cols.length + (paymentRequired ? 5 : 4)} className="px-3 py-2">
                       <NotesCell response={r} onSave={(notes) => onUpdate(r.id, { internal_notes: notes })} />
                     </td>
                   </tr>

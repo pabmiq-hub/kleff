@@ -1,4 +1,4 @@
-import { createFileRoute, Outlet, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Outlet, Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useAuth } from "@/auth/AuthProvider";
 import { Button } from "@/components/ui/button";
 import { NotificationsBell } from "@/components/app/NotificationsBell";
@@ -32,6 +32,8 @@ export const Route = createFileRoute("/admin")({
 function AdminLayout() {
   const { session, loading, isSuperAdmin, user, signOut } = useAuth();
   const navigate = useNavigate();
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const wideContent = pathname.startsWith("/admin/registrations/");
 
   if (loading) {
     return (
@@ -100,7 +102,7 @@ function AdminLayout() {
         <div className="sticky top-0 z-20 flex items-center justify-end gap-2 px-4 md:px-8 py-3 bg-cream/90 backdrop-blur border-b border-ink/10">
           <NotificationsBell />
         </div>
-        <div className="max-w-6xl w-full p-4 md:p-8">
+        <div className={`w-full p-4 md:p-8 ${wideContent ? "" : "max-w-6xl"}`}>
           <Outlet />
         </div>
       </main>
