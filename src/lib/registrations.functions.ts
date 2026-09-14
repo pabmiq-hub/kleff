@@ -435,18 +435,19 @@ export const adminListForms = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     const rows = (data ?? []) as unknown as Array<{ id: string; slug: string; title: string; kind: "form" | "external"; is_published: boolean; external_mode: string | null; created_at: string; max_responses: number | null; closes_at: string | null }>;
     const ids = rows.map((d) => d.id);
-    let counts: Record<string, number> = {};
+    let participantCounts: Record<string, number> = {};
     if (ids.length) {
       const { data: rs } = await supabaseAdmin
         .from("registration_responses")
-        .select("form_id")
-        .in("form_id", ids);
-      counts = ((rs ?? []) as Array<{ form_id: string }>).reduce<Record<string, number>>((acc, r) => {
-        acc[r.form_id] = (acc[r.form_id] ?? 0) + 1;
+        .select("form_id, guests_count")
+        .in("form_id", ids)
+        .is("cancelled_at", null);
+      participantCounts = ((rs ?? []) as Array<{ form_id: string; guests_count: number | null }>).reduce<Record<string, number>>((acc, r) => {
+        acc[r.form_id] = (acc[r.form_id] ?? 0) + 1 + Math.max(0, r.guests_count ?? 0);
         return acc;
       }, {});
     }
-    return { forms: rows.map((f) => ({ ...f, responses: counts[f.id] ?? 0 })) };
+    return { forms: rows.map((f) => ({ ...f, participants: participantCounts[f.id] ?? 0 })) };
   });
 
 export const adminCreateForm = createServerFn({ method: "POST" })
