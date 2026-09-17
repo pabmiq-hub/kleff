@@ -249,8 +249,8 @@ const ParticipantJoin = ({
       setEventDate(normalizeUpcomingEventDate(data.date, data.status));
       setEventTime((data as any).event_time || null);
       setEventLocation((data as any).event_location || null);
-      setRegistrationSubtitle(data.registration_subtitle || null);
-      setRegistrationDescription(data.registration_description || null);
+      setRegistrationSubtitle(variantSubtitle || data.registration_subtitle || null);
+      setRegistrationDescription(variantDescription || data.registration_description || null);
       
       // Set module type
       setEventModule(data.module || "social");
