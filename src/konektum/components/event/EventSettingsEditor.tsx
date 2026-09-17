@@ -218,6 +218,15 @@ const EventSettingsEditor = ({
   const [customFormEnabled, setCustomFormEnabled] = useState(false);
   const [customFormFields, setCustomFormFields] = useState<FormField[]>([]);
 
+  // Table distribution by gender + secondary public link
+  const [formTableGenderMode, setFormTableGenderMode] = useState<string>("mixed");
+  const [formPrimaryTargetGender, setFormPrimaryTargetGender] = useState<string>("");
+  const [formSecondaryLinkEnabled, setFormSecondaryLinkEnabled] = useState(false);
+  const [formSecondarySlug, setFormSecondarySlug] = useState("");
+  const [formSecondarySubtitle, setFormSecondarySubtitle] = useState("");
+  const [formSecondaryDescription, setFormSecondaryDescription] = useState("");
+  const [formSecondaryTargetGender, setFormSecondaryTargetGender] = useState("");
+
   const isProfessional = eventModule === "professional";
   const isLocked = eventStatus !== "pending";
   const canUseCustomTables = (hasFeature("custom_table_layout") || isSuperAdmin) && !isProfessional;
