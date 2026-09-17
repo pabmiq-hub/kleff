@@ -642,6 +642,108 @@ const EventSettingsEditor = ({
 
           {!isProfessional && (
             <div className="flex items-center justify-between p-4 border rounded-lg">
+              <div className="flex-1 pr-4">
+                <Label className="text-base">Distribución de mesas</Label>
+                <p className="text-sm text-muted-foreground">
+                  <strong>Mixtas:</strong> hombres y mujeres pueden compartir mesa.<br />
+                  <strong>100% mismo género:</strong> mesas exclusivas de chicas y mesas exclusivas de chicos, sin mezclar.
+                </p>
+              </div>
+              <Select value={formTableGenderMode} onValueChange={setFormTableGenderMode}>
+                <SelectTrigger className="w-56">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="mixed">Mixtas (estándar)</SelectItem>
+                  <SelectItem value="single_gender">100% mismo género</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+
+          {!isProfessional && (
+            <div className="p-4 border rounded-lg space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex-1 pr-4">
+                  <Label className="text-base">Segundo enlace de inscripción</Label>
+                  <p className="text-sm text-muted-foreground">
+                    Dos direcciones distintas con su propio texto que llevan al mismo evento (por ejemplo, una para chicas y otra para chicos).
+                  </p>
+                </div>
+                <Switch checked={formSecondaryLinkEnabled} onCheckedChange={setFormSecondaryLinkEnabled} />
+              </div>
+
+              {formSecondaryLinkEnabled && (
+                <div className="space-y-4 pt-3 border-t">
+                  <div className="space-y-2">
+                    <Label>Enlace principal · público al que se dirige</Label>
+                    <Select value={formPrimaryTargetGender || "none"} onValueChange={(v) => setFormPrimaryTargetGender(v === "none" ? "" : v)}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Sin preselección" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="none">Sin preselección</SelectItem>
+                        {formPreferences.genders.map((g) => (
+                          <SelectItem key={g} value={g}>{g}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="event-secondary-slug">Dirección del segundo enlace</Label>
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm text-muted-foreground whitespace-nowrap">
+                        {typeof window !== "undefined" ? window.location.host : "kleff.es"}/
+                      </span>
+                      <Input
+                        id="event-secondary-slug"
+                        value={formSecondarySlug}
+                        placeholder="mi-evento-chicos"
+                        onChange={(e) => setFormSecondarySlug(slugifyEventDraft(e.target.value))}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>Segundo enlace · público al que se dirige</Label>
+                    <Select value={formSecondaryTargetGender || "none"} onValueChange={(v) => setFormSecondaryTargetGender(v === "none" ? "" : v)}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Sin preselección" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="none">Sin preselección</SelectItem>
+                        {formPreferences.genders.map((g) => (
+                          <SelectItem key={g} value={g}>{g}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="event-secondary-subtitle">Subtítulo del segundo enlace</Label>
+                    <Input
+                      id="event-secondary-subtitle"
+                      value={formSecondarySubtitle}
+                      placeholder="Ej: Mesas solo para chicos"
+                      onChange={(e) => setFormSecondarySubtitle(e.target.value)}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>Descripción del segundo enlace</Label>
+                    <RichTextEditor
+                      value={formSecondaryDescription}
+                      onChange={setFormSecondaryDescription}
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {!isProfessional && (
+            <div className="flex items-center justify-between p-4 border rounded-lg">
               <div>
                 <Label className="text-base">⭐ Super Like</Label>
                 <p className="text-sm text-muted-foreground">
