@@ -255,6 +255,13 @@ const EventSettingsEditor = ({
         }
       }
       if ((data as any)?.slug) setFormSlug((data as any).slug);
+      setFormTableGenderMode((data as any)?.table_gender_mode || "mixed");
+      setFormPrimaryTargetGender((data as any)?.primary_target_gender || "");
+      setFormSecondaryLinkEnabled(!!(data as any)?.secondary_slug);
+      setFormSecondarySlug((data as any)?.secondary_slug || "");
+      setFormSecondarySubtitle((data as any)?.secondary_registration_subtitle || "");
+      setFormSecondaryDescription((data as any)?.secondary_registration_description || "");
+      setFormSecondaryTargetGender((data as any)?.secondary_target_gender || "");
       if ((data as any)?.wrapped_enabled) setFormWrappedEnabled(true);
       setFormSocialGame(normalizeIcebreakers((data as any)?.social_game));
       setFormWrappedQuestions(getWrappedQuestions((data as any)?.wrapped_questions));
