@@ -1096,12 +1096,58 @@ const EventDetail = () => {
     const rotationMode = eventData?.rotation_mode || "fixed_host";
     // Resolve inclusion groups: arg overrides, else compute from current state
     const inclusionGroups = inclusionGroupsArg ?? computeInclusionGroups(inclusions);
-    
-    if (rotationMode === "all_rotate") {
-      return generateAllRotateTables(participantsList, numRounds, tableSize, relaxConstraints, genderParity, previousEncountersMap, avoidEncountersMode, groupRoundsConfig, gameMode, inclusionGroups);
-    } else {
-      return generateFixedHostTables(participantsList, numRounds, tableSize, relaxConstraints, genderParity, previousEncountersMap, avoidEncountersMode, groupRoundsConfig, gameMode, inclusionGroups);
+
+    const runGenerator = (list: DbParticipant[], parity: boolean): TableGenerationResult => {
+      if (rotationMode === "all_rotate") {
+        return generateAllRotateTables(list, numRounds, tableSize, relaxConstraints, parity, previousEncountersMap, avoidEncountersMode, groupRoundsConfig, gameMode, inclusionGroups);
+      }
+      return generateFixedHostTables(list, numRounds, tableSize, relaxConstraints, parity, previousEncountersMap, avoidEncountersMode, groupRoundsConfig, gameMode, inclusionGroups);
+    };
+
+    // 100% same-gender tables: generate each gender universe separately and merge
+    if ((eventData as any)?.table_gender_mode === "single_gender") {
+      const groups = new Map<string, DbParticipant[]>();
+      for (const p of participantsList) {
+        const key = String((p as any).gender || "Sin género").trim() || "Sin género";
+        if (!groups.has(key)) groups.set(key, []);
+        groups.get(key)!.push(p);
+      }
+
+      const results = Array.from(groups.values())
+        .filter((list) => list.length > 0)
+        .map((list) => runGenerator(list, false));
+
+      if (results.length <= 1) return results[0] ?? runGenerator(participantsList, false);
+
+      const mergedRounds: any[] = [];
+      for (let round = 1; round <= numRounds; round++) {
+        const roundTables: any[] = [];
+        for (const res of results) {
+          const entry = res.tables.find((t: any) => t.round === round);
+          if (entry?.tables?.length) roundTables.push(...entry.tables);
+        }
+        mergedRounds.push({ round, tables: roundTables });
+      }
+
+      const playedAfter: Record<string, string[]> = {};
+      for (const res of results) {
+        for (const [k, v] of Object.entries(res.playedAfter || {})) {
+          playedAfter[k] = Array.from(new Set([...(playedAfter[k] || []), ...(v as string[])]));
+        }
+      }
+
+      const incompletes = results.filter((r) => r.hasIncomplete);
+      return {
+        tables: mergedRounds,
+        hasIncomplete: incompletes.length > 0,
+        incompleteInfo: incompletes.length > 0
+          ? "Algunas mesas no pudieron completarse manteniendo mesas del mismo género."
+          : "",
+        playedAfter,
+      };
     }
+
+    return runGenerator(participantsList, genderParity);
   };
 
   // Helper function to count genders in a table
