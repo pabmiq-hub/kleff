@@ -181,7 +181,11 @@ function CatchAll() {
   if (data.kind === "kon") {
     return (
       <PublicEventPage event={data.event}>
-        <ParticipantJoin />
+        <ParticipantJoin
+          variantSubtitle={data.event.variantSubtitle}
+          variantDescription={data.event.variantDescription}
+          variantGender={data.event.variantGender}
+        />
       </PublicEventPage>
     );
   }
