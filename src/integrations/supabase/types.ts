@@ -1471,6 +1471,7 @@ export type Database = {
           payment_reminders_enabled: boolean
           payment_tracking_enabled: boolean
           preliminary_round: Json | null
+          primary_target_gender: string | null
           professional_config: Json | null
           public_preliminary_tables_available: boolean
           quota_waitlist_enabled: boolean
@@ -1488,6 +1489,10 @@ export type Database = {
           round_started_at: string | null
           rounds: number
           scheduled_email_at: string | null
+          secondary_registration_description: string | null
+          secondary_registration_subtitle: string | null
+          secondary_slug: string | null
+          secondary_target_gender: string | null
           selection_closed_at: string | null
           selection_deadline_hours: number | null
           series_id: string | null
@@ -1496,6 +1501,7 @@ export type Database = {
           social_game: Json | null
           status: string
           super_like_enabled: boolean
+          table_gender_mode: string
           table_size: number
           tables: Json | null
           tables_generation_mode: string
@@ -1546,6 +1552,7 @@ export type Database = {
           payment_reminders_enabled?: boolean
           payment_tracking_enabled?: boolean
           preliminary_round?: Json | null
+          primary_target_gender?: string | null
           professional_config?: Json | null
           public_preliminary_tables_available?: boolean
           quota_waitlist_enabled?: boolean
@@ -1563,6 +1570,10 @@ export type Database = {
           round_started_at?: string | null
           rounds?: number
           scheduled_email_at?: string | null
+          secondary_registration_description?: string | null
+          secondary_registration_subtitle?: string | null
+          secondary_slug?: string | null
+          secondary_target_gender?: string | null
           selection_closed_at?: string | null
           selection_deadline_hours?: number | null
           series_id?: string | null
@@ -1571,6 +1582,7 @@ export type Database = {
           social_game?: Json | null
           status?: string
           super_like_enabled?: boolean
+          table_gender_mode?: string
           table_size?: number
           tables?: Json | null
           tables_generation_mode?: string
@@ -1621,6 +1633,7 @@ export type Database = {
           payment_reminders_enabled?: boolean
           payment_tracking_enabled?: boolean
           preliminary_round?: Json | null
+          primary_target_gender?: string | null
           professional_config?: Json | null
           public_preliminary_tables_available?: boolean
           quota_waitlist_enabled?: boolean
@@ -1638,6 +1651,10 @@ export type Database = {
           round_started_at?: string | null
           rounds?: number
           scheduled_email_at?: string | null
+          secondary_registration_description?: string | null
+          secondary_registration_subtitle?: string | null
+          secondary_slug?: string | null
+          secondary_target_gender?: string | null
           selection_closed_at?: string | null
           selection_deadline_hours?: number | null
           series_id?: string | null
@@ -1646,6 +1663,7 @@ export type Database = {
           social_game?: Json | null
           status?: string
           super_like_enabled?: boolean
+          table_gender_mode?: string
           table_size?: number
           tables?: Json | null
           tables_generation_mode?: string
@@ -4295,6 +4313,7 @@ export type Database = {
           organizer_profile_id: string | null
           participants_count: number | null
           payment_tracking_enabled: boolean | null
+          primary_target_gender: string | null
           professional_config: Json | null
           quota_waitlist_enabled: boolean | null
           registration_description: string | null
@@ -4308,6 +4327,10 @@ export type Database = {
           round_started_at: string | null
           rounds: number | null
           scheduled_email_at: string | null
+          secondary_registration_description: string | null
+          secondary_registration_subtitle: string | null
+          secondary_slug: string | null
+          secondary_target_gender: string | null
           selection_closed_at: string | null
           selection_deadline_hours: number | null
           slot_quotas: Json | null
@@ -4315,6 +4338,7 @@ export type Database = {
           social_game: Json | null
           status: string | null
           super_like_enabled: boolean | null
+          table_gender_mode: string | null
           table_size: number | null
           waitlist_enabled: boolean | null
           wrapped_enabled: boolean | null
@@ -4346,6 +4370,7 @@ export type Database = {
           organizer_profile_id?: string | null
           participants_count?: number | null
           payment_tracking_enabled?: boolean | null
+          primary_target_gender?: string | null
           professional_config?: Json | null
           quota_waitlist_enabled?: boolean | null
           registration_description?: string | null
@@ -4359,6 +4384,10 @@ export type Database = {
           round_started_at?: string | null
           rounds?: number | null
           scheduled_email_at?: string | null
+          secondary_registration_description?: string | null
+          secondary_registration_subtitle?: string | null
+          secondary_slug?: string | null
+          secondary_target_gender?: string | null
           selection_closed_at?: string | null
           selection_deadline_hours?: number | null
           slot_quotas?: Json | null
@@ -4366,6 +4395,7 @@ export type Database = {
           social_game?: Json | null
           status?: string | null
           super_like_enabled?: boolean | null
+          table_gender_mode?: string | null
           table_size?: number | null
           waitlist_enabled?: boolean | null
           wrapped_enabled?: boolean | null
@@ -4397,6 +4427,7 @@ export type Database = {
           organizer_profile_id?: string | null
           participants_count?: number | null
           payment_tracking_enabled?: boolean | null
+          primary_target_gender?: string | null
           professional_config?: Json | null
           quota_waitlist_enabled?: boolean | null
           registration_description?: string | null
@@ -4410,6 +4441,10 @@ export type Database = {
           round_started_at?: string | null
           rounds?: number | null
           scheduled_email_at?: string | null
+          secondary_registration_description?: string | null
+          secondary_registration_subtitle?: string | null
+          secondary_slug?: string | null
+          secondary_target_gender?: string | null
           selection_closed_at?: string | null
           selection_deadline_hours?: number | null
           slot_quotas?: Json | null
@@ -4417,6 +4452,7 @@ export type Database = {
           social_game?: Json | null
           status?: string | null
           super_like_enabled?: boolean | null
+          table_gender_mode?: string | null
           table_size?: number | null
           waitlist_enabled?: boolean | null
           wrapped_enabled?: boolean | null
