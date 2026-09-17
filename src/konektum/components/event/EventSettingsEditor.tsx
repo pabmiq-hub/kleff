@@ -218,6 +218,15 @@ const EventSettingsEditor = ({
   const [customFormEnabled, setCustomFormEnabled] = useState(false);
   const [customFormFields, setCustomFormFields] = useState<FormField[]>([]);
 
+  // Table distribution by gender + secondary public link
+  const [formTableGenderMode, setFormTableGenderMode] = useState<string>("mixed");
+  const [formPrimaryTargetGender, setFormPrimaryTargetGender] = useState<string>("");
+  const [formSecondaryLinkEnabled, setFormSecondaryLinkEnabled] = useState(false);
+  const [formSecondarySlug, setFormSecondarySlug] = useState("");
+  const [formSecondarySubtitle, setFormSecondarySubtitle] = useState("");
+  const [formSecondaryDescription, setFormSecondaryDescription] = useState("");
+  const [formSecondaryTargetGender, setFormSecondaryTargetGender] = useState("");
+
   const isProfessional = eventModule === "professional";
   const isLocked = eventStatus !== "pending";
   const canUseCustomTables = (hasFeature("custom_table_layout") || isSuperAdmin) && !isProfessional;
@@ -243,7 +252,7 @@ const EventSettingsEditor = ({
     const loadExtras = async () => {
       const { data } = await supabase
         .from("events")
-        .select("slug, custom_registration_form, wrapped_enabled, wrapped_questions, social_game, languages_enabled, available_languages")
+        .select("slug, custom_registration_form, wrapped_enabled, wrapped_questions, social_game, languages_enabled, available_languages, table_gender_mode, primary_target_gender, secondary_slug, secondary_registration_subtitle, secondary_registration_description, secondary_target_gender")
         .eq("id", eventId)
         .single();
 
@@ -255,6 +264,13 @@ const EventSettingsEditor = ({
         }
       }
       if ((data as any)?.slug) setFormSlug((data as any).slug);
+      setFormTableGenderMode((data as any)?.table_gender_mode || "mixed");
+      setFormPrimaryTargetGender((data as any)?.primary_target_gender || "");
+      setFormSecondaryLinkEnabled(!!(data as any)?.secondary_slug);
+      setFormSecondarySlug((data as any)?.secondary_slug || "");
+      setFormSecondarySubtitle((data as any)?.secondary_registration_subtitle || "");
+      setFormSecondaryDescription((data as any)?.secondary_registration_description || "");
+      setFormSecondaryTargetGender((data as any)?.secondary_target_gender || "");
       if ((data as any)?.wrapped_enabled) setFormWrappedEnabled(true);
       setFormSocialGame(normalizeIcebreakers((data as any)?.social_game));
       setFormWrappedQuestions(getWrappedQuestions((data as any)?.wrapped_questions));
@@ -299,6 +315,20 @@ const EventSettingsEditor = ({
         round_duration: formRoundDuration,
         rotation_mode: formRotationMode,
         gender_parity: isProfessional ? false : formGenderParity,
+        table_gender_mode: isProfessional ? "mixed" : formTableGenderMode,
+        primary_target_gender: !isProfessional && formSecondaryLinkEnabled ? (formPrimaryTargetGender || null) : null,
+        secondary_slug: !isProfessional && formSecondaryLinkEnabled
+          ? (slugifyEventName(formSecondarySlug) || null)
+          : null,
+        secondary_registration_subtitle: !isProfessional && formSecondaryLinkEnabled
+          ? (formSecondarySubtitle.trim() || null)
+          : null,
+        secondary_registration_description: !isProfessional && formSecondaryLinkEnabled
+          ? (formSecondaryDescription.trim() || null)
+          : null,
+        secondary_target_gender: !isProfessional && formSecondaryLinkEnabled
+          ? (formSecondaryTargetGender || null)
+          : null,
         language: formLanguage,
         registration_subtitle: formRegSubtitle.trim() || null,
         registration_description: formRegDescription.trim() || null,
@@ -607,6 +637,108 @@ const EventSettingsEditor = ({
                 checked={formGenderParity}
                 onCheckedChange={setFormGenderParity}
               />
+            </div>
+          )}
+
+          {!isProfessional && (
+            <div className="flex items-center justify-between p-4 border rounded-lg">
+              <div className="flex-1 pr-4">
+                <Label className="text-base">Distribución de mesas</Label>
+                <p className="text-sm text-muted-foreground">
+                  <strong>Mixtas:</strong> hombres y mujeres pueden compartir mesa.<br />
+                  <strong>100% mismo género:</strong> mesas exclusivas de chicas y mesas exclusivas de chicos, sin mezclar.
+                </p>
+              </div>
+              <Select value={formTableGenderMode} onValueChange={setFormTableGenderMode}>
+                <SelectTrigger className="w-56">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="mixed">Mixtas (estándar)</SelectItem>
+                  <SelectItem value="single_gender">100% mismo género</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+
+          {!isProfessional && (
+            <div className="p-4 border rounded-lg space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex-1 pr-4">
+                  <Label className="text-base">Segundo enlace de inscripción</Label>
+                  <p className="text-sm text-muted-foreground">
+                    Dos direcciones distintas con su propio texto que llevan al mismo evento (por ejemplo, una para chicas y otra para chicos).
+                  </p>
+                </div>
+                <Switch checked={formSecondaryLinkEnabled} onCheckedChange={setFormSecondaryLinkEnabled} />
+              </div>
+
+              {formSecondaryLinkEnabled && (
+                <div className="space-y-4 pt-3 border-t">
+                  <div className="space-y-2">
+                    <Label>Enlace principal · público al que se dirige</Label>
+                    <Select value={formPrimaryTargetGender || "none"} onValueChange={(v) => setFormPrimaryTargetGender(v === "none" ? "" : v)}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Sin preselección" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="none">Sin preselección</SelectItem>
+                        {formPreferences.genders.map((g) => (
+                          <SelectItem key={g} value={g}>{g}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="event-secondary-slug">Dirección del segundo enlace</Label>
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm text-muted-foreground whitespace-nowrap">
+                        {typeof window !== "undefined" ? window.location.host : "kleff.es"}/
+                      </span>
+                      <Input
+                        id="event-secondary-slug"
+                        value={formSecondarySlug}
+                        placeholder="mi-evento-chicos"
+                        onChange={(e) => setFormSecondarySlug(slugifyEventDraft(e.target.value))}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>Segundo enlace · público al que se dirige</Label>
+                    <Select value={formSecondaryTargetGender || "none"} onValueChange={(v) => setFormSecondaryTargetGender(v === "none" ? "" : v)}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Sin preselección" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="none">Sin preselección</SelectItem>
+                        {formPreferences.genders.map((g) => (
+                          <SelectItem key={g} value={g}>{g}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="event-secondary-subtitle">Subtítulo del segundo enlace</Label>
+                    <Input
+                      id="event-secondary-subtitle"
+                      value={formSecondarySubtitle}
+                      placeholder="Ej: Mesas solo para chicos"
+                      onChange={(e) => setFormSecondarySubtitle(e.target.value)}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>Descripción del segundo enlace</Label>
+                    <RichTextEditor
+                      value={formSecondaryDescription}
+                      onChange={setFormSecondaryDescription}
+                    />
+                  </div>
+                </div>
+              )}
             </div>
           )}
 

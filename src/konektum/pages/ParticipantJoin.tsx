@@ -78,7 +78,18 @@ interface QuotaStatus {
   available: number;
 }
 
-const ParticipantJoin = ({ eventIdOverride }: { eventIdOverride?: string } = {}) => {
+const ParticipantJoin = ({
+  eventIdOverride,
+  variantSubtitle,
+  variantDescription,
+  variantGender,
+}: {
+  eventIdOverride?: string;
+  /** Overrides coming from a secondary public link pointing at the same event. */
+  variantSubtitle?: string | null;
+  variantDescription?: string | null;
+  variantGender?: string | null;
+} = {}) => {
   const { id: routeEventId } = useParams();
   const eventId = eventIdOverride || routeEventId;
   const eb = useEventBranding(eventId);
@@ -190,6 +201,14 @@ const ParticipantJoin = ({ eventIdOverride }: { eventIdOverride?: string } = {})
   const normalizeKey = (v: any) =>
     String(v ?? '').toLowerCase().trim().replace(/–/g, '-').replace(/\s+/g, '');
 
+  // Secondary public link: preselect the gender this link is aimed at.
+  useEffect(() => {
+    if (!variantGender) return;
+    const match = eventGenders.find((g) => normalizeKey(g) === normalizeKey(variantGender));
+    if (match) setGender((prev) => prev || match);
+  }, [variantGender, eventGenders]);
+
+
   useEffect(() => {
     const checkEvent = async () => {
       if (!eventId) {
@@ -238,8 +257,8 @@ const ParticipantJoin = ({ eventIdOverride }: { eventIdOverride?: string } = {})
       setEventDate(normalizeUpcomingEventDate(data.date, data.status));
       setEventTime((data as any).event_time || null);
       setEventLocation((data as any).event_location || null);
-      setRegistrationSubtitle(data.registration_subtitle || null);
-      setRegistrationDescription(data.registration_description || null);
+      setRegistrationSubtitle(variantSubtitle || data.registration_subtitle || null);
+      setRegistrationDescription(variantDescription || data.registration_description || null);
       
       // Set module type
       setEventModule(data.module || "social");
