@@ -78,7 +78,18 @@ interface QuotaStatus {
   available: number;
 }
 
-const ParticipantJoin = ({ eventIdOverride }: { eventIdOverride?: string } = {}) => {
+const ParticipantJoin = ({
+  eventIdOverride,
+  variantSubtitle,
+  variantDescription,
+  variantGender,
+}: {
+  eventIdOverride?: string;
+  /** Overrides coming from a secondary public link pointing at the same event. */
+  variantSubtitle?: string | null;
+  variantDescription?: string | null;
+  variantGender?: string | null;
+} = {}) => {
   const { id: routeEventId } = useParams();
   const eventId = eventIdOverride || routeEventId;
   const eb = useEventBranding(eventId);
