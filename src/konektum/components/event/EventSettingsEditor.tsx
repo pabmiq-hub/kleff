@@ -315,6 +315,20 @@ const EventSettingsEditor = ({
         round_duration: formRoundDuration,
         rotation_mode: formRotationMode,
         gender_parity: isProfessional ? false : formGenderParity,
+        table_gender_mode: isProfessional ? "mixed" : formTableGenderMode,
+        primary_target_gender: !isProfessional && formSecondaryLinkEnabled ? (formPrimaryTargetGender || null) : null,
+        secondary_slug: !isProfessional && formSecondaryLinkEnabled
+          ? (slugifyEventName(formSecondarySlug) || null)
+          : null,
+        secondary_registration_subtitle: !isProfessional && formSecondaryLinkEnabled
+          ? (formSecondarySubtitle.trim() || null)
+          : null,
+        secondary_registration_description: !isProfessional && formSecondaryLinkEnabled
+          ? (formSecondaryDescription.trim() || null)
+          : null,
+        secondary_target_gender: !isProfessional && formSecondaryLinkEnabled
+          ? (formSecondaryTargetGender || null)
+          : null,
         language: formLanguage,
         registration_subtitle: formRegSubtitle.trim() || null,
         registration_description: formRegDescription.trim() || null,
