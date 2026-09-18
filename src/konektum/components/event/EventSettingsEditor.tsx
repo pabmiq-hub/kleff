@@ -188,6 +188,9 @@ const EventSettingsEditor = ({
   const [formQuotaWaitlistEnabled, setFormQuotaWaitlistEnabled] = useState<boolean>(
     initialQuotaWaitlistEnabled !== false
   );
+  const [formWaitlistPromotionMode, setFormWaitlistPromotionMode] = useState<string>(
+    initialWaitlistPromotionMode === "manual" ? "manual" : "auto"
+  );
   const [formPaymentTrackingEnabled, setFormPaymentTrackingEnabled] = useState(initialPaymentTrackingEnabled);
   const [formPaymentRemindersEnabled, setFormPaymentRemindersEnabled] = useState(initialPaymentRemindersEnabled);
   const [formPaymentReminderFirstHours, setFormPaymentReminderFirstHours] = useState<number>(initialPaymentReminderFirstHours || 24);
