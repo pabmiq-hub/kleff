@@ -1508,6 +1508,7 @@ export type Database = {
           test_config: Json | null
           updated_at: string
           waitlist_enabled: boolean
+          waitlist_promotion_mode: string
           wrapped_enabled: boolean
           wrapped_questions: Json | null
         }
@@ -1589,6 +1590,7 @@ export type Database = {
           test_config?: Json | null
           updated_at?: string
           waitlist_enabled?: boolean
+          waitlist_promotion_mode?: string
           wrapped_enabled?: boolean
           wrapped_questions?: Json | null
         }
@@ -1670,6 +1672,7 @@ export type Database = {
           test_config?: Json | null
           updated_at?: string
           waitlist_enabled?: boolean
+          waitlist_promotion_mode?: string
           wrapped_enabled?: boolean
           wrapped_questions?: Json | null
         }

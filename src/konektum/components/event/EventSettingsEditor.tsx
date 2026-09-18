@@ -76,6 +76,7 @@ interface EventSettingsEditorProps {
   registrationRequirementsEnabled?: boolean;
   slotQuotas?: SlotQuota[] | null;
   quotaWaitlistEnabled?: boolean;
+  waitlistPromotionMode?: string;
   paymentTrackingEnabled?: boolean;
   paymentRemindersEnabled?: boolean;
   paymentReminderFirstHours?: number;
@@ -187,6 +188,9 @@ const EventSettingsEditor = ({
   );
   const [formQuotaWaitlistEnabled, setFormQuotaWaitlistEnabled] = useState<boolean>(
     initialQuotaWaitlistEnabled !== false
+  );
+  const [formWaitlistPromotionMode, setFormWaitlistPromotionMode] = useState<string>(
+    initialWaitlistPromotionMode === "manual" ? "manual" : "auto"
   );
   const [formPaymentTrackingEnabled, setFormPaymentTrackingEnabled] = useState(initialPaymentTrackingEnabled);
   const [formPaymentRemindersEnabled, setFormPaymentRemindersEnabled] = useState(initialPaymentRemindersEnabled);
