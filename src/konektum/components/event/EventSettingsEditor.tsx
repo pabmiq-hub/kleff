@@ -76,6 +76,7 @@ interface EventSettingsEditorProps {
   registrationRequirementsEnabled?: boolean;
   slotQuotas?: SlotQuota[] | null;
   quotaWaitlistEnabled?: boolean;
+  waitlistPromotionMode?: string;
   paymentTrackingEnabled?: boolean;
   paymentRemindersEnabled?: boolean;
   paymentReminderFirstHours?: number;
