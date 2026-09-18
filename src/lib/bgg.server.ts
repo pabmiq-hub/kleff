@@ -469,37 +469,36 @@ export async function syncBggCollection(): Promise<{
   removedInactive: number;
   enriched: number;
 }> {
-  // 1) Authoritative source: the games flagged "owned" on our BGG collection.
-  const owned = await fetchBggOwnedCollection();
-  if (owned.size === 0) {
+  // 1) Authoritative source: everything flagged OWNED on Ludoya.
+  //    (BGG's XML API blocks our egress IPs, so Ludoya drives the catalogue.)
+  const ludoyaGames = (await fetchLudoyaCollection()).filter((g) => {
+    const copies = g.annotations?.copies ?? [];
+    return copies.some((c) => c?.ownership === "OWNED");
+  });
+  if (ludoyaGames.length === 0) {
     throw new Error(
-      "No se pudo leer la colección de BoardGameGeek (owned). Sincronización cancelada para no alterar el catálogo.",
+      "No se pudo leer la colección de Ludoya (owned). Sincronización cancelada para no alterar el catálogo.",
     );
   }
 
-  // 2) Games the admin deleted must never come back.
+  // 2) Optional: BGG collection display names (edition titles). Best-effort.
+  let displayNames = new Map<number, string>();
+  try {
+    displayNames = await fetchBggOwnedCollection();
+  } catch (e) {
+    console.warn(
+      "[bgg-sync] display names unavailable:",
+      e instanceof Error ? e.message : String(e),
+    );
+  }
+
+  // 3) Games the admin deleted must never come back.
   const { data: exclusionRows } = await supabaseAdmin
     .from("bgg_sync_exclusions")
     .select("bgg_id");
   const excluded = new Set<number>(
     ((exclusionRows ?? []) as Array<{ bgg_id: number }>).map((r) => r.bgg_id),
   );
-  for (const id of excluded) owned.delete(id);
-
-  // 3) Ludoya provides extra metadata (images, player counts, playtime), but
-  //    only for copies we actually own. It is never a source of new games.
-  let ludoyaGames: LudoyaGame[] = [];
-  try {
-    ludoyaGames = (await fetchLudoyaCollection()).filter((g) => {
-      const copies = g.annotations?.copies ?? [];
-      return copies.some((c) => c?.ownership === "OWNED");
-    });
-  } catch (e) {
-    console.warn(
-      "[bgg-sync] Ludoya unavailable:",
-      e instanceof Error ? e.message : String(e),
-    );
-  }
 
   // Reuse existing bgg_id mapping + enrichment so we don't refetch from BGG
   // for games that are already complete and fresh.
@@ -518,16 +517,13 @@ export async function syncBggCollection(): Promise<{
     if (e.bgg_id != null) existingByBggId.set(e.bgg_id, e);
   }
 
-  // Resolve bgg_id per Ludoya game (use cached value when possible).
-  const ludoyaByBggId = new Map<number, LudoyaGame>();
+  // 4) Resolve a bgg_id for every Ludoya game (cached by title when possible).
+  const resolvedBggId = new Map<string, number>(); // ludoya slug -> bgg id
   const slugsToResolve: LudoyaGame[] = [];
   for (const g of ludoyaGames) {
     const cached = existingByTitle.get(g.name.toLowerCase());
-    if (cached?.bgg_id) {
-      ludoyaByBggId.set(cached.bgg_id, g);
-    } else {
-      slugsToResolve.push(g);
-    }
+    if (cached?.bgg_id) resolvedBggId.set(g.slug, cached.bgg_id);
+    else slugsToResolve.push(g);
   }
   const BATCH = 8;
   for (let i = 0; i < slugsToResolve.length; i += BATCH) {
@@ -535,42 +531,51 @@ export async function syncBggCollection(): Promise<{
     const results = await Promise.all(batch.map((g) => fetchLudoyaBggId(g.slug)));
     batch.forEach((g, idx) => {
       const id = results[idx];
-      if (id != null && !ludoyaByBggId.has(id)) ludoyaByBggId.set(id, g);
+      if (id != null) resolvedBggId.set(g.slug, id);
     });
   }
 
-  const ownedIds = [...owned.keys()];
+  // 5) Deduplicate: one record per bgg_id (games without id keep their slug).
+  const bySyncKey = new Map<string, { game: LudoyaGame; bggId: number | null }>();
+  for (const g of ludoyaGames) {
+    const bggId = resolvedBggId.get(g.slug) ?? null;
+    if (bggId != null && excluded.has(bggId)) continue;
+    const key = bggId != null ? `bgg:${bggId}` : `slug:${g.slug}`;
+    if (!bySyncKey.has(key)) bySyncKey.set(key, { game: g, bggId });
+  }
+  const entries = [...bySyncKey.values()];
 
-  // Decide which BGG ids actually need enrichment this run.
-  const idsToEnrich = ownedIds.filter(
-    (id) => !alreadyEnriched(existingByBggId.get(id)),
-  );
+  // 6) Enrich only the ids that need it.
+  const idsToEnrich = entries
+    .map((e) => e.bggId)
+    .filter((id): id is number => id != null)
+    .filter((id) => !alreadyEnriched(existingByBggId.get(id)));
   const extras = await enrichWithBgg(idsToEnrich);
 
-  // Build records driven strictly by the owned BGG collection.
+  // 7) Build records driven strictly by the Ludoya owned collection.
   const matchedIds = new Set<string>();
   const toInsert: Array<Record<string, unknown>> = [];
   const toUpdate: Array<{ id: string; patch: Record<string, unknown> }> = [];
 
-  for (const bggId of ownedIds) {
-    const displayName = owned.get(bggId) ?? null;
-    const g = ludoyaByBggId.get(bggId) ?? {};
-    const extra = extras.get(bggId);
+  for (const { game, bggId } of entries) {
+    const displayName = bggId != null ? (displayNames.get(bggId) ?? null) : null;
+    const extra = bggId != null ? extras.get(bggId) : undefined;
     const prev =
-      existingByBggId.get(bggId) ??
+      (bggId != null ? existingByBggId.get(bggId) : undefined) ??
+      existingByTitle.get(game.name.toLowerCase()) ??
       (displayName ? existingByTitle.get(displayName.toLowerCase()) : undefined);
     const rec = buildRecord(
-      g,
+      game,
       bggId,
       extra,
       prev,
       extra?.bgg_primary_name ?? null,
       displayName,
     );
-    if (prev) {
+    if (prev && !matchedIds.has(prev.id)) {
       matchedIds.add(prev.id);
       toUpdate.push({ id: prev.id, patch: { ...rec, is_active: true } });
-    } else {
+    } else if (!prev) {
       toInsert.push({
         ...rec,
         is_active: true,
@@ -598,14 +603,14 @@ export async function syncBggCollection(): Promise<{
     if (error) throw new Error(`update ${u.id}: ${error.message}`);
   }
 
-  // Deactivate rows that came from BGG but are no longer owned. Rows added
-  // manually (no bgg_id) are left untouched.
+  // Deactivate rows that came from BGG/Ludoya but are no longer owned. Rows
+  // added manually (no bgg_id) are left untouched.
   let removedInactive = 0;
   for (const row of existingRows) {
     if (matchedIds.has(row.id)) continue;
     if (row.bgg_id == null) continue;
     // Curated rows (a shelf/location assigned by an admin, e.g. "en reposición")
-    // stay in the catalogue even if BGG no longer lists them as owned.
+    // stay in the catalogue even if they are no longer listed as owned.
     if (row.shelf != null) continue;
     const { error } = await supabaseAdmin
       .from("bgg_games")
@@ -615,7 +620,7 @@ export async function syncBggCollection(): Promise<{
   }
 
   return {
-    fetched: owned.size,
+    fetched: entries.length,
     upserted: toInsert.length + toUpdate.length,
     removedInactive,
     enriched: extras.size,
