@@ -2693,8 +2693,17 @@ const EventDetail = () => {
     });
 
     // Auto-promote from waitlist if enabled, but never exceeding per gender/age quota
-    if (eventData?.waitlist_enabled && waitlistEntries.some(w => w.status === 'waiting')) {
+    if (
+      eventData?.waitlist_enabled &&
+      ((eventData as any)?.waitlist_promotion_mode ?? 'auto') !== 'manual' &&
+      waitlistEntries.some(w => w.status === 'waiting')
+    ) {
       await handleAutoPromoteWaitlist(newParticipants);
+    } else if (eventData?.waitlist_enabled && waitlistEntries.some(w => w.status === 'waiting')) {
+      toast({
+        title: 'Plaza liberada',
+        description: 'Hay gente en lista de espera. Inscríbela manualmente desde la pestaña Lista de espera.',
+      });
     }
   };
 
@@ -6021,6 +6030,7 @@ const EventDetail = () => {
                 registrationRequirementsEnabled={(eventData as any).registration_requirements_enabled || false}
                 slotQuotas={(eventData as any).slot_quotas || null}
                 quotaWaitlistEnabled={(eventData as any).quota_waitlist_enabled ?? true}
+                waitlistPromotionMode={(eventData as any).waitlist_promotion_mode ?? "auto"}
                 paymentTrackingEnabled={(eventData as any).payment_tracking_enabled || false}
                 paymentRemindersEnabled={(eventData as any).payment_reminders_enabled || false}
                 paymentReminderFirstHours={(eventData as any).payment_reminder_first_hours ?? 24}
