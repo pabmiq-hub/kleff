@@ -122,6 +122,7 @@ const EventSettingsEditor = ({
   registrationRequirementsEnabled: initialRegRequirementsEnabled = false,
   slotQuotas: initialSlotQuotas = null,
   quotaWaitlistEnabled: initialQuotaWaitlistEnabled = true,
+  waitlistPromotionMode: initialWaitlistPromotionMode = "auto",
   paymentTrackingEnabled: initialPaymentTrackingEnabled = false,
   paymentRemindersEnabled: initialPaymentRemindersEnabled = false,
   paymentReminderFirstHours: initialPaymentReminderFirstHours = 24,
