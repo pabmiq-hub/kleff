@@ -44,6 +44,7 @@ interface EventSettingsTabsProps {
   registrationRequirementsEnabled?: boolean;
   slotQuotas?: any;
   quotaWaitlistEnabled?: boolean;
+  waitlistPromotionMode?: string;
   paymentTrackingEnabled?: boolean;
   paymentRemindersEnabled?: boolean;
   paymentReminderFirstHours?: number;

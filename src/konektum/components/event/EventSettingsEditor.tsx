@@ -122,6 +122,7 @@ const EventSettingsEditor = ({
   registrationRequirementsEnabled: initialRegRequirementsEnabled = false,
   slotQuotas: initialSlotQuotas = null,
   quotaWaitlistEnabled: initialQuotaWaitlistEnabled = true,
+  waitlistPromotionMode: initialWaitlistPromotionMode = "auto",
   paymentTrackingEnabled: initialPaymentTrackingEnabled = false,
   paymentRemindersEnabled: initialPaymentRemindersEnabled = false,
   paymentReminderFirstHours: initialPaymentReminderFirstHours = 24,
@@ -374,6 +375,7 @@ const EventSettingsEditor = ({
         registration_requirements_enabled: !isProfessional ? formRegRequirementsEnabled : false,
         slot_quotas: !isProfessional && formRegRequirementsEnabled ? formSlotQuotas : null,
         quota_waitlist_enabled: !isProfessional ? formQuotaWaitlistEnabled : true,
+        waitlist_promotion_mode: formWaitlistPromotionMode === "manual" ? "manual" : "auto",
         payment_tracking_enabled: formPaymentTrackingEnabled,
         payment_reminders_enabled: formPaymentTrackingEnabled && formPaymentRemindersEnabled,
         payment_reminder_first_hours: Math.max(1, Number(formPaymentReminderFirstHours) || 24),
@@ -1125,6 +1127,31 @@ const EventSettingsEditor = ({
               onWaitlistEnabledChange={setFormQuotaWaitlistEnabled}
             />
           )}
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">Lista de espera</CardTitle>
+              <CardDescription>
+                Decide qué ocurre cuando se libera una plaza porque alguien se da de baja.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <Select value={formWaitlistPromotionMode} onValueChange={setFormWaitlistPromotionMode}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="auto">Automática por orden de lista</SelectItem>
+                  <SelectItem value="manual">Manual: decide el organizador</SelectItem>
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground">
+                {formWaitlistPromotionMode === "manual"
+                  ? "Al producirse una baja no se inscribe a nadie automáticamente: tú eliges a quién inscribir desde la pestaña Lista de espera."
+                  : "Al producirse una baja se inscribe automáticamente a la primera persona de la lista que cumpla las cuotas."}
+              </p>
+            </CardContent>
+          </Card>
 
           <Card>
             <CardHeader>
