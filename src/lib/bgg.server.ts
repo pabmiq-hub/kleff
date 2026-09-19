@@ -151,6 +151,7 @@ async function fetchLudoyaCollection(): Promise<LudoyaGame[]> {
   const res = await fetch(LUDOYA_URL, {
     headers: {
       Accept: "application/json",
+      "Accept-Language": "es-ES,es;q=0.9",
       "User-Agent":
         "Mozilla/5.0 (compatible; KleffSync/1.0; +https://kleff.lovable.app)",
     },
