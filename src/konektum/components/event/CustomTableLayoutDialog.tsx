@@ -5,14 +5,14 @@ import { Button } from "@/konektum/ui/button";
 import { Input } from "@/konektum/ui/input";
 import { Label } from "@/konektum/ui/label";
 import { ChevronLeft, ChevronRight, Save } from "lucide-react";
-import { CustomTableLayout } from "@/konektum/lib/customTableLayout";
+import { CustomTableLayout, CustomTableFill, getCustomTableFill } from "@/konektum/lib/customTableLayout";
 
 interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   defaultCapacity: number;
   initialLayout: CustomTableLayout | null | undefined;
-  onSave: (layout: CustomTableLayout) => void;
+  onSave: (layout: CustomTableLayout) => void | Promise<void>;
 }
 
 const CustomTableLayoutDialog = ({ open, onOpenChange, defaultCapacity, initialLayout, onSave }: Props) => {
@@ -21,6 +21,8 @@ const CustomTableLayoutDialog = ({ open, onOpenChange, defaultCapacity, initialL
   const [capacities, setCapacities] = useState<number[]>(
     initialLayout?.tables.map(t => t.capacity) || []
   );
+  const [fill, setFill] = useState<CustomTableFill>(getCustomTableFill(initialLayout));
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     if (open) {
@@ -28,6 +30,7 @@ const CustomTableLayoutDialog = ({ open, onOpenChange, defaultCapacity, initialL
       setStep(1);
       setNumTables(initial?.length || 5);
       setCapacities(initial || []);
+      setFill(getCustomTableFill(initialLayout));
     }
   }, [open, initialLayout]);
 
@@ -46,10 +49,15 @@ const CustomTableLayoutDialog = ({ open, onOpenChange, defaultCapacity, initialL
 
   const totalSeats = capacities.reduce((a, b) => a + (Number(b) || 0), 0);
 
-  const handleSave = () => {
+  const handleSave = async () => {
     const cleaned = capacities.map(c => Math.max(2, Math.min(20, Math.floor(Number(c) || 0))));
-    onSave({ enabled: true, tables: cleaned.map(capacity => ({ capacity })) });
-    onOpenChange(false);
+    setSaving(true);
+    try {
+      await onSave({ enabled: true, tables: cleaned.map(capacity => ({ capacity })), fill });
+      onOpenChange(false);
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -90,6 +98,31 @@ const CustomTableLayoutDialog = ({ open, onOpenChange, defaultCapacity, initialL
                 />
               </div>
             ))}
+            <div className="pt-2 space-y-2 border-t">
+              <Label className="text-sm">Reparto de participantes</Label>
+              <div className="grid gap-2">
+                <button
+                  type="button"
+                  onClick={() => setFill("balanced")}
+                  className={`text-left rounded-md border px-3 py-2 text-sm ${fill === "balanced" ? "border-primary bg-primary/5" : ""}`}
+                >
+                  <strong>Equilibrado</strong>
+                  <span className="block text-xs text-muted-foreground">
+                    Se crean siempre todas las mesas configuradas y se reparten los asistentes entre ellas sin superar su capacidad.
+                  </span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setFill("sequential")}
+                  className={`text-left rounded-md border px-3 py-2 text-sm ${fill === "sequential" ? "border-primary bg-primary/5" : ""}`}
+                >
+                  <strong>Secuencial</strong>
+                  <span className="block text-xs text-muted-foreground">
+                    Se llena la mesa 1 hasta su capacidad, luego la 2, y así sucesivamente.
+                  </span>
+                </button>
+              </div>
+            </div>
             <p className="text-xs text-muted-foreground pt-1">
               Capacidad total: <strong>{totalSeats}</strong> plazas en {capacities.length} mesas
             </p>
@@ -110,8 +143,8 @@ const CustomTableLayoutDialog = ({ open, onOpenChange, defaultCapacity, initialL
               Siguiente <ChevronRight className="w-4 h-4 ml-1" />
             </Button>
           ) : (
-            <Button onClick={handleSave}>
-              <Save className="w-4 h-4 mr-1" /> Guardar
+            <Button onClick={handleSave} disabled={saving}>
+              <Save className="w-4 h-4 mr-1" /> {saving ? "Guardando..." : "Guardar"}
             </Button>
           )}
         </DialogFooter>
