@@ -429,11 +429,11 @@ serve(async (req) => {
         const alreadyAssigned = tables.some(t => t.some((p: any) => p.id === participant.id));
 
         if (!alreadyAssigned) {
-          // Pick the non-dismissed table with the most free seats (ties → earliest).
+          // Fill tables sequentially by number while respecting each capacity.
           const candidates = tables
             .map((t, i) => ({ i, free: capacityFor(i) - t.length }))
             .filter(({ i, free }) => !dismissed.includes(i) && free > 0)
-            .sort((a, b) => b.free - a.free || a.i - b.i);
+            .sort((a, b) => a.i - b.i);
 
           let placed = false;
           for (const { i } of candidates) {

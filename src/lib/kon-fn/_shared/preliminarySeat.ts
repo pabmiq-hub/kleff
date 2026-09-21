@@ -74,7 +74,7 @@ export async function seatInPreliminaryRound(
     const candidates = tables
       .map((t, i) => ({ i, free: capacityFor(i) - (Array.isArray(t) ? t.length : 0) }))
       .filter(({ i, free }) => !dismissed.includes(i) && free > 0)
-      .sort((a, b) => b.free - a.free || a.i - b.i);
+      .sort((a, b) => a.i - b.i);
 
     let placed = false;
     for (const { i } of candidates) {
