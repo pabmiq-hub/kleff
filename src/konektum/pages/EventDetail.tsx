@@ -3022,8 +3022,16 @@ const EventDetail = () => {
     if (result.tables && result.tables.length > 0) {
       newRound = { ...result.tables[0], round: newRoundNumber };
     } else {
-      // Fallback: empty tables
-      const existingTableCount = currentTables[0]?.tables?.length || Math.ceil(checkedInParticipants.length / (eventData.table_size || 4));
+      // Fallback: preserve the configured custom layout when available.
+      const customDistribution = isCustomTablesEnabled(eventData.custom_tables)
+        ? computeCustomDistribution(
+            checkedInParticipants.length,
+            eventData.custom_tables.tables.map((table) => table.capacity)
+          )
+        : null;
+      const existingTableCount = customDistribution?.numTables
+        || currentTables[0]?.tables?.length
+        || Math.ceil(checkedInParticipants.length / (eventData.table_size || 4));
       newRound = {
         round: newRoundNumber,
         tables: Array.from({ length: Math.max(existingTableCount, 1) }, () => []),
@@ -5695,7 +5703,7 @@ const EventDetail = () => {
                               <AlertDialogHeader>
                                 <AlertDialogTitle>¿Regenerar mesas?</AlertDialogTitle>
                                 <AlertDialogDescription>
-                                  Se descartarán las mesas actuales y se generarán nuevas respetando el tamaño de mesa configurado ({eventData.table_size} personas) y el resto de reglas del evento. Solo disponible antes de iniciar la primera ronda.
+                                  Se descartarán las mesas actuales y se generarán nuevas respetando {isCustomTablesEnabled(eventData.custom_tables) ? "la capacidad configurada para cada mesa" : `el tamaño configurado (${eventData.table_size} personas por mesa)`} y el resto de reglas del evento. Solo disponible antes de iniciar la primera ronda.
                                 </AlertDialogDescription>
                               </AlertDialogHeader>
                               <AlertDialogFooter>

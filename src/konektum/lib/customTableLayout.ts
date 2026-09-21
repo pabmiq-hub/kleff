@@ -15,8 +15,8 @@ export const isCustomTablesEnabled = (
 
 /**
  * Compute a distribution that respects the configured per-table capacities,
- * proportionally scaling down when there are fewer participants than total
- * capacity, and dropping empty tables.
+ * filling tables in their configured order. Every table reaches its configured
+ * capacity before the next one opens; only the final active table may be smaller.
  */
 export const computeCustomDistribution = (
   numParticipants: number,
@@ -27,39 +27,24 @@ export const computeCustomDistribution = (
     return { numTables: 0, sizes: [] };
   }
 
-  const totalCap = caps.reduce((a, b) => a + b, 0);
+  const sizes: number[] = [];
+  let remaining = numParticipants;
 
-  // If there's room for everyone, fill greedily up to each table's capacity.
-  if (numParticipants >= totalCap) {
-    const sizes = [...caps];
-    // Cap to numParticipants if (somehow) configured higher
-    return { numTables: sizes.length, sizes };
+  for (const capacity of caps) {
+    if (remaining <= 0) break;
+    const size = Math.min(capacity, remaining);
+    sizes.push(size);
+    remaining -= size;
   }
 
-  // Proportional allocation, respecting capacity ceilings.
-  const raw = caps.map(c => (numParticipants * c) / totalCap);
-  const sizes = raw.map(r => Math.floor(r));
-  let assigned = sizes.reduce((a, b) => a + b, 0);
-  let remainder = numParticipants - assigned;
-
-  // Distribute leftover seats to tables with the largest fractional remainder
-  // (and remaining capacity), to keep distribution balanced and respect caps.
-  const order = caps
-    .map((c, i) => ({ i, frac: raw[i] - Math.floor(raw[i]), cap: c }))
-    .sort((a, b) => b.frac - a.frac || b.cap - a.cap);
-
-  let cursor = 0;
-  while (remainder > 0 && cursor < order.length * 2) {
-    const slot = order[cursor % order.length];
-    if (sizes[slot.i] < slot.cap) {
-      sizes[slot.i]++;
-      remainder--;
-    }
-    cursor++;
+  // A custom layout is a capacity ceiling. If attendance exceeds it, keep
+  // everybody assigned by opening overflow tables using the final capacity.
+  const overflowCapacity = caps[caps.length - 1];
+  while (remaining > 0) {
+    const size = Math.min(overflowCapacity, remaining);
+    sizes.push(size);
+    remaining -= size;
   }
 
-  // Drop empty tables (e.g. proportional rounding to 0 with very few participants).
-  const filtered: number[] = [];
-  for (const s of sizes) if (s > 0) filtered.push(s);
-  return { numTables: filtered.length, sizes: filtered };
+  return { numTables: sizes.length, sizes };
 };

@@ -76,13 +76,11 @@ export function fillPreliminaryTables(
     const alreadyAssigned = tables.some((t) => t.some((x) => x.id === p.id));
     if (alreadyAssigned) continue;
 
-    // Pick the non-dismissed table with the most free seats, falling back to
-    // earliest index on tie — fills custom layouts predictably and respects
-    // per-table capacity.
+    // Fill tables sequentially by number, respecting each configured capacity.
     const candidates = tables
       .map((t, i) => ({ i, free: capacityFor(i) - t.length }))
       .filter(({ i, free }) => !dismissed.includes(i) && free > 0)
-      .sort((a, b) => b.free - a.free || a.i - b.i);
+      .sort((a, b) => a.i - b.i);
 
     let placed = false;
     for (const { i } of candidates) {
