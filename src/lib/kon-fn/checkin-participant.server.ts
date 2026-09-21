@@ -20,32 +20,32 @@ const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
 const RATE_LIMIT_WINDOW_MS = 60000; // 1 minute
 const MAX_REQUESTS_PER_WINDOW = 5;
 
-function isRateLimited(ip: string): boolean {
-  const now = Date.now();
-  const entry = rateLimitMap.get(ip);
-  
-  if (!entry || now > entry.resetTime) {
-    rateLimitMap.set(ip, { count: 1, resetTime: now + RATE_LIMIT_WINDOW_MS });
-    return false;
-  }
-  
-  if (entry.count >= MAX_REQUESTS_PER_WINDOW) {
-    return true;
-  }
-  
-  entry.count++;
-  return false;
-}
-
-// Clean up old entries periodically (every 5 minutes)
-setInterval(() => {
-  const now = Date.now();
+function pruneRateLimitMap(now: number) {
   for (const [ip, entry] of rateLimitMap.entries()) {
     if (now > entry.resetTime) {
       rateLimitMap.delete(ip);
     }
   }
-}, 300000);
+}
+
+function isRateLimited(ip: string): boolean {
+  const now = Date.now();
+  pruneRateLimitMap(now);
+  const entry = rateLimitMap.get(ip);
+
+  if (!entry || now > entry.resetTime) {
+    rateLimitMap.set(ip, { count: 1, resetTime: now + RATE_LIMIT_WINDOW_MS });
+    return false;
+  }
+
+  if (entry.count >= MAX_REQUESTS_PER_WINDOW) {
+    return true;
+  }
+
+  entry.count++;
+  return false;
+}
+
 
 /** "Nombre A." for participant-facing lists */
 function anonymizeName(full: string): string {
