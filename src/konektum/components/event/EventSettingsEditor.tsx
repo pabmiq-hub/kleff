@@ -305,6 +305,27 @@ const EventSettingsEditor = ({
     loadExtras();
   }, [eventId]);
 
+  // Persist the custom table layout immediately so the admin does not have to
+  // scroll down to "Guardar cambios" for it to apply to new rounds.
+  const persistCustomTables = async (layout: CustomTableLayout | null) => {
+    setFormCustomTables(layout);
+    const { error } = await supabase
+      .from("events")
+      .update({ custom_tables: layout })
+      .eq("id", eventId);
+    if (error) {
+      toast({ title: "Error", description: "No se pudo guardar el tamaño de las mesas", variant: "destructive" });
+      return;
+    }
+    toast({
+      title: layout ? "Mesas guardadas" : "Mesas personalizadas eliminadas",
+      description: layout
+        ? `${layout.tables.length} mesas · ${layout.tables.reduce((a, t) => a + (t.capacity || 0), 0)} plazas`
+        : "Se usará el tamaño de mesa uniforme.",
+    });
+    onUpdate?.();
+  };
+
   const handleSave = async () => {
     setIsSaving(true);
     try {
@@ -547,7 +568,7 @@ const EventSettingsEditor = ({
                   <Button type="button" size="sm" variant="outline" onClick={() => setShowCustomTablesDialog(true)}>
                     Editar
                   </Button>
-                  <Button type="button" size="sm" variant="ghost" onClick={() => setFormCustomTables(null)}>
+                  <Button type="button" size="sm" variant="ghost" onClick={() => persistCustomTables(null)}>
                     Quitar
                   </Button>
                 </div>
@@ -1294,7 +1315,7 @@ const EventSettingsEditor = ({
         onOpenChange={setShowCustomTablesDialog}
         defaultCapacity={formTableSize}
         initialLayout={formCustomTables}
-        onSave={(layout) => setFormCustomTables(layout)}
+        onSave={(layout) => persistCustomTables(layout)}
       />
 
       <WrappedQuestionsEditor

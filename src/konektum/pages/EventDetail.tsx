@@ -72,7 +72,7 @@ import {
   writePlayedMap,
   rebuildPlayedFromTables,
 } from "@/konektum/lib/gameMode";
-import { isCustomTablesEnabled, computeCustomDistribution } from "@/konektum/lib/customTableLayout";
+import { isCustomTablesEnabled, computeCustomDistribution, getCustomTableFill } from "@/konektum/lib/customTableLayout";
 import { areDatingCompatible } from "@/konektum/lib/datingCompatibility";
 
 interface ParticipantExclusion {
@@ -1346,7 +1346,7 @@ const EventDetail = () => {
     const customLayout = (eventData as any)?.custom_tables;
     const useCustomLayout = isCustomTablesEnabled(customLayout);
     const distribution = useCustomLayout
-      ? computeCustomDistribution(numParticipants, customLayout.tables.map((t: any) => t.capacity))
+      ? computeCustomDistribution(numParticipants, customLayout.tables.map((t: any) => t.capacity), getCustomTableFill(customLayout))
       : calculateOptimalTableDistribution(numParticipants, tableSize, 3);
     const numTables = distribution.numTables;
     const tableSizes = distribution.sizes;
@@ -1573,7 +1573,7 @@ const EventDetail = () => {
     const customLayout = (eventData as any)?.custom_tables;
     const useCustomLayout = isCustomTablesEnabled(customLayout);
     const distribution = useCustomLayout
-      ? computeCustomDistribution(numParticipants, customLayout.tables.map((t: any) => t.capacity))
+      ? computeCustomDistribution(numParticipants, customLayout.tables.map((t: any) => t.capacity), getCustomTableFill(customLayout))
       : calculateOptimalTableDistribution(numParticipants, tableSize, 3);
     const numTables = distribution.numTables;
     const tableSizes = distribution.sizes;
@@ -3026,7 +3026,8 @@ const EventDetail = () => {
       const customDistribution = isCustomTablesEnabled(eventData.custom_tables)
         ? computeCustomDistribution(
             checkedInParticipants.length,
-            eventData.custom_tables.tables.map((table) => table.capacity)
+            eventData.custom_tables.tables.map((table) => table.capacity),
+            getCustomTableFill(eventData.custom_tables)
           )
         : null;
       const existingTableCount = customDistribution?.numTables
