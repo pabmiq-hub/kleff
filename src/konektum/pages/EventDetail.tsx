@@ -450,10 +450,37 @@ const EventDetail = () => {
     });
     setEventStatus(event.status as "pending" | "active" | "completed");
     // Load current_round and completed_rounds from database
-    const loadedRound = event.current_round || 1;
+    const loadedCompleted: number[] = (event.completed_rounds as number[]) || [];
+    const availableRounds: number[] = Array.isArray(event.tables)
+      ? (event.tables as any[]).map((t: any) => t?.round).filter((r: any) => typeof r === "number")
+      : [];
+    let loadedRound = event.current_round || 1;
+    // Self-heal: deleting/renumbering rounds can leave current_round pointing at a
+    // round that is already completed or no longer exists, which freezes the timer
+    // and hides the active round from participants.
+    const isBroken =
+      loadedCompleted.includes(loadedRound) ||
+      (availableRounds.length > 0 && !availableRounds.includes(loadedRound));
+    if (isBroken && availableRounds.length > 0) {
+      const nextRound =
+        availableRounds.find((r) => !loadedCompleted.includes(r)) ??
+        availableRounds[availableRounds.length - 1];
+      if (nextRound !== loadedRound) {
+        loadedRound = nextRound;
+        await supabase
+          .from("events")
+          .update({
+            current_round: nextRound,
+            round_started_at: null,
+            round_paused_at: null,
+            round_elapsed_seconds: 0,
+          })
+          .eq("id", id);
+      }
+    }
     setCurrentRound(loadedRound);
     setViewingRound(loadedRound);
-    setCompletedRounds(event.completed_rounds || []);
+    setCompletedRounds(loadedCompleted);
 
     // Load participants
     const { data: participantsData } = await supabase
@@ -3083,7 +3110,6 @@ const EventDetail = () => {
       .map((rd: any, idx: number) => ({ ...rd, round: idx + 1 }));
 
     const newRoundsCount = updatedTables.length;
-    const newCurrentRound = Math.min(currentRound, newRoundsCount);
     const newCompletedRounds = completedRounds
       .filter(r => r !== roundNumber)
       .map(r => {
@@ -3101,6 +3127,20 @@ const EventDetail = () => {
       .map(r => keptOriginalRounds.indexOf(r) + 1)
       .filter(r => r > 0);
 
+    // Point the active round at the first round that is still pending, so the
+    // timer and the participant view never get stuck on a completed round.
+    const allRoundNumbers = updatedTables.map((rd: any) => rd.round as number);
+    const newCurrentRound =
+      allRoundNumbers.find((r) => !remappedCompleted.includes(r)) ?? newRoundsCount;
+
+    // Drop a draft pointer that no longer matches an existing round.
+    const previousDraft = (eventData as any)?.draft_round ?? null;
+    const keptDraft =
+      previousDraft && previousDraft !== roundNumber
+        ? keptOriginalRounds.indexOf(previousDraft) + 1 || null
+        : null;
+    const newDraftRound = keptDraft && keptDraft === newCurrentRound ? keptDraft : null;
+
     const { error } = await supabase
       .from("events")
       .update({ 
@@ -3108,6 +3148,10 @@ const EventDetail = () => {
         rounds: newRoundsCount, 
         current_round: newCurrentRound,
         completed_rounds: remappedCompleted,
+        draft_round: newDraftRound,
+        round_started_at: null,
+        round_paused_at: null,
+        round_elapsed_seconds: 0,
       })
       .eq("id", id);
 
@@ -3116,7 +3160,15 @@ const EventDetail = () => {
       return;
     }
 
-    setEventData(prev => prev ? { ...prev, tables: updatedTables, rounds: newRoundsCount } : prev);
+    setEventData(prev => prev ? {
+      ...prev,
+      tables: updatedTables,
+      rounds: newRoundsCount,
+      draft_round: newDraftRound,
+      round_started_at: null,
+      round_paused_at: null,
+      round_elapsed_seconds: 0,
+    } : prev);
     setCurrentRound(newCurrentRound);
     setCompletedRounds(remappedCompleted);
     setViewingRound(Math.min(viewingRound, newRoundsCount));
