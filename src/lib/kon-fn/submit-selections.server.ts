@@ -65,32 +65,32 @@ const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
 const RATE_LIMIT_WINDOW = 10 * 60 * 1000; // 10 minutes
 const MAX_SUBMISSIONS = 10;
 
-function isRateLimited(ip: string): boolean {
-  const now = Date.now();
-  const record = rateLimitMap.get(ip);
-  
-  if (!record || now > record.resetTime) {
-    rateLimitMap.set(ip, { count: 1, resetTime: now + RATE_LIMIT_WINDOW });
-    return false;
-  }
-  
-  if (record.count >= MAX_SUBMISSIONS) {
-    return true;
-  }
-  
-  record.count++;
-  return false;
-}
-
-// Cleanup old entries periodically
-setInterval(() => {
-  const now = Date.now();
+function pruneRateLimitMap(now: number) {
   for (const [ip, record] of rateLimitMap.entries()) {
     if (now > record.resetTime) {
       rateLimitMap.delete(ip);
     }
   }
-}, 60000);
+}
+
+function isRateLimited(ip: string): boolean {
+  const now = Date.now();
+  pruneRateLimitMap(now);
+  const record = rateLimitMap.get(ip);
+
+  if (!record || now > record.resetTime) {
+    rateLimitMap.set(ip, { count: 1, resetTime: now + RATE_LIMIT_WINDOW });
+    return false;
+  }
+
+  if (record.count >= MAX_SUBMISSIONS) {
+    return true;
+  }
+
+  record.count++;
+  return false;
+}
+
 
 serve(async (req) => {
   // Handle CORS preflight requests
