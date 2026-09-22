@@ -360,6 +360,10 @@ return new Response(
         crushes: crushesSent,
         crushAllowance,
         crushesUsed: crushesSent.length,
+        repeats: repeatsSent,
+        repeatAllowance,
+        repeatsUsed: repeatsSent.length,
+
         hasSentCrush: crushesSent.length >= crushAllowance,
         existingCrush: crushesSent[0] || null,
         crushesReceived,
