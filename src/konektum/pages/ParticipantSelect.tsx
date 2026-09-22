@@ -309,7 +309,31 @@ const ParticipantSelect = () => {
       setTablesData(tables);
       setExistingSelections(allExistingSelections);
 
-      // Check if participant already used their super like + received any
+      // Extra allowances earned in the social game (1 base + rewards)
+      let extraSuperLikes = 0;
+      let extraRepeats = 0;
+      let extraCrushes = 0;
+      if (verifiedParticipant) {
+        try {
+          const { data: rewards } = await supabase
+            .from('game_rewards')
+            .select('reward_type')
+            .eq('event_id', eventId)
+            .eq('participant_id', verifiedParticipant.id);
+          for (const r of (rewards || []) as any[]) {
+            if (r.reward_type === 'super_like') extraSuperLikes++;
+            else if (r.reward_type === 'repeat') extraRepeats++;
+            else if (r.reward_type === 'crush') extraCrushes++;
+          }
+        } catch {
+          /* non-blocking: keep base allowance */
+        }
+      }
+      setSuperLikeAllowance(1 + extraSuperLikes);
+      setRepeatAllowance(1 + extraRepeats);
+      setCrushAllowance(1 + extraCrushes);
+
+      // Check how many super likes the participant already used + received any
       if (superLikeEnabled && verifiedParticipant) {
         const [sentRes, receivedRes] = await Promise.all([
           supabase
@@ -317,8 +341,7 @@ const ParticipantSelect = () => {
             .select('id')
             .eq('event_id', eventId)
             .eq('selector_id', verifiedParticipant.id)
-            .eq('is_super_like', true)
-            .limit(1),
+            .eq('is_super_like', true),
           supabase
             .from('participant_selections')
             .select('id')
@@ -327,7 +350,9 @@ const ParticipantSelect = () => {
             .eq('is_super_like', true)
             .limit(1),
         ]);
-        if (sentRes.data && sentRes.data.length > 0) setExistingSuperLike(true);
+        const usedSuperLikes = (sentRes.data || []).length;
+        setSuperLikesUsedCount(usedSuperLikes);
+        if (usedSuperLikes >= 1 + extraSuperLikes) setExistingSuperLike(true);
         if (receivedRes.data && receivedRes.data.length > 0) setHasReceivedSuperLike(true);
 
         // Show onboarding once per event
@@ -338,29 +363,23 @@ const ParticipantSelect = () => {
         }
       }
 
-      // Check existing repeat request for this participant
+      // Existing repeat + crush requests for this participant
       if (verifiedParticipant) {
-        const { data: existingRepeat } = await supabase
+        const { data: existingRepeats } = await supabase
           .from('repeat_requests')
           .select('status, target_id')
           .eq('event_id', eventId)
-          .eq('requester_id', verifiedParticipant.id)
-          .maybeSingle();
-        if (existingRepeat) {
-          setRepeatRequestUsed({ status: existingRepeat.status, targetId: existingRepeat.target_id });
-        }
+          .eq('requester_id', verifiedParticipant.id);
+        setRepeatsSent(((existingRepeats || []) as any[]).map((r: any) => ({ status: r.status, targetId: r.target_id })));
 
-        // Check existing crush (Flechazo) for this participant
-        const { data: existingCrush } = await supabase
+        const { data: existingCrushes } = await supabase
           .from('crush_requests')
           .select('status, target_id')
           .eq('event_id', eventId)
-          .eq('requester_id', verifiedParticipant.id)
-          .maybeSingle();
-        if (existingCrush) {
-          setCrushUsed({ status: existingCrush.status, targetId: existingCrush.target_id });
-        }
+          .eq('requester_id', verifiedParticipant.id);
+        setCrushesSent(((existingCrushes || []) as any[]).map((r: any) => ({ status: r.status, targetId: r.target_id })));
       }
+
 
       const userPreference = verifiedParticipant.preference || null;
       setCurrentUserPreference(userPreference);
