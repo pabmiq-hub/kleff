@@ -139,6 +139,9 @@ const ParticipantSelect = () => {
 
   const [confirmCrushFor, setConfirmCrushFor] = useState<{ id: string; name: string } | null>(null);
   const [isSendingCrush, setIsSendingCrush] = useState(false);
+  const repeatSlotsLeft = Math.max(0, repeatAllowance - repeatsSent.length);
+  const crushSlotsLeft = Math.max(0, crushAllowance - crushesSent.length);
+
   const [totalRounds, setTotalRounds] = useState<number>(0);
   const [editingIds, setEditingIds] = useState<Set<string>>(new Set());
   const [pendingEdits, setPendingEdits] = useState<Map<string, { friendship: boolean; dating: boolean; originalType?: string }>>(new Map());
