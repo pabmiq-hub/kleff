@@ -930,9 +930,11 @@ const ParticipantAccess = () => {
     }
   };
 
-  // ===== Repeat request handlers (1 per event) =====
+  // ===== Repeat request handlers (1 base + extras earned in the game) =====
   const openRepeatDialog = (participantId: string, name: string, round: number) => {
-    if (repeatRequestUsed) return;
+    if (repeatSlotsLeft <= 0) return;
+    if (repeatsSent.some(r => r.targetId === participantId)) return;
+
     if (eventStatus === 'completed' || currentRound >= totalRounds) return;
     const ms = matchSelections.find(s => s.participantId === participantId && s.round === round);
     if (!ms) return;
