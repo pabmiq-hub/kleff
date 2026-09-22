@@ -257,7 +257,7 @@ serve(async (req) => {
           reward_type: type,
           game_code: "who_is_who",
         })),
-        { onConflict: "event_id,participant_id,round,reward_type,game_code", ignoreDuplicates: true },
+        { onConflict: "event_id,participant_id,round,reward_type", ignoreDuplicates: true },
       );
       if (rewardError) console.error("[submit-game-vote] reward upsert error", rewardError);
     }
