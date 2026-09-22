@@ -8,13 +8,16 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ArrowLeft, Plus, Save, Trash2, GripVertical, Loader2, Mail, X, Eye, Globe, EyeOff, Send, CalendarClock } from "lucide-react";
+import { ArrowLeft, Plus, Save, Trash2, GripVertical, Loader2, Mail, X, Eye, Globe, EyeOff, Send, CalendarClock, Megaphone } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import {
   adminGetForm, adminUpdateForm, adminUpsertQuestion, adminDeleteQuestion,
   adminReorderQuestions, adminListResponses, adminUpdateResponse, adminDeleteResponse,
   adminSendReminder, adminPreviewEmails,
+  adminPreviewAnnouncement, adminSendAnnouncement, adminListAnnouncements,
   type RegistrationQuestion, type RegistrationForm, type RegistrationResponse,
+  type RegistrationAnnouncement, type AnnouncementBlocks,
 } from "@/lib/registrations.functions";
 import {
   DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors,
@@ -106,6 +109,7 @@ function RegistrationEditor() {
         <TabsList className="bg-ink/5 border border-ink/10">
           <TabsTrigger value="settings">Ajustes</TabsTrigger>
           {form.kind === "form" && <TabsTrigger value="comms">Comunicación</TabsTrigger>}
+          {form.kind === "form" && <TabsTrigger value="announcements">Comunicados</TabsTrigger>}
           {form.kind === "form" && <TabsTrigger value="responses">Inscritos</TabsTrigger>}
         </TabsList>
         <TabsContent value="settings" className="mt-4">
@@ -120,8 +124,11 @@ function RegistrationEditor() {
             <TabsContent value="comms" className="mt-4">
               <CommunicationSettings form={form} onSaved={(patched) => setData((d) => d ? { ...d, form: { ...d.form, ...patched } } : d)} />
             </TabsContent>
+            <TabsContent value="announcements" className="mt-4">
+              <AnnouncementsPanel form={form} />
+            </TabsContent>
             <TabsContent value="responses" className="mt-4">
-              <ResponsesPanel formId={form.id} questions={questions} paymentRequired={!!form.payment_required} />
+              <ResponsesPanel form={form} questions={questions} />
             </TabsContent>
           </>
         )}
