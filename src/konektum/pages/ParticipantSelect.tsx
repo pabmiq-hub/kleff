@@ -157,7 +157,7 @@ const ParticipantSelect = () => {
       try {
         const { data: event, error } = await (supabase as any)
           .from('events_public')
-          .select('status, current_round, rounds, language, super_like_enabled, repeat_request_enabled, crush_enabled')
+          .select('status, current_round, rounds, language, super_like_enabled, repeat_request_enabled, crush_enabled, selection_closed_at')
           .eq('id', eventId)
           .single();
 
@@ -182,7 +182,7 @@ const ParticipantSelect = () => {
         setRepeatEnabled(!!event.repeat_request_enabled);
         setCrushEnabled(!!event.crush_enabled);
 
-        if (event.status === 'completed') {
+        if (event.selection_closed_at) {
           setStep("completed");
         } else if (event.status === 'pending' || event.current_round === 0) {
           setStep("not_started");
@@ -514,7 +514,7 @@ const ParticipantSelect = () => {
       if (error || data?.error) {
         toast({
           title: "Error",
-          description: data?.error || (eventLang === "es" ? "No se pudo enviar la solicitud" : "Could not send the request"),
+          description: data?.error || error?.message || (eventLang === "es" ? "No se pudo enviar la solicitud" : "Could not send the request"),
           variant: "destructive",
         });
         return;
@@ -563,7 +563,7 @@ const ParticipantSelect = () => {
       if (error || data?.error) {
         toast({
           title: "Error",
-          description: data?.error || (eventLang === "es" ? "No se pudo enviar el flechazo" : "Could not send the Flechazo"),
+          description: data?.error || error?.message || (eventLang === "es" ? "No se pudo enviar el flechazo" : "Could not send the Flechazo"),
           variant: "destructive",
         });
         return;
@@ -719,7 +719,10 @@ const ParticipantSelect = () => {
 
   const submitRound = async (round: number, tablemates: Participant[]) => {
     if (!verifiedParticipant || !eventId) return;
+    if (submittingRound !== null) return;
     setSubmittingRound(round);
+
+    try {
 
     const ids = new Set(tablemates.map(p => p.id));
 
@@ -738,10 +741,9 @@ const ParticipantSelect = () => {
       if (error || data?.error) {
         toast({
           title: "Error",
-          description: data?.error || (eventLang === "es" ? "No se pudo actualizar la selección" : "Could not update the selection"),
+          description: data?.error || error?.message || (eventLang === "es" ? "No se pudo actualizar la selección" : "Could not update the selection"),
           variant: "destructive",
         });
-        setSubmittingRound(null);
         return;
       }
     }
@@ -769,10 +771,9 @@ const ParticipantSelect = () => {
       if (error || data?.error) {
         toast({
           title: "Error",
-          description: data?.error || t.select.noTablemates,
+          description: data?.error || error?.message || (eventLang === "es" ? "No se pudieron guardar las selecciones" : "Could not save selections"),
           variant: "destructive",
         });
-        setSubmittingRound(null);
         return;
       }
     }
@@ -837,9 +838,17 @@ const ParticipantSelect = () => {
       });
     }
 
-    setSubmittingRound(null);
     // Auto-collapse the just-submitted round
     setOpenRound(prev => prev === `round-${round}` ? "" : prev);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : (eventLang === "es" ? "No se pudieron guardar las selecciones" : "Could not save selections"),
+        variant: "destructive",
+      });
+    } finally {
+      setSubmittingRound(null);
+    }
   };
 
   const markRoundNoConnections = (round: number) => {
@@ -858,7 +867,10 @@ const ParticipantSelect = () => {
   // Legacy single-submit flow — kept for events without round data (e.g. preliminary-only)
   const performSubmit = async () => {
     if (!verifiedParticipant || !eventId) return;
+    if (isSubmitting) return;
     setIsSubmitting(true);
+
+    try {
 
     const editEntries = Array.from(pendingEdits.entries()).filter(([, edit]) => {
       const newType = computePendingType(edit);
@@ -873,10 +885,9 @@ const ParticipantSelect = () => {
       if (error || data?.error) {
         toast({
           title: "Error",
-          description: data?.error || (eventLang === "es" ? "No se pudo actualizar la selección" : "Could not update the selection"),
+          description: data?.error || error?.message || (eventLang === "es" ? "No se pudo actualizar la selección" : "Could not update the selection"),
           variant: "destructive",
         });
-        setIsSubmitting(false);
         return;
       }
     }
@@ -888,7 +899,6 @@ const ParticipantSelect = () => {
         title: t.select.noTablemates,
         description: t.select.continueWithout,
       });
-      setIsSubmitting(false);
       setStep("done");
       return;
     }
@@ -908,10 +918,9 @@ const ParticipantSelect = () => {
       if (error || data?.error) {
         toast({
           title: "Error",
-          description: data?.error || t.select.noTablemates,
+          description: data?.error || error?.message || (eventLang === "es" ? "No se pudieron guardar las selecciones" : "Could not save selections"),
           variant: "destructive",
         });
-        setIsSubmitting(false);
         return;
       }
 
@@ -928,8 +937,16 @@ const ParticipantSelect = () => {
       });
     }
 
-    setIsSubmitting(false);
     setStep("done");
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : (eventLang === "es" ? "No se pudieron guardar las selecciones" : "Could not save selections"),
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleSubmit = async () => {
