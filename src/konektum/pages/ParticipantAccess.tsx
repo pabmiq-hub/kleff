@@ -589,20 +589,23 @@ const ParticipantAccess = () => {
       setMatchSelections(allSelections);
       setStep("panel");
 
-      // Fetch existing repeat request for this participant (if feature enabled)
-      try {
-        const { data: existingRepeat } = await (supabase as any)
-          .from('repeat_requests')
-          .select('status, target_id')
-          .eq('event_id', eventId)
-          .eq('requester_id', verifiedParticipant.id)
-          .maybeSingle();
-        if (existingRepeat) {
-          setRepeatRequestUsed({ status: existingRepeat.status, targetId: existingRepeat.target_id });
+      // Repeat requests already sent + allowance (base 1 + extras won in the game)
+      if (Array.isArray(data.repeats)) {
+        setRepeatsSent(data.repeats);
+        setRepeatAllowance(typeof data.repeatAllowance === 'number' ? data.repeatAllowance : 1);
+      } else {
+        try {
+          const { data: existingRepeats } = await (supabase as any)
+            .from('repeat_requests')
+            .select('status, target_id')
+            .eq('event_id', eventId)
+            .eq('requester_id', verifiedParticipant.id);
+          setRepeatsSent((existingRepeats || []).map((r: any) => ({ status: r.status, targetId: r.target_id })));
+        } catch (e) {
+          console.warn('Could not fetch repeat requests:', e);
         }
-      } catch (e) {
-        console.warn('Could not fetch repeat request:', e);
       }
+
 
       if (!Array.isArray(data.crushes) && !data.existingCrush) {
         try {
