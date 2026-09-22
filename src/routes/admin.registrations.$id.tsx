@@ -8,13 +8,16 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ArrowLeft, Plus, Save, Trash2, GripVertical, Loader2, Mail, X, Eye, Globe, EyeOff, Send, CalendarClock } from "lucide-react";
+import { ArrowLeft, Plus, Save, Trash2, GripVertical, Loader2, Mail, X, Eye, Globe, EyeOff, Send, CalendarClock, Megaphone } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import {
   adminGetForm, adminUpdateForm, adminUpsertQuestion, adminDeleteQuestion,
   adminReorderQuestions, adminListResponses, adminUpdateResponse, adminDeleteResponse,
   adminSendReminder, adminPreviewEmails,
+  adminPreviewAnnouncement, adminSendAnnouncement, adminListAnnouncements,
   type RegistrationQuestion, type RegistrationForm, type RegistrationResponse,
+  type RegistrationAnnouncement, type AnnouncementBlocks,
 } from "@/lib/registrations.functions";
 import {
   DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors,
@@ -106,6 +109,7 @@ function RegistrationEditor() {
         <TabsList className="bg-ink/5 border border-ink/10">
           <TabsTrigger value="settings">Ajustes</TabsTrigger>
           {form.kind === "form" && <TabsTrigger value="comms">Comunicación</TabsTrigger>}
+          {form.kind === "form" && <TabsTrigger value="announcements">Comunicados</TabsTrigger>}
           {form.kind === "form" && <TabsTrigger value="responses">Inscritos</TabsTrigger>}
         </TabsList>
         <TabsContent value="settings" className="mt-4">
@@ -120,8 +124,11 @@ function RegistrationEditor() {
             <TabsContent value="comms" className="mt-4">
               <CommunicationSettings form={form} onSaved={(patched) => setData((d) => d ? { ...d, form: { ...d.form, ...patched } } : d)} />
             </TabsContent>
+            <TabsContent value="announcements" className="mt-4">
+              <AnnouncementsPanel form={form} />
+            </TabsContent>
             <TabsContent value="responses" className="mt-4">
-              <ResponsesPanel formId={form.id} questions={questions} paymentRequired={!!form.payment_required} />
+              <ResponsesPanel form={form} questions={questions} />
             </TabsContent>
           </>
         )}
@@ -557,12 +564,16 @@ function OptionsEditor({ value, onChange }: { value: RegistrationQuestion["optio
 
 // ----------------- Responses Panel -----------------
 
-function ResponsesPanel({ formId, questions, paymentRequired }: { formId: string; questions: RegistrationQuestion[]; paymentRequired?: boolean }) {
+function ResponsesPanel({ form, questions }: { form: RegistrationForm; questions: RegistrationQuestion[] }) {
+  const formId = form.id;
+  const paymentRequired = !!form.payment_required;
+  const maxGuests = form.allow_guests ? Math.max(1, form.max_guests_per_response ?? 1) : 0;
   const listFn = useServerFn(adminListResponses);
   const updateFn = useServerFn(adminUpdateResponse);
   const deleteFn = useServerFn(adminDeleteResponse);
   const [responses, setResponses] = useState<RegistrationResponse[]>([]);
   const [loading, setLoading] = useState(true);
+  const [reminderTarget, setReminderTarget] = useState<{ responseId?: string; count: number } | null>(null);
 
   const reload = async () => {
     setLoading(true);
@@ -592,15 +603,27 @@ function ResponsesPanel({ formId, questions, paymentRequired }: { formId: string
 
   if (loading) return <p className="text-ink/60 text-sm">Cargando respuestas…</p>;
 
-  const totalAttendees = responses.reduce((n, r) => n + 1 + (r.guests_count ?? 0), 0);
+  const active = responses.filter((r) => !r.cancelled_at && r.email_contact);
+  const totalAttendees = responses.reduce((n, r) => n + (r.cancelled_at ? 0 : 1 + (r.guests_count ?? 0)), 0);
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-2 flex-wrap">
         <p className="text-sm text-ink/70">
-          {responses.length} respuesta{responses.length === 1 ? "" : "s"} · {totalAttendees} persona{totalAttendees === 1 ? "" : "s"}
+          {responses.length} respuesta{responses.length === 1 ? "" : "s"} · <strong>{totalAttendees} participante{totalAttendees === 1 ? "" : "s"}</strong>
         </p>
-        <Button size="sm" onClick={downloadCsv} variant="outline" className="border-ink/20 text-ink hover:bg-ink/10" disabled={!responses.length}>Descargar CSV</Button>
+        <div className="flex gap-2">
+          <Button
+            size="sm"
+            variant="outline"
+            className="border-ink/20 text-ink hover:bg-ink/10"
+            disabled={!active.length}
+            onClick={() => setReminderTarget({ count: active.length })}
+          >
+            <Mail className="h-4 w-4 mr-2" /> Enviar recordatorio a todos
+          </Button>
+          <Button size="sm" onClick={downloadCsv} variant="outline" className="border-ink/20 text-ink hover:bg-ink/10" disabled={!responses.length}>Descargar CSV</Button>
+        </div>
       </div>
       {responses.length === 0 ? (
         <p className="text-ink/60 text-sm">Aún no hay inscripciones recibidas.</p>
@@ -609,6 +632,8 @@ function ResponsesPanel({ formId, questions, paymentRequired }: { formId: string
           responses={responses}
           questions={questions}
           paymentRequired={paymentRequired}
+          maxGuests={maxGuests}
+          onReminder={(id) => setReminderTarget({ responseId: id, count: 1 })}
           onUpdate={async (id, patch) => {
             try {
               await updateFn({ data: { id, ...patch } });
@@ -624,7 +649,69 @@ function ResponsesPanel({ formId, questions, paymentRequired }: { formId: string
           }}
         />
       )}
+
+      <ReminderDialog
+        formId={formId}
+        target={reminderTarget}
+        onClose={() => setReminderTarget(null)}
+      />
     </div>
+  );
+}
+
+function ReminderDialog({ formId, target, onClose }: {
+  formId: string;
+  target: { responseId?: string; count: number } | null;
+  onClose: () => void;
+}) {
+  const previewFn = useServerFn(adminPreviewEmails);
+  const sendFn = useServerFn(adminSendReminder);
+  const [html, setHtml] = useState<string | null>(null);
+  const [sending, setSending] = useState(false);
+
+  useEffect(() => {
+    setHtml(null);
+    if (!target) return;
+    const payload: { form_id: string; response_id?: string } = { form_id: formId };
+    if (target.responseId) payload.response_id = target.responseId;
+    previewFn({ data: payload })
+      .then((res) => setHtml((res as { reminder: { html: string } }).reminder.html))
+      .catch((e) => toast.error((e as Error).message));
+  }, [target, formId]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const send = async () => {
+    if (!target) return;
+    setSending(true);
+    try {
+      const payload: { form_id: string; response_id?: string } = { form_id: formId };
+      if (target.responseId) payload.response_id = target.responseId;
+      const res = await sendFn({ data: payload });
+      toast.success(`Recordatorio enviado a ${(res as { sent: number }).sent} persona(s)`);
+      onClose();
+    } catch (e) { toast.error((e as Error).message); } finally { setSending(false); }
+  };
+
+  return (
+    <Dialog open={!!target} onOpenChange={(v) => { if (!v) onClose(); }}>
+      <DialogContent className="bg-white border-ink/15 text-ink max-w-3xl">
+        <DialogHeader>
+          <DialogTitle>
+            {target?.responseId ? "Reenviar recordatorio a esta persona" : `Enviar recordatorio a ${target?.count ?? 0} participante(s)`}
+          </DialogTitle>
+        </DialogHeader>
+        {html ? (
+          <iframe title="Previsualización del recordatorio" srcDoc={html} className="w-full h-[460px] rounded-lg border border-ink/10 bg-white" />
+        ) : (
+          <p className="text-sm text-ink/60 flex items-center gap-2"><Loader2 className="h-4 w-4 animate-spin" /> Generando previsualización…</p>
+        )}
+        <DialogFooter>
+          <Button variant="ghost" onClick={onClose}>Cancelar</Button>
+          <Button onClick={send} disabled={sending || !html} className="bg-coral hover:bg-coral/90">
+            {sending ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Send className="h-4 w-4 mr-2" />} Enviar ahora
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }
 
@@ -634,12 +721,14 @@ function columnLabel(q: RegistrationQuestion) {
   return q.label;
 }
 
-function ResponsesTable({ responses, questions, paymentRequired, onUpdate, onDelete }: {
+function ResponsesTable({ responses, questions, paymentRequired, maxGuests, onUpdate, onDelete, onReminder }: {
   responses: RegistrationResponse[];
   questions: RegistrationQuestion[];
   paymentRequired?: boolean;
-  onUpdate: (id: string, patch: { payment_status?: RegistrationResponse["payment_status"]; internal_notes?: string | null }) => Promise<void>;
+  maxGuests: number;
+  onUpdate: (id: string, patch: { payment_status?: RegistrationResponse["payment_status"]; internal_notes?: string | null; guests_count?: number }) => Promise<void>;
   onDelete: (id: string) => void;
+  onReminder: (id: string) => void;
 }) {
   const [notesFor, setNotesFor] = useState<string | null>(null);
   const cols = questions.filter((q) => q.special !== "contact_email");
@@ -669,7 +758,20 @@ function ResponsesTable({ responses, questions, paymentRequired, onUpdate, onDel
                 <tr key={r.id} className={`border-b border-ink/5 align-top ${cancelled ? "opacity-50" : ""}`}>
                   <td className="px-3 py-2 text-xs text-ink/60 whitespace-nowrap">{new Date(r.created_at).toLocaleString("es-ES")}</td>
                   <td className="px-3 py-2 text-ink font-medium whitespace-nowrap">{r.email_contact ?? "—"}</td>
-                  <td className="px-3 py-2 whitespace-nowrap text-ink/80">{guests > 0 ? `${1 + guests} (+${guests})` : "1"}</td>
+                  <td className="px-3 py-2 whitespace-nowrap text-ink/80">
+                    {maxGuests > 0 && !cancelled ? (
+                      <Select value={String(guests)} onValueChange={(v) => onUpdate(r.id, { guests_count: Number(v) })}>
+                        <SelectTrigger className="bg-white border-ink/15 text-ink h-8 text-xs w-28"><SelectValue /></SelectTrigger>
+                        <SelectContent className="bg-white border-ink/15 text-ink">
+                          {Array.from({ length: maxGuests + 1 }, (_, n) => (
+                            <SelectItem key={n} value={String(n)}>{n === 0 ? "1 (sola)" : `${1 + n} (+${n})`}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    ) : (
+                      guests > 0 ? `${1 + guests} (+${guests})` : "1"
+                    )}
+                  </td>
                   {cols.map((q) => (
                     <td key={q.id} className="px-3 py-2 text-ink/80">
                       {q.special === "game_pick"
@@ -693,6 +795,9 @@ function ResponsesTable({ responses, questions, paymentRequired, onUpdate, onDel
                     </td>
                   )}
                   <td className="px-3 py-2 whitespace-nowrap">
+                    {!cancelled && r.email_contact && (
+                      <Button size="sm" variant="ghost" onClick={() => onReminder(r.id)} title="Reenviar recordatorio" className="h-8 w-8 p-0 text-ink/60 hover:text-coral"><Mail className="h-3.5 w-3.5" /></Button>
+                    )}
                     <Button size="sm" variant="ghost" onClick={() => setNotesFor((n) => n === r.id ? null : r.id)} className="h-8 px-2 text-xs text-ink/60 hover:text-ink">Notas</Button>
                     <Button size="sm" variant="ghost" onClick={() => onDelete(r.id)} className="text-ink/60 hover:text-red-400 hover:bg-red-500/10 h-8 w-8 p-0"><Trash2 className="h-3.5 w-3.5" /></Button>
                   </td>
@@ -1085,6 +1190,122 @@ function LegalInfoEditor({ html, enabled, onChangeHtml, onToggle }: { html: stri
           </div>
         </>
       )}
+    </div>
+  );
+}
+
+// ----------------- Announcements (comunicados) -----------------
+
+const ANNOUNCEMENT_BLOCKS: { key: keyof AnnouncementBlocks; label: string; hint: string }[] = [
+  { key: "event_details", label: "Detalles del evento", hint: "Fecha, hora y ubicación actualizadas." },
+  { key: "calendar", label: "Botones de calendario", hint: "Google Calendar e iCalendar." },
+  { key: "cancel", label: "Enlace para darse de baja", hint: "Personalizado para cada participante." },
+  { key: "form_link", label: "Enlace al formulario", hint: "Para responder preguntas nuevas o revisar datos." },
+];
+
+function AnnouncementsPanel({ form }: { form: RegistrationForm }) {
+  const previewFn = useServerFn(adminPreviewAnnouncement);
+  const sendFn = useServerFn(adminSendAnnouncement);
+  const listFn = useServerFn(adminListAnnouncements);
+
+  const [subject, setSubject] = useState("");
+  const [body, setBody] = useState("");
+  const [blocks, setBlocks] = useState<AnnouncementBlocks>({ event_details: true, calendar: false, cancel: true, form_link: false });
+  const [preview, setPreview] = useState<{ html: string; recipients: number } | null>(null);
+  const [loadingPreview, setLoadingPreview] = useState(false);
+  const [sending, setSending] = useState(false);
+  const [history, setHistory] = useState<RegistrationAnnouncement[]>([]);
+
+  const loadHistory = async () => {
+    try {
+      const res = await listFn({ data: { form_id: form.id } });
+      setHistory((res as { announcements: RegistrationAnnouncement[] }).announcements);
+    } catch { /* ignore */ }
+  };
+  useEffect(() => { void loadHistory(); }, [form.id]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const openPreview = async () => {
+    if (!subject.trim() || !body.trim()) { toast.error("Escribe un asunto y un mensaje"); return; }
+    setLoadingPreview(true);
+    try {
+      const res = await previewFn({ data: { form_id: form.id, subject: subject.trim(), body_html: body, blocks } });
+      setPreview(res as { html: string; recipients: number });
+    } catch (e) { toast.error((e as Error).message); } finally { setLoadingPreview(false); }
+  };
+
+  const send = async () => {
+    setSending(true);
+    try {
+      const res = await sendFn({ data: { form_id: form.id, subject: subject.trim(), body_html: body, blocks } }) as { sent: number; failed: number };
+      toast.success(`Comunicado enviado a ${res.sent} persona(s)${res.failed ? ` · ${res.failed} fallo(s)` : ""}`);
+      setPreview(null);
+      setSubject(""); setBody("");
+      await loadHistory();
+    } catch (e) { toast.error((e as Error).message); } finally { setSending(false); }
+  };
+
+  return (
+    <div className="space-y-6">
+      <Card title="Nuevo comunicado">
+        <Row label="Asunto">
+          <Input value={subject} onChange={(e) => setSubject(e.target.value)} placeholder={`Información importante · ${form.title}`} className="bg-white border-ink/15 text-ink" />
+        </Row>
+        <Row label="Mensaje">
+          <RichTextEditor value={body} onChange={setBody} placeholder="Escribe el comunicado…" />
+          <p className="text-xs text-ink/50 mt-1">Variables: {"{{nombre}}"}, {"{{titulo}}"}, {"{{fecha}}"}, {"{{ubicacion}}"}, {"{{invitados}}"}</p>
+        </Row>
+        <Row label="Información adicional">
+          <div className="grid sm:grid-cols-2 gap-3">
+            {ANNOUNCEMENT_BLOCKS.map((b) => (
+              <label key={b.key} className="flex items-start gap-3 rounded-lg border border-ink/10 p-3">
+                <Switch checked={!!blocks[b.key]} onCheckedChange={(v) => setBlocks((s) => ({ ...s, [b.key]: v }))} />
+                <span>
+                  <span className="block text-sm text-ink font-medium">{b.label}</span>
+                  <span className="block text-xs text-ink/55">{b.hint}</span>
+                </span>
+              </label>
+            ))}
+          </div>
+        </Row>
+        <Button onClick={openPreview} disabled={loadingPreview} className="bg-coral hover:bg-coral/90">
+          {loadingPreview ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Megaphone className="h-4 w-4 mr-2" />} Previsualizar y enviar
+        </Button>
+      </Card>
+
+      <Card title="Comunicados enviados">
+        {history.length === 0 ? (
+          <p className="text-sm text-ink/60">Todavía no has enviado ningún comunicado.</p>
+        ) : (
+          <ul className="divide-y divide-ink/10">
+            {history.map((a) => (
+              <li key={a.id} className="py-2 flex items-center justify-between gap-3">
+                <span className="text-sm text-ink">{a.subject}</span>
+                <span className="text-xs text-ink/55 whitespace-nowrap">
+                  {new Date(a.sent_at ?? a.created_at).toLocaleString("es-ES")} · {a.recipients_count} envío(s)
+                  {a.failed_count ? ` · ${a.failed_count} fallo(s)` : ""}
+                </span>
+              </li>
+            ))}
+          </ul>
+        )}
+      </Card>
+
+      <Dialog open={!!preview} onOpenChange={(v) => { if (!v) setPreview(null); }}>
+        <DialogContent className="bg-white border-ink/15 text-ink max-w-3xl">
+          <DialogHeader>
+            <DialogTitle>Enviar comunicado a {preview?.recipients ?? 0} participante(s)</DialogTitle>
+          </DialogHeader>
+          {preview && (
+            <iframe title="Previsualización del comunicado" srcDoc={preview.html} className="w-full h-[460px] rounded-lg border border-ink/10 bg-white" />
+          )}
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setPreview(null)}>Cancelar</Button>
+            <Button onClick={send} disabled={sending || !preview?.recipients} className="bg-coral hover:bg-coral/90">
+              {sending ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Send className="h-4 w-4 mr-2" />} Confirmar y enviar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

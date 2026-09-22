@@ -688,12 +688,14 @@ export const adminUpdateResponse = createServerFn({ method: "POST" })
     id: z.string().uuid(),
     payment_status: z.enum(["pending", "paid", "refunded", "not_required"]).optional(),
     internal_notes: z.string().max(2000).nullable().optional(),
+    guests_count: z.number().int().min(0).max(20).optional(),
   }))
   .handler(async ({ data, context }) => {
     await assertSuperAdmin(context.userId);
     const patch: Record<string, unknown> = {};
     if (data.payment_status) patch.payment_status = data.payment_status;
     if (data.internal_notes !== undefined) patch.internal_notes = data.internal_notes;
+    if (data.guests_count !== undefined) patch.guests_count = data.guests_count;
     const { error } = await supabaseAdmin.from("registration_responses").update(patch as never).eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true };
@@ -736,27 +738,214 @@ export const adminSendReminder = createServerFn({ method: "POST" })
     return { sent: list.length };
   });
 
+type RecipientRow = {
+  id: string;
+  cancel_token: string;
+  email_contact: string | null;
+  guests_count: number | null;
+  data: Record<string, unknown>;
+};
+
+async function loadFormOrThrow(formId: string): Promise<RegistrationForm> {
+  const { data: form } = await supabaseAdmin
+    .from("registration_forms").select("*").eq("id", formId).maybeSingle();
+  if (!form) throw new Error("Formulario no encontrado");
+  return form as unknown as RegistrationForm;
+}
+
+async function loadRecipients(formId: string, ids?: string[]): Promise<RecipientRow[]> {
+  let query = supabaseAdmin
+    .from("registration_responses")
+    .select("id, cancel_token, email_contact, guests_count, data")
+    .eq("form_id", formId)
+    .is("cancelled_at", null)
+    .not("email_contact", "is", null)
+    .order("created_at", { ascending: true });
+  if (ids && ids.length) query = query.in("id", ids);
+  const { data: rows, error } = await query;
+  if (error) throw new Error(error.message);
+  return (rows ?? []) as unknown as RecipientRow[];
+}
+
+const SAMPLE_RECIPIENT: RecipientRow = {
+  id: "00000000-0000-0000-0000-000000000000",
+  cancel_token: "00000000-0000-0000-0000-000000000000",
+  email_contact: "participante@ejemplo.com",
+  guests_count: 1,
+  data: { nombre: "Marta" },
+};
+
 /** Preview of the emails as the participant will receive them. */
 export const adminPreviewEmails = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator(z.object({ form_id: z.string().uuid() }))
+  .inputValidator(z.object({ form_id: z.string().uuid(), response_id: z.string().uuid().optional() }))
   .handler(async ({ data, context }) => {
     await assertSuperAdmin(context.userId);
-    const { data: form } = await supabaseAdmin
-      .from("registration_forms").select("*").eq("id", data.form_id).maybeSingle();
-    if (!form) throw new Error("Formulario no encontrado");
-    const f = form as unknown as RegistrationForm;
+    const f = await loadFormOrThrow(data.form_id);
     const { buildRegistrationEmail } = await import("@/lib/registrations-email.server");
     const { registrationEventEmail } = await import("@/lib/email/templates.server");
-    const sample = {
-      cancel_token: "00000000-0000-0000-0000-000000000000",
-      email_contact: "participante@ejemplo.com",
-      guests_count: f.allow_guests ? 1 : 0,
-      data: { nombre: "Marta" },
-    };
+    let sample: RecipientRow = { ...SAMPLE_RECIPIENT, guests_count: f.allow_guests ? 1 : 0 };
+    if (data.response_id) {
+      const rows = await loadRecipients(f.id, [data.response_id]);
+      if (rows[0]) sample = rows[0];
+    }
     const make = (kind: "confirmation" | "reminder") => {
       const built = buildRegistrationEmail(kind, f, sample);
       return registrationEventEmail({ kind, formTitle: f.title, ...built });
     };
     return { confirmation: make("confirmation"), reminder: make("reminder") };
+  });
+
+// ---------------- COMUNICADOS ----------------
+
+export type RegistrationAnnouncement = {
+  id: string;
+  form_id: string;
+  subject: string;
+  body_html: string;
+  blocks: AnnouncementBlocks;
+  recipients_count: number;
+  failed_count: number;
+  sent_at: string | null;
+  created_at: string;
+};
+
+export type AnnouncementBlocks = {
+  event_details?: boolean;
+  calendar?: boolean;
+  cancel?: boolean;
+  form_link?: boolean;
+};
+
+const announcementBlocksSchema = z.object({
+  event_details: z.boolean().optional(),
+  calendar: z.boolean().optional(),
+  cancel: z.boolean().optional(),
+  form_link: z.boolean().optional(),
+});
+
+async function buildAnnouncement(
+  f: RegistrationForm,
+  recipient: RecipientRow,
+  subject: string,
+  bodyHtml: string,
+  blocks: AnnouncementBlocks,
+) {
+  const { buildRegistrationEmail } = await import("@/lib/registrations-email.server");
+  const { announcementEmail } = await import("@/lib/email/templates.server");
+  const { renderTemplateText } = await import("@/lib/registrations-calendar");
+  const built = buildRegistrationEmail("reminder", f, recipient);
+  const vars = {
+    nombre: built.userName ?? "",
+    titulo: f.title,
+    fecha: built.eventDateLabel ?? "",
+    ubicacion: f.event_location ?? "",
+    invitados: String(recipient.guests_count ?? 0),
+  };
+  return announcementEmail({
+    formTitle: f.title,
+    subject: renderTemplateText(subject, vars),
+    bodyHtml: renderTemplateText(bodyHtml, vars),
+    userName: built.userName ?? null,
+    eventDateLabel: built.eventDateLabel,
+    eventLocation: built.eventLocation,
+    googleUrl: built.googleUrl,
+    icsUrl: built.icsUrl,
+    cancelUrl: built.cancelUrl,
+    eventUrl: built.eventUrl,
+    includeEventDetails: !!blocks.event_details,
+    includeCalendar: !!blocks.calendar,
+    includeCancel: !!blocks.cancel,
+    includeFormLink: !!blocks.form_link,
+  });
+}
+
+/** Renders the announcement exactly as the first recipient will receive it. */
+export const adminPreviewAnnouncement = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator(z.object({
+    form_id: z.string().uuid(),
+    subject: z.string().min(1).max(200),
+    body_html: z.string().max(20000),
+    blocks: announcementBlocksSchema,
+    response_ids: z.array(z.string().uuid()).optional(),
+  }))
+  .handler(async ({ data, context }) => {
+    await assertSuperAdmin(context.userId);
+    const f = await loadFormOrThrow(data.form_id);
+    const { sanitizeHtml } = await import("@/lib/sanitize.server");
+    const recipients = await loadRecipients(f.id, data.response_ids);
+    const sample = recipients[0] ?? { ...SAMPLE_RECIPIENT, guests_count: f.allow_guests ? 1 : 0 };
+    const email = await buildAnnouncement(f, sample, data.subject, sanitizeHtml(data.body_html), data.blocks);
+    return { ...email, recipients: recipients.length };
+  });
+
+/** Sends the announcement to every active registration (or the selected ones). */
+export const adminSendAnnouncement = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator(z.object({
+    form_id: z.string().uuid(),
+    subject: z.string().min(1).max(200),
+    body_html: z.string().max(20000),
+    blocks: announcementBlocksSchema,
+    response_ids: z.array(z.string().uuid()).optional(),
+  }))
+  .handler(async ({ data, context }) => {
+    await assertSuperAdmin(context.userId);
+    const f = await loadFormOrThrow(data.form_id);
+    const { sanitizeHtml } = await import("@/lib/sanitize.server");
+    const { sendEmailSafe } = await import("@/lib/email/send.server");
+    const body = sanitizeHtml(data.body_html);
+    const recipients = await loadRecipients(f.id, data.response_ids);
+
+    let sent = 0;
+    let failed = 0;
+    const BATCH = 5;
+    for (let i = 0; i < recipients.length; i += BATCH) {
+      const slice = recipients.slice(i, i + BATCH);
+      const results = await Promise.allSettled(slice.map(async (r) => {
+        const email = await buildAnnouncement(f, r, data.subject, body, data.blocks);
+        const res = await sendEmailSafe({
+          to: r.email_contact as string,
+          subject: email.subject,
+          html: email.html,
+          tags: [{ name: "type", value: "registration_announcement" }],
+        });
+        if (!res) throw new Error("send failed");
+        return res;
+      }));
+      for (const res of results) {
+        if (res.status === "fulfilled") sent += 1;
+        else failed += 1;
+      }
+    }
+
+    await supabaseAdmin.from("registration_announcements").insert({
+      form_id: f.id,
+      subject: data.subject,
+      body_html: body,
+      blocks: data.blocks,
+      recipients_count: sent,
+      failed_count: failed,
+      sent_at: new Date().toISOString(),
+      created_by: context.userId,
+    } as never);
+
+    return { sent, failed };
+  });
+
+/** History of announcements sent for a registration form. */
+export const adminListAnnouncements = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator(z.object({ form_id: z.string().uuid() }))
+  .handler(async ({ data, context }) => {
+    await assertSuperAdmin(context.userId);
+    const { data: rows, error } = await supabaseAdmin
+      .from("registration_announcements")
+      .select("*")
+      .eq("form_id", data.form_id)
+      .order("created_at", { ascending: false })
+      .limit(50);
+    if (error) throw new Error(error.message);
+    return { announcements: (rows ?? []) as unknown as RegistrationAnnouncement[] };
   });
