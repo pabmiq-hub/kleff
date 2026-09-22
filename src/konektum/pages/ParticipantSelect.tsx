@@ -126,14 +126,22 @@ const ParticipantSelect = () => {
   const [hasReceivedSuperLike, setHasReceivedSuperLike] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [confirmSuperLikeFor, setConfirmSuperLikeFor] = useState<{ id: string; name: string } | null>(null);
-  const [repeatRequestUsed, setRepeatRequestUsed] = useState<{ status: string; targetId?: string } | null>(null);
+  const [repeatsSent, setRepeatsSent] = useState<{ status: string; targetId?: string }[]>([]);
+  const [repeatAllowance, setRepeatAllowance] = useState(1);
   const [confirmRepeatFor, setConfirmRepeatFor] = useState<{ id: string; name: string } | null>(null);
   const [isSendingRepeat, setIsSendingRepeat] = useState(false);
   const [repeatEnabled, setRepeatEnabled] = useState(false);
   const [crushEnabled, setCrushEnabled] = useState(false);
-  const [crushUsed, setCrushUsed] = useState<{ status: string; targetId?: string } | null>(null);
+  const [crushesSent, setCrushesSent] = useState<{ status: string; targetId?: string }[]>([]);
+  const [superLikeAllowance, setSuperLikeAllowance] = useState(1);
+  const [superLikesUsedCount, setSuperLikesUsedCount] = useState(0);
+  const [crushAllowance, setCrushAllowance] = useState(1);
+
   const [confirmCrushFor, setConfirmCrushFor] = useState<{ id: string; name: string } | null>(null);
   const [isSendingCrush, setIsSendingCrush] = useState(false);
+  const repeatSlotsLeft = Math.max(0, repeatAllowance - repeatsSent.length);
+  const crushSlotsLeft = Math.max(0, crushAllowance - crushesSent.length);
+
   const [totalRounds, setTotalRounds] = useState<number>(0);
   const [editingIds, setEditingIds] = useState<Set<string>>(new Set());
   const [pendingEdits, setPendingEdits] = useState<Map<string, { friendship: boolean; dating: boolean; originalType?: string }>>(new Map());
@@ -301,7 +309,31 @@ const ParticipantSelect = () => {
       setTablesData(tables);
       setExistingSelections(allExistingSelections);
 
-      // Check if participant already used their super like + received any
+      // Extra allowances earned in the social game (1 base + rewards)
+      let extraSuperLikes = 0;
+      let extraRepeats = 0;
+      let extraCrushes = 0;
+      if (verifiedParticipant) {
+        try {
+          const { data: rewards } = await supabase
+            .from('game_rewards')
+            .select('reward_type')
+            .eq('event_id', eventId)
+            .eq('participant_id', verifiedParticipant.id);
+          for (const r of (rewards || []) as any[]) {
+            if (r.reward_type === 'super_like') extraSuperLikes++;
+            else if (r.reward_type === 'repeat') extraRepeats++;
+            else if (r.reward_type === 'crush') extraCrushes++;
+          }
+        } catch {
+          /* non-blocking: keep base allowance */
+        }
+      }
+      setSuperLikeAllowance(1 + extraSuperLikes);
+      setRepeatAllowance(1 + extraRepeats);
+      setCrushAllowance(1 + extraCrushes);
+
+      // Check how many super likes the participant already used + received any
       if (superLikeEnabled && verifiedParticipant) {
         const [sentRes, receivedRes] = await Promise.all([
           supabase
@@ -309,8 +341,7 @@ const ParticipantSelect = () => {
             .select('id')
             .eq('event_id', eventId)
             .eq('selector_id', verifiedParticipant.id)
-            .eq('is_super_like', true)
-            .limit(1),
+            .eq('is_super_like', true),
           supabase
             .from('participant_selections')
             .select('id')
@@ -319,7 +350,9 @@ const ParticipantSelect = () => {
             .eq('is_super_like', true)
             .limit(1),
         ]);
-        if (sentRes.data && sentRes.data.length > 0) setExistingSuperLike(true);
+        const usedSuperLikes = (sentRes.data || []).length;
+        setSuperLikesUsedCount(usedSuperLikes);
+        if (usedSuperLikes >= 1 + extraSuperLikes) setExistingSuperLike(true);
         if (receivedRes.data && receivedRes.data.length > 0) setHasReceivedSuperLike(true);
 
         // Show onboarding once per event
@@ -330,29 +363,23 @@ const ParticipantSelect = () => {
         }
       }
 
-      // Check existing repeat request for this participant
+      // Existing repeat + crush requests for this participant
       if (verifiedParticipant) {
-        const { data: existingRepeat } = await supabase
+        const { data: existingRepeats } = await supabase
           .from('repeat_requests')
           .select('status, target_id')
           .eq('event_id', eventId)
-          .eq('requester_id', verifiedParticipant.id)
-          .maybeSingle();
-        if (existingRepeat) {
-          setRepeatRequestUsed({ status: existingRepeat.status, targetId: existingRepeat.target_id });
-        }
+          .eq('requester_id', verifiedParticipant.id);
+        setRepeatsSent(((existingRepeats || []) as any[]).map((r: any) => ({ status: r.status, targetId: r.target_id })));
 
-        // Check existing crush (Flechazo) for this participant
-        const { data: existingCrush } = await supabase
+        const { data: existingCrushes } = await supabase
           .from('crush_requests')
           .select('status, target_id')
           .eq('event_id', eventId)
-          .eq('requester_id', verifiedParticipant.id)
-          .maybeSingle();
-        if (existingCrush) {
-          setCrushUsed({ status: existingCrush.status, targetId: existingCrush.target_id });
-        }
+          .eq('requester_id', verifiedParticipant.id);
+        setCrushesSent(((existingCrushes || []) as any[]).map((r: any) => ({ status: r.status, targetId: r.target_id })));
       }
+
 
       const userPreference = verifiedParticipant.preference || null;
       setCurrentUserPreference(userPreference);
@@ -460,12 +487,15 @@ const ParticipantSelect = () => {
   const requestSuperLike = (participantId: string, name: string) => {
     if (existingSuperLike || superLikeId) {
       toast({
-        title: eventLang === "es" ? "Super Like ya asignado" : "Super Like already assigned",
-        description: eventLang === "es" ? "Solo puedes dar 1 Super Like por evento" : "You can only give 1 Super Like per event",
+        title: eventLang === "es" ? "Sin Super Likes disponibles" : "No Super Likes available",
+        description: eventLang === "es"
+          ? `Has usado tus ${superLikeAllowance} Super Like(s) de este evento`
+          : `You have used your ${superLikeAllowance} Super Like(s) for this event`,
         variant: "destructive",
       });
       return;
     }
+
     setConfirmSuperLikeFor({ id: participantId, name: formatAnonymousName(name) });
   };
 
@@ -489,18 +519,20 @@ const ParticipantSelect = () => {
   };
 
   const requestRepeat = (participantId: string, name: string) => {
-    if (repeatRequestUsed) {
+    if (repeatsSent.some(r => r.targetId === participantId)) return;
+    if (repeatSlotsLeft <= 0) {
       toast({
-        title: eventLang === "es" ? "Ya has usado tu repetición" : "You already used your repeat",
+        title: eventLang === "es" ? "Sin repeticiones disponibles" : "No repeats available",
         description: eventLang === "es"
-          ? "Solo puedes solicitar repetir con una persona por evento"
-          : "You can only request to repeat with one person per event",
+          ? `Has usado tus ${repeatAllowance} solicitud(es) de repetir en este evento`
+          : `You have used your ${repeatAllowance} repeat request(s) for this event`,
         variant: "destructive",
       });
       return;
     }
     setConfirmRepeatFor({ id: participantId, name: formatAnonymousName(name) });
   };
+
 
   const confirmRepeat = async () => {
     if (!confirmRepeatFor || !verifiedParticipant || !eventId) return;
@@ -521,7 +553,7 @@ const ParticipantSelect = () => {
         });
         return;
       }
-      setRepeatRequestUsed({ status: "pending", targetId: confirmRepeatFor.id });
+      setRepeatsSent(prev => [...prev, { status: "pending", targetId: confirmRepeatFor.id }]);
       toast({
         title: eventLang === "es" ? "🔁 Solicitud enviada" : "🔁 Request sent",
         description: eventLang === "es"
@@ -538,18 +570,20 @@ const ParticipantSelect = () => {
   };
 
   const requestCrush = (participantId: string, name: string) => {
-    if (crushUsed) {
+    if (crushesSent.some(c => c.targetId === participantId)) return;
+    if (crushSlotsLeft <= 0) {
       toast({
-        title: eventLang === "es" ? "Ya has enviado tu flechazo" : "You already sent your Flechazo",
+        title: eventLang === "es" ? "Sin flechazos disponibles" : "No Flechazos available",
         description: eventLang === "es"
-          ? "Solo puedes enviar un Flechazo por evento"
-          : "You can only send one Flechazo per event",
+          ? `Has usado tus ${crushAllowance} Flechazo(s) de este evento`
+          : `You have used your ${crushAllowance} Flechazo(s) for this event`,
         variant: "destructive",
       });
       return;
     }
     setConfirmCrushFor({ id: participantId, name: formatAnonymousName(name) });
   };
+
 
   const confirmCrush = async () => {
     if (!confirmCrushFor || !verifiedParticipant || !eventId) return;
@@ -983,6 +1017,8 @@ const ParticipantSelect = () => {
         onConfirm={confirmSuperLike}
         recipientName={confirmSuperLikeFor?.name || ""}
         language={eventLang}
+        remaining={Math.max(0, superLikeAllowance - superLikesUsedCount - (superLikeId ? 1 : 0))}
+
       />
       <Link to={`/event/${eventId}/access`} className="absolute top-6 left-6 flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors">
         <ArrowLeft className="w-4 h-4" />
@@ -1130,21 +1166,19 @@ const ParticipantSelect = () => {
                 ) : null
               )}
               {repeatEnabled && (() => {
-                const isThisRepeat = repeatRequestUsed?.targetId === person.id;
-                const repeatDisabled = !!repeatRequestUsed && !isThisRepeat;
+                const thisRepeat = repeatsSent.find(r => r.targetId === person.id);
                 const hasRemainingRounds = eventStatus !== 'completed' && currentRound < totalRounds;
-                if (!isThisRepeat && !hasRemainingRounds) return null;
-                return isThisRepeat ? (
+                if (!thisRepeat && (!hasRemainingRounds || repeatSlotsLeft <= 0)) return null;
+                return thisRepeat ? (
                   <div className="flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-violet-50 dark:bg-violet-950/30 border-2 border-violet-300 text-violet-800 dark:text-violet-200 text-sm font-semibold">
                     <Repeat2 className="w-4 h-4" />
                     {eventLang === "es"
-                      ? (repeatRequestUsed?.status === "accepted" ? "Repetición aceptada ✓" : repeatRequestUsed?.status === "declined" ? "Repetición rechazada" : repeatRequestUsed?.status === "expired" ? "Repetición caducada" : "Repetición pendiente")
-                      : (repeatRequestUsed?.status === "accepted" ? "Repeat accepted ✓" : repeatRequestUsed?.status === "declined" ? "Repeat declined" : repeatRequestUsed?.status === "expired" ? "Repeat expired" : "Repeat pending")}
+                      ? (thisRepeat.status === "accepted" ? "Repetición aceptada ✓" : thisRepeat.status === "declined" ? "Repetición rechazada" : thisRepeat.status === "expired" ? "Repetición caducada" : "Repetición pendiente")
+                      : (thisRepeat.status === "accepted" ? "Repeat accepted ✓" : thisRepeat.status === "declined" ? "Repeat declined" : thisRepeat.status === "expired" ? "Repeat expired" : "Repeat pending")}
                   </div>
                 ) : (
                   <button
                     type="button"
-                    disabled={repeatDisabled}
                     onClick={() => requestRepeat(person.id, person.name)}
                     title={eventLang === "es" ? "Solicita volver a coincidir con esta persona en una próxima ronda." : "Request to be seated again with this person in an upcoming round."}
                     className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg border-2 border-violet-300 hover:border-violet-500 bg-violet-50 hover:bg-violet-100 dark:bg-violet-950/20 dark:border-violet-700/40 text-violet-700 dark:text-violet-300 text-sm font-semibold transition-all hover:scale-[1.02] hover:shadow-md disabled:opacity-40 disabled:hover:scale-100 disabled:cursor-not-allowed"
@@ -1155,14 +1189,14 @@ const ParticipantSelect = () => {
                 );
               })()}
               {crushEnabled && wantsRomance(verifiedParticipant?.preference) && wantsRomance(person.preference) && (() => {
-                const isThisCrush = crushUsed?.targetId === person.id;
-                if (!isThisCrush && crushUsed) return null;
-                return isThisCrush ? (
+                const thisCrush = crushesSent.find(c => c.targetId === person.id);
+                if (!thisCrush && crushSlotsLeft <= 0) return null;
+                return thisCrush ? (
                   <div className="flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-rose-50 dark:bg-rose-950/30 border-2 border-rose-300 text-rose-800 dark:text-rose-200 text-sm font-semibold">
                     <Heart className="w-4 h-4 fill-rose-500 text-rose-500" />
                     {eventLang === "es"
-                      ? (crushUsed?.status === "accepted" ? "Flechazo aceptado 💘" : crushUsed?.status === "declined" ? "Flechazo rechazado" : "Flechazo pendiente")
-                      : (crushUsed?.status === "accepted" ? "Flechazo accepted 💘" : crushUsed?.status === "declined" ? "Flechazo declined" : "Flechazo pending")}
+                      ? (thisCrush.status === "accepted" ? "Flechazo aceptado 💘" : thisCrush.status === "declined" ? "Flechazo rechazado" : "Flechazo pendiente")
+                      : (thisCrush.status === "accepted" ? "Flechazo accepted 💘" : thisCrush.status === "declined" ? "Flechazo declined" : "Flechazo pending")}
                   </div>
                 ) : (
                   <button
@@ -1176,6 +1210,7 @@ const ParticipantSelect = () => {
                   </button>
                 );
               })()}
+
             </div>
           );
           return (
@@ -1375,32 +1410,37 @@ const ParticipantSelect = () => {
               <p className="text-sm text-center text-muted-foreground">{t.select.matchHint}</p>
               {repeatEnabled && (() => {
                 const hasRemainingRounds = eventStatus !== 'completed' && currentRound < totalRounds;
-                if (!hasRemainingRounds && !repeatRequestUsed) return null;
+                if (!hasRemainingRounds && repeatsSent.length === 0) return null;
                 return (
                   <div className="text-xs text-center text-violet-700 dark:text-violet-400 flex items-center justify-center gap-1.5 font-medium">
                     <Repeat2 className="w-3.5 h-3.5" />
-                    {repeatRequestUsed
-                      ? (eventLang === "es" ? "Repetición usada 🔁" : "Repeat used 🔁")
-                      : (eventLang === "es" ? "Te queda 1 Repetición 🔁" : "1 Repeat remaining 🔁")}
+                    {eventLang === "es"
+                      ? `Repetir: ${repeatSlotsLeft} de ${repeatAllowance} disponibles 🔁`
+                      : `Repeats: ${repeatSlotsLeft} of ${repeatAllowance} available 🔁`}
                   </div>
                 );
               })()}
               {crushEnabled && (
                 <div className="text-xs text-center text-rose-700 dark:text-rose-400 flex items-center justify-center gap-1.5 font-medium">
                   <Heart className="w-3.5 h-3.5 fill-rose-500 text-rose-500" />
-                  {crushUsed
-                    ? (eventLang === "es" ? "Flechazo enviado 💘" : "Flechazo sent 💘")
-                    : (eventLang === "es" ? "Te queda 1 Flechazo 💘" : "1 Flechazo remaining 💘")}
+                  {eventLang === "es"
+                    ? `Flechazos: ${crushSlotsLeft} de ${crushAllowance} disponibles 💘`
+                    : `Flechazos: ${crushSlotsLeft} of ${crushAllowance} available 💘`}
                 </div>
               )}
-              {superLikeEnabled && (
-                <div className="text-xs text-center text-amber-700 dark:text-amber-400 flex items-center justify-center gap-1.5 font-medium">
-                  <Star className="w-3.5 h-3.5 fill-amber-500 text-amber-500" />
-                  {existingSuperLike || superLikeId
-                    ? (eventLang === "es" ? "Super Like usado ✓" : "Super Like used ✓")
-                    : (eventLang === "es" ? "Te queda 1 Super Like ⭐" : "1 Super Like remaining ⭐")}
-                </div>
-              )}
+              {superLikeEnabled && (() => {
+                const used = superLikesUsedCount + (superLikeId ? 1 : 0);
+                const left = Math.max(0, superLikeAllowance - used);
+                return (
+                  <div className="text-xs text-center text-amber-700 dark:text-amber-400 flex items-center justify-center gap-1.5 font-medium">
+                    <Star className="w-3.5 h-3.5 fill-amber-500 text-amber-500" />
+                    {eventLang === "es"
+                      ? `Super Likes: ${left} de ${superLikeAllowance} disponibles ⭐`
+                      : `Super Likes: ${left} of ${superLikeAllowance} available ⭐`}
+                  </div>
+                );
+              })()}
+
 
               {useRoundView ? (
                 allRoundsComplete && (

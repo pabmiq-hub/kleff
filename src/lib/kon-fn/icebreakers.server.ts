@@ -273,7 +273,7 @@ serve(async (req) => {
             game_code: GAME,
             reward_type: type,
           })),
-          { onConflict: "event_id,participant_id,round,reward_type,game_code", ignoreDuplicates: true },
+          { onConflict: "event_id,participant_id,round,reward_type", ignoreDuplicates: true },
         );
       }
       session = await loadSession();

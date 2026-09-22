@@ -288,7 +288,7 @@ export async function registerVote(
         game_code: gameCode,
         reward_type: type,
       })),
-      { onConflict: "event_id,participant_id,round,reward_type,game_code", ignoreDuplicates: true },
+      { onConflict: "event_id,participant_id,round,reward_type", ignoreDuplicates: true },
     );
   }
   return null;

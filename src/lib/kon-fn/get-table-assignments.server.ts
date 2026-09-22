@@ -222,7 +222,7 @@ serve(async (req) => {
     }
 
     // Fetch preferences for all tablemates + existing selections + super like/crush info in parallel
-    const [preferencesResult, selectionsResult, sentSuperLikeResult, receivedSuperLikeResult, existingCrushResult, superLikeRewardsResult, crushRewardsResult, receivedCrushResult] = await Promise.all([
+    const [preferencesResult, selectionsResult, sentSuperLikeResult, receivedSuperLikeResult, existingCrushResult, superLikeRewardsResult, crushRewardsResult, receivedCrushResult, repeatRequestsResult, repeatRewardsResult] = await Promise.all([
       tablemateIds.size > 0
         ? supabase.from('participants').select('id, preference, dating_preference, gender').in('id', Array.from(tablemateIds))
         : Promise.resolve({ data: [], error: null }),
@@ -239,7 +239,12 @@ serve(async (req) => {
       supabase.from('game_rewards').select('id').eq('event_id', eventId).eq('participant_id', participant.id).eq('reward_type', 'crush'),
       // Flechazos RECEIVED and still pending (shown in the participant panel)
       supabase.from('crush_requests').select('id, token, status, requester_id, created_at').eq('event_id', eventId).eq('target_id', participant.id).eq('status', 'pending').order('created_at', { ascending: true }),
+      // Repeat requests already sent (can be more than one when extras are earned)
+      supabase.from('repeat_requests').select('status, target_id, created_at').eq('event_id', eventId).eq('requester_id', participant.id).order('created_at', { ascending: true }),
+      // Extra Repeats earned in the social game
+      supabase.from('game_rewards').select('id').eq('event_id', eventId).eq('participant_id', participant.id).eq('reward_type', 'repeat'),
     ]);
+
 
 
     const preferencesMap = new Map<string, { preference: string | null; dating_preference: string | null; gender: string | null }>();
@@ -276,6 +281,12 @@ serve(async (req) => {
       targetId: c.target_id,
     }));
     const crushAllowance = 1 + ((crushRewardsResult as any)?.data || []).length;
+    const repeatsSent = (((repeatRequestsResult as any)?.data || []) as any[]).map((r: any) => ({
+      status: r.status,
+      targetId: r.target_id,
+    }));
+    const repeatAllowance = 1 + ((repeatRewardsResult as any)?.data || []).length;
+
 
     // Pending Flechazos received: expose id + token so the panel can accept/decline them
     const pendingCrushRows = (((receivedCrushResult as any)?.data || []) as any[]);
@@ -349,6 +360,10 @@ return new Response(
         crushes: crushesSent,
         crushAllowance,
         crushesUsed: crushesSent.length,
+        repeats: repeatsSent,
+        repeatAllowance,
+        repeatsUsed: repeatsSent.length,
+
         hasSentCrush: crushesSent.length >= crushAllowance,
         existingCrush: crushesSent[0] || null,
         crushesReceived,
