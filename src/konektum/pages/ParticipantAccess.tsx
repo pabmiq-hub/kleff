@@ -960,7 +960,7 @@ const ParticipantAccess = () => {
         });
         return;
       }
-      setRepeatRequestUsed({ status: 'pending', targetId: repeatTarget.id });
+      setRepeatsSent(prev => [...prev, { status: 'pending', targetId: repeatTarget.id }]);
       toast({
         title: eventLang === 'es' ? '🔁 Solicitud enviada' : '🔁 Request sent',
         description: eventLang === 'es'
