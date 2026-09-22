@@ -487,12 +487,15 @@ const ParticipantSelect = () => {
   const requestSuperLike = (participantId: string, name: string) => {
     if (existingSuperLike || superLikeId) {
       toast({
-        title: eventLang === "es" ? "Super Like ya asignado" : "Super Like already assigned",
-        description: eventLang === "es" ? "Solo puedes dar 1 Super Like por evento" : "You can only give 1 Super Like per event",
+        title: eventLang === "es" ? "Sin Super Likes disponibles" : "No Super Likes available",
+        description: eventLang === "es"
+          ? `Has usado tus ${superLikeAllowance} Super Like(s) de este evento`
+          : `You have used your ${superLikeAllowance} Super Like(s) for this event`,
         variant: "destructive",
       });
       return;
     }
+
     setConfirmSuperLikeFor({ id: participantId, name: formatAnonymousName(name) });
   };
 
