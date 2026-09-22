@@ -187,7 +187,10 @@ const ParticipantAccess = () => {
 
   // Repeat request feature
   const [repeatEnabled, setRepeatEnabled] = useState(false);
-  const [repeatRequestUsed, setRepeatRequestUsed] = useState<{ status: string; targetId?: string } | null>(null);
+  const [repeatsSent, setRepeatsSent] = useState<{ status: string; targetId?: string }[]>([]);
+  const [repeatAllowance, setRepeatAllowance] = useState(1);
+  const repeatSlotsLeft = Math.max(0, repeatAllowance - repeatsSent.length);
+
   const [repeatTarget, setRepeatTarget] = useState<{ id: string; name: string; round: number } | null>(null);
   const [isSendingRepeat, setIsSendingRepeat] = useState(false);
 
