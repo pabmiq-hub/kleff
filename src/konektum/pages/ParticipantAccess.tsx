@@ -139,6 +139,7 @@ const ParticipantAccess = () => {
   const [matchSelections, setMatchSelections] = useState<MatchSelection[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const submitLockRef = useRef(false);
   const [eventStatus, setEventStatus] = useState<string>("");
   const [currentRound, setCurrentRound] = useState<number>(0);
 
@@ -759,7 +760,8 @@ const ParticipantAccess = () => {
 
   const performSubmit = async () => {
     if (!verifiedParticipant || !eventId) return;
-    if (isSubmitting) return;
+    if (submitLockRef.current) return;
+    submitLockRef.current = true;
     setIsSubmitting(true);
 
     try {
@@ -839,6 +841,7 @@ const ParticipantAccess = () => {
         variant: "destructive",
       });
     } finally {
+      submitLockRef.current = false;
       setIsSubmitting(false);
     }
   };
@@ -854,7 +857,8 @@ const ParticipantAccess = () => {
 
   const handleSubmitEmpty = async () => {
     if (!verifiedParticipant || !eventId) return;
-    if (isSubmitting) return;
+    if (submitLockRef.current) return;
+    submitLockRef.current = true;
     setIsSubmitting(true);
     try {
       const { data, error } = await supabase.functions.invoke('submit-selections', {
@@ -872,6 +876,7 @@ const ParticipantAccess = () => {
     } catch (error) {
       toast({ title: t.access.error, description: error instanceof Error ? error.message : t.access.errorSaving, variant: "destructive" });
     } finally {
+      submitLockRef.current = false;
       setIsSubmitting(false);
     }
   };

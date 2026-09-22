@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useParams, Link } from "@/konektum/router";
 import { Button } from "@/konektum/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/konektum/ui/card";
@@ -140,6 +140,8 @@ const ParticipantSelect = () => {
   const [confirmEditSubmit, setConfirmEditSubmit] = useState(false);
   const [reviewedRounds, setReviewedRounds] = useState<Set<number>>(new Set());
   const [submittingRound, setSubmittingRound] = useState<number | null>(null);
+  const submitLockRef = useRef(false);
+  const roundSubmitLockRef = useRef(false);
   const [openRound, setOpenRound] = useState<string>("");
   const { toast } = useToast();
 
@@ -719,7 +721,8 @@ const ParticipantSelect = () => {
 
   const submitRound = async (round: number, tablemates: Participant[]) => {
     if (!verifiedParticipant || !eventId) return;
-    if (submittingRound !== null) return;
+    if (roundSubmitLockRef.current) return;
+    roundSubmitLockRef.current = true;
     setSubmittingRound(round);
 
     try {
@@ -847,6 +850,7 @@ const ParticipantSelect = () => {
         variant: "destructive",
       });
     } finally {
+      roundSubmitLockRef.current = false;
       setSubmittingRound(null);
     }
   };
@@ -867,7 +871,8 @@ const ParticipantSelect = () => {
   // Legacy single-submit flow — kept for events without round data (e.g. preliminary-only)
   const performSubmit = async () => {
     if (!verifiedParticipant || !eventId) return;
-    if (isSubmitting) return;
+    if (submitLockRef.current) return;
+    submitLockRef.current = true;
     setIsSubmitting(true);
 
     try {
@@ -945,6 +950,7 @@ const ParticipantSelect = () => {
         variant: "destructive",
       });
     } finally {
+      submitLockRef.current = false;
       setIsSubmitting(false);
     }
   };
