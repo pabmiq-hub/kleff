@@ -1408,32 +1408,37 @@ const ParticipantSelect = () => {
               <p className="text-sm text-center text-muted-foreground">{t.select.matchHint}</p>
               {repeatEnabled && (() => {
                 const hasRemainingRounds = eventStatus !== 'completed' && currentRound < totalRounds;
-                if (!hasRemainingRounds && !repeatRequestUsed) return null;
+                if (!hasRemainingRounds && repeatsSent.length === 0) return null;
                 return (
                   <div className="text-xs text-center text-violet-700 dark:text-violet-400 flex items-center justify-center gap-1.5 font-medium">
                     <Repeat2 className="w-3.5 h-3.5" />
-                    {repeatRequestUsed
-                      ? (eventLang === "es" ? "Repetición usada 🔁" : "Repeat used 🔁")
-                      : (eventLang === "es" ? "Te queda 1 Repetición 🔁" : "1 Repeat remaining 🔁")}
+                    {eventLang === "es"
+                      ? `Repetir: ${repeatSlotsLeft} de ${repeatAllowance} disponibles 🔁`
+                      : `Repeats: ${repeatSlotsLeft} of ${repeatAllowance} available 🔁`}
                   </div>
                 );
               })()}
               {crushEnabled && (
                 <div className="text-xs text-center text-rose-700 dark:text-rose-400 flex items-center justify-center gap-1.5 font-medium">
                   <Heart className="w-3.5 h-3.5 fill-rose-500 text-rose-500" />
-                  {crushUsed
-                    ? (eventLang === "es" ? "Flechazo enviado 💘" : "Flechazo sent 💘")
-                    : (eventLang === "es" ? "Te queda 1 Flechazo 💘" : "1 Flechazo remaining 💘")}
+                  {eventLang === "es"
+                    ? `Flechazos: ${crushSlotsLeft} de ${crushAllowance} disponibles 💘`
+                    : `Flechazos: ${crushSlotsLeft} of ${crushAllowance} available 💘`}
                 </div>
               )}
-              {superLikeEnabled && (
-                <div className="text-xs text-center text-amber-700 dark:text-amber-400 flex items-center justify-center gap-1.5 font-medium">
-                  <Star className="w-3.5 h-3.5 fill-amber-500 text-amber-500" />
-                  {existingSuperLike || superLikeId
-                    ? (eventLang === "es" ? "Super Like usado ✓" : "Super Like used ✓")
-                    : (eventLang === "es" ? "Te queda 1 Super Like ⭐" : "1 Super Like remaining ⭐")}
-                </div>
-              )}
+              {superLikeEnabled && (() => {
+                const used = superLikesUsedCount + (superLikeId ? 1 : 0);
+                const left = Math.max(0, superLikeAllowance - used);
+                return (
+                  <div className="text-xs text-center text-amber-700 dark:text-amber-400 flex items-center justify-center gap-1.5 font-medium">
+                    <Star className="w-3.5 h-3.5 fill-amber-500 text-amber-500" />
+                    {eventLang === "es"
+                      ? `Super Likes: ${left} de ${superLikeAllowance} disponibles ⭐`
+                      : `Super Likes: ${left} of ${superLikeAllowance} available ⭐`}
+                  </div>
+                );
+              })()}
+
 
               {useRoundView ? (
                 allRoundsComplete && (
