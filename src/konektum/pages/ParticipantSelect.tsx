@@ -519,18 +519,20 @@ const ParticipantSelect = () => {
   };
 
   const requestRepeat = (participantId: string, name: string) => {
-    if (repeatRequestUsed) {
+    if (repeatsSent.some(r => r.targetId === participantId)) return;
+    if (repeatSlotsLeft <= 0) {
       toast({
-        title: eventLang === "es" ? "Ya has usado tu repetición" : "You already used your repeat",
+        title: eventLang === "es" ? "Sin repeticiones disponibles" : "No repeats available",
         description: eventLang === "es"
-          ? "Solo puedes solicitar repetir con una persona por evento"
-          : "You can only request to repeat with one person per event",
+          ? `Has usado tus ${repeatAllowance} solicitud(es) de repetir en este evento`
+          : `You have used your ${repeatAllowance} repeat request(s) for this event`,
         variant: "destructive",
       });
       return;
     }
     setConfirmRepeatFor({ id: participantId, name: formatAnonymousName(name) });
   };
+
 
   const confirmRepeat = async () => {
     if (!confirmRepeatFor || !verifiedParticipant || !eventId) return;
