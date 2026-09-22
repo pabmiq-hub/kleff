@@ -688,12 +688,14 @@ export const adminUpdateResponse = createServerFn({ method: "POST" })
     id: z.string().uuid(),
     payment_status: z.enum(["pending", "paid", "refunded", "not_required"]).optional(),
     internal_notes: z.string().max(2000).nullable().optional(),
+    guests_count: z.number().int().min(0).max(20).optional(),
   }))
   .handler(async ({ data, context }) => {
     await assertSuperAdmin(context.userId);
     const patch: Record<string, unknown> = {};
     if (data.payment_status) patch.payment_status = data.payment_status;
     if (data.internal_notes !== undefined) patch.internal_notes = data.internal_notes;
+    if (data.guests_count !== undefined) patch.guests_count = data.guests_count;
     const { error } = await supabaseAdmin.from("registration_responses").update(patch as never).eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true };
