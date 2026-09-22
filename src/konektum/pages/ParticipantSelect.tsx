@@ -1164,21 +1164,19 @@ const ParticipantSelect = () => {
                 ) : null
               )}
               {repeatEnabled && (() => {
-                const isThisRepeat = repeatRequestUsed?.targetId === person.id;
-                const repeatDisabled = !!repeatRequestUsed && !isThisRepeat;
+                const thisRepeat = repeatsSent.find(r => r.targetId === person.id);
                 const hasRemainingRounds = eventStatus !== 'completed' && currentRound < totalRounds;
-                if (!isThisRepeat && !hasRemainingRounds) return null;
-                return isThisRepeat ? (
+                if (!thisRepeat && (!hasRemainingRounds || repeatSlotsLeft <= 0)) return null;
+                return thisRepeat ? (
                   <div className="flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-violet-50 dark:bg-violet-950/30 border-2 border-violet-300 text-violet-800 dark:text-violet-200 text-sm font-semibold">
                     <Repeat2 className="w-4 h-4" />
                     {eventLang === "es"
-                      ? (repeatRequestUsed?.status === "accepted" ? "Repetición aceptada ✓" : repeatRequestUsed?.status === "declined" ? "Repetición rechazada" : repeatRequestUsed?.status === "expired" ? "Repetición caducada" : "Repetición pendiente")
-                      : (repeatRequestUsed?.status === "accepted" ? "Repeat accepted ✓" : repeatRequestUsed?.status === "declined" ? "Repeat declined" : repeatRequestUsed?.status === "expired" ? "Repeat expired" : "Repeat pending")}
+                      ? (thisRepeat.status === "accepted" ? "Repetición aceptada ✓" : thisRepeat.status === "declined" ? "Repetición rechazada" : thisRepeat.status === "expired" ? "Repetición caducada" : "Repetición pendiente")
+                      : (thisRepeat.status === "accepted" ? "Repeat accepted ✓" : thisRepeat.status === "declined" ? "Repeat declined" : thisRepeat.status === "expired" ? "Repeat expired" : "Repeat pending")}
                   </div>
                 ) : (
                   <button
                     type="button"
-                    disabled={repeatDisabled}
                     onClick={() => requestRepeat(person.id, person.name)}
                     title={eventLang === "es" ? "Solicita volver a coincidir con esta persona en una próxima ronda." : "Request to be seated again with this person in an upcoming round."}
                     className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg border-2 border-violet-300 hover:border-violet-500 bg-violet-50 hover:bg-violet-100 dark:bg-violet-950/20 dark:border-violet-700/40 text-violet-700 dark:text-violet-300 text-sm font-semibold transition-all hover:scale-[1.02] hover:shadow-md disabled:opacity-40 disabled:hover:scale-100 disabled:cursor-not-allowed"
@@ -1189,14 +1187,14 @@ const ParticipantSelect = () => {
                 );
               })()}
               {crushEnabled && wantsRomance(verifiedParticipant?.preference) && wantsRomance(person.preference) && (() => {
-                const isThisCrush = crushUsed?.targetId === person.id;
-                if (!isThisCrush && crushUsed) return null;
-                return isThisCrush ? (
+                const thisCrush = crushesSent.find(c => c.targetId === person.id);
+                if (!thisCrush && crushSlotsLeft <= 0) return null;
+                return thisCrush ? (
                   <div className="flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-rose-50 dark:bg-rose-950/30 border-2 border-rose-300 text-rose-800 dark:text-rose-200 text-sm font-semibold">
                     <Heart className="w-4 h-4 fill-rose-500 text-rose-500" />
                     {eventLang === "es"
-                      ? (crushUsed?.status === "accepted" ? "Flechazo aceptado 💘" : crushUsed?.status === "declined" ? "Flechazo rechazado" : "Flechazo pendiente")
-                      : (crushUsed?.status === "accepted" ? "Flechazo accepted 💘" : crushUsed?.status === "declined" ? "Flechazo declined" : "Flechazo pending")}
+                      ? (thisCrush.status === "accepted" ? "Flechazo aceptado 💘" : thisCrush.status === "declined" ? "Flechazo rechazado" : "Flechazo pendiente")
+                      : (thisCrush.status === "accepted" ? "Flechazo accepted 💘" : thisCrush.status === "declined" ? "Flechazo declined" : "Flechazo pending")}
                   </div>
                 ) : (
                   <button
@@ -1210,6 +1208,7 @@ const ParticipantSelect = () => {
                   </button>
                 );
               })()}
+
             </div>
           );
           return (
