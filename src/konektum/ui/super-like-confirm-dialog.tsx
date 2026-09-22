@@ -9,10 +9,13 @@ interface SuperLikeConfirmDialogProps {
   onConfirm: () => void;
   recipientName: string;
   language?: "es" | "en";
+  /** Super Likes still available (base + extras won in the game). */
+  remaining?: number;
 }
 
-const SuperLikeConfirmDialog = ({ open, onClose, onConfirm, recipientName, language = "es" }: SuperLikeConfirmDialogProps) => {
+const SuperLikeConfirmDialog = ({ open, onClose, onConfirm, recipientName, language = "es", remaining }: SuperLikeConfirmDialogProps) => {
   const isEn = language === "en";
+  const left = typeof remaining === "number" ? Math.max(0, remaining) : 1;
 
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
@@ -27,17 +30,18 @@ const SuperLikeConfirmDialog = ({ open, onClose, onConfirm, recipientName, langu
           <DialogDescription className="text-center pt-2">
             {isEn ? (
               <>
-                You're about to give your <strong className="text-amber-600">only Super Like</strong> of the event to{" "}
-                <strong>{recipientName}</strong>. They will receive an anonymous notification immediately.
+                You're about to give a Super Like to <strong>{recipientName}</strong>. You have{" "}
+                <strong className="text-amber-600">{left}</strong> available. They will receive an anonymous notification immediately.
               </>
             ) : (
               <>
-                Vas a dar tu <strong className="text-amber-600">único Super Like</strong> del evento a{" "}
-                <strong>{recipientName}</strong>. Recibirá una notificación anónima inmediatamente.
+                Vas a dar un Super Like a <strong>{recipientName}</strong>. Te quedan{" "}
+                <strong className="text-amber-600">{left}</strong> disponibles. Recibirá una notificación anónima inmediatamente.
               </>
             )}
           </DialogDescription>
         </DialogHeader>
+
         <DialogFooter className="flex flex-col-reverse sm:flex-row gap-2">
           <Button variant="outline" onClick={onClose} className="flex-1">
             {isEn ? "Cancel" : "Cancelar"}
