@@ -1641,28 +1641,27 @@ const ParticipantAccess = () => {
                                       </div>
                                     )}
                                     {repeatEnabled && (() => {
-                                      const isThisRepeat = repeatRequestUsed?.targetId === ms.participantId;
-                                      const repeatDisabled = !!repeatRequestUsed && !isThisRepeat;
+                                      const thisRepeat = repeatsSent.find(r => r.targetId === ms.participantId);
                                       const hasRemainingRounds = eventStatus !== 'completed' && currentRound < totalRounds;
                                       // Hide the action button if the event has no upcoming rounds, but still show "accepted/pending" status badge.
-                                      if (!isThisRepeat && !hasRemainingRounds) return null;
-                                      if (isThisRepeat) {
+                                      if (!thisRepeat && (!hasRemainingRounds || repeatSlotsLeft <= 0)) return null;
+                                      if (thisRepeat) {
                                         return (
                                           <div className="w-full flex items-center justify-center gap-2 px-3 py-1.5 rounded-md bg-violet-50 dark:bg-violet-950/30 border border-violet-300 text-violet-800 dark:text-violet-200 text-xs font-semibold">
                                             <Repeat2 className="w-3.5 h-3.5" />
                                             {eventLang === 'es'
-                                              ? (repeatRequestUsed?.status === 'accepted'
+                                              ? (thisRepeat.status === 'accepted'
                                                   ? 'Repetición aceptada ✓'
-                                                  : repeatRequestUsed?.status === 'declined'
+                                                  : thisRepeat.status === 'declined'
                                                     ? 'Repetición rechazada'
-                                                    : repeatRequestUsed?.status === 'expired'
+                                                    : thisRepeat.status === 'expired'
                                                       ? 'Repetición caducada'
                                                       : 'Repetición pendiente')
-                                              : (repeatRequestUsed?.status === 'accepted'
+                                              : (thisRepeat.status === 'accepted'
                                                   ? 'Repeat accepted ✓'
-                                                  : repeatRequestUsed?.status === 'declined'
+                                                  : thisRepeat.status === 'declined'
                                                     ? 'Repeat declined'
-                                                    : repeatRequestUsed?.status === 'expired'
+                                                    : thisRepeat.status === 'expired'
                                                       ? 'Repeat expired'
                                                       : 'Repeat pending')}
                                           </div>
@@ -1671,7 +1670,6 @@ const ParticipantAccess = () => {
                                       return (
                                         <button
                                           type="button"
-                                          disabled={repeatDisabled}
                                           onClick={() => openRepeatDialog(ms.participantId, tablemate.name, round)}
                                           title={eventLang === 'en' ? "Request to be seated again with this person in an upcoming round. They'll get an email to accept or decline." : 'Solicita volver a coincidir con esta persona en una próxima ronda. Recibirá un email para aceptar o rechazar.'}
                                           className="w-full inline-flex items-center justify-center gap-1.5 text-xs font-semibold py-1.5 px-3 rounded-md border border-violet-300 bg-violet-50 hover:bg-violet-100 dark:bg-violet-950/20 dark:border-violet-700/40 text-violet-700 dark:text-violet-300 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
@@ -1681,6 +1679,7 @@ const ParticipantAccess = () => {
                                         </button>
                                       );
                                     })()}
+
                                     {crushEnabled && wantsRomance(verifiedParticipant?.preference) && wantsRomance(tablemate.preference) && (() => {
                                       const thisCrush = crushesSent.find(c => c.targetId === ms.participantId);
                                       if (!thisCrush && crushSlotsLeft <= 0) return null;
