@@ -564,12 +564,16 @@ function OptionsEditor({ value, onChange }: { value: RegistrationQuestion["optio
 
 // ----------------- Responses Panel -----------------
 
-function ResponsesPanel({ formId, questions, paymentRequired }: { formId: string; questions: RegistrationQuestion[]; paymentRequired?: boolean }) {
+function ResponsesPanel({ form, questions }: { form: RegistrationForm; questions: RegistrationQuestion[] }) {
+  const formId = form.id;
+  const paymentRequired = !!form.payment_required;
+  const maxGuests = form.allow_guests ? Math.max(1, form.max_guests_per_response ?? 1) : 0;
   const listFn = useServerFn(adminListResponses);
   const updateFn = useServerFn(adminUpdateResponse);
   const deleteFn = useServerFn(adminDeleteResponse);
   const [responses, setResponses] = useState<RegistrationResponse[]>([]);
   const [loading, setLoading] = useState(true);
+  const [reminderTarget, setReminderTarget] = useState<{ responseId?: string; count: number } | null>(null);
 
   const reload = async () => {
     setLoading(true);
@@ -599,15 +603,27 @@ function ResponsesPanel({ formId, questions, paymentRequired }: { formId: string
 
   if (loading) return <p className="text-ink/60 text-sm">Cargando respuestas…</p>;
 
-  const totalAttendees = responses.reduce((n, r) => n + 1 + (r.guests_count ?? 0), 0);
+  const active = responses.filter((r) => !r.cancelled_at && r.email_contact);
+  const totalAttendees = responses.reduce((n, r) => n + (r.cancelled_at ? 0 : 1 + (r.guests_count ?? 0)), 0);
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-2 flex-wrap">
         <p className="text-sm text-ink/70">
-          {responses.length} respuesta{responses.length === 1 ? "" : "s"} · {totalAttendees} persona{totalAttendees === 1 ? "" : "s"}
+          {responses.length} respuesta{responses.length === 1 ? "" : "s"} · <strong>{totalAttendees} participante{totalAttendees === 1 ? "" : "s"}</strong>
         </p>
-        <Button size="sm" onClick={downloadCsv} variant="outline" className="border-ink/20 text-ink hover:bg-ink/10" disabled={!responses.length}>Descargar CSV</Button>
+        <div className="flex gap-2">
+          <Button
+            size="sm"
+            variant="outline"
+            className="border-ink/20 text-ink hover:bg-ink/10"
+            disabled={!active.length}
+            onClick={() => setReminderTarget({ count: active.length })}
+          >
+            <Mail className="h-4 w-4 mr-2" /> Enviar recordatorio a todos
+          </Button>
+          <Button size="sm" onClick={downloadCsv} variant="outline" className="border-ink/20 text-ink hover:bg-ink/10" disabled={!responses.length}>Descargar CSV</Button>
+        </div>
       </div>
       {responses.length === 0 ? (
         <p className="text-ink/60 text-sm">Aún no hay inscripciones recibidas.</p>
@@ -616,6 +632,8 @@ function ResponsesPanel({ formId, questions, paymentRequired }: { formId: string
           responses={responses}
           questions={questions}
           paymentRequired={paymentRequired}
+          maxGuests={maxGuests}
+          onReminder={(id) => setReminderTarget({ responseId: id, count: 1 })}
           onUpdate={async (id, patch) => {
             try {
               await updateFn({ data: { id, ...patch } });
@@ -631,7 +649,69 @@ function ResponsesPanel({ formId, questions, paymentRequired }: { formId: string
           }}
         />
       )}
+
+      <ReminderDialog
+        formId={formId}
+        target={reminderTarget}
+        onClose={() => setReminderTarget(null)}
+      />
     </div>
+  );
+}
+
+function ReminderDialog({ formId, target, onClose }: {
+  formId: string;
+  target: { responseId?: string; count: number } | null;
+  onClose: () => void;
+}) {
+  const previewFn = useServerFn(adminPreviewEmails);
+  const sendFn = useServerFn(adminSendReminder);
+  const [html, setHtml] = useState<string | null>(null);
+  const [sending, setSending] = useState(false);
+
+  useEffect(() => {
+    setHtml(null);
+    if (!target) return;
+    const payload: { form_id: string; response_id?: string } = { form_id: formId };
+    if (target.responseId) payload.response_id = target.responseId;
+    previewFn({ data: payload })
+      .then((res) => setHtml((res as { reminder: { html: string } }).reminder.html))
+      .catch((e) => toast.error((e as Error).message));
+  }, [target, formId]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const send = async () => {
+    if (!target) return;
+    setSending(true);
+    try {
+      const payload: { form_id: string; response_id?: string } = { form_id: formId };
+      if (target.responseId) payload.response_id = target.responseId;
+      const res = await sendFn({ data: payload });
+      toast.success(`Recordatorio enviado a ${(res as { sent: number }).sent} persona(s)`);
+      onClose();
+    } catch (e) { toast.error((e as Error).message); } finally { setSending(false); }
+  };
+
+  return (
+    <Dialog open={!!target} onOpenChange={(v) => { if (!v) onClose(); }}>
+      <DialogContent className="bg-white border-ink/15 text-ink max-w-3xl">
+        <DialogHeader>
+          <DialogTitle>
+            {target?.responseId ? "Reenviar recordatorio a esta persona" : `Enviar recordatorio a ${target?.count ?? 0} participante(s)`}
+          </DialogTitle>
+        </DialogHeader>
+        {html ? (
+          <iframe title="Previsualización del recordatorio" srcDoc={html} className="w-full h-[460px] rounded-lg border border-ink/10 bg-white" />
+        ) : (
+          <p className="text-sm text-ink/60 flex items-center gap-2"><Loader2 className="h-4 w-4 animate-spin" /> Generando previsualización…</p>
+        )}
+        <DialogFooter>
+          <Button variant="ghost" onClick={onClose}>Cancelar</Button>
+          <Button onClick={send} disabled={sending || !html} className="bg-coral hover:bg-coral/90">
+            {sending ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Send className="h-4 w-4 mr-2" />} Enviar ahora
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }
 
@@ -641,12 +721,14 @@ function columnLabel(q: RegistrationQuestion) {
   return q.label;
 }
 
-function ResponsesTable({ responses, questions, paymentRequired, onUpdate, onDelete }: {
+function ResponsesTable({ responses, questions, paymentRequired, maxGuests, onUpdate, onDelete, onReminder }: {
   responses: RegistrationResponse[];
   questions: RegistrationQuestion[];
   paymentRequired?: boolean;
-  onUpdate: (id: string, patch: { payment_status?: RegistrationResponse["payment_status"]; internal_notes?: string | null }) => Promise<void>;
+  maxGuests: number;
+  onUpdate: (id: string, patch: { payment_status?: RegistrationResponse["payment_status"]; internal_notes?: string | null; guests_count?: number }) => Promise<void>;
   onDelete: (id: string) => void;
+  onReminder: (id: string) => void;
 }) {
   const [notesFor, setNotesFor] = useState<string | null>(null);
   const cols = questions.filter((q) => q.special !== "contact_email");
@@ -676,7 +758,20 @@ function ResponsesTable({ responses, questions, paymentRequired, onUpdate, onDel
                 <tr key={r.id} className={`border-b border-ink/5 align-top ${cancelled ? "opacity-50" : ""}`}>
                   <td className="px-3 py-2 text-xs text-ink/60 whitespace-nowrap">{new Date(r.created_at).toLocaleString("es-ES")}</td>
                   <td className="px-3 py-2 text-ink font-medium whitespace-nowrap">{r.email_contact ?? "—"}</td>
-                  <td className="px-3 py-2 whitespace-nowrap text-ink/80">{guests > 0 ? `${1 + guests} (+${guests})` : "1"}</td>
+                  <td className="px-3 py-2 whitespace-nowrap text-ink/80">
+                    {maxGuests > 0 && !cancelled ? (
+                      <Select value={String(guests)} onValueChange={(v) => onUpdate(r.id, { guests_count: Number(v) })}>
+                        <SelectTrigger className="bg-white border-ink/15 text-ink h-8 text-xs w-28"><SelectValue /></SelectTrigger>
+                        <SelectContent className="bg-white border-ink/15 text-ink">
+                          {Array.from({ length: maxGuests + 1 }, (_, n) => (
+                            <SelectItem key={n} value={String(n)}>{n === 0 ? "1 (sola)" : `${1 + n} (+${n})`}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    ) : (
+                      guests > 0 ? `${1 + guests} (+${guests})` : "1"
+                    )}
+                  </td>
                   {cols.map((q) => (
                     <td key={q.id} className="px-3 py-2 text-ink/80">
                       {q.special === "game_pick"
@@ -700,6 +795,9 @@ function ResponsesTable({ responses, questions, paymentRequired, onUpdate, onDel
                     </td>
                   )}
                   <td className="px-3 py-2 whitespace-nowrap">
+                    {!cancelled && r.email_contact && (
+                      <Button size="sm" variant="ghost" onClick={() => onReminder(r.id)} title="Reenviar recordatorio" className="h-8 w-8 p-0 text-ink/60 hover:text-coral"><Mail className="h-3.5 w-3.5" /></Button>
+                    )}
                     <Button size="sm" variant="ghost" onClick={() => setNotesFor((n) => n === r.id ? null : r.id)} className="h-8 px-2 text-xs text-ink/60 hover:text-ink">Notas</Button>
                     <Button size="sm" variant="ghost" onClick={() => onDelete(r.id)} className="text-ink/60 hover:text-red-400 hover:bg-red-500/10 h-8 w-8 p-0"><Trash2 className="h-3.5 w-3.5" /></Button>
                   </td>
