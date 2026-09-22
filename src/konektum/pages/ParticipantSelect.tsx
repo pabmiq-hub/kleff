@@ -1017,6 +1017,8 @@ const ParticipantSelect = () => {
         onConfirm={confirmSuperLike}
         recipientName={confirmSuperLikeFor?.name || ""}
         language={eventLang}
+        remaining={Math.max(0, superLikeAllowance - superLikesUsedCount - (superLikeId ? 1 : 0))}
+
       />
       <Link to={`/event/${eventId}/access`} className="absolute top-6 left-6 flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors">
         <ArrowLeft className="w-4 h-4" />
