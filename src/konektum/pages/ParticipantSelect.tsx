@@ -553,7 +553,7 @@ const ParticipantSelect = () => {
         });
         return;
       }
-      setRepeatRequestUsed({ status: "pending", targetId: confirmRepeatFor.id });
+      setRepeatsSent(prev => [...prev, { status: "pending", targetId: confirmRepeatFor.id }]);
       toast({
         title: eventLang === "es" ? "🔁 Solicitud enviada" : "🔁 Request sent",
         description: eventLang === "es"
