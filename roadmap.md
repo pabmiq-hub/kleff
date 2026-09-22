@@ -1,0 +1,3 @@
+- [ ] Diagnosticar selecciones y acciones Super Like de extremo a extremo
+- [ ] Corregir causas de bloqueos, fallos parciales y errores de envío
+- [ ] Verificar localmente y contra producción sin alterar datos reales
