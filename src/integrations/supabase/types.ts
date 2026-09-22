@@ -3629,6 +3629,56 @@ export type Database = {
         }
         Relationships: []
       }
+      registration_announcements: {
+        Row: {
+          blocks: Json
+          body_html: string
+          created_at: string
+          created_by: string | null
+          failed_count: number
+          form_id: string
+          id: string
+          recipients_count: number
+          sent_at: string | null
+          subject: string
+          updated_at: string
+        }
+        Insert: {
+          blocks?: Json
+          body_html?: string
+          created_at?: string
+          created_by?: string | null
+          failed_count?: number
+          form_id: string
+          id?: string
+          recipients_count?: number
+          sent_at?: string | null
+          subject: string
+          updated_at?: string
+        }
+        Update: {
+          blocks?: Json
+          body_html?: string
+          created_at?: string
+          created_by?: string | null
+          failed_count?: number
+          form_id?: string
+          id?: string
+          recipients_count?: number
+          sent_at?: string | null
+          subject?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "registration_announcements_form_id_fkey"
+            columns: ["form_id"]
+            isOneToOne: false
+            referencedRelation: "registration_forms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       registration_files: {
         Row: {
           created_at: string
