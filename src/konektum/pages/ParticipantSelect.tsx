@@ -570,18 +570,20 @@ const ParticipantSelect = () => {
   };
 
   const requestCrush = (participantId: string, name: string) => {
-    if (crushUsed) {
+    if (crushesSent.some(c => c.targetId === participantId)) return;
+    if (crushSlotsLeft <= 0) {
       toast({
-        title: eventLang === "es" ? "Ya has enviado tu flechazo" : "You already sent your Flechazo",
+        title: eventLang === "es" ? "Sin flechazos disponibles" : "No Flechazos available",
         description: eventLang === "es"
-          ? "Solo puedes enviar un Flechazo por evento"
-          : "You can only send one Flechazo per event",
+          ? `Has usado tus ${crushAllowance} Flechazo(s) de este evento`
+          : `You have used your ${crushAllowance} Flechazo(s) for this event`,
         variant: "destructive",
       });
       return;
     }
     setConfirmCrushFor({ id: participantId, name: formatAnonymousName(name) });
   };
+
 
   const confirmCrush = async () => {
     if (!confirmCrushFor || !verifiedParticipant || !eventId) return;
