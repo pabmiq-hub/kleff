@@ -2004,8 +2004,9 @@ const ParticipantAccess = () => {
             </DialogTitle>
             <DialogDescription className="text-center">
               {eventLang === 'es'
-                ? 'Solo puedes solicitar repetir con UNA persona en todo el evento. La otra persona recibirá un email para aceptar o rechazar la solicitud.'
-                : 'You can only request a repeat with ONE person per event. The other person will receive an email to accept or decline the request.'}
+                ? `Te quedan ${repeatSlotsLeft} solicitud(es) de repetir. La otra persona recibirá un email para aceptar o rechazar la solicitud.`
+                : `You have ${repeatSlotsLeft} repeat request(s) left. The other person will receive an email to accept or decline the request.`}
+
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="flex flex-col sm:flex-row gap-2">
