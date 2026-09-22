@@ -121,20 +121,6 @@ serve(async (req) => {
   }
 
   try {
-    const clientIP = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() 
-      || req.headers.get('x-real-ip') 
-      || 'unknown';
-    
-    console.log(`[register-participant] Request from IP: ${clientIP}`);
-    
-    if (isRateLimited(clientIP)) {
-      console.warn(`[register-participant] Rate limit exceeded for IP: ${clientIP}`);
-      return new Response(
-        JSON.stringify({ error: 'Demasiadas solicitudes. Espera un minuto antes de intentarlo de nuevo.' }),
-        { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
     const body = await req.json();
     const isProfessional = body.isProfessional === true;
     const marketingConsent = body.marketingConsent === true;
