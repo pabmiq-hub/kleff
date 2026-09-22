@@ -126,12 +126,17 @@ const ParticipantSelect = () => {
   const [hasReceivedSuperLike, setHasReceivedSuperLike] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [confirmSuperLikeFor, setConfirmSuperLikeFor] = useState<{ id: string; name: string } | null>(null);
-  const [repeatRequestUsed, setRepeatRequestUsed] = useState<{ status: string; targetId?: string } | null>(null);
+  const [repeatsSent, setRepeatsSent] = useState<{ status: string; targetId?: string }[]>([]);
+  const [repeatAllowance, setRepeatAllowance] = useState(1);
   const [confirmRepeatFor, setConfirmRepeatFor] = useState<{ id: string; name: string } | null>(null);
   const [isSendingRepeat, setIsSendingRepeat] = useState(false);
   const [repeatEnabled, setRepeatEnabled] = useState(false);
   const [crushEnabled, setCrushEnabled] = useState(false);
-  const [crushUsed, setCrushUsed] = useState<{ status: string; targetId?: string } | null>(null);
+  const [crushesSent, setCrushesSent] = useState<{ status: string; targetId?: string }[]>([]);
+  const [superLikeAllowance, setSuperLikeAllowance] = useState(1);
+  const [superLikesUsedCount, setSuperLikesUsedCount] = useState(0);
+  const [crushAllowance, setCrushAllowance] = useState(1);
+
   const [confirmCrushFor, setConfirmCrushFor] = useState<{ id: string; name: string } | null>(null);
   const [isSendingCrush, setIsSendingCrush] = useState(false);
   const [totalRounds, setTotalRounds] = useState<number>(0);
