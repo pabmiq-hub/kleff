@@ -1987,6 +1987,8 @@ const ParticipantAccess = () => {
           onConfirm={confirmSuperLike}
           recipientName={superLikeTarget.name}
           language={eventLang}
+          remaining={Math.max(0, superLikeAllowance - superLikesUsed)}
+
         />
       )}
 
