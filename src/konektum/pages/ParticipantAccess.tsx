@@ -992,6 +992,9 @@ const ParticipantAccess = () => {
 
       if (typeof data.crushAllowance === 'number') setCrushAllowance(data.crushAllowance);
       if (Array.isArray(data.crushes)) setCrushesSent(data.crushes);
+      if (typeof data.repeatAllowance === 'number') setRepeatAllowance(data.repeatAllowance);
+      if (Array.isArray(data.repeats)) setRepeatsSent(data.repeats);
+
     } catch {
       /* non-blocking */
     }
