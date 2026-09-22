@@ -276,3 +276,74 @@ export function registrationCancelTeamEmail(opts: {
   });
   return { subject: `❌ Baja — ${opts.formTitle}`, html };
 }
+
+// ---------- Announcement / comunicado (to participants) ----------
+export function announcementEmail(opts: {
+  formTitle: string;
+  subject: string;
+  bodyHtml: string;
+  userName?: string | null;
+  eventDateLabel?: string | null;
+  eventLocation?: string | null;
+  googleUrl?: string | null;
+  icsUrl?: string | null;
+  cancelUrl?: string | null;
+  eventUrl?: string | null;
+  includeEventDetails?: boolean;
+  includeCalendar?: boolean;
+  includeCancel?: boolean;
+  includeFormLink?: boolean;
+}): { subject: string; html: string } {
+  const name = opts.userName ? escape(opts.userName) : "";
+
+  const details: string[] = [];
+  if (opts.includeEventDetails) {
+    if (opts.eventDateLabel) details.push(`<strong>📅 Cuándo:</strong> ${escape(opts.eventDateLabel)}`);
+    if (opts.eventLocation) details.push(`<strong>📍 Dónde:</strong> ${escape(opts.eventLocation)}`);
+  }
+  const detailsHtml = details.length
+    ? `<div style="margin:18px 0;padding:14px 16px;background:#ffffff;border:2px solid ${INK};border-radius:12px;font-size:15px;line-height:1.8;">
+         ${details.join("<br>")}
+       </div>`
+    : "";
+
+  const calendar =
+    opts.includeCalendar && (opts.googleUrl || opts.icsUrl)
+      ? `<p style="margin:18px 0 6px;font-weight:700;">Añádelo a tu calendario</p>
+         <p style="margin:0 0 8px;">
+           ${opts.googleUrl ? `<a href="${escape(opts.googleUrl)}" style="display:inline-block;margin:4px 8px 4px 0;padding:10px 18px;border:2px solid ${INK};border-radius:999px;background:#ffffff;color:${INK};text-decoration:none;font-weight:600;font-size:14px;">Google Calendar</a>` : ""}
+           ${opts.icsUrl ? `<a href="${escape(opts.icsUrl)}" style="display:inline-block;margin:4px 0;padding:10px 18px;border:2px solid ${INK};border-radius:999px;background:#ffffff;color:${INK};text-decoration:none;font-weight:600;font-size:14px;">iCalendar (Apple / Outlook)</a>` : ""}
+         </p>`
+      : "";
+
+  const formLink =
+    opts.includeFormLink && opts.eventUrl
+      ? `<p style="margin:18px 0 0;font-size:14px;">
+           ¿Te falta algún dato o quieres revisar tus respuestas?
+           <a href="${escape(opts.eventUrl)}" style="color:${BRAND_CORAL};font-weight:600;">Abrir el formulario del evento</a>.
+         </p>`
+      : "";
+
+  const cancel =
+    opts.includeCancel && opts.cancelUrl
+      ? `<p style="margin:22px 0 0;font-size:13px;color:#6b6b6b;">
+           ¿No puedes venir? <a href="${escape(opts.cancelUrl)}" style="color:${BRAND_CORAL};font-weight:600;">Darme de baja del evento</a>.
+         </p>`
+      : "";
+
+  const html = layout({
+    title: opts.subject,
+    preview: opts.subject,
+    bodyHtml: `
+      <h1 style="font-family:Georgia,serif;font-size:24px;margin:0 0 12px;">${escape(opts.formTitle)}</h1>
+      <p style="margin:0 0 12px;">Hola${name ? ` ${name}` : ""},</p>
+      <div style="font-size:16px;line-height:1.6;">${opts.bodyHtml}</div>
+      ${detailsHtml}
+      ${calendar}
+      ${formLink}
+      ${cancel}
+      <p style="margin:18px 0 0;">El equipo de KLEFF</p>
+    `,
+  });
+  return { subject: opts.subject, html };
+}
