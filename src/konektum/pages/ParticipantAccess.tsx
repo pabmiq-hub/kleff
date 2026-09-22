@@ -139,6 +139,7 @@ const ParticipantAccess = () => {
   const [matchSelections, setMatchSelections] = useState<MatchSelection[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const submitLockRef = useRef(false);
   const [eventStatus, setEventStatus] = useState<string>("");
   const [currentRound, setCurrentRound] = useState<number>(0);
 
@@ -759,7 +760,11 @@ const ParticipantAccess = () => {
 
   const performSubmit = async () => {
     if (!verifiedParticipant || !eventId) return;
+    if (submitLockRef.current) return;
+    submitLockRef.current = true;
     setIsSubmitting(true);
+
+    try {
 
     // 1) Apply edits to previously-submitted selections
     const edits = getMeaningfulEdits();
@@ -770,10 +775,9 @@ const ParticipantAccess = () => {
       if (error || data?.error) {
         toast({
           title: t.access.error,
-          description: data?.error || (eventLang === 'es' ? 'No se pudo actualizar la selección' : 'Could not update the selection'),
+          description: data?.error || error?.message || (eventLang === 'es' ? 'No se pudo actualizar la selección' : 'Could not update the selection'),
           variant: "destructive",
         });
-        setIsSubmitting(false);
         return;
       }
     }
@@ -814,8 +818,7 @@ const ParticipantAccess = () => {
 
 
       if (error || data?.error) {
-        toast({ title: t.access.error, description: data?.error || t.access.errorSaving, variant: "destructive" });
-        setIsSubmitting(false);
+        toast({ title: t.access.error, description: data?.error || error?.message || t.access.errorSaving, variant: "destructive" });
         return;
       }
 
@@ -829,9 +832,18 @@ const ParticipantAccess = () => {
       });
     }
 
-    setIsSubmitting(false);
     clearSession();
     setStep("done");
+    } catch (error) {
+      toast({
+        title: t.access.error,
+        description: error instanceof Error ? error.message : t.access.errorSaving,
+        variant: "destructive",
+      });
+    } finally {
+      submitLockRef.current = false;
+      setIsSubmitting(false);
+    }
   };
 
   const handleSubmit = async () => {
@@ -845,22 +857,28 @@ const ParticipantAccess = () => {
 
   const handleSubmitEmpty = async () => {
     if (!verifiedParticipant || !eventId) return;
+    if (submitLockRef.current) return;
+    submitLockRef.current = true;
     setIsSubmitting(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('submit-selections', {
+        body: { eventId, verificationCode, selections: [] }
+      });
 
-    const { data, error } = await supabase.functions.invoke('submit-selections', {
-      body: { eventId, verificationCode, selections: [] }
-    });
+      if (error || data?.error) {
+        toast({ title: t.access.error, description: data?.error || error?.message || t.access.errorSaving, variant: "destructive" });
+        return;
+      }
 
-    if (error || data?.error) {
-      toast({ title: t.access.error, description: data?.error || t.access.errorSaving, variant: "destructive" });
+      toast({ title: t.access.selectionsSaved, description: "Tu respuesta ha sido registrada" });
+      clearSession();
+      setStep("done");
+    } catch (error) {
+      toast({ title: t.access.error, description: error instanceof Error ? error.message : t.access.errorSaving, variant: "destructive" });
+    } finally {
+      submitLockRef.current = false;
       setIsSubmitting(false);
-      return;
     }
-
-    toast({ title: t.access.selectionsSaved, description: "Tu respuesta ha sido registrada" });
-    setIsSubmitting(false);
-    clearSession();
-    setStep("done");
   };
 
   const handlePreliminaryConfirmation = async (confirmed: boolean) => {
@@ -929,7 +947,7 @@ const ParticipantAccess = () => {
       if (error || data?.error) {
         toast({
           title: t.access.error,
-          description: data?.error || (eventLang === 'es' ? 'No se pudo enviar la solicitud' : 'Could not send the request'),
+          description: data?.error || error?.message || (eventLang === 'es' ? 'No se pudo enviar la solicitud' : 'Could not send the request'),
           variant: 'destructive',
         });
         return;
@@ -993,7 +1011,7 @@ const ParticipantAccess = () => {
       if (error || data?.error) {
         toast({
           title: t.access.error,
-          description: data?.error || (eventLang === 'es' ? 'No se pudo enviar el flechazo' : 'Could not send the Flechazo'),
+          description: data?.error || error?.message || (eventLang === 'es' ? 'No se pudo enviar el flechazo' : 'Could not send the Flechazo'),
           variant: 'destructive',
         });
         return;

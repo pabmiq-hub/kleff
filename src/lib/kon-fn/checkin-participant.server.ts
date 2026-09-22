@@ -15,38 +15,6 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// Simple in-memory rate limiter (per IP, max 5 check-ins per minute)
-const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
-const RATE_LIMIT_WINDOW_MS = 60000; // 1 minute
-const MAX_REQUESTS_PER_WINDOW = 5;
-
-function pruneRateLimitMap(now: number) {
-  for (const [ip, entry] of rateLimitMap.entries()) {
-    if (now > entry.resetTime) {
-      rateLimitMap.delete(ip);
-    }
-  }
-}
-
-function isRateLimited(ip: string): boolean {
-  const now = Date.now();
-  pruneRateLimitMap(now);
-  const entry = rateLimitMap.get(ip);
-
-  if (!entry || now > entry.resetTime) {
-    rateLimitMap.set(ip, { count: 1, resetTime: now + RATE_LIMIT_WINDOW_MS });
-    return false;
-  }
-
-  if (entry.count >= MAX_REQUESTS_PER_WINDOW) {
-    return true;
-  }
-
-  entry.count++;
-  return false;
-}
-
-
 /** "Nombre A." for participant-facing lists */
 function anonymizeName(full: string): string {
   const parts = String(full || '').trim().split(/\s+/);
@@ -147,22 +115,6 @@ serve(async (req) => {
   }
 
   try {
-    // Get client IP for rate limiting
-    const clientIP = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() 
-      || req.headers.get('x-real-ip') 
-      || 'unknown';
-    
-    console.log(`[checkin-participant] Request from IP: ${clientIP}`);
-    
-    // Check rate limit
-    if (isRateLimited(clientIP)) {
-      console.warn(`[checkin-participant] Rate limit exceeded for IP: ${clientIP}`);
-      return new Response(
-        JSON.stringify({ error: 'Too many requests. Please wait a minute before trying again.' }),
-        { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
     const { eventId, participantId, verificationCode, sendEmail = true, baseUrl } = await req.json();
     
     console.log(`[checkin-participant] Check-in request for event: ${eventId}, participantId: ${participantId || 'N/A'}, code: ${verificationCode ? 'provided' : 'not provided'}`);

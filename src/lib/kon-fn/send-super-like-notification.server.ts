@@ -57,7 +57,7 @@ serve(async (req) => {
     // Get event info
     const { data: event, error: eventError } = await supabase
       .from('events')
-      .select('name, language, email_template, organizer_id, super_like_enabled, is_test_event, test_config')
+      .select('name, slug, language, email_template, organizer_id, super_like_enabled, is_test_event, test_config')
       .eq('id', eventId)
       .single();
 
@@ -145,31 +145,19 @@ serve(async (req) => {
       : (isEn ? `With love,\nThe ${brandName} Team 💕` : `Con cariño,\nEl equipo de ${brandName} 💕`);
 
     // Determine sender
-    let senderFrom = `${brandName} <hola@kleff.es>`;
+    const senderFrom = `${brandName} <hola@kleff.es>`;
     const resendApiKey = Deno.env.get('RESEND_API_KEY') || '';
 
-    if (event.organizer_id) {
-      const { data: orgData } = await supabase
-        .from('organizers')
-        .select('id')
-        .eq('user_id', event.organizer_id)
-        .single();
-
-      if (orgData) {
-        const { data: resendConfig } = await supabase
-          .from('organizer_resend_config')
-          .select('sender_email, sender_name')
-          .eq('organizer_id', orgData.id)
-          .eq('is_verified', true)
-          .maybeSingle();
-
-        if (resendConfig) {
-          senderFrom = `${resendConfig.sender_name || brandName} <${resendConfig.sender_email}>`;
-        }
-      }
+    if (!resendApiKey) {
+      return new Response(
+        JSON.stringify({ error: 'Email service not configured' }),
+        { status: 503, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
-    const accessUrl = `https://kleff.es/event/${eventId}/access`;
+    const accessUrl = event.slug
+      ? `https://kleff.es/${encodeURIComponent(event.slug)}/usuario`
+      : `https://kleff.es/event/${eventId}/access`;
 
     const htmlContent = `
 <!DOCTYPE html>
@@ -231,6 +219,7 @@ serve(async (req) => {
     // Send email
     const emailRes = await fetch('https://api.resend.com/emails', {
       method: 'POST',
+      signal: AbortSignal.timeout(4_000),
       headers: {
         'Authorization': `Bearer ${resendApiKey}`,
         'Content-Type': 'application/json',

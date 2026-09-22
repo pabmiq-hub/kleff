@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useParams, Link } from "@/konektum/router";
 import { Button } from "@/konektum/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/konektum/ui/card";
@@ -140,6 +140,8 @@ const ParticipantSelect = () => {
   const [confirmEditSubmit, setConfirmEditSubmit] = useState(false);
   const [reviewedRounds, setReviewedRounds] = useState<Set<number>>(new Set());
   const [submittingRound, setSubmittingRound] = useState<number | null>(null);
+  const submitLockRef = useRef(false);
+  const roundSubmitLockRef = useRef(false);
   const [openRound, setOpenRound] = useState<string>("");
   const { toast } = useToast();
 
@@ -157,7 +159,7 @@ const ParticipantSelect = () => {
       try {
         const { data: event, error } = await (supabase as any)
           .from('events_public')
-          .select('status, current_round, rounds, language, super_like_enabled, repeat_request_enabled, crush_enabled')
+          .select('status, current_round, rounds, language, super_like_enabled, repeat_request_enabled, crush_enabled, selection_closed_at')
           .eq('id', eventId)
           .single();
 
@@ -182,7 +184,7 @@ const ParticipantSelect = () => {
         setRepeatEnabled(!!event.repeat_request_enabled);
         setCrushEnabled(!!event.crush_enabled);
 
-        if (event.status === 'completed') {
+        if (event.selection_closed_at) {
           setStep("completed");
         } else if (event.status === 'pending' || event.current_round === 0) {
           setStep("not_started");
@@ -514,7 +516,7 @@ const ParticipantSelect = () => {
       if (error || data?.error) {
         toast({
           title: "Error",
-          description: data?.error || (eventLang === "es" ? "No se pudo enviar la solicitud" : "Could not send the request"),
+          description: data?.error || error?.message || (eventLang === "es" ? "No se pudo enviar la solicitud" : "Could not send the request"),
           variant: "destructive",
         });
         return;
@@ -563,7 +565,7 @@ const ParticipantSelect = () => {
       if (error || data?.error) {
         toast({
           title: "Error",
-          description: data?.error || (eventLang === "es" ? "No se pudo enviar el flechazo" : "Could not send the Flechazo"),
+          description: data?.error || error?.message || (eventLang === "es" ? "No se pudo enviar el flechazo" : "Could not send the Flechazo"),
           variant: "destructive",
         });
         return;
@@ -719,7 +721,11 @@ const ParticipantSelect = () => {
 
   const submitRound = async (round: number, tablemates: Participant[]) => {
     if (!verifiedParticipant || !eventId) return;
+    if (roundSubmitLockRef.current) return;
+    roundSubmitLockRef.current = true;
     setSubmittingRound(round);
+
+    try {
 
     const ids = new Set(tablemates.map(p => p.id));
 
@@ -738,10 +744,9 @@ const ParticipantSelect = () => {
       if (error || data?.error) {
         toast({
           title: "Error",
-          description: data?.error || (eventLang === "es" ? "No se pudo actualizar la selección" : "Could not update the selection"),
+          description: data?.error || error?.message || (eventLang === "es" ? "No se pudo actualizar la selección" : "Could not update the selection"),
           variant: "destructive",
         });
-        setSubmittingRound(null);
         return;
       }
     }
@@ -769,10 +774,9 @@ const ParticipantSelect = () => {
       if (error || data?.error) {
         toast({
           title: "Error",
-          description: data?.error || t.select.noTablemates,
+          description: data?.error || error?.message || (eventLang === "es" ? "No se pudieron guardar las selecciones" : "Could not save selections"),
           variant: "destructive",
         });
-        setSubmittingRound(null);
         return;
       }
     }
@@ -837,9 +841,18 @@ const ParticipantSelect = () => {
       });
     }
 
-    setSubmittingRound(null);
     // Auto-collapse the just-submitted round
     setOpenRound(prev => prev === `round-${round}` ? "" : prev);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : (eventLang === "es" ? "No se pudieron guardar las selecciones" : "Could not save selections"),
+        variant: "destructive",
+      });
+    } finally {
+      roundSubmitLockRef.current = false;
+      setSubmittingRound(null);
+    }
   };
 
   const markRoundNoConnections = (round: number) => {
@@ -858,7 +871,11 @@ const ParticipantSelect = () => {
   // Legacy single-submit flow — kept for events without round data (e.g. preliminary-only)
   const performSubmit = async () => {
     if (!verifiedParticipant || !eventId) return;
+    if (submitLockRef.current) return;
+    submitLockRef.current = true;
     setIsSubmitting(true);
+
+    try {
 
     const editEntries = Array.from(pendingEdits.entries()).filter(([, edit]) => {
       const newType = computePendingType(edit);
@@ -873,10 +890,9 @@ const ParticipantSelect = () => {
       if (error || data?.error) {
         toast({
           title: "Error",
-          description: data?.error || (eventLang === "es" ? "No se pudo actualizar la selección" : "Could not update the selection"),
+          description: data?.error || error?.message || (eventLang === "es" ? "No se pudo actualizar la selección" : "Could not update the selection"),
           variant: "destructive",
         });
-        setIsSubmitting(false);
         return;
       }
     }
@@ -888,7 +904,6 @@ const ParticipantSelect = () => {
         title: t.select.noTablemates,
         description: t.select.continueWithout,
       });
-      setIsSubmitting(false);
       setStep("done");
       return;
     }
@@ -908,10 +923,9 @@ const ParticipantSelect = () => {
       if (error || data?.error) {
         toast({
           title: "Error",
-          description: data?.error || t.select.noTablemates,
+          description: data?.error || error?.message || (eventLang === "es" ? "No se pudieron guardar las selecciones" : "Could not save selections"),
           variant: "destructive",
         });
-        setIsSubmitting(false);
         return;
       }
 
@@ -928,8 +942,17 @@ const ParticipantSelect = () => {
       });
     }
 
-    setIsSubmitting(false);
     setStep("done");
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : (eventLang === "es" ? "No se pudieron guardar las selecciones" : "Could not save selections"),
+        variant: "destructive",
+      });
+    } finally {
+      submitLockRef.current = false;
+      setIsSubmitting(false);
+    }
   };
 
   const handleSubmit = async () => {

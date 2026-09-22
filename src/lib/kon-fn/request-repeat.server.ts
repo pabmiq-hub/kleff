@@ -240,8 +240,9 @@ serve(async (req: Request) => {
 
       const senderEmail = "KLEFF <hola@kleff.es>";
       try {
-        await fetch("https://api.resend.com/emails", {
+        const emailResponse = await fetch("https://api.resend.com/emails", {
           method: "POST",
+          signal: AbortSignal.timeout(5_000),
           headers: {
             Authorization: `Bearer ${resendApiKey}`,
             "Content-Type": "application/json",
@@ -253,6 +254,9 @@ serve(async (req: Request) => {
             html,
           }),
         });
+        if (!emailResponse.ok) {
+          console.error("[request-repeat] Resend rejected email", emailResponse.status);
+        }
       } catch (mailErr) {
         console.error("[request-repeat] email send failed", mailErr);
       }

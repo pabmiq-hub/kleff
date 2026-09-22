@@ -59,36 +59,12 @@ function areDatingCompatible(pref1: string, gender1: string | null, pref2: strin
   return false;
 }
 
-// Lightweight rate limit (15 edits per IP / 10 min) to deter abuse.
-const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
-const RATE_LIMIT_WINDOW = 10 * 60 * 1000;
-const MAX_EDITS = 15;
-
-function isRateLimited(ip: string): boolean {
-  const now = Date.now();
-  const record = rateLimitMap.get(ip);
-  if (!record || now > record.resetTime) {
-    rateLimitMap.set(ip, { count: 1, resetTime: now + RATE_LIMIT_WINDOW });
-    return false;
-  }
-  if (record.count >= MAX_EDITS) return true;
-  record.count++;
-  return false;
-}
-
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const clientIP = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
-                     req.headers.get('x-real-ip') || 'unknown';
-    if (isRateLimited(clientIP)) {
-      return new Response(JSON.stringify({ error: 'Demasiadas modificaciones. Espera unos minutos.' }),
-        { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
-    }
-
     const { eventId, verificationCode, selectedId, selectionType } = await req.json();
 
     const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -173,21 +149,20 @@ serve(async (req) => {
 
     const wasSuperLike = !!existing?.is_super_like;
 
-    // Delete existing (RLS blocks DELETE for public, but service role bypasses RLS)
-    if (existing) {
-      const { error: delError } = await supabase
+    // Removing remains one statement, so a failed request cannot leave a
+    // half-written replacement behind.
+    if (!selectionType) {
+      const { error: deleteError } = await supabase
         .from('participant_selections')
         .delete()
-        .eq('id', existing.id);
-      if (delError) {
-        console.error('[update-selection] Delete error:', delError);
-        return new Response(JSON.stringify({ error: 'No se pudo actualizar la selección' }),
+        .eq('event_id', eventId)
+        .eq('selector_id', selector.id)
+        .eq('selected_id', selectedId);
+      if (deleteError) {
+        console.error('[update-selection] Delete error:', deleteError);
+        return new Response(JSON.stringify({ error: 'No se pudo eliminar la selección' }),
           { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
       }
-    }
-
-    // If selectionType is null/empty → remove (already done above) and exit
-    if (!selectionType) {
       return new Response(JSON.stringify({ success: true, removed: true }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
@@ -205,13 +180,13 @@ serve(async (req) => {
 
     const { error: insertError } = await supabase
       .from('participant_selections')
-      .insert({
+      .upsert({
         event_id: eventId,
         selector_id: selector.id,
         selected_id: selectedId,
         selection_type: finalType,
         is_super_like: wasSuperLike, // preserve super-like assignment if it existed
-      });
+      }, { onConflict: 'event_id,selector_id,selected_id' });
 
     if (insertError) {
       console.error('[update-selection] Insert error:', insertError);

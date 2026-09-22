@@ -14,28 +14,6 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// Rate limiter
-const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
-const RATE_LIMIT_WINDOW_MS = 60000;
-const MAX_REQUESTS_PER_WINDOW = 20;
-
-function isRateLimited(ip: string): boolean {
-  const now = Date.now();
-  const entry = rateLimitMap.get(ip);
-  
-  if (!entry || now > entry.resetTime) {
-    rateLimitMap.set(ip, { count: 1, resetTime: now + RATE_LIMIT_WINDOW_MS });
-    return false;
-  }
-  
-  if (entry.count >= MAX_REQUESTS_PER_WINDOW) {
-    return true;
-  }
-  
-  entry.count++;
-  return false;
-}
-
 /** Returns "FirstName L." from a full name */
 function anonymizeName(fullName: string): string {
   const parts = fullName.trim().split(/\s+/);
@@ -56,17 +34,6 @@ serve(async (req) => {
   }
 
   try {
-    const clientIP = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() 
-      || req.headers.get('x-real-ip') 
-      || 'unknown';
-    
-    if (isRateLimited(clientIP)) {
-      return new Response(
-        JSON.stringify({ error: 'Demasiadas solicitudes. Espera un minuto.' }),
-        { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
     const { eventId, verificationCode }: TableAssignmentRequest = await req.json();
     
     console.log(`[get-table-assignments] Request for event: ${eventId}`);

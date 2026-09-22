@@ -61,6 +61,8 @@ export function konTable(name: string): string {
 
 type InvokeResult = { data: any; error: any };
 
+const KON_REQUEST_TIMEOUT_MS = 20_000;
+
 type LooseClient = {
   from: (table: string) => any;
   rpc: (fn: string, args?: unknown, opts?: unknown) => any;
@@ -88,11 +90,19 @@ async function invoke(
       const token = data.session?.access_token;
       if (token) headers["Authorization"] = `Bearer ${token}`;
     }
-    const res = await fetch(`/api/public/kon/${name}`, {
-      method: "POST",
-      headers,
-      body: JSON.stringify(options?.body ?? {}),
-    });
+    const controller = new AbortController();
+    const timeoutId = window.setTimeout(() => controller.abort(), KON_REQUEST_TIMEOUT_MS);
+    let res: Response;
+    try {
+      res = await fetch(`/api/public/kon/${name}`, {
+        method: "POST",
+        headers,
+        body: JSON.stringify(options?.body ?? {}),
+        signal: controller.signal,
+      });
+    } finally {
+      window.clearTimeout(timeoutId);
+    }
     const text = await res.text();
     let payload: any = null;
     try {
@@ -112,7 +122,17 @@ async function invoke(
     }
     return { data: payload, error: null };
   } catch (err) {
-    return { data: null, error: { message: err instanceof Error ? err.message : "Network error" } };
+    const timedOut = err instanceof DOMException && err.name === "AbortError";
+    return {
+      data: null,
+      error: {
+        message: timedOut
+          ? "La conexión está tardando demasiado. Comprueba tu cobertura e inténtalo de nuevo; no se duplicará el envío."
+          : err instanceof Error
+            ? err.message
+            : "Error de conexión",
+      },
+    };
   }
 }
 
