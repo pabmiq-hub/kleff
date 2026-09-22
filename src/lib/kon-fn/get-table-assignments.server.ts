@@ -281,6 +281,12 @@ serve(async (req) => {
       targetId: c.target_id,
     }));
     const crushAllowance = 1 + ((crushRewardsResult as any)?.data || []).length;
+    const repeatsSent = (((repeatRequestsResult as any)?.data || []) as any[]).map((r: any) => ({
+      status: r.status,
+      targetId: r.target_id,
+    }));
+    const repeatAllowance = 1 + ((repeatRewardsResult as any)?.data || []).length;
+
 
     // Pending Flechazos received: expose id + token so the panel can accept/decline them
     const pendingCrushRows = (((receivedCrushResult as any)?.data || []) as any[]);
