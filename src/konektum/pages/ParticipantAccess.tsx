@@ -1490,7 +1490,28 @@ const ParticipantAccess = () => {
                     </p>
                   </div>
                 )}
+                <div className="flex flex-wrap items-center justify-center gap-2 text-xs font-semibold">
+                  <span className="inline-flex items-center gap-1 rounded-full border border-amber-300 bg-amber-50 dark:bg-amber-950/20 px-2.5 py-1 text-amber-700 dark:text-amber-300">
+                    <Star className="w-3.5 h-3.5 fill-amber-500 text-amber-500" />
+                    {eventLang === 'en'
+                      ? `Super Likes: ${Math.max(0, superLikeAllowance - superLikesUsed)} available`
+                      : `Super Likes: ${Math.max(0, superLikeAllowance - superLikesUsed)} disponibles`}
+                  </span>
+                  {crushEnabled && (
+                    <span className="inline-flex items-center gap-1 rounded-full border border-rose-300 bg-rose-50 dark:bg-rose-950/20 px-2.5 py-1 text-rose-700 dark:text-rose-300">
+                      <Heart className="w-3.5 h-3.5 fill-rose-500 text-rose-500" />
+                      {eventLang === 'en' ? `Flechazos: ${crushSlotsLeft} available` : `Flechazos: ${crushSlotsLeft} disponibles`}
+                    </span>
+                  )}
+                  {repeatEnabled && (
+                    <span className="inline-flex items-center gap-1 rounded-full border border-violet-300 bg-violet-50 dark:bg-violet-950/20 px-2.5 py-1 text-violet-700 dark:text-violet-300">
+                      <Repeat2 className="w-3.5 h-3.5" />
+                      {eventLang === 'en' ? `Repeats: ${repeatSlotsLeft} available` : `Repetir: ${repeatSlotsLeft} disponibles`}
+                    </span>
+                  )}
+                </div>
                 {hasReceivedSuperLike && (
+
                   <SuperLikeBanner language={eventLang} variant="received" />
                 )}
                 {hasSentSuperLike && (
