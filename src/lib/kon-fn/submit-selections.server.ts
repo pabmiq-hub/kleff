@@ -60,38 +60,6 @@ function areDatingCompatible(pref1: string, gender1: string | null, pref2: strin
   return false;
 }
 
-// Simple rate limiting - 10 submissions per IP per 10 minutes (increased for incremental selections)
-const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
-const RATE_LIMIT_WINDOW = 10 * 60 * 1000; // 10 minutes
-const MAX_SUBMISSIONS = 10;
-
-function pruneRateLimitMap(now: number) {
-  for (const [ip, record] of rateLimitMap.entries()) {
-    if (now > record.resetTime) {
-      rateLimitMap.delete(ip);
-    }
-  }
-}
-
-function isRateLimited(ip: string): boolean {
-  const now = Date.now();
-  pruneRateLimitMap(now);
-  const record = rateLimitMap.get(ip);
-
-  if (!record || now > record.resetTime) {
-    rateLimitMap.set(ip, { count: 1, resetTime: now + RATE_LIMIT_WINDOW });
-    return false;
-  }
-
-  if (record.count >= MAX_SUBMISSIONS) {
-    return true;
-  }
-
-  record.count++;
-  return false;
-}
-
-
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -99,20 +67,6 @@ serve(async (req) => {
   }
 
   try {
-    // Get client IP for rate limiting
-    const clientIP = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 
-                     req.headers.get('x-real-ip') || 
-                     'unknown';
-
-    // Check rate limit
-    if (isRateLimited(clientIP)) {
-      console.log(`[submit-selections] Rate limit exceeded for IP: ${clientIP}`);
-      return new Response(
-        JSON.stringify({ error: 'Has enviado demasiadas selecciones. Por favor, espera unos minutos.' }),
-        { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
     const { eventId, selectorId: rawSelectorId, verificationCode, selections, superLikeId, superLikeIds: rawSuperLikeIds } = await req.json();
 
     // Accept either a single superLikeId (legacy) or an array of superLikeIds (game rewards allow extras)
@@ -221,7 +175,7 @@ serve(async (req) => {
     // Verify the event exists and check super_like_enabled
     const { data: event, error: eventError } = await supabase
       .from('events')
-      .select('id, status, super_like_enabled')
+      .select('id, status, super_like_enabled, selection_closed_at')
       .eq('id', eventId)
       .single();
 
@@ -230,6 +184,13 @@ serve(async (req) => {
       return new Response(
         JSON.stringify({ error: 'Evento no encontrado' }),
         { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    if (event.selection_closed_at) {
+      return new Response(
+        JSON.stringify({ error: 'El periodo de selecciones ya está cerrado' }),
+        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
@@ -408,7 +369,10 @@ serve(async (req) => {
 
     const { error: insertError } = await supabase
       .from('participant_selections')
-      .insert(selectionsToInsert);
+      .upsert(selectionsToInsert, {
+        onConflict: 'event_id,selector_id,selected_id',
+        ignoreDuplicates: true,
+      });
 
     if (insertError) {
       console.error('[submit-selections] Error inserting selections:', insertError);
@@ -424,17 +388,21 @@ serve(async (req) => {
       .update({ selection_submitted_at: new Date().toISOString() })
       .eq('id', selectorId);
 
-    // Trigger super like notifications for every super like actually stored
+    // Notify after persistence. A slow email provider must never hold this
+    // request indefinitely or make a successful selection look unsuccessful.
     if (allowedSuperLikeIds.size > 0 && event.super_like_enabled) {
-      for (const recipientId of allowedSuperLikeIds) {
-        try {
-          await invokeKonFunction("send-super-like-notification", { eventId, recipientId });
-          console.log(`[submit-selections] Super like notification triggered for recipient: ${recipientId}`);
-        } catch (notifError) {
-          console.error('[submit-selections] Error sending super like notification:', notifError);
-          // Don't fail the whole request for a notification error
+      await Promise.allSettled(Array.from(allowedSuperLikeIds, async (recipientId) => {
+        const response = await Promise.race([
+          invokeKonFunction("send-super-like-notification", { eventId, recipientId }),
+          new Promise<Response>((resolve) => setTimeout(
+            () => resolve(new Response(JSON.stringify({ error: "Email timeout" }), { status: 504 })),
+            5_000,
+          )),
+        ]);
+        if (!response.ok) {
+          console.error(`[submit-selections] Super Like email failed for ${recipientId}: ${response.status}`);
         }
-      }
+      }));
     }
 
 

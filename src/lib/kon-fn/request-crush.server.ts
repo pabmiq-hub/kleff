@@ -245,14 +245,18 @@ serve(async (req: Request) => {
       `;
 
       try {
-        await fetch("https://api.resend.com/emails", {
+        const emailResponse = await fetch("https://api.resend.com/emails", {
           method: "POST",
+          signal: AbortSignal.timeout(5_000),
           headers: { Authorization: `Bearer ${resendApiKey}`, "Content-Type": "application/json" },
           body: JSON.stringify({
             from: "KLEFF <hola@kleff.es>",
             to: [target.email], subject, html,
           }),
         });
+        if (!emailResponse.ok) {
+          console.error("[request-crush] Resend rejected email", emailResponse.status);
+        }
       } catch (mailErr) {
         console.error("[request-crush] email send failed", mailErr);
       }
