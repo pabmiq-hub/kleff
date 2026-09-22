@@ -2032,8 +2032,9 @@ const ParticipantAccess = () => {
             </DialogTitle>
             <DialogDescription className="text-center">
               {eventLang === 'es'
-                ? 'Solo puedes enviar UN Flechazo por evento. La otra persona recibirá un email con tu nombre para aceptar o rechazar. Si acepta, ambos recibiréis vuestros datos de contacto.'
-                : 'You can only send ONE Flechazo per event. The other person will receive an email with your name to accept or decline. If accepted, you will both receive each other\'s contact details.'}
+                ? `Te quedan ${crushSlotsLeft} Flechazo(s). La otra persona recibirá un email con tu nombre para aceptar o rechazar. Si acepta, ambos recibiréis vuestros datos de contacto.`
+                : `You have ${crushSlotsLeft} Flechazo(s) left. The other person will receive an email with your name to accept or decline. If accepted, you will both receive each other's contact details.`}
+
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="flex flex-col sm:flex-row gap-2">
