@@ -1327,6 +1327,7 @@ const ParticipantJoin = ({
                         )}
                       </div>
 
+                      {!genderLocked && (
                       <div className="space-y-2" data-field-error={hasErr("gender") ? "true" : undefined}>
                         <Label className={hasErr("gender") ? "text-destructive" : undefined}>{t.join.genderLabel}</Label>
                         <Select value={gender} onValueChange={(val) => {
@@ -1348,6 +1349,8 @@ const ParticipantJoin = ({
                         </Select>
                         <FieldError show={hasErr("gender")} message={fieldErrorMessage(eventLang)} />
                       </div>
+                      )}
+
 
                       {wrappedEnabled && (
                         <div className="space-y-2" data-field-error={hasErr("email") ? "true" : undefined}>
