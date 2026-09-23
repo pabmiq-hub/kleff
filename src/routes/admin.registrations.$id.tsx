@@ -724,11 +724,12 @@ function columnLabel(q: RegistrationQuestion) {
   return q.label;
 }
 
-function ResponsesTable({ responses, questions, paymentRequired, maxGuests, onUpdate, onDelete, onReminder }: {
+function ResponsesTable({ responses, questions, paymentRequired, maxGuests, readOnly, onUpdate, onDelete, onReminder }: {
   responses: RegistrationResponse[];
   questions: RegistrationQuestion[];
   paymentRequired?: boolean;
   maxGuests: number;
+  readOnly?: boolean;
   onUpdate: (id: string, patch: { payment_status?: RegistrationResponse["payment_status"]; internal_notes?: string | null; guests_count?: number }) => Promise<void>;
   onDelete: (id: string) => void;
   onReminder: (id: string) => void;
