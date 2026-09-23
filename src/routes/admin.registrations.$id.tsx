@@ -763,7 +763,7 @@ function ResponsesTable({ responses, questions, paymentRequired, maxGuests, read
                   <td className="px-3 py-2 text-xs text-ink/60 whitespace-nowrap">{new Date(r.created_at).toLocaleString("es-ES")}</td>
                   <td className="px-3 py-2 text-ink font-medium whitespace-nowrap">{r.email_contact ?? "—"}</td>
                   <td className="px-3 py-2 whitespace-nowrap text-ink/80">
-                    {maxGuests > 0 && !cancelled ? (
+                    {maxGuests > 0 && !cancelled && !readOnly ? (
                       <Select value={String(guests)} onValueChange={(v) => onUpdate(r.id, { guests_count: Number(v) })}>
                         <SelectTrigger className="bg-white border-ink/15 text-ink h-8 text-xs w-28"><SelectValue /></SelectTrigger>
                         <SelectContent className="bg-white border-ink/15 text-ink">
