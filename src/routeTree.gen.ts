@@ -140,6 +140,7 @@ import { Route as AdminFinanzasImpuestosRouteImport } from './routes/admin.finan
 import { Route as AdminFinanzasGastosRouteImport } from './routes/admin.finanzas.gastos'
 import { Route as AdminFinanzasFacturasRouteImport } from './routes/admin.finanzas.facturas'
 import { Route as AdminFinanzasCuotasRouteImport } from './routes/admin.finanzas.cuotas'
+import { Route as AdminFinanzasColaboracionesRouteImport } from './routes/admin.finanzas.colaboraciones'
 import { Route as AdminFinanzasAportacionesRouteImport } from './routes/admin.finanzas.aportaciones'
 import { Route as AdminContentUrlsRouteImport } from './routes/admin.content.urls'
 import { Route as AdminContentRedirectsRouteImport } from './routes/admin.content.redirects'
@@ -814,6 +815,12 @@ const AdminFinanzasCuotasRoute = AdminFinanzasCuotasRouteImport.update({
   path: '/cuotas',
   getParentRoute: () => AdminFinanzasRoute,
 } as any)
+const AdminFinanzasColaboracionesRoute =
+  AdminFinanzasColaboracionesRouteImport.update({
+    id: '/colaboraciones',
+    path: '/colaboraciones',
+    getParentRoute: () => AdminFinanzasRoute,
+  } as any)
 const AdminFinanzasAportacionesRoute =
   AdminFinanzasAportacionesRouteImport.update({
     id: '/aportaciones',
@@ -995,6 +1002,7 @@ export interface FileRoutesByFullPath {
   '/admin/content/redirects': typeof AdminContentRedirectsRoute
   '/admin/content/urls': typeof AdminContentUrlsRoute
   '/admin/finanzas/aportaciones': typeof AdminFinanzasAportacionesRoute
+  '/admin/finanzas/colaboraciones': typeof AdminFinanzasColaboracionesRoute
   '/admin/finanzas/cuotas': typeof AdminFinanzasCuotasRoute
   '/admin/finanzas/facturas': typeof AdminFinanzasFacturasRoute
   '/admin/finanzas/gastos': typeof AdminFinanzasGastosRoute
@@ -1134,6 +1142,7 @@ export interface FileRoutesByTo {
   '/admin/content/redirects': typeof AdminContentRedirectsRoute
   '/admin/content/urls': typeof AdminContentUrlsRoute
   '/admin/finanzas/aportaciones': typeof AdminFinanzasAportacionesRoute
+  '/admin/finanzas/colaboraciones': typeof AdminFinanzasColaboracionesRoute
   '/admin/finanzas/cuotas': typeof AdminFinanzasCuotasRoute
   '/admin/finanzas/facturas': typeof AdminFinanzasFacturasRoute
   '/admin/finanzas/gastos': typeof AdminFinanzasGastosRoute
@@ -1283,6 +1292,7 @@ export interface FileRoutesById {
   '/admin/content/redirects': typeof AdminContentRedirectsRoute
   '/admin/content/urls': typeof AdminContentUrlsRoute
   '/admin/finanzas/aportaciones': typeof AdminFinanzasAportacionesRoute
+  '/admin/finanzas/colaboraciones': typeof AdminFinanzasColaboracionesRoute
   '/admin/finanzas/cuotas': typeof AdminFinanzasCuotasRoute
   '/admin/finanzas/facturas': typeof AdminFinanzasFacturasRoute
   '/admin/finanzas/gastos': typeof AdminFinanzasGastosRoute
@@ -1433,6 +1443,7 @@ export interface FileRouteTypes {
     | '/admin/content/redirects'
     | '/admin/content/urls'
     | '/admin/finanzas/aportaciones'
+    | '/admin/finanzas/colaboraciones'
     | '/admin/finanzas/cuotas'
     | '/admin/finanzas/facturas'
     | '/admin/finanzas/gastos'
@@ -1572,6 +1583,7 @@ export interface FileRouteTypes {
     | '/admin/content/redirects'
     | '/admin/content/urls'
     | '/admin/finanzas/aportaciones'
+    | '/admin/finanzas/colaboraciones'
     | '/admin/finanzas/cuotas'
     | '/admin/finanzas/facturas'
     | '/admin/finanzas/gastos'
@@ -1720,6 +1732,7 @@ export interface FileRouteTypes {
     | '/admin/content/redirects'
     | '/admin/content/urls'
     | '/admin/finanzas/aportaciones'
+    | '/admin/finanzas/colaboraciones'
     | '/admin/finanzas/cuotas'
     | '/admin/finanzas/facturas'
     | '/admin/finanzas/gastos'
@@ -2782,6 +2795,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminFinanzasCuotasRouteImport
       parentRoute: typeof AdminFinanzasRoute
     }
+    '/admin/finanzas/colaboraciones': {
+      id: '/admin/finanzas/colaboraciones'
+      path: '/colaboraciones'
+      fullPath: '/admin/finanzas/colaboraciones'
+      preLoaderRoute: typeof AdminFinanzasColaboracionesRouteImport
+      parentRoute: typeof AdminFinanzasRoute
+    }
     '/admin/finanzas/aportaciones': {
       id: '/admin/finanzas/aportaciones'
       path: '/aportaciones'
@@ -2926,6 +2946,7 @@ const AdminContentRouteWithChildren = AdminContentRoute._addFileChildren(
 
 interface AdminFinanzasRouteChildren {
   AdminFinanzasAportacionesRoute: typeof AdminFinanzasAportacionesRoute
+  AdminFinanzasColaboracionesRoute: typeof AdminFinanzasColaboracionesRoute
   AdminFinanzasCuotasRoute: typeof AdminFinanzasCuotasRoute
   AdminFinanzasFacturasRoute: typeof AdminFinanzasFacturasRoute
   AdminFinanzasGastosRoute: typeof AdminFinanzasGastosRoute
@@ -2935,6 +2956,7 @@ interface AdminFinanzasRouteChildren {
 
 const AdminFinanzasRouteChildren: AdminFinanzasRouteChildren = {
   AdminFinanzasAportacionesRoute: AdminFinanzasAportacionesRoute,
+  AdminFinanzasColaboracionesRoute: AdminFinanzasColaboracionesRoute,
   AdminFinanzasCuotasRoute: AdminFinanzasCuotasRoute,
   AdminFinanzasFacturasRoute: AdminFinanzasFacturasRoute,
   AdminFinanzasGastosRoute: AdminFinanzasGastosRoute,
