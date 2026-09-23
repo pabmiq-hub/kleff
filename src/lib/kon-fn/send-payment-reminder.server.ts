@@ -8,6 +8,7 @@ const Deno = {
 };
 
 import { createClient } from "@/lib/kon-fn/client.server";
+import { participantVariant, variantEventName, variantTemplates } from "./_shared/variantTemplates";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -108,7 +109,6 @@ async function processEvent(
   const isEn = event.language === "en";
   const emailTpl = event.email_template as any;
   const comm = emailTpl?.communication_templates_v2 || {};
-  const tpl = comm.payment_reminder || (isEn ? DEFAULT_EN : DEFAULT_ES);
   const defaults = isEn ? DEFAULT_EN : DEFAULT_ES;
   const primaryColor = comm.primaryColor || "#e11d48";
   const KONEKTUM_LOGO = "https://kleff.es/kleff-logo.png";
@@ -148,7 +148,7 @@ async function processEvent(
   let q = supabase
     .from("participants")
     .select(
-      "id, name, email, created_at, payment_status, payment_reminder_count, payment_last_reminder_at"
+      "id, name, email, registration_variant, created_at, payment_status, payment_reminder_count, payment_last_reminder_at"
     )
     .eq("event_id", event.id)
     .neq("payment_status", "paid")
@@ -183,12 +183,13 @@ async function processEvent(
     const p = eligible[i];
     const vars: Record<string, string> = {
       "{{nombre}}": p.name,
-      "{{evento}}": event.name,
+      "{{evento}}": variantEventName(event, participantVariant(eligible[i])),
       "{{fecha}}": formatDate(event.date, isEn ? "en-US" : "es-ES"),
       "{{ubicacion}}": event.event_location || "",
       "{{hora}}": event.event_time || "",
     };
 
+    const tpl = (variantTemplates(emailTpl, participantVariant(eligible[i])) as any).payment_reminder || defaults;
     const subject = replaceVars(tpl.subject || defaults.subject, vars);
     const greeting = replaceVars(tpl.greeting || defaults.greeting, vars);
     const intro = replaceVars(tpl.intro || defaults.intro, vars);

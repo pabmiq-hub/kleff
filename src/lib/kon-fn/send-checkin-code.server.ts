@@ -9,6 +9,7 @@ const Deno = {
 
 import { Resend } from "@/lib/kon-fn/resend.server";
 import { createClient } from "@/lib/kon-fn/client.server";
+import { participantVariant, variantEventName, variantTemplates } from "./_shared/variantTemplates";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
@@ -76,7 +77,7 @@ serve(async (req) => {
     // Get participant details with verification code
     const { data: participant, error: participantError } = await supabase
       .from("participants")
-      .select("id, name, email, verification_code")
+      .select("id, name, email, verification_code, registration_variant")
       .eq("id", participantId)
       .single();
 
@@ -104,7 +105,7 @@ serve(async (req) => {
     // Get event details including email_template
     const { data: event, error: eventError } = await supabase
       .from("events")
-      .select("id, name, date, language, organizer_id, email_template, is_test_event, test_config")
+      .select("id, name, secondary_event_name, date, language, organizer_id, email_template, is_test_event, test_config")
       .eq("id", eventId)
       .single();
 
@@ -155,7 +156,9 @@ serve(async (req) => {
 
     // Read customized template from event
     const emailTemplate = event.email_template as any;
-    const communicationTemplate = emailTemplate?.communication_templates_v2 || emailTemplate || {};
+    const pVariant = participantVariant(participant);
+    const eventName = variantEventName(event, pVariant);
+    const communicationTemplate = variantTemplates(emailTemplate, pVariant);
     const tpl = communicationTemplate?.checkin_code;
     const primaryColor = communicationTemplate?.primaryColor || emailTemplate?.primaryColor || "#e11d48";
     const logoUrl = communicationTemplate?.logoUrl || emailTemplate?.logoUrl || defaultLogoUrl;
@@ -167,14 +170,14 @@ serve(async (req) => {
     // Template variables
     const vars: Record<string, string> = {
       "{{nombre}}": participant.name,
-      "{{evento}}": event.name,
+      "{{evento}}": eventName,
       "{{codigo}}": participant.verification_code,
     };
 
     // Use customized template or defaults
     const subject = tpl?.subject
       ? replaceVariables(tpl.subject, vars)
-      : (isEn ? `Your access code - ${event.name}` : `Tu código de acceso - ${event.name}`);
+      : (isEn ? `Your access code - ${eventName}` : `Tu código de acceso - ${eventName}`);
     
     const greeting = tpl?.greeting
       ? replaceVariables(tpl.greeting, vars)
@@ -183,8 +186,8 @@ serve(async (req) => {
     const intro = tpl?.intro
       ? replaceVariables(tpl.intro, vars)
       : (isEn
-        ? `You have been registered for the event ${event.name}. Use this code to check in and access your panel.`
-        : `Has sido registrado/a en el evento ${event.name}. Usa este código para hacer tu check-in y acceder a tu panel.`);
+        ? `You have been registered for the event ${eventName}. Use this code to check in and access your panel.`
+        : `Has sido registrado/a en el evento ${eventName}. Usa este código para hacer tu check-in y acceder a tu panel.`);
     
     const closing = tpl?.closing
       ? replaceVariables(tpl.closing, vars)
