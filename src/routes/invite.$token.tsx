@@ -66,16 +66,23 @@ function InvitePage() {
   }
 
   const handleAvatarUpload = async (file: File) => {
-    if (file.size > 2 * 1024 * 1024) {
-      toast.error(t.imageTooBig);
+    if (!isSupportedImage(file)) {
+      toast.error(t.invalidImage);
       return;
     }
+    setOptimizingAvatar(true);
     setUploadingAvatar(true);
     // Use a temp folder + a random uuid; we'll move it on accept... or just leave it.
     // Simpler: use the email + random name (anonymous upload not allowed in policy).
     // Workaround: upload via a server function with service role
     try {
-      const { file: optimized } = await optimizeImage(file, { maxSize: 512, quality: 0.85 });
+      // Compress client-side first so only the optimised version is stored.
+      const { file: optimized } = await optimizeImage(file, {
+        maxSize: 1600,
+        quality: 0.85,
+        maxBytes: 1024 * 1024,
+      });
+      setOptimizingAvatar(false);
       const formData = new FormData();
       formData.append("file", optimized);
       const res = await fetch(`/api/public/upload-invite-avatar?token=${encodeURIComponent(token)}`, {

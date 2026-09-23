@@ -182,7 +182,13 @@ function ProfilePage() {
               onClick={() => fileRef.current?.click()}
             >
               <Upload className="h-4 w-4 mr-2" />
-              {uploading ? t.profile.uploading : form.avatarUrl ? t.profile.changePhoto : t.profile.uploadPhoto}
+              {optimizing
+                ? t.profile.optimizingImage
+                : uploading
+                  ? t.profile.uploading
+                  : form.avatarUrl
+                    ? t.profile.changePhoto
+                    : t.profile.uploadPhoto}
             </Button>
             {form.avatarUrl && (
               <button
