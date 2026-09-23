@@ -305,7 +305,7 @@ serve(async (req: Request) => {
       const { data: event } = await supabase
         .from("events")
         .select(
-          "id, name, organizer_id, language, email_template, date, event_time, event_location, payment_tracking_enabled, payment_reminder_first_hours, payment_reminder_second_hours, is_test_event, test_config"
+          "id, name, secondary_event_name, organizer_id, language, email_template, date, event_time, event_location, payment_tracking_enabled, payment_reminder_first_hours, payment_reminder_second_hours, is_test_event, test_config"
         )
         .eq("id", event_id)
         .single();
@@ -341,7 +341,7 @@ serve(async (req: Request) => {
     const { data: events } = await supabase
       .from("events")
       .select(
-        "id, name, organizer_id, language, email_template, date, event_time, event_location, payment_tracking_enabled, payment_reminders_enabled, payment_reminder_first_hours, payment_reminder_second_hours, is_test_event, test_config"
+        "id, name, secondary_event_name, organizer_id, language, email_template, date, event_time, event_location, payment_tracking_enabled, payment_reminders_enabled, payment_reminder_first_hours, payment_reminder_second_hours, is_test_event, test_config"
       )
       .eq("payment_tracking_enabled", true)
       .eq("payment_reminders_enabled", true)
