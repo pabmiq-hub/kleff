@@ -1489,6 +1489,7 @@ export type Database = {
           round_started_at: string | null
           rounds: number
           scheduled_email_at: string | null
+          secondary_event_name: string | null
           secondary_registration_description: string | null
           secondary_registration_subtitle: string | null
           secondary_slug: string | null
@@ -1571,6 +1572,7 @@ export type Database = {
           round_started_at?: string | null
           rounds?: number
           scheduled_email_at?: string | null
+          secondary_event_name?: string | null
           secondary_registration_description?: string | null
           secondary_registration_subtitle?: string | null
           secondary_slug?: string | null
@@ -1653,6 +1655,7 @@ export type Database = {
           round_started_at?: string | null
           rounds?: number
           scheduled_email_at?: string | null
+          secondary_event_name?: string | null
           secondary_registration_description?: string | null
           secondary_registration_subtitle?: string | null
           secondary_slug?: string | null
@@ -2647,6 +2650,7 @@ export type Database = {
           phone: string | null
           preference: string | null
           preferred_age_range: string | null
+          registration_variant: string
           sector: string | null
           selection_submitted_at: string | null
           solutions: string[] | null
@@ -2686,6 +2690,7 @@ export type Database = {
           phone?: string | null
           preference?: string | null
           preferred_age_range?: string | null
+          registration_variant?: string
           sector?: string | null
           selection_submitted_at?: string | null
           solutions?: string[] | null
@@ -2725,6 +2730,7 @@ export type Database = {
           phone?: string | null
           preference?: string | null
           preferred_age_range?: string | null
+          registration_variant?: string
           sector?: string | null
           selection_submitted_at?: string | null
           solutions?: string[] | null

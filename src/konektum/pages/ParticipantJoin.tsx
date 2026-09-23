@@ -80,11 +80,14 @@ interface QuotaStatus {
 
 const ParticipantJoin = ({
   eventIdOverride,
+  variant = "primary",
   variantSubtitle,
   variantDescription,
   variantGender,
 }: {
   eventIdOverride?: string;
+  /** Which public link was used to reach the form. */
+  variant?: "primary" | "secondary";
   /** Overrides coming from a secondary public link pointing at the same event. */
   variantSubtitle?: string | null;
   variantDescription?: string | null;

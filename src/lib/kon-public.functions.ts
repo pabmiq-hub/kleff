@@ -22,7 +22,7 @@ export const resolveKonEvent = createServerFn({ method: "GET" })
     const client = supabaseAdmin as unknown as { from: (t: string) => any };
 
     const columns =
-      "id, name, slug, secondary_slug, secondary_registration_subtitle, secondary_registration_description, secondary_target_gender, primary_target_gender";
+      "id, name, slug, secondary_slug, secondary_event_name, secondary_registration_subtitle, secondary_registration_description, secondary_target_gender, primary_target_gender";
     const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(data.slug);
 
     let row: any = null;
@@ -44,7 +44,7 @@ export const resolveKonEvent = createServerFn({ method: "GET" })
 
     return {
       id: row.id,
-      name: row.name,
+      name: isSecondary && row.secondary_event_name ? row.secondary_event_name : row.name,
       slug: row.slug ?? null,
       variant: isSecondary ? "secondary" : "primary",
       variantSubtitle: isSecondary ? row.secondary_registration_subtitle ?? null : null,
