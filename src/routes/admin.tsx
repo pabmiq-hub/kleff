@@ -18,6 +18,8 @@ import {
   Sparkles,
   Vote,
   Heart,
+  Euro,
+  KeyRound,
 } from "lucide-react";
 
 export const Route = createFileRoute("/admin")({
