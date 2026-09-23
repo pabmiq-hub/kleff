@@ -29,7 +29,13 @@ function RouteComponent() {
   const event = Route.useLoaderData();
   return (
     <PublicEventPage event={event}>
-      <ParticipantJoin />
+      <ParticipantJoin
+        variant={event?.variant}
+        variantSubtitle={event?.variantSubtitle}
+        variantDescription={event?.variantDescription}
+        variantGender={event?.variantGender}
+        eventNameOverride={event?.name}
+      />
     </PublicEventPage>
   );
 }

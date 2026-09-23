@@ -84,6 +84,7 @@ const ParticipantJoin = ({
   variantSubtitle,
   variantDescription,
   variantGender,
+  eventNameOverride,
 }: {
   eventIdOverride?: string;
   /** Which public link was used to reach the form. */
@@ -92,6 +93,8 @@ const ParticipantJoin = ({
   variantSubtitle?: string | null;
   variantDescription?: string | null;
   variantGender?: string | null;
+  /** Event title as shown to the audience of this specific link. */
+  eventNameOverride?: string | null;
 } = {}) => {
   const { id: routeEventId } = useParams();
   const eventId = eventIdOverride || routeEventId;
@@ -204,11 +207,13 @@ const ParticipantJoin = ({
   const normalizeKey = (v: any) =>
     String(v ?? '').toLowerCase().trim().replace(/–/g, '-').replace(/\s+/g, '');
 
-  // Secondary public link: preselect the gender this link is aimed at.
+  // Dedicated public link: the gender is fixed by the link, so we preselect it
+  // and hide the selector from the participant.
+  const genderLocked = Boolean(variantGender);
   useEffect(() => {
     if (!variantGender) return;
     const match = eventGenders.find((g) => normalizeKey(g) === normalizeKey(variantGender));
-    if (match) setGender((prev) => prev || match);
+    setGender((prev) => prev || match || variantGender);
   }, [variantGender, eventGenders]);
 
 
@@ -256,7 +261,7 @@ const ParticipantJoin = ({
       setQuotaWaitlistEnabled(((data as any).quota_waitlist_enabled ?? true) === true);
 
       setEventExists(true);
-      setEventName(data.name);
+      setEventName(eventNameOverride || data.name);
       setEventDate(normalizeUpcomingEventDate(data.date, data.status));
       setEventTime((data as any).event_time || null);
       setEventLocation((data as any).event_location || null);
@@ -1322,6 +1327,7 @@ const ParticipantJoin = ({
                         )}
                       </div>
 
+                      {!genderLocked && (
                       <div className="space-y-2" data-field-error={hasErr("gender") ? "true" : undefined}>
                         <Label className={hasErr("gender") ? "text-destructive" : undefined}>{t.join.genderLabel}</Label>
                         <Select value={gender} onValueChange={(val) => {
@@ -1343,6 +1349,8 @@ const ParticipantJoin = ({
                         </Select>
                         <FieldError show={hasErr("gender")} message={fieldErrorMessage(eventLang)} />
                       </div>
+                      )}
+
 
                       {wrappedEnabled && (
                         <div className="space-y-2" data-field-error={hasErr("email") ? "true" : undefined}>
@@ -1420,6 +1428,7 @@ const ParticipantJoin = ({
                         )}
                       </div>
 
+                      {!genderLocked && (
                       <div className="space-y-2" data-field-error={hasErr("gender") ? "true" : undefined}>
                         <Label className={hasErr("gender") ? "text-destructive" : undefined}>{t.join.genderLabel}</Label>
                         <Select value={gender} onValueChange={(val) => {
@@ -1441,6 +1450,8 @@ const ParticipantJoin = ({
                         </Select>
                         <FieldError show={hasErr("gender")} message={fieldErrorMessage(eventLang)} />
                       </div>
+                      )}
+
                     </>
                   )}
 
