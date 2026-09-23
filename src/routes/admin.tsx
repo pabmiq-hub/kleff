@@ -71,19 +71,36 @@ function AdminLayout() {
           </span>
         </Link>
         <nav className="flex md:flex-col gap-1 flex-1 ml-auto md:ml-0">
-          <AdminNavLink to="/admin" exact icon={<LayoutDashboard className="h-4 w-4" />} label="Resumen" />
-          <AdminNavLink to="/admin/members" icon={<Users className="h-4 w-4" />} label="Socios" />
-          <AdminNavLink to="/admin/invitations" icon={<Mail className="h-4 w-4" />} label="Invitaciones" />
-          <AdminNavLink to="/admin/rentals" icon={<Dices className="h-4 w-4" />} label="Alquiler" />
-          <AdminNavLink to="/admin/content" icon={<FileText className="h-4 w-4" />} label="Contenido" />
-          <AdminNavLink to="/admin/registrations" icon={<ClipboardList className="h-4 w-4" />} label="Inscripciones" />
-          <AdminNavLink to="/admin/blog" icon={<Newspaper className="h-4 w-4" />} label="Blog" />
-          <AdminNavLink to="/admin/media" icon={<Newspaper className="h-4 w-4" />} label="Medios" />
-          <AdminNavLink to="/admin/team" icon={<UserCircle2 className="h-4 w-4" />} label="Equipo" />
-          <AdminNavLink to="/admin/polls" icon={<Vote className="h-4 w-4" />} label="Votaciones" />
-          <AdminNavLink to="/admin/karma" icon={<Sparkles className="h-4 w-4" />} label="Karma" />
-          <AdminNavLink to="/admin/konektum" icon={<Heart className="h-4 w-4" />} label="Konektum" />
-
+          {isSuperAdmin && (
+            <>
+              <AdminNavLink to="/admin" exact icon={<LayoutDashboard className="h-4 w-4" />} label="Resumen" />
+              <AdminNavLink to="/admin/members" icon={<Users className="h-4 w-4" />} label="Socios" />
+              <AdminNavLink to="/admin/invitations" icon={<Mail className="h-4 w-4" />} label="Invitaciones" />
+              <AdminNavLink to="/admin/rentals" icon={<Dices className="h-4 w-4" />} label="Alquiler" />
+              <AdminNavLink to="/admin/content" icon={<FileText className="h-4 w-4" />} label="Contenido" />
+            </>
+          )}
+          {(isSuperAdmin || can("inscripcion")) && (
+            <AdminNavLink to="/admin/registrations" icon={<ClipboardList className="h-4 w-4" />} label="Inscripciones" />
+          )}
+          {can("finanzas") && (
+            <AdminNavLink to="/admin/finanzas" icon={<Euro className="h-4 w-4" />} label="Finanzas" />
+          )}
+          {can("blog") && <AdminNavLink to="/admin/blog" icon={<Newspaper className="h-4 w-4" />} label="Blog" />}
+          {isSuperAdmin && (
+            <>
+              <AdminNavLink to="/admin/media" icon={<Newspaper className="h-4 w-4" />} label="Medios" />
+              <AdminNavLink to="/admin/team" icon={<UserCircle2 className="h-4 w-4" />} label="Equipo" />
+              <AdminNavLink to="/admin/polls" icon={<Vote className="h-4 w-4" />} label="Votaciones" />
+              <AdminNavLink to="/admin/karma" icon={<Sparkles className="h-4 w-4" />} label="Karma" />
+            </>
+          )}
+          {can("konektum") && (
+            <AdminNavLink to="/admin/konektum" icon={<Heart className="h-4 w-4" />} label="Konektum" />
+          )}
+          {isSuperAdmin && (
+            <AdminNavLink to="/admin/usuarios" icon={<KeyRound className="h-4 w-4" />} label="Usuarios y permisos" />
+          )}
         </nav>
         <div className="md:mt-auto space-y-1">
           <Link
