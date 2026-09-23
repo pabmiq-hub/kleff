@@ -73,6 +73,18 @@ function RegistrationEditor() {
     }
   };
 
+  if (!isSuperAdmin) {
+    return (
+      <div className="space-y-6">
+        <div className="rounded-2xl border border-ink/10 bg-white p-5">
+          <h1 className="text-2xl font-display font-semibold text-ink">{form.title || form.slug}</h1>
+          <p className="text-sm text-ink/60 mt-1">Listado de personas inscritas (solo lectura).</p>
+        </div>
+        <ResponsesPanel form={form} questions={questions} readOnly />
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <Link to="/admin/registrations" className="inline-flex items-center gap-2 text-sm text-ink/70 hover:text-ink"><ArrowLeft className="h-4 w-4" /> Volver</Link>
