@@ -361,7 +361,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     const { data: eventsToProcess, error: eventsError } = await supabase
       .from("events")
-      .select("id, name, email_template, scheduled_email_at, module, language")
+      .select("id, name, organizer_id, email_template, scheduled_email_at, module, language")
       .not("scheduled_email_at", "is", null)
       .is("emails_sent_at", null)
       .eq("is_test_event", false)
@@ -447,8 +447,14 @@ const handler = async (req: Request): Promise<Response> => {
       
       const { data: selections } = await supabase
         .from("participant_selections")
-        .select("selector_id, selected_id, selection_type")
+        .select("selector_id, selected_id, selection_type, is_super_like")
         .eq("event_id", event.id);
+
+      const { data: crushRequests } = await supabase
+        .from("crush_requests")
+        .select("requester_id, target_id, status")
+        .eq("event_id", event.id)
+        .eq("status", "accepted");
 
       // For professional events, get table assignments
       const { data: tableAssignments } = isProfessional 
