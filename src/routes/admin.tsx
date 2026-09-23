@@ -1,5 +1,6 @@
 import { createFileRoute, Outlet, Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useAuth } from "@/auth/AuthProvider";
+import { useAdminAccess } from "@/hooks/useAdminAccess";
 import { Button } from "@/components/ui/button";
 import { NotificationsBell } from "@/components/app/NotificationsBell";
 import {
