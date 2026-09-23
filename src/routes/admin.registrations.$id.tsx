@@ -787,7 +787,7 @@ function ResponsesTable({ responses, questions, paymentRequired, maxGuests, read
                   ))}
                   {paymentRequired && (
                     <td className="px-3 py-2">
-                      <Select value={r.payment_status} onValueChange={(v) => onUpdate(r.id, { payment_status: v as RegistrationResponse["payment_status"] })}>
+                      <Select disabled={readOnly} value={r.payment_status} onValueChange={(v) => onUpdate(r.id, { payment_status: v as RegistrationResponse["payment_status"] })}>
                         <SelectTrigger className="bg-white border-ink/15 text-ink h-8 text-xs w-32"><SelectValue /></SelectTrigger>
                         <SelectContent className="bg-white border-ink/15 text-ink">
                           <SelectItem value="not_required">Sin pago</SelectItem>
