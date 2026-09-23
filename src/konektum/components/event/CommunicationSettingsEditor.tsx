@@ -561,7 +561,7 @@ const CommunicationSettingsEditor = ({
                     logoHeight={templates.logoHeight}
                     brandName={templates.brandName}
                     headerTitle={templates.headerTitle}
-                    eventName={eventName}
+                    eventName={audience === "secondary" ? (secondaryEventName || eventName) : eventName}
                     matchesVariant={tab.key === "matches" ? matchesVariant : tab.key === "no_show" ? "without" : undefined}
                     matchesWithoutTemplate={tab.key === "matches" ? templates.matches_without : tab.key === "no_show" ? templates.no_show : undefined}
                     reminderOptions={tab.key === "reminder" ? templates.reminderOptions : undefined}
