@@ -364,7 +364,12 @@ const EventSettingsEditor = ({
         registration_subtitle: formRegSubtitle.trim() || null,
         registration_description: formRegDescription.trim() || null,
         custom_age_ranges: formPreferences.ageRanges,
-        custom_genders: formPreferences.genders,
+        custom_genders: Array.from(new Set([
+          ...formPreferences.genders,
+          ...(!isProfessional && formSecondaryLinkEnabled
+            ? [formPrimaryTargetGender, formSecondaryTargetGender].filter(Boolean)
+            : []),
+        ])),
         custom_preferences: formPreferences.preferences,
         custom_dating_preferences: formPreferences.datingPreferences,
         group_rounds: formGroupRoundsEnabled && formGroupRounds.length > 0 ? formGroupRounds : null,
