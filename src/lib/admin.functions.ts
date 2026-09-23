@@ -77,9 +77,10 @@ const profileSchema = z.object({
   gender: z.enum(["female", "male", "non_binary", "other", "prefer_not_to_say"]),
   idDocument: z
     .string()
+    .trim()
     .min(5)
     .max(40)
-    .regex(/^[A-Za-z0-9-]+$/, "Formato no válido"),
+    .regex(/^[A-Za-z0-9 ./-]+$/, "Formato no válido"),
   ludoyaUsername: z
     .string()
     .min(2)
