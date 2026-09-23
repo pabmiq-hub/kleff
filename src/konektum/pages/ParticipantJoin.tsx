@@ -703,6 +703,7 @@ const ParticipantJoin = ({
             const { data, error } = await supabase.functions.invoke('register-participant', {
               body: {
                 eventId,
+                registrationVariant: variant,
                 name: name.trim(),
                 email: email.trim(),
                 phone: phone.trim(),
@@ -756,6 +757,7 @@ const ParticipantJoin = ({
     const { data, error } = await supabase.functions.invoke('register-participant', {
       body: {
         eventId,
+        registrationVariant: variant,
         name: name.trim(),
         email: email.trim(),
         phone: phone.trim(),
@@ -868,6 +870,7 @@ const ParticipantJoin = ({
     const { data: result, error } = await supabase.functions.invoke('register-participant', {
       body: {
         eventId,
+        registrationVariant: variant,
         name: data.name,
         email: data.email,
         phone: data.phone,
@@ -1099,6 +1102,7 @@ const ParticipantJoin = ({
       if (formValues.needs) body.needs = formValues.needs;
       if (formValues.solutions) body.solutions = formValues.solutions;
       body.marketingConsent = formValues.marketingConsent === true;
+      body.registrationVariant = variant;
 
       // Custom fields stored as metadata
       const customFields: Record<string, any> = {};
