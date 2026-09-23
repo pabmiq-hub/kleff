@@ -8,6 +8,7 @@ import { ClipboardList, Plus, ExternalLink, Trash2, Users, Loader2, Pencil, Sett
 import { adminListForms, adminCreateForm, adminDeleteForm } from "@/lib/registrations.functions";
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
+import { useAdminAccess } from "@/hooks/useAdminAccess";
 
 export const Route = createFileRoute("/admin/registrations/")({
   head: () => ({ meta: [{ title: "Inscripciones — Admin KLEFF" }, { name: "robots", content: "noindex, nofollow" }] }),
@@ -22,6 +23,7 @@ type FormRow = {
 
 function AdminRegistrations() {
   const router = useRouter();
+  const { isSuperAdmin } = useAdminAccess();
   const listFn = useServerFn(adminListForms);
   const createFn = useServerFn(adminCreateForm);
   const deleteFn = useServerFn(adminDeleteForm);
@@ -111,9 +113,11 @@ function AdminRegistrations() {
           </p>
         </div>
         <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) resetDialog(); }}>
-          <DialogTrigger asChild>
-            <Button className="bg-coral hover:bg-coral/90 text-ink"><Plus className="h-4 w-4 mr-2" /> Nueva inscripción</Button>
-          </DialogTrigger>
+          {isSuperAdmin && (
+            <DialogTrigger asChild>
+              <Button className="bg-coral hover:bg-coral/90 text-ink"><Plus className="h-4 w-4 mr-2" /> Nueva inscripción</Button>
+            </DialogTrigger>
+          )}
           <DialogContent className="bg-white border-ink/15 text-ink max-w-lg">
             <DialogHeader>
               <DialogTitle>{step === 1 ? "¿Qué tipo de inscripción?" : "Configuración inicial"}</DialogTitle>
@@ -222,11 +226,11 @@ function AdminRegistrations() {
                 </td>
                 <td className="px-4 py-3">
                   <div className="flex gap-1 items-center">
-                    <Link to="/admin/registrations/$id" params={{ id: f.id }} className="inline-flex items-center gap-1 h-8 px-2.5 rounded-md bg-coral/10 text-coral hover:bg-coral/20 text-xs font-medium" title={f.is_published ? "Gestionar" : "Continuar borrador"}>
-                      {f.is_published ? <><Settings className="h-3.5 w-3.5" /> Gestionar</> : <><Pencil className="h-3.5 w-3.5" /> Editar</>}
+                    <Link to="/admin/registrations/$id" params={{ id: f.id }} className="inline-flex items-center gap-1 h-8 px-2.5 rounded-md bg-coral/10 text-coral hover:bg-coral/20 text-xs font-medium" title={isSuperAdmin ? (f.is_published ? "Gestionar" : "Continuar borrador") : "Ver inscritos"}>
+                      {!isSuperAdmin ? <><Users className="h-3.5 w-3.5" /> Ver inscritos</> : f.is_published ? <><Settings className="h-3.5 w-3.5" /> Gestionar</> : <><Pencil className="h-3.5 w-3.5" /> Editar</>}
                     </Link>
                     {f.is_published && <a href={`/${f.slug}`} target="_blank" rel="noreferrer" className="inline-flex items-center justify-center h-8 w-8 rounded-md text-ink/70 hover:text-ink hover:bg-ink/10" title="Ver pública"><ExternalLink className="h-3.5 w-3.5" /></a>}
-                    <Button size="sm" variant="ghost" onClick={() => handleDelete(f.id, f.title || f.slug)} className="text-ink/70 hover:text-red-500 hover:bg-red-500/10 h-8 w-8 p-0" title="Eliminar"><Trash2 className="h-3.5 w-3.5" /></Button>
+                    {isSuperAdmin && <Button size="sm" variant="ghost" onClick={() => handleDelete(f.id, f.title || f.slug)} className="text-ink/70 hover:text-red-500 hover:bg-red-500/10 h-8 w-8 p-0" title="Eliminar"><Trash2 className="h-3.5 w-3.5" /></Button>}
                   </div>
                 </td>
               </tr>

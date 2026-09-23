@@ -30,6 +30,7 @@ import { CSS } from "@dnd-kit/utilities";
 import { ImagePicker } from "@/components/cms/ImagePicker";
 import { RichTextEditor } from "@/components/cms/RichTextEditor";
 import { normalizeHighlights, plainTextToHtml, DEFAULT_LEGAL_HTML, HIGHLIGHT_PRESETS, type HighlightRow } from "@/lib/registrations-content";
+import { useAdminAccess } from "@/hooks/useAdminAccess";
 
 export const Route = createFileRoute("/admin/registrations/$id")({
   head: () => ({ meta: [{ title: "Editar inscripción — Admin KLEFF" }, { name: "robots", content: "noindex, nofollow" }] }),
@@ -40,9 +41,11 @@ function RegistrationEditor() {
   const { id } = Route.useParams();
   const getForm = useServerFn(adminGetForm);
   const updateFn = useServerFn(adminUpdateForm);
+  const { isSuperAdmin } = useAdminAccess();
   const [data, setData] = useState<{ form: RegistrationForm; questions: RegistrationQuestion[] } | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [togglingPub, setTogglingPub] = useState(false);
+
 
   useEffect(() => {
     let cancelled = false;
@@ -69,6 +72,18 @@ function RegistrationEditor() {
       setTogglingPub(false);
     }
   };
+
+  if (!isSuperAdmin) {
+    return (
+      <div className="space-y-6">
+        <div className="rounded-2xl border border-ink/10 bg-white p-5">
+          <h1 className="text-2xl font-display font-semibold text-ink">{form.title || form.slug}</h1>
+          <p className="text-sm text-ink/60 mt-1">Listado de personas inscritas (solo lectura).</p>
+        </div>
+        <ResponsesPanel form={form} questions={questions} readOnly />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -564,7 +579,7 @@ function OptionsEditor({ value, onChange }: { value: RegistrationQuestion["optio
 
 // ----------------- Responses Panel -----------------
 
-function ResponsesPanel({ form, questions }: { form: RegistrationForm; questions: RegistrationQuestion[] }) {
+function ResponsesPanel({ form, questions, readOnly }: { form: RegistrationForm; questions: RegistrationQuestion[]; readOnly?: boolean }) {
   const formId = form.id;
   const paymentRequired = !!form.payment_required;
   const maxGuests = form.allow_guests ? Math.max(1, form.max_guests_per_response ?? 1) : 0;
@@ -613,15 +628,17 @@ function ResponsesPanel({ form, questions }: { form: RegistrationForm; questions
           {responses.length} respuesta{responses.length === 1 ? "" : "s"} · <strong>{totalAttendees} participante{totalAttendees === 1 ? "" : "s"}</strong>
         </p>
         <div className="flex gap-2">
-          <Button
-            size="sm"
-            variant="outline"
-            className="border-ink/20 text-ink hover:bg-ink/10"
-            disabled={!active.length}
-            onClick={() => setReminderTarget({ count: active.length })}
-          >
-            <Mail className="h-4 w-4 mr-2" /> Enviar recordatorio a todos
-          </Button>
+          {!readOnly && (
+            <Button
+              size="sm"
+              variant="outline"
+              className="border-ink/20 text-ink hover:bg-ink/10"
+              disabled={!active.length}
+              onClick={() => setReminderTarget({ count: active.length })}
+            >
+              <Mail className="h-4 w-4 mr-2" /> Enviar recordatorio a todos
+            </Button>
+          )}
           <Button size="sm" onClick={downloadCsv} variant="outline" className="border-ink/20 text-ink hover:bg-ink/10" disabled={!responses.length}>Descargar CSV</Button>
         </div>
       </div>
@@ -633,6 +650,7 @@ function ResponsesPanel({ form, questions }: { form: RegistrationForm; questions
           questions={questions}
           paymentRequired={paymentRequired}
           maxGuests={maxGuests}
+          readOnly={readOnly}
           onReminder={(id) => setReminderTarget({ responseId: id, count: 1 })}
           onUpdate={async (id, patch) => {
             try {
@@ -721,11 +739,12 @@ function columnLabel(q: RegistrationQuestion) {
   return q.label;
 }
 
-function ResponsesTable({ responses, questions, paymentRequired, maxGuests, onUpdate, onDelete, onReminder }: {
+function ResponsesTable({ responses, questions, paymentRequired, maxGuests, readOnly, onUpdate, onDelete, onReminder }: {
   responses: RegistrationResponse[];
   questions: RegistrationQuestion[];
   paymentRequired?: boolean;
   maxGuests: number;
+  readOnly?: boolean;
   onUpdate: (id: string, patch: { payment_status?: RegistrationResponse["payment_status"]; internal_notes?: string | null; guests_count?: number }) => Promise<void>;
   onDelete: (id: string) => void;
   onReminder: (id: string) => void;
@@ -759,7 +778,7 @@ function ResponsesTable({ responses, questions, paymentRequired, maxGuests, onUp
                   <td className="px-3 py-2 text-xs text-ink/60 whitespace-nowrap">{new Date(r.created_at).toLocaleString("es-ES")}</td>
                   <td className="px-3 py-2 text-ink font-medium whitespace-nowrap">{r.email_contact ?? "—"}</td>
                   <td className="px-3 py-2 whitespace-nowrap text-ink/80">
-                    {maxGuests > 0 && !cancelled ? (
+                    {maxGuests > 0 && !cancelled && !readOnly ? (
                       <Select value={String(guests)} onValueChange={(v) => onUpdate(r.id, { guests_count: Number(v) })}>
                         <SelectTrigger className="bg-white border-ink/15 text-ink h-8 text-xs w-28"><SelectValue /></SelectTrigger>
                         <SelectContent className="bg-white border-ink/15 text-ink">
@@ -783,7 +802,7 @@ function ResponsesTable({ responses, questions, paymentRequired, maxGuests, onUp
                   ))}
                   {paymentRequired && (
                     <td className="px-3 py-2">
-                      <Select value={r.payment_status} onValueChange={(v) => onUpdate(r.id, { payment_status: v as RegistrationResponse["payment_status"] })}>
+                      <Select disabled={readOnly} value={r.payment_status} onValueChange={(v) => onUpdate(r.id, { payment_status: v as RegistrationResponse["payment_status"] })}>
                         <SelectTrigger className="bg-white border-ink/15 text-ink h-8 text-xs w-32"><SelectValue /></SelectTrigger>
                         <SelectContent className="bg-white border-ink/15 text-ink">
                           <SelectItem value="not_required">Sin pago</SelectItem>
@@ -795,11 +814,15 @@ function ResponsesTable({ responses, questions, paymentRequired, maxGuests, onUp
                     </td>
                   )}
                   <td className="px-3 py-2 whitespace-nowrap">
-                    {!cancelled && r.email_contact && (
-                      <Button size="sm" variant="ghost" onClick={() => onReminder(r.id)} title="Reenviar recordatorio" className="h-8 w-8 p-0 text-ink/60 hover:text-coral"><Mail className="h-3.5 w-3.5" /></Button>
+                    {!readOnly && (
+                      <>
+                        {!cancelled && r.email_contact && (
+                          <Button size="sm" variant="ghost" onClick={() => onReminder(r.id)} title="Reenviar recordatorio" className="h-8 w-8 p-0 text-ink/60 hover:text-coral"><Mail className="h-3.5 w-3.5" /></Button>
+                        )}
+                        <Button size="sm" variant="ghost" onClick={() => setNotesFor((n) => n === r.id ? null : r.id)} className="h-8 px-2 text-xs text-ink/60 hover:text-ink">Notas</Button>
+                        <Button size="sm" variant="ghost" onClick={() => onDelete(r.id)} className="text-ink/60 hover:text-red-400 hover:bg-red-500/10 h-8 w-8 p-0"><Trash2 className="h-3.5 w-3.5" /></Button>
+                      </>
                     )}
-                    <Button size="sm" variant="ghost" onClick={() => setNotesFor((n) => n === r.id ? null : r.id)} className="h-8 px-2 text-xs text-ink/60 hover:text-ink">Notas</Button>
-                    <Button size="sm" variant="ghost" onClick={() => onDelete(r.id)} className="text-ink/60 hover:text-red-400 hover:bg-red-500/10 h-8 w-8 p-0"><Trash2 className="h-3.5 w-3.5" /></Button>
                   </td>
                 </tr>
                 {notesFor === r.id && (
