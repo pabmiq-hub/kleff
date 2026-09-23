@@ -97,6 +97,7 @@ function InvitePage() {
     } catch {
       toast.error(t.photoError);
     } finally {
+      setOptimizingAvatar(false);
       setUploadingAvatar(false);
     }
   };
@@ -276,6 +277,11 @@ function InvitePage() {
                   if (f) void handleAvatarUpload(f);
                 }}
               />
+              {uploadingAvatar && (
+                <p className="text-xs text-muted-foreground">
+                  {optimizingAvatar ? t.optimizingImage : t.uploadingPhoto}
+                </p>
+              )}
               {avatarUrl && (
                 <img loading="lazy" decoding="async" src={avatarUrl} alt="" className="mt-2 h-20 w-20 rounded-full object-cover border-2 border-ink" />
               )}
