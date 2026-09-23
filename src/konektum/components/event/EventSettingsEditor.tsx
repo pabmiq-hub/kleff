@@ -758,8 +758,6 @@ const EventSettingsEditor = ({
                     <p className="text-xs text-muted-foreground">
                       Al guardar, el público elegido se añade automáticamente a los géneros admitidos del evento.
                     </p>
-                      </SelectContent>
-                    </Select>
                   </div>
 
                   <div className="space-y-2">
