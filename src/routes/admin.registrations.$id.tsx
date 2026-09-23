@@ -40,9 +40,11 @@ function RegistrationEditor() {
   const { id } = Route.useParams();
   const getForm = useServerFn(adminGetForm);
   const updateFn = useServerFn(adminUpdateForm);
+  const { isSuperAdmin } = useAdminAccess();
   const [data, setData] = useState<{ form: RegistrationForm; questions: RegistrationQuestion[] } | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [togglingPub, setTogglingPub] = useState(false);
+
 
   useEffect(() => {
     let cancelled = false;
