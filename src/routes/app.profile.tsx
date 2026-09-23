@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { optimizeImage } from "@/lib/image-optimize";
+import { optimizeImage, isSupportedImage } from "@/lib/image-optimize";
 import { supabase } from "@/integrations/supabase/client";
 import { getMyProfile, updateMyProfile } from "@/lib/profile.functions";
 import { LudoyaLinkCard } from "@/components/app/LudoyaLinkCard";
@@ -33,6 +33,7 @@ function ProfilePage() {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [optimizing, setOptimizing] = useState(false);
   const [memberNumber, setMemberNumber] = useState<number | null>(null);
   const [form, setForm] = useState({
     fullName: "",
@@ -127,6 +128,7 @@ function ProfilePage() {
     } catch (err) {
       toast.error(err instanceof Error ? err.message : t.profile.photoUploadError);
     } finally {
+      setOptimizing(false);
       setUploading(false);
     }
   };
