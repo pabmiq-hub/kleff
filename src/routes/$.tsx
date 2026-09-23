@@ -186,6 +186,7 @@ function CatchAll() {
           variantSubtitle={data.event.variantSubtitle}
           variantDescription={data.event.variantDescription}
           variantGender={data.event.variantGender}
+          eventNameOverride={data.event.name}
         />
       </PublicEventPage>
     );
