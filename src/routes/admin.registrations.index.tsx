@@ -8,6 +8,7 @@ import { ClipboardList, Plus, ExternalLink, Trash2, Users, Loader2, Pencil, Sett
 import { adminListForms, adminCreateForm, adminDeleteForm } from "@/lib/registrations.functions";
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
+import { useAdminAccess } from "@/hooks/useAdminAccess";
 
 export const Route = createFileRoute("/admin/registrations/")({
   head: () => ({ meta: [{ title: "Inscripciones — Admin KLEFF" }, { name: "robots", content: "noindex, nofollow" }] }),
