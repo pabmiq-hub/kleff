@@ -11,6 +11,19 @@ const Deno = {
 // 4-6 emojis; the table then guesses who wrote each sequence and the real story
 // is revealed after voting.
 import {
+  UUID_RE,
+  anonymizeName,
+  applyReady,
+  corsHeaders,
+  effectiveStatus,
+  entryToken,
+  fetchVotesAndRewards,
+  json,
+  loadContext,
+  profileSignals,
+  registerVote,
+  seededShuffle,
+  shuffle,
 } from "@/lib/kon-fn/_shared/icebreakers";
 
 const GAME = "emoji_story";
