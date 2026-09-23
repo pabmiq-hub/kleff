@@ -90,6 +90,7 @@ import { Route as AdminMembersRouteImport } from './routes/admin.members'
 import { Route as AdminKonektumRouteImport } from './routes/admin.konektum'
 import { Route as AdminKarmaRouteImport } from './routes/admin.karma'
 import { Route as AdminInvitationsRouteImport } from './routes/admin.invitations'
+import { Route as AdminFinanzasRouteImport } from './routes/admin.finanzas'
 import { Route as AdminContentRouteImport } from './routes/admin.content'
 import { Route as AdminBlogRouteImport } from './routes/admin.blog'
 import { Route as EventSlugUsuarioRouteImport } from './routes/$eventSlug.usuario'
@@ -555,6 +556,11 @@ const AdminInvitationsRoute = AdminInvitationsRouteImport.update({
   path: '/invitations',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminFinanzasRoute = AdminFinanzasRouteImport.update({
+  id: '/finanzas',
+  path: '/finanzas',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminContentRoute = AdminContentRouteImport.update({
   id: '/content',
   path: '/content',
@@ -889,6 +895,7 @@ export interface FileRoutesByFullPath {
   '/$eventSlug/usuario': typeof EventSlugUsuarioRoute
   '/admin/blog': typeof AdminBlogRouteWithChildren
   '/admin/content': typeof AdminContentRouteWithChildren
+  '/admin/finanzas': typeof AdminFinanzasRoute
   '/admin/invitations': typeof AdminInvitationsRoute
   '/admin/karma': typeof AdminKarmaRoute
   '/admin/konektum': typeof AdminKonektumRouteWithChildren
@@ -1026,6 +1033,7 @@ export interface FileRoutesByTo {
   '/$eventSlug/registro': typeof EventSlugRegistroRoute
   '/$eventSlug/seleccion': typeof EventSlugSeleccionRoute
   '/$eventSlug/usuario': typeof EventSlugUsuarioRoute
+  '/admin/finanzas': typeof AdminFinanzasRoute
   '/admin/invitations': typeof AdminInvitationsRoute
   '/admin/karma': typeof AdminKarmaRoute
   '/admin/members': typeof AdminMembersRoute
@@ -1164,6 +1172,7 @@ export interface FileRoutesById {
   '/$eventSlug/usuario': typeof EventSlugUsuarioRoute
   '/admin/blog': typeof AdminBlogRouteWithChildren
   '/admin/content': typeof AdminContentRouteWithChildren
+  '/admin/finanzas': typeof AdminFinanzasRoute
   '/admin/invitations': typeof AdminInvitationsRoute
   '/admin/karma': typeof AdminKarmaRoute
   '/admin/konektum': typeof AdminKonektumRouteWithChildren
@@ -1307,6 +1316,7 @@ export interface FileRouteTypes {
     | '/$eventSlug/usuario'
     | '/admin/blog'
     | '/admin/content'
+    | '/admin/finanzas'
     | '/admin/invitations'
     | '/admin/karma'
     | '/admin/konektum'
@@ -1444,6 +1454,7 @@ export interface FileRouteTypes {
     | '/$eventSlug/registro'
     | '/$eventSlug/seleccion'
     | '/$eventSlug/usuario'
+    | '/admin/finanzas'
     | '/admin/invitations'
     | '/admin/karma'
     | '/admin/members'
@@ -1581,6 +1592,7 @@ export interface FileRouteTypes {
     | '/$eventSlug/usuario'
     | '/admin/blog'
     | '/admin/content'
+    | '/admin/finanzas'
     | '/admin/invitations'
     | '/admin/karma'
     | '/admin/konektum'
@@ -2349,6 +2361,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminInvitationsRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/finanzas': {
+      id: '/admin/finanzas'
+      path: '/finanzas'
+      fullPath: '/admin/finanzas'
+      preLoaderRoute: typeof AdminFinanzasRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/content': {
       id: '/admin/content'
       path: '/content'
@@ -2856,6 +2875,7 @@ const AdminRentalsRouteWithChildren = AdminRentalsRoute._addFileChildren(
 interface AdminRouteChildren {
   AdminBlogRoute: typeof AdminBlogRouteWithChildren
   AdminContentRoute: typeof AdminContentRouteWithChildren
+  AdminFinanzasRoute: typeof AdminFinanzasRoute
   AdminInvitationsRoute: typeof AdminInvitationsRoute
   AdminKarmaRoute: typeof AdminKarmaRoute
   AdminKonektumRoute: typeof AdminKonektumRouteWithChildren
@@ -2874,6 +2894,7 @@ interface AdminRouteChildren {
 const AdminRouteChildren: AdminRouteChildren = {
   AdminBlogRoute: AdminBlogRouteWithChildren,
   AdminContentRoute: AdminContentRouteWithChildren,
+  AdminFinanzasRoute: AdminFinanzasRoute,
   AdminInvitationsRoute: AdminInvitationsRoute,
   AdminKarmaRoute: AdminKarmaRoute,
   AdminKonektumRoute: AdminKonektumRouteWithChildren,
