@@ -47,6 +47,8 @@ export const signupDict = {
     submitting: "Creando cuenta…",
     selectGenderError: "Selecciona un género",
     imageTooBig: "La imagen no puede superar los 2MB",
+    invalidImage: "El archivo no es una imagen válida",
+    optimizingImage: "Optimizando imagen…",
     photoUploaded: "Foto subida",
     photoError: "Error al subir la foto",
     welcome: "¡Bienvenido a KLEFF!",
