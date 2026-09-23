@@ -30,12 +30,13 @@ export const Route = createFileRoute("/admin")({
 });
 
 function AdminLayout() {
-  const { session, loading, isSuperAdmin, user, signOut } = useAuth();
+  const { session, loading, user, signOut } = useAuth();
+  const { access, loading: accessLoading, can, isSuperAdmin } = useAdminAccess();
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const wideContent = pathname.startsWith("/admin/registrations/");
 
-  if (loading) {
+  if (loading || (session && accessLoading)) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-cream text-ink">
         <p className="text-ink/70">Cargando…</p>
@@ -48,7 +49,8 @@ function AdminLayout() {
     return null;
   }
 
-  if (!isSuperAdmin) {
+  const hasAnyAccess = isSuperAdmin || Boolean(access?.activo && access.permisos.length > 0);
+  if (!hasAnyAccess) {
     void navigate({ to: "/app" });
     return null;
   }
