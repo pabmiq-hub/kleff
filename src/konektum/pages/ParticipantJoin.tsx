@@ -261,7 +261,7 @@ const ParticipantJoin = ({
       setQuotaWaitlistEnabled(((data as any).quota_waitlist_enabled ?? true) === true);
 
       setEventExists(true);
-      setEventName(data.name);
+      setEventName(eventNameOverride || data.name);
       setEventDate(normalizeUpcomingEventDate(data.date, data.status));
       setEventTime((data as any).event_time || null);
       setEventLocation((data as any).event_location || null);
