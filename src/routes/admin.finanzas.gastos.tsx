@@ -182,8 +182,9 @@ function GastosPage() {
             <div>
               <Label>Justificante (opcional)</Label>
               <ImagePicker
-                value={form.adjunto_url}
-                onChange={(url) => setForm({ ...form, adjunto_url: url ?? "" })}
+                url={form.adjunto_url}
+                label="Subir justificante"
+                onChange={(url) => setForm({ ...form, adjunto_url: url })}
               />
             </div>
           </div>
