@@ -104,6 +104,7 @@ import { Route as AdminRentalsIndexRouteImport } from './routes/admin.rentals.in
 import { Route as AdminRegistrationsIndexRouteImport } from './routes/admin.registrations.index'
 import { Route as AdminMediaIndexRouteImport } from './routes/admin.media.index'
 import { Route as AdminKonektumIndexRouteImport } from './routes/admin.konektum.index'
+import { Route as AdminFinanzasIndexRouteImport } from './routes/admin.finanzas.index'
 import { Route as AdminContentIndexRouteImport } from './routes/admin.content.index'
 import { Route as AdminBlogIndexRouteImport } from './routes/admin.blog.index'
 import { Route as SSeriesSlugJoinRouteImport } from './routes/s.$seriesSlug.join'
@@ -626,6 +627,11 @@ const AdminKonektumIndexRoute = AdminKonektumIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AdminKonektumRoute,
 } as any)
+const AdminFinanzasIndexRoute = AdminFinanzasIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminFinanzasRoute,
+} as any)
 const AdminContentIndexRoute = AdminContentIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -895,7 +901,7 @@ export interface FileRoutesByFullPath {
   '/$eventSlug/usuario': typeof EventSlugUsuarioRoute
   '/admin/blog': typeof AdminBlogRouteWithChildren
   '/admin/content': typeof AdminContentRouteWithChildren
-  '/admin/finanzas': typeof AdminFinanzasRoute
+  '/admin/finanzas': typeof AdminFinanzasRouteWithChildren
   '/admin/invitations': typeof AdminInvitationsRoute
   '/admin/karma': typeof AdminKarmaRoute
   '/admin/konektum': typeof AdminKonektumRouteWithChildren
@@ -988,6 +994,7 @@ export interface FileRoutesByFullPath {
   '/s/$seriesSlug/join': typeof SSeriesSlugJoinRoute
   '/admin/blog/': typeof AdminBlogIndexRoute
   '/admin/content/': typeof AdminContentIndexRoute
+  '/admin/finanzas/': typeof AdminFinanzasIndexRoute
   '/admin/konektum/': typeof AdminKonektumIndexRoute
   '/admin/media/': typeof AdminMediaIndexRoute
   '/admin/registrations/': typeof AdminRegistrationsIndexRoute
@@ -1033,7 +1040,6 @@ export interface FileRoutesByTo {
   '/$eventSlug/registro': typeof EventSlugRegistroRoute
   '/$eventSlug/seleccion': typeof EventSlugSeleccionRoute
   '/$eventSlug/usuario': typeof EventSlugUsuarioRoute
-  '/admin/finanzas': typeof AdminFinanzasRoute
   '/admin/invitations': typeof AdminInvitationsRoute
   '/admin/karma': typeof AdminKarmaRoute
   '/admin/members': typeof AdminMembersRoute
@@ -1122,6 +1128,7 @@ export interface FileRoutesByTo {
   '/s/$seriesSlug/join': typeof SSeriesSlugJoinRoute
   '/admin/blog': typeof AdminBlogIndexRoute
   '/admin/content': typeof AdminContentIndexRoute
+  '/admin/finanzas': typeof AdminFinanzasIndexRoute
   '/admin/konektum': typeof AdminKonektumIndexRoute
   '/admin/media': typeof AdminMediaIndexRoute
   '/admin/registrations': typeof AdminRegistrationsIndexRoute
@@ -1172,7 +1179,7 @@ export interface FileRoutesById {
   '/$eventSlug/usuario': typeof EventSlugUsuarioRoute
   '/admin/blog': typeof AdminBlogRouteWithChildren
   '/admin/content': typeof AdminContentRouteWithChildren
-  '/admin/finanzas': typeof AdminFinanzasRoute
+  '/admin/finanzas': typeof AdminFinanzasRouteWithChildren
   '/admin/invitations': typeof AdminInvitationsRoute
   '/admin/karma': typeof AdminKarmaRoute
   '/admin/konektum': typeof AdminKonektumRouteWithChildren
@@ -1265,6 +1272,7 @@ export interface FileRoutesById {
   '/s/$seriesSlug/join': typeof SSeriesSlugJoinRoute
   '/admin/blog/': typeof AdminBlogIndexRoute
   '/admin/content/': typeof AdminContentIndexRoute
+  '/admin/finanzas/': typeof AdminFinanzasIndexRoute
   '/admin/konektum/': typeof AdminKonektumIndexRoute
   '/admin/media/': typeof AdminMediaIndexRoute
   '/admin/registrations/': typeof AdminRegistrationsIndexRoute
@@ -1409,6 +1417,7 @@ export interface FileRouteTypes {
     | '/s/$seriesSlug/join'
     | '/admin/blog/'
     | '/admin/content/'
+    | '/admin/finanzas/'
     | '/admin/konektum/'
     | '/admin/media/'
     | '/admin/registrations/'
@@ -1454,7 +1463,6 @@ export interface FileRouteTypes {
     | '/$eventSlug/registro'
     | '/$eventSlug/seleccion'
     | '/$eventSlug/usuario'
-    | '/admin/finanzas'
     | '/admin/invitations'
     | '/admin/karma'
     | '/admin/members'
@@ -1543,6 +1551,7 @@ export interface FileRouteTypes {
     | '/s/$seriesSlug/join'
     | '/admin/blog'
     | '/admin/content'
+    | '/admin/finanzas'
     | '/admin/konektum'
     | '/admin/media'
     | '/admin/registrations'
@@ -1685,6 +1694,7 @@ export interface FileRouteTypes {
     | '/s/$seriesSlug/join'
     | '/admin/blog/'
     | '/admin/content/'
+    | '/admin/finanzas/'
     | '/admin/konektum/'
     | '/admin/media/'
     | '/admin/registrations/'
@@ -2459,6 +2469,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminKonektumIndexRouteImport
       parentRoute: typeof AdminKonektumRoute
     }
+    '/admin/finanzas/': {
+      id: '/admin/finanzas/'
+      path: '/'
+      fullPath: '/admin/finanzas/'
+      preLoaderRoute: typeof AdminFinanzasIndexRouteImport
+      parentRoute: typeof AdminFinanzasRoute
+    }
     '/admin/content/': {
       id: '/admin/content/'
       path: '/'
@@ -2811,6 +2828,18 @@ const AdminContentRouteWithChildren = AdminContentRoute._addFileChildren(
   AdminContentRouteChildren,
 )
 
+interface AdminFinanzasRouteChildren {
+  AdminFinanzasIndexRoute: typeof AdminFinanzasIndexRoute
+}
+
+const AdminFinanzasRouteChildren: AdminFinanzasRouteChildren = {
+  AdminFinanzasIndexRoute: AdminFinanzasIndexRoute,
+}
+
+const AdminFinanzasRouteWithChildren = AdminFinanzasRoute._addFileChildren(
+  AdminFinanzasRouteChildren,
+)
+
 interface AdminKonektumRouteChildren {
   AdminKonektumAnaliticaRoute: typeof AdminKonektumAnaliticaRoute
   AdminKonektumConfiguracionRoute: typeof AdminKonektumConfiguracionRoute
@@ -2875,7 +2904,7 @@ const AdminRentalsRouteWithChildren = AdminRentalsRoute._addFileChildren(
 interface AdminRouteChildren {
   AdminBlogRoute: typeof AdminBlogRouteWithChildren
   AdminContentRoute: typeof AdminContentRouteWithChildren
-  AdminFinanzasRoute: typeof AdminFinanzasRoute
+  AdminFinanzasRoute: typeof AdminFinanzasRouteWithChildren
   AdminInvitationsRoute: typeof AdminInvitationsRoute
   AdminKarmaRoute: typeof AdminKarmaRoute
   AdminKonektumRoute: typeof AdminKonektumRouteWithChildren
@@ -2894,7 +2923,7 @@ interface AdminRouteChildren {
 const AdminRouteChildren: AdminRouteChildren = {
   AdminBlogRoute: AdminBlogRouteWithChildren,
   AdminContentRoute: AdminContentRouteWithChildren,
-  AdminFinanzasRoute: AdminFinanzasRoute,
+  AdminFinanzasRoute: AdminFinanzasRouteWithChildren,
   AdminInvitationsRoute: AdminInvitationsRoute,
   AdminKarmaRoute: AdminKarmaRoute,
   AdminKonektumRoute: AdminKonektumRouteWithChildren,
