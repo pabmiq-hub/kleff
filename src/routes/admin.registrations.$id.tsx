@@ -635,6 +635,7 @@ function ResponsesPanel({ form, questions, readOnly }: { form: RegistrationForm;
           questions={questions}
           paymentRequired={paymentRequired}
           maxGuests={maxGuests}
+          readOnly={readOnly}
           onReminder={(id) => setReminderTarget({ responseId: id, count: 1 })}
           onUpdate={async (id, patch) => {
             try {
