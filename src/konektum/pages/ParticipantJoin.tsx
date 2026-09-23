@@ -207,11 +207,13 @@ const ParticipantJoin = ({
   const normalizeKey = (v: any) =>
     String(v ?? '').toLowerCase().trim().replace(/–/g, '-').replace(/\s+/g, '');
 
-  // Secondary public link: preselect the gender this link is aimed at.
+  // Dedicated public link: the gender is fixed by the link, so we preselect it
+  // and hide the selector from the participant.
+  const genderLocked = Boolean(variantGender);
   useEffect(() => {
     if (!variantGender) return;
     const match = eventGenders.find((g) => normalizeKey(g) === normalizeKey(variantGender));
-    if (match) setGender((prev) => prev || match);
+    setGender((prev) => prev || match || variantGender);
   }, [variantGender, eventGenders]);
 
 
