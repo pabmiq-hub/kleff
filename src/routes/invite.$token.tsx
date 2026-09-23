@@ -17,7 +17,7 @@ import { toast } from "sonner";
 import { useAppLocale } from "@/i18n/app-i18n";
 import { signupDict } from "@/i18n/app/signup";
 import { LOCALES, LOCALE_LABELS } from "@/i18n/config";
-import { optimizeImage } from "@/lib/image-optimize";
+import { optimizeImage, isSupportedImage } from "@/lib/image-optimize";
 
 export const Route = createFileRoute("/invite/$token")({
   head: () => ({
@@ -43,6 +43,7 @@ function InvitePage() {
   const [step, setStep] = useState<"language" | "form">("language");
   const [submitting, setSubmitting] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [optimizingAvatar, setOptimizingAvatar] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [form, setForm] = useState({
     password: "",
@@ -66,16 +67,23 @@ function InvitePage() {
   }
 
   const handleAvatarUpload = async (file: File) => {
-    if (file.size > 2 * 1024 * 1024) {
-      toast.error(t.imageTooBig);
+    if (!isSupportedImage(file)) {
+      toast.error(t.invalidImage);
       return;
     }
+    setOptimizingAvatar(true);
     setUploadingAvatar(true);
     // Use a temp folder + a random uuid; we'll move it on accept... or just leave it.
     // Simpler: use the email + random name (anonymous upload not allowed in policy).
     // Workaround: upload via a server function with service role
     try {
-      const { file: optimized } = await optimizeImage(file, { maxSize: 512, quality: 0.85 });
+      // Compress client-side first so only the optimised version is stored.
+      const { file: optimized } = await optimizeImage(file, {
+        maxSize: 1600,
+        quality: 0.85,
+        maxBytes: 1024 * 1024,
+      });
+      setOptimizingAvatar(false);
       const formData = new FormData();
       formData.append("file", optimized);
       const res = await fetch(`/api/public/upload-invite-avatar?token=${encodeURIComponent(token)}`, {
@@ -89,6 +97,7 @@ function InvitePage() {
     } catch {
       toast.error(t.photoError);
     } finally {
+      setOptimizingAvatar(false);
       setUploadingAvatar(false);
     }
   };
@@ -268,6 +277,11 @@ function InvitePage() {
                   if (f) void handleAvatarUpload(f);
                 }}
               />
+              {uploadingAvatar && (
+                <p className="text-xs text-muted-foreground">
+                  {optimizingAvatar ? t.optimizingImage : t.uploadingPhoto}
+                </p>
+              )}
               {avatarUrl && (
                 <img loading="lazy" decoding="async" src={avatarUrl} alt="" className="mt-2 h-20 w-20 rounded-full object-cover border-2 border-ink" />
               )}

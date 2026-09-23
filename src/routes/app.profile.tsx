@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { optimizeImage } from "@/lib/image-optimize";
+import { optimizeImage, isSupportedImage } from "@/lib/image-optimize";
 import { supabase } from "@/integrations/supabase/client";
 import { getMyProfile, updateMyProfile } from "@/lib/profile.functions";
 import { LudoyaLinkCard } from "@/components/app/LudoyaLinkCard";
@@ -33,6 +33,7 @@ function ProfilePage() {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [optimizing, setOptimizing] = useState(false);
   const [memberNumber, setMemberNumber] = useState<number | null>(null);
   const [form, setForm] = useState({
     fullName: "",
@@ -95,16 +96,24 @@ function ProfilePage() {
   };
 
   const handleAvatarUpload = async (file: File) => {
-    if (file.size > 2 * 1024 * 1024) {
-      toast.error(t.profile.imageTooLargeError);
+    if (!isSupportedImage(file)) {
+      toast.error(t.profile.invalidImageError);
       return;
     }
+    setOptimizing(true);
     setUploading(true);
     try {
+      // Compress in the browser first: any reasonably sized photo becomes a
+      // WebP under 1 MB, so the original never reaches storage.
+      const { file: optimized } = await optimizeImage(file, {
+        maxSize: 1600,
+        quality: 0.85,
+        maxBytes: 1024 * 1024,
+      });
+      setOptimizing(false);
       const { data: sess } = await supabase.auth.getSession();
       const token = sess.session?.access_token;
       if (!token) throw new Error(t.profile.invalidSessionError);
-      const { file: optimized } = await optimizeImage(file, { maxSize: 512, quality: 0.85 });
       const fd = new FormData();
       fd.append("file", optimized);
       const res = await fetch("/api/public/upload-my-avatar", {
@@ -119,6 +128,7 @@ function ProfilePage() {
     } catch (err) {
       toast.error(err instanceof Error ? err.message : t.profile.photoUploadError);
     } finally {
+      setOptimizing(false);
       setUploading(false);
     }
   };
@@ -172,7 +182,13 @@ function ProfilePage() {
               onClick={() => fileRef.current?.click()}
             >
               <Upload className="h-4 w-4 mr-2" />
-              {uploading ? t.profile.uploading : form.avatarUrl ? t.profile.changePhoto : t.profile.uploadPhoto}
+              {optimizing
+                ? t.profile.optimizingImage
+                : uploading
+                  ? t.profile.uploading
+                  : form.avatarUrl
+                    ? t.profile.changePhoto
+                    : t.profile.uploadPhoto}
             </Button>
             {form.avatarUrl && (
               <button
