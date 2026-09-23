@@ -182,6 +182,7 @@ function CatchAll() {
     return (
       <PublicEventPage event={data.event}>
         <ParticipantJoin
+          variant={data.event.variant}
           variantSubtitle={data.event.variantSubtitle}
           variantDescription={data.event.variantDescription}
           variantGender={data.event.variantGender}
