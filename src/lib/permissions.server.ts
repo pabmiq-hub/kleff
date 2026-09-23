@@ -79,3 +79,22 @@ export async function assertPermission(
 export const assertFinanzasRead = (userId: string) => assertPermission(userId, "finanzas");
 export const assertFinanzasWrite = (userId: string) =>
   assertPermission(userId, "finanzas", { minNivel: "escritura" });
+
+/** Inscripciones a las que el usuario tiene acceso ("all" para super admin). */
+export async function allowedFormIds(userId: string): Promise<string[] | "all"> {
+  const access = await getAdminAccess(userId);
+  if (access.isSuperAdmin) return "all";
+  if (!access.activo) throw new Error("Forbidden");
+  const ids = access.permisos
+    .filter((p) => p.recurso === "inscripcion" && p.recurso_id)
+    .map((p) => p.recurso_id as string);
+  if (!ids.length) throw new Error("Forbidden: sin acceso a inscripciones");
+  return ids;
+}
+
+export async function assertFormAccess(userId: string, formId: string): Promise<void> {
+  const ids = await allowedFormIds(userId);
+  if (ids !== "all" && !ids.includes(formId)) {
+    throw new Error("Forbidden: sin acceso a esta inscripción");
+  }
+}
