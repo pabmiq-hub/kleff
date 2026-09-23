@@ -513,10 +513,36 @@ const handler = async (req: Request): Promise<Response> => {
       const processed = new Set<string>();
 
       if (!isProfessional) {
-        for (const sel of selections || []) {
+        // Super likes behave like 'both'; accepted crushes are mutual 'both'.
+        type Sel = { selector_id: string; selected_id: string; selection_type: string | null; is_super_like?: boolean };
+        const augmented: Sel[] = (selections || []).map((s: any) => ({
+          selector_id: s.selector_id,
+          selected_id: s.selected_id,
+          selection_type: s.is_super_like ? 'both' : s.selection_type,
+          is_super_like: !!s.is_super_like,
+        }));
+        const augIdx = new Map<string, number>();
+        augmented.forEach((s, i) => augIdx.set(`${s.selector_id}->${s.selected_id}`, i));
+        for (const cr of (crushRequests || []) as Array<{ requester_id: string; target_id: string }>) {
+          if (!cr.requester_id || !cr.target_id) continue;
+          const upsert = (from: string, to: string) => {
+            const k = `${from}->${to}`;
+            const i = augIdx.get(k);
+            if (i === undefined) {
+              augmented.push({ selector_id: from, selected_id: to, selection_type: 'both', is_super_like: true });
+              augIdx.set(k, augmented.length - 1);
+            } else {
+              augmented[i] = { ...augmented[i], selection_type: 'both', is_super_like: true };
+            }
+          };
+          upsert(cr.requester_id, cr.target_id);
+          upsert(cr.target_id, cr.requester_id);
+        }
+
+        for (const sel of augmented) {
           const key = [sel.selector_id, sel.selected_id].sort().join('-');
           if (processed.has(key)) continue;
-          const reverse = selections?.find(s => s.selector_id === sel.selected_id && s.selected_id === sel.selector_id);
+          const reverse = augmented.find(s => s.selector_id === sel.selected_id && s.selected_id === sel.selector_id);
           if (reverse) {
             const sel1Type = sel.selection_type || 'friendship';
             const sel2Type = reverse.selection_type || 'friendship';
@@ -525,17 +551,18 @@ const handler = async (req: Request): Promise<Response> => {
             if (matchedWith && selector) {
               const hasFriendship = (sel1Type === 'friendship' || sel1Type === 'both') && (sel2Type === 'friendship' || sel2Type === 'both');
               const hasDating = (sel1Type === 'dating' || sel1Type === 'both') && (sel2Type === 'dating' || sel2Type === 'both');
-              
+              const isSuperMatch = !!sel.is_super_like || !!reverse.is_super_like;
+
               if (!matchesByParticipant.has(sel.selector_id)) matchesByParticipant.set(sel.selector_id, { friendship: [], dating: [] });
               if (!matchesByParticipant.has(sel.selected_id)) matchesByParticipant.set(sel.selected_id, { friendship: [], dating: [] });
-              
+
               if (hasFriendship) {
-                matchesByParticipant.get(sel.selector_id)!.friendship.push({ name: formatAnonymousName(matchedWith.name), phone: matchedWith.phone });
-                matchesByParticipant.get(sel.selected_id)!.friendship.push({ name: formatAnonymousName(selector.name), phone: selector.phone });
+                matchesByParticipant.get(sel.selector_id)!.friendship.push({ name: formatAnonymousName(matchedWith.name), phone: matchedWith.phone, isSuperMatch });
+                matchesByParticipant.get(sel.selected_id)!.friendship.push({ name: formatAnonymousName(selector.name), phone: selector.phone, isSuperMatch });
               }
               if (hasDating) {
-                matchesByParticipant.get(sel.selector_id)!.dating.push({ name: formatAnonymousName(matchedWith.name), phone: matchedWith.phone });
-                matchesByParticipant.get(sel.selected_id)!.dating.push({ name: formatAnonymousName(selector.name), phone: selector.phone });
+                matchesByParticipant.get(sel.selector_id)!.dating.push({ name: formatAnonymousName(matchedWith.name), phone: matchedWith.phone, isSuperMatch });
+                matchesByParticipant.get(sel.selected_id)!.dating.push({ name: formatAnonymousName(selector.name), phone: selector.phone, isSuperMatch });
               }
             }
             processed.add(key);
