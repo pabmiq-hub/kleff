@@ -799,11 +799,15 @@ function ResponsesTable({ responses, questions, paymentRequired, maxGuests, read
                     </td>
                   )}
                   <td className="px-3 py-2 whitespace-nowrap">
-                    {!cancelled && r.email_contact && (
-                      <Button size="sm" variant="ghost" onClick={() => onReminder(r.id)} title="Reenviar recordatorio" className="h-8 w-8 p-0 text-ink/60 hover:text-coral"><Mail className="h-3.5 w-3.5" /></Button>
+                    {!readOnly && (
+                      <>
+                        {!cancelled && r.email_contact && (
+                          <Button size="sm" variant="ghost" onClick={() => onReminder(r.id)} title="Reenviar recordatorio" className="h-8 w-8 p-0 text-ink/60 hover:text-coral"><Mail className="h-3.5 w-3.5" /></Button>
+                        )}
+                        <Button size="sm" variant="ghost" onClick={() => setNotesFor((n) => n === r.id ? null : r.id)} className="h-8 px-2 text-xs text-ink/60 hover:text-ink">Notas</Button>
+                        <Button size="sm" variant="ghost" onClick={() => onDelete(r.id)} className="text-ink/60 hover:text-red-400 hover:bg-red-500/10 h-8 w-8 p-0"><Trash2 className="h-3.5 w-3.5" /></Button>
+                      </>
                     )}
-                    <Button size="sm" variant="ghost" onClick={() => setNotesFor((n) => n === r.id ? null : r.id)} className="h-8 px-2 text-xs text-ink/60 hover:text-ink">Notas</Button>
-                    <Button size="sm" variant="ghost" onClick={() => onDelete(r.id)} className="text-ink/60 hover:text-red-400 hover:bg-red-500/10 h-8 w-8 p-0"><Trash2 className="h-3.5 w-3.5" /></Button>
                   </td>
                 </tr>
                 {notesFor === r.id && (
