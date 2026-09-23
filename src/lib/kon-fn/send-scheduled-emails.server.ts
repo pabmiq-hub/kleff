@@ -640,6 +640,20 @@ const handler = async (req: Request): Promise<Response> => {
           participant.name
         );
 
+        try {
+          await supabase.from("email_logs").insert({
+            event_id: event.id,
+            participant_id: participant.id,
+            email_type: isProfessional ? 'connection' : 'match',
+            status: result.success ? 'sent' : 'failed',
+            error_message: result.error || null,
+            sent_at: result.success ? new Date().toISOString() : null,
+          });
+        } catch (e) {
+          console.error("Failed to log email result:", e);
+        }
+
+
         if (!result.success) {
           errors.push(`${participant.name}: ${result.error}`);
           stats.failed++;
