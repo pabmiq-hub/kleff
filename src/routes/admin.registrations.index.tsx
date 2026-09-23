@@ -22,6 +22,7 @@ type FormRow = {
 
 function AdminRegistrations() {
   const router = useRouter();
+  const { isSuperAdmin } = useAdminAccess();
   const listFn = useServerFn(adminListForms);
   const createFn = useServerFn(adminCreateForm);
   const deleteFn = useServerFn(adminDeleteForm);
