@@ -10,6 +10,17 @@ const Deno = {
 // «Timeline» icebreaker: each participant orders their own milestones and the
 // table takes turns guessing the protagonist's real chronological order.
 import {
+  anonymizeName,
+  applyReady,
+  corsHeaders,
+  effectiveStatus,
+  entryToken,
+  fetchVotesAndRewards,
+  json,
+  loadContext,
+  profileSignals,
+  registerVote,
+  seededShuffle,
 } from "@/lib/kon-fn/_shared/icebreakers";
 
 const GAME = "timeline";
