@@ -95,16 +95,24 @@ function ProfilePage() {
   };
 
   const handleAvatarUpload = async (file: File) => {
-    if (file.size > 2 * 1024 * 1024) {
-      toast.error(t.profile.imageTooLargeError);
+    if (!isSupportedImage(file)) {
+      toast.error(t.profile.invalidImageError);
       return;
     }
+    setOptimizing(true);
     setUploading(true);
     try {
+      // Compress in the browser first: any reasonably sized photo becomes a
+      // WebP under 1 MB, so the original never reaches storage.
+      const { file: optimized } = await optimizeImage(file, {
+        maxSize: 1600,
+        quality: 0.85,
+        maxBytes: 1024 * 1024,
+      });
+      setOptimizing(false);
       const { data: sess } = await supabase.auth.getSession();
       const token = sess.session?.access_token;
       if (!token) throw new Error(t.profile.invalidSessionError);
-      const { file: optimized } = await optimizeImage(file, { maxSize: 512, quality: 0.85 });
       const fd = new FormData();
       fd.append("file", optimized);
       const res = await fetch("/api/public/upload-my-avatar", {
