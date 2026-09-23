@@ -564,7 +564,7 @@ function OptionsEditor({ value, onChange }: { value: RegistrationQuestion["optio
 
 // ----------------- Responses Panel -----------------
 
-function ResponsesPanel({ form, questions }: { form: RegistrationForm; questions: RegistrationQuestion[] }) {
+function ResponsesPanel({ form, questions, readOnly }: { form: RegistrationForm; questions: RegistrationQuestion[]; readOnly?: boolean }) {
   const formId = form.id;
   const paymentRequired = !!form.payment_required;
   const maxGuests = form.allow_guests ? Math.max(1, form.max_guests_per_response ?? 1) : 0;
