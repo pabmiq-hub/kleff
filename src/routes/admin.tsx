@@ -1,5 +1,6 @@
 import { createFileRoute, Outlet, Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useAuth } from "@/auth/AuthProvider";
+import { useAdminAccess } from "@/hooks/useAdminAccess";
 import { Button } from "@/components/ui/button";
 import { NotificationsBell } from "@/components/app/NotificationsBell";
 import {
@@ -17,6 +18,8 @@ import {
   Sparkles,
   Vote,
   Heart,
+  Euro,
+  KeyRound,
 } from "lucide-react";
 
 export const Route = createFileRoute("/admin")({
@@ -30,12 +33,13 @@ export const Route = createFileRoute("/admin")({
 });
 
 function AdminLayout() {
-  const { session, loading, isSuperAdmin, user, signOut } = useAuth();
+  const { session, loading, user, signOut } = useAuth();
+  const { access, loading: accessLoading, can, isSuperAdmin } = useAdminAccess();
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const wideContent = pathname.startsWith("/admin/registrations/");
 
-  if (loading) {
+  if (loading || (session && accessLoading)) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-cream text-ink">
         <p className="text-ink/70">Cargando…</p>
@@ -48,7 +52,8 @@ function AdminLayout() {
     return null;
   }
 
-  if (!isSuperAdmin) {
+  const hasAnyAccess = isSuperAdmin || Boolean(access?.activo && access.permisos.length > 0);
+  if (!hasAnyAccess) {
     void navigate({ to: "/app" });
     return null;
   }
@@ -68,19 +73,36 @@ function AdminLayout() {
           </span>
         </Link>
         <nav className="flex md:flex-col gap-1 flex-1 ml-auto md:ml-0">
-          <AdminNavLink to="/admin" exact icon={<LayoutDashboard className="h-4 w-4" />} label="Resumen" />
-          <AdminNavLink to="/admin/members" icon={<Users className="h-4 w-4" />} label="Socios" />
-          <AdminNavLink to="/admin/invitations" icon={<Mail className="h-4 w-4" />} label="Invitaciones" />
-          <AdminNavLink to="/admin/rentals" icon={<Dices className="h-4 w-4" />} label="Alquiler" />
-          <AdminNavLink to="/admin/content" icon={<FileText className="h-4 w-4" />} label="Contenido" />
-          <AdminNavLink to="/admin/registrations" icon={<ClipboardList className="h-4 w-4" />} label="Inscripciones" />
-          <AdminNavLink to="/admin/blog" icon={<Newspaper className="h-4 w-4" />} label="Blog" />
-          <AdminNavLink to="/admin/media" icon={<Newspaper className="h-4 w-4" />} label="Medios" />
-          <AdminNavLink to="/admin/team" icon={<UserCircle2 className="h-4 w-4" />} label="Equipo" />
-          <AdminNavLink to="/admin/polls" icon={<Vote className="h-4 w-4" />} label="Votaciones" />
-          <AdminNavLink to="/admin/karma" icon={<Sparkles className="h-4 w-4" />} label="Karma" />
-          <AdminNavLink to="/admin/konektum" icon={<Heart className="h-4 w-4" />} label="Konektum" />
-
+          {isSuperAdmin && (
+            <>
+              <AdminNavLink to="/admin" exact icon={<LayoutDashboard className="h-4 w-4" />} label="Resumen" />
+              <AdminNavLink to="/admin/members" icon={<Users className="h-4 w-4" />} label="Socios" />
+              <AdminNavLink to="/admin/invitations" icon={<Mail className="h-4 w-4" />} label="Invitaciones" />
+              <AdminNavLink to="/admin/rentals" icon={<Dices className="h-4 w-4" />} label="Alquiler" />
+              <AdminNavLink to="/admin/content" icon={<FileText className="h-4 w-4" />} label="Contenido" />
+            </>
+          )}
+          {(isSuperAdmin || can("inscripcion")) && (
+            <AdminNavLink to="/admin/registrations" icon={<ClipboardList className="h-4 w-4" />} label="Inscripciones" />
+          )}
+          {can("finanzas") && (
+            <AdminNavLink to="/admin/finanzas" icon={<Euro className="h-4 w-4" />} label="Finanzas" />
+          )}
+          {can("blog") && <AdminNavLink to="/admin/blog" icon={<Newspaper className="h-4 w-4" />} label="Blog" />}
+          {isSuperAdmin && (
+            <>
+              <AdminNavLink to="/admin/media" icon={<Newspaper className="h-4 w-4" />} label="Medios" />
+              <AdminNavLink to="/admin/team" icon={<UserCircle2 className="h-4 w-4" />} label="Equipo" />
+              <AdminNavLink to="/admin/polls" icon={<Vote className="h-4 w-4" />} label="Votaciones" />
+              <AdminNavLink to="/admin/karma" icon={<Sparkles className="h-4 w-4" />} label="Karma" />
+            </>
+          )}
+          {can("konektum") && (
+            <AdminNavLink to="/admin/konektum" icon={<Heart className="h-4 w-4" />} label="Konektum" />
+          )}
+          {isSuperAdmin && (
+            <AdminNavLink to="/admin/usuarios" icon={<KeyRound className="h-4 w-4" />} label="Usuarios y permisos" />
+          )}
         </nav>
         <div className="md:mt-auto space-y-1">
           <Link

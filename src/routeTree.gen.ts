@@ -82,6 +82,7 @@ import { Route as AppKleffersRouteImport } from './routes/app.kleffers'
 import { Route as AppKarmaRouteImport } from './routes/app.karma'
 import { Route as AppInsigniasRouteImport } from './routes/app.insignias'
 import { Route as AppCarnetRouteImport } from './routes/app.carnet'
+import { Route as AdminUsuariosRouteImport } from './routes/admin.usuarios'
 import { Route as AdminTeamRouteImport } from './routes/admin.team'
 import { Route as AdminRentalsRouteImport } from './routes/admin.rentals'
 import { Route as AdminRegistrationsRouteImport } from './routes/admin.registrations'
@@ -90,6 +91,7 @@ import { Route as AdminMembersRouteImport } from './routes/admin.members'
 import { Route as AdminKonektumRouteImport } from './routes/admin.konektum'
 import { Route as AdminKarmaRouteImport } from './routes/admin.karma'
 import { Route as AdminInvitationsRouteImport } from './routes/admin.invitations'
+import { Route as AdminFinanzasRouteImport } from './routes/admin.finanzas'
 import { Route as AdminContentRouteImport } from './routes/admin.content'
 import { Route as AdminBlogRouteImport } from './routes/admin.blog'
 import { Route as EventSlugUsuarioRouteImport } from './routes/$eventSlug.usuario'
@@ -103,6 +105,7 @@ import { Route as AdminRentalsIndexRouteImport } from './routes/admin.rentals.in
 import { Route as AdminRegistrationsIndexRouteImport } from './routes/admin.registrations.index'
 import { Route as AdminMediaIndexRouteImport } from './routes/admin.media.index'
 import { Route as AdminKonektumIndexRouteImport } from './routes/admin.konektum.index'
+import { Route as AdminFinanzasIndexRouteImport } from './routes/admin.finanzas.index'
 import { Route as AdminContentIndexRouteImport } from './routes/admin.content.index'
 import { Route as AdminBlogIndexRouteImport } from './routes/admin.blog.index'
 import { Route as SSeriesSlugJoinRouteImport } from './routes/s.$seriesSlug.join'
@@ -134,6 +137,13 @@ import { Route as AdminKonektumPlantillasRouteImport } from './routes/admin.kone
 import { Route as AdminKonektumEmailRouteImport } from './routes/admin.konektum.email'
 import { Route as AdminKonektumConfiguracionRouteImport } from './routes/admin.konektum.configuracion'
 import { Route as AdminKonektumAnaliticaRouteImport } from './routes/admin.konektum.analitica'
+import { Route as AdminFinanzasImpuestosRouteImport } from './routes/admin.finanzas.impuestos'
+import { Route as AdminFinanzasGastosRouteImport } from './routes/admin.finanzas.gastos'
+import { Route as AdminFinanzasFacturasRouteImport } from './routes/admin.finanzas.facturas'
+import { Route as AdminFinanzasCuotasRouteImport } from './routes/admin.finanzas.cuotas'
+import { Route as AdminFinanzasColaboracionesRouteImport } from './routes/admin.finanzas.colaboraciones'
+import { Route as AdminFinanzasCategoriasRouteImport } from './routes/admin.finanzas.categorias'
+import { Route as AdminFinanzasAportacionesRouteImport } from './routes/admin.finanzas.aportaciones'
 import { Route as AdminContentUrlsRouteImport } from './routes/admin.content.urls'
 import { Route as AdminContentRedirectsRouteImport } from './routes/admin.content.redirects'
 import { Route as AdminContentPageKeyRouteImport } from './routes/admin.content.$pageKey'
@@ -515,6 +525,11 @@ const AppCarnetRoute = AppCarnetRouteImport.update({
   path: '/carnet',
   getParentRoute: () => AppRoute,
 } as any)
+const AdminUsuariosRoute = AdminUsuariosRouteImport.update({
+  id: '/usuarios',
+  path: '/usuarios',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminTeamRoute = AdminTeamRouteImport.update({
   id: '/team',
   path: '/team',
@@ -553,6 +568,11 @@ const AdminKarmaRoute = AdminKarmaRouteImport.update({
 const AdminInvitationsRoute = AdminInvitationsRouteImport.update({
   id: '/invitations',
   path: '/invitations',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminFinanzasRoute = AdminFinanzasRouteImport.update({
+  id: '/finanzas',
+  path: '/finanzas',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminContentRoute = AdminContentRouteImport.update({
@@ -619,6 +639,11 @@ const AdminKonektumIndexRoute = AdminKonektumIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => AdminKonektumRoute,
+} as any)
+const AdminFinanzasIndexRoute = AdminFinanzasIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminFinanzasRoute,
 } as any)
 const AdminContentIndexRoute = AdminContentIndexRouteImport.update({
   id: '/',
@@ -777,6 +802,43 @@ const AdminKonektumAnaliticaRoute = AdminKonektumAnaliticaRouteImport.update({
   path: '/analitica',
   getParentRoute: () => AdminKonektumRoute,
 } as any)
+const AdminFinanzasImpuestosRoute = AdminFinanzasImpuestosRouteImport.update({
+  id: '/impuestos',
+  path: '/impuestos',
+  getParentRoute: () => AdminFinanzasRoute,
+} as any)
+const AdminFinanzasGastosRoute = AdminFinanzasGastosRouteImport.update({
+  id: '/gastos',
+  path: '/gastos',
+  getParentRoute: () => AdminFinanzasRoute,
+} as any)
+const AdminFinanzasFacturasRoute = AdminFinanzasFacturasRouteImport.update({
+  id: '/facturas',
+  path: '/facturas',
+  getParentRoute: () => AdminFinanzasRoute,
+} as any)
+const AdminFinanzasCuotasRoute = AdminFinanzasCuotasRouteImport.update({
+  id: '/cuotas',
+  path: '/cuotas',
+  getParentRoute: () => AdminFinanzasRoute,
+} as any)
+const AdminFinanzasColaboracionesRoute =
+  AdminFinanzasColaboracionesRouteImport.update({
+    id: '/colaboraciones',
+    path: '/colaboraciones',
+    getParentRoute: () => AdminFinanzasRoute,
+  } as any)
+const AdminFinanzasCategoriasRoute = AdminFinanzasCategoriasRouteImport.update({
+  id: '/categorias',
+  path: '/categorias',
+  getParentRoute: () => AdminFinanzasRoute,
+} as any)
+const AdminFinanzasAportacionesRoute =
+  AdminFinanzasAportacionesRouteImport.update({
+    id: '/aportaciones',
+    path: '/aportaciones',
+    getParentRoute: () => AdminFinanzasRoute,
+  } as any)
 const AdminContentUrlsRoute = AdminContentUrlsRouteImport.update({
   id: '/urls',
   path: '/urls',
@@ -889,6 +951,7 @@ export interface FileRoutesByFullPath {
   '/$eventSlug/usuario': typeof EventSlugUsuarioRoute
   '/admin/blog': typeof AdminBlogRouteWithChildren
   '/admin/content': typeof AdminContentRouteWithChildren
+  '/admin/finanzas': typeof AdminFinanzasRouteWithChildren
   '/admin/invitations': typeof AdminInvitationsRoute
   '/admin/karma': typeof AdminKarmaRoute
   '/admin/konektum': typeof AdminKonektumRouteWithChildren
@@ -897,6 +960,7 @@ export interface FileRoutesByFullPath {
   '/admin/registrations': typeof AdminRegistrationsRouteWithChildren
   '/admin/rentals': typeof AdminRentalsRouteWithChildren
   '/admin/team': typeof AdminTeamRoute
+  '/admin/usuarios': typeof AdminUsuariosRoute
   '/app/carnet': typeof AppCarnetRoute
   '/app/insignias': typeof AppInsigniasRoute
   '/app/karma': typeof AppKarmaRoute
@@ -950,6 +1014,13 @@ export interface FileRoutesByFullPath {
   '/admin/content/$pageKey': typeof AdminContentPageKeyRoute
   '/admin/content/redirects': typeof AdminContentRedirectsRoute
   '/admin/content/urls': typeof AdminContentUrlsRoute
+  '/admin/finanzas/aportaciones': typeof AdminFinanzasAportacionesRoute
+  '/admin/finanzas/categorias': typeof AdminFinanzasCategoriasRoute
+  '/admin/finanzas/colaboraciones': typeof AdminFinanzasColaboracionesRoute
+  '/admin/finanzas/cuotas': typeof AdminFinanzasCuotasRoute
+  '/admin/finanzas/facturas': typeof AdminFinanzasFacturasRoute
+  '/admin/finanzas/gastos': typeof AdminFinanzasGastosRoute
+  '/admin/finanzas/impuestos': typeof AdminFinanzasImpuestosRoute
   '/admin/konektum/analitica': typeof AdminKonektumAnaliticaRoute
   '/admin/konektum/configuracion': typeof AdminKonektumConfiguracionRoute
   '/admin/konektum/email': typeof AdminKonektumEmailRoute
@@ -981,6 +1052,7 @@ export interface FileRoutesByFullPath {
   '/s/$seriesSlug/join': typeof SSeriesSlugJoinRoute
   '/admin/blog/': typeof AdminBlogIndexRoute
   '/admin/content/': typeof AdminContentIndexRoute
+  '/admin/finanzas/': typeof AdminFinanzasIndexRoute
   '/admin/konektum/': typeof AdminKonektumIndexRoute
   '/admin/media/': typeof AdminMediaIndexRoute
   '/admin/registrations/': typeof AdminRegistrationsIndexRoute
@@ -1031,6 +1103,7 @@ export interface FileRoutesByTo {
   '/admin/members': typeof AdminMembersRoute
   '/admin/polls': typeof AdminPollsRoute
   '/admin/team': typeof AdminTeamRoute
+  '/admin/usuarios': typeof AdminUsuariosRoute
   '/app/carnet': typeof AppCarnetRoute
   '/app/insignias': typeof AppInsigniasRoute
   '/app/karma': typeof AppKarmaRoute
@@ -1083,6 +1156,13 @@ export interface FileRoutesByTo {
   '/admin/content/$pageKey': typeof AdminContentPageKeyRoute
   '/admin/content/redirects': typeof AdminContentRedirectsRoute
   '/admin/content/urls': typeof AdminContentUrlsRoute
+  '/admin/finanzas/aportaciones': typeof AdminFinanzasAportacionesRoute
+  '/admin/finanzas/categorias': typeof AdminFinanzasCategoriasRoute
+  '/admin/finanzas/colaboraciones': typeof AdminFinanzasColaboracionesRoute
+  '/admin/finanzas/cuotas': typeof AdminFinanzasCuotasRoute
+  '/admin/finanzas/facturas': typeof AdminFinanzasFacturasRoute
+  '/admin/finanzas/gastos': typeof AdminFinanzasGastosRoute
+  '/admin/finanzas/impuestos': typeof AdminFinanzasImpuestosRoute
   '/admin/konektum/analitica': typeof AdminKonektumAnaliticaRoute
   '/admin/konektum/configuracion': typeof AdminKonektumConfiguracionRoute
   '/admin/konektum/email': typeof AdminKonektumEmailRoute
@@ -1114,6 +1194,7 @@ export interface FileRoutesByTo {
   '/s/$seriesSlug/join': typeof SSeriesSlugJoinRoute
   '/admin/blog': typeof AdminBlogIndexRoute
   '/admin/content': typeof AdminContentIndexRoute
+  '/admin/finanzas': typeof AdminFinanzasIndexRoute
   '/admin/konektum': typeof AdminKonektumIndexRoute
   '/admin/media': typeof AdminMediaIndexRoute
   '/admin/registrations': typeof AdminRegistrationsIndexRoute
@@ -1164,6 +1245,7 @@ export interface FileRoutesById {
   '/$eventSlug/usuario': typeof EventSlugUsuarioRoute
   '/admin/blog': typeof AdminBlogRouteWithChildren
   '/admin/content': typeof AdminContentRouteWithChildren
+  '/admin/finanzas': typeof AdminFinanzasRouteWithChildren
   '/admin/invitations': typeof AdminInvitationsRoute
   '/admin/karma': typeof AdminKarmaRoute
   '/admin/konektum': typeof AdminKonektumRouteWithChildren
@@ -1172,6 +1254,7 @@ export interface FileRoutesById {
   '/admin/registrations': typeof AdminRegistrationsRouteWithChildren
   '/admin/rentals': typeof AdminRentalsRouteWithChildren
   '/admin/team': typeof AdminTeamRoute
+  '/admin/usuarios': typeof AdminUsuariosRoute
   '/app/carnet': typeof AppCarnetRoute
   '/app/insignias': typeof AppInsigniasRoute
   '/app/karma': typeof AppKarmaRoute
@@ -1225,6 +1308,13 @@ export interface FileRoutesById {
   '/admin/content/$pageKey': typeof AdminContentPageKeyRoute
   '/admin/content/redirects': typeof AdminContentRedirectsRoute
   '/admin/content/urls': typeof AdminContentUrlsRoute
+  '/admin/finanzas/aportaciones': typeof AdminFinanzasAportacionesRoute
+  '/admin/finanzas/categorias': typeof AdminFinanzasCategoriasRoute
+  '/admin/finanzas/colaboraciones': typeof AdminFinanzasColaboracionesRoute
+  '/admin/finanzas/cuotas': typeof AdminFinanzasCuotasRoute
+  '/admin/finanzas/facturas': typeof AdminFinanzasFacturasRoute
+  '/admin/finanzas/gastos': typeof AdminFinanzasGastosRoute
+  '/admin/finanzas/impuestos': typeof AdminFinanzasImpuestosRoute
   '/admin/konektum/analitica': typeof AdminKonektumAnaliticaRoute
   '/admin/konektum/configuracion': typeof AdminKonektumConfiguracionRoute
   '/admin/konektum/email': typeof AdminKonektumEmailRoute
@@ -1256,6 +1346,7 @@ export interface FileRoutesById {
   '/s/$seriesSlug/join': typeof SSeriesSlugJoinRoute
   '/admin/blog/': typeof AdminBlogIndexRoute
   '/admin/content/': typeof AdminContentIndexRoute
+  '/admin/finanzas/': typeof AdminFinanzasIndexRoute
   '/admin/konektum/': typeof AdminKonektumIndexRoute
   '/admin/media/': typeof AdminMediaIndexRoute
   '/admin/registrations/': typeof AdminRegistrationsIndexRoute
@@ -1307,6 +1398,7 @@ export interface FileRouteTypes {
     | '/$eventSlug/usuario'
     | '/admin/blog'
     | '/admin/content'
+    | '/admin/finanzas'
     | '/admin/invitations'
     | '/admin/karma'
     | '/admin/konektum'
@@ -1315,6 +1407,7 @@ export interface FileRouteTypes {
     | '/admin/registrations'
     | '/admin/rentals'
     | '/admin/team'
+    | '/admin/usuarios'
     | '/app/carnet'
     | '/app/insignias'
     | '/app/karma'
@@ -1368,6 +1461,13 @@ export interface FileRouteTypes {
     | '/admin/content/$pageKey'
     | '/admin/content/redirects'
     | '/admin/content/urls'
+    | '/admin/finanzas/aportaciones'
+    | '/admin/finanzas/categorias'
+    | '/admin/finanzas/colaboraciones'
+    | '/admin/finanzas/cuotas'
+    | '/admin/finanzas/facturas'
+    | '/admin/finanzas/gastos'
+    | '/admin/finanzas/impuestos'
     | '/admin/konektum/analitica'
     | '/admin/konektum/configuracion'
     | '/admin/konektum/email'
@@ -1399,6 +1499,7 @@ export interface FileRouteTypes {
     | '/s/$seriesSlug/join'
     | '/admin/blog/'
     | '/admin/content/'
+    | '/admin/finanzas/'
     | '/admin/konektum/'
     | '/admin/media/'
     | '/admin/registrations/'
@@ -1449,6 +1550,7 @@ export interface FileRouteTypes {
     | '/admin/members'
     | '/admin/polls'
     | '/admin/team'
+    | '/admin/usuarios'
     | '/app/carnet'
     | '/app/insignias'
     | '/app/karma'
@@ -1501,6 +1603,13 @@ export interface FileRouteTypes {
     | '/admin/content/$pageKey'
     | '/admin/content/redirects'
     | '/admin/content/urls'
+    | '/admin/finanzas/aportaciones'
+    | '/admin/finanzas/categorias'
+    | '/admin/finanzas/colaboraciones'
+    | '/admin/finanzas/cuotas'
+    | '/admin/finanzas/facturas'
+    | '/admin/finanzas/gastos'
+    | '/admin/finanzas/impuestos'
     | '/admin/konektum/analitica'
     | '/admin/konektum/configuracion'
     | '/admin/konektum/email'
@@ -1532,6 +1641,7 @@ export interface FileRouteTypes {
     | '/s/$seriesSlug/join'
     | '/admin/blog'
     | '/admin/content'
+    | '/admin/finanzas'
     | '/admin/konektum'
     | '/admin/media'
     | '/admin/registrations'
@@ -1581,6 +1691,7 @@ export interface FileRouteTypes {
     | '/$eventSlug/usuario'
     | '/admin/blog'
     | '/admin/content'
+    | '/admin/finanzas'
     | '/admin/invitations'
     | '/admin/karma'
     | '/admin/konektum'
@@ -1589,6 +1700,7 @@ export interface FileRouteTypes {
     | '/admin/registrations'
     | '/admin/rentals'
     | '/admin/team'
+    | '/admin/usuarios'
     | '/app/carnet'
     | '/app/insignias'
     | '/app/karma'
@@ -1642,6 +1754,13 @@ export interface FileRouteTypes {
     | '/admin/content/$pageKey'
     | '/admin/content/redirects'
     | '/admin/content/urls'
+    | '/admin/finanzas/aportaciones'
+    | '/admin/finanzas/categorias'
+    | '/admin/finanzas/colaboraciones'
+    | '/admin/finanzas/cuotas'
+    | '/admin/finanzas/facturas'
+    | '/admin/finanzas/gastos'
+    | '/admin/finanzas/impuestos'
     | '/admin/konektum/analitica'
     | '/admin/konektum/configuracion'
     | '/admin/konektum/email'
@@ -1673,6 +1792,7 @@ export interface FileRouteTypes {
     | '/s/$seriesSlug/join'
     | '/admin/blog/'
     | '/admin/content/'
+    | '/admin/finanzas/'
     | '/admin/konektum/'
     | '/admin/media/'
     | '/admin/registrations/'
@@ -2293,6 +2413,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppCarnetRouteImport
       parentRoute: typeof AppRoute
     }
+    '/admin/usuarios': {
+      id: '/admin/usuarios'
+      path: '/usuarios'
+      fullPath: '/admin/usuarios'
+      preLoaderRoute: typeof AdminUsuariosRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/team': {
       id: '/admin/team'
       path: '/team'
@@ -2347,6 +2474,13 @@ declare module '@tanstack/react-router' {
       path: '/invitations'
       fullPath: '/admin/invitations'
       preLoaderRoute: typeof AdminInvitationsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/finanzas': {
+      id: '/admin/finanzas'
+      path: '/finanzas'
+      fullPath: '/admin/finanzas'
+      preLoaderRoute: typeof AdminFinanzasRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/content': {
@@ -2439,6 +2573,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/konektum/'
       preLoaderRoute: typeof AdminKonektumIndexRouteImport
       parentRoute: typeof AdminKonektumRoute
+    }
+    '/admin/finanzas/': {
+      id: '/admin/finanzas/'
+      path: '/'
+      fullPath: '/admin/finanzas/'
+      preLoaderRoute: typeof AdminFinanzasIndexRouteImport
+      parentRoute: typeof AdminFinanzasRoute
     }
     '/admin/content/': {
       id: '/admin/content/'
@@ -2657,6 +2798,55 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminKonektumAnaliticaRouteImport
       parentRoute: typeof AdminKonektumRoute
     }
+    '/admin/finanzas/impuestos': {
+      id: '/admin/finanzas/impuestos'
+      path: '/impuestos'
+      fullPath: '/admin/finanzas/impuestos'
+      preLoaderRoute: typeof AdminFinanzasImpuestosRouteImport
+      parentRoute: typeof AdminFinanzasRoute
+    }
+    '/admin/finanzas/gastos': {
+      id: '/admin/finanzas/gastos'
+      path: '/gastos'
+      fullPath: '/admin/finanzas/gastos'
+      preLoaderRoute: typeof AdminFinanzasGastosRouteImport
+      parentRoute: typeof AdminFinanzasRoute
+    }
+    '/admin/finanzas/facturas': {
+      id: '/admin/finanzas/facturas'
+      path: '/facturas'
+      fullPath: '/admin/finanzas/facturas'
+      preLoaderRoute: typeof AdminFinanzasFacturasRouteImport
+      parentRoute: typeof AdminFinanzasRoute
+    }
+    '/admin/finanzas/cuotas': {
+      id: '/admin/finanzas/cuotas'
+      path: '/cuotas'
+      fullPath: '/admin/finanzas/cuotas'
+      preLoaderRoute: typeof AdminFinanzasCuotasRouteImport
+      parentRoute: typeof AdminFinanzasRoute
+    }
+    '/admin/finanzas/colaboraciones': {
+      id: '/admin/finanzas/colaboraciones'
+      path: '/colaboraciones'
+      fullPath: '/admin/finanzas/colaboraciones'
+      preLoaderRoute: typeof AdminFinanzasColaboracionesRouteImport
+      parentRoute: typeof AdminFinanzasRoute
+    }
+    '/admin/finanzas/categorias': {
+      id: '/admin/finanzas/categorias'
+      path: '/categorias'
+      fullPath: '/admin/finanzas/categorias'
+      preLoaderRoute: typeof AdminFinanzasCategoriasRouteImport
+      parentRoute: typeof AdminFinanzasRoute
+    }
+    '/admin/finanzas/aportaciones': {
+      id: '/admin/finanzas/aportaciones'
+      path: '/aportaciones'
+      fullPath: '/admin/finanzas/aportaciones'
+      preLoaderRoute: typeof AdminFinanzasAportacionesRouteImport
+      parentRoute: typeof AdminFinanzasRoute
+    }
     '/admin/content/urls': {
       id: '/admin/content/urls'
       path: '/urls'
@@ -2792,6 +2982,32 @@ const AdminContentRouteWithChildren = AdminContentRoute._addFileChildren(
   AdminContentRouteChildren,
 )
 
+interface AdminFinanzasRouteChildren {
+  AdminFinanzasAportacionesRoute: typeof AdminFinanzasAportacionesRoute
+  AdminFinanzasCategoriasRoute: typeof AdminFinanzasCategoriasRoute
+  AdminFinanzasColaboracionesRoute: typeof AdminFinanzasColaboracionesRoute
+  AdminFinanzasCuotasRoute: typeof AdminFinanzasCuotasRoute
+  AdminFinanzasFacturasRoute: typeof AdminFinanzasFacturasRoute
+  AdminFinanzasGastosRoute: typeof AdminFinanzasGastosRoute
+  AdminFinanzasImpuestosRoute: typeof AdminFinanzasImpuestosRoute
+  AdminFinanzasIndexRoute: typeof AdminFinanzasIndexRoute
+}
+
+const AdminFinanzasRouteChildren: AdminFinanzasRouteChildren = {
+  AdminFinanzasAportacionesRoute: AdminFinanzasAportacionesRoute,
+  AdminFinanzasCategoriasRoute: AdminFinanzasCategoriasRoute,
+  AdminFinanzasColaboracionesRoute: AdminFinanzasColaboracionesRoute,
+  AdminFinanzasCuotasRoute: AdminFinanzasCuotasRoute,
+  AdminFinanzasFacturasRoute: AdminFinanzasFacturasRoute,
+  AdminFinanzasGastosRoute: AdminFinanzasGastosRoute,
+  AdminFinanzasImpuestosRoute: AdminFinanzasImpuestosRoute,
+  AdminFinanzasIndexRoute: AdminFinanzasIndexRoute,
+}
+
+const AdminFinanzasRouteWithChildren = AdminFinanzasRoute._addFileChildren(
+  AdminFinanzasRouteChildren,
+)
+
 interface AdminKonektumRouteChildren {
   AdminKonektumAnaliticaRoute: typeof AdminKonektumAnaliticaRoute
   AdminKonektumConfiguracionRoute: typeof AdminKonektumConfiguracionRoute
@@ -2856,6 +3072,7 @@ const AdminRentalsRouteWithChildren = AdminRentalsRoute._addFileChildren(
 interface AdminRouteChildren {
   AdminBlogRoute: typeof AdminBlogRouteWithChildren
   AdminContentRoute: typeof AdminContentRouteWithChildren
+  AdminFinanzasRoute: typeof AdminFinanzasRouteWithChildren
   AdminInvitationsRoute: typeof AdminInvitationsRoute
   AdminKarmaRoute: typeof AdminKarmaRoute
   AdminKonektumRoute: typeof AdminKonektumRouteWithChildren
@@ -2864,6 +3081,7 @@ interface AdminRouteChildren {
   AdminRegistrationsRoute: typeof AdminRegistrationsRouteWithChildren
   AdminRentalsRoute: typeof AdminRentalsRouteWithChildren
   AdminTeamRoute: typeof AdminTeamRoute
+  AdminUsuariosRoute: typeof AdminUsuariosRoute
   AdminIndexRoute: typeof AdminIndexRoute
   AdminMediaIdRoute: typeof AdminMediaIdRoute
   AdminMediaNewRoute: typeof AdminMediaNewRoute
@@ -2874,6 +3092,7 @@ interface AdminRouteChildren {
 const AdminRouteChildren: AdminRouteChildren = {
   AdminBlogRoute: AdminBlogRouteWithChildren,
   AdminContentRoute: AdminContentRouteWithChildren,
+  AdminFinanzasRoute: AdminFinanzasRouteWithChildren,
   AdminInvitationsRoute: AdminInvitationsRoute,
   AdminKarmaRoute: AdminKarmaRoute,
   AdminKonektumRoute: AdminKonektumRouteWithChildren,
@@ -2882,6 +3101,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminRegistrationsRoute: AdminRegistrationsRouteWithChildren,
   AdminRentalsRoute: AdminRentalsRouteWithChildren,
   AdminTeamRoute: AdminTeamRoute,
+  AdminUsuariosRoute: AdminUsuariosRoute,
   AdminIndexRoute: AdminIndexRoute,
   AdminMediaIdRoute: AdminMediaIdRoute,
   AdminMediaNewRoute: AdminMediaNewRoute,
