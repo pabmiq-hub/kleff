@@ -30,6 +30,7 @@ import { CSS } from "@dnd-kit/utilities";
 import { ImagePicker } from "@/components/cms/ImagePicker";
 import { RichTextEditor } from "@/components/cms/RichTextEditor";
 import { normalizeHighlights, plainTextToHtml, DEFAULT_LEGAL_HTML, HIGHLIGHT_PRESETS, type HighlightRow } from "@/lib/registrations-content";
+import { useAdminAccess } from "@/hooks/useAdminAccess";
 
 export const Route = createFileRoute("/admin/registrations/$id")({
   head: () => ({ meta: [{ title: "Editar inscripción — Admin KLEFF" }, { name: "robots", content: "noindex, nofollow" }] }),
