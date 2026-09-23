@@ -84,6 +84,7 @@ const ParticipantJoin = ({
   variantSubtitle,
   variantDescription,
   variantGender,
+  eventNameOverride,
 }: {
   eventIdOverride?: string;
   /** Which public link was used to reach the form. */
@@ -92,6 +93,8 @@ const ParticipantJoin = ({
   variantSubtitle?: string | null;
   variantDescription?: string | null;
   variantGender?: string | null;
+  /** Event title as shown to the audience of this specific link. */
+  eventNameOverride?: string | null;
 } = {}) => {
   const { id: routeEventId } = useParams();
   const eventId = eventIdOverride || routeEventId;
