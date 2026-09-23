@@ -676,7 +676,8 @@ export const adminListResponses = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator(z.object({ form_id: z.string().uuid() }))
   .handler(async ({ data, context }) => {
-    await assertSuperAdmin(context.userId);
+    const { assertFormAccess } = await import("@/lib/permissions.server");
+    await assertFormAccess(context.userId, data.form_id);
     const { data: rows, error } = await supabaseAdmin
       .from("registration_responses")
       .select("*")
