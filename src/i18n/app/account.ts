@@ -52,6 +52,8 @@ export const accountDict = {
       updateSuccess: "Perfil actualizado",
       genericError: "Error",
       imageTooLargeError: "La imagen no puede superar los 2MB",
+      invalidImageError: "El archivo no es una imagen válida",
+      optimizingImage: "Optimizando imagen…",
       invalidSessionError: "Sesión no válida",
       photoUpdated: "Foto actualizada",
       photoUploadError: "Error subiendo la foto",
