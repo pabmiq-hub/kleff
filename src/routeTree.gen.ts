@@ -136,6 +136,7 @@ import { Route as AdminKonektumPlantillasRouteImport } from './routes/admin.kone
 import { Route as AdminKonektumEmailRouteImport } from './routes/admin.konektum.email'
 import { Route as AdminKonektumConfiguracionRouteImport } from './routes/admin.konektum.configuracion'
 import { Route as AdminKonektumAnaliticaRouteImport } from './routes/admin.konektum.analitica'
+import { Route as AdminFinanzasFacturasRouteImport } from './routes/admin.finanzas.facturas'
 import { Route as AdminFinanzasCuotasRouteImport } from './routes/admin.finanzas.cuotas'
 import { Route as AdminFinanzasAportacionesRouteImport } from './routes/admin.finanzas.aportaciones'
 import { Route as AdminContentUrlsRouteImport } from './routes/admin.content.urls'
@@ -791,6 +792,11 @@ const AdminKonektumAnaliticaRoute = AdminKonektumAnaliticaRouteImport.update({
   path: '/analitica',
   getParentRoute: () => AdminKonektumRoute,
 } as any)
+const AdminFinanzasFacturasRoute = AdminFinanzasFacturasRouteImport.update({
+  id: '/facturas',
+  path: '/facturas',
+  getParentRoute: () => AdminFinanzasRoute,
+} as any)
 const AdminFinanzasCuotasRoute = AdminFinanzasCuotasRouteImport.update({
   id: '/cuotas',
   path: '/cuotas',
@@ -978,6 +984,7 @@ export interface FileRoutesByFullPath {
   '/admin/content/urls': typeof AdminContentUrlsRoute
   '/admin/finanzas/aportaciones': typeof AdminFinanzasAportacionesRoute
   '/admin/finanzas/cuotas': typeof AdminFinanzasCuotasRoute
+  '/admin/finanzas/facturas': typeof AdminFinanzasFacturasRoute
   '/admin/konektum/analitica': typeof AdminKonektumAnaliticaRoute
   '/admin/konektum/configuracion': typeof AdminKonektumConfiguracionRoute
   '/admin/konektum/email': typeof AdminKonektumEmailRoute
@@ -1114,6 +1121,7 @@ export interface FileRoutesByTo {
   '/admin/content/urls': typeof AdminContentUrlsRoute
   '/admin/finanzas/aportaciones': typeof AdminFinanzasAportacionesRoute
   '/admin/finanzas/cuotas': typeof AdminFinanzasCuotasRoute
+  '/admin/finanzas/facturas': typeof AdminFinanzasFacturasRoute
   '/admin/konektum/analitica': typeof AdminKonektumAnaliticaRoute
   '/admin/konektum/configuracion': typeof AdminKonektumConfiguracionRoute
   '/admin/konektum/email': typeof AdminKonektumEmailRoute
@@ -1260,6 +1268,7 @@ export interface FileRoutesById {
   '/admin/content/urls': typeof AdminContentUrlsRoute
   '/admin/finanzas/aportaciones': typeof AdminFinanzasAportacionesRoute
   '/admin/finanzas/cuotas': typeof AdminFinanzasCuotasRoute
+  '/admin/finanzas/facturas': typeof AdminFinanzasFacturasRoute
   '/admin/konektum/analitica': typeof AdminKonektumAnaliticaRoute
   '/admin/konektum/configuracion': typeof AdminKonektumConfiguracionRoute
   '/admin/konektum/email': typeof AdminKonektumEmailRoute
@@ -1407,6 +1416,7 @@ export interface FileRouteTypes {
     | '/admin/content/urls'
     | '/admin/finanzas/aportaciones'
     | '/admin/finanzas/cuotas'
+    | '/admin/finanzas/facturas'
     | '/admin/konektum/analitica'
     | '/admin/konektum/configuracion'
     | '/admin/konektum/email'
@@ -1543,6 +1553,7 @@ export interface FileRouteTypes {
     | '/admin/content/urls'
     | '/admin/finanzas/aportaciones'
     | '/admin/finanzas/cuotas'
+    | '/admin/finanzas/facturas'
     | '/admin/konektum/analitica'
     | '/admin/konektum/configuracion'
     | '/admin/konektum/email'
@@ -1688,6 +1699,7 @@ export interface FileRouteTypes {
     | '/admin/content/urls'
     | '/admin/finanzas/aportaciones'
     | '/admin/finanzas/cuotas'
+    | '/admin/finanzas/facturas'
     | '/admin/konektum/analitica'
     | '/admin/konektum/configuracion'
     | '/admin/konektum/email'
@@ -2718,6 +2730,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminKonektumAnaliticaRouteImport
       parentRoute: typeof AdminKonektumRoute
     }
+    '/admin/finanzas/facturas': {
+      id: '/admin/finanzas/facturas'
+      path: '/facturas'
+      fullPath: '/admin/finanzas/facturas'
+      preLoaderRoute: typeof AdminFinanzasFacturasRouteImport
+      parentRoute: typeof AdminFinanzasRoute
+    }
     '/admin/finanzas/cuotas': {
       id: '/admin/finanzas/cuotas'
       path: '/cuotas'
@@ -2870,12 +2889,14 @@ const AdminContentRouteWithChildren = AdminContentRoute._addFileChildren(
 interface AdminFinanzasRouteChildren {
   AdminFinanzasAportacionesRoute: typeof AdminFinanzasAportacionesRoute
   AdminFinanzasCuotasRoute: typeof AdminFinanzasCuotasRoute
+  AdminFinanzasFacturasRoute: typeof AdminFinanzasFacturasRoute
   AdminFinanzasIndexRoute: typeof AdminFinanzasIndexRoute
 }
 
 const AdminFinanzasRouteChildren: AdminFinanzasRouteChildren = {
   AdminFinanzasAportacionesRoute: AdminFinanzasAportacionesRoute,
   AdminFinanzasCuotasRoute: AdminFinanzasCuotasRoute,
+  AdminFinanzasFacturasRoute: AdminFinanzasFacturasRoute,
   AdminFinanzasIndexRoute: AdminFinanzasIndexRoute,
 }
 
