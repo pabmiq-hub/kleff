@@ -364,7 +364,12 @@ const EventSettingsEditor = ({
         registration_subtitle: formRegSubtitle.trim() || null,
         registration_description: formRegDescription.trim() || null,
         custom_age_ranges: formPreferences.ageRanges,
-        custom_genders: formPreferences.genders,
+        custom_genders: Array.from(new Set([
+          ...formPreferences.genders,
+          ...(!isProfessional && formSecondaryLinkEnabled
+            ? [formPrimaryTargetGender, formSecondaryTargetGender].filter(Boolean)
+            : []),
+        ])),
         custom_preferences: formPreferences.preferences,
         custom_dating_preferences: formPreferences.datingPreferences,
         group_rounds: formGroupRoundsEnabled && formGroupRounds.length > 0 ? formGroupRounds : null,
@@ -715,7 +720,7 @@ const EventSettingsEditor = ({
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="none">Sin preselección</SelectItem>
-                        {formPreferences.genders.map((g) => (
+                        {Array.from(new Set(["Hombre", "Mujer", "No binario", ...formPreferences.genders])).map((g) => (
                           <SelectItem key={g} value={g}>{g}</SelectItem>
                         ))}
                       </SelectContent>
@@ -745,11 +750,14 @@ const EventSettingsEditor = ({
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="none">Sin preselección</SelectItem>
-                        {formPreferences.genders.map((g) => (
+                        {Array.from(new Set(["Hombre", "Mujer", "No binario", ...formPreferences.genders])).map((g) => (
                           <SelectItem key={g} value={g}>{g}</SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
+                    <p className="text-xs text-muted-foreground">
+                      Al guardar, el público elegido se añade automáticamente a los géneros admitidos del evento.
+                    </p>
                   </div>
 
                   <div className="space-y-2">
