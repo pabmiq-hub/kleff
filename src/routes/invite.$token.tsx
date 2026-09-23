@@ -17,7 +17,7 @@ import { toast } from "sonner";
 import { useAppLocale } from "@/i18n/app-i18n";
 import { signupDict } from "@/i18n/app/signup";
 import { LOCALES, LOCALE_LABELS } from "@/i18n/config";
-import { optimizeImage } from "@/lib/image-optimize";
+import { optimizeImage, isSupportedImage } from "@/lib/image-optimize";
 
 export const Route = createFileRoute("/invite/$token")({
   head: () => ({
@@ -43,6 +43,7 @@ function InvitePage() {
   const [step, setStep] = useState<"language" | "form">("language");
   const [submitting, setSubmitting] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [optimizingAvatar, setOptimizingAvatar] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [form, setForm] = useState({
     password: "",
