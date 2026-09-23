@@ -123,6 +123,7 @@ serve(async (req) => {
   try {
     const body = await req.json();
     const isProfessional = body.isProfessional === true;
+    const registrationVariant = body.registrationVariant === 'secondary' ? 'secondary' : 'primary';
     const marketingConsent = body.marketingConsent === true;
 
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
@@ -288,6 +289,7 @@ serve(async (req) => {
         .from('participants')
         .insert({
           event_id: eventId,
+          registration_variant: registrationVariant,
           name: name.trim(),
           email: email.toLowerCase().trim(),
           phone: phone.trim(),
@@ -636,6 +638,7 @@ serve(async (req) => {
       .from('participants')
       .insert({
         event_id: eventId,
+        registration_variant: registrationVariant,
         name: name.trim(),
         email: email.toLowerCase().trim(),
         phone: phone.trim(),
