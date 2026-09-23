@@ -720,7 +720,7 @@ const EventSettingsEditor = ({
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="none">Sin preselección</SelectItem>
-                        {formPreferences.genders.map((g) => (
+                        {Array.from(new Set(["Hombre", "Mujer", "No binario", ...formPreferences.genders])).map((g) => (
                           <SelectItem key={g} value={g}>{g}</SelectItem>
                         ))}
                       </SelectContent>
@@ -750,9 +750,14 @@ const EventSettingsEditor = ({
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="none">Sin preselección</SelectItem>
-                        {formPreferences.genders.map((g) => (
+                        {Array.from(new Set(["Hombre", "Mujer", "No binario", ...formPreferences.genders])).map((g) => (
                           <SelectItem key={g} value={g}>{g}</SelectItem>
                         ))}
+                      </SelectContent>
+                    </Select>
+                    <p className="text-xs text-muted-foreground">
+                      Al guardar, el público elegido se añade automáticamente a los géneros admitidos del evento.
+                    </p>
                       </SelectContent>
                     </Select>
                   </div>
