@@ -4154,6 +4154,55 @@ const EventDetail = () => {
           </div>
         </div>
 
+        {eventData?.emails_sent_at ? (
+          <Card className="border-primary/30 bg-primary/5">
+            <CardContent className="py-4 flex flex-col sm:flex-row sm:items-center gap-3 justify-between">
+              <div className="flex items-start gap-2 text-sm">
+                <CheckCircle2 className="w-4 h-4 text-primary mt-0.5 shrink-0" />
+                <span>
+                  Correos de matches enviados el{" "}
+                  {new Date(eventData.emails_sent_at).toLocaleString("es-ES", { dateStyle: "long", timeStyle: "short" })}
+                </span>
+              </div>
+              <Button variant="outline" size="sm" onClick={handleSendEmails} disabled={isSendingEmails}>
+                {isSendingEmails ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Send className="w-4 h-4 mr-2" />}
+                Reenviar correos
+              </Button>
+            </CardContent>
+          </Card>
+        ) : eventData?.scheduled_email_at ? (
+          <Card className={new Date(eventData.scheduled_email_at) <= new Date() ? "border-amber-500/50 bg-amber-500/10" : "border-primary/30 bg-primary/5"}>
+            <CardContent className="py-4 flex flex-col sm:flex-row sm:items-center gap-3 justify-between">
+              <div className="flex items-start gap-2 text-sm">
+                <Clock className="w-4 h-4 mt-0.5 shrink-0" />
+                <span>
+                  {new Date(eventData.scheduled_email_at) <= new Date()
+                    ? `El plazo venció el ${new Date(eventData.scheduled_email_at).toLocaleString("es-ES", { dateStyle: "long", timeStyle: "short" })} y los correos aún no se han enviado.`
+                    : `Los correos de matches se enviarán automáticamente el ${new Date(eventData.scheduled_email_at).toLocaleString("es-ES", { dateStyle: "long", timeStyle: "short" })}.`}
+                </span>
+              </div>
+              <Button variant="hero" size="sm" onClick={handleSendEmails} disabled={isSendingEmails}>
+                {isSendingEmails ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Send className="w-4 h-4 mr-2" />}
+                Enviar correos ahora
+              </Button>
+            </CardContent>
+          </Card>
+        ) : eventData?.status === "completed" ? (
+          <Card className="border-amber-500/50 bg-amber-500/10">
+            <CardContent className="py-4 flex flex-col sm:flex-row sm:items-center gap-3 justify-between">
+              <div className="flex items-start gap-2 text-sm">
+                <Mail className="w-4 h-4 mt-0.5 shrink-0" />
+                <span>Evento cerrado. Todavía no se han enviado los correos con los matches.</span>
+              </div>
+              <Button variant="hero" size="sm" onClick={handleSendEmails} disabled={isSendingEmails}>
+                {isSendingEmails ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Send className="w-4 h-4 mr-2" />}
+                Enviar correos de matches
+              </Button>
+            </CardContent>
+          </Card>
+        ) : null}
+
+
         <Tabs defaultValue="participants" className="space-y-6">
           <div className="overflow-x-auto scrollbar-hide -mx-4 px-4">
             <TabsList className="bg-card border w-max flex-nowrap">
