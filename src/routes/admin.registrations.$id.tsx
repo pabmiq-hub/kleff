@@ -613,15 +613,17 @@ function ResponsesPanel({ form, questions, readOnly }: { form: RegistrationForm;
           {responses.length} respuesta{responses.length === 1 ? "" : "s"} · <strong>{totalAttendees} participante{totalAttendees === 1 ? "" : "s"}</strong>
         </p>
         <div className="flex gap-2">
-          <Button
-            size="sm"
-            variant="outline"
-            className="border-ink/20 text-ink hover:bg-ink/10"
-            disabled={!active.length}
-            onClick={() => setReminderTarget({ count: active.length })}
-          >
-            <Mail className="h-4 w-4 mr-2" /> Enviar recordatorio a todos
-          </Button>
+          {!readOnly && (
+            <Button
+              size="sm"
+              variant="outline"
+              className="border-ink/20 text-ink hover:bg-ink/10"
+              disabled={!active.length}
+              onClick={() => setReminderTarget({ count: active.length })}
+            >
+              <Mail className="h-4 w-4 mr-2" /> Enviar recordatorio a todos
+            </Button>
+          )}
           <Button size="sm" onClick={downloadCsv} variant="outline" className="border-ink/20 text-ink hover:bg-ink/10" disabled={!responses.length}>Descargar CSV</Button>
         </div>
       </div>
