@@ -228,6 +228,7 @@ const EventSettingsEditor = ({
   const [formPrimaryTargetGender, setFormPrimaryTargetGender] = useState<string>("");
   const [formSecondaryLinkEnabled, setFormSecondaryLinkEnabled] = useState(false);
   const [formSecondarySlug, setFormSecondarySlug] = useState("");
+  const [formSecondaryEventName, setFormSecondaryEventName] = useState("");
   const [formSecondarySubtitle, setFormSecondarySubtitle] = useState("");
   const [formSecondaryDescription, setFormSecondaryDescription] = useState("");
   const [formSecondaryTargetGender, setFormSecondaryTargetGender] = useState("");
@@ -257,7 +258,7 @@ const EventSettingsEditor = ({
     const loadExtras = async () => {
       const { data } = await supabase
         .from("events")
-        .select("slug, custom_registration_form, wrapped_enabled, wrapped_questions, social_game, languages_enabled, available_languages, table_gender_mode, primary_target_gender, secondary_slug, secondary_registration_subtitle, secondary_registration_description, secondary_target_gender")
+        .select("slug, custom_registration_form, wrapped_enabled, wrapped_questions, social_game, languages_enabled, available_languages, table_gender_mode, primary_target_gender, secondary_slug, secondary_event_name, secondary_registration_subtitle, secondary_registration_description, secondary_target_gender")
         .eq("id", eventId)
         .single();
 
@@ -273,6 +274,7 @@ const EventSettingsEditor = ({
       setFormPrimaryTargetGender((data as any)?.primary_target_gender || "");
       setFormSecondaryLinkEnabled(!!(data as any)?.secondary_slug);
       setFormSecondarySlug((data as any)?.secondary_slug || "");
+      setFormSecondaryEventName((data as any)?.secondary_event_name || "");
       setFormSecondarySubtitle((data as any)?.secondary_registration_subtitle || "");
       setFormSecondaryDescription((data as any)?.secondary_registration_description || "");
       setFormSecondaryTargetGender((data as any)?.secondary_target_gender || "");
@@ -345,6 +347,9 @@ const EventSettingsEditor = ({
         primary_target_gender: !isProfessional && formSecondaryLinkEnabled ? (formPrimaryTargetGender || null) : null,
         secondary_slug: !isProfessional && formSecondaryLinkEnabled
           ? (slugifyEventName(formSecondarySlug) || null)
+          : null,
+        secondary_event_name: !isProfessional && formSecondaryLinkEnabled
+          ? (formSecondaryEventName.trim() || null)
           : null,
         secondary_registration_subtitle: !isProfessional && formSecondaryLinkEnabled
           ? (formSecondarySubtitle.trim() || null)
@@ -745,6 +750,19 @@ const EventSettingsEditor = ({
                         ))}
                       </SelectContent>
                     </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="event-secondary-name">Título del evento en el segundo enlace</Label>
+                    <Input
+                      id="event-secondary-name"
+                      value={formSecondaryEventName}
+                      placeholder="Ej: Slow Friending · Edición Chicos"
+                      onChange={(e) => setFormSecondaryEventName(e.target.value)}
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Si lo dejas en blanco se usa el título general del evento. Se muestra en la página pública y en los correos de quienes entran por este enlace.
+                    </p>
                   </div>
 
                   <div className="space-y-2">
