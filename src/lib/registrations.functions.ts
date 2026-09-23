@@ -508,7 +508,8 @@ export const adminGetForm = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator(z.object({ id: z.string().uuid() }))
   .handler(async ({ data, context }) => {
-    await assertSuperAdmin(context.userId);
+    const { assertFormAccess } = await import("@/lib/permissions.server");
+    await assertFormAccess(context.userId, data.id);
     const { data: form, error } = await supabaseAdmin
       .from("registration_forms").select("*").eq("id", data.id).single();
     if (error) throw new Error(error.message);
