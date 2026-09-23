@@ -113,9 +113,11 @@ function AdminRegistrations() {
           </p>
         </div>
         <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) resetDialog(); }}>
-          <DialogTrigger asChild>
-            <Button className="bg-coral hover:bg-coral/90 text-ink"><Plus className="h-4 w-4 mr-2" /> Nueva inscripción</Button>
-          </DialogTrigger>
+          {isSuperAdmin && (
+            <DialogTrigger asChild>
+              <Button className="bg-coral hover:bg-coral/90 text-ink"><Plus className="h-4 w-4 mr-2" /> Nueva inscripción</Button>
+            </DialogTrigger>
+          )}
           <DialogContent className="bg-white border-ink/15 text-ink max-w-lg">
             <DialogHeader>
               <DialogTitle>{step === 1 ? "¿Qué tipo de inscripción?" : "Configuración inicial"}</DialogTitle>
