@@ -8,6 +8,7 @@ const Deno = {
 };
 
 import { createClient } from "@/lib/kon-fn/client.server";
+import { participantVariant, variantEventName, variantTemplates } from "./_shared/variantTemplates";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -299,7 +300,7 @@ const handler = async (req: Request): Promise<Response> => {
     // Get event with email_template
     const { data: event } = await supabase
       .from("events")
-      .select("name, organizer_id, language, email_template, date, event_time, event_location, status, is_test_event, test_config")
+      .select("name, secondary_event_name, organizer_id, language, email_template, date, event_time, event_location, status, is_test_event, test_config")
       .eq("id", event_id)
       .single();
 
@@ -385,7 +386,7 @@ const handler = async (req: Request): Promise<Response> => {
     // Get participants
     const { data: participants } = await supabase
       .from("participants")
-      .select("id, name, email")
+      .select("id, name, email, registration_variant")
       .eq("event_id", event_id)
       .in("id", participant_ids);
 
@@ -396,28 +397,28 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Default templates for each type
     const defaultEventReminderES = {
-      subject: `📅 Recordatorio: ¡No te olvides de ${event.name}!`,
+      subject: `📅 Recordatorio: ¡No te olvides de {{evento}}!`,
       greeting: `¡Hola {{nombre}}! 👋`,
       intro: `Te recordamos que se acerca el evento {{evento}}.\n\n📅 Fecha: {{fecha}}\n📍 Lugar: {{ubicacion}}\n🕐 Hora: {{hora}}\n\n¡Te esperamos! No olvides llegar a tiempo.`,
       closing: `¡Nos vemos pronto! 🎉`,
       signature: `Un saludo,\n${brandName}`,
     };
     const defaultEventReminderEN = {
-      subject: `📅 Reminder: Don't forget about ${event.name}!`,
+      subject: `📅 Reminder: Don't forget about {{evento}}!`,
       greeting: `Hi {{nombre}}! 👋`,
       intro: `Just a reminder that the event {{evento}} is coming up.\n\n📅 Date: {{fecha}}\n📍 Location: {{ubicacion}}\n🕐 Time: {{hora}}\n\nWe look forward to seeing you!`,
       closing: `See you soon! 🎉`,
       signature: `Best regards,\n${brandName}`,
     };
     const defaultSelectionReminderES = {
-      subject: `⏰ Recordatorio: ¡Envía tus selecciones para ${event.name}!`,
+      subject: `⏰ Recordatorio: ¡Envía tus selecciones para {{evento}}!`,
       greeting: `¡Hola {{nombre}}! 👋`,
       intro: `¡Aún estás a tiempo de indicar tus matches para el evento {{evento}}!\n\nNo te pierdas la oportunidad de conectar con las personas que conociste.`,
       closing: `¡Esperamos que hayas pasado un buen rato! 💕`,
       signature: `Este es un recordatorio automático de ${brandName}.\nSi ya has enviado tus selecciones, ignora este mensaje.`,
     };
     const defaultSelectionReminderEN = {
-      subject: `⏰ Reminder: Send your selections for ${event.name}!`,
+      subject: `⏰ Reminder: Send your selections for {{evento}}!`,
       greeting: `Hi {{nombre}}! 👋`,
       intro: `You still have time to submit your matches for the event {{evento}}!\n\nDon't miss the opportunity to connect with the people you met.`,
       closing: `We hope you had a great time! 💕`,
@@ -427,14 +428,14 @@ const handler = async (req: Request): Promise<Response> => {
     const defaultNextEventInviteES = {
       subject: `👋 ¡Te esperamos en nuestro próximo evento!`,
       greeting: `¡Hola {{nombre}}! 👋`,
-      intro: `Sentimos no haber coincidido contigo en ${event.name}.\n\nNos encantaría verte en nuestro próximo evento: será una nueva oportunidad para conocer gente increíble y pasar un rato inolvidable.\n\nMantente atento a nuestras próximas convocatorias. 💫`,
+      intro: `Sentimos no haber coincidido contigo en {{evento}}.\n\nNos encantaría verte en nuestro próximo evento: será una nueva oportunidad para conocer gente increíble y pasar un rato inolvidable.\n\nMantente atento a nuestras próximas convocatorias. 💫`,
       closing: `¡Esperamos verte muy pronto! 🎉`,
       signature: `Un saludo,\n${brandName}`,
     };
     const defaultNextEventInviteEN = {
       subject: `👋 We hope to see you at our next event!`,
       greeting: `Hi {{nombre}}! 👋`,
-      intro: `We're sorry we missed you at ${event.name}.\n\nWe'd love to see you at our next event — a new chance to meet amazing people and have a great time.\n\nStay tuned for our upcoming events. 💫`,
+      intro: `We're sorry we missed you at {{evento}}.\n\nWe'd love to see you at our next event — a new chance to meet amazing people and have a great time.\n\nStay tuned for our upcoming events. 💫`,
       closing: `We hope to see you very soon! 🎉`,
       signature: `Best regards,\n${brandName}`,
     };
@@ -442,17 +443,14 @@ const handler = async (req: Request): Promise<Response> => {
     const eventReminderDefaults = isEn ? defaultEventReminderEN : defaultEventReminderES;
     const selectionReminderDefaults = isEn ? defaultSelectionReminderEN : defaultSelectionReminderES;
     const nextEventInviteDefaults = isEn ? defaultNextEventInviteEN : defaultNextEventInviteES;
-    const tpl = isNextEventInvite
-      ? (communicationTemplate?.next_event_invite || nextEventInviteDefaults)
+    const resolveTpl = (ct: any) => isNextEventInvite
+      ? (ct?.next_event_invite || nextEventInviteDefaults)
       : isSelectionReminder
-      ? (communicationTemplate?.selection_reminder || selectionReminderDefaults)
+      ? (ct?.selection_reminder || selectionReminderDefaults)
       : (
-          shouldFallbackToEventReminder(
-            communicationTemplate?.reminder,
-            communicationTemplate?.selection_reminder,
-          )
+          shouldFallbackToEventReminder(ct?.reminder, ct?.selection_reminder)
             ? eventReminderDefaults
-            : (communicationTemplate?.reminder || eventReminderDefaults)
+            : (ct?.reminder || eventReminderDefaults)
         );
     const defaults = isNextEventInvite ? nextEventInviteDefaults : (isSelectionReminder ? selectionReminderDefaults : eventReminderDefaults);
 
@@ -472,9 +470,14 @@ const handler = async (req: Request): Promise<Response> => {
       const eventDateForLinks = normalizedEventDate ? toIsoDate(normalizedEventDate) : (event.date || '');
       const formattedEventDate = formatDisplayDate(event.date, event.status, isEn ? 'en-US' : 'es-ES');
 
+      const pVariant = participantVariant(participant);
+      const participantTemplates = variantTemplates(emailTemplate, pVariant);
+      const tpl = resolveTpl(participantTemplates);
+      const eventName = variantEventName(event, pVariant);
+
       const vars: Record<string, string> = {
         "{{nombre}}": participant.name,
-        "{{evento}}": event.name,
+        "{{evento}}": eventName,
         "{{fecha}}": formattedEventDate,
         "{{ubicacion}}": event.event_location || "",
         "{{hora}}": event.event_time || "",
@@ -518,7 +521,7 @@ const handler = async (req: Request): Promise<Response> => {
         const startDate = eventDate.replace(/-/g, '') + 'T' + eventTime.replace(':', '') + '00';
         const endHour = String(Math.min(23, parseInt(eventTime.split(':')[0]) + 2)).padStart(2, '0');
         const endDate = eventDate.replace(/-/g, '') + 'T' + endHour + eventTime.split(':')[1] + '00';
-        const gcalUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(event.name)}&dates=${startDate}/${endDate}&location=${encodeURIComponent(eventLoc)}`;
+        const gcalUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(eventName)}&dates=${startDate}/${endDate}&location=${encodeURIComponent(eventLoc)}`;
         return `
         <div style="text-align: center; margin: 15px 0;">
           <a href="${gcalUrl}" style="display: inline-block; padding: 8px 16px; border: 1px solid ${primaryColor}; border-radius: 6px; color: ${primaryColor}; text-decoration: none; font-size: 13px; margin: 0 5px;">📅 Google Calendar</a>

@@ -9,6 +9,7 @@ const Deno = {
 
 import { Resend } from "@/lib/kon-fn/resend.server";
 import { createClient } from "@/lib/kon-fn/client.server";
+import { participantVariant, variantEventName, variantTemplates } from "./_shared/variantTemplates";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
@@ -82,7 +83,7 @@ serve(async (req) => {
     // Get participant details
     const { data: participant, error: participantError } = await supabase
       .from("participants")
-      .select("id, name, email, verification_code")
+      .select("id, name, email, verification_code, registration_variant")
       .eq("id", participantId)
       .single();
 
@@ -104,7 +105,7 @@ serve(async (req) => {
     // Get event details including email_template
     const { data: event, error: eventError } = await supabase
       .from("events")
-      .select("id, name, date, language, event_time, event_location, organizer_id, email_template, is_test_event, test_config")
+      .select("id, name, secondary_event_name, date, language, event_time, event_location, organizer_id, email_template, is_test_event, test_config")
       .eq("id", eventId)
       .single();
 
@@ -169,7 +170,9 @@ serve(async (req) => {
 
     // Read customized template from event
     const emailTemplate = event.email_template as any;
-    const communicationTemplate = emailTemplate?.communication_templates_v2 || emailTemplate || {};
+    const pVariant = participantVariant(participant);
+    const eventName = variantEventName(event, pVariant);
+    const communicationTemplate = variantTemplates(emailTemplate, pVariant);
     
     // Decide which template to use based on withCode flag
     const useWithCode = withCode === true;
@@ -189,7 +192,7 @@ serve(async (req) => {
     // Template variables
     const vars: Record<string, string> = {
       "{{nombre}}": participant.name,
-      "{{evento}}": event.name,
+      "{{evento}}": eventName,
       "{{fecha}}": formattedDateTime,
       "{{ubicacion}}": event.event_location || (isEn ? 'TBD' : 'Por confirmar'),
       "{{hora}}": formattedTime || (isEn ? 'TBD' : 'Por confirmar'),
@@ -205,12 +208,12 @@ serve(async (req) => {
 
     if (useWithCode) {
       defaultSubject = isEn
-        ? `Registration confirmed! Your access code - ${event.name}`
-        : `¡Registro confirmado! Tu código de acceso - ${event.name}`;
+        ? `Registration confirmed! Your access code - ${eventName}`
+        : `¡Registro confirmado! Tu código de acceso - ${eventName}`;
       defaultGreeting = isEn ? `Hi ${participant.name}! 🎉` : `¡Hola ${participant.name}! 🎉`;
       defaultIntro = isEn
-        ? `Your registration for ${event.name} has been confirmed.\n\n📅 Date: ${formattedDateTime}\n📍 Location: ${event.event_location || 'TBD'}\n🕐 Time: ${formattedTime || 'TBD'}`
-        : `Tu registro para ${event.name} ha sido confirmado.\n\n📅 Fecha: ${formattedDateTime}\n📍 Lugar: ${event.event_location || 'Por confirmar'}\n🕐 Hora: ${formattedTime || 'Por confirmar'}`;
+        ? `Your registration for ${eventName} has been confirmed.\n\n📅 Date: ${formattedDateTime}\n📍 Location: ${event.event_location || 'TBD'}\n🕐 Time: ${formattedTime || 'TBD'}`
+        : `Tu registro para ${eventName} ha sido confirmado.\n\n📅 Fecha: ${formattedDateTime}\n📍 Lugar: ${event.event_location || 'Por confirmar'}\n🕐 Hora: ${formattedTime || 'Por confirmar'}`;
       defaultClosing = isEn
         ? "Save this code, you will need it to check in and access your panel during and after the event."
         : "Guarda este código, lo necesitarás para hacer check-in y acceder a tu panel durante y después del evento.";
@@ -219,12 +222,12 @@ serve(async (req) => {
         : `¡Nos vemos en el evento!\nEquipo ${brandName} 🎉`;
     } else {
       defaultSubject = isEn
-        ? `Registration confirmed! - ${event.name}`
-        : `¡Registro confirmado! - ${event.name}`;
+        ? `Registration confirmed! - ${eventName}`
+        : `¡Registro confirmado! - ${eventName}`;
       defaultGreeting = isEn ? `Hi ${participant.name}! 🎉` : `¡Hola ${participant.name}! 🎉`;
       defaultIntro = isEn
-        ? `Your registration for ${event.name} has been confirmed.\n\n📅 Date: ${formattedDateTime}\n📍 Location: ${event.event_location || 'TBD'}\n🕐 Time: ${formattedTime || 'TBD'}`
-        : `Tu registro para ${event.name} ha sido confirmado.\n\n📅 Fecha: ${formattedDateTime}\n📍 Lugar: ${event.event_location || 'Por confirmar'}\n🕐 Hora: ${formattedTime || 'Por confirmar'}`;
+        ? `Your registration for ${eventName} has been confirmed.\n\n📅 Date: ${formattedDateTime}\n📍 Location: ${event.event_location || 'TBD'}\n🕐 Time: ${formattedTime || 'TBD'}`
+        : `Tu registro para ${eventName} ha sido confirmado.\n\n📅 Fecha: ${formattedDateTime}\n📍 Lugar: ${event.event_location || 'Por confirmar'}\n🕐 Hora: ${formattedTime || 'Por confirmar'}`;
       defaultClosing = isEn
         ? "We'll send you an access code before the event. Make sure to arrive on time!"
         : "Te enviaremos un código de acceso antes del evento. ¡Asegúrate de llegar a tiempo!";
@@ -255,7 +258,7 @@ serve(async (req) => {
       }
     }
 
-    const calendarTitle = encodeURIComponent(event.name);
+    const calendarTitle = encodeURIComponent(eventName);
     const calendarLocation = encodeURIComponent(event.event_location || '');
     const calendarDetails = encodeURIComponent(
       isEn ? `Event organized via ${brandName}` : `Evento organizado a través de ${brandName}`
@@ -270,7 +273,7 @@ serve(async (req) => {
       'BEGIN:VEVENT',
       `DTSTART:${startDateTime}`,
       `DTEND:${endDateTime}`,
-      `SUMMARY:${event.name}`,
+      `SUMMARY:${eventName}`,
       `LOCATION:${event.event_location || ''}`,
       `DESCRIPTION:${isEn ? `Event organized via ${brandName}` : `Evento organizado a través de ${brandName}`}`,
       'END:VEVENT',
@@ -286,7 +289,7 @@ serve(async (req) => {
           <a href="${googleCalUrl}" target="_blank" style="display: inline-block; padding: 12px 24px; background: ${primaryColor}; color: white; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 14px; margin: 0 6px;">
             Google Calendar
           </a>
-          <a href="${icsDataUri}" download="${event.name.replace(/[^a-zA-Z0-9]/g, '_')}.ics" style="display: inline-block; padding: 12px 24px; background: #333; color: white; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 14px; margin: 0 6px;">
+          <a href="${icsDataUri}" download="${eventName.replace(/[^a-zA-Z0-9]/g, '_')}.ics" style="display: inline-block; padding: 12px 24px; background: #333; color: white; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 14px; margin: 0 6px;">
             iCalendar (.ics)
           </a>
         </div>

@@ -75,7 +75,13 @@ const CommunicationSettingsEditor = ({
   const [isUploadingLogo, setIsUploadingLogo] = useState(false);
   const logoInputRef = useRef<HTMLInputElement>(null);
   const defaults = language === "en" ? DEFAULT_TEMPLATES_EN : DEFAULT_TEMPLATES_ES;
-  const [templates, setTemplates] = useState<CommunicationTemplates>({ ...defaults });
+  const [primaryTemplates, setPrimaryTemplates] = useState<CommunicationTemplates>({ ...defaults });
+  const [secondaryTemplates, setSecondaryTemplates] = useState<CommunicationTemplates>({ ...defaults });
+  const [audience, setAudience] = useState<"primary" | "secondary">("primary");
+  const [hasSecondaryLink, setHasSecondaryLink] = useState(false);
+  const [secondaryEventName, setSecondaryEventName] = useState<string>("");
+  const templates = audience === "secondary" ? secondaryTemplates : primaryTemplates;
+  const setTemplates = audience === "secondary" ? setSecondaryTemplates : setPrimaryTemplates;
   const [matchesVariant, setMatchesVariant] = useState<"with" | "without">("with");
   const [registrationVariant, setRegistrationVariant] = useState<"without_code" | "with_code">("without_code");
 
@@ -87,26 +93,28 @@ const CommunicationSettingsEditor = ({
     setIsLoading(true);
     const { data } = await supabase
       .from("events")
-      .select("email_template")
+      .select("email_template, secondary_slug, secondary_event_name")
       .eq("id", eventId)
       .single();
 
-    if (data?.email_template) {
-      const stored = data.email_template as any;
-      if (stored.communication_templates_v2) {
-        const merged = normalizeCommunicationTemplates({
-          ...defaults,
-          ...stored.communication_templates_v2,
-        } as CommunicationTemplates, defaults);
+    setHasSecondaryLink(!!(data as any)?.secondary_slug);
+    setSecondaryEventName((data as any)?.secondary_event_name || "");
 
-        const parsedLogoHeight = Number(merged.logoHeight);
-        merged.logoHeight = Number.isFinite(parsedLogoHeight)
-          ? Math.min(120, Math.max(24, parsedLogoHeight))
-          : defaults.logoHeight;
-
-        setTemplates(merged);
-      }
+    const stored = (data?.email_template as any) || {};
+    const clampLogo = (tpl: CommunicationTemplates) => {
+      const parsed = Number(tpl.logoHeight);
+      tpl.logoHeight = Number.isFinite(parsed) ? Math.min(120, Math.max(24, parsed)) : defaults.logoHeight;
+      return tpl;
+    };
+    const base = stored.communication_templates_v2 || null;
+    if (base) {
+      setPrimaryTemplates(clampLogo(normalizeCommunicationTemplates({ ...defaults, ...base } as CommunicationTemplates, defaults)));
     }
+    setSecondaryTemplates(clampLogo(normalizeCommunicationTemplates({
+      ...defaults,
+      ...(base || {}),
+      ...(stored.communication_templates_v2_secondary || {}),
+    } as CommunicationTemplates, defaults)));
     setIsLoading(false);
   };
 
@@ -167,14 +175,15 @@ const CommunicationSettingsEditor = ({
         .single();
 
       const existingTemplate = (current?.email_template as any) || {};
-      const sanitizedLogoHeight = Math.min(120, Math.max(24, Number(templates.logoHeight) || defaults.logoHeight));
+      const sanitize = (tpl: CommunicationTemplates) => ({
+        ...tpl,
+        logoHeight: Math.min(120, Math.max(24, Number(tpl.logoHeight) || defaults.logoHeight)),
+        headerTitle: tpl.headerTitle != null ? tpl.headerTitle.trim() : defaults.headerTitle,
+      });
       const updatedTemplate = {
         ...existingTemplate,
-        communication_templates_v2: {
-          ...templates,
-          logoHeight: sanitizedLogoHeight,
-          headerTitle: templates.headerTitle != null ? templates.headerTitle.trim() : defaults.headerTitle,
-        },
+        communication_templates_v2: sanitize(primaryTemplates),
+        ...(hasSecondaryLink ? { communication_templates_v2_secondary: sanitize(secondaryTemplates) } : {}),
       };
 
       const { error } = await supabase
@@ -223,6 +232,33 @@ const CommunicationSettingsEditor = ({
         </CardDescription>
       </CardHeader>
       <CardContent>
+        {hasSecondaryLink && (
+          <div className="mb-6 p-4 rounded-lg border bg-muted/30">
+            <Label className="text-xs font-medium">¿Para qué público estás redactando?</Label>
+            <div className="flex flex-wrap gap-2 mt-2">
+              <Button
+                type="button"
+                size="sm"
+                variant={audience === "primary" ? "default" : "outline"}
+                onClick={() => setAudience("primary")}
+              >
+                🟣 {eventName} · enlace principal
+              </Button>
+              <Button
+                type="button"
+                size="sm"
+                variant={audience === "secondary" ? "default" : "outline"}
+                onClick={() => setAudience("secondary")}
+              >
+                🔵 {secondaryEventName || "Segundo enlace"}
+              </Button>
+            </div>
+            <p className="text-xs text-muted-foreground mt-2">
+              Cada público recibe los textos de su pestaña. Si no cambias nada en el segundo enlace, se enviarán los mismos textos del enlace principal.
+            </p>
+          </div>
+        )}
+
         {/* Branding controls */}
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-4 mb-6 p-4 bg-muted/30 rounded-lg border">
            <div className="space-y-2">
