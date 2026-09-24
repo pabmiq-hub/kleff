@@ -173,7 +173,13 @@ const ParticipantJoin = ({
     });
   };
 
-  const filteredDatingPreferences = getFilteredDatingPreferences(gender, eventDatingPreferences);
+  // Si las opciones del evento no cubren el género elegido (p. ej. segundo enlace
+  // con otro colectivo), se usan las opciones estándar para ese género.
+  const filteredDatingPreferences = (() => {
+    const fromEvent = getFilteredDatingPreferences(gender, eventDatingPreferences);
+    if (fromEvent.length > 0) return fromEvent;
+    return getFilteredDatingPreferences(gender, eventLang === "en" ? DATING_PREFS_EN : DATING_PREFS_ES);
+  })();
   
   // Quota system
   const [quotasEnabled, setQuotasEnabled] = useState(false);
