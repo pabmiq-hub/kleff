@@ -157,6 +157,7 @@ export const signupDict = {
     imageTooBig: "The image cannot be larger than 2MB",
     invalidImage: "The file is not a valid image",
     optimizingImage: "Optimising image…",
+    uploadingPhoto: "Uploading photo…",
     photoUploaded: "Photo uploaded",
     photoError: "Error uploading the photo",
     welcome: "Welcome to KLEFF!",
