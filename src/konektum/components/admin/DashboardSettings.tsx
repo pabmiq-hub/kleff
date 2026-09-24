@@ -108,19 +108,16 @@ export function DashboardSettings({ user, organizer, plan, limits, branding, onR
       toast({ title: "Error", description: "Solo se permiten archivos de imagen", variant: "destructive" });
       return;
     }
-    if (file.size > 2 * 1024 * 1024) {
-      toast({ title: "Error", description: "El archivo no puede superar 2MB", variant: "destructive" });
-      return;
-    }
-
     setIsUploading(true);
     try {
-      const ext = file.name.split(".").pop();
+      const { optimizeImage } = await import("@/lib/image-optimize");
+      const { file: optimized } = await optimizeImage(file, { maxSize: 1024, maxBytes: 1024 * 1024 });
+      const ext = optimized.name.split(".").pop();
       const filePath = `${user.id}/logo.${ext}`;
 
       const { error: uploadError } = await supabase.storage
         .from("organizer-logos")
-        .upload(filePath, file, { upsert: true });
+        .upload(filePath, optimized, { upsert: true, contentType: optimized.type });
       if (uploadError) throw uploadError;
 
       const { data: urlData } = supabase.storage.from("organizer-logos").getPublicUrl(filePath);
