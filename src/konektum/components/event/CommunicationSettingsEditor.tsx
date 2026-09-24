@@ -306,15 +306,21 @@ const CommunicationSettingsEditor = ({
                  onChange={async (e) => {
                    const file = e.target.files?.[0];
                    if (!file) return;
+                   if (!file.type.startsWith("image/")) {
+                     toast({ title: "Error", description: "El archivo no es una imagen válida", variant: "destructive" });
+                     return;
+                   }
                    setIsUploadingLogo(true);
                    try {
-                     const ext = file.name.split('.').pop();
+                     const { optimizeImage } = await import("@/lib/image-optimize");
+                     const { file: optimized } = await optimizeImage(file, { maxSize: 1024, maxBytes: 1024 * 1024 });
+                     const ext = optimized.name.split('.').pop();
                      const { data: { user } } = await supabaseClient.auth.getUser();
                      if (!user) throw new Error('No authenticated user');
                      const path = `${user.id}/email-logo-${eventId}-${Date.now()}.${ext}`;
                      const { error: uploadError } = await supabaseClient.storage
                        .from('organizer-logos')
-                       .upload(path, file, { upsert: true });
+                       .upload(path, optimized, { upsert: true, contentType: optimized.type });
                      if (uploadError) throw uploadError;
                      const { data: { publicUrl } } = supabaseClient.storage
                        .from('organizer-logos')

@@ -127,13 +127,13 @@ function PropertiesPanel({ onClose, hasSelection }: { onClose: () => void; hasSe
 
   const handleUpload = async (file: File) => {
     if (!selected) return;
-    if (file.size > 25 * 1024 * 1024) {
-      toast.error("La imagen debe pesar menos de 25 MB");
+    if (!file.type.startsWith("image/")) {
+      toast.error("El archivo no es una imagen válida");
       return;
     }
     setUploading(true);
     try {
-      const r = await upload({ data: await optimizeToUploadPayload(file) });
+      const r = await upload({ data: await optimizeToUploadPayload(file, { maxSize: 1920 }) });
       await setImage(selected.id, r.url);
       toast.success("Imagen actualizada");
     } catch (e) {
