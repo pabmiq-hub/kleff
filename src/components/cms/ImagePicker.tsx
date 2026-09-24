@@ -25,13 +25,14 @@ export function ImagePicker({ url, onChange, className = "", height = "h-32", la
     input.onchange = async () => {
       const file = input.files?.[0];
       if (!file) return;
-      if (file.size > 8 * 1024 * 1024) {
-        toast.error("La imagen supera los 8 MB");
+      if (!file.type.startsWith("image/")) {
+        toast.error("El archivo no es una imagen válida");
         return;
       }
       setUploading(true);
       try {
-        const payload = await optimizeToUploadPayload(file);
+        // Resized + re-encoded in the browser before it ever leaves the device.
+        const payload = await optimizeToUploadPayload(file, { maxSize: 1920 });
         const { url: newUrl } = await upload({ data: payload });
         onChange(newUrl);
       } catch (e) {
