@@ -172,13 +172,13 @@ export function MediaAppearanceForm({ initial }: Props) {
   const handleUpload = async (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (file.size > 8 * 1024 * 1024) {
-      toast.error("Imagen demasiado grande (máx 8 MB)");
+    if (!file.type.startsWith("image/")) {
+      toast.error("El archivo no es una imagen válida");
       return;
     }
     setUploading(true);
     try {
-      const res = await uploadFn({ data: await optimizeToUploadPayload(file) });
+      const res = await uploadFn({ data: await optimizeToUploadPayload(file, { maxSize: 1920 }) });
       hasLocalChangesRef.current = true;
       setImageUrl(res.url);
       toast.success("Imagen subida");

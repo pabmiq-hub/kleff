@@ -261,13 +261,13 @@ function ImageField({
   const [uploading, setUploading] = useState(false);
 
   const handleFile = async (file: File) => {
-    if (file.size > 25 * 1024 * 1024) {
-      toast.error("La imagen debe pesar menos de 25 MB");
+    if (!file.type.startsWith("image/")) {
+      toast.error("El archivo no es una imagen válida");
       return;
     }
     setUploading(true);
     try {
-      const r = await upload({ data: await optimizeToUploadPayload(file) });
+      const r = await upload({ data: await optimizeToUploadPayload(file, { maxSize: 1920 }) });
       onChange(r.url);
       toast.success("Imagen subida");
     } catch (e) {
