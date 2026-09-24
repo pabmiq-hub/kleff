@@ -103,6 +103,7 @@ export const signupDict = {
     imageTooBig: "La imatge no pot superar els 2 MB",
     invalidImage: "El fitxer no és una imatge vàlida",
     optimizingImage: "Optimitzant imatge…",
+    uploadingPhoto: "Pujant foto…",
     photoUploaded: "Foto pujada",
     photoError: "Error en pujar la foto",
     welcome: "Benvingut/da a KLEFF!",
