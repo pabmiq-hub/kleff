@@ -696,7 +696,18 @@ export const adminUpdateResponse = createServerFn({ method: "POST" })
     guests_count: z.number().int().min(0).max(20).optional(),
   }))
   .handler(async ({ data, context }) => {
-    await assertSuperAdmin(context.userId);
+    const { getAdminAccess, hasPermission } = await import("@/lib/permissions.server");
+    const { data: row, error: rowErr } = await supabaseAdmin
+      .from("registration_responses")
+      .select("form_id")
+      .eq("id", data.id)
+      .single();
+    if (rowErr || !row) throw new Error("Inscripción no encontrada");
+    const access = await getAdminAccess(context.userId);
+    const formId = (row as { form_id: string }).form_id;
+    if (!access.isSuperAdmin && !hasPermission(access, "inscripcion", { minNivel: "escritura", recursoId: formId })) {
+      throw new Error("Forbidden: no tienes permiso de edición sobre esta inscripción");
+    }
     const patch: Record<string, unknown> = {};
     if (data.payment_status) patch.payment_status = data.payment_status;
     if (data.internal_notes !== undefined) patch.internal_notes = data.internal_notes;
