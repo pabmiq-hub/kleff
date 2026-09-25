@@ -41,7 +41,7 @@ function RegistrationEditor() {
   const { id } = Route.useParams();
   const getForm = useServerFn(adminGetForm);
   const updateFn = useServerFn(adminUpdateForm);
-  const { isSuperAdmin } = useAdminAccess();
+  const { isSuperAdmin, access } = useAdminAccess();
   const [data, setData] = useState<{ form: RegistrationForm; questions: RegistrationQuestion[] } | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [togglingPub, setTogglingPub] = useState(false);
@@ -73,14 +73,27 @@ function RegistrationEditor() {
     }
   };
 
+  const canEditResponses =
+    isSuperAdmin ||
+    (access?.permisos ?? []).some(
+      (p) =>
+        p.recurso === "inscripcion" &&
+        (!p.recurso_id || p.recurso_id === id) &&
+        (p.nivel === "escritura" || p.nivel === "completo"),
+    );
+
   if (!isSuperAdmin) {
     return (
       <div className="space-y-6">
         <div className="rounded-2xl border border-ink/10 bg-white p-5">
           <h1 className="text-2xl font-display font-semibold text-ink">{form.title || form.slug}</h1>
-          <p className="text-sm text-ink/60 mt-1">Listado de personas inscritas (solo lectura).</p>
+          <p className="text-sm text-ink/60 mt-1">
+            {canEditResponses
+              ? "Listado de personas inscritas. Puedes marcar pagos, editar invitados y guardar notas."
+              : "Listado de personas inscritas (solo lectura)."}
+          </p>
         </div>
-        <ResponsesPanel form={form} questions={questions} readOnly />
+        <ResponsesPanel form={form} questions={questions} readOnly={!canEditResponses} />
       </div>
     );
   }
