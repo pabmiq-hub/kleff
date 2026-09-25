@@ -8,7 +8,7 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ArrowLeft, Plus, Save, Trash2, GripVertical, Loader2, Mail, X, Eye, Globe, EyeOff, Send, CalendarClock, Megaphone } from "lucide-react";
+import { ArrowLeft, Plus, Save, Trash2, GripVertical, Loader2, Mail, X, Eye, Globe, EyeOff, Send, CalendarClock, Megaphone, CreditCard } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import {
@@ -656,7 +656,8 @@ function ResponsesPanel({ form, questions, readOnly }: { form: RegistrationForm;
             try {
               await updateFn({ data: { id, ...patch } });
               setResponses((rs) => rs.map((x) => x.id === id ? { ...x, ...patch } as RegistrationResponse : x));
-            } catch (e) { toast.error((e as Error).message); }
+              return true;
+            } catch (e) { toast.error((e as Error).message); return false; }
           }}
           onDelete={async (id) => {
             if (!confirm("¿Eliminar esta respuesta?")) return;
@@ -745,7 +746,7 @@ function ResponsesTable({ responses, questions, paymentRequired, maxGuests, read
   paymentRequired?: boolean;
   maxGuests: number;
   readOnly?: boolean;
-  onUpdate: (id: string, patch: { payment_status?: RegistrationResponse["payment_status"]; internal_notes?: string | null; guests_count?: number }) => Promise<void>;
+  onUpdate: (id: string, patch: { payment_status?: RegistrationResponse["payment_status"]; internal_notes?: string | null; guests_count?: number }) => Promise<boolean>;
   onDelete: (id: string) => void;
   onReminder: (id: string) => void;
 }) {
@@ -810,8 +811,7 @@ function ResponsesTable({ responses, questions, paymentRequired, maxGuests, read
                           disabled={readOnly || cancelled}
                           onClick={async () => {
                             const next = r.payment_status === "paid" ? "pending" : "paid";
-                            await onUpdate(r.id, { payment_status: next });
-                            toast.success(next === "paid" ? "Marcado como pagado" : "Marcado como pendiente");
+                            if (await onUpdate(r.id, { payment_status: next })) toast.success(next === "paid" ? "Marcado como pagado" : "Marcado como pendiente");
                           }}
                           title={r.payment_status === "paid" ? "Haz clic para deshacer" : "Marcar como pagado"}
                           className={`h-8 text-xs gap-1 ${r.payment_status === "paid" ? "bg-emerald-600 hover:bg-emerald-700 text-white" : "bg-white border border-ink/20 text-ink hover:bg-emerald-50"}`}
@@ -837,7 +837,7 @@ function ResponsesTable({ responses, questions, paymentRequired, maxGuests, read
                 {notesFor === r.id && (
                   <tr key={`${r.id}-notes`} className="border-b border-ink/5 bg-ink/[0.02]">
                     <td colSpan={cols.length + (paymentRequired ? 5 : 4)} className="px-3 py-2">
-                      <NotesCell response={r} onSave={async (notes) => { await onUpdate(r.id, { internal_notes: notes }); toast.success("Notas guardadas"); }} />
+                      <NotesCell response={r} onSave={async (notes) => { if (await onUpdate(r.id, { internal_notes: notes })) toast.success("Notas guardadas"); }} />
                     </td>
                   </tr>
                 )}
