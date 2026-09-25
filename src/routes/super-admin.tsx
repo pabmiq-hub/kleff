@@ -124,12 +124,12 @@ function SuperAdminLoginPage() {
         <Link to="/" className="block text-center mb-8">
           <span className="font-display font-bold text-3xl tracking-tight text-cream">KLEFF</span>
           <p className="text-sm text-cream/60 mt-1 flex items-center justify-center gap-1">
-            <Shield className="h-3.5 w-3.5" /> Acceso super administrador
+            <Shield className="h-3.5 w-3.5" /> Acceso a administración
           </p>
         </Link>
 
         <div className="bg-card rounded-2xl border-2 border-coral shadow-tactile p-8">
-          <h1 className="font-display text-2xl font-bold mb-1">Panel super admin</h1>
+          <h1 className="font-display text-2xl font-bold mb-1">Panel de administración</h1>
           <p className="text-sm text-muted-foreground mb-6">
             Acceso reservado al equipo de KLEFF.
           </p>

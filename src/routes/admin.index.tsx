@@ -1,4 +1,6 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useAdminAccess } from "@/hooks/useAdminAccess";
+import { adminLandingPath } from "@/lib/admin-landing";
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { getAdminKpis } from "@/lib/rental.functions";
@@ -16,6 +18,18 @@ interface Kpis {
 }
 
 function AdminHome() {
+  const { access, loading, isSuperAdmin } = useAdminAccess();
+  const navigate = useNavigate();
+  useEffect(() => {
+    if (loading || isSuperAdmin) return;
+    const landing = adminLandingPath(access);
+    if (landing && landing !== "/admin") void navigate({ to: landing, replace: true });
+  }, [loading, isSuperAdmin, access, navigate]);
+  if (loading || !isSuperAdmin) return <p className="text-ink/60">Cargando…</p>;
+  return <AdminSummary />;
+}
+
+function AdminSummary() {
   const fn = useServerFn(getAdminKpis);
   const [kpis, setKpis] = useState<Kpis | null>(null);
 

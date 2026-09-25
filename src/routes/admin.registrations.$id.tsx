@@ -801,16 +801,25 @@ function ResponsesTable({ responses, questions, paymentRequired, maxGuests, read
                     </td>
                   ))}
                   {paymentRequired && (
-                    <td className="px-3 py-2">
-                      <Select disabled={readOnly} value={r.payment_status} onValueChange={(v) => onUpdate(r.id, { payment_status: v as RegistrationResponse["payment_status"] })}>
-                        <SelectTrigger className="bg-white border-ink/15 text-ink h-8 text-xs w-32"><SelectValue /></SelectTrigger>
-                        <SelectContent className="bg-white border-ink/15 text-ink">
-                          <SelectItem value="not_required">Sin pago</SelectItem>
-                          <SelectItem value="pending">Pendiente</SelectItem>
-                          <SelectItem value="paid">Pagado</SelectItem>
-                          <SelectItem value="refunded">Reembolsado</SelectItem>
-                        </SelectContent>
-                      </Select>
+                    <td className="px-3 py-2 whitespace-nowrap">
+                      {r.payment_status === "refunded" ? (
+                        <span className="text-xs text-ink/60">Reembolsado</span>
+                      ) : (
+                        <Button
+                          size="sm"
+                          disabled={readOnly || cancelled}
+                          onClick={async () => {
+                            const next = r.payment_status === "paid" ? "pending" : "paid";
+                            await onUpdate(r.id, { payment_status: next });
+                            toast.success(next === "paid" ? "Marcado como pagado" : "Marcado como pendiente");
+                          }}
+                          title={r.payment_status === "paid" ? "Haz clic para deshacer" : "Marcar como pagado"}
+                          className={`h-8 text-xs gap-1 ${r.payment_status === "paid" ? "bg-emerald-600 hover:bg-emerald-700 text-white" : "bg-white border border-ink/20 text-ink hover:bg-emerald-50"}`}
+                        >
+                          <CreditCard className="h-3.5 w-3.5" />
+                          {r.payment_status === "paid" ? "Pagado" : "Marcar pagado"}
+                        </Button>
+                      )}
                     </td>
                   )}
                   <td className="px-3 py-2 whitespace-nowrap">
@@ -819,7 +828,7 @@ function ResponsesTable({ responses, questions, paymentRequired, maxGuests, read
                         {!cancelled && r.email_contact && (
                           <Button size="sm" variant="ghost" onClick={() => onReminder(r.id)} title="Reenviar recordatorio" className="h-8 w-8 p-0 text-ink/60 hover:text-coral"><Mail className="h-3.5 w-3.5" /></Button>
                         )}
-                        <Button size="sm" variant="ghost" onClick={() => setNotesFor((n) => n === r.id ? null : r.id)} className="h-8 px-2 text-xs text-ink/60 hover:text-ink">Notas</Button>
+                        <Button size="sm" variant="ghost" onClick={() => setNotesFor((n) => n === r.id ? null : r.id)} className={`h-8 px-2 text-xs hover:text-ink ${r.internal_notes ? "text-coral font-semibold" : "text-ink/60"}`}>Notas{r.internal_notes ? " •" : ""}</Button>
                         <Button size="sm" variant="ghost" onClick={() => onDelete(r.id)} className="text-ink/60 hover:text-red-400 hover:bg-red-500/10 h-8 w-8 p-0"><Trash2 className="h-3.5 w-3.5" /></Button>
                       </>
                     )}
@@ -828,7 +837,7 @@ function ResponsesTable({ responses, questions, paymentRequired, maxGuests, read
                 {notesFor === r.id && (
                   <tr key={`${r.id}-notes`} className="border-b border-ink/5 bg-ink/[0.02]">
                     <td colSpan={cols.length + (paymentRequired ? 5 : 4)} className="px-3 py-2">
-                      <NotesCell response={r} onSave={(notes) => onUpdate(r.id, { internal_notes: notes })} />
+                      <NotesCell response={r} onSave={async (notes) => { await onUpdate(r.id, { internal_notes: notes }); toast.success("Notas guardadas"); }} />
                     </td>
                   </tr>
                 )}
@@ -841,17 +850,28 @@ function ResponsesTable({ responses, questions, paymentRequired, maxGuests, read
   );
 }
 
-function NotesCell({ response, onSave }: { response: RegistrationResponse; onSave: (notes: string | null) => void }) {
+function NotesCell({ response, onSave }: { response: RegistrationResponse; onSave: (notes: string | null) => Promise<void> }) {
   const [notes, setNotes] = useState(response.internal_notes ?? "");
+  const [saving, setSaving] = useState(false);
+  const dirty = notes !== (response.internal_notes ?? "");
+  const save = async () => {
+    if (!dirty) return;
+    setSaving(true);
+    try { await onSave(notes.trim() ? notes : null); } finally { setSaving(false); }
+  };
   return (
-    <Textarea
-      rows={2}
-      value={notes}
-      onChange={(e) => setNotes(e.target.value)}
-      onBlur={() => notes !== (response.internal_notes ?? "") && onSave(notes || null)}
-      placeholder="Notas internas…"
-      className="bg-white border-ink/15 text-ink text-sm"
-    />
+    <div className="flex gap-2 items-start">
+      <Textarea
+        rows={2}
+        value={notes}
+        onChange={(e) => setNotes(e.target.value)}
+        placeholder="Notas internas…"
+        className="bg-white border-ink/15 text-ink text-sm flex-1"
+      />
+      <Button size="sm" onClick={save} disabled={!dirty || saving} className="h-9">
+        {saving ? "Guardando…" : dirty ? "Guardar" : "Guardado"}
+      </Button>
+    </div>
   );
 }
 
