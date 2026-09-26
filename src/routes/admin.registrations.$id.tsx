@@ -192,7 +192,7 @@ function FormSettings({ form, questions, onSaved }: { form: RegistrationForm; qu
             title: state.title,
             description: state.description,
             description_html: state.description_html,
-            highlights: normalizeHighlights(state.highlights),
+            highlights: syncDateHighlight(normalizeHighlights(state.highlights), state.event_date),
             legal_info_html: state.legal_info_html,
             legal_info_enabled: state.legal_info_enabled,
             cover_image_url: state.cover_image_url,
@@ -246,7 +246,7 @@ function FormSettings({ form, questions, onSaved }: { form: RegistrationForm; qu
         </Row>
         <Row label="Categorías destacadas">
           <HighlightsEditor
-            value={normalizeHighlights(state.highlights)}
+            value={syncDateHighlight(normalizeHighlights(state.highlights), state.event_date)}
             onChange={(rows) => set("highlights", rows as RegistrationForm["highlights"])}
             form={state}
             setField={set}
@@ -314,6 +314,53 @@ function FormSettings({ form, questions, onSaved }: { form: RegistrationForm; qu
 
       {!isExternal && (
         <>
+          <Card title="Pago e inscripciones">
+            <div className="flex items-center gap-3">
+              <Switch checked={!!state.payment_required} onCheckedChange={(v) => set("payment_required", v)} />
+              <Label className="text-ink text-sm">Este evento requiere pago</Label>
+            </div>
+            <p className="text-xs text-ink/50 mt-1">
+              Al activarlo aparece la columna «Pago» y el botón «Marcar pagado» en la pestaña Inscritos.
+            </p>
+            {state.payment_required && (
+              <div className="mt-4 space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <Row label="Precio por persona (€)">
+                    <Input
+                      type="number"
+                      min={0}
+                      step="0.01"
+                      value={state.payment_amount_cents != null ? (state.payment_amount_cents / 100).toFixed(2) : ""}
+                      onChange={(e) => set("payment_amount_cents", e.target.value === "" ? null : Math.max(0, Math.round(Number(e.target.value) * 100)))}
+                      className="bg-white border-ink/15 text-ink"
+                      placeholder="5.00"
+                    />
+                  </Row>
+                  <Row label="Moneda">
+                    <Select value={state.payment_currency || "EUR"} onValueChange={(v) => set("payment_currency", v)}>
+                      <SelectTrigger className="bg-white border-ink/15 text-ink"><SelectValue /></SelectTrigger>
+                      <SelectContent className="bg-white border-ink/15 text-ink">
+                        <SelectItem value="EUR">EUR (€)</SelectItem>
+                        <SelectItem value="USD">USD ($)</SelectItem>
+                        <SelectItem value="GBP">GBP (£)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </Row>
+                </div>
+                <Row label="Instrucciones de pago">
+                  <Textarea
+                    rows={3}
+                    value={state.payment_instructions ?? ""}
+                    onChange={(e) => set("payment_instructions", e.target.value || null)}
+                    className="bg-white border-ink/15 text-ink"
+                    placeholder="Bizum al 600 000 000 indicando tu nombre, o en efectivo al llegar."
+                  />
+                  <p className="text-xs text-ink/50 mt-1">Se muestran en la página pública y en el correo de confirmación.</p>
+                </Row>
+              </div>
+            )}
+          </Card>
+
 
           <Card title="Notificaciones">
             <Row label="Emails para notificar nuevas inscripciones (separados por coma)">
@@ -1106,6 +1153,14 @@ function CommunicationSettings({ form, onSaved }: { form: RegistrationForm; onSa
 function fmtEventDate(iso: string | null) {
   if (!iso) return "";
   return new Date(iso).toLocaleString("es-ES", { dateStyle: "full", timeStyle: "short", timeZone: "Europe/Madrid" });
+}
+
+/** Mantiene el texto de la categoría «Fecha» siempre en sintonía con event_date. */
+function syncDateHighlight(rows: HighlightRow[], eventDate: string | null): HighlightRow[] {
+  const text = fmtEventDate(eventDate);
+  return rows.map((r) =>
+    r.label.trim().toLowerCase().startsWith("fecha") ? { ...r, text } : r
+  );
 }
 
 function HighlightsEditor({ value, onChange, form, setField }: {
