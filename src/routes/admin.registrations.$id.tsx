@@ -184,7 +184,7 @@ function FormSettings({ form, questions, onSaved }: { form: RegistrationForm; qu
     setSaving(true);
     try {
       const emails = notifyInput.split(",").map((e) => e.trim()).filter(Boolean);
-      await updateFn({
+      const res = await updateFn({
         data: {
           id: form.id,
           patch: {
@@ -215,7 +215,8 @@ function FormSettings({ form, questions, onSaved }: { form: RegistrationForm; qu
           },
         },
       });
-      toast.success("Cambios guardados");
+      const n = (res as { rescheduled?: number })?.rescheduled ?? 0;
+      toast.success(n > 0 ? `Cambios guardados · ${n} recordatorios reprogramados con los nuevos datos` : "Cambios guardados");
       onSaved({ ...state, notify_emails: emails });
     } catch (e) {
       toast.error((e as Error).message);
