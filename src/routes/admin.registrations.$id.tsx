@@ -1190,13 +1190,15 @@ function HighlightsEditor({ value, onChange, form, setField }: {
               <Input value={row.emoji} onChange={(e) => update(i, { emoji: e.target.value })} className="w-16 text-center bg-white border-ink/15 text-ink" placeholder="📍" />
               <Input value={row.label} onChange={(e) => update(i, { label: e.target.value })} className="w-40 bg-white border-ink/15 text-ink" placeholder="Lugar" />
               <Input
-                value={row.text}
+                value={kind === "date" ? fmtEventDate(form.event_date) : row.text}
+                readOnly={kind === "date"}
                 onChange={(e) => {
+                  if (kind === "date") return;
                   update(i, { text: e.target.value });
                   if (kind === "place") setField("event_location", e.target.value || null);
                 }}
-                className="flex-1 bg-white border-ink/15 text-ink"
-                placeholder={kind === "date" ? "Se rellena con la fecha de abajo" : "Carrer Exemple 3, Barcelona"}
+                className={`flex-1 border-ink/15 text-ink ${kind === "date" ? "bg-ink/[0.06] cursor-not-allowed" : "bg-white"}`}
+                placeholder={kind === "date" ? "Elige la fecha en el selector de abajo" : "Carrer Exemple 3, Barcelona"}
               />
               <Button type="button" variant="ghost" size="icon" onClick={() => onChange(value.filter((_, idx) => idx !== i))}>
                 <Trash2 className="h-4 w-4 text-ink/50" />
