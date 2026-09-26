@@ -574,10 +574,46 @@ export const adminUpdateForm = createServerFn({ method: "POST" })
       if (typeof patch["description_html"] === "string") patch["description_html"] = sanitizeHtml(patch["description_html"] as string);
       if (typeof patch["legal_info_html"] === "string") patch["legal_info_html"] = sanitizeHtml(patch["legal_info_html"] as string);
     }
+    const REMINDER_FIELDS = [
+      "event_date", "event_location", "title", "slug", "description",
+      "reminder_subject", "reminder_body", "reminder_offsets_hours",
+    ];
+    const { data: before } = await supabaseAdmin
+      .from("registration_forms").select("*").eq("id", data.id).maybeSingle();
     const { error } = await supabaseAdmin
       .from("registration_forms").update(patch as never).eq("id", data.id);
     if (error) throw new Error(error.message);
-    return { ok: true };
+
+    // If anything shown in the reminder changed, cancel queued reminders and reschedule them.
+    let rescheduled = 0;
+    const prev = (before ?? {}) as Record<string, unknown>;
+    const changed = REMINDER_FIELDS.some(
+      (k) => k in patch && JSON.stringify(patch[k] ?? null) !== JSON.stringify(prev[k] ?? null),
+    );
+    if (before && changed) {
+      const { data: after } = await supabaseAdmin
+        .from("registration_forms").select("*").eq("id", data.id).maybeSingle();
+      const { data: rows } = await supabaseAdmin
+        .from("registration_responses")
+        .select("id, cancel_token, email_contact, guests_count, data, reminder_email_ids")
+        .eq("form_id", data.id)
+        .is("cancelled_at", null);
+      const { cancelScheduledReminders, scheduleReminderEmails } = await import("@/lib/registrations-email.server");
+      const list = (rows ?? []) as Array<{
+        id: string; cancel_token: string; email_contact: string | null; guests_count: number | null;
+        data: Record<string, unknown> | null; reminder_email_ids: string[] | null;
+      }>;
+      for (let i = 0; i < list.length; i += 5) {
+        await Promise.allSettled(list.slice(i, i + 5).map(async (r) => {
+          await cancelScheduledReminders(Array.isArray(r.reminder_email_ids) ? r.reminder_email_ids : []);
+          const ids = await scheduleReminderEmails(after as never, r);
+          await supabaseAdmin.from("registration_responses")
+            .update({ reminder_email_ids: ids } as never).eq("id", r.id);
+          if (ids.length) rescheduled++;
+        }));
+      }
+    }
+    return { ok: true, rescheduled };
   });
 
 export const adminDeleteForm = createServerFn({ method: "POST" })
