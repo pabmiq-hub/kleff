@@ -25,6 +25,17 @@ export interface SendEmailResult {
   id: string;
 }
 
+// Keep under Resend's 10 requests/second limit: space out request starts
+// within this worker (retries on 429 cover concurrent workers).
+const MIN_GAP_MS = 125;
+let nextSlot = 0;
+async function throttle(): Promise<void> {
+  const now = Date.now();
+  const slot = Math.max(now, nextSlot);
+  nextSlot = slot + MIN_GAP_MS;
+  if (slot > now) await new Promise((r) => setTimeout(r, slot - now));
+}
+
 export async function sendEmail(input: SendEmailInput): Promise<SendEmailResult> {
   const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey) throw new Error("RESEND_API_KEY not configured");
@@ -42,19 +53,29 @@ export async function sendEmail(input: SendEmailInput): Promise<SendEmailResult>
   if (input.tags) body.tags = input.tags;
   if (input.scheduledAt) body.scheduled_at = input.scheduledAt;
 
-  const res = await fetch(RESEND_ENDPOINT, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${apiKey}`,
-    },
-    body: JSON.stringify(body),
-  });
+  let res: Response | null = null;
+  for (let attempt = 0; attempt < 5; attempt++) {
+    await throttle();
+    res = await fetch(RESEND_ENDPOINT, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify(body),
+    });
+    if (res.status !== 429 && res.status < 500) break;
+    if (attempt === 4) break;
+    const retryAfter = Number(res.headers.get("retry-after"));
+    const wait = Number.isFinite(retryAfter) && retryAfter > 0 ? retryAfter * 1000 : 600 * (attempt + 1);
+    await res.text().catch(() => "");
+    await new Promise((r) => setTimeout(r, Math.min(wait, 5000)));
+  }
 
-  if (!res.ok) {
-    const errText = await res.text();
-    console.error(`[email] Resend failed [${res.status}]: ${errText}`);
-    throw new Error(`Resend request failed [${res.status}]: ${errText}`);
+  if (!res || !res.ok) {
+    const errText = res ? await res.text() : "no response";
+    console.error(`[email] Resend failed [${res?.status}]: ${errText}`);
+    throw new Error(`Resend request failed [${res?.status}]: ${errText}`);
   }
   const json = (await res.json()) as { id: string };
   return { id: json.id };
