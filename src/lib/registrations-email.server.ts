@@ -185,3 +185,51 @@ export async function cancelScheduledReminders(ids: string[]): Promise<void> {
   const { cancelScheduledEmail } = await import("@/lib/email/send.server");
   await Promise.all(ids.map((id) => cancelScheduledEmail(id)));
 }
+
+/**
+ * Sends (or schedules, when scheduledAt is given) the pending-payment reminder.
+ * Returns the email id, or null if nothing was sent.
+ */
+export async function sendPaymentReminderEmail(
+  form: EmailFormLike & {
+    payment_amount_cents?: number | null;
+    payment_currency?: string | null;
+    payment_instructions?: string | null;
+  },
+  response: EmailResponseLike,
+  scheduledAt?: string,
+): Promise<string | null> {
+  if (!response.email_contact) return null;
+  const { sendEmailSafe } = await import("@/lib/email/send.server");
+  const { registrationEventEmail } = await import("@/lib/email/templates.server");
+  const built = buildRegistrationEmail("reminder", form, response);
+  const people = 1 + (response.guests_count ?? 0);
+  let amount = "";
+  if (form.payment_amount_cents) {
+    const total = (form.payment_amount_cents * people) / 100;
+    amount = new Intl.NumberFormat("es-ES", { style: "currency", currency: form.payment_currency || "EUR" }).format(total);
+  }
+  const intro = [
+    `Aún no nos consta el pago de tu inscripción a ${form.title}.`,
+    amount ? `Importe pendiente: ${amount}${people > 1 ? ` (${people} plazas)` : ""}.` : "",
+    form.payment_instructions ? `Cómo pagar: ${form.payment_instructions}` : "",
+    "Si ya lo has hecho, ignora este mensaje. ¡Gracias!",
+  ].filter(Boolean).join("\n\n");
+  const tpl = registrationEventEmail({
+    kind: "reminder",
+    formTitle: form.title,
+    ...built,
+    subject: `Pago pendiente — ${form.title}`,
+    intro,
+    googleUrl: null,
+    icsUrl: null,
+  });
+  const res = await sendEmailSafe({
+    to: response.email_contact,
+    subject: tpl.subject,
+    html: tpl.html,
+    scheduledAt,
+    tags: [{ name: "type", value: "registration_payment_reminder" }],
+  });
+  return res?.id ?? null;
+}
