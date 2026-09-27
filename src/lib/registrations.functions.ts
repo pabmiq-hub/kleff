@@ -45,6 +45,8 @@ export type RegistrationForm = {
   payment_amount_cents: number | null;
   payment_currency: string;
   payment_instructions: string | null;
+  payment_reminder_enabled?: boolean;
+  payment_reminder_hours?: number;
   max_responses: number | null;
   closes_at: string | null;
   confirmation_message: string | null;
@@ -292,6 +294,23 @@ export const submitRegistration = createServerFn({ method: "POST" })
             .eq("id", responseId);
         }
       }
+
+      const fp = f as unknown as { payment_required?: boolean; payment_reminder_enabled?: boolean; payment_reminder_hours?: number };
+      if (data.emailContact && fp.payment_required && fp.payment_reminder_enabled) {
+        const { sendPaymentReminderEmail } = await import("@/lib/registrations-email.server");
+        const hours = fp.payment_reminder_hours === 48 ? 48 : 24;
+        const id = await sendPaymentReminderEmail(f as never, {
+          cancel_token: row.cancel_token,
+          email_contact: data.emailContact,
+          guests_count: guests,
+          data: data.data as Record<string, unknown>,
+        }, new Date(Date.now() + hours * 3600_000).toISOString());
+        if (id) {
+          await supabaseAdmin.from("registration_responses")
+            .update({ payment_reminder_email_id: id } as never).eq("id", responseId);
+        }
+      }
+
 
 
       const { data: qRows } = await supabaseAdmin
@@ -548,6 +567,8 @@ export const adminUpdateForm = createServerFn({ method: "POST" })
       payment_amount_cents: z.number().int().min(0).nullable().optional(),
       payment_currency: z.string().length(3).optional(),
       payment_instructions: z.string().max(2000).nullable().optional(),
+      payment_reminder_enabled: z.boolean().optional(),
+      payment_reminder_hours: z.union([z.literal(24), z.literal(48)]).optional(),
       max_responses: z.number().int().min(1).nullable().optional(),
       closes_at: z.string().nullable().optional(),
       confirmation_message: z.string().max(2000).nullable().optional(),
@@ -748,6 +769,17 @@ export const adminUpdateResponse = createServerFn({ method: "POST" })
     if (data.payment_status) patch.payment_status = data.payment_status;
     if (data.internal_notes !== undefined) patch.internal_notes = data.internal_notes;
     if (data.guests_count !== undefined) patch.guests_count = data.guests_count;
+    if (data.payment_status && data.payment_status !== "pending") {
+      // Paid/refunded: cancel any queued payment reminder.
+      const { data: cur } = await supabaseAdmin
+        .from("registration_responses").select("payment_reminder_email_id").eq("id", data.id).maybeSingle();
+      const rid = (cur as { payment_reminder_email_id?: string | null } | null)?.payment_reminder_email_id;
+      if (rid) {
+        const { cancelScheduledReminders } = await import("@/lib/registrations-email.server");
+        await cancelScheduledReminders([rid]);
+        patch.payment_reminder_email_id = null;
+      }
+    }
     const { error } = await supabaseAdmin.from("registration_responses").update(patch as never).eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true };
@@ -789,6 +821,36 @@ export const adminSendReminder = createServerFn({ method: "POST" })
     }
     return { sent: list.length };
   });
+
+/** Manually send the pending-payment reminder to everyone who hasn't paid yet. */
+export const adminSendPaymentReminder = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator(z.object({ form_id: z.string().uuid() }))
+  .handler(async ({ data, context }) => {
+    const { getAdminAccess, hasPermission } = await import("@/lib/permissions.server");
+    const access = await getAdminAccess(context.userId);
+    if (!access.isSuperAdmin && !hasPermission(access, "inscripcion", { minNivel: "escritura", recursoId: data.form_id })) {
+      throw new Error("Forbidden");
+    }
+    const { data: form } = await supabaseAdmin
+      .from("registration_forms").select("*").eq("id", data.form_id).maybeSingle();
+    if (!form) throw new Error("Formulario no encontrado");
+    const { data: rows, error } = await supabaseAdmin
+      .from("registration_responses")
+      .select("id, cancel_token, email_contact, guests_count, data")
+      .eq("form_id", data.form_id)
+      .eq("payment_status", "pending")
+      .is("cancelled_at", null)
+      .not("email_contact", "is", null);
+    if (error) throw new Error(error.message);
+    const { sendPaymentReminderEmail } = await import("@/lib/registrations-email.server");
+    let sent = 0;
+    for (const r of (rows ?? []) as RecipientRow[]) {
+      if (await sendPaymentReminderEmail(form as never, r)) sent++;
+    }
+    return { sent };
+  });
+
 
 type RecipientRow = {
   id: string;

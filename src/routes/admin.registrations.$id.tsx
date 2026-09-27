@@ -14,7 +14,7 @@ import { toast } from "sonner";
 import {
   adminGetForm, adminUpdateForm, adminUpsertQuestion, adminDeleteQuestion,
   adminReorderQuestions, adminListResponses, adminUpdateResponse, adminDeleteResponse,
-  adminSendReminder, adminPreviewEmails,
+  adminSendReminder, adminPreviewEmails, adminSendPaymentReminder,
   adminPreviewAnnouncement, adminSendAnnouncement, adminListAnnouncements,
   type RegistrationQuestion, type RegistrationForm, type RegistrationResponse,
   type RegistrationAnnouncement, type AnnouncementBlocks,
@@ -204,6 +204,8 @@ function FormSettings({ form, questions, onSaved }: { form: RegistrationForm; qu
             payment_amount_cents: state.payment_amount_cents,
             payment_currency: state.payment_currency,
             payment_instructions: state.payment_instructions,
+            payment_reminder_enabled: !!state.payment_reminder_enabled,
+            payment_reminder_hours: state.payment_reminder_hours === 48 ? 48 : 24,
             max_responses: state.max_responses,
             closes_at: state.closes_at,
             confirmation_message: state.confirmation_message,
@@ -358,6 +360,26 @@ function FormSettings({ form, questions, onSaved }: { form: RegistrationForm; qu
                   />
                   <p className="text-xs text-ink/50 mt-1">Se muestran en la página pública y en el correo de confirmación.</p>
                 </Row>
+                <div className="rounded-lg border border-ink/10 p-3 space-y-3">
+                  <label className="flex items-center justify-between gap-3">
+                    <span className="text-sm text-ink">
+                      Recordatorio automático de pago pendiente
+                      <span className="block text-xs text-ink/50">Se envía solo a quien aún no haya pagado. Si lo marcas como pagado antes, se cancela.</span>
+                    </span>
+                    <Switch checked={!!state.payment_reminder_enabled} onCheckedChange={(v) => set("payment_reminder_enabled", v)} />
+                  </label>
+                  {state.payment_reminder_enabled && (
+                    <Row label="Enviar tras la inscripción">
+                      <Select value={String(state.payment_reminder_hours === 48 ? 48 : 24)} onValueChange={(v) => set("payment_reminder_hours", Number(v))}>
+                        <SelectTrigger className="bg-white border-ink/15 text-ink"><SelectValue /></SelectTrigger>
+                        <SelectContent className="bg-white border-ink/15 text-ink">
+                          <SelectItem value="24">A las 24 horas</SelectItem>
+                          <SelectItem value="48">A las 48 horas</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </Row>
+                  )}
+                </div>
               </div>
             )}
           </Card>
@@ -650,6 +672,8 @@ function ResponsesPanel({ form, questions, readOnly }: { form: RegistrationForm;
   const [responses, setResponses] = useState<RegistrationResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [reminderTarget, setReminderTarget] = useState<{ responseId?: string; count: number } | null>(null);
+  const payReminderFn = useServerFn(adminSendPaymentReminder);
+  const [sendingPay, setSendingPay] = useState(false);
 
   const reload = async () => {
     setLoading(true);
@@ -680,6 +704,7 @@ function ResponsesPanel({ form, questions, readOnly }: { form: RegistrationForm;
   if (loading) return <p className="text-ink/60 text-sm">Cargando respuestas…</p>;
 
   const active = responses.filter((r) => !r.cancelled_at && r.email_contact);
+  const pendingPay = active.filter((r) => r.payment_status === "pending");
   const totalAttendees = responses.reduce((n, r) => n + (r.cancelled_at ? 0 : 1 + (r.guests_count ?? 0)), 0);
 
   return (
@@ -698,6 +723,25 @@ function ResponsesPanel({ form, questions, readOnly }: { form: RegistrationForm;
               onClick={() => setReminderTarget({ count: active.length })}
             >
               <Mail className="h-4 w-4 mr-2" /> Enviar recordatorio a todos
+            </Button>
+          )}
+          {!readOnly && paymentRequired && (
+            <Button
+              size="sm"
+              variant="outline"
+              className="border-ink/20 text-ink hover:bg-ink/10"
+              disabled={!pendingPay.length || sendingPay}
+              onClick={async () => {
+                if (!confirm(`¿Enviar recordatorio de pago a ${pendingPay.length} persona${pendingPay.length === 1 ? "" : "s"} con el pago pendiente?`)) return;
+                setSendingPay(true);
+                try {
+                  const res = await payReminderFn({ data: { form_id: formId } });
+                  toast.success(`Recordatorio de pago enviado a ${res.sent} persona${res.sent === 1 ? "" : "s"}`);
+                } catch (e) { toast.error((e as Error).message); }
+                finally { setSendingPay(false); }
+              }}
+            >
+              <Mail className="h-4 w-4 mr-2" /> Recordar pago a pendientes ({pendingPay.length})
             </Button>
           )}
           <Button size="sm" onClick={downloadCsv} variant="outline" className="border-ink/20 text-ink hover:bg-ink/10" disabled={!responses.length}>Descargar CSV</Button>
