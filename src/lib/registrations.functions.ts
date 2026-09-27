@@ -45,6 +45,8 @@ export type RegistrationForm = {
   payment_amount_cents: number | null;
   payment_currency: string;
   payment_instructions: string | null;
+  payment_reminder_enabled?: boolean;
+  payment_reminder_hours?: number;
   max_responses: number | null;
   closes_at: string | null;
   confirmation_message: string | null;
@@ -565,6 +567,8 @@ export const adminUpdateForm = createServerFn({ method: "POST" })
       payment_amount_cents: z.number().int().min(0).nullable().optional(),
       payment_currency: z.string().length(3).optional(),
       payment_instructions: z.string().max(2000).nullable().optional(),
+      payment_reminder_enabled: z.boolean().optional(),
+      payment_reminder_hours: z.union([z.literal(24), z.literal(48)]).optional(),
       max_responses: z.number().int().min(1).nullable().optional(),
       closes_at: z.string().nullable().optional(),
       confirmation_message: z.string().max(2000).nullable().optional(),
