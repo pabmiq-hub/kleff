@@ -33,7 +33,7 @@ export const Route = createFileRoute("/admin")({
 });
 
 function AdminLayout() {
-  const { session, loading, user, signOut } = useAuth();
+  const { session, loading, user, signOut, isSuperAdmin: authSuperAdmin } = useAuth();
   const { access, loading: accessLoading, can, isSuperAdmin } = useAdminAccess();
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
@@ -52,7 +52,7 @@ function AdminLayout() {
     return null;
   }
 
-  const hasAnyAccess = isSuperAdmin || Boolean(access?.activo && access.permisos.length > 0);
+  const hasAnyAccess = isSuperAdmin || authSuperAdmin || Boolean(access?.activo && access.permisos.length > 0);
   if (!hasAnyAccess) {
     void navigate({ to: "/app" });
     return null;
