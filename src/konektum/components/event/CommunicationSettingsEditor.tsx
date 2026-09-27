@@ -183,7 +183,19 @@ const CommunicationSettingsEditor = ({
       const updatedTemplate = {
         ...existingTemplate,
         communication_templates_v2: sanitize(primaryTemplates),
-        ...(hasSecondaryLink ? { communication_templates_v2_secondary: sanitize(secondaryTemplates) } : {}),
+        // Store only the fields where the second link really differs from the main one,
+        // so later edits to the main texts keep flowing to the second audience.
+        ...(hasSecondaryLink ? {
+          communication_templates_v2_secondary: (() => {
+            const p = sanitize(primaryTemplates) as Record<string, unknown>;
+            const s = sanitize(secondaryTemplates) as Record<string, unknown>;
+            const diff: Record<string, unknown> = {};
+            for (const k of Object.keys(s)) {
+              if (JSON.stringify(s[k]) !== JSON.stringify(p[k])) diff[k] = s[k];
+            }
+            return diff;
+          })(),
+        } : {}),
       };
 
       const { error } = await supabase
