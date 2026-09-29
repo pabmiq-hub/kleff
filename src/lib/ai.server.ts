@@ -10,7 +10,7 @@
  * gracefully — a failed translation should never lose the user's content).
  */
 
-const GOOGLE_MODEL = process.env.GOOGLE_AI_MODEL || "gemini-3.6-flash";
+const GOOGLE_MODEL = "gemini-flash-lite-latest";
 const GATEWAY_MODEL = "google/gemini-3.6-flash";
 
 export type AiTextOptions = {
@@ -28,9 +28,31 @@ export function aiProvider(): "google" | "lovable" | null {
   return null;
 }
 
+const FALLBACK_MODELS = ["gemini-flash-lite-latest", "gemini-3.5-flash-lite", "gemini-flash-latest"];
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
 async function callGoogle(opts: AiTextOptions, apiKey: string): Promise<string | null> {
   const tag = opts.tag ?? "[ai]";
-  const model = encodeURIComponent(GOOGLE_MODEL);
+  const models = [...new Set([GOOGLE_MODEL, ...FALLBACK_MODELS])];
+  for (const m of models) {
+    for (let attempt = 0; attempt < 3; attempt++) {
+      const res = await callGoogleModel(opts, apiKey, m);
+      if (res.ok) return res.text;
+      if (res.status !== 503 && res.status !== 429 && res.status !== 500) break; // try next model
+      await sleep(600 * 2 ** attempt);
+    }
+    console.warn(`${tag} Google model ${m} unavailable, trying fallback`);
+  }
+  return null;
+}
+
+async function callGoogleModel(
+  opts: AiTextOptions,
+  apiKey: string,
+  modelName: string,
+): Promise<{ ok: true; text: string | null } | { ok: false; status: number }> {
+  const tag = opts.tag ?? "[ai]";
+  const model = encodeURIComponent(modelName);
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
 
   const res = await fetch(url, {
@@ -51,8 +73,8 @@ async function callGoogle(opts: AiTextOptions, apiKey: string): Promise<string |
 
   if (!res.ok) {
     const txt = await res.text().catch(() => "");
-    console.error(`${tag} Google AI ${res.status}: ${txt.slice(0, 300)}`);
-    return null;
+    console.error(`${tag} Google AI ${modelName} ${res.status}: ${txt.slice(0, 300)}`);
+    return { ok: false, status: res.status };
   }
 
   const json = (await res.json()) as {

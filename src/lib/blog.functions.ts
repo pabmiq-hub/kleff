@@ -307,63 +307,59 @@ export const adminTranslateBlogPost = createServerFn({ method: "POST" })
       throw new Error("Solo super-administradores pueden traducir posts.");
     }
 
-    const { data: row, error } = await supabaseAdmin
-      .from("blog_posts")
-      .select("*")
-      .eq("id", data.id)
-      .maybeSingle();
-    if (error) throw new Error(error.message);
-    if (!row) throw new Error("Post no encontrado");
-    if (!row.title_en || !row.content_en) throw new Error("El post no tiene contenido en inglés para traducir");
-
-    const updates: {
-      title_es?: string;
-      excerpt_es?: string;
-      content_es?: string;
-      title_ca?: string;
-      excerpt_ca?: string;
-      content_ca?: string;
-    } = {};
-
-    if (data.force || !row.title_es || !row.content_es) {
-      const es = await translatePost(
-        { title: row.title_en, excerpt: row.excerpt_en ?? "", content: row.content_en },
-        "Spanish (Spain, castellano)",
-      );
-      if (es) {
-        updates.title_es = es.title;
-        updates.excerpt_es = es.excerpt;
-        updates.content_es = es.content;
-      }
-    }
-    if (data.force || !row.title_ca || !row.content_ca) {
-      const ca = await translatePost(
-        { title: row.title_en, excerpt: row.excerpt_en ?? "", content: row.content_en },
-        "Catalan (Català)",
-      );
-      if (ca) {
-        updates.title_ca = ca.title;
-        updates.excerpt_ca = ca.excerpt;
-        updates.content_ca = ca.content;
-      }
-    }
-
-    if (Object.keys(updates).length > 0) {
-      const { error: updErr } = await supabaseAdmin.from("blog_posts").update(updates).eq("id", data.id);
-      if (updErr) throw new Error(updErr.message);
-    }
-
-    return { ok: true, fieldsUpdated: Object.keys(updates).length };
+    return translateMissingLanguages(data.id, data.force);
   });
+
+const LANGS = {
+  es: "Spanish (Spain, castellano)",
+  ca: "Catalan (Català)",
+  en: "English",
+} as const;
+type LangKey = keyof typeof LANGS;
+
+/** Detects the source language (ES > EN > CA) and fills the missing ones. */
+async function translateMissingLanguages(id: string, force: boolean) {
+  const { data: row, error } = await supabaseAdmin.from("blog_posts").select("*").eq("id", id).maybeSingle();
+  if (error) throw new Error(error.message);
+  if (!row) throw new Error("Post no encontrado");
+  const r = row as unknown as Record<string, string | null>;
+  const has = (k: LangKey) => !!(r[`title_${k}`] && r[`content_${k}`]);
+  const source = (["es", "en", "ca"] as LangKey[]).find(has);
+  if (!source) throw new Error("El post no tiene contenido en ningún idioma para traducir");
+
+  const src = { title: r[`title_${source}`]!, excerpt: r[`excerpt_${source}`] ?? "", content: r[`content_${source}`]! };
+  const updates: Record<string, string> = {};
+  const generated: string[] = [];
+  const failed: string[] = [];
+  for (const target of (["es", "ca", "en"] as LangKey[]).filter((k) => k !== source)) {
+    if (!force && has(target)) continue;
+    const out = await translatePost(src, LANGS[source], LANGS[target]);
+    if (out) {
+      updates[`title_${target}`] = out.title;
+      updates[`excerpt_${target}`] = out.excerpt;
+      updates[`content_${target}`] = out.content;
+      generated.push(target.toUpperCase());
+    } else failed.push(target.toUpperCase());
+  }
+  if (Object.keys(updates).length > 0) {
+    const { error: updErr } = await supabaseAdmin.from("blog_posts").update(updates as never).eq("id", id);
+    if (updErr) throw new Error(updErr.message);
+  }
+  if (failed.length && !generated.length) {
+    throw new Error(`La IA no respondió al traducir a ${failed.join(", ")}. Inténtalo de nuevo en unos minutos.`);
+  }
+  return { ok: true, source: source.toUpperCase(), generated, failed, fieldsUpdated: Object.keys(updates).length };
+}
 
 async function translatePost(
   src: { title: string; excerpt: string; content: string },
+  sourceLanguage: string,
   targetLanguage: string,
 ): Promise<{ title: string; excerpt: string; content: string } | null> {
   const { aiText } = await import("@/lib/ai.server");
 
   const system =
-    `You translate KLEFF blog posts (a Barcelona board games community) from English to ${targetLanguage}. ` +
+    `You translate KLEFF blog posts (a Barcelona board games community) from ${sourceLanguage} to ${targetLanguage}. ` +
     `Return a single JSON object with keys "title", "excerpt", "content". ` +
     `Rules: ` +
     `- Translate naturally and idiomatically. Keep the warm, energetic, community tone. ` +
@@ -625,38 +621,7 @@ export const adminTranslateBlogPostFromEs = createServerFn({ method: "POST" })
   .inputValidator((data: unknown) => z.object({ id: z.string().uuid(), force: z.boolean().default(false) }).parse(data))
   .handler(async ({ data, context }) => {
     await assertSuperAdmin(context.userId);
-    const { data: row, error } = await supabaseAdmin
-      .from("blog_posts").select("*").eq("id", data.id).maybeSingle();
-    if (error) throw new Error(error.message);
-    if (!row) throw new Error("Post no encontrado");
-    if (!row.title_es || !row.content_es) {
-      return { ok: false, reason: "missing-es" };
-    }
-
-    const updates: Record<string, string> = {};
-    const targets: { lang: string; key: "ca" | "en"; existing: { t: string | null; c: string | null } }[] = [
-      { lang: "Catalan (Català)", key: "ca", existing: { t: row.title_ca, c: row.content_ca } },
-      { lang: "English", key: "en", existing: { t: row.title_en, c: row.content_en } },
-    ];
-
-    for (const t of targets) {
-      if (!data.force && t.existing.t && t.existing.c) continue;
-      const out = await translatePost(
-        { title: row.title_es, excerpt: row.excerpt_es ?? "", content: row.content_es },
-        t.lang,
-      );
-      if (out) {
-        updates[`title_${t.key}`] = out.title;
-        updates[`excerpt_${t.key}`] = out.excerpt;
-        updates[`content_${t.key}`] = out.content;
-      }
-    }
-
-    if (Object.keys(updates).length > 0) {
-      const { error: updErr } = await supabaseAdmin.from("blog_posts").update(updates as never).eq("id", data.id);
-      if (updErr) throw new Error(updErr.message);
-    }
-    return { ok: true, fieldsUpdated: Object.keys(updates).length };
+    return translateMissingLanguages(data.id, data.force);
   });
 
 export const adminDeleteBlogPost = createServerFn({ method: "POST" })
