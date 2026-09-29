@@ -65,7 +65,8 @@ function AdminBlog() {
     setTranslatingId(id);
     try {
       const res = await translateFn({ data: { id, force: false } });
-      toast.success(`Post traducido (${res.fieldsUpdated} campos actualizados)`);
+      if (res.generated.length) toast.success(`Traducido desde ${res.source} → ${res.generated.join(" / ")}`);
+      else toast.info("Este post ya estaba traducido a todos los idiomas");
       await reload();
     } catch (e) {
       toast.error(`Error al traducir: ${(e as Error).message}`);

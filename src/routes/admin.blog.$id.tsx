@@ -121,11 +121,10 @@ function BlogPostEditor() {
         setTranslating(true);
         try {
           const res = await translateFn({ data: { id: state.id as string, force: false } });
-          if (res.ok && (res.fieldsUpdated ?? 0) > 0) {
-            toast.success("Traducciones generadas (CA / EN)");
-          } else if (!res.ok && res.reason === "missing-es") {
-            toast.error("Completa primero el título y contenido en ES para traducir.");
+          if (res.generated.length > 0) {
+            toast.success(`Traducido desde ${res.source} → ${res.generated.join(" / ")}`);
           }
+          if (res.failed.length > 0) toast.error(`No se pudo traducir a ${res.failed.join(", ")}`);
         } catch (e) { toast.error("Traducción: " + (e as Error).message); }
         finally { setTranslating(false); }
       }
