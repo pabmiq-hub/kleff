@@ -33,15 +33,20 @@ type PermisoDraft = {
   konektum: boolean;
   blog: boolean;
   inscripciones: string[];
+  inscripcionNiveles: Record<string, "lectura" | "escritura">;
 };
 
-const EMPTY_DRAFT: PermisoDraft = { finanzas: "", konektum: false, blog: false, inscripciones: [] };
+const EMPTY_DRAFT: PermisoDraft = { finanzas: "", konektum: false, blog: false, inscripciones: [], inscripcionNiveles: {} };
 
 const draftToPermisos = (d: PermisoDraft) => [
   ...(d.finanzas ? [{ recurso: "finanzas" as const, nivel: d.finanzas }] : []),
   ...(d.konektum ? [{ recurso: "konektum" as const, nivel: "completo" as const }] : []),
   ...(d.blog ? [{ recurso: "blog" as const, nivel: "completo" as const }] : []),
-  ...d.inscripciones.map((id) => ({ recurso: "inscripcion" as const, nivel: "lectura" as const, recurso_id: id })),
+  ...d.inscripciones.map((id) => ({
+    recurso: "inscripcion" as const,
+    nivel: (d.inscripcionNiveles[id] ?? "lectura") as "lectura" | "escritura",
+    recurso_id: id,
+  })),
 ];
 
 function UsuariosPage() {
@@ -89,6 +94,11 @@ function UsuariosPage() {
       konektum: u.permisos.some((p) => p.recurso === "konektum"),
       blog: u.permisos.some((p) => p.recurso === "blog"),
       inscripciones: u.permisos.filter((p) => p.recurso === "inscripcion" && p.recurso_id).map((p) => p.recurso_id as string),
+      inscripcionNiveles: Object.fromEntries(
+        u.permisos
+          .filter((p) => p.recurso === "inscripcion" && p.recurso_id)
+          .map((p) => [p.recurso_id as string, p.nivel === "lectura" || !p.nivel ? "lectura" : "escritura"]),
+      ),
     });
   };
 
@@ -132,7 +142,7 @@ function UsuariosPage() {
               {u.permisos.map((p) => (
                 <span key={p.id} className="rounded-full bg-ink/10 px-2 py-0.5 text-xs font-semibold">
                   {p.recurso === "inscripcion"
-                    ? `Inscripción: ${forms.find((f) => f.id === p.recurso_id)?.title ?? "—"}`
+                    ? `Inscripción: ${forms.find((f) => f.id === p.recurso_id)?.title ?? "—"} (${p.nivel === "lectura" || !p.nivel ? "solo lectura" : "gestión y pagos"})`
                     : p.recurso === "finanzas"
                       ? `Finanzas (${p.nivel === "escritura" ? "lectura y escritura" : "solo lectura"})`
                       : p.recurso === "konektum"
@@ -316,25 +326,45 @@ function PermisosEditor({
         Blog (acceso completo)
       </label>
       <div>
-        <Label>Inscripciones concretas (solo ver inscritos)</Label>
-        <div className="max-h-40 overflow-y-auto space-y-1 mt-1">
-          {forms.map((f) => (
-            <label key={f.id} className="flex items-center gap-2 text-sm">
-              <input
-                type="checkbox"
-                checked={draft.inscripciones.includes(f.id)}
-                onChange={(e) =>
-                  setDraft({
-                    ...draft,
-                    inscripciones: e.target.checked
-                      ? [...draft.inscripciones, f.id]
-                      : draft.inscripciones.filter((x) => x !== f.id),
-                  })
-                }
-              />
-              {f.title}
-            </label>
-          ))}
+        <Label>Inscripciones concretas</Label>
+        <div className="max-h-48 overflow-y-auto space-y-1 mt-1">
+          {forms.map((f) => {
+            const checked = draft.inscripciones.includes(f.id);
+            return (
+              <div key={f.id} className="flex items-center justify-between gap-2 text-sm">
+                <label className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={checked}
+                    onChange={(e) =>
+                      setDraft({
+                        ...draft,
+                        inscripciones: e.target.checked
+                          ? [...draft.inscripciones, f.id]
+                          : draft.inscripciones.filter((x) => x !== f.id),
+                      })
+                    }
+                  />
+                  {f.title}
+                </label>
+                {checked && (
+                  <select
+                    className="rounded-md border border-ink/20 bg-white px-2 py-1 text-xs"
+                    value={draft.inscripcionNiveles[f.id] ?? "lectura"}
+                    onChange={(e) =>
+                      setDraft({
+                        ...draft,
+                        inscripcionNiveles: { ...draft.inscripcionNiveles, [f.id]: e.target.value as "lectura" | "escritura" },
+                      })
+                    }
+                  >
+                    <option value="lectura">Solo lectura</option>
+                    <option value="escritura">Gestión y pagos</option>
+                  </select>
+                )}
+              </div>
+            );
+          })}
         </div>
       </div>
     </div>
