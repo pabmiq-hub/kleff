@@ -85,7 +85,7 @@ async function callGoogleModel(
     .map((p) => p.text ?? "")
     .join("")
     .trim();
-  return text.length > 0 ? text : null;
+  return { ok: true, text: text.length > 0 ? text : null };
 }
 
 async function callLovable(opts: AiTextOptions, apiKey: string): Promise<string | null> {
