@@ -789,7 +789,14 @@ export const adminDeleteResponse = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator(z.object({ id: z.string().uuid() }))
   .handler(async ({ data, context }) => {
-    await assertSuperAdmin(context.userId);
+    const { data: row } = await supabaseAdmin
+      .from("registration_responses").select("form_id").eq("id", data.id).maybeSingle();
+    const formId = (row as { form_id?: string } | null)?.form_id;
+    const { getAdminAccess, hasPermission } = await import("@/lib/permissions.server");
+    const access = await getAdminAccess(context.userId);
+    if (!formId || (!access.isSuperAdmin && !hasPermission(access, "inscripcion", { minNivel: "escritura", recursoId: formId }))) {
+      throw new Error("Forbidden: no tienes permiso de edición sobre esta inscripción");
+    }
     const { error } = await supabaseAdmin.from("registration_responses").delete().eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true };
@@ -800,7 +807,11 @@ export const adminSendReminder = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator(z.object({ form_id: z.string().uuid(), response_id: z.string().uuid().optional() }))
   .handler(async ({ data, context }) => {
-    await assertSuperAdmin(context.userId);
+    const { getAdminAccess, hasPermission } = await import("@/lib/permissions.server");
+    const access = await getAdminAccess(context.userId);
+    if (!access.isSuperAdmin && !hasPermission(access, "inscripcion", { minNivel: "escritura", recursoId: data.form_id })) {
+      throw new Error("Forbidden: no tienes permiso de edición sobre esta inscripción");
+    }
     const { data: form } = await supabaseAdmin
       .from("registration_forms").select("*").eq("id", data.form_id).maybeSingle();
     if (!form) throw new Error("Formulario no encontrado");
@@ -894,7 +905,11 @@ export const adminPreviewEmails = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator(z.object({ form_id: z.string().uuid(), response_id: z.string().uuid().optional() }))
   .handler(async ({ data, context }) => {
-    await assertSuperAdmin(context.userId);
+    const { getAdminAccess, hasPermission } = await import("@/lib/permissions.server");
+    const access = await getAdminAccess(context.userId);
+    if (!access.isSuperAdmin && !hasPermission(access, "inscripcion", { minNivel: "escritura", recursoId: data.form_id })) {
+      throw new Error("Forbidden: no tienes permiso de edición sobre esta inscripción");
+    }
     const f = await loadFormOrThrow(data.form_id);
     const { buildRegistrationEmail } = await import("@/lib/registrations-email.server");
     const { registrationEventEmail } = await import("@/lib/email/templates.server");
