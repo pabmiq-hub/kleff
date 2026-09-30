@@ -18,7 +18,7 @@ export const Route = createFileRoute("/admin/registrations/")({
 type FormRow = {
   id: string; slug: string; title: string; kind: "form" | "external";
   is_published: boolean; external_mode: string | null;
-  created_at: string; max_responses: number | null; closes_at: string | null; participants: number;
+  created_at: string; max_responses: number | null; closes_at: string | null; event_date: string | null; participants: number;
 };
 
 function AdminRegistrations() {
@@ -30,6 +30,9 @@ function AdminRegistrations() {
   const [forms, setForms] = useState<FormRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [tab, setTab] = useState<"form" | "external">("form");
+  const [when, setWhen] = useState<"upcoming" | "past" | "all">("upcoming");
+  const [search, setSearch] = useState("");
 
   // Two-step dialog state
   const [open, setOpen] = useState(false);
@@ -96,6 +99,26 @@ function AdminRegistrations() {
       toast.error((e as Error).message);
     }
   };
+
+  const now = Date.now();
+  const isPast = (f: FormRow) => {
+    const d = f.event_date ?? f.closes_at;
+    return d ? new Date(d).getTime() < now - 12 * 3600_000 : false;
+  };
+  const nativeCount = forms.filter((f) => f.kind === "form").length;
+  const externalCount = forms.length - nativeCount;
+  const q = search.trim().toLowerCase();
+  const visible = forms
+    .filter((f) => f.kind === tab)
+    .filter((f) => tab !== "form" || when === "all" || (when === "past" ? isPast(f) : !isPast(f)))
+    .filter((f) => !q || `${f.title} ${f.slug}`.toLowerCase().includes(q))
+    .sort((a, b) => {
+      if (tab !== "form") return 0;
+      const ta = a.event_date ? new Date(a.event_date).getTime() : Infinity;
+      const tb = b.event_date ? new Date(b.event_date).getTime() : Infinity;
+      return when === "past" ? tb - ta : ta - tb;
+    });
+
 
   if (loadError) {
     return <div className="rounded-lg border border-red-500/20 bg-red-500/10 p-4 text-sm text-red-200">{loadError}</div>;
@@ -193,6 +216,22 @@ function AdminRegistrations() {
         </Dialog>
       </header>
 
+      <div className="flex flex-wrap items-center gap-2">
+        <div className="inline-flex rounded-lg border border-ink/15 bg-white p-1">
+          {([["form", `Nativos (${nativeCount})`], ["external", `Embebidos / externos (${externalCount})`]] as const).map(([k, l]) => (
+            <button key={k} onClick={() => setTab(k)} className={`px-3 py-1.5 rounded-md text-sm ${tab === k ? "bg-coral text-ink font-medium" : "text-ink/70 hover:text-ink"}`}>{l}</button>
+          ))}
+        </div>
+        {tab === "form" && (
+          <div className="inline-flex rounded-lg border border-ink/15 bg-white p-1">
+            {([["upcoming", "Próximos"], ["past", "Pasados"], ["all", "Todos"]] as const).map(([k, l]) => (
+              <button key={k} onClick={() => setWhen(k)} className={`px-3 py-1.5 rounded-md text-sm ${when === k ? "bg-ink/10 text-ink font-medium" : "text-ink/60 hover:text-ink"}`}>{l}</button>
+            ))}
+          </div>
+        )}
+        <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Buscar…" className="bg-white border-ink/15 text-ink h-10 max-w-xs ml-auto" />
+      </div>
+
       <div className="rounded-lg border border-ink/10 bg-white overflow-hidden">
         <table className="w-full text-sm">
           <thead className="bg-ink/5 text-left text-xs uppercase tracking-wider text-ink/60">
@@ -206,13 +245,13 @@ function AdminRegistrations() {
           <tbody>
             {loading ? (
               <tr><td colSpan={4} className="px-4 py-12 text-center text-ink/60"><span className="inline-flex items-center gap-2"><Loader2 className="h-4 w-4 animate-spin" /> Cargando inscripciones…</span></td></tr>
-            ) : forms.length === 0 ? (
-              <tr><td colSpan={4} className="px-4 py-12 text-center text-ink/60">Aún no hay inscripciones.</td></tr>
-            ) : forms.map((f) => (
+            ) : visible.length === 0 ? (
+              <tr><td colSpan={4} className="px-4 py-12 text-center text-ink/60">No hay inscripciones en esta vista.</td></tr>
+            ) : visible.map((f) => (
               <tr key={f.id} className="border-t border-ink/10 hover:bg-cream/[0.02]">
                 <td className="px-4 py-3">
                   <Link to="/admin/registrations/$id" params={{ id: f.id }} className="font-medium text-ink hover:text-coral">{f.title || f.slug}</Link>
-                  <div className="text-xs text-ink/50 mt-0.5">kleff.es/{f.slug}{f.kind === "external" ? ` · externo (${f.external_mode ?? "redirect"})` : ""}</div>
+                  <div className="text-xs text-ink/50 mt-0.5">{f.event_date ? `${new Date(f.event_date).toLocaleDateString("es-ES", { weekday: "short", day: "numeric", month: "short", year: "numeric" })} · ` : ""}kleff.es/{f.slug}{f.kind === "external" ? ` · ${f.external_mode === "iframe" ? "embebido" : "redirección"}` : ""}</div>
                 </td>
                 <td className="px-4 py-3 text-center">
                   <span className={`text-xs px-2 py-0.5 rounded-full ${f.is_published ? "bg-emerald-500/20 text-emerald-700" : "bg-ink/10 text-ink/60"}`}>{f.is_published ? "Publicado" : "Borrador"}</span>
