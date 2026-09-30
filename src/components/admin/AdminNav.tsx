@@ -69,7 +69,7 @@ export function AdminNavGroups({ groups, onNavigate }: { groups: NavGroup[]; onN
   );
 }
 
-export function AdminSectionTabs({ isSuperAdmin, can }: { isSuperAdmin: boolean; can: (r: string) => boolean }) {
+export function AdminSectionTabs({ isSuperAdmin, can }: { isSuperAdmin: boolean; can: (r: any) => boolean }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const group = TAB_GROUPS.find((g) => g.some((t) => pathname === t.to || pathname.startsWith(t.to + "/")));
   if (!group) return null;
