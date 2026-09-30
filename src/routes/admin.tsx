@@ -1,25 +1,25 @@
 import { createFileRoute, Outlet, Link, useNavigate, useRouterState } from "@tanstack/react-router";
+import { useState } from "react";
 import { useAuth } from "@/auth/AuthProvider";
 import { useAdminAccess } from "@/hooks/useAdminAccess";
 import { Button } from "@/components/ui/button";
 import { NotificationsBell } from "@/components/app/NotificationsBell";
+import { AdminNavGroups, AdminSectionTabs, type NavGroup } from "@/components/admin/AdminNav";
 import {
   LayoutDashboard,
   Users,
-  Mail,
   Dices,
   FileText,
-  Newspaper,
   ClipboardList,
   LogOut,
   Shield,
   ExternalLink,
-  UserCircle2,
-  Sparkles,
   Vote,
   Heart,
   Euro,
   KeyRound,
+  Menu,
+  X,
 } from "lucide-react";
 
 export const Route = createFileRoute("/admin")({
@@ -38,6 +38,7 @@ function AdminLayout() {
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const wideContent = pathname.startsWith("/admin/registrations/");
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   if (loading || (session && accessLoading)) {
     return (
@@ -63,94 +64,115 @@ function AdminLayout() {
     void navigate({ to: "/super-admin" });
   };
 
+  const sa = isSuperAdmin;
+  const groups: NavGroup[] = [
+    {
+      title: "General",
+      items: [{ label: "Resumen", to: "/admin", exact: true, icon: <LayoutDashboard className="h-4 w-4" />, show: sa }],
+    },
+    {
+      title: "Actividades",
+      items: [
+        { label: "Inscripciones", to: "/admin/registrations", icon: <ClipboardList className="h-4 w-4" />, show: sa || can("inscripcion") },
+        { label: "Konektum", to: "/admin/konektum", icon: <Heart className="h-4 w-4" />, show: can("konektum") },
+        { label: "Alquiler", to: "/admin/rentals", icon: <Dices className="h-4 w-4" />, show: sa },
+      ],
+    },
+    {
+      title: "Comunidad",
+      items: [
+        { label: "Socios", to: "/admin/members", match: ["/admin/members", "/admin/invitations"], icon: <Users className="h-4 w-4" />, show: sa },
+        { label: "Participación", to: "/admin/polls", match: ["/admin/polls", "/admin/karma"], icon: <Vote className="h-4 w-4" />, show: sa },
+      ],
+    },
+    {
+      title: "Web",
+      items: [
+        {
+          label: "Contenido",
+          to: sa ? "/admin/content" : "/admin/blog",
+          match: ["/admin/content", "/admin/blog", "/admin/media", "/admin/team"],
+          icon: <FileText className="h-4 w-4" />,
+          show: sa || can("blog"),
+        },
+      ],
+    },
+    {
+      title: "Gestión",
+      items: [
+        { label: "Finanzas", to: "/admin/finanzas", icon: <Euro className="h-4 w-4" />, show: can("finanzas") },
+        { label: "Usuarios y permisos", to: "/admin/usuarios", icon: <KeyRound className="h-4 w-4" />, show: sa },
+      ],
+    },
+  ];
+
+  const footer = (
+    <div className="space-y-1 border-t border-ink/10 pt-3">
+      <Link
+        to="/app"
+        className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-ink/60 hover:text-ink hover:bg-ink/5 transition-colors"
+      >
+        <ExternalLink className="h-3.5 w-3.5" /> Ir a zona socio
+      </Link>
+      <div className="px-3 text-xs text-ink/50 truncate">{user?.email}</div>
+      <Button variant="ghost" size="sm" onClick={handleLogout} className="w-full justify-start text-ink hover:text-ink hover:bg-ink/10">
+        <LogOut className="h-4 w-4 mr-2" /> Salir
+      </Button>
+    </div>
+  );
+
+  const brand = (
+    <Link to="/admin" className="font-display font-bold text-xl tracking-tight text-ink">
+      KLEFF{" "}
+      <span className="text-coral text-xs font-sans font-semibold inline-flex items-center gap-1">
+        <Shield className="h-3 w-3" /> ADMIN
+      </span>
+    </Link>
+  );
+
   return (
     <div className="h-screen bg-cream text-ink flex flex-col md:flex-row overflow-hidden">
-      <aside className="md:w-64 md:shrink-0 bg-cream-deep border-b-2 md:border-b-0 md:border-r border-ink/10 p-4 md:p-6 flex md:flex-col gap-2 md:h-screen z-30 md:overflow-y-auto">
-        <Link to="/admin" className="font-display font-bold text-xl tracking-tight mb-0 md:mb-6 text-ink">
-          KLEFF{" "}
-          <span className="text-coral text-xs font-sans font-semibold inline-flex items-center gap-1">
-            <Shield className="h-3 w-3" /> ADMIN
-          </span>
-        </Link>
-        <nav className="flex md:flex-col gap-1 flex-1 ml-auto md:ml-0">
-          {isSuperAdmin && (
-            <>
-              <AdminNavLink to="/admin" exact icon={<LayoutDashboard className="h-4 w-4" />} label="Resumen" />
-              <AdminNavLink to="/admin/members" icon={<Users className="h-4 w-4" />} label="Socios" />
-              <AdminNavLink to="/admin/invitations" icon={<Mail className="h-4 w-4" />} label="Invitaciones" />
-              <AdminNavLink to="/admin/rentals" icon={<Dices className="h-4 w-4" />} label="Alquiler" />
-              <AdminNavLink to="/admin/content" icon={<FileText className="h-4 w-4" />} label="Contenido" />
-            </>
-          )}
-          {(isSuperAdmin || can("inscripcion")) && (
-            <AdminNavLink to="/admin/registrations" icon={<ClipboardList className="h-4 w-4" />} label="Inscripciones" />
-          )}
-          {can("finanzas") && (
-            <AdminNavLink to="/admin/finanzas" icon={<Euro className="h-4 w-4" />} label="Finanzas" />
-          )}
-          {can("blog") && <AdminNavLink to="/admin/blog" icon={<Newspaper className="h-4 w-4" />} label="Blog" />}
-          {isSuperAdmin && (
-            <>
-              <AdminNavLink to="/admin/media" icon={<Newspaper className="h-4 w-4" />} label="Medios" />
-              <AdminNavLink to="/admin/team" icon={<UserCircle2 className="h-4 w-4" />} label="Equipo" />
-              <AdminNavLink to="/admin/polls" icon={<Vote className="h-4 w-4" />} label="Votaciones" />
-              <AdminNavLink to="/admin/karma" icon={<Sparkles className="h-4 w-4" />} label="Karma" />
-            </>
-          )}
-          {can("konektum") && (
-            <AdminNavLink to="/admin/konektum" icon={<Heart className="h-4 w-4" />} label="Konektum" />
-          )}
-          {isSuperAdmin && (
-            <AdminNavLink to="/admin/usuarios" icon={<KeyRound className="h-4 w-4" />} label="Usuarios y permisos" />
-          )}
-        </nav>
-        <div className="md:mt-auto space-y-1">
-          <Link
-            to="/app"
-            className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-ink/60 hover:text-ink hover:bg-ink/5 transition-colors"
-          >
-            <ExternalLink className="h-3.5 w-3.5" />
-            <span className="hidden md:inline">Ir a zona socio</span>
-          </Link>
-          <div className="hidden md:block px-3 pt-2 text-xs text-ink/50 border-t border-ink/10">
-            {user?.email}
-          </div>
-          <Button variant="ghost" size="sm" onClick={handleLogout} className="w-full text-ink hover:text-ink hover:bg-ink/10">
-            <LogOut className="h-4 w-4 mr-2" /> <span className="hidden md:inline">Salir</span>
-          </Button>
+      <aside className="hidden md:flex md:w-64 md:shrink-0 bg-cream-deep border-r border-ink/10 p-6 flex-col gap-6 h-screen overflow-y-auto">
+        {brand}
+        <div className="flex-1">
+          <AdminNavGroups groups={groups} />
         </div>
+        {footer}
       </aside>
+
+      {mobileOpen && (
+        <div className="md:hidden fixed inset-0 z-50 flex">
+          <div className="absolute inset-0 bg-ink/40" onClick={() => setMobileOpen(false)} />
+          <div className="relative w-72 max-w-[85%] h-full bg-cream-deep p-5 flex flex-col gap-6 overflow-y-auto">
+            <div className="flex items-center justify-between">
+              {brand}
+              <button aria-label="Cerrar menú" onClick={() => setMobileOpen(false)} className="p-2 rounded-lg hover:bg-ink/10">
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            <div className="flex-1">
+              <AdminNavGroups groups={groups} onNavigate={() => setMobileOpen(false)} />
+            </div>
+            {footer}
+          </div>
+        </div>
+      )}
+
       <main className="flex-1 overflow-y-auto">
-        <div className="sticky top-0 z-20 flex items-center justify-end gap-2 px-4 md:px-8 py-3 bg-cream/90 backdrop-blur border-b border-ink/10">
+        <div className="sticky top-0 z-20 flex items-center justify-between md:justify-end gap-2 px-4 md:px-8 py-3 bg-cream/90 backdrop-blur border-b border-ink/10">
+          <div className="flex items-center gap-2 md:hidden">
+            <button aria-label="Abrir menú" onClick={() => setMobileOpen(true)} className="p-2 rounded-lg hover:bg-ink/10">
+              <Menu className="h-5 w-5" />
+            </button>
+            {brand}
+          </div>
           <NotificationsBell />
         </div>
         <div className={`w-full p-4 md:p-8 ${wideContent ? "" : "max-w-6xl"}`}>
+          <AdminSectionTabs isSuperAdmin={sa} can={can} />
           <Outlet />
         </div>
       </main>
     </div>
-  );
-}
-
-function AdminNavLink({
-  to,
-  icon,
-  label,
-  exact,
-}: {
-  to: string;
-  icon: React.ReactNode;
-  label: string;
-  exact?: boolean;
-}) {
-  return (
-    <Link
-      to={to}
-      activeOptions={{ exact }}
-      activeProps={{ className: "bg-coral text-ink" }}
-      className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-ink/80 hover:bg-ink/10 transition-colors"
-    >
-      {icon} <span className="hidden md:inline">{label}</span>
-    </Link>
   );
 }
