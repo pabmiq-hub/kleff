@@ -450,12 +450,12 @@ export const adminListForms = createServerFn({ method: "POST" })
     const allowed = await allowedFormIds(context.userId);
     let query = supabaseAdmin
       .from("registration_forms")
-      .select("id, slug, title, kind, is_published, external_mode, created_at, max_responses, closes_at")
+      .select("id, slug, title, kind, is_published, external_mode, created_at, max_responses, closes_at, event_date")
       .order("created_at", { ascending: false });
     if (allowed !== "all") query = query.in("id", allowed);
     const { data, error } = await query;
     if (error) throw new Error(error.message);
-    const rows = (data ?? []) as unknown as Array<{ id: string; slug: string; title: string; kind: "form" | "external"; is_published: boolean; external_mode: string | null; created_at: string; max_responses: number | null; closes_at: string | null }>;
+    const rows = (data ?? []) as unknown as Array<{ id: string; slug: string; title: string; kind: "form" | "external"; is_published: boolean; external_mode: string | null; created_at: string; max_responses: number | null; closes_at: string | null; event_date: string | null }>;
     const ids = rows.map((d) => d.id);
     let participantCounts: Record<string, number> = {};
     if (ids.length) {
