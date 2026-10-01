@@ -1,7 +1,7 @@
 import { useServerFn } from "@tanstack/react-start";
 import { AutoResizeIframe } from "@/components/cms/AutoResizeIframe";
 import { useState } from "react";
-import { submitRegistration, searchGamesForPick, type RegistrationForm, type RegistrationQuestion } from "@/lib/registrations.functions";
+import { submitRegistration, searchGamesForPick, type RegistrationForm, type RegistrationQuestion, type SeriesEdition } from "@/lib/registrations.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -21,11 +21,17 @@ type Props = {
   questions: RegistrationQuestion[];
   responsesCount: number;
   attendeesCount?: number;
+  editions?: SeriesEdition[];
 };
 
 type PickedGame = { id: string; name: string; imageUrl: string | null };
 
-export function PublicRegistrationPage({ form, questions, responsesCount, attendeesCount }: Props) {
+const fmtEditionDate = (iso: string | null) =>
+  iso
+    ? new Date(iso).toLocaleString("es-ES", { weekday: "long", day: "numeric", month: "long", hour: "2-digit", minute: "2-digit", timeZone: "Europe/Madrid" })
+    : "Fecha por confirmar";
+
+export function PublicRegistrationPage({ form, questions, responsesCount, attendeesCount, editions }: Props) {
   const submitFn = useServerFn(submitRegistration);
   const [values, setValues] = useState<Record<string, unknown>>({});
   const [emailContact, setEmailContact] = useState("");
@@ -106,6 +112,23 @@ export function PublicRegistrationPage({ form, questions, responsesCount, attend
       )}
       <div className="max-w-2xl mx-auto px-6 py-12">
         <h1 className="font-display text-3xl md:text-4xl mb-3 text-foreground">{form.title}</h1>
+        {editions && editions.length > 1 && (
+          <div className="mb-6 rounded-xl border border-border bg-muted/40 p-4">
+            <p className="text-sm font-medium text-foreground mb-2">Elige fecha</p>
+            <div className="flex flex-wrap gap-2">
+              {editions.map((e) => (
+                <a
+                  key={e.id}
+                  href={`/${e.slug}`}
+                  aria-current={e.id === form.id ? "true" : undefined}
+                  className={`text-sm px-3 py-1.5 rounded-full border capitalize ${e.id === form.id ? "bg-primary text-primary-foreground border-primary" : "border-border text-foreground hover:bg-muted"}`}
+                >
+                  {fmtEditionDate(e.event_date)}
+                </a>
+              ))}
+            </div>
+          </div>
+        )}
         {descriptionHtml && (
           <div className="blog-content mb-6" dangerouslySetInnerHTML={{ __html: descriptionHtml }} />
         )}
