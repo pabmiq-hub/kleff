@@ -130,6 +130,15 @@ export type RegistrationResponse = {
 
 // ---------------- PUBLIC ----------------
 
+export type SeriesEdition = { id: string; slug: string; title: string; event_date: string | null };
+
+/** An edition is open while its event date has not passed (and its deadline, if any). */
+function isEditionOpen(f: { event_date: string | null; closes_at: string | null }, now = new Date()) {
+  if (f.closes_at && new Date(f.closes_at) < now) return false;
+  if (!f.event_date) return true;
+  return new Date(f.event_date) >= now;
+}
+
 export const getPublishedForm = createServerFn({ method: "GET" })
   .inputValidator(z.object({ slug: z.string().min(1).max(120) }))
   .handler(async ({ data }) => {
@@ -139,8 +148,24 @@ export const getPublishedForm = createServerFn({ method: "GET" })
       .eq("slug", data.slug)
       .eq("is_published", true)
       .maybeSingle();
-    if (!form) return { form: null, questions: [], responsesCount: 0, attendeesCount: 0 };
-    const f = form as unknown as RegistrationForm;
+    if (!form) return { form: null, questions: [], responsesCount: 0, attendeesCount: 0, editions: [] as SeriesEdition[] };
+    let f = form as unknown as RegistrationForm & { series_id?: string | null };
+    let editions: SeriesEdition[] = [];
+    if (f.series_id) {
+      const { data: sib } = await supabaseAdmin
+        .from("registration_forms")
+        .select("*")
+        .eq("series_id", f.series_id)
+        .eq("is_published", true)
+        .order("event_date", { ascending: true, nullsFirst: false });
+      const all = (sib ?? []) as unknown as Array<RegistrationForm & { series_id: string }>;
+      const open = all.filter((e) => isEditionOpen(e));
+      editions = open.map((e) => ({ id: e.id, slug: e.slug, title: e.title, event_date: e.event_date }));
+      if (!isEditionOpen(f)) {
+        // Past edition: show the next open one, otherwise the latest published edition.
+        f = open[0] ?? [...all].sort((a, b) => String(b.event_date ?? "").localeCompare(String(a.event_date ?? "")))[0] ?? f;
+      }
+    }
     const { data: questions } = await supabaseAdmin
       .from("registration_questions")
       .select("*")
