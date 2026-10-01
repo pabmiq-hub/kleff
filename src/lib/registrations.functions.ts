@@ -185,6 +185,7 @@ export const getPublishedForm = createServerFn({ method: "GET" })
       questions: visible,
       responsesCount: active.length,
       attendeesCount,
+      editions,
     };
   });
 
@@ -259,6 +260,9 @@ export const submitRegistration = createServerFn({ method: "POST" })
     if (f.kind === "external" || f.external_mode) throw new Error("Este formulario es externo");
     if (f.closes_at && new Date(f.closes_at) < new Date()) {
       throw new Error("El plazo de inscripción ha finalizado");
+    }
+    if ((f as { series_id?: string | null }).series_id && f.event_date && new Date(f.event_date) < new Date()) {
+      throw new Error("Esta edición ya se ha celebrado");
     }
     const guests = f.allow_guests ? Math.min(data.guests, f.max_guests_per_response) : 0;
     if (f.max_responses) {
@@ -552,17 +556,89 @@ export const adminGetForm = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator(z.object({ id: z.string().uuid() }))
   .handler(async ({ data, context }) => {
-    const { assertFormAccess } = await import("@/lib/permissions.server");
+    const { assertFormAccess, allowedFormIds } = await import("@/lib/permissions.server");
     await assertFormAccess(context.userId, data.id);
     const { data: form, error } = await supabaseAdmin
       .from("registration_forms").select("*").eq("id", data.id).single();
     if (error) throw new Error(error.message);
     const { data: qs } = await supabaseAdmin
       .from("registration_questions").select("*").eq("form_id", data.id).order("position", { ascending: true });
+    const seriesId = (form as { series_id?: string | null }).series_id;
+    let editions: Array<SeriesEdition & { is_published: boolean }> = [];
+    if (seriesId) {
+      const allowed = await allowedFormIds(context.userId);
+      const { data: sib } = await supabaseAdmin
+        .from("registration_forms")
+        .select("id, slug, title, event_date, is_published")
+        .eq("series_id", seriesId)
+        .order("event_date", { ascending: true, nullsFirst: false });
+      editions = ((sib ?? []) as Array<SeriesEdition & { is_published: boolean }>)
+        .filter((e) => allowed === "all" || allowed.includes(e.id));
+    }
     return {
-      form: form as unknown as RegistrationForm,
+      form: form as unknown as RegistrationForm & { series_id?: string | null },
       questions: sortQuestions(await ensureCoreQuestions(data.id, (qs ?? []) as unknown as RegistrationQuestion[])),
+      editions,
     };
+  });
+
+/**
+ * Creates a new edition of a native form: same configuration, questions and
+ * emails, new date, no registrations. Editions share the series public link.
+ */
+export const adminDuplicateEdition = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator(z.object({ id: z.string().uuid(), event_date: z.string().min(10) }))
+  .handler(async ({ data, context }) => {
+    await assertSuperAdmin(context.userId);
+    const { data: base, error } = await supabaseAdmin
+      .from("registration_forms").select("*").eq("id", data.id).single();
+    if (error || !base) throw new Error(error?.message ?? "Evento no encontrado");
+    const b = base as Record<string, unknown>;
+    if (b.kind === "external") throw new Error("Solo los formularios nativos admiten ediciones");
+    const seriesId = (b.series_id as string | null) ?? (b.id as string);
+    if (!b.series_id) {
+      await supabaseAdmin.from("registration_forms").update({ series_id: seriesId } as never).eq("id", b.id as string);
+    }
+    // Series root keeps the public slug; editions get a dated internal slug.
+    const { data: root } = await supabaseAdmin
+      .from("registration_forms").select("slug").eq("id", seriesId).maybeSingle();
+    const rootSlug = ((root as { slug?: string } | null)?.slug ?? (b.slug as string)).slice(0, 100);
+    const ymd = data.event_date.slice(0, 10).replace(/-/g, "");
+    let slug = `${rootSlug}-${ymd}`;
+    for (let i = 2; i < 20; i++) {
+      const { data: dup } = await supabaseAdmin.from("registration_forms").select("id").eq("slug", slug).maybeSingle();
+      if (!dup) break;
+      slug = `${rootSlug}-${ymd}-${i}`;
+    }
+    const clone: Record<string, unknown> = { ...b };
+    for (const k of ["id", "created_at", "updated_at"]) delete clone[k];
+    Object.assign(clone, {
+      slug,
+      series_id: seriesId,
+      event_date: data.event_date,
+      is_published: false,
+      closes_at: null,
+      reminder_sent_at: null,
+      reminder_at: null,
+    });
+    // Keep the «Fecha» highlight in sync with the new date (it is regenerated in Ajustes).
+    const { data: row, error: insErr } = await supabaseAdmin
+      .from("registration_forms").insert(clone as never).select("id").single();
+    if (insErr) throw new Error(insErr.message);
+    const newId = (row as { id: string }).id;
+    const { data: qs } = await supabaseAdmin
+      .from("registration_questions").select("*").eq("form_id", data.id);
+    const qrows = ((qs ?? []) as Array<Record<string, unknown>>).map((q) => {
+      const c = { ...q, form_id: newId };
+      delete c.id; delete c.created_at; delete c.updated_at;
+      return c;
+    });
+    if (qrows.length) {
+      const { error: qErr } = await supabaseAdmin.from("registration_questions").insert(qrows as never);
+      if (qErr) throw new Error(qErr.message);
+    }
+    return { id: newId };
   });
 
 export const adminUpdateForm = createServerFn({ method: "POST" })
