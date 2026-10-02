@@ -155,7 +155,7 @@ export const getPublishedForm = createServerFn({ method: "GET" })
       const { data: sib } = await supabaseAdmin
         .from("registration_forms")
         .select("*")
-        .eq("series_id", f.series_id)
+        .eq("series_id" as never, f.series_id)
         .eq("is_published", true)
         .order("event_date", { ascending: true, nullsFirst: false });
       const all = (sib ?? []) as unknown as Array<RegistrationForm & { series_id: string }>;
@@ -570,7 +570,7 @@ export const adminGetForm = createServerFn({ method: "POST" })
       const { data: sib } = await supabaseAdmin
         .from("registration_forms")
         .select("id, slug, title, event_date, is_published")
-        .eq("series_id", seriesId)
+        .eq("series_id" as never, seriesId)
         .order("event_date", { ascending: true, nullsFirst: false });
       editions = ((sib ?? []) as Array<SeriesEdition & { is_published: boolean }>)
         .filter((e) => allowed === "all" || allowed.includes(e.id));
@@ -630,7 +630,7 @@ export const adminDuplicateEdition = createServerFn({ method: "POST" })
     const { data: qs } = await supabaseAdmin
       .from("registration_questions").select("*").eq("form_id", data.id);
     const qrows = ((qs ?? []) as Array<Record<string, unknown>>).map((q) => {
-      const c = { ...q, form_id: newId };
+      const c: Record<string, unknown> = { ...q, form_id: newId };
       delete c.id; delete c.created_at; delete c.updated_at;
       return c;
     });
