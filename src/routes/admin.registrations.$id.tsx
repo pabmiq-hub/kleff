@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -12,7 +12,7 @@ import { ArrowLeft, Plus, Save, Trash2, GripVertical, Loader2, Mail, X, Eye, Glo
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import {
-  adminGetForm, adminUpdateForm, adminUpsertQuestion, adminDeleteQuestion,
+  adminGetForm, adminUpdateForm, adminDuplicateEdition, adminUpsertQuestion, adminDeleteQuestion,
   adminReorderQuestions, adminListResponses, adminUpdateResponse, adminDeleteResponse,
   adminSendReminder, adminPreviewEmails, adminSendPaymentReminder,
   adminPreviewAnnouncement, adminSendAnnouncement, adminListAnnouncements,
@@ -132,6 +132,13 @@ function RegistrationEditor() {
           </Button>
         </div>
       </div>
+
+      {form.kind === "form" && (
+        <EditionsPanel
+          formId={form.id}
+          editions={(data as { editions?: Array<{ id: string; slug: string; title: string; event_date: string | null; is_published: boolean }> }).editions ?? []}
+        />
+      )}
 
       <Tabs defaultValue="settings" className="w-full">
         <TabsList className="bg-ink/5 border border-ink/10">
@@ -1460,6 +1467,76 @@ function AnnouncementsPanel({ form }: { form: RegistrationForm }) {
             <Button variant="ghost" onClick={() => setPreview(null)}>Cancelar</Button>
             <Button onClick={send} disabled={sending || !preview?.recipients} className="bg-coral hover:bg-coral/90">
               {sending ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Send className="h-4 w-4 mr-2" />} Confirmar y enviar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
+
+function EditionsPanel({ formId, editions }: { formId: string; editions: Array<{ id: string; slug: string; title: string; event_date: string | null; is_published: boolean }> }) {
+  const dupFn = useServerFn(adminDuplicateEdition);
+  const navigate = useNavigate();
+  const [open, setOpen] = useState(false);
+  const [date, setDate] = useState("");
+  const [busy, setBusy] = useState(false);
+  const now = Date.now();
+  const create = async () => {
+    if (!date) return;
+    setBusy(true);
+    try {
+      const res = await dupFn({ data: { id: formId, event_date: new Date(date).toISOString() } });
+      toast.success("Nueva edición creada en borrador. Revisa la descripción y publícala.");
+      setOpen(false);
+      navigate({ to: "/admin/registrations/$id", params: { id: res.id } });
+    } catch (e) {
+      toast.error((e as Error).message);
+    } finally {
+      setBusy(false);
+    }
+  };
+  return (
+    <div className="rounded-2xl border border-ink/10 bg-white p-5 space-y-3">
+      <div className="flex items-center justify-between gap-3 flex-wrap">
+        <div>
+          <h2 className="font-display font-semibold text-ink">Ediciones de este evento</h2>
+          <p className="text-sm text-ink/60">Todas comparten el mismo enlace público. Si hay varias fechas abiertas, la persona elige; si ya pasaron todas, se muestra la última.</p>
+        </div>
+        <Button onClick={() => setOpen(true)} className="bg-coral hover:bg-coral/90 text-white"><Plus className="h-4 w-4 mr-2" /> Nueva edición</Button>
+      </div>
+      {editions.length > 0 && (
+        <ul className="divide-y divide-ink/10">
+          {editions.map((e) => {
+            const past = e.event_date ? new Date(e.event_date).getTime() < now : false;
+            return (
+              <li key={e.id} className="py-2 flex items-center gap-3 text-sm">
+                <span className={`text-xs px-2 py-0.5 rounded-full ${past ? "bg-ink/10 text-ink/60" : e.is_published ? "bg-coral text-white" : "bg-ink/5 text-ink/70"}`}>
+                  {past ? "Histórico" : e.is_published ? "Abierta" : "Borrador"}
+                </span>
+                <span className="text-ink/80 capitalize">
+                  {e.event_date ? new Date(e.event_date).toLocaleString("es-ES", { weekday: "short", day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit" }) : "Sin fecha"}
+                </span>
+                {e.id === formId ? (
+                  <span className="text-xs text-ink/50">(estás aquí)</span>
+                ) : (
+                  <Link to="/admin/registrations/$id" params={{ id: e.id }} className="text-coral hover:underline ml-auto">Abrir</Link>
+                )}
+              </li>
+            );
+          })}
+        </ul>
+      )}
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent>
+          <DialogHeader><DialogTitle>Nueva edición</DialogTitle></DialogHeader>
+          <p className="text-sm text-ink/70">Se copian la configuración, las preguntas, el pago y los correos. No se copian los inscritos. Queda en borrador para que cambies la descripción antes de publicarla.</p>
+          <Label>Fecha y hora</Label>
+          <Input type="datetime-local" value={date} onChange={(e) => setDate(e.target.value)} />
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>
+            <Button onClick={create} disabled={!date || busy} className="bg-coral hover:bg-coral/90 text-white">
+              {busy && <Loader2 className="h-4 w-4 mr-2 animate-spin" />} Crear edición
             </Button>
           </DialogFooter>
         </DialogContent>
