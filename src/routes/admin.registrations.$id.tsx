@@ -133,6 +133,13 @@ function RegistrationEditor() {
         </div>
       </div>
 
+      {form.kind === "form" && (
+        <EditionsPanel
+          formId={form.id}
+          editions={(data as { editions?: Array<{ id: string; slug: string; title: string; event_date: string | null; is_published: boolean }> }).editions ?? []}
+        />
+      )}
+
       <Tabs defaultValue="settings" className="w-full">
         <TabsList className="bg-ink/5 border border-ink/10">
           <TabsTrigger value="settings">Ajustes</TabsTrigger>
