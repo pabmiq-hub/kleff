@@ -158,7 +158,7 @@ function AdminLayout() {
         </div>
       )}
 
-      <main className="flex-1 overflow-y-auto">
+      <main className="min-w-0 flex-1 overflow-x-hidden overflow-y-auto">
         <div className="sticky top-0 z-20 flex items-center justify-between md:justify-end gap-2 px-4 md:px-8 py-3 bg-cream/90 backdrop-blur border-b border-ink/10">
           <div className="flex items-center gap-2 md:hidden">
             <button aria-label="Abrir menú" onClick={() => setMobileOpen(true)} className="p-2 rounded-lg hover:bg-ink/10">
@@ -168,7 +168,7 @@ function AdminLayout() {
           </div>
           <NotificationsBell />
         </div>
-        <div className={`w-full p-4 md:p-8 ${wideContent ? "" : "max-w-6xl"}`}>
+        <div className={`w-full min-w-0 p-4 md:p-8 ${wideContent ? "" : "max-w-6xl"}`}>
           <AdminSectionTabs isSuperAdmin={sa} can={can} />
           <Outlet />
         </div>

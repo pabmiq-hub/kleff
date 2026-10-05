@@ -3955,7 +3955,7 @@ const EventDetail = () => {
       />
 
       {/* Main content */}
-      <main className="container mx-auto px-4 py-8">
+      <main className="container mx-auto min-w-0 px-3 py-6 sm:px-4 sm:py-8">
         {(eventData as any).is_test_event && (
           <div className="mb-6 rounded-lg border border-orange-300 dark:border-orange-800/50 bg-orange-50 dark:bg-orange-950/20 p-4 flex items-start gap-3">
             <div className="w-9 h-9 rounded-full bg-orange-100 dark:bg-orange-900/40 flex items-center justify-center shrink-0">
@@ -4275,9 +4275,9 @@ const EventDetail = () => {
           </div>
 
           {/* Participants Tab */}
-          <TabsContent value="participants">
-            <Card>
-              <CardHeader>
+          <TabsContent value="participants" className="min-w-0">
+            <Card className="min-w-0">
+              <CardHeader className="min-w-0 p-4 sm:p-6">
                 <div className="flex flex-col gap-4">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div>
@@ -4289,7 +4289,7 @@ const EventDetail = () => {
                         }
                       </CardDescription>
                     </div>
-                  <div className="flex flex-wrap items-center gap-2">
+                  <div className="flex min-w-0 flex-wrap items-center gap-2">
                     {/* Add participant */}
                     <Button variant="outline" size="sm" onClick={() => setShowAddModal(true)}>
                       <Plus className="w-4 h-4 sm:mr-2" />
@@ -4565,8 +4565,8 @@ const EventDetail = () => {
                   {participants.length > 0 && (
                     <div className="space-y-3 pt-2 border-t">
                       {/* Search bar and mobile filter toggle */}
-                      <div className="flex items-center gap-2">
-                        <div className="relative flex-1">
+                      <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2">
+                        <div className="relative min-w-0">
                           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                           <input
                             type="text"
@@ -4588,7 +4588,7 @@ const EventDetail = () => {
                         <Button
                           variant={showFilters ? "default" : "outline"}
                           size="sm"
-                          className="sm:hidden h-9"
+                          className="sm:hidden h-9 shrink-0"
                           onClick={() => setShowFilters(!showFilters)}
                         >
                           <Filter className="w-4 h-4" />
@@ -4603,7 +4603,7 @@ const EventDetail = () => {
                         </div>
                         
                         {/* Filters grid on mobile, flex on desktop */}
-                        <div className="grid grid-cols-2 sm:flex gap-2 w-full sm:w-auto">
+                        <div className="grid min-w-0 grid-cols-2 sm:flex gap-2 w-full sm:w-auto">
                           <select
                             value={filterCheckin}
                             onChange={(e) => setFilterCheckin(e.target.value as "all" | "confirmed" | "pending")}
@@ -4784,7 +4784,7 @@ const EventDetail = () => {
                       </div>
                       
                       {/* Sorting buttons - separate row on mobile */}
-                      <div className="flex items-center gap-1 justify-end sm:justify-start">
+                      <div className="flex max-w-full items-center gap-1 overflow-x-auto pb-1 sm:justify-start">
                         <span className="text-xs text-muted-foreground mr-2 hidden sm:inline">Ordenar:</span>
                         <Button
                           variant={sortByCheckin === "confirmed-first" ? "default" : "outline"}
@@ -4862,9 +4862,9 @@ const EventDetail = () => {
                         }
                         if (startAt && Date.now() >= startAt.getTime()) return null;
                         return (
-                          <div className="flex items-center justify-between gap-3 mt-3 p-3 rounded-lg border border-dashed border-emerald-300 bg-emerald-50/50 dark:bg-emerald-950/10">
-                            <div className="flex items-center gap-2 text-sm">
-                              <CreditCard className="w-4 h-4 text-emerald-700 dark:text-emerald-400" />
+                          <div className="flex min-w-0 flex-col gap-3 mt-3 p-3 rounded-lg border border-dashed border-emerald-300 bg-emerald-50/50 dark:bg-emerald-950/10 sm:flex-row sm:items-center sm:justify-between">
+                            <div className="flex min-w-0 items-start gap-2 text-sm">
+                              <CreditCard className="w-4 h-4 shrink-0 mt-0.5 text-emerald-700 dark:text-emerald-400" />
                               <span>
                                 <strong>{unpaidWithEmail.length}</strong> {unpaidWithEmail.length === 1 ? "participante pendiente" : "participantes pendientes"} de pago con email.
                               </span>
@@ -4872,7 +4872,7 @@ const EventDetail = () => {
                             <Button
                               size="sm"
                               variant="default"
-                              className="bg-emerald-600 hover:bg-emerald-700 text-white"
+                              className="h-auto min-h-9 w-full whitespace-normal text-center sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white"
                               disabled={isSendingBulkPaymentReminders}
                               onClick={() => handleSendPaymentReminder(unpaidWithEmail.map((p: any) => p.id))}
                             >
@@ -4890,7 +4890,7 @@ const EventDetail = () => {
                   )}
                 </div>
               </CardHeader>
-              <CardContent>
+              <CardContent className="min-w-0 px-4 pb-4 sm:px-6 sm:pb-6">
                 {participants.length === 0 ? (
                   <div className="text-center py-12">
                     <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mx-auto mb-4">
