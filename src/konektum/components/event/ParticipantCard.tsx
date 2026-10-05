@@ -119,7 +119,7 @@ const ParticipantCard = ({
 
   return (
     <div
-      className={`group relative rounded-lg border bg-card transition-all duration-200 hover:shadow-md animate-fade-in cursor-pointer ${
+      className={`group relative min-w-0 rounded-lg border bg-card transition-all duration-200 hover:shadow-md animate-fade-in cursor-pointer ${
         participant.checked_in ? "border-primary/30 bg-primary/[0.02]" : "border-border"
       }`}
       style={{ animationDelay: `${index * 0.03}s` }}
@@ -127,9 +127,9 @@ const ParticipantCard = ({
     >
       <div className="p-4">
         {/* Header: Name + Badges + Actions */}
-        <div className="flex items-start justify-between gap-3 mb-3">
-          <div className="flex items-center gap-2 min-w-0 flex-wrap">
-            <h4 className="font-semibold text-sm truncate">{participant.name}</h4>
+        <div className="flex min-w-0 flex-col gap-3 mb-3 sm:flex-row sm:items-start sm:justify-between">
+          <div className="flex min-w-0 flex-wrap items-center gap-2">
+            <h4 className="min-w-0 max-w-full font-semibold text-sm break-words">{participant.name}</h4>
             {participant.is_fake && (
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -190,7 +190,7 @@ const ParticipantCard = ({
           </div>
 
           {/* Actions */}
-          <div className="flex items-center gap-0.5 shrink-0" onClick={(e) => e.stopPropagation()}>
+          <div className="flex max-w-full flex-wrap items-center gap-1 sm:shrink-0 sm:justify-end" onClick={(e) => e.stopPropagation()}>
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-foreground" onClick={onView}>
@@ -369,7 +369,7 @@ const ParticipantCard = ({
         </div>
 
         {/* Info grid */}
-        <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-xs text-muted-foreground">
+        <div className="grid min-w-0 grid-cols-1 gap-x-4 gap-y-1.5 text-xs text-muted-foreground sm:grid-cols-2">
           {/* Age range */}
           {!isProfessional && participant.age_range && (
             <div className="flex items-center gap-1.5">
@@ -380,7 +380,7 @@ const ParticipantCard = ({
 
           {/* Company (professional) */}
           {isProfessional && participant.company_name && (
-            <div className="flex items-center gap-1.5 truncate">
+            <div className="flex min-w-0 items-center gap-1.5 truncate">
               <span className="truncate">{participant.company_name}</span>
             </div>
           )}
