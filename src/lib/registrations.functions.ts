@@ -708,8 +708,8 @@ export const adminUpdateForm = createServerFn({ method: "POST" })
       const { data: clash } = await supabaseAdmin
         .from("registration_forms").select("id, series_id").eq("slug", patch["slug"] as string).neq("id", data.id).maybeSingle();
       if (clash) {
-        const mySeries = (before as { series_id: string | null }).series_id;
-        const theirs = clash as { series_id: string | null; id: string };
+        const mySeries = (before as unknown as { series_id: string | null }).series_id;
+        const theirs = clash as unknown as { series_id: string | null; id: string };
         if (mySeries && (theirs.series_id === mySeries || theirs.id === mySeries)) {
           delete patch["slug"];
         } else {
