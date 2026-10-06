@@ -702,6 +702,21 @@ export const adminUpdateForm = createServerFn({ method: "POST" })
     ];
     const { data: before } = await supabaseAdmin
       .from("registration_forms").select("*").eq("id", data.id).maybeSingle();
+    // Editions of a series share the public link: if the slug typed belongs to
+    // another edition of the same series, keep this edition's internal slug.
+    if (typeof patch["slug"] === "string" && before && patch["slug"] !== (before as { slug: string }).slug) {
+      const { data: clash } = await supabaseAdmin
+        .from("registration_forms").select("id, series_id").eq("slug", patch["slug"] as string).neq("id", data.id).maybeSingle();
+      if (clash) {
+        const mySeries = (before as { series_id: string | null }).series_id;
+        const theirs = clash as { series_id: string | null; id: string };
+        if (mySeries && (theirs.series_id === mySeries || theirs.id === mySeries)) {
+          delete patch["slug"];
+        } else {
+          throw new Error(`Ya existe otra inscripción con el enlace «${patch["slug"]}».`);
+        }
+      }
+    }
     const { error } = await supabaseAdmin
       .from("registration_forms").update(patch as never).eq("id", data.id);
     if (error) throw new Error(error.message);
