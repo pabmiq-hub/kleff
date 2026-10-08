@@ -708,6 +708,55 @@ function ResponsesPanel({ form, questions, readOnly }: { form: RegistrationForm;
     URL.revokeObjectURL(url);
   };
 
+  const exportHeaders = () => ["Fecha", "Email", "Invitados", "Personas", "Estado de pago", ...questions.map((q) => q.label || q.id)];
+  const exportRows = () => responses.map((r) => [
+    new Date(r.created_at).toLocaleString("es-ES"),
+    r.email_contact ?? "",
+    String(r.guests_count ?? 0),
+    String(1 + (r.guests_count ?? 0)),
+    r.payment_status,
+    ...questions.map((q) => answerToText(r.data?.[q.id])),
+  ]);
+  const exportName = () => `inscritos-${(form.slug || formId).toLowerCase().replace(/\s+/g, "-")}`;
+
+  const downloadExcel = async () => {
+    const XLSX = await import("xlsx");
+    const data = responses.map((r) => {
+      const row: Record<string, string> = {
+        "Fecha": new Date(r.created_at).toLocaleString("es-ES"),
+        "Email": r.email_contact ?? "",
+        "Invitados": String(r.guests_count ?? 0),
+        "Personas": String(1 + (r.guests_count ?? 0)),
+        "Estado de pago": r.payment_status,
+      };
+      questions.forEach((q) => { row[q.label || q.id] = answerToText(r.data?.[q.id]); });
+      return row;
+    });
+    const ws = XLSX.utils.json_to_sheet(data);
+    ws["!cols"] = exportHeaders().map((h) => ({ wch: Math.max(12, Math.min(40, h.length + 4)) }));
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Inscritos");
+    XLSX.writeFile(wb, `${exportName()}.xlsx`);
+  };
+
+  const downloadPdf = async () => {
+    const [{ jsPDF }, autoTableMod] = await Promise.all([import("jspdf"), import("jspdf-autotable")]);
+    const autoTable = (autoTableMod as { default?: unknown }).default ?? autoTableMod;
+    const doc = new jsPDF({ orientation: "landscape" });
+    doc.setFontSize(14);
+    doc.text(`Inscritos — ${form.title || form.slug}`, 14, 14);
+    doc.setFontSize(9);
+    doc.text(`Generado el ${new Date().toLocaleString("es-ES")} · ${responses.length} inscripciones`, 14, 20);
+    (autoTable as (d: unknown, o: unknown) => void)(doc, {
+      startY: 24,
+      head: [exportHeaders()],
+      body: exportRows(),
+      styles: { fontSize: 7, cellPadding: 1.5 },
+      headStyles: { fillColor: [240, 110, 90] },
+    });
+    doc.save(`${exportName()}.pdf`);
+  };
+
   if (loading) return <p className="text-ink/60 text-sm">Cargando respuestas…</p>;
 
   const active = responses.filter((r) => !r.cancelled_at && r.email_contact);
@@ -751,7 +800,9 @@ function ResponsesPanel({ form, questions, readOnly }: { form: RegistrationForm;
               <Mail className="h-4 w-4 mr-2" /> Recordar pago a pendientes ({pendingPay.length})
             </Button>
           )}
-          <Button size="sm" onClick={downloadCsv} variant="outline" className="border-ink/20 text-ink hover:bg-ink/10" disabled={!responses.length}>Descargar CSV</Button>
+          <Button size="sm" onClick={downloadCsv} variant="outline" className="border-ink/20 text-ink hover:bg-ink/10" disabled={!responses.length}>CSV</Button>
+          <Button size="sm" onClick={() => void downloadExcel()} variant="outline" className="border-ink/20 text-ink hover:bg-ink/10" disabled={!responses.length}>Excel</Button>
+          <Button size="sm" onClick={() => void downloadPdf()} variant="outline" className="border-ink/20 text-ink hover:bg-ink/10" disabled={!responses.length}>PDF</Button>
         </div>
       </div>
       {responses.length === 0 ? (
