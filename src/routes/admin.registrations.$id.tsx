@@ -800,7 +800,9 @@ function ResponsesPanel({ form, questions, readOnly }: { form: RegistrationForm;
               <Mail className="h-4 w-4 mr-2" /> Recordar pago a pendientes ({pendingPay.length})
             </Button>
           )}
-          <Button size="sm" onClick={downloadCsv} variant="outline" className="border-ink/20 text-ink hover:bg-ink/10" disabled={!responses.length}>Descargar CSV</Button>
+          <Button size="sm" onClick={downloadCsv} variant="outline" className="border-ink/20 text-ink hover:bg-ink/10" disabled={!responses.length}>CSV</Button>
+          <Button size="sm" onClick={() => void downloadExcel()} variant="outline" className="border-ink/20 text-ink hover:bg-ink/10" disabled={!responses.length}>Excel</Button>
+          <Button size="sm" onClick={() => void downloadPdf()} variant="outline" className="border-ink/20 text-ink hover:bg-ink/10" disabled={!responses.length}>PDF</Button>
         </div>
       </div>
       {responses.length === 0 ? (
