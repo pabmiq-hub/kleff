@@ -140,31 +140,34 @@ function isEditionOpen(f: { event_date: string | null; closes_at: string | null 
 }
 
 export const getPublishedForm = createServerFn({ method: "GET" })
-  .inputValidator(z.object({ slug: z.string().min(1).max(120) }))
+  .inputValidator(z.object({ slug: z.string().min(1).max(120), fecha: z.string().max(20).optional() }))
   .handler(async ({ data }) => {
-    const { data: form } = await supabaseAdmin
+    // Editions of a series share the same slug: load every published row for it.
+    const { data: rowsBySlug } = await supabaseAdmin
       .from("registration_forms")
       .select("*")
       .eq("slug", data.slug)
       .eq("is_published", true)
-      .maybeSingle();
-    if (!form) return { form: null, questions: [], responsesCount: 0, attendeesCount: 0, editions: [] as SeriesEdition[] };
-    let f = form as unknown as RegistrationForm & { series_id?: string | null };
+      .order("event_date", { ascending: true, nullsFirst: false });
+    const candidates = (rowsBySlug ?? []) as unknown as Array<RegistrationForm & { series_id?: string | null }>;
+    if (candidates.length === 0) return { form: null, questions: [], responsesCount: 0, attendeesCount: 0, editions: [] as SeriesEdition[] };
+    let f = candidates[0];
     let editions: SeriesEdition[] = [];
-    if (f.series_id) {
+    const seriesId = candidates.find((c) => c.series_id)?.series_id ?? null;
+    if (seriesId) {
       const { data: sib } = await supabaseAdmin
         .from("registration_forms")
         .select("*")
-        .eq("series_id" as never, f.series_id)
+        .eq("series_id" as never, seriesId)
         .eq("is_published", true)
         .order("event_date", { ascending: true, nullsFirst: false });
       const all = (sib ?? []) as unknown as Array<RegistrationForm & { series_id: string }>;
       const open = all.filter((e) => isEditionOpen(e));
       editions = open.map((e) => ({ id: e.id, slug: e.slug, title: e.title, event_date: e.event_date }));
-      if (!isEditionOpen(f)) {
-        // Past edition: show the next open one, otherwise the latest published edition.
-        f = open[0] ?? [...all].sort((a, b) => String(b.event_date ?? "").localeCompare(String(a.event_date ?? "")))[0] ?? f;
-      }
+      const ymd = (d: string | null) => (d ? d.slice(0, 10).replace(/-/g, "") : "");
+      const wanted = data.fecha ? open.find((e) => ymd(e.event_date) === data.fecha!.replace(/-/g, "")) : undefined;
+      // Requested date → that edition; else next open one; else latest published edition.
+      f = wanted ?? open[0] ?? [...all].sort((a, b) => String(b.event_date ?? "").localeCompare(String(a.event_date ?? "")))[0] ?? f;
     }
     const { data: questions } = await supabaseAdmin
       .from("registration_questions")
@@ -600,17 +603,10 @@ export const adminDuplicateEdition = createServerFn({ method: "POST" })
     if (!b.series_id) {
       await supabaseAdmin.from("registration_forms").update({ series_id: seriesId } as never).eq("id", b.id as string);
     }
-    // Series root keeps the public slug; editions get a dated internal slug.
+    // Every edition of a series shares the root's public slug.
     const { data: root } = await supabaseAdmin
       .from("registration_forms").select("slug").eq("id", seriesId).maybeSingle();
-    const rootSlug = ((root as { slug?: string } | null)?.slug ?? (b.slug as string)).slice(0, 100);
-    const ymd = data.event_date.slice(0, 10).replace(/-/g, "");
-    let slug = `${rootSlug}-${ymd}`;
-    for (let i = 2; i < 20; i++) {
-      const { data: dup } = await supabaseAdmin.from("registration_forms").select("id").eq("slug", slug).maybeSingle();
-      if (!dup) break;
-      slug = `${rootSlug}-${ymd}-${i}`;
-    }
+    const slug = (root as { slug?: string } | null)?.slug ?? (b.slug as string);
     const clone: Record<string, unknown> = { ...b };
     for (const k of ["id", "created_at", "updated_at"]) delete clone[k];
     Object.assign(clone, {
