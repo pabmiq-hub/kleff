@@ -698,24 +698,23 @@ export const adminUpdateForm = createServerFn({ method: "POST" })
     ];
     const { data: before } = await supabaseAdmin
       .from("registration_forms").select("*").eq("id", data.id).maybeSingle();
-    // Editions of a series share the public link: if the slug typed belongs to
-    // another edition of the same series, keep this edition's internal slug.
-    if (typeof patch["slug"] === "string" && before && patch["slug"] !== (before as { slug: string }).slug) {
-      const { data: clash } = await supabaseAdmin
-        .from("registration_forms").select("id, series_id").eq("slug", patch["slug"] as string).neq("id", data.id).maybeSingle();
-      if (clash) {
-        const mySeries = (before as unknown as { series_id: string | null }).series_id;
-        const theirs = clash as unknown as { series_id: string | null; id: string };
-        if (mySeries && (theirs.series_id === mySeries || theirs.id === mySeries)) {
-          delete patch["slug"];
-        } else {
-          throw new Error(`Ya existe otra inscripción con el enlace «${patch["slug"]}».`);
-        }
-      }
+    // Editions of a series share the public link: a slug change applies to the whole series.
+    const mySeries = (before as unknown as { series_id: string | null } | null)?.series_id ?? null;
+    const newSlug = typeof patch["slug"] === "string" && before && patch["slug"] !== (before as { slug: string }).slug
+      ? (patch["slug"] as string) : null;
+    if (newSlug) {
+      const { data: clashes } = await supabaseAdmin
+        .from("registration_forms").select("id, series_id").eq("slug", newSlug).neq("id", data.id);
+      const foreign = ((clashes ?? []) as unknown as Array<{ id: string; series_id: string | null }>)
+        .some((c) => !mySeries || c.series_id !== mySeries);
+      if (foreign) throw new Error(`Ya existe otra inscripción con el enlace «${newSlug}».`);
     }
     const { error } = await supabaseAdmin
       .from("registration_forms").update(patch as never).eq("id", data.id);
     if (error) throw new Error(error.message);
+    if (newSlug && mySeries) {
+      await supabaseAdmin.from("registration_forms").update({ slug: newSlug } as never).eq("series_id" as never, mySeries);
+    }
 
     // If anything shown in the reminder changed, cancel queued reminders and reschedule them.
     let rescheduled = 0;

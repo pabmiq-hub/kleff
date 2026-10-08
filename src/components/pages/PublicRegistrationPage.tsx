@@ -119,7 +119,7 @@ export function PublicRegistrationPage({ form, questions, responsesCount, attend
               {editions.map((e) => (
                 <a
                   key={e.id}
-                  href={`/${e.slug}`}
+                  href={`/${e.slug}?fecha=${(e.event_date ?? "").slice(0, 10)}`}
                   aria-current={e.id === form.id ? "true" : undefined}
                   className={`text-sm px-3 py-1.5 rounded-full border capitalize ${e.id === form.id ? "bg-primary text-primary-foreground border-primary" : "border-border text-foreground hover:bg-muted"}`}
                 >

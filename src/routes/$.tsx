@@ -43,7 +43,8 @@ export const Route = createFileRoute("/$")({
         // 1) Registration form (highest priority — slug-in-root).
         // Only check on root locale (es) — registrations are monolingual.
         if (locale === "es") {
-          const reg = await getPublishedForm({ data: { slug: slugCandidate } });
+          const fecha = new URLSearchParams(location.searchStr ?? "").get("fecha") ?? undefined;
+          const reg = await getPublishedForm({ data: { slug: slugCandidate, fecha: fecha?.slice(0, 20) } });
           if (reg.form) {
             // External redirect: 302 to external URL
             if (reg.form.kind === "external" && reg.form.external_mode === "redirect" && reg.form.external_url) {
