@@ -1,4 +1,5 @@
 // @ts-nocheck
+import { canManageKonektum } from "./_shared/konAccess";
 // Ported from the original Konektum edge function `send-reminder-email`.
 let __handler: any = null;
 const serve = (h: any) => { __handler = h; };
@@ -311,7 +312,7 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
-    if (event.organizer_id !== user.id) {
+    if (event.organizer_id !== user.id && !(await canManageKonektum(user.id))) {
       return new Response(
         JSON.stringify({ error: "Forbidden - You are not the organizer of this event" }), 
         { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }

@@ -1,4 +1,5 @@
 // @ts-nocheck
+import { canManageKonektum } from "./_shared/konAccess";
 // Ported from the original Konektum edge function `send-match-emails`.
 let __handler: any = null;
 const serve = (h: any) => { __handler = h; };
@@ -444,7 +445,7 @@ const handler = async (req: Request): Promise<Response> => {
     const isProfessional = event.module === 'professional';
     console.log("Event type:", isProfessional ? "Professional" : "Social");
 
-    if (event.organizer_id !== user.id) {
+    if (event.organizer_id !== user.id && !(await canManageKonektum(user.id))) {
       console.log("User is not the organizer. User:", user.id, "Organizer:", event.organizer_id);
       return new Response(
         JSON.stringify({ error: "Forbidden - You are not the organizer of this event" }), 
