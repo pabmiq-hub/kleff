@@ -1,5 +1,5 @@
-import { canManageKonektum } from "./_shared/konAccess";
 // @ts-nocheck
+import { canManageKonektum } from "./_shared/konAccess";
 // Ported from the original Konektum edge function `send-reminder-email`.
 let __handler: any = null;
 const serve = (h: any) => { __handler = h; };
