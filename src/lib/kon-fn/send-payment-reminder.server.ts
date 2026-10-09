@@ -1,3 +1,4 @@
+import { canManageKonektum } from "./_shared/konAccess";
 // @ts-nocheck
 // Ported from the original Konektum edge function `send-payment-reminder`.
 let __handler: any = null;
@@ -310,7 +311,7 @@ serve(async (req: Request) => {
         .eq("id", event_id)
         .single();
 
-      if (!event || event.organizer_id !== user.id) {
+      if (!event || event.organizer_id !== user.id && !(await canManageKonektum(user.id))) {
         return new Response(JSON.stringify({ error: "Forbidden" }), {
           status: 403,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
