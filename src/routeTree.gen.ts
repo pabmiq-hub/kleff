@@ -108,6 +108,7 @@ import { Route as AdminKonektumIndexRouteImport } from './routes/admin.konektum.
 import { Route as AdminFinanzasIndexRouteImport } from './routes/admin.finanzas.index'
 import { Route as AdminContentIndexRouteImport } from './routes/admin.content.index'
 import { Route as AdminBlogIndexRouteImport } from './routes/admin.blog.index'
+import { Route as ActividadesJuegosIndexRouteImport } from './routes/actividades_.juegos.index'
 import { Route as SSeriesSlugJoinRouteImport } from './routes/s.$seriesSlug.join'
 import { Route as InscripcionBajaTokenRouteImport } from './routes/inscripcion.baja.$token'
 import { Route as EventIdTablesRouteImport } from './routes/event.$id.tables'
@@ -655,6 +656,11 @@ const AdminBlogIndexRoute = AdminBlogIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AdminBlogRoute,
 } as any)
+const ActividadesJuegosIndexRoute = ActividadesJuegosIndexRouteImport.update({
+  id: '/actividades_/juegos/',
+  path: '/actividades/juegos/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SSeriesSlugJoinRoute = SSeriesSlugJoinRouteImport.update({
   id: '/s/$seriesSlug/join',
   path: '/s/$seriesSlug/join',
@@ -1050,6 +1056,7 @@ export interface FileRoutesByFullPath {
   '/event/$id/tables': typeof EventIdTablesRoute
   '/inscripcion/baja/$token': typeof InscripcionBajaTokenRoute
   '/s/$seriesSlug/join': typeof SSeriesSlugJoinRoute
+  '/actividades/juegos/': typeof ActividadesJuegosIndexRoute
   '/admin/blog/': typeof AdminBlogIndexRoute
   '/admin/content/': typeof AdminContentIndexRoute
   '/admin/finanzas/': typeof AdminFinanzasIndexRoute
@@ -1192,6 +1199,7 @@ export interface FileRoutesByTo {
   '/event/$id/tables': typeof EventIdTablesRoute
   '/inscripcion/baja/$token': typeof InscripcionBajaTokenRoute
   '/s/$seriesSlug/join': typeof SSeriesSlugJoinRoute
+  '/actividades/juegos': typeof ActividadesJuegosIndexRoute
   '/admin/blog': typeof AdminBlogIndexRoute
   '/admin/content': typeof AdminContentIndexRoute
   '/admin/finanzas': typeof AdminFinanzasIndexRoute
@@ -1344,6 +1352,7 @@ export interface FileRoutesById {
   '/event/$id/tables': typeof EventIdTablesRoute
   '/inscripcion/baja/$token': typeof InscripcionBajaTokenRoute
   '/s/$seriesSlug/join': typeof SSeriesSlugJoinRoute
+  '/actividades_/juegos/': typeof ActividadesJuegosIndexRoute
   '/admin/blog/': typeof AdminBlogIndexRoute
   '/admin/content/': typeof AdminContentIndexRoute
   '/admin/finanzas/': typeof AdminFinanzasIndexRoute
@@ -1497,6 +1506,7 @@ export interface FileRouteTypes {
     | '/event/$id/tables'
     | '/inscripcion/baja/$token'
     | '/s/$seriesSlug/join'
+    | '/actividades/juegos/'
     | '/admin/blog/'
     | '/admin/content/'
     | '/admin/finanzas/'
@@ -1639,6 +1649,7 @@ export interface FileRouteTypes {
     | '/event/$id/tables'
     | '/inscripcion/baja/$token'
     | '/s/$seriesSlug/join'
+    | '/actividades/juegos'
     | '/admin/blog'
     | '/admin/content'
     | '/admin/finanzas'
@@ -1790,6 +1801,7 @@ export interface FileRouteTypes {
     | '/event/$id/tables'
     | '/inscripcion/baja/$token'
     | '/s/$seriesSlug/join'
+    | '/actividades_/juegos/'
     | '/admin/blog/'
     | '/admin/content/'
     | '/admin/finanzas/'
@@ -1892,6 +1904,7 @@ export interface RootRouteChildren {
   EventIdTablesRoute: typeof EventIdTablesRoute
   InscripcionBajaTokenRoute: typeof InscripcionBajaTokenRoute
   SSeriesSlugJoinRoute: typeof SSeriesSlugJoinRoute
+  ActividadesJuegosIndexRoute: typeof ActividadesJuegosIndexRoute
   SSeriesSlugIndexRoute: typeof SSeriesSlugIndexRoute
   ApiPublicHooksFeaturedDispatchRoute: typeof ApiPublicHooksFeaturedDispatchRoute
   ApiPublicKonFnRoute: typeof ApiPublicKonFnRoute
@@ -2595,6 +2608,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminBlogIndexRouteImport
       parentRoute: typeof AdminBlogRoute
     }
+    '/actividades_/juegos/': {
+      id: '/actividades_/juegos/'
+      path: '/actividades/juegos'
+      fullPath: '/actividades/juegos/'
+      preLoaderRoute: typeof ActividadesJuegosIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/s/$seriesSlug/join': {
       id: '/s/$seriesSlug/join'
       path: '/s/$seriesSlug/join'
@@ -3238,6 +3258,7 @@ const rootRouteChildren: RootRouteChildren = {
   EventIdTablesRoute: EventIdTablesRoute,
   InscripcionBajaTokenRoute: InscripcionBajaTokenRoute,
   SSeriesSlugJoinRoute: SSeriesSlugJoinRoute,
+  ActividadesJuegosIndexRoute: ActividadesJuegosIndexRoute,
   SSeriesSlugIndexRoute: SSeriesSlugIndexRoute,
   ApiPublicHooksFeaturedDispatchRoute: ApiPublicHooksFeaturedDispatchRoute,
   ApiPublicKonFnRoute: ApiPublicKonFnRoute,
