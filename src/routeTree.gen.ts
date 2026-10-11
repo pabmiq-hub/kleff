@@ -152,6 +152,7 @@ import { Route as AdminBlogNewRouteImport } from './routes/admin.blog.new'
 import { Route as AdminBlogIdRouteImport } from './routes/admin.blog.$id'
 import { Route as EventSlugCancelarParticipantIdRouteImport } from './routes/$eventSlug.cancelar.$participantId'
 import { Route as AdminKonektumEventosIndexRouteImport } from './routes/admin.konektum.eventos.index'
+import { Route as ActividadesJuegosGameIdIndexRouteImport } from './routes/actividades_.juegos.$gameId.index'
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
 import { Route as EventIdCancelParticipantIdRouteImport } from './routes/event.$id.cancel.$participantId'
 import { Route as ApiPublicRegistroIcsTokenRouteImport } from './routes/api.public.registro-ics.$token'
@@ -882,6 +883,12 @@ const AdminKonektumEventosIndexRoute =
     path: '/eventos/',
     getParentRoute: () => AdminKonektumRoute,
   } as any)
+const ActividadesJuegosGameIdIndexRoute =
+  ActividadesJuegosGameIdIndexRouteImport.update({
+    id: '/actividades_/juegos/$gameId/',
+    path: '/actividades/juegos/$gameId/',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const LovableEmailQueueProcessRoute =
   LovableEmailQueueProcessRouteImport.update({
     id: '/lovable/email/queue/process',
@@ -1073,6 +1080,7 @@ export interface FileRoutesByFullPath {
   '/api/public/registro-ics/$token': typeof ApiPublicRegistroIcsTokenRoute
   '/event/$id/cancel/$participantId': typeof EventIdCancelParticipantIdRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
+  '/actividades/juegos/$gameId/': typeof ActividadesJuegosGameIdIndexRoute
   '/admin/konektum/eventos/': typeof AdminKonektumEventosIndexRoute
 }
 export interface FileRoutesByTo {
@@ -1216,6 +1224,7 @@ export interface FileRoutesByTo {
   '/api/public/registro-ics/$token': typeof ApiPublicRegistroIcsTokenRoute
   '/event/$id/cancel/$participantId': typeof EventIdCancelParticipantIdRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
+  '/actividades/juegos/$gameId': typeof ActividadesJuegosGameIdIndexRoute
   '/admin/konektum/eventos': typeof AdminKonektumEventosIndexRoute
 }
 export interface FileRoutesById {
@@ -1369,6 +1378,7 @@ export interface FileRoutesById {
   '/api/public/registro-ics/$token': typeof ApiPublicRegistroIcsTokenRoute
   '/event/$id/cancel/$participantId': typeof EventIdCancelParticipantIdRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
+  '/actividades_/juegos/$gameId/': typeof ActividadesJuegosGameIdIndexRoute
   '/admin/konektum/eventos/': typeof AdminKonektumEventosIndexRoute
 }
 export interface FileRouteTypes {
@@ -1523,6 +1533,7 @@ export interface FileRouteTypes {
     | '/api/public/registro-ics/$token'
     | '/event/$id/cancel/$participantId'
     | '/lovable/email/queue/process'
+    | '/actividades/juegos/$gameId/'
     | '/admin/konektum/eventos/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -1666,6 +1677,7 @@ export interface FileRouteTypes {
     | '/api/public/registro-ics/$token'
     | '/event/$id/cancel/$participantId'
     | '/lovable/email/queue/process'
+    | '/actividades/juegos/$gameId'
     | '/admin/konektum/eventos'
   id:
     | '__root__'
@@ -1818,6 +1830,7 @@ export interface FileRouteTypes {
     | '/api/public/registro-ics/$token'
     | '/event/$id/cancel/$participantId'
     | '/lovable/email/queue/process'
+    | '/actividades_/juegos/$gameId/'
     | '/admin/konektum/eventos/'
   fileRoutesById: FileRoutesById
 }
@@ -1911,6 +1924,7 @@ export interface RootRouteChildren {
   ApiPublicRegistroIcsTokenRoute: typeof ApiPublicRegistroIcsTokenRoute
   EventIdCancelParticipantIdRoute: typeof EventIdCancelParticipantIdRoute
   LovableEmailQueueProcessRoute: typeof LovableEmailQueueProcessRoute
+  ActividadesJuegosGameIdIndexRoute: typeof ActividadesJuegosGameIdIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -2916,6 +2930,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminKonektumEventosIndexRouteImport
       parentRoute: typeof AdminKonektumRoute
     }
+    '/actividades_/juegos/$gameId/': {
+      id: '/actividades_/juegos/$gameId/'
+      path: '/actividades/juegos/$gameId'
+      fullPath: '/actividades/juegos/$gameId/'
+      preLoaderRoute: typeof ActividadesJuegosGameIdIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/lovable/email/queue/process': {
       id: '/lovable/email/queue/process'
       path: '/lovable/email/queue/process'
@@ -3265,6 +3286,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicRegistroIcsTokenRoute: ApiPublicRegistroIcsTokenRoute,
   EventIdCancelParticipantIdRoute: EventIdCancelParticipantIdRoute,
   LovableEmailQueueProcessRoute: LovableEmailQueueProcessRoute,
+  ActividadesJuegosGameIdIndexRoute: ActividadesJuegosGameIdIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
