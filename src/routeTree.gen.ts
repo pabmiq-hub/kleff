@@ -152,6 +152,7 @@ import { Route as AdminBlogNewRouteImport } from './routes/admin.blog.new'
 import { Route as AdminBlogIdRouteImport } from './routes/admin.blog.$id'
 import { Route as EventSlugCancelarParticipantIdRouteImport } from './routes/$eventSlug.cancelar.$participantId'
 import { Route as AdminKonektumEventosIndexRouteImport } from './routes/admin.konektum.eventos.index'
+import { Route as ActividadesJuegosJugarIndexRouteImport } from './routes/actividades_.juegos.jugar.index'
 import { Route as ActividadesJuegosGameIdIndexRouteImport } from './routes/actividades_.juegos.$gameId.index'
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
 import { Route as EventIdCancelParticipantIdRouteImport } from './routes/event.$id.cancel.$participantId'
@@ -160,6 +161,9 @@ import { Route as ApiPublicKonFnRouteImport } from './routes/api.public.kon.$fn'
 import { Route as ApiPublicHooksFeaturedDispatchRouteImport } from './routes/api.public.hooks.featured-dispatch'
 import { Route as AdminKonektumEventosNuevoRouteImport } from './routes/admin.konektum.eventos.nuevo'
 import { Route as AdminKonektumEventosIdRouteImport } from './routes/admin.konektum.eventos.$id'
+import { Route as ActividadesJuegosJugarSessionIdRouteImport } from './routes/actividades_.juegos.jugar.$sessionId'
+import { Route as ActividadesJuegosInvitacionTokenRouteImport } from './routes/actividades_.juegos.invitacion.$token'
+import { Route as ActividadesJuegosGameIdPartidasSessionIdRouteImport } from './routes/actividades_.juegos.$gameId.partidas.$sessionId'
 
 const TorneosRoute = TorneosRouteImport.update({
   id: '/torneos',
@@ -883,6 +887,12 @@ const AdminKonektumEventosIndexRoute =
     path: '/eventos/',
     getParentRoute: () => AdminKonektumRoute,
   } as any)
+const ActividadesJuegosJugarIndexRoute =
+  ActividadesJuegosJugarIndexRouteImport.update({
+    id: '/actividades_/juegos/jugar/',
+    path: '/actividades/juegos/jugar/',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ActividadesJuegosGameIdIndexRoute =
   ActividadesJuegosGameIdIndexRouteImport.update({
     id: '/actividades_/juegos/$gameId/',
@@ -929,6 +939,24 @@ const AdminKonektumEventosIdRoute = AdminKonektumEventosIdRouteImport.update({
   path: '/eventos/$id',
   getParentRoute: () => AdminKonektumRoute,
 } as any)
+const ActividadesJuegosJugarSessionIdRoute =
+  ActividadesJuegosJugarSessionIdRouteImport.update({
+    id: '/actividades_/juegos/jugar/$sessionId',
+    path: '/actividades/juegos/jugar/$sessionId',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ActividadesJuegosInvitacionTokenRoute =
+  ActividadesJuegosInvitacionTokenRouteImport.update({
+    id: '/actividades_/juegos/invitacion/$token',
+    path: '/actividades/juegos/invitacion/$token',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ActividadesJuegosGameIdPartidasSessionIdRoute =
+  ActividadesJuegosGameIdPartidasSessionIdRouteImport.update({
+    id: '/actividades_/juegos/$gameId/partidas/$sessionId',
+    path: '/actividades/juegos/$gameId/partidas/$sessionId',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -1073,6 +1101,8 @@ export interface FileRoutesByFullPath {
   '/admin/rentals/': typeof AdminRentalsIndexRoute
   '/app/rentals/': typeof AppRentalsIndexRoute
   '/s/$seriesSlug/': typeof SSeriesSlugIndexRoute
+  '/actividades/juegos/invitacion/$token': typeof ActividadesJuegosInvitacionTokenRoute
+  '/actividades/juegos/jugar/$sessionId': typeof ActividadesJuegosJugarSessionIdRoute
   '/admin/konektum/eventos/$id': typeof AdminKonektumEventosIdRoute
   '/admin/konektum/eventos/nuevo': typeof AdminKonektumEventosNuevoRoute
   '/api/public/hooks/featured-dispatch': typeof ApiPublicHooksFeaturedDispatchRoute
@@ -1081,7 +1111,9 @@ export interface FileRoutesByFullPath {
   '/event/$id/cancel/$participantId': typeof EventIdCancelParticipantIdRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/actividades/juegos/$gameId/': typeof ActividadesJuegosGameIdIndexRoute
+  '/actividades/juegos/jugar/': typeof ActividadesJuegosJugarIndexRoute
   '/admin/konektum/eventos/': typeof AdminKonektumEventosIndexRoute
+  '/actividades/juegos/$gameId/partidas/$sessionId': typeof ActividadesJuegosGameIdPartidasSessionIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -1217,6 +1249,8 @@ export interface FileRoutesByTo {
   '/admin/rentals': typeof AdminRentalsIndexRoute
   '/app/rentals': typeof AppRentalsIndexRoute
   '/s/$seriesSlug': typeof SSeriesSlugIndexRoute
+  '/actividades/juegos/invitacion/$token': typeof ActividadesJuegosInvitacionTokenRoute
+  '/actividades/juegos/jugar/$sessionId': typeof ActividadesJuegosJugarSessionIdRoute
   '/admin/konektum/eventos/$id': typeof AdminKonektumEventosIdRoute
   '/admin/konektum/eventos/nuevo': typeof AdminKonektumEventosNuevoRoute
   '/api/public/hooks/featured-dispatch': typeof ApiPublicHooksFeaturedDispatchRoute
@@ -1225,7 +1259,9 @@ export interface FileRoutesByTo {
   '/event/$id/cancel/$participantId': typeof EventIdCancelParticipantIdRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/actividades/juegos/$gameId': typeof ActividadesJuegosGameIdIndexRoute
+  '/actividades/juegos/jugar': typeof ActividadesJuegosJugarIndexRoute
   '/admin/konektum/eventos': typeof AdminKonektumEventosIndexRoute
+  '/actividades/juegos/$gameId/partidas/$sessionId': typeof ActividadesJuegosGameIdPartidasSessionIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -1371,6 +1407,8 @@ export interface FileRoutesById {
   '/admin/rentals/': typeof AdminRentalsIndexRoute
   '/app/rentals/': typeof AppRentalsIndexRoute
   '/s/$seriesSlug/': typeof SSeriesSlugIndexRoute
+  '/actividades_/juegos/invitacion/$token': typeof ActividadesJuegosInvitacionTokenRoute
+  '/actividades_/juegos/jugar/$sessionId': typeof ActividadesJuegosJugarSessionIdRoute
   '/admin/konektum/eventos/$id': typeof AdminKonektumEventosIdRoute
   '/admin/konektum/eventos/nuevo': typeof AdminKonektumEventosNuevoRoute
   '/api/public/hooks/featured-dispatch': typeof ApiPublicHooksFeaturedDispatchRoute
@@ -1379,7 +1417,9 @@ export interface FileRoutesById {
   '/event/$id/cancel/$participantId': typeof EventIdCancelParticipantIdRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/actividades_/juegos/$gameId/': typeof ActividadesJuegosGameIdIndexRoute
+  '/actividades_/juegos/jugar/': typeof ActividadesJuegosJugarIndexRoute
   '/admin/konektum/eventos/': typeof AdminKonektumEventosIndexRoute
+  '/actividades_/juegos/$gameId/partidas/$sessionId': typeof ActividadesJuegosGameIdPartidasSessionIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -1526,6 +1566,8 @@ export interface FileRouteTypes {
     | '/admin/rentals/'
     | '/app/rentals/'
     | '/s/$seriesSlug/'
+    | '/actividades/juegos/invitacion/$token'
+    | '/actividades/juegos/jugar/$sessionId'
     | '/admin/konektum/eventos/$id'
     | '/admin/konektum/eventos/nuevo'
     | '/api/public/hooks/featured-dispatch'
@@ -1534,7 +1576,9 @@ export interface FileRouteTypes {
     | '/event/$id/cancel/$participantId'
     | '/lovable/email/queue/process'
     | '/actividades/juegos/$gameId/'
+    | '/actividades/juegos/jugar/'
     | '/admin/konektum/eventos/'
+    | '/actividades/juegos/$gameId/partidas/$sessionId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -1670,6 +1714,8 @@ export interface FileRouteTypes {
     | '/admin/rentals'
     | '/app/rentals'
     | '/s/$seriesSlug'
+    | '/actividades/juegos/invitacion/$token'
+    | '/actividades/juegos/jugar/$sessionId'
     | '/admin/konektum/eventos/$id'
     | '/admin/konektum/eventos/nuevo'
     | '/api/public/hooks/featured-dispatch'
@@ -1678,7 +1724,9 @@ export interface FileRouteTypes {
     | '/event/$id/cancel/$participantId'
     | '/lovable/email/queue/process'
     | '/actividades/juegos/$gameId'
+    | '/actividades/juegos/jugar'
     | '/admin/konektum/eventos'
+    | '/actividades/juegos/$gameId/partidas/$sessionId'
   id:
     | '__root__'
     | '/'
@@ -1823,6 +1871,8 @@ export interface FileRouteTypes {
     | '/admin/rentals/'
     | '/app/rentals/'
     | '/s/$seriesSlug/'
+    | '/actividades_/juegos/invitacion/$token'
+    | '/actividades_/juegos/jugar/$sessionId'
     | '/admin/konektum/eventos/$id'
     | '/admin/konektum/eventos/nuevo'
     | '/api/public/hooks/featured-dispatch'
@@ -1831,7 +1881,9 @@ export interface FileRouteTypes {
     | '/event/$id/cancel/$participantId'
     | '/lovable/email/queue/process'
     | '/actividades_/juegos/$gameId/'
+    | '/actividades_/juegos/jugar/'
     | '/admin/konektum/eventos/'
+    | '/actividades_/juegos/$gameId/partidas/$sessionId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -1919,12 +1971,16 @@ export interface RootRouteChildren {
   SSeriesSlugJoinRoute: typeof SSeriesSlugJoinRoute
   ActividadesJuegosIndexRoute: typeof ActividadesJuegosIndexRoute
   SSeriesSlugIndexRoute: typeof SSeriesSlugIndexRoute
+  ActividadesJuegosInvitacionTokenRoute: typeof ActividadesJuegosInvitacionTokenRoute
+  ActividadesJuegosJugarSessionIdRoute: typeof ActividadesJuegosJugarSessionIdRoute
   ApiPublicHooksFeaturedDispatchRoute: typeof ApiPublicHooksFeaturedDispatchRoute
   ApiPublicKonFnRoute: typeof ApiPublicKonFnRoute
   ApiPublicRegistroIcsTokenRoute: typeof ApiPublicRegistroIcsTokenRoute
   EventIdCancelParticipantIdRoute: typeof EventIdCancelParticipantIdRoute
   LovableEmailQueueProcessRoute: typeof LovableEmailQueueProcessRoute
   ActividadesJuegosGameIdIndexRoute: typeof ActividadesJuegosGameIdIndexRoute
+  ActividadesJuegosJugarIndexRoute: typeof ActividadesJuegosJugarIndexRoute
+  ActividadesJuegosGameIdPartidasSessionIdRoute: typeof ActividadesJuegosGameIdPartidasSessionIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -2930,6 +2986,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminKonektumEventosIndexRouteImport
       parentRoute: typeof AdminKonektumRoute
     }
+    '/actividades_/juegos/jugar/': {
+      id: '/actividades_/juegos/jugar/'
+      path: '/actividades/juegos/jugar'
+      fullPath: '/actividades/juegos/jugar/'
+      preLoaderRoute: typeof ActividadesJuegosJugarIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/actividades_/juegos/$gameId/': {
       id: '/actividades_/juegos/$gameId/'
       path: '/actividades/juegos/$gameId'
@@ -2985,6 +3048,27 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/konektum/eventos/$id'
       preLoaderRoute: typeof AdminKonektumEventosIdRouteImport
       parentRoute: typeof AdminKonektumRoute
+    }
+    '/actividades_/juegos/jugar/$sessionId': {
+      id: '/actividades_/juegos/jugar/$sessionId'
+      path: '/actividades/juegos/jugar/$sessionId'
+      fullPath: '/actividades/juegos/jugar/$sessionId'
+      preLoaderRoute: typeof ActividadesJuegosJugarSessionIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/actividades_/juegos/invitacion/$token': {
+      id: '/actividades_/juegos/invitacion/$token'
+      path: '/actividades/juegos/invitacion/$token'
+      fullPath: '/actividades/juegos/invitacion/$token'
+      preLoaderRoute: typeof ActividadesJuegosInvitacionTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/actividades_/juegos/$gameId/partidas/$sessionId': {
+      id: '/actividades_/juegos/$gameId/partidas/$sessionId'
+      path: '/actividades/juegos/$gameId/partidas/$sessionId'
+      fullPath: '/actividades/juegos/$gameId/partidas/$sessionId'
+      preLoaderRoute: typeof ActividadesJuegosGameIdPartidasSessionIdRouteImport
+      parentRoute: typeof rootRouteImport
     }
   }
 }
@@ -3281,12 +3365,17 @@ const rootRouteChildren: RootRouteChildren = {
   SSeriesSlugJoinRoute: SSeriesSlugJoinRoute,
   ActividadesJuegosIndexRoute: ActividadesJuegosIndexRoute,
   SSeriesSlugIndexRoute: SSeriesSlugIndexRoute,
+  ActividadesJuegosInvitacionTokenRoute: ActividadesJuegosInvitacionTokenRoute,
+  ActividadesJuegosJugarSessionIdRoute: ActividadesJuegosJugarSessionIdRoute,
   ApiPublicHooksFeaturedDispatchRoute: ApiPublicHooksFeaturedDispatchRoute,
   ApiPublicKonFnRoute: ApiPublicKonFnRoute,
   ApiPublicRegistroIcsTokenRoute: ApiPublicRegistroIcsTokenRoute,
   EventIdCancelParticipantIdRoute: EventIdCancelParticipantIdRoute,
   LovableEmailQueueProcessRoute: LovableEmailQueueProcessRoute,
   ActividadesJuegosGameIdIndexRoute: ActividadesJuegosGameIdIndexRoute,
+  ActividadesJuegosJugarIndexRoute: ActividadesJuegosJugarIndexRoute,
+  ActividadesJuegosGameIdPartidasSessionIdRoute:
+    ActividadesJuegosGameIdPartidasSessionIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
