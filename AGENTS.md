@@ -1,0 +1,2 @@
+- Murder Mystery module ("Juegos") lives in src/lib/mm + src/components/mm with tables prefixed mm_; players never use Supabase Auth: all player reads/writes go through server functions that verify an HMAC player token, so is_killer and other characters' data never reach the browser.
+- Juegos routes use the `actividades_` file prefix so they don't nest under the public /actividades page.
