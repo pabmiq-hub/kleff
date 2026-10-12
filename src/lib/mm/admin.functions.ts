@@ -8,7 +8,7 @@ async function guard(userId: string) {
   await assertSuperAdmin(userId);
   return import("./engine.server");
 }
-const emails = () => import("./emails.server");
+const mmEmails = () => import("./emails.server");
 
 const id = z.string().uuid();
 
@@ -263,7 +263,7 @@ export const mmManagePlayers = createServerFn({ method: "POST" })
         for (const email of emails) {
           const token = eng.newToken();
           await db().from("mm_invitations").insert({ session_id: sid, email, token, sent_at: new Date().toISOString() });
-          await (await emails()).sendInviteEmail(email, token, title, s.name);
+          await (await mmEmails()).sendInviteEmail(email, token, title, s.name);
         }
         await logEvent(sid, "invitations_sent", { count: emails.length });
         return { ok: true, count: emails.length };
@@ -271,12 +271,12 @@ export const mmManagePlayers = createServerFn({ method: "POST" })
       case "resend": {
         if (data.invitationId) {
           const { data: inv } = await db().from("mm_invitations").select("*").eq("id", data.invitationId).single();
-          await (await emails()).sendInviteEmail(inv.email, inv.token, title, s.name);
+          await (await mmEmails()).sendInviteEmail(inv.email, inv.token, title, s.name);
           await db().from("mm_invitations").update({ sent_at: new Date().toISOString() }).eq("id", inv.id);
         } else if (data.playerId) {
           const { data: p } = await db().from("mm_session_players").select("*").eq("id", data.playerId).single();
           if (!p?.email) throw new Error("Este jugador no tiene email");
-          await (await emails()).sendCodeEmail(p.email, p.display_name, p.access_code, title);
+          await (await mmEmails()).sendCodeEmail(p.email, p.display_name, p.access_code, title);
         }
         return { ok: true };
       }
