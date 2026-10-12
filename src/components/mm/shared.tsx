@@ -145,3 +145,5 @@ export function describeEvent(e: { type: string; payload: any }, playerName?: st
       return `${who}${EVENT_LABELS[e.type] ?? e.type}`;
   }
 }
+
+export const sessionTopicName = (id: string) => `mm-session-${id}`;
