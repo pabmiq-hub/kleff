@@ -2,3 +2,6 @@
 - [ ] Corregir causas de bloqueos, fallos parciales y errores de envío
 - [ ] Verificar localmente y contra producción sin alterar datos reales
 - [x] Adaptar Konektum a móviles: controles, avisos de pago y tarjetas de participantes sin desbordes (revisión visual autenticada pendiente: la conexión de acceso no responde)
+- [x] Juegos (Murder Mystery) fase 1: tablas mm_*, importación JSON + demo, partidas, invitaciones, códigos, panel admin y jugador, actos/temporizador, votación, revelación
+- [ ] Juegos fase 2: acciones conjuntas, fragmentos, uso de habilidades, entrega de objetos, objetivos automáticos
+- [ ] Juegos fase 3: avance programado sin nadie conectado (cron), presencia en tiempo real, animaciones Lottie
