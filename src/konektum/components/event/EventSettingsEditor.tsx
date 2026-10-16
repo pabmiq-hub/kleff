@@ -5,6 +5,7 @@ import { Button } from "@/konektum/ui/button";
 import { Input } from "@/konektum/ui/input";
 import { Label } from "@/konektum/ui/label";
 import { Switch } from "@/konektum/ui/switch";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/konektum/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/konektum/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/konektum/ui/select";
 import { Textarea } from "@/konektum/ui/textarea";
@@ -515,16 +516,44 @@ const EventSettingsEditor = ({
   return (
     <>
       <Card>
-        <CardHeader>
-          <CardTitle>Ajustes del evento</CardTitle>
-          <CardDescription>
-            {isLocked 
-              ? "Algunos ajustes estructurales están bloqueados porque el evento ya ha comenzado"
-              : "Modifica la configuración del evento antes de iniciarlo"}
-          </CardDescription>
+        <CardHeader className="sticky top-0 z-20 bg-card/95 backdrop-blur border-b rounded-t-xl">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div>
+              <CardTitle>Ajustes del evento</CardTitle>
+              <CardDescription className="mt-1">
+                {isLocked
+                  ? "Algunos ajustes estructurales están bloqueados porque el evento ya ha comenzado"
+                  : "Modifica la configuración del evento antes de iniciarlo"}
+              </CardDescription>
+            </div>
+            <div className="flex gap-2 shrink-0">
+              <Button asChild variant="outline" size="sm">
+                <a href={`/${slugifyEventName(formSlug)}`} target="_blank" rel="noreferrer">
+                  <Eye className="w-4 h-4 mr-1" />
+                  Ver inscripción
+                </a>
+              </Button>
+              <Button size="sm" onClick={handleSave} disabled={isSaving}>
+                {isSaving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
+                Guardar cambios
+              </Button>
+            </div>
+          </div>
         </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <CardContent className="pt-6">
+          <Tabs defaultValue="info" className="w-full">
+            <div className="overflow-x-auto -mx-1 px-1 mb-6">
+              <TabsList className="w-max min-w-full justify-start">
+                <TabsTrigger value="info">Información pública</TabsTrigger>
+                <TabsTrigger value="inscripcion">Inscripción y plazas</TabsTrigger>
+                <TabsTrigger value="pago">Pago y comunicaciones</TabsTrigger>
+                <TabsTrigger value="dinamica">Dinámica</TabsTrigger>
+                {!isProfessional && <TabsTrigger value="extras">Experiencia y extras</TabsTrigger>}
+                <TabsTrigger value="avanzado">Avanzado</TabsTrigger>
+              </TabsList>
+            </div>
+            <TabsContent value="info" className="space-y-6 mt-0">
+<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
               <Label htmlFor="event-name">Nombre del evento</Label>
               <Input
@@ -578,148 +607,110 @@ const EventSettingsEditor = ({
                 onChange={(e) => setFormEventLocation(e.target.value)}
               />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="event-rounds">Número de rondas {isLocked && <Lock className="w-3 h-3 inline text-muted-foreground" />}</Label>
-              <Input
-                id="event-rounds"
-                type="number"
-                min={1}
-                max={20}
-                value={formRounds}
-                onChange={(e) => setFormRounds(parseInt(e.target.value) || 1)}
-                disabled={isLocked}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="event-table-size">Tamaño de mesa</Label>
-              {customTablesActive ? (
-                <div className="flex items-center gap-2">
-                  <div className="flex-1 px-3 py-2 rounded-md border bg-muted/40 text-sm">
-                    Personalizado · {formCustomTables!.tables.length} mesas · {formCustomTables!.tables.reduce((a, t) => a + (t.capacity || 0), 0)} plazas
-                  </div>
-                  <Button type="button" size="sm" variant="outline" onClick={() => setShowCustomTablesDialog(true)}>
-                    Editar
-                  </Button>
-                  <Button type="button" size="sm" variant="ghost" onClick={() => persistCustomTables(null)}>
-                    Quitar
-                  </Button>
-                </div>
-              ) : (
-                <div className="flex items-center gap-2">
-                  <Input
-                    id="event-table-size"
-                    type="number"
-                    min={2}
-                    max={12}
-                    value={formTableSize}
-                    onChange={(e) => setFormTableSize(parseInt(e.target.value) || 2)}
-                    className="flex-1"
-                  />
-                  {canUseCustomTables && (
-                    <Button
-                      type="button"
-                      size="sm"
-                      variant="outline"
-                      onClick={() => setShowCustomTablesDialog(true)}
-                      title="Configurar mesas con capacidades individuales"
-                    >
-                      <Settings2 className="w-4 h-4 mr-1" />
-                      Personalizar
-                    </Button>
-                  )}
-                </div>
-              )}
-              {isLocked && (
-                <p className="text-xs text-muted-foreground">
-                  Los cambios se aplicarán al regenerar las mesas desde el panel del evento.
-                </p>
-              )}
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="event-duration">Duración de ronda (segundos)</Label>
-              <Input
-                id="event-duration"
-                type="number"
-                min={60}
-                max={3600}
-                step={30}
-                value={formRoundDuration}
-                onChange={(e) => setFormRoundDuration(parseInt(e.target.value) || 300)}
-              />
-              <p className="text-xs text-muted-foreground">
-                {Math.floor(formRoundDuration / 60)} min {formRoundDuration % 60 > 0 ? `${formRoundDuration % 60} seg` : ""}
+</div>
+          <div className="flex items-center justify-between p-4 border rounded-lg">
+            <div>
+              <Label className="text-base">Idioma del evento</Label>
+              <p className="text-sm text-muted-foreground">
+                Idioma del formulario de inscripción y las comunicaciones con participantes
               </p>
             </div>
-            <div className="space-y-2">
-              <Label>Modo de rotación {isLocked && <Lock className="w-3 h-3 inline text-muted-foreground" />}</Label>
-              <Select value={formRotationMode} onValueChange={(v) => setFormRotationMode(v as "fixed_host" | "all_rotate")} disabled={isLocked}>
-                <SelectTrigger disabled={isLocked}>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="fixed_host">Anfitrión fijo</SelectItem>
-                  <SelectItem value="all_rotate">Todos rotan</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+            <Select value={formLanguage} onValueChange={(v) => setFormLanguage(v as "es" | "en")}>
+              <SelectTrigger className="w-32">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="es">🇪🇸 Español</SelectItem>
+                <SelectItem value="en">🇬🇧 English</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
-
-          {isProfessional && (
-            <div className="flex items-center justify-between p-4 border rounded-lg">
+            <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base">Datos destacados del formulario</CardTitle>
+              <CardDescription>Fecha, lugar y precio se muestran solos. Añade aquí otros datos (plazas, idiomas, juegos…) para destacarlos en la ficha.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {formHighlights.map((h, i) => (
+                <div key={i} className="grid grid-cols-[3.5rem_1fr] sm:grid-cols-[3.5rem_9rem_1fr_auto] gap-2 items-start">
+                  <Input value={h.emoji} maxLength={4} className="text-center" onChange={(e) => setFormHighlights((p) => p.map((x, j) => j === i ? { ...x, emoji: e.target.value } : x))} />
+                  <Input value={h.label} placeholder="Etiqueta" onChange={(e) => setFormHighlights((p) => p.map((x, j) => j === i ? { ...x, label: e.target.value } : x))} />
+                  <Input value={h.text} placeholder="Texto" className="col-span-2 sm:col-span-1" onChange={(e) => setFormHighlights((p) => p.map((x, j) => j === i ? { ...x, text: e.target.value } : x))} />
+                  <Button type="button" variant="ghost" size="sm" className="col-span-2 sm:col-span-1" onClick={() => setFormHighlights((p) => p.filter((_, j) => j !== i))}>Quitar</Button>
+                </div>
+              ))}
+              <div className="flex flex-wrap gap-2">
+                {HIGHLIGHT_PRESETS.filter((p) => !["Lugar", "Precio", "Fecha"].includes(p.label)).map((p) => (
+                  <Button key={p.label} type="button" variant="outline" size="sm" onClick={() => setFormHighlights((prev) => [...prev, { emoji: p.emoji, label: p.label, text: "" }])}>
+                    {p.emoji} {p.label}
+                  </Button>
+                ))}
+                <Button type="button" variant="outline" size="sm" onClick={() => setFormHighlights((prev) => [...prev, { emoji: "✨", label: "", text: "" }])}>+ Otro</Button>
+              </div>
+              <p className="text-xs text-muted-foreground">Recuerda guardar los ajustes.</p>
+            </CardContent>
+          </Card>
+            </TabsContent>
+            <TabsContent value="inscripcion" className="space-y-6 mt-0">
+          {/* Registration Form Customization */}
+          <div className="space-y-4 p-4 border rounded-lg">
+            <div className="flex items-center justify-between">
               <div>
-                <Label className="text-base">Tipo de rotación B2B</Label>
+                <Label className="text-base">Personalización del formulario de inscripción</Label>
                 <p className="text-sm text-muted-foreground">
-                  Define quién permanece fijo en la mesa y quién rota entre mesas
+                  Personaliza el subtítulo, la descripción y los campos del formulario
                 </p>
               </div>
-              <Select value={formB2BRotation} onValueChange={setFormB2BRotation}>
-                <SelectTrigger className="w-64">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="client_fixed">Clientes fijos – Proveedores rotan</SelectItem>
-                  <SelectItem value="provider_fixed">Proveedores fijos – Clientes rotan</SelectItem>
-                </SelectContent>
-              </Select>
+              <Button variant="outline" size="sm" onClick={() => setShowPreviewModal(true)}>
+                <Eye className="w-4 h-4 mr-1" />
+                Vista previa
+              </Button>
             </div>
-          )}
-
-          {!isProfessional && (
-            <div className="flex items-center justify-between p-4 border rounded-lg">
-              <div>
-                <Label className="text-base">Paridad de género</Label>
-                <p className="text-sm text-muted-foreground">
-                  Intentar equilibrar hombres y mujeres en cada mesa
-                </p>
-              </div>
-              <Switch
-                checked={formGenderParity}
-                onCheckedChange={setFormGenderParity}
+            <div className="space-y-2">
+              <Label htmlFor="reg-subtitle">Subtítulo del formulario</Label>
+              <Input
+                id="reg-subtitle"
+                value={formRegSubtitle}
+                onChange={(e) => setFormRegSubtitle(e.target.value)}
+                placeholder={formLanguage === "en" ? "e.g. Fill in your details to participate" : "Ej: Completa tus datos para participar"}
               />
             </div>
-          )}
-
-          {!isProfessional && (
-            <div className="flex items-center justify-between p-4 border rounded-lg">
-              <div className="flex-1 pr-4">
-                <Label className="text-base">Distribución de mesas</Label>
-                <p className="text-sm text-muted-foreground">
-                  <strong>Mixtas:</strong> hombres y mujeres pueden compartir mesa.<br />
-                  <strong>100% mismo género:</strong> mesas exclusivas de chicas y mesas exclusivas de chicos, sin mezclar.
-                </p>
-              </div>
-              <Select value={formTableGenderMode} onValueChange={setFormTableGenderMode}>
-                <SelectTrigger className="w-56">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="mixed">Mixtas (estándar)</SelectItem>
-                  <SelectItem value="single_gender">100% mismo género</SelectItem>
-                </SelectContent>
-              </Select>
+            <div className="space-y-2">
+              <Label htmlFor="reg-description">Descripción adicional</Label>
+              <RichTextEditor
+                value={formRegDescription}
+                onChange={setFormRegDescription}
+                placeholder={formLanguage === "en" ? "e.g. Additional event info, dress code, location details..." : "Ej: Información adicional del evento, código de vestimenta, ubicación..."}
+                minHeight="120px"
+              />
             </div>
-          )}
 
+            {/* Custom Registration Form Fields */}
+            <div className="border-t pt-4 mt-4">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <ClipboardList className="w-4 h-4 text-muted-foreground" />
+                  <Label className="text-sm font-medium">Campos personalizados del formulario</Label>
+                </div>
+                <Switch
+                  checked={customFormEnabled}
+                  onCheckedChange={(checked) => {
+                    setCustomFormEnabled(checked);
+                    if (checked && customFormFields.length === 0) {
+                      setCustomFormFields(getDefaultFields(isProfessional ? "professional" : "social"));
+                    }
+                  }}
+                />
+              </div>
+              {customFormEnabled && (
+                <RegistrationFormEditor
+                  fields={customFormFields}
+                  onChange={setCustomFormFields}
+                  eventModule={isProfessional ? "professional" : "social"}
+                />
+              )}
+            </div>
+          </div>
           {!isProfessional && (
             <div className="p-4 border rounded-lg space-y-4">
               <div className="flex items-center justify-between">
@@ -816,367 +807,6 @@ const EventSettingsEditor = ({
               )}
             </div>
           )}
-
-          {!isProfessional && (
-            <div className="flex items-center justify-between p-4 border rounded-lg">
-              <div>
-                <Label className="text-base">⭐ Super Like</Label>
-                <p className="text-sm text-muted-foreground">
-                  Permite a cada participante enviar 1 Super Like por evento. El destinatario recibirá un email anónimo animándole a enviar sus selecciones.
-                </p>
-              </div>
-              <Switch
-                checked={formSuperLikeEnabled}
-                onCheckedChange={setFormSuperLikeEnabled}
-              />
-            </div>
-          )}
-
-          {!isProfessional && (
-            <FeatureGate feature="repeat_request" showUpgrade={false}>
-              <div className="flex items-center justify-between p-4 border rounded-lg">
-                <div className="flex-1 pr-4">
-                  <Label className="text-base">🔁 Función "Repetir"</Label>
-                  <p className="text-sm text-muted-foreground">
-                    Permite a cada participante solicitar una vez por evento volver a coincidir con un compañero de mesa anterior. Si el destinatario acepta, se crea una inclusión automática para la siguiente ronda generada.
-                  </p>
-                </div>
-                <Switch
-                  checked={formRepeatRequestEnabled}
-                  onCheckedChange={setFormRepeatRequestEnabled}
-                />
-              </div>
-            </FeatureGate>
-          )}
-
-          {!isProfessional && (
-            <div className="flex items-center justify-between p-4 border rounded-lg">
-              <div className="flex-1 pr-4">
-                <Label className="text-base">💘 Función "Flechazo"</Label>
-                <p className="text-sm text-muted-foreground">
-                  Permite a cada participante enviar 1 Flechazo directo por evento. El destinatario recibe un email para aceptar o rechazar. Si acepta, ambos reciben los datos de contacto del otro y, si aún quedan rondas, se sentarán en la misma mesa.
-                </p>
-              </div>
-              <Switch
-                checked={formCrushEnabled}
-                onCheckedChange={setFormCrushEnabled}
-              />
-            </div>
-          )}
-
-          {!isProfessional && (
-            <div className="p-4 border rounded-lg space-y-3">
-              <div className="flex items-center justify-between">
-                <div className="flex-1 pr-4">
-                  <Label className="text-base">✨ Modo Wrapped</Label>
-                  <p className="text-sm text-muted-foreground">
-                    Añade un formulario de intereses en 2 pasos y calcula compatibilidad entre participantes. Los intereses se reutilizan en futuros eventos Wrapped del mismo organizador.
-                  </p>
-                </div>
-                <Switch
-                  checked={formWrappedEnabled}
-                  onCheckedChange={setFormWrappedEnabled}
-                />
-              </div>
-              {formWrappedEnabled && (
-                <div className="flex items-center justify-between pt-3 border-t">
-                  <p className="text-sm text-muted-foreground">
-                    {formWrappedQuestions.length} preguntas de intereses configuradas
-                  </p>
-                  <Button type="button" variant="outline" size="sm" onClick={() => setShowWrappedEditor(true)}>
-                    <Sparkles className="w-4 h-4 mr-2" />
-                    Personalizar preguntas
-                  </Button>
-                </div>
-              )}
-            </div>
-          )}
-
-          {!isProfessional && (
-            <div className="p-4 border rounded-lg space-y-3">
-              <div className="flex items-center justify-between">
-                <div className="flex-1 pr-4">
-                  <Label className="text-base flex items-center gap-2">
-                    <Languages className="w-4 h-4" /> Idiomas que hablan los asistentes
-                  </Label>
-                  <p className="text-sm text-muted-foreground">
-                    Muestra un selector de idiomas en el formulario de inscripción. Se tiene en cuenta al generar las mesas para agrupar personas con idiomas en común.
-                  </p>
-                </div>
-                <Switch
-                  checked={formLanguagesEnabled}
-                  onCheckedChange={setFormLanguagesEnabled}
-                />
-              </div>
-              {formLanguagesEnabled && (
-                <div className="pt-3 border-t space-y-2">
-                  <p className="text-xs text-muted-foreground">Idiomas disponibles en el formulario:</p>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                    {AVAILABLE_LANGUAGE_OPTIONS.map((opt) => {
-                      const checked = formAvailableLanguages.includes(opt.code);
-                      return (
-                        <label key={opt.code} className="flex items-center gap-2 p-2 rounded-md border cursor-pointer hover:bg-muted/50">
-                          <Checkbox
-                            checked={checked}
-                            onCheckedChange={(v) => {
-                              setFormAvailableLanguages((prev) =>
-                                v ? Array.from(new Set([...prev, opt.code])) : prev.filter((c) => c !== opt.code)
-                              );
-                            }}
-                          />
-                          <span className="text-sm">{opt.label}</span>
-                        </label>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-
-
-
-          <div className="flex items-center justify-between p-4 border rounded-lg">
-            <div>
-              <Label className="text-base">Idioma del evento</Label>
-              <p className="text-sm text-muted-foreground">
-                Idioma del formulario de inscripción y las comunicaciones con participantes
-              </p>
-            </div>
-            <Select value={formLanguage} onValueChange={(v) => setFormLanguage(v as "es" | "en")}>
-              <SelectTrigger className="w-32">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="es">🇪🇸 Español</SelectItem>
-                <SelectItem value="en">🇬🇧 English</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          {!isProfessional && (
-            <div className="flex items-center justify-between p-4 border rounded-lg">
-              <div className="flex-1 pr-4">
-                <Label className="text-base">Generación de rondas</Label>
-                <p className="text-sm text-muted-foreground">
-                  <strong>Anticipada:</strong> todas las rondas se generan al iniciar el evento.<br />
-                  <strong>Justo a tiempo:</strong> cada ronda se genera al finalizar la anterior, excluyendo bajas/cancelaciones.
-                </p>
-              </div>
-              <Select value={formTablesGenerationMode} onValueChange={setFormTablesGenerationMode}>
-                <SelectTrigger className="w-56">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="upfront">Anticipada (al iniciar)</SelectItem>
-                  <SelectItem value="per_round">Justo a tiempo (por ronda)</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          )}
-
-          {/* Check-in timing */}
-          <div className="flex items-center justify-between p-4 border rounded-lg">
-            <div>
-              <Label className="text-base">Apertura del check-in</Label>
-              <p className="text-sm text-muted-foreground">
-                Tiempo antes del evento en que los participantes pueden hacer check-in
-              </p>
-            </div>
-            <Select value={String(formCheckinMinutes)} onValueChange={(v) => setFormCheckinMinutes(Number(v))}>
-              <SelectTrigger className="w-48">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="0">Solo manualmente</SelectItem>
-                <SelectItem value="30">30 minutos antes</SelectItem>
-                <SelectItem value="60">1 hora antes</SelectItem>
-                <SelectItem value="120">2 horas antes</SelectItem>
-                <SelectItem value="180">3 horas antes</SelectItem>
-                <SelectItem value="360">6 horas antes</SelectItem>
-                <SelectItem value="720">12 horas antes</SelectItem>
-                <SelectItem value="1440">24 horas antes</SelectItem>
-                <SelectItem value="2880">48 horas antes</SelectItem>
-                <SelectItem value="99999">Siempre abierto</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* Code send mode */}
-          <div className="flex items-center justify-between p-4 border rounded-lg">
-            <div className="flex-1 mr-4">
-              <Label className="text-base flex items-center gap-2">
-                <KeyRound className="w-4 h-4" />
-                Envío de códigos de acceso
-              </Label>
-              <p className="text-sm text-muted-foreground mt-1">
-                {formCodeSendMode === "on_registration"
-                  ? "El código se envía automáticamente junto con la confirmación de inscripción"
-                  : formCodeSendMode === "automatic"
-                    ? "El código se envía automáticamente 24h antes del evento. Si alguien se inscribe con menos de 24h, lo recibe al momento"
-                    : "Tú decides cuándo enviar los códigos manualmente desde el panel de participantes"}
-              </p>
-            </div>
-            <Select value={formCodeSendMode} onValueChange={setFormCodeSendMode}>
-              <SelectTrigger className="w-52">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="on_registration">Al registrarse</SelectItem>
-                <SelectItem value="automatic">Automático (24h antes)</SelectItem>
-                <SelectItem value="manual">Manual</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* Reminder mode */}
-          <div className="flex items-center justify-between p-4 border rounded-lg">
-            <div className="flex-1 mr-4">
-              <Label className="text-base flex items-center gap-2">
-                <Bell className="w-4 h-4" />
-                Recordatorio del evento
-              </Label>
-              <p className="text-sm text-muted-foreground mt-1">
-                {formReminderMode === "manual"
-                  ? "Envía recordatorios manualmente desde el panel del evento"
-                  : formReminderMode === "24h"
-                    ? "Se enviará un recordatorio automáticamente 24h antes del evento"
-                    : formReminderMode === "48h"
-                      ? "Se enviará un recordatorio automáticamente 48h antes del evento"
-                      : "Se enviará un recordatorio en la fecha y hora configurada"}
-              </p>
-            </div>
-            <Select value={formReminderMode} onValueChange={setFormReminderMode}>
-              <SelectTrigger className="w-52">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="manual">Manual</SelectItem>
-                <SelectItem value="24h">24h antes del evento</SelectItem>
-                <SelectItem value="48h">48h antes del evento</SelectItem>
-                <SelectItem value="custom">Personalizado</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          {formReminderMode === "custom" && (
-            <div className="ml-4 p-4 border rounded-lg bg-muted/30">
-              <Label className="text-sm">Fecha y hora del recordatorio</Label>
-              <Input
-                type="datetime-local"
-                value={formReminderScheduledAt}
-                onChange={(e) => setFormReminderScheduledAt(e.target.value)}
-                className="mt-2 w-64"
-              />
-            </div>
-          )}
-
-          {/* Preliminary Round - Social only, Enterprise feature */}
-          {!isProfessional && (
-            <FeatureGate feature="preliminary_round">
-              <div className="flex items-center justify-between p-4 border rounded-lg">
-                <div>
-                  <Label className="text-base">🎯 Ronda Preliminar</Label>
-                  <p className="text-sm text-muted-foreground">
-                    Crea mesas de relleno mientras los participantes llegan, sin tener en cuenta preferencias. 
-                    Ideal para que nadie espere sentado antes de iniciar el evento.
-                  </p>
-                </div>
-                <Switch
-                  checked={formPreliminaryRoundEnabled}
-                  onCheckedChange={setFormPreliminaryRoundEnabled}
-                />
-              </div>
-            </FeatureGate>
-          )}
-
-          {/* Social game «¿Quién es quién?» — Social only */}
-          {!isProfessional && (
-            <IcebreakersEditor value={formSocialGame} onChange={setFormSocialGame} wrappedEnabled={formWrappedEnabled} />
-          )}
-
-          {/* Game Mode (Modo lúdico) — Enterprise + Social only */}
-          {!isProfessional && canUseGameMode && (
-            <GameModeEditor
-              value={formGameMode}
-              onChange={setFormGameMode}
-              estimatedTables={Math.max(1, Math.ceil(Math.max(participantsCount || 0, formTableSize) / Math.max(formTableSize, 1)))}
-              totalRounds={formRounds}
-              participantsCount={participantsCount || 0}
-            />
-          )}
-
-          {/* Registration Form Customization */}
-          <div className="space-y-4 p-4 border rounded-lg">
-            <div className="flex items-center justify-between">
-              <div>
-                <Label className="text-base">Personalización del formulario de inscripción</Label>
-                <p className="text-sm text-muted-foreground">
-                  Personaliza el subtítulo, la descripción y los campos del formulario
-                </p>
-              </div>
-              <Button variant="outline" size="sm" onClick={() => setShowPreviewModal(true)}>
-                <Eye className="w-4 h-4 mr-1" />
-                Vista previa
-              </Button>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="reg-subtitle">Subtítulo del formulario</Label>
-              <Input
-                id="reg-subtitle"
-                value={formRegSubtitle}
-                onChange={(e) => setFormRegSubtitle(e.target.value)}
-                placeholder={formLanguage === "en" ? "e.g. Fill in your details to participate" : "Ej: Completa tus datos para participar"}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="reg-description">Descripción adicional</Label>
-              <RichTextEditor
-                value={formRegDescription}
-                onChange={setFormRegDescription}
-                placeholder={formLanguage === "en" ? "e.g. Additional event info, dress code, location details..." : "Ej: Información adicional del evento, código de vestimenta, ubicación..."}
-                minHeight="120px"
-              />
-            </div>
-
-            {/* Custom Registration Form Fields */}
-            <div className="border-t pt-4 mt-4">
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-2">
-                  <ClipboardList className="w-4 h-4 text-muted-foreground" />
-                  <Label className="text-sm font-medium">Campos personalizados del formulario</Label>
-                </div>
-                <Switch
-                  checked={customFormEnabled}
-                  onCheckedChange={(checked) => {
-                    setCustomFormEnabled(checked);
-                    if (checked && customFormFields.length === 0) {
-                      setCustomFormFields(getDefaultFields(isProfessional ? "professional" : "social"));
-                    }
-                  }}
-                />
-              </div>
-              {customFormEnabled && (
-                <RegistrationFormEditor
-                  fields={customFormFields}
-                  onChange={setCustomFormFields}
-                  eventModule={isProfessional ? "professional" : "social"}
-                />
-              )}
-            </div>
-          </div>
-
-          {!isProfessional && (
-            <GroupRoundsEditor
-              enabled={formGroupRoundsEnabled}
-              onEnabledChange={setFormGroupRoundsEnabled}
-              groupRounds={formGroupRounds}
-              onGroupRoundsChange={setFormGroupRounds}
-              totalRounds={formRounds}
-              defaultTableSize={formTableSize}
-            />
-          )}
-
           {!isProfessional && (
             <EventPreferencesEditor
               value={formPreferences}
@@ -1196,7 +826,6 @@ const EventSettingsEditor = ({
               onWaitlistEnabledChange={setFormQuotaWaitlistEnabled}
             />
           )}
-
           <Card>
             <CardHeader>
               <CardTitle className="text-base">Lista de espera</CardTitle>
@@ -1221,33 +850,9 @@ const EventSettingsEditor = ({
               </p>
             </CardContent>
           </Card>
-
-          <Card>
-            <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base">Datos destacados del formulario</CardTitle>
-              <CardDescription>Fecha, lugar y precio se muestran solos. Añade aquí otros datos (plazas, idiomas, juegos…) para destacarlos en la ficha.</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              {formHighlights.map((h, i) => (
-                <div key={i} className="grid grid-cols-[3.5rem_1fr] sm:grid-cols-[3.5rem_9rem_1fr_auto] gap-2 items-start">
-                  <Input value={h.emoji} maxLength={4} className="text-center" onChange={(e) => setFormHighlights((p) => p.map((x, j) => j === i ? { ...x, emoji: e.target.value } : x))} />
-                  <Input value={h.label} placeholder="Etiqueta" onChange={(e) => setFormHighlights((p) => p.map((x, j) => j === i ? { ...x, label: e.target.value } : x))} />
-                  <Input value={h.text} placeholder="Texto" className="col-span-2 sm:col-span-1" onChange={(e) => setFormHighlights((p) => p.map((x, j) => j === i ? { ...x, text: e.target.value } : x))} />
-                  <Button type="button" variant="ghost" size="sm" className="col-span-2 sm:col-span-1" onClick={() => setFormHighlights((p) => p.filter((_, j) => j !== i))}>Quitar</Button>
-                </div>
-              ))}
-              <div className="flex flex-wrap gap-2">
-                {HIGHLIGHT_PRESETS.filter((p) => !["Lugar", "Precio", "Fecha"].includes(p.label)).map((p) => (
-                  <Button key={p.label} type="button" variant="outline" size="sm" onClick={() => setFormHighlights((prev) => [...prev, { emoji: p.emoji, label: p.label, text: "" }])}>
-                    {p.emoji} {p.label}
-                  </Button>
-                ))}
-                <Button type="button" variant="outline" size="sm" onClick={() => setFormHighlights((prev) => [...prev, { emoji: "✨", label: "", text: "" }])}>+ Otro</Button>
-              </div>
-              <p className="text-xs text-muted-foreground">Recuerda guardar los ajustes.</p>
-            </CardContent>
-          </Card>
+            </TabsContent>
+            <TabsContent value="pago" className="space-y-6 mt-0">
+<Card>
             <CardHeader>
               <CardTitle className="text-base">Seguimiento de pagos</CardTitle>
               <CardDescription>
@@ -1371,22 +976,428 @@ const EventSettingsEditor = ({
               )}
             </CardContent>
           </Card>
-
-          <div className="flex justify-end">
-            <Button onClick={handleSave} disabled={isSaving}>
-              {isSaving ? (
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-              ) : (
-                <Save className="w-4 h-4 mr-2" />
-              )}
-              Guardar cambios
-            </Button>
+          {/* Code send mode */}
+          <div className="flex items-center justify-between p-4 border rounded-lg">
+            <div className="flex-1 mr-4">
+              <Label className="text-base flex items-center gap-2">
+                <KeyRound className="w-4 h-4" />
+                Envío de códigos de acceso
+              </Label>
+              <p className="text-sm text-muted-foreground mt-1">
+                {formCodeSendMode === "on_registration"
+                  ? "El código se envía automáticamente junto con la confirmación de inscripción"
+                  : formCodeSendMode === "automatic"
+                    ? "El código se envía automáticamente 24h antes del evento. Si alguien se inscribe con menos de 24h, lo recibe al momento"
+                    : "Tú decides cuándo enviar los códigos manualmente desde el panel de participantes"}
+              </p>
+            </div>
+            <Select value={formCodeSendMode} onValueChange={setFormCodeSendMode}>
+              <SelectTrigger className="w-52">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="on_registration">Al registrarse</SelectItem>
+                <SelectItem value="automatic">Automático (24h antes)</SelectItem>
+                <SelectItem value="manual">Manual</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
-        </CardContent>
-      </Card>
 
-      {user && (
-        <div className="mt-6">
+          {/* Reminder mode */}
+          <div className="flex items-center justify-between p-4 border rounded-lg">
+            <div className="flex-1 mr-4">
+              <Label className="text-base flex items-center gap-2">
+                <Bell className="w-4 h-4" />
+                Recordatorio del evento
+              </Label>
+              <p className="text-sm text-muted-foreground mt-1">
+                {formReminderMode === "manual"
+                  ? "Envía recordatorios manualmente desde el panel del evento"
+                  : formReminderMode === "24h"
+                    ? "Se enviará un recordatorio automáticamente 24h antes del evento"
+                    : formReminderMode === "48h"
+                      ? "Se enviará un recordatorio automáticamente 48h antes del evento"
+                      : "Se enviará un recordatorio en la fecha y hora configurada"}
+              </p>
+            </div>
+            <Select value={formReminderMode} onValueChange={setFormReminderMode}>
+              <SelectTrigger className="w-52">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="manual">Manual</SelectItem>
+                <SelectItem value="24h">24h antes del evento</SelectItem>
+                <SelectItem value="48h">48h antes del evento</SelectItem>
+                <SelectItem value="custom">Personalizado</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {formReminderMode === "custom" && (
+            <div className="ml-4 p-4 border rounded-lg bg-muted/30">
+              <Label className="text-sm">Fecha y hora del recordatorio</Label>
+              <Input
+                type="datetime-local"
+                value={formReminderScheduledAt}
+                onChange={(e) => setFormReminderScheduledAt(e.target.value)}
+                className="mt-2 w-64"
+              />
+            </div>
+          )}
+            </TabsContent>
+            <TabsContent value="dinamica" className="space-y-6 mt-0">
+<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-2">
+              <Label htmlFor="event-rounds">Número de rondas {isLocked && <Lock className="w-3 h-3 inline text-muted-foreground" />}</Label>
+              <Input
+                id="event-rounds"
+                type="number"
+                min={1}
+                max={20}
+                value={formRounds}
+                onChange={(e) => setFormRounds(parseInt(e.target.value) || 1)}
+                disabled={isLocked}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="event-table-size">Tamaño de mesa</Label>
+              {customTablesActive ? (
+                <div className="flex items-center gap-2">
+                  <div className="flex-1 px-3 py-2 rounded-md border bg-muted/40 text-sm">
+                    Personalizado · {formCustomTables!.tables.length} mesas · {formCustomTables!.tables.reduce((a, t) => a + (t.capacity || 0), 0)} plazas
+                  </div>
+                  <Button type="button" size="sm" variant="outline" onClick={() => setShowCustomTablesDialog(true)}>
+                    Editar
+                  </Button>
+                  <Button type="button" size="sm" variant="ghost" onClick={() => persistCustomTables(null)}>
+                    Quitar
+                  </Button>
+                </div>
+              ) : (
+                <div className="flex items-center gap-2">
+                  <Input
+                    id="event-table-size"
+                    type="number"
+                    min={2}
+                    max={12}
+                    value={formTableSize}
+                    onChange={(e) => setFormTableSize(parseInt(e.target.value) || 2)}
+                    className="flex-1"
+                  />
+                  {canUseCustomTables && (
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      onClick={() => setShowCustomTablesDialog(true)}
+                      title="Configurar mesas con capacidades individuales"
+                    >
+                      <Settings2 className="w-4 h-4 mr-1" />
+                      Personalizar
+                    </Button>
+                  )}
+                </div>
+              )}
+              {isLocked && (
+                <p className="text-xs text-muted-foreground">
+                  Los cambios se aplicarán al regenerar las mesas desde el panel del evento.
+                </p>
+              )}
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="event-duration">Duración de ronda (segundos)</Label>
+              <Input
+                id="event-duration"
+                type="number"
+                min={60}
+                max={3600}
+                step={30}
+                value={formRoundDuration}
+                onChange={(e) => setFormRoundDuration(parseInt(e.target.value) || 300)}
+              />
+              <p className="text-xs text-muted-foreground">
+                {Math.floor(formRoundDuration / 60)} min {formRoundDuration % 60 > 0 ? `${formRoundDuration % 60} seg` : ""}
+              </p>
+            </div>
+            <div className="space-y-2">
+              <Label>Modo de rotación {isLocked && <Lock className="w-3 h-3 inline text-muted-foreground" />}</Label>
+              <Select value={formRotationMode} onValueChange={(v) => setFormRotationMode(v as "fixed_host" | "all_rotate")} disabled={isLocked}>
+                <SelectTrigger disabled={isLocked}>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="fixed_host">Anfitrión fijo</SelectItem>
+                  <SelectItem value="all_rotate">Todos rotan</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+</div>
+          {isProfessional && (
+            <div className="flex items-center justify-between p-4 border rounded-lg">
+              <div>
+                <Label className="text-base">Tipo de rotación B2B</Label>
+                <p className="text-sm text-muted-foreground">
+                  Define quién permanece fijo en la mesa y quién rota entre mesas
+                </p>
+              </div>
+              <Select value={formB2BRotation} onValueChange={setFormB2BRotation}>
+                <SelectTrigger className="w-64">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="client_fixed">Clientes fijos – Proveedores rotan</SelectItem>
+                  <SelectItem value="provider_fixed">Proveedores fijos – Clientes rotan</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+
+          {!isProfessional && (
+            <div className="flex items-center justify-between p-4 border rounded-lg">
+              <div>
+                <Label className="text-base">Paridad de género</Label>
+                <p className="text-sm text-muted-foreground">
+                  Intentar equilibrar hombres y mujeres en cada mesa
+                </p>
+              </div>
+              <Switch
+                checked={formGenderParity}
+                onCheckedChange={setFormGenderParity}
+              />
+            </div>
+          )}
+
+          {!isProfessional && (
+            <div className="flex items-center justify-between p-4 border rounded-lg">
+              <div className="flex-1 pr-4">
+                <Label className="text-base">Distribución de mesas</Label>
+                <p className="text-sm text-muted-foreground">
+                  <strong>Mixtas:</strong> hombres y mujeres pueden compartir mesa.<br />
+                  <strong>100% mismo género:</strong> mesas exclusivas de chicas y mesas exclusivas de chicos, sin mezclar.
+                </p>
+              </div>
+              <Select value={formTableGenderMode} onValueChange={setFormTableGenderMode}>
+                <SelectTrigger className="w-56">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="mixed">Mixtas (estándar)</SelectItem>
+                  <SelectItem value="single_gender">100% mismo género</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+          {!isProfessional && (
+            <div className="flex items-center justify-between p-4 border rounded-lg">
+              <div className="flex-1 pr-4">
+                <Label className="text-base">Generación de rondas</Label>
+                <p className="text-sm text-muted-foreground">
+                  <strong>Anticipada:</strong> todas las rondas se generan al iniciar el evento.<br />
+                  <strong>Justo a tiempo:</strong> cada ronda se genera al finalizar la anterior, excluyendo bajas/cancelaciones.
+                </p>
+              </div>
+              <Select value={formTablesGenerationMode} onValueChange={setFormTablesGenerationMode}>
+                <SelectTrigger className="w-56">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="upfront">Anticipada (al iniciar)</SelectItem>
+                  <SelectItem value="per_round">Justo a tiempo (por ronda)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+
+          {/* Check-in timing */}
+          <div className="flex items-center justify-between p-4 border rounded-lg">
+            <div>
+              <Label className="text-base">Apertura del check-in</Label>
+              <p className="text-sm text-muted-foreground">
+                Tiempo antes del evento en que los participantes pueden hacer check-in
+              </p>
+            </div>
+            <Select value={String(formCheckinMinutes)} onValueChange={(v) => setFormCheckinMinutes(Number(v))}>
+              <SelectTrigger className="w-48">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="0">Solo manualmente</SelectItem>
+                <SelectItem value="30">30 minutos antes</SelectItem>
+                <SelectItem value="60">1 hora antes</SelectItem>
+                <SelectItem value="120">2 horas antes</SelectItem>
+                <SelectItem value="180">3 horas antes</SelectItem>
+                <SelectItem value="360">6 horas antes</SelectItem>
+                <SelectItem value="720">12 horas antes</SelectItem>
+                <SelectItem value="1440">24 horas antes</SelectItem>
+                <SelectItem value="2880">48 horas antes</SelectItem>
+                <SelectItem value="99999">Siempre abierto</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          {/* Preliminary Round - Social only, Enterprise feature */}
+          {!isProfessional && (
+            <FeatureGate feature="preliminary_round">
+              <div className="flex items-center justify-between p-4 border rounded-lg">
+                <div>
+                  <Label className="text-base">🎯 Ronda Preliminar</Label>
+                  <p className="text-sm text-muted-foreground">
+                    Crea mesas de relleno mientras los participantes llegan, sin tener en cuenta preferencias. 
+                    Ideal para que nadie espere sentado antes de iniciar el evento.
+                  </p>
+                </div>
+                <Switch
+                  checked={formPreliminaryRoundEnabled}
+                  onCheckedChange={setFormPreliminaryRoundEnabled}
+                />
+              </div>
+            </FeatureGate>
+          )}
+          {!isProfessional && (
+            <GroupRoundsEditor
+              enabled={formGroupRoundsEnabled}
+              onEnabledChange={setFormGroupRoundsEnabled}
+              groupRounds={formGroupRounds}
+              onGroupRoundsChange={setFormGroupRounds}
+              totalRounds={formRounds}
+              defaultTableSize={formTableSize}
+            />
+          )}
+            </TabsContent>
+            <TabsContent value="extras" className="space-y-6 mt-0">
+          {!isProfessional && (
+            <div className="flex items-center justify-between p-4 border rounded-lg">
+              <div>
+                <Label className="text-base">⭐ Super Like</Label>
+                <p className="text-sm text-muted-foreground">
+                  Permite a cada participante enviar 1 Super Like por evento. El destinatario recibirá un email anónimo animándole a enviar sus selecciones.
+                </p>
+              </div>
+              <Switch
+                checked={formSuperLikeEnabled}
+                onCheckedChange={setFormSuperLikeEnabled}
+              />
+            </div>
+          )}
+
+          {!isProfessional && (
+            <FeatureGate feature="repeat_request" showUpgrade={false}>
+              <div className="flex items-center justify-between p-4 border rounded-lg">
+                <div className="flex-1 pr-4">
+                  <Label className="text-base">🔁 Función "Repetir"</Label>
+                  <p className="text-sm text-muted-foreground">
+                    Permite a cada participante solicitar una vez por evento volver a coincidir con un compañero de mesa anterior. Si el destinatario acepta, se crea una inclusión automática para la siguiente ronda generada.
+                  </p>
+                </div>
+                <Switch
+                  checked={formRepeatRequestEnabled}
+                  onCheckedChange={setFormRepeatRequestEnabled}
+                />
+              </div>
+            </FeatureGate>
+          )}
+
+          {!isProfessional && (
+            <div className="flex items-center justify-between p-4 border rounded-lg">
+              <div className="flex-1 pr-4">
+                <Label className="text-base">💘 Función "Flechazo"</Label>
+                <p className="text-sm text-muted-foreground">
+                  Permite a cada participante enviar 1 Flechazo directo por evento. El destinatario recibe un email para aceptar o rechazar. Si acepta, ambos reciben los datos de contacto del otro y, si aún quedan rondas, se sentarán en la misma mesa.
+                </p>
+              </div>
+              <Switch
+                checked={formCrushEnabled}
+                onCheckedChange={setFormCrushEnabled}
+              />
+            </div>
+          )}
+
+          {!isProfessional && (
+            <div className="p-4 border rounded-lg space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex-1 pr-4">
+                  <Label className="text-base">✨ Modo Wrapped</Label>
+                  <p className="text-sm text-muted-foreground">
+                    Añade un formulario de intereses en 2 pasos y calcula compatibilidad entre participantes. Los intereses se reutilizan en futuros eventos Wrapped del mismo organizador.
+                  </p>
+                </div>
+                <Switch
+                  checked={formWrappedEnabled}
+                  onCheckedChange={setFormWrappedEnabled}
+                />
+              </div>
+              {formWrappedEnabled && (
+                <div className="flex items-center justify-between pt-3 border-t">
+                  <p className="text-sm text-muted-foreground">
+                    {formWrappedQuestions.length} preguntas de intereses configuradas
+                  </p>
+                  <Button type="button" variant="outline" size="sm" onClick={() => setShowWrappedEditor(true)}>
+                    <Sparkles className="w-4 h-4 mr-2" />
+                    Personalizar preguntas
+                  </Button>
+                </div>
+              )}
+            </div>
+          )}
+
+          {!isProfessional && (
+            <div className="p-4 border rounded-lg space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex-1 pr-4">
+                  <Label className="text-base flex items-center gap-2">
+                    <Languages className="w-4 h-4" /> Idiomas que hablan los asistentes
+                  </Label>
+                  <p className="text-sm text-muted-foreground">
+                    Muestra un selector de idiomas en el formulario de inscripción. Se tiene en cuenta al generar las mesas para agrupar personas con idiomas en común.
+                  </p>
+                </div>
+                <Switch
+                  checked={formLanguagesEnabled}
+                  onCheckedChange={setFormLanguagesEnabled}
+                />
+              </div>
+              {formLanguagesEnabled && (
+                <div className="pt-3 border-t space-y-2">
+                  <p className="text-xs text-muted-foreground">Idiomas disponibles en el formulario:</p>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                    {AVAILABLE_LANGUAGE_OPTIONS.map((opt) => {
+                      const checked = formAvailableLanguages.includes(opt.code);
+                      return (
+                        <label key={opt.code} className="flex items-center gap-2 p-2 rounded-md border cursor-pointer hover:bg-muted/50">
+                          <Checkbox
+                            checked={checked}
+                            onCheckedChange={(v) => {
+                              setFormAvailableLanguages((prev) =>
+                                v ? Array.from(new Set([...prev, opt.code])) : prev.filter((c) => c !== opt.code)
+                              );
+                            }}
+                          />
+                          <span className="text-sm">{opt.label}</span>
+                        </label>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+          {/* Social game «¿Quién es quién?» — Social only */}
+          {!isProfessional && (
+            <IcebreakersEditor value={formSocialGame} onChange={setFormSocialGame} wrappedEnabled={formWrappedEnabled} />
+          )}
+
+          {/* Game Mode (Modo lúdico) — Enterprise + Social only */}
+          {!isProfessional && canUseGameMode && (
+            <GameModeEditor
+              value={formGameMode}
+              onChange={setFormGameMode}
+              estimatedTables={Math.max(1, Math.ceil(Math.max(participantsCount || 0, formTableSize) / Math.max(formTableSize, 1)))}
+              totalRounds={formRounds}
+              participantsCount={participantsCount || 0}
+            />
+          )}
+            </TabsContent>
+            <TabsContent value="avanzado" className="space-y-6 mt-0">
+{user ? (
           <EventSeriesManager
             organizerUserId={user.id}
             organizerSlug={organizer?.slug}
@@ -1405,8 +1416,18 @@ const EventSettingsEditor = ({
               onUpdate({ series_id: value });
             }}
           />
-        </div>
-      )}
+) : null}
+            </TabsContent>
+          </Tabs>
+          <div className="flex justify-end mt-6 pt-4 border-t">
+            <Button onClick={handleSave} disabled={isSaving}>
+              {isSaving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
+              Guardar cambios
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
 
 
       {/* Registration Form Preview Modal */}
