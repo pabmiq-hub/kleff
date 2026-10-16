@@ -625,7 +625,6 @@ const EventSettingsEditor = ({
               </SelectContent>
             </Select>
           </div>
-<Card>
             <Card>
             <CardHeader className="pb-3">
               <CardTitle className="text-base">Datos destacados del formulario</CardTitle>
