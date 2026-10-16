@@ -19,7 +19,7 @@ interface Props {
   description?: string | null;
 }
 
-/** Ficha destacada + aviso de pago + descripción plegable para formularios públicos de Konektum. */
+/** Ficha destacada + descripción visible + aviso de pago para formularios públicos de Konektum. */
 export default function EventHighlights({ lang, eventDate, eventTime, eventLocation, paymentInfo, highlights, description }: Props) {
   const isEn = lang === "en";
   const pay = paymentInfo || { enabled: false, amountCents: null, currency: "EUR", instructions: null };
@@ -35,12 +35,12 @@ export default function EventHighlights({ lang, eventDate, eventTime, eventLocat
   }
 
   return (
-    <div className="space-y-4 text-left">
+    <div className="space-y-5 text-left">
       {rows.length > 0 && (
-        <dl className="rounded-xl bg-muted/40 p-4 space-y-3 text-sm">
+        <dl className="grid gap-4 rounded-xl bg-muted/40 p-4 text-sm sm:grid-cols-2 sm:p-5">
           {rows.map((r, i) => (
-            <div key={i} className="flex items-start gap-3">
-              <span className="text-lg leading-none" aria-hidden>{r.icon}</span>
+            <div key={i} className="flex items-start gap-3 min-w-0">
+              <span className="text-xl leading-none shrink-0" aria-hidden>{r.icon}</span>
               <div className="min-w-0">
                 <dt className="text-xs uppercase tracking-wide text-muted-foreground">{r.label}</dt>
                 <dd className="font-medium text-foreground first-letter:uppercase break-words whitespace-pre-line">{r.value}</dd>
@@ -49,25 +49,19 @@ export default function EventHighlights({ lang, eventDate, eventTime, eventLocat
           ))}
         </dl>
       )}
+      {description && (
+        <div className="text-sm sm:text-base text-foreground/85 leading-relaxed">
+          <RichTextRenderer content={description} />
+        </div>
+      )}
       {pay.enabled && (hasPrice || pay.instructions) && pay.amountCents !== 0 && (
-        <div className="rounded-xl border-2 border-primary/40 bg-primary/5 p-4 text-sm space-y-2">
+        <div className="rounded-xl border-2 border-primary/40 bg-primary/5 p-4 sm:p-5 text-sm space-y-2">
           <p className="font-semibold text-foreground">
             💳 {isEn ? "Payment required to confirm your spot" : "Hay que pagar para confirmar tu plaza"}
             {hasPrice && `: ${price}`}
           </p>
           {pay.instructions && <p className="whitespace-pre-line text-foreground/80">{pay.instructions}</p>}
         </div>
-      )}
-      {description && (
-        <details className="group rounded-xl border p-4 text-sm">
-          <summary className="cursor-pointer font-medium text-foreground list-none flex items-center justify-between">
-            {isEn ? "About the event" : "Sobre el evento"}
-            <span className="text-muted-foreground group-open:rotate-180 transition-transform">⌄</span>
-          </summary>
-          <div className="mt-3 text-foreground/80">
-            <RichTextRenderer content={description} />
-          </div>
-        </details>
       )}
     </div>
   );

@@ -1170,7 +1170,7 @@ const ParticipantJoin = ({
     return (
       <div className="min-h-screen bg-background">
         <BrandedHeader logoUrl={eb.logoUrl} companyName={eb.companyName} isWhiteLabel={eb.isWhiteLabel} centered />
-        <main className="container mx-auto px-4 py-8 max-w-md">
+        <main className="container mx-auto px-3 sm:px-6 py-6 sm:py-10 max-w-3xl">
           <DynamicRegistrationForm
             fields={customRegistrationForm.fields}
             eventName={eventName}
@@ -1195,7 +1195,7 @@ const ParticipantJoin = ({
     return (
       <div className="min-h-screen bg-background">
         <BrandedHeader logoUrl={eb.logoUrl} companyName={eb.companyName} isWhiteLabel={eb.isWhiteLabel} centered />
-        <main className="container mx-auto px-4 py-8 max-w-md">
+        <main className="container mx-auto px-3 sm:px-6 py-6 sm:py-10 max-w-3xl">
           <B2BRegistrationForm
             eventName={eventName}
             eventDate={eventDate}
@@ -1218,7 +1218,7 @@ const ParticipantJoin = ({
     <div className="min-h-screen bg-background">
       <BrandedHeader logoUrl={eb.logoUrl} companyName={eb.companyName} isWhiteLabel={eb.isWhiteLabel} centered />
 
-      <main className="container mx-auto px-4 py-8 max-w-md">
+      <main className="container mx-auto px-3 sm:px-6 py-6 sm:py-10 max-w-3xl">
         {/* Quota availability display removed from participant form — tracked in admin dashboard */}
 
         <Card className="animate-fade-in">
