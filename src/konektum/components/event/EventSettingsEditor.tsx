@@ -1421,6 +1421,13 @@ const EventSettingsEditor = ({
         registrationSubtitle={formRegSubtitle || null}
         registrationDescription={formRegDescription || null}
         eventLang={formLanguage}
+        highlights={formHighlights}
+        paymentInfo={{
+          enabled: formPaymentTrackingEnabled,
+          amountCents: formPaymentAmount !== "" && !isNaN(Number(formPaymentAmount)) ? Math.round(Number(formPaymentAmount) * 100) : null,
+          currency: formPaymentCurrency || "EUR",
+          instructions: formPaymentInstructions.trim() || null,
+        }}
       />
 
       <CustomTableLayoutDialog
