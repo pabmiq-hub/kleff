@@ -127,6 +127,7 @@ const ParticipantJoin = ({
   const [eventDate, setEventDate] = useState<Date | null>(null);
   const [eventTime, setEventTime] = useState<string | null>(null);
   const [eventLocation, setEventLocation] = useState<string | null>(null);
+  const [paymentInfo, setPaymentInfo] = useState<{ amountCents: number | null; currency: string; instructions: string | null; enabled: boolean }>({ amountCents: null, currency: "EUR", instructions: null, enabled: false });
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [registrationClosed, setRegistrationClosed] = useState(false);
@@ -233,7 +234,7 @@ const ParticipantJoin = ({
 
       const { data, error } = await (supabase as any)
         .from("events_public")
-        .select("id, name, date, status, language, event_time, event_location, custom_age_ranges, custom_genders, custom_preferences, custom_dating_preferences, registration_requirements_enabled, slot_quotas, quota_waitlist_enabled, registration_subtitle, registration_description, module, professional_config, custom_registration_form, registration_open, waitlist_enabled, wrapped_enabled, wrapped_questions, social_game, languages_enabled, available_languages")
+        .select("id, name, date, status, language, event_time, event_location, custom_age_ranges, custom_genders, custom_preferences, custom_dating_preferences, registration_requirements_enabled, slot_quotas, quota_waitlist_enabled, registration_subtitle, registration_description, module, professional_config, custom_registration_form, registration_open, waitlist_enabled, wrapped_enabled, wrapped_questions, social_game, languages_enabled, available_languages, payment_tracking_enabled, payment_amount_cents, payment_currency, payment_instructions")
         .eq("id", eventId)
         .single();
 
@@ -271,6 +272,12 @@ const ParticipantJoin = ({
       setEventDate(normalizeUpcomingEventDate(data.date, data.status));
       setEventTime((data as any).event_time || null);
       setEventLocation((data as any).event_location || null);
+      setPaymentInfo({
+        enabled: !!(data as any).payment_tracking_enabled,
+        amountCents: (data as any).payment_amount_cents ?? null,
+        currency: (data as any).payment_currency || "EUR",
+        instructions: (data as any).payment_instructions || null,
+      });
       setRegistrationSubtitle(variantSubtitle || data.registration_subtitle || null);
       setRegistrationDescription(variantDescription || data.registration_description || null);
       
@@ -1210,27 +1217,58 @@ const ParticipantJoin = ({
         {/* Quota availability display removed from participant form — tracked in admin dashboard */}
 
         <Card className="animate-fade-in">
-          <CardHeader className="text-center">
-            <CardTitle className="font-display text-2xl">{t.join.joinEvent} {eventName}</CardTitle>
-            <CardDescription>
-              {registrationSubtitle || t.join.formSubtitle}
-              {registrationDescription && (
-                <div className="block mt-2 text-sm text-foreground/80">
-                  <RichTextRenderer content={registrationDescription} />
-                </div>
-              )}
-              {eventDate && (
-                <span className="block mt-2 text-primary font-medium">
-                  📅 {eventDate.toLocaleDateString(eventLang === 'en' ? 'en-US' : 'es-ES', { weekday: 'long', day: 'numeric', month: 'long' })}
-                  {eventTime && ` · 🕐 ${eventTime}`}
-                </span>
-              )}
-              {eventLocation && (
-                <span className="block mt-1 text-foreground/70 font-medium">
-                  📍 {eventLocation}
-                </span>
-              )}
-            </CardDescription>
+          <CardHeader className="space-y-4">
+            <div className="text-center space-y-2">
+              <CardTitle className="font-display text-2xl leading-tight">{eventName}</CardTitle>
+              <CardDescription className="text-base">{registrationSubtitle || t.join.formSubtitle}</CardDescription>
+            </div>
+            {(() => {
+              const isEn = eventLang === 'en';
+              const hasPrice = paymentInfo.enabled && paymentInfo.amountCents != null;
+              const rows: { icon: string; label: string; value: string }[] = [];
+              if (eventDate) rows.push({ icon: "📅", label: isEn ? "Date" : "Fecha", value: eventDate.toLocaleDateString(isEn ? 'en-GB' : 'es-ES', { weekday: 'long', day: 'numeric', month: 'long' }) + (eventTime ? ` · ${eventTime}` : "") });
+              if (eventLocation) rows.push({ icon: "📍", label: isEn ? "Location" : "Lugar", value: eventLocation });
+              if (hasPrice) rows.push({ icon: "💶", label: isEn ? "Price" : "Precio", value: paymentInfo.amountCents === 0 ? (isEn ? "Free" : "Gratis") : `${(paymentInfo.amountCents! / 100).toFixed(2)} ${paymentInfo.currency}` });
+              return (
+                <>
+                  {rows.length > 0 && (
+                    <dl className="rounded-xl bg-muted/40 p-4 space-y-3 text-sm">
+                      {rows.map((r) => (
+                        <div key={r.label} className="flex items-start gap-3">
+                          <span className="text-lg leading-none" aria-hidden>{r.icon}</span>
+                          <div className="min-w-0">
+                            <dt className="text-xs uppercase tracking-wide text-muted-foreground">{r.label}</dt>
+                            <dd className="font-medium text-foreground first-letter:uppercase break-words">{r.value}</dd>
+                          </div>
+                        </div>
+                      ))}
+                    </dl>
+                  )}
+                  {paymentInfo.enabled && (hasPrice || paymentInfo.instructions) && paymentInfo.amountCents !== 0 && (
+                    <div className="rounded-xl border-2 border-primary/40 bg-primary/5 p-4 text-sm space-y-2">
+                      <p className="font-semibold text-foreground">
+                        💳 {isEn ? "Payment required to confirm your spot" : "Hay que pagar para confirmar tu plaza"}
+                        {hasPrice && `: ${(paymentInfo.amountCents! / 100).toFixed(2)} ${paymentInfo.currency}`}
+                      </p>
+                      {paymentInfo.instructions && (
+                        <p className="whitespace-pre-line text-foreground/80">{paymentInfo.instructions}</p>
+                      )}
+                    </div>
+                  )}
+                  {registrationDescription && (
+                    <details className="group rounded-xl border p-4 text-sm">
+                      <summary className="cursor-pointer font-medium text-foreground list-none flex items-center justify-between">
+                        {isEn ? "About the event" : "Sobre el evento"}
+                        <span className="text-muted-foreground group-open:rotate-180 transition-transform">⌄</span>
+                      </summary>
+                      <div className="mt-3 text-foreground/80">
+                        <RichTextRenderer content={registrationDescription} />
+                      </div>
+                    </details>
+                  )}
+                </>
+              );
+            })()}
           </CardHeader>
           <CardContent>
             {registrationClosed && waitlistEnabled && (

@@ -7,6 +7,7 @@ import { Label } from "@/konektum/ui/label";
 import { Switch } from "@/konektum/ui/switch";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/konektum/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/konektum/ui/select";
+import { Textarea } from "@/konektum/ui/textarea";
 import { Loader2, Save, Eye, ClipboardList, Lock, KeyRound, Bell } from "lucide-react";
 import { useToast } from "@/konektum/hooks/use-toast";
 import { supabase } from "@/konektum/supabase";
