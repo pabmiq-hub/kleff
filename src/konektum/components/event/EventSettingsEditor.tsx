@@ -1415,6 +1415,7 @@ const EventSettingsEditor = ({
               }
               onUpdate({ series_id: value });
             }}
+          />
 ) : null}
             </TabsContent>
           </Tabs>
@@ -1427,7 +1428,6 @@ const EventSettingsEditor = ({
         </CardContent>
       </Card>
 
-      )}
 
 
       {/* Registration Form Preview Modal */}
