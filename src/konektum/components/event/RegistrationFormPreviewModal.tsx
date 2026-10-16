@@ -21,6 +21,8 @@ interface RegistrationFormPreviewModalProps {
   registrationSubtitle: string | null;
   registrationDescription: string | null;
   eventLang: "es" | "en";
+  highlights?: any;
+  paymentInfo?: any;
 }
 
 const RegistrationFormPreviewModal = ({
@@ -34,6 +36,8 @@ const RegistrationFormPreviewModal = ({
   registrationSubtitle,
   registrationDescription,
   eventLang,
+  highlights,
+  paymentInfo,
 }: RegistrationFormPreviewModalProps) => {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -54,6 +58,8 @@ const RegistrationFormPreviewModal = ({
             registrationSubtitle={registrationSubtitle}
             registrationDescription={registrationDescription}
             eventLang={eventLang}
+            highlights={highlights}
+            paymentInfo={paymentInfo}
             isSubmitting={false}
             onSubmit={() => {}}
           />

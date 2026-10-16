@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/konektum/ui/checkbox";
 import { Loader2 } from "lucide-react";
 import type { FormField } from "@/konektum/components/event/RegistrationFormEditor";
-import { RichTextRenderer } from "@/konektum/ui/rich-text-renderer";
+import EventHighlights, { type PaymentInfo } from "@/konektum/components/registration/EventHighlights";
 import GDPRConsent from "@/konektum/components/registration/GDPRConsent";
 import { FieldError } from "@/konektum/ui/field-error";
 import { errorInputClass, fieldErrorMessage, scrollToFirstError } from "@/konektum/lib/formErrors";
@@ -26,6 +26,8 @@ interface DynamicRegistrationFormProps {
   eventLang: "es" | "en";
   isSubmitting: boolean;
   onSubmit: (values: Record<string, any>) => void;
+  paymentInfo?: PaymentInfo | null;
+  highlights?: unknown;
 }
 
 const DynamicRegistrationForm = ({
@@ -39,6 +41,8 @@ const DynamicRegistrationForm = ({
   eventLang,
   isSubmitting,
   onSubmit,
+  paymentInfo,
+  highlights,
 }: DynamicRegistrationFormProps) => {
   const [values, setValues] = useState<Record<string, any>>({});
   const [dataConsent, setDataConsent] = useState(false);
@@ -87,39 +91,25 @@ const DynamicRegistrationForm = ({
 
   return (
     <Card className="animate-fade-in">
-      <CardHeader className="text-center">
-        <CardTitle className="font-display text-2xl">
-          {eventLang === "en" ? "Join" : "Inscripción"} {eventName}
-        </CardTitle>
-        <CardDescription>
-          {registrationSubtitle ||
-            (eventLang === "en"
-              ? "Fill in your details to participate"
-              : "Completa tus datos para participar")}
-          {eventDate && (
-            <span className="block mt-2 text-primary font-medium">
-              📅{" "}
-              {eventDate.toLocaleDateString(
-                eventLang === "en" ? "en-US" : "es-ES",
-                { weekday: "long", day: "numeric", month: "long" }
-              )}
-              {eventTime && ` · 🕐 ${eventTime}`}
-            </span>
-          )}
-          {eventLocation && (
-            <span className="block mt-1 text-foreground/70 font-medium">
-              📍 {eventLocation}
-            </span>
-          )}
-        </CardDescription>
-        {registrationDescription && (
-          <div className="mt-4 text-sm text-foreground/80 text-left border-t pt-4">
-            <RichTextRenderer
-              content={registrationDescription}
-              className="prose-p:mb-4 prose-p:leading-relaxed prose-headings:mb-2 prose-ul:mb-3 prose-ol:mb-3 prose-li:mb-1 [&_p]:mb-4 [&_p]:leading-relaxed [&_br]:block [&_br]:mb-2"
-            />
-          </div>
-        )}
+      <CardHeader className="space-y-4">
+        <div className="text-center space-y-2">
+          <CardTitle className="font-display text-2xl leading-tight">{eventName}</CardTitle>
+          <CardDescription className="text-base">
+            {registrationSubtitle ||
+              (eventLang === "en"
+                ? "Fill in your details to participate"
+                : "Completa tus datos para participar")}
+          </CardDescription>
+        </div>
+        <EventHighlights
+          lang={eventLang}
+          eventDate={eventDate}
+          eventTime={eventTime}
+          eventLocation={eventLocation}
+          paymentInfo={paymentInfo}
+          highlights={highlights}
+          description={registrationDescription}
+        />
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4" noValidate>

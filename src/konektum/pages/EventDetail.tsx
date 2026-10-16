@@ -6148,6 +6148,7 @@ const EventDetail = () => {
                 paymentAmountCents={(eventData as any).payment_amount_cents ?? null}
                 paymentCurrency={(eventData as any).payment_currency ?? "EUR"}
                 paymentInstructions={(eventData as any).payment_instructions ?? null}
+                registrationHighlights={(eventData as any).registration_highlights ?? null}
                 seriesId={(eventData as any).series_id ?? null}
                 onUpdate={(updates) => {
                   setEventData(prev => prev ? { ...prev, ...updates } : prev);
