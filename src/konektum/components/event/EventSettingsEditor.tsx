@@ -7,6 +7,7 @@ import { Label } from "@/konektum/ui/label";
 import { Switch } from "@/konektum/ui/switch";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/konektum/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/konektum/ui/select";
+import { Textarea } from "@/konektum/ui/textarea";
 import { Loader2, Save, Eye, ClipboardList, Lock, KeyRound, Bell } from "lucide-react";
 import { useToast } from "@/konektum/hooks/use-toast";
 import { supabase } from "@/konektum/supabase";
@@ -81,6 +82,9 @@ interface EventSettingsEditorProps {
   paymentRemindersEnabled?: boolean;
   paymentReminderFirstHours?: number;
   paymentReminderSecondHours?: number | null;
+  paymentAmountCents?: number | null;
+  paymentCurrency?: string | null;
+  paymentInstructions?: string | null;
   customTables?: CustomTableLayout | null;
   seriesId?: string | null;
   onUpdate: (updates: Record<string, any>) => void;
@@ -127,6 +131,9 @@ const EventSettingsEditor = ({
   paymentRemindersEnabled: initialPaymentRemindersEnabled = false,
   paymentReminderFirstHours: initialPaymentReminderFirstHours = 24,
   paymentReminderSecondHours: initialPaymentReminderSecondHours = null,
+  paymentAmountCents: initialPaymentAmountCents = null,
+  paymentCurrency: initialPaymentCurrency = "EUR",
+  paymentInstructions: initialPaymentInstructions = null,
   customTables: initialCustomTables = null,
   seriesId: initialSeriesId = null,
   onUpdate,
@@ -146,6 +153,11 @@ const EventSettingsEditor = ({
   const [formEventTime, setFormEventTime] = useState(eventTime || "");
   const [formEventLocation, setFormEventLocation] = useState(eventLocation || "");
   const [formRounds, setFormRounds] = useState(rounds);
+  const [formPaymentAmount, setFormPaymentAmount] = useState<string>(
+    initialPaymentAmountCents != null ? (initialPaymentAmountCents / 100).toString() : "",
+  );
+  const [formPaymentCurrency, setFormPaymentCurrency] = useState<string>(initialPaymentCurrency || "EUR");
+  const [formPaymentInstructions, setFormPaymentInstructions] = useState<string>(initialPaymentInstructions || "");
   const [formTableSize, setFormTableSize] = useState(tableSize);
   const [formRoundDuration, setFormRoundDuration] = useState(roundDuration);
   const [formRotationMode, setFormRotationMode] = useState(rotationMode);
@@ -408,6 +420,11 @@ const EventSettingsEditor = ({
         quota_waitlist_enabled: !isProfessional ? formQuotaWaitlistEnabled : true,
         waitlist_promotion_mode: formWaitlistPromotionMode === "manual" ? "manual" : "auto",
         payment_tracking_enabled: formPaymentTrackingEnabled,
+        payment_amount_cents: formPaymentTrackingEnabled && formPaymentAmount !== "" && !isNaN(Number(formPaymentAmount))
+          ? Math.round(Number(formPaymentAmount) * 100)
+          : null,
+        payment_currency: formPaymentCurrency || "EUR",
+        payment_instructions: formPaymentTrackingEnabled && formPaymentInstructions.trim() ? formPaymentInstructions.trim() : null,
         payment_reminders_enabled: formPaymentTrackingEnabled && formPaymentRemindersEnabled,
         payment_reminder_first_hours: Math.max(1, Number(formPaymentReminderFirstHours) || 24),
         payment_reminder_second_hours: formPaymentReminderSecondEnabled
@@ -1221,6 +1238,46 @@ const EventSettingsEditor = ({
 
               {formPaymentTrackingEnabled && (
                 <div className="space-y-3 pt-3 border-t">
+                  <div className="space-y-3 pb-3 border-b">
+                    <div className="grid grid-cols-[1fr_auto] gap-2">
+                      <div className="space-y-1">
+                        <Label htmlFor="payment-amount">Precio por persona</Label>
+                        <Input
+                          id="payment-amount"
+                          type="number"
+                          min={0}
+                          step="0.01"
+                          placeholder="5.00"
+                          value={formPaymentAmount}
+                          onChange={(e) => setFormPaymentAmount(e.target.value)}
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <Label>Moneda</Label>
+                        <Select value={formPaymentCurrency} onValueChange={setFormPaymentCurrency}>
+                          <SelectTrigger className="w-24"><SelectValue /></SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="EUR">EUR</SelectItem>
+                            <SelectItem value="USD">USD</SelectItem>
+                            <SelectItem value="GBP">GBP</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                    <div className="space-y-1">
+                      <Label htmlFor="payment-instructions">Instrucciones de pago</Label>
+                      <Textarea
+                        id="payment-instructions"
+                        rows={4}
+                        placeholder="Ej.: Bizum al 600 000 000 indicando tu nombre, o transferencia a ES00…"
+                        value={formPaymentInstructions}
+                        onChange={(e) => setFormPaymentInstructions(e.target.value)}
+                      />
+                      <p className="text-xs text-muted-foreground">
+                        El precio y estas instrucciones se muestran destacados en el formulario público. Así puedes quitarlos de la descripción.
+                      </p>
+                    </div>
+                  </div>
                   <div className="flex items-center justify-between">
                     <div className="space-y-0.5">
                       <Label htmlFor="payment-reminders-toggle" className="cursor-pointer">

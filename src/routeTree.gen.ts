@@ -9,170 +9,275 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as TorneosRouteImport } from './routes/torneos'
-import { Route as TerminosRouteImport } from './routes/terminos'
-import { Route as TardaDeJocsICuinaJaponesaRouteImport } from './routes/tarda-de-jocs-i-cuina-japonesa'
-import { Route as SuperAdminRouteImport } from './routes/super-admin'
-import { Route as SobreNosotrosRouteImport } from './routes/sobre-nosotros'
-import { Route as SlowFriendingLudicoRouteImport } from './routes/slow-friending-ludico'
-import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
-import { Route as RolesOcultosRouteImport } from './routes/roles-ocultos'
-import { Route as RepeatResponseRouteImport } from './routes/repeat-response'
-import { Route as PrivacidadRouteImport } from './routes/privacidad'
-import { Route as MediosRouteImport } from './routes/medios'
-import { Route as LudotecaRouteImport } from './routes/ludoteca'
-import { Route as LoginRouteImport } from './routes/login'
-import { Route as CrushResponseRouteImport } from './routes/crush-response'
-import { Route as CookiesRouteImport } from './routes/cookies'
-import { Route as ContactoRouteImport } from './routes/contacto'
-import { Route as ComoFuncionaRouteImport } from './routes/como-funciona'
-import { Route as CatanRouteImport } from './routes/catan'
-import { Route as BloodOnTheClocktowerRouteImport } from './routes/blood-on-the-clocktower'
-import { Route as BlogRouteImport } from './routes/blog'
-import { Route as AvisoLegalRouteImport } from './routes/aviso-legal'
-import { Route as AppRouteImport } from './routes/app'
-import { Route as AdminRouteImport } from './routes/admin'
-import { Route as ActividadesRouteImport } from './routes/actividades'
-import { Route as SplatRouteImport } from './routes/$'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as EnIndexRouteImport } from './routes/en.index'
-import { Route as CaIndexRouteImport } from './routes/ca.index'
-import { Route as AppIndexRouteImport } from './routes/app.index'
-import { Route as AdminIndexRouteImport } from './routes/admin.index'
-import { Route as VerificarIdRouteImport } from './routes/verificar.$id'
-import { Route as InviteTokenRouteImport } from './routes/invite.$token'
-import { Route as InscripcionSlugRouteImport } from './routes/inscripcion.$slug'
-import { Route as EnTournamentsRouteImport } from './routes/en.tournaments'
-import { Route as EnTermsRouteImport } from './routes/en.terms'
-import { Route as EnSlowFriendingRouteImport } from './routes/en.slow-friending'
-import { Route as EnPrivacyRouteImport } from './routes/en.privacy'
-import { Route as EnMediaRouteImport } from './routes/en.media'
-import { Route as EnLudotecaRouteImport } from './routes/en.ludoteca'
-import { Route as EnLegalNoticeRouteImport } from './routes/en.legal-notice'
-import { Route as EnHowItWorksRouteImport } from './routes/en.how-it-works'
-import { Route as EnHiddenRolesRouteImport } from './routes/en.hidden-roles'
-import { Route as EnCookiesRouteImport } from './routes/en.cookies'
-import { Route as EnContactRouteImport } from './routes/en.contact'
-import { Route as EnCatanRouteImport } from './routes/en.catan'
-import { Route as EnBloodOnTheClocktowerRouteImport } from './routes/en.blood-on-the-clocktower'
-import { Route as EnBlogRouteImport } from './routes/en.blog'
-import { Route as EnActivitiesRouteImport } from './routes/en.activities'
-import { Route as EnAboutRouteImport } from './routes/en.about'
-import { Route as CaTornejosRouteImport } from './routes/ca.tornejos'
-import { Route as CaTermesRouteImport } from './routes/ca.termes'
-import { Route as CaSlowFriendingLudicRouteImport } from './routes/ca.slow-friending-ludic'
-import { Route as CaRolsOcultsRouteImport } from './routes/ca.rols-ocults'
-import { Route as CaQuiSomRouteImport } from './routes/ca.qui-som'
-import { Route as CaPrivacitatRouteImport } from './routes/ca.privacitat'
-import { Route as CaMitjansRouteImport } from './routes/ca.mitjans'
-import { Route as CaLudotecaRouteImport } from './routes/ca.ludoteca'
-import { Route as CaCookiesRouteImport } from './routes/ca.cookies'
-import { Route as CaContacteRouteImport } from './routes/ca.contacte'
-import { Route as CaComFuncionaRouteImport } from './routes/ca.com-funciona'
-import { Route as CaCatanRouteImport } from './routes/ca.catan'
-import { Route as CaBloodOnTheClocktowerRouteImport } from './routes/ca.blood-on-the-clocktower'
-import { Route as CaBlogRouteImport } from './routes/ca.blog'
-import { Route as CaAvisLegalRouteImport } from './routes/ca.avis-legal'
-import { Route as CaActivitatsRouteImport } from './routes/ca.activitats'
-import { Route as AppVotacionesRouteImport } from './routes/app.votaciones'
-import { Route as AppRentalsRouteImport } from './routes/app.rentals'
-import { Route as AppProfileRouteImport } from './routes/app.profile'
-import { Route as AppPartidasRouteImport } from './routes/app.partidas'
-import { Route as AppKleffersRouteImport } from './routes/app.kleffers'
-import { Route as AppKarmaRouteImport } from './routes/app.karma'
-import { Route as AppInsigniasRouteImport } from './routes/app.insignias'
-import { Route as AppCarnetRouteImport } from './routes/app.carnet'
-import { Route as AdminUsuariosRouteImport } from './routes/admin.usuarios'
-import { Route as AdminTeamRouteImport } from './routes/admin.team'
-import { Route as AdminRentalsRouteImport } from './routes/admin.rentals'
-import { Route as AdminRegistrationsRouteImport } from './routes/admin.registrations'
-import { Route as AdminPollsRouteImport } from './routes/admin.polls'
-import { Route as AdminMembersRouteImport } from './routes/admin.members'
-import { Route as AdminKonektumRouteImport } from './routes/admin.konektum'
-import { Route as AdminKarmaRouteImport } from './routes/admin.karma'
-import { Route as AdminInvitationsRouteImport } from './routes/admin.invitations'
-import { Route as AdminFinanzasRouteImport } from './routes/admin.finanzas'
-import { Route as AdminContentRouteImport } from './routes/admin.content'
-import { Route as AdminBlogRouteImport } from './routes/admin.blog'
-import { Route as EventSlugUsuarioRouteImport } from './routes/$eventSlug.usuario'
-import { Route as EventSlugSeleccionRouteImport } from './routes/$eventSlug.seleccion'
-import { Route as EventSlugRegistroRouteImport } from './routes/$eventSlug.registro'
-import { Route as EventSlugMesasRouteImport } from './routes/$eventSlug.mesas'
+import { Route as SplatRouteImport } from './routes/$'
+import { Route as ActividadesRouteImport } from './routes/actividades'
+import { Route as AdminRouteImport } from './routes/admin'
+import { Route as AppRouteImport } from './routes/app'
+import { Route as AvisoLegalRouteImport } from './routes/aviso-legal'
+import { Route as BlogRouteImport } from './routes/blog'
+import { Route as BloodOnTheClocktowerRouteImport } from './routes/blood-on-the-clocktower'
+import { Route as CatanRouteImport } from './routes/catan'
+import { Route as ComoFuncionaRouteImport } from './routes/como-funciona'
+import { Route as ContactoRouteImport } from './routes/contacto'
+import { Route as CookiesRouteImport } from './routes/cookies'
+import { Route as CrushResponseRouteImport } from './routes/crush-response'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as LudotecaRouteImport } from './routes/ludoteca'
+import { Route as MediosRouteImport } from './routes/medios'
+import { Route as PrivacidadRouteImport } from './routes/privacidad'
+import { Route as RepeatResponseRouteImport } from './routes/repeat-response'
+import { Route as RolesOcultosRouteImport } from './routes/roles-ocultos'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as SlowFriendingLudicoRouteImport } from './routes/slow-friending-ludico'
+import { Route as SobreNosotrosRouteImport } from './routes/sobre-nosotros'
+import { Route as SuperAdminRouteImport } from './routes/super-admin'
+import { Route as TardaDeJocsICuinaJaponesaRouteImport } from './routes/tarda-de-jocs-i-cuina-japonesa'
+import { Route as TerminosRouteImport } from './routes/terminos'
+import { Route as TorneosRouteImport } from './routes/torneos'
 import { Route as EventSlugCheckInRouteImport } from './routes/$eventSlug.check-in'
-import { Route as SSeriesSlugIndexRouteImport } from './routes/s.$seriesSlug.index'
-import { Route as AppRentalsIndexRouteImport } from './routes/app.rentals.index'
-import { Route as AdminRentalsIndexRouteImport } from './routes/admin.rentals.index'
-import { Route as AdminRegistrationsIndexRouteImport } from './routes/admin.registrations.index'
-import { Route as AdminMediaIndexRouteImport } from './routes/admin.media.index'
-import { Route as AdminKonektumIndexRouteImport } from './routes/admin.konektum.index'
-import { Route as AdminFinanzasIndexRouteImport } from './routes/admin.finanzas.index'
-import { Route as AdminContentIndexRouteImport } from './routes/admin.content.index'
-import { Route as AdminBlogIndexRouteImport } from './routes/admin.blog.index'
-import { Route as ActividadesJuegosIndexRouteImport } from './routes/actividades_.juegos.index'
-import { Route as SSeriesSlugJoinRouteImport } from './routes/s.$seriesSlug.join'
-import { Route as InscripcionBajaTokenRouteImport } from './routes/inscripcion.baja.$token'
-import { Route as EventIdTablesRouteImport } from './routes/event.$id.tables'
-import { Route as EventIdSelectRouteImport } from './routes/event.$id.select'
-import { Route as EventIdJoinRouteImport } from './routes/event.$id.join'
-import { Route as EventIdCheckinRouteImport } from './routes/event.$id.checkin'
-import { Route as EventIdAccessRouteImport } from './routes/event.$id.access'
-import { Route as AuthLudoyaCallbackRouteImport } from './routes/auth.ludoya.callback'
-import { Route as AppRentalsRequestsRouteImport } from './routes/app.rentals.requests'
-import { Route as AppRentalsHistoryRouteImport } from './routes/app.rentals.history'
-import { Route as AppRentalsActiveRouteImport } from './routes/app.rentals.active'
-import { Route as ApiPublicUploadMyAvatarRouteImport } from './routes/api.public.upload-my-avatar'
-import { Route as ApiPublicUploadInviteAvatarRouteImport } from './routes/api.public.upload-invite-avatar'
-import { Route as ApiPublicSyncBggRouteImport } from './routes/api.public.sync-bgg'
-import { Route as ApiPublicLudoyaImageRouteImport } from './routes/api.public.ludoya-image'
-import { Route as ApiPublicContactRouteImport } from './routes/api.public.contact'
-import { Route as AdminRentalsSettingsRouteImport } from './routes/admin.rentals.settings'
-import { Route as AdminRentalsHistoryRouteImport } from './routes/admin.rentals.history'
-import { Route as AdminRentalsCatalogRouteImport } from './routes/admin.rentals.catalog'
-import { Route as AdminRentalsActiveRouteImport } from './routes/admin.rentals.active'
-import { Route as AdminRegistrationsIdRouteImport } from './routes/admin.registrations.$id'
-import { Route as AdminPagesPageIdRouteImport } from './routes/admin.pages.$pageId'
-import { Route as AdminMediaNewRouteImport } from './routes/admin.media.new'
-import { Route as AdminMediaIdRouteImport } from './routes/admin.media.$id'
-import { Route as AdminKonektumUsuariosRouteImport } from './routes/admin.konektum.usuarios'
-import { Route as AdminKonektumPlantillasRouteImport } from './routes/admin.konektum.plantillas'
-import { Route as AdminKonektumEmailRouteImport } from './routes/admin.konektum.email'
-import { Route as AdminKonektumConfiguracionRouteImport } from './routes/admin.konektum.configuracion'
-import { Route as AdminKonektumAnaliticaRouteImport } from './routes/admin.konektum.analitica'
-import { Route as AdminFinanzasImpuestosRouteImport } from './routes/admin.finanzas.impuestos'
-import { Route as AdminFinanzasGastosRouteImport } from './routes/admin.finanzas.gastos'
-import { Route as AdminFinanzasFacturasRouteImport } from './routes/admin.finanzas.facturas'
-import { Route as AdminFinanzasCuotasRouteImport } from './routes/admin.finanzas.cuotas'
-import { Route as AdminFinanzasColaboracionesRouteImport } from './routes/admin.finanzas.colaboraciones'
-import { Route as AdminFinanzasCategoriasRouteImport } from './routes/admin.finanzas.categorias'
-import { Route as AdminFinanzasAportacionesRouteImport } from './routes/admin.finanzas.aportaciones'
-import { Route as AdminContentUrlsRouteImport } from './routes/admin.content.urls'
-import { Route as AdminContentRedirectsRouteImport } from './routes/admin.content.redirects'
-import { Route as AdminContentPageKeyRouteImport } from './routes/admin.content.$pageKey'
-import { Route as AdminBlogNewRouteImport } from './routes/admin.blog.new'
-import { Route as AdminBlogIdRouteImport } from './routes/admin.blog.$id'
+import { Route as EventSlugMesasRouteImport } from './routes/$eventSlug.mesas'
+import { Route as EventSlugRegistroRouteImport } from './routes/$eventSlug.registro'
+import { Route as EventSlugSeleccionRouteImport } from './routes/$eventSlug.seleccion'
+import { Route as EventSlugUsuarioRouteImport } from './routes/$eventSlug.usuario'
+import { Route as AdminIndexRouteImport } from './routes/admin.index'
+import { Route as AdminBlogRouteImport } from './routes/admin.blog'
+import { Route as AdminContentRouteImport } from './routes/admin.content'
+import { Route as AdminFinanzasRouteImport } from './routes/admin.finanzas'
+import { Route as AdminInvitationsRouteImport } from './routes/admin.invitations'
+import { Route as AdminKarmaRouteImport } from './routes/admin.karma'
+import { Route as AdminKonektumRouteImport } from './routes/admin.konektum'
+import { Route as AdminMembersRouteImport } from './routes/admin.members'
+import { Route as AdminPollsRouteImport } from './routes/admin.polls'
+import { Route as AdminRegistrationsRouteImport } from './routes/admin.registrations'
+import { Route as AdminRentalsRouteImport } from './routes/admin.rentals'
+import { Route as AdminTeamRouteImport } from './routes/admin.team'
+import { Route as AdminUsuariosRouteImport } from './routes/admin.usuarios'
+import { Route as AppIndexRouteImport } from './routes/app.index'
+import { Route as AppCarnetRouteImport } from './routes/app.carnet'
+import { Route as AppInsigniasRouteImport } from './routes/app.insignias'
+import { Route as AppKarmaRouteImport } from './routes/app.karma'
+import { Route as AppKleffersRouteImport } from './routes/app.kleffers'
+import { Route as AppPartidasRouteImport } from './routes/app.partidas'
+import { Route as AppProfileRouteImport } from './routes/app.profile'
+import { Route as AppRentalsRouteImport } from './routes/app.rentals'
+import { Route as AppVotacionesRouteImport } from './routes/app.votaciones'
+import { Route as CaIndexRouteImport } from './routes/ca.index'
+import { Route as CaActivitatsRouteImport } from './routes/ca.activitats'
+import { Route as CaAvisLegalRouteImport } from './routes/ca.avis-legal'
+import { Route as CaBlogRouteImport } from './routes/ca.blog'
+import { Route as CaBloodOnTheClocktowerRouteImport } from './routes/ca.blood-on-the-clocktower'
+import { Route as CaCatanRouteImport } from './routes/ca.catan'
+import { Route as CaComFuncionaRouteImport } from './routes/ca.com-funciona'
+import { Route as CaContacteRouteImport } from './routes/ca.contacte'
+import { Route as CaCookiesRouteImport } from './routes/ca.cookies'
+import { Route as CaLudotecaRouteImport } from './routes/ca.ludoteca'
+import { Route as CaMitjansRouteImport } from './routes/ca.mitjans'
+import { Route as CaPrivacitatRouteImport } from './routes/ca.privacitat'
+import { Route as CaQuiSomRouteImport } from './routes/ca.qui-som'
+import { Route as CaRolsOcultsRouteImport } from './routes/ca.rols-ocults'
+import { Route as CaSlowFriendingLudicRouteImport } from './routes/ca.slow-friending-ludic'
+import { Route as CaTermesRouteImport } from './routes/ca.termes'
+import { Route as CaTornejosRouteImport } from './routes/ca.tornejos'
+import { Route as EnIndexRouteImport } from './routes/en.index'
+import { Route as EnAboutRouteImport } from './routes/en.about'
+import { Route as EnActivitiesRouteImport } from './routes/en.activities'
+import { Route as EnBlogRouteImport } from './routes/en.blog'
+import { Route as EnBloodOnTheClocktowerRouteImport } from './routes/en.blood-on-the-clocktower'
+import { Route as EnCatanRouteImport } from './routes/en.catan'
+import { Route as EnContactRouteImport } from './routes/en.contact'
+import { Route as EnCookiesRouteImport } from './routes/en.cookies'
+import { Route as EnHiddenRolesRouteImport } from './routes/en.hidden-roles'
+import { Route as EnHowItWorksRouteImport } from './routes/en.how-it-works'
+import { Route as EnLegalNoticeRouteImport } from './routes/en.legal-notice'
+import { Route as EnLudotecaRouteImport } from './routes/en.ludoteca'
+import { Route as EnMediaRouteImport } from './routes/en.media'
+import { Route as EnPrivacyRouteImport } from './routes/en.privacy'
+import { Route as EnSlowFriendingRouteImport } from './routes/en.slow-friending'
+import { Route as EnTermsRouteImport } from './routes/en.terms'
+import { Route as EnTournamentsRouteImport } from './routes/en.tournaments'
+import { Route as InscripcionSlugRouteImport } from './routes/inscripcion.$slug'
+import { Route as InviteTokenRouteImport } from './routes/invite.$token'
+import { Route as VerificarIdRouteImport } from './routes/verificar.$id'
 import { Route as EventSlugCancelarParticipantIdRouteImport } from './routes/$eventSlug.cancelar.$participantId'
-import { Route as AdminKonektumEventosIndexRouteImport } from './routes/admin.konektum.eventos.index'
-import { Route as ActividadesJuegosJugarIndexRouteImport } from './routes/actividades_.juegos.jugar.index'
+import { Route as ActividadesJuegosIndexRouteImport } from './routes/actividades_.juegos.index'
+import { Route as AdminBlogIndexRouteImport } from './routes/admin.blog.index'
+import { Route as AdminBlogIdRouteImport } from './routes/admin.blog.$id'
+import { Route as AdminBlogNewRouteImport } from './routes/admin.blog.new'
+import { Route as AdminContentIndexRouteImport } from './routes/admin.content.index'
+import { Route as AdminContentPageKeyRouteImport } from './routes/admin.content.$pageKey'
+import { Route as AdminContentRedirectsRouteImport } from './routes/admin.content.redirects'
+import { Route as AdminContentUrlsRouteImport } from './routes/admin.content.urls'
+import { Route as AdminFinanzasIndexRouteImport } from './routes/admin.finanzas.index'
+import { Route as AdminFinanzasAportacionesRouteImport } from './routes/admin.finanzas.aportaciones'
+import { Route as AdminFinanzasCategoriasRouteImport } from './routes/admin.finanzas.categorias'
+import { Route as AdminFinanzasColaboracionesRouteImport } from './routes/admin.finanzas.colaboraciones'
+import { Route as AdminFinanzasCuotasRouteImport } from './routes/admin.finanzas.cuotas'
+import { Route as AdminFinanzasFacturasRouteImport } from './routes/admin.finanzas.facturas'
+import { Route as AdminFinanzasGastosRouteImport } from './routes/admin.finanzas.gastos'
+import { Route as AdminFinanzasImpuestosRouteImport } from './routes/admin.finanzas.impuestos'
+import { Route as AdminKonektumIndexRouteImport } from './routes/admin.konektum.index'
+import { Route as AdminKonektumAnaliticaRouteImport } from './routes/admin.konektum.analitica'
+import { Route as AdminKonektumConfiguracionRouteImport } from './routes/admin.konektum.configuracion'
+import { Route as AdminKonektumEmailRouteImport } from './routes/admin.konektum.email'
+import { Route as AdminKonektumPlantillasRouteImport } from './routes/admin.konektum.plantillas'
+import { Route as AdminKonektumUsuariosRouteImport } from './routes/admin.konektum.usuarios'
+import { Route as AdminMediaIndexRouteImport } from './routes/admin.media.index'
+import { Route as AdminMediaIdRouteImport } from './routes/admin.media.$id'
+import { Route as AdminMediaNewRouteImport } from './routes/admin.media.new'
+import { Route as AdminPagesPageIdRouteImport } from './routes/admin.pages.$pageId'
+import { Route as AdminRegistrationsIndexRouteImport } from './routes/admin.registrations.index'
+import { Route as AdminRegistrationsIdRouteImport } from './routes/admin.registrations.$id'
+import { Route as AdminRentalsIndexRouteImport } from './routes/admin.rentals.index'
+import { Route as AdminRentalsActiveRouteImport } from './routes/admin.rentals.active'
+import { Route as AdminRentalsCatalogRouteImport } from './routes/admin.rentals.catalog'
+import { Route as AdminRentalsHistoryRouteImport } from './routes/admin.rentals.history'
+import { Route as AdminRentalsSettingsRouteImport } from './routes/admin.rentals.settings'
+import { Route as ApiPublicContactRouteImport } from './routes/api.public.contact'
+import { Route as ApiPublicLudoyaImageRouteImport } from './routes/api.public.ludoya-image'
+import { Route as ApiPublicSyncBggRouteImport } from './routes/api.public.sync-bgg'
+import { Route as ApiPublicUploadInviteAvatarRouteImport } from './routes/api.public.upload-invite-avatar'
+import { Route as ApiPublicUploadMyAvatarRouteImport } from './routes/api.public.upload-my-avatar'
+import { Route as AppRentalsIndexRouteImport } from './routes/app.rentals.index'
+import { Route as AppRentalsActiveRouteImport } from './routes/app.rentals.active'
+import { Route as AppRentalsHistoryRouteImport } from './routes/app.rentals.history'
+import { Route as AppRentalsRequestsRouteImport } from './routes/app.rentals.requests'
+import { Route as AuthLudoyaCallbackRouteImport } from './routes/auth.ludoya.callback'
+import { Route as EventIdAccessRouteImport } from './routes/event.$id.access'
+import { Route as EventIdCheckinRouteImport } from './routes/event.$id.checkin'
+import { Route as EventIdJoinRouteImport } from './routes/event.$id.join'
+import { Route as EventIdSelectRouteImport } from './routes/event.$id.select'
+import { Route as EventIdTablesRouteImport } from './routes/event.$id.tables'
+import { Route as InscripcionBajaTokenRouteImport } from './routes/inscripcion.baja.$token'
+import { Route as SSeriesSlugIndexRouteImport } from './routes/s.$seriesSlug.index'
+import { Route as SSeriesSlugJoinRouteImport } from './routes/s.$seriesSlug.join'
 import { Route as ActividadesJuegosGameIdIndexRouteImport } from './routes/actividades_.juegos.$gameId.index'
-import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
-import { Route as EventIdCancelParticipantIdRouteImport } from './routes/event.$id.cancel.$participantId'
-import { Route as ApiPublicRegistroIcsTokenRouteImport } from './routes/api.public.registro-ics.$token'
-import { Route as ApiPublicKonFnRouteImport } from './routes/api.public.kon.$fn'
-import { Route as ApiPublicHooksFeaturedDispatchRouteImport } from './routes/api.public.hooks.featured-dispatch'
-import { Route as AdminKonektumEventosNuevoRouteImport } from './routes/admin.konektum.eventos.nuevo'
-import { Route as AdminKonektumEventosIdRouteImport } from './routes/admin.konektum.eventos.$id'
-import { Route as ActividadesJuegosJugarSessionIdRouteImport } from './routes/actividades_.juegos.jugar.$sessionId'
 import { Route as ActividadesJuegosInvitacionTokenRouteImport } from './routes/actividades_.juegos.invitacion.$token'
+import { Route as ActividadesJuegosJugarIndexRouteImport } from './routes/actividades_.juegos.jugar.index'
+import { Route as ActividadesJuegosJugarSessionIdRouteImport } from './routes/actividades_.juegos.jugar.$sessionId'
+import { Route as AdminKonektumEventosIndexRouteImport } from './routes/admin.konektum.eventos.index'
+import { Route as AdminKonektumEventosIdRouteImport } from './routes/admin.konektum.eventos.$id'
+import { Route as AdminKonektumEventosNuevoRouteImport } from './routes/admin.konektum.eventos.nuevo'
+import { Route as ApiPublicHooksFeaturedDispatchRouteImport } from './routes/api.public.hooks.featured-dispatch'
+import { Route as ApiPublicKonFnRouteImport } from './routes/api.public.kon.$fn'
+import { Route as ApiPublicRegistroIcsTokenRouteImport } from './routes/api.public.registro-ics.$token'
+import { Route as EventIdCancelParticipantIdRouteImport } from './routes/event.$id.cancel.$participantId'
+import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
 import { Route as ActividadesJuegosGameIdPartidasSessionIdRouteImport } from './routes/actividades_.juegos.$gameId.partidas.$sessionId'
 
-const TorneosRoute = TorneosRouteImport.update({
-  id: '/torneos',
-  path: '/torneos',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const TerminosRoute = TerminosRouteImport.update({
-  id: '/terminos',
-  path: '/terminos',
+const SplatRoute = SplatRouteImport.update({
+  id: '/$',
+  path: '/$',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ActividadesRoute = ActividadesRouteImport.update({
+  id: '/actividades',
+  path: '/actividades',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppRoute = AppRouteImport.update({
+  id: '/app',
+  path: '/app',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AvisoLegalRoute = AvisoLegalRouteImport.update({
+  id: '/aviso-legal',
+  path: '/aviso-legal',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BlogRoute = BlogRouteImport.update({
+  id: '/blog',
+  path: '/blog',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BloodOnTheClocktowerRoute = BloodOnTheClocktowerRouteImport.update({
+  id: '/blood-on-the-clocktower',
+  path: '/blood-on-the-clocktower',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CatanRoute = CatanRouteImport.update({
+  id: '/catan',
+  path: '/catan',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ComoFuncionaRoute = ComoFuncionaRouteImport.update({
+  id: '/como-funciona',
+  path: '/como-funciona',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ContactoRoute = ContactoRouteImport.update({
+  id: '/contacto',
+  path: '/contacto',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CookiesRoute = CookiesRouteImport.update({
+  id: '/cookies',
+  path: '/cookies',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CrushResponseRoute = CrushResponseRouteImport.update({
+  id: '/crush-response',
+  path: '/crush-response',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LudotecaRoute = LudotecaRouteImport.update({
+  id: '/ludoteca',
+  path: '/ludoteca',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MediosRoute = MediosRouteImport.update({
+  id: '/medios',
+  path: '/medios',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacidadRoute = PrivacidadRouteImport.update({
+  id: '/privacidad',
+  path: '/privacidad',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RepeatResponseRoute = RepeatResponseRouteImport.update({
+  id: '/repeat-response',
+  path: '/repeat-response',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RolesOcultosRoute = RolesOcultosRouteImport.update({
+  id: '/roles-ocultos',
+  path: '/roles-ocultos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SlowFriendingLudicoRoute = SlowFriendingLudicoRouteImport.update({
+  id: '/slow-friending-ludico',
+  path: '/slow-friending-ludico',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SobreNosotrosRoute = SobreNosotrosRouteImport.update({
+  id: '/sobre-nosotros',
+  path: '/sobre-nosotros',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SuperAdminRoute = SuperAdminRouteImport.update({
+  id: '/super-admin',
+  path: '/super-admin',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TardaDeJocsICuinaJaponesaRoute =
@@ -181,434 +286,14 @@ const TardaDeJocsICuinaJaponesaRoute =
     path: '/tarda-de-jocs-i-cuina-japonesa',
     getParentRoute: () => rootRouteImport,
   } as any)
-const SuperAdminRoute = SuperAdminRouteImport.update({
-  id: '/super-admin',
-  path: '/super-admin',
+const TerminosRoute = TerminosRouteImport.update({
+  id: '/terminos',
+  path: '/terminos',
   getParentRoute: () => rootRouteImport,
 } as any)
-const SobreNosotrosRoute = SobreNosotrosRouteImport.update({
-  id: '/sobre-nosotros',
-  path: '/sobre-nosotros',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SlowFriendingLudicoRoute = SlowFriendingLudicoRouteImport.update({
-  id: '/slow-friending-ludico',
-  path: '/slow-friending-ludico',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
-  id: '/sitemap.xml',
-  path: '/sitemap.xml',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const RolesOcultosRoute = RolesOcultosRouteImport.update({
-  id: '/roles-ocultos',
-  path: '/roles-ocultos',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const RepeatResponseRoute = RepeatResponseRouteImport.update({
-  id: '/repeat-response',
-  path: '/repeat-response',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PrivacidadRoute = PrivacidadRouteImport.update({
-  id: '/privacidad',
-  path: '/privacidad',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const MediosRoute = MediosRouteImport.update({
-  id: '/medios',
-  path: '/medios',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LudotecaRoute = LudotecaRouteImport.update({
-  id: '/ludoteca',
-  path: '/ludoteca',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LoginRoute = LoginRouteImport.update({
-  id: '/login',
-  path: '/login',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CrushResponseRoute = CrushResponseRouteImport.update({
-  id: '/crush-response',
-  path: '/crush-response',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CookiesRoute = CookiesRouteImport.update({
-  id: '/cookies',
-  path: '/cookies',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ContactoRoute = ContactoRouteImport.update({
-  id: '/contacto',
-  path: '/contacto',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ComoFuncionaRoute = ComoFuncionaRouteImport.update({
-  id: '/como-funciona',
-  path: '/como-funciona',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CatanRoute = CatanRouteImport.update({
-  id: '/catan',
-  path: '/catan',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const BloodOnTheClocktowerRoute = BloodOnTheClocktowerRouteImport.update({
-  id: '/blood-on-the-clocktower',
-  path: '/blood-on-the-clocktower',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const BlogRoute = BlogRouteImport.update({
-  id: '/blog',
-  path: '/blog',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AvisoLegalRoute = AvisoLegalRouteImport.update({
-  id: '/aviso-legal',
-  path: '/aviso-legal',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AppRoute = AppRouteImport.update({
-  id: '/app',
-  path: '/app',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminRoute = AdminRouteImport.update({
-  id: '/admin',
-  path: '/admin',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ActividadesRoute = ActividadesRouteImport.update({
-  id: '/actividades',
-  path: '/actividades',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SplatRoute = SplatRouteImport.update({
-  id: '/$',
-  path: '/$',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const EnIndexRoute = EnIndexRouteImport.update({
-  id: '/en/',
-  path: '/en/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CaIndexRoute = CaIndexRouteImport.update({
-  id: '/ca/',
-  path: '/ca/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AppIndexRoute = AppIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => AppRoute,
-} as any)
-const AdminIndexRoute = AdminIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => AdminRoute,
-} as any)
-const VerificarIdRoute = VerificarIdRouteImport.update({
-  id: '/verificar/$id',
-  path: '/verificar/$id',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const InviteTokenRoute = InviteTokenRouteImport.update({
-  id: '/invite/$token',
-  path: '/invite/$token',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const InscripcionSlugRoute = InscripcionSlugRouteImport.update({
-  id: '/inscripcion/$slug',
-  path: '/inscripcion/$slug',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const EnTournamentsRoute = EnTournamentsRouteImport.update({
-  id: '/en/tournaments',
-  path: '/en/tournaments',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const EnTermsRoute = EnTermsRouteImport.update({
-  id: '/en/terms',
-  path: '/en/terms',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const EnSlowFriendingRoute = EnSlowFriendingRouteImport.update({
-  id: '/en/slow-friending',
-  path: '/en/slow-friending',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const EnPrivacyRoute = EnPrivacyRouteImport.update({
-  id: '/en/privacy',
-  path: '/en/privacy',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const EnMediaRoute = EnMediaRouteImport.update({
-  id: '/en/media',
-  path: '/en/media',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const EnLudotecaRoute = EnLudotecaRouteImport.update({
-  id: '/en/ludoteca',
-  path: '/en/ludoteca',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const EnLegalNoticeRoute = EnLegalNoticeRouteImport.update({
-  id: '/en/legal-notice',
-  path: '/en/legal-notice',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const EnHowItWorksRoute = EnHowItWorksRouteImport.update({
-  id: '/en/how-it-works',
-  path: '/en/how-it-works',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const EnHiddenRolesRoute = EnHiddenRolesRouteImport.update({
-  id: '/en/hidden-roles',
-  path: '/en/hidden-roles',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const EnCookiesRoute = EnCookiesRouteImport.update({
-  id: '/en/cookies',
-  path: '/en/cookies',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const EnContactRoute = EnContactRouteImport.update({
-  id: '/en/contact',
-  path: '/en/contact',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const EnCatanRoute = EnCatanRouteImport.update({
-  id: '/en/catan',
-  path: '/en/catan',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const EnBloodOnTheClocktowerRoute = EnBloodOnTheClocktowerRouteImport.update({
-  id: '/en/blood-on-the-clocktower',
-  path: '/en/blood-on-the-clocktower',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const EnBlogRoute = EnBlogRouteImport.update({
-  id: '/en/blog',
-  path: '/en/blog',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const EnActivitiesRoute = EnActivitiesRouteImport.update({
-  id: '/en/activities',
-  path: '/en/activities',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const EnAboutRoute = EnAboutRouteImport.update({
-  id: '/en/about',
-  path: '/en/about',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CaTornejosRoute = CaTornejosRouteImport.update({
-  id: '/ca/tornejos',
-  path: '/ca/tornejos',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CaTermesRoute = CaTermesRouteImport.update({
-  id: '/ca/termes',
-  path: '/ca/termes',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CaSlowFriendingLudicRoute = CaSlowFriendingLudicRouteImport.update({
-  id: '/ca/slow-friending-ludic',
-  path: '/ca/slow-friending-ludic',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CaRolsOcultsRoute = CaRolsOcultsRouteImport.update({
-  id: '/ca/rols-ocults',
-  path: '/ca/rols-ocults',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CaQuiSomRoute = CaQuiSomRouteImport.update({
-  id: '/ca/qui-som',
-  path: '/ca/qui-som',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CaPrivacitatRoute = CaPrivacitatRouteImport.update({
-  id: '/ca/privacitat',
-  path: '/ca/privacitat',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CaMitjansRoute = CaMitjansRouteImport.update({
-  id: '/ca/mitjans',
-  path: '/ca/mitjans',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CaLudotecaRoute = CaLudotecaRouteImport.update({
-  id: '/ca/ludoteca',
-  path: '/ca/ludoteca',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CaCookiesRoute = CaCookiesRouteImport.update({
-  id: '/ca/cookies',
-  path: '/ca/cookies',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CaContacteRoute = CaContacteRouteImport.update({
-  id: '/ca/contacte',
-  path: '/ca/contacte',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CaComFuncionaRoute = CaComFuncionaRouteImport.update({
-  id: '/ca/com-funciona',
-  path: '/ca/com-funciona',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CaCatanRoute = CaCatanRouteImport.update({
-  id: '/ca/catan',
-  path: '/ca/catan',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CaBloodOnTheClocktowerRoute = CaBloodOnTheClocktowerRouteImport.update({
-  id: '/ca/blood-on-the-clocktower',
-  path: '/ca/blood-on-the-clocktower',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CaBlogRoute = CaBlogRouteImport.update({
-  id: '/ca/blog',
-  path: '/ca/blog',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CaAvisLegalRoute = CaAvisLegalRouteImport.update({
-  id: '/ca/avis-legal',
-  path: '/ca/avis-legal',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CaActivitatsRoute = CaActivitatsRouteImport.update({
-  id: '/ca/activitats',
-  path: '/ca/activitats',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AppVotacionesRoute = AppVotacionesRouteImport.update({
-  id: '/votaciones',
-  path: '/votaciones',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppRentalsRoute = AppRentalsRouteImport.update({
-  id: '/rentals',
-  path: '/rentals',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppProfileRoute = AppProfileRouteImport.update({
-  id: '/profile',
-  path: '/profile',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppPartidasRoute = AppPartidasRouteImport.update({
-  id: '/partidas',
-  path: '/partidas',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppKleffersRoute = AppKleffersRouteImport.update({
-  id: '/kleffers',
-  path: '/kleffers',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppKarmaRoute = AppKarmaRouteImport.update({
-  id: '/karma',
-  path: '/karma',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppInsigniasRoute = AppInsigniasRouteImport.update({
-  id: '/insignias',
-  path: '/insignias',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppCarnetRoute = AppCarnetRouteImport.update({
-  id: '/carnet',
-  path: '/carnet',
-  getParentRoute: () => AppRoute,
-} as any)
-const AdminUsuariosRoute = AdminUsuariosRouteImport.update({
-  id: '/usuarios',
-  path: '/usuarios',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminTeamRoute = AdminTeamRouteImport.update({
-  id: '/team',
-  path: '/team',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminRentalsRoute = AdminRentalsRouteImport.update({
-  id: '/rentals',
-  path: '/rentals',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminRegistrationsRoute = AdminRegistrationsRouteImport.update({
-  id: '/registrations',
-  path: '/registrations',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminPollsRoute = AdminPollsRouteImport.update({
-  id: '/polls',
-  path: '/polls',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminMembersRoute = AdminMembersRouteImport.update({
-  id: '/members',
-  path: '/members',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminKonektumRoute = AdminKonektumRouteImport.update({
-  id: '/konektum',
-  path: '/konektum',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminKarmaRoute = AdminKarmaRouteImport.update({
-  id: '/karma',
-  path: '/karma',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminInvitationsRoute = AdminInvitationsRouteImport.update({
-  id: '/invitations',
-  path: '/invitations',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminFinanzasRoute = AdminFinanzasRouteImport.update({
-  id: '/finanzas',
-  path: '/finanzas',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminContentRoute = AdminContentRouteImport.update({
-  id: '/content',
-  path: '/content',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminBlogRoute = AdminBlogRouteImport.update({
-  id: '/blog',
-  path: '/blog',
-  getParentRoute: () => AdminRoute,
-} as any)
-const EventSlugUsuarioRoute = EventSlugUsuarioRouteImport.update({
-  id: '/$eventSlug/usuario',
-  path: '/$eventSlug/usuario',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const EventSlugSeleccionRoute = EventSlugSeleccionRouteImport.update({
-  id: '/$eventSlug/seleccion',
-  path: '/$eventSlug/seleccion',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const EventSlugRegistroRoute = EventSlugRegistroRouteImport.update({
-  id: '/$eventSlug/registro',
-  path: '/$eventSlug/registro',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const EventSlugMesasRoute = EventSlugMesasRouteImport.update({
-  id: '/$eventSlug/mesas',
-  path: '/$eventSlug/mesas',
+const TorneosRoute = TorneosRouteImport.update({
+  id: '/torneos',
+  path: '/torneos',
   getParentRoute: () => rootRouteImport,
 } as any)
 const EventSlugCheckInRoute = EventSlugCheckInRouteImport.update({
@@ -616,232 +301,370 @@ const EventSlugCheckInRoute = EventSlugCheckInRouteImport.update({
   path: '/$eventSlug/check-in',
   getParentRoute: () => rootRouteImport,
 } as any)
-const SSeriesSlugIndexRoute = SSeriesSlugIndexRouteImport.update({
-  id: '/s/$seriesSlug/',
-  path: '/s/$seriesSlug/',
+const EventSlugMesasRoute = EventSlugMesasRouteImport.update({
+  id: '/$eventSlug/mesas',
+  path: '/$eventSlug/mesas',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AppRentalsIndexRoute = AppRentalsIndexRouteImport.update({
+const EventSlugRegistroRoute = EventSlugRegistroRouteImport.update({
+  id: '/$eventSlug/registro',
+  path: '/$eventSlug/registro',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EventSlugSeleccionRoute = EventSlugSeleccionRouteImport.update({
+  id: '/$eventSlug/seleccion',
+  path: '/$eventSlug/seleccion',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EventSlugUsuarioRoute = EventSlugUsuarioRouteImport.update({
+  id: '/$eventSlug/usuario',
+  path: '/$eventSlug/usuario',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => AppRentalsRoute,
-} as any)
-const AdminRentalsIndexRoute = AdminRentalsIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => AdminRentalsRoute,
-} as any)
-const AdminRegistrationsIndexRoute = AdminRegistrationsIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => AdminRegistrationsRoute,
-} as any)
-const AdminMediaIndexRoute = AdminMediaIndexRouteImport.update({
-  id: '/media/',
-  path: '/media/',
   getParentRoute: () => AdminRoute,
 } as any)
-const AdminKonektumIndexRoute = AdminKonektumIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => AdminKonektumRoute,
+const AdminBlogRoute = AdminBlogRouteImport.update({
+  id: '/blog',
+  path: '/blog',
+  getParentRoute: () => AdminRoute,
 } as any)
-const AdminFinanzasIndexRoute = AdminFinanzasIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => AdminFinanzasRoute,
+const AdminContentRoute = AdminContentRouteImport.update({
+  id: '/content',
+  path: '/content',
+  getParentRoute: () => AdminRoute,
 } as any)
-const AdminContentIndexRoute = AdminContentIndexRouteImport.update({
+const AdminFinanzasRoute = AdminFinanzasRouteImport.update({
+  id: '/finanzas',
+  path: '/finanzas',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminInvitationsRoute = AdminInvitationsRouteImport.update({
+  id: '/invitations',
+  path: '/invitations',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminKarmaRoute = AdminKarmaRouteImport.update({
+  id: '/karma',
+  path: '/karma',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminKonektumRoute = AdminKonektumRouteImport.update({
+  id: '/konektum',
+  path: '/konektum',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminMembersRoute = AdminMembersRouteImport.update({
+  id: '/members',
+  path: '/members',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminPollsRoute = AdminPollsRouteImport.update({
+  id: '/polls',
+  path: '/polls',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminRegistrationsRoute = AdminRegistrationsRouteImport.update({
+  id: '/registrations',
+  path: '/registrations',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminRentalsRoute = AdminRentalsRouteImport.update({
+  id: '/rentals',
+  path: '/rentals',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminTeamRoute = AdminTeamRouteImport.update({
+  id: '/team',
+  path: '/team',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminUsuariosRoute = AdminUsuariosRouteImport.update({
+  id: '/usuarios',
+  path: '/usuarios',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AppIndexRoute = AppIndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => AdminContentRoute,
+  getParentRoute: () => AppRoute,
+} as any)
+const AppCarnetRoute = AppCarnetRouteImport.update({
+  id: '/carnet',
+  path: '/carnet',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppInsigniasRoute = AppInsigniasRouteImport.update({
+  id: '/insignias',
+  path: '/insignias',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppKarmaRoute = AppKarmaRouteImport.update({
+  id: '/karma',
+  path: '/karma',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppKleffersRoute = AppKleffersRouteImport.update({
+  id: '/kleffers',
+  path: '/kleffers',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppPartidasRoute = AppPartidasRouteImport.update({
+  id: '/partidas',
+  path: '/partidas',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppProfileRoute = AppProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppRentalsRoute = AppRentalsRouteImport.update({
+  id: '/rentals',
+  path: '/rentals',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppVotacionesRoute = AppVotacionesRouteImport.update({
+  id: '/votaciones',
+  path: '/votaciones',
+  getParentRoute: () => AppRoute,
+} as any)
+const CaIndexRoute = CaIndexRouteImport.update({
+  id: '/ca/',
+  path: '/ca/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CaActivitatsRoute = CaActivitatsRouteImport.update({
+  id: '/ca/activitats',
+  path: '/ca/activitats',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CaAvisLegalRoute = CaAvisLegalRouteImport.update({
+  id: '/ca/avis-legal',
+  path: '/ca/avis-legal',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CaBlogRoute = CaBlogRouteImport.update({
+  id: '/ca/blog',
+  path: '/ca/blog',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CaBloodOnTheClocktowerRoute = CaBloodOnTheClocktowerRouteImport.update({
+  id: '/ca/blood-on-the-clocktower',
+  path: '/ca/blood-on-the-clocktower',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CaCatanRoute = CaCatanRouteImport.update({
+  id: '/ca/catan',
+  path: '/ca/catan',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CaComFuncionaRoute = CaComFuncionaRouteImport.update({
+  id: '/ca/com-funciona',
+  path: '/ca/com-funciona',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CaContacteRoute = CaContacteRouteImport.update({
+  id: '/ca/contacte',
+  path: '/ca/contacte',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CaCookiesRoute = CaCookiesRouteImport.update({
+  id: '/ca/cookies',
+  path: '/ca/cookies',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CaLudotecaRoute = CaLudotecaRouteImport.update({
+  id: '/ca/ludoteca',
+  path: '/ca/ludoteca',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CaMitjansRoute = CaMitjansRouteImport.update({
+  id: '/ca/mitjans',
+  path: '/ca/mitjans',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CaPrivacitatRoute = CaPrivacitatRouteImport.update({
+  id: '/ca/privacitat',
+  path: '/ca/privacitat',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CaQuiSomRoute = CaQuiSomRouteImport.update({
+  id: '/ca/qui-som',
+  path: '/ca/qui-som',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CaRolsOcultsRoute = CaRolsOcultsRouteImport.update({
+  id: '/ca/rols-ocults',
+  path: '/ca/rols-ocults',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CaSlowFriendingLudicRoute = CaSlowFriendingLudicRouteImport.update({
+  id: '/ca/slow-friending-ludic',
+  path: '/ca/slow-friending-ludic',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CaTermesRoute = CaTermesRouteImport.update({
+  id: '/ca/termes',
+  path: '/ca/termes',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CaTornejosRoute = CaTornejosRouteImport.update({
+  id: '/ca/tornejos',
+  path: '/ca/tornejos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EnIndexRoute = EnIndexRouteImport.update({
+  id: '/en/',
+  path: '/en/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EnAboutRoute = EnAboutRouteImport.update({
+  id: '/en/about',
+  path: '/en/about',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EnActivitiesRoute = EnActivitiesRouteImport.update({
+  id: '/en/activities',
+  path: '/en/activities',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EnBlogRoute = EnBlogRouteImport.update({
+  id: '/en/blog',
+  path: '/en/blog',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EnBloodOnTheClocktowerRoute = EnBloodOnTheClocktowerRouteImport.update({
+  id: '/en/blood-on-the-clocktower',
+  path: '/en/blood-on-the-clocktower',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EnCatanRoute = EnCatanRouteImport.update({
+  id: '/en/catan',
+  path: '/en/catan',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EnContactRoute = EnContactRouteImport.update({
+  id: '/en/contact',
+  path: '/en/contact',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EnCookiesRoute = EnCookiesRouteImport.update({
+  id: '/en/cookies',
+  path: '/en/cookies',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EnHiddenRolesRoute = EnHiddenRolesRouteImport.update({
+  id: '/en/hidden-roles',
+  path: '/en/hidden-roles',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EnHowItWorksRoute = EnHowItWorksRouteImport.update({
+  id: '/en/how-it-works',
+  path: '/en/how-it-works',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EnLegalNoticeRoute = EnLegalNoticeRouteImport.update({
+  id: '/en/legal-notice',
+  path: '/en/legal-notice',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EnLudotecaRoute = EnLudotecaRouteImport.update({
+  id: '/en/ludoteca',
+  path: '/en/ludoteca',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EnMediaRoute = EnMediaRouteImport.update({
+  id: '/en/media',
+  path: '/en/media',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EnPrivacyRoute = EnPrivacyRouteImport.update({
+  id: '/en/privacy',
+  path: '/en/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EnSlowFriendingRoute = EnSlowFriendingRouteImport.update({
+  id: '/en/slow-friending',
+  path: '/en/slow-friending',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EnTermsRoute = EnTermsRouteImport.update({
+  id: '/en/terms',
+  path: '/en/terms',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EnTournamentsRoute = EnTournamentsRouteImport.update({
+  id: '/en/tournaments',
+  path: '/en/tournaments',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const InscripcionSlugRoute = InscripcionSlugRouteImport.update({
+  id: '/inscripcion/$slug',
+  path: '/inscripcion/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const InviteTokenRoute = InviteTokenRouteImport.update({
+  id: '/invite/$token',
+  path: '/invite/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const VerificarIdRoute = VerificarIdRouteImport.update({
+  id: '/verificar/$id',
+  path: '/verificar/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EventSlugCancelarParticipantIdRoute =
+  EventSlugCancelarParticipantIdRouteImport.update({
+    id: '/$eventSlug/cancelar/$participantId',
+    path: '/$eventSlug/cancelar/$participantId',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ActividadesJuegosIndexRoute = ActividadesJuegosIndexRouteImport.update({
+  id: '/actividades_/juegos/',
+  path: '/actividades/juegos/',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AdminBlogIndexRoute = AdminBlogIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => AdminBlogRoute,
 } as any)
-const ActividadesJuegosIndexRoute = ActividadesJuegosIndexRouteImport.update({
-  id: '/actividades_/juegos/',
-  path: '/actividades/juegos/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SSeriesSlugJoinRoute = SSeriesSlugJoinRouteImport.update({
-  id: '/s/$seriesSlug/join',
-  path: '/s/$seriesSlug/join',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const InscripcionBajaTokenRoute = InscripcionBajaTokenRouteImport.update({
-  id: '/inscripcion/baja/$token',
-  path: '/inscripcion/baja/$token',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const EventIdTablesRoute = EventIdTablesRouteImport.update({
-  id: '/event/$id/tables',
-  path: '/event/$id/tables',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const EventIdSelectRoute = EventIdSelectRouteImport.update({
-  id: '/event/$id/select',
-  path: '/event/$id/select',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const EventIdJoinRoute = EventIdJoinRouteImport.update({
-  id: '/event/$id/join',
-  path: '/event/$id/join',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const EventIdCheckinRoute = EventIdCheckinRouteImport.update({
-  id: '/event/$id/checkin',
-  path: '/event/$id/checkin',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const EventIdAccessRoute = EventIdAccessRouteImport.update({
-  id: '/event/$id/access',
-  path: '/event/$id/access',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AuthLudoyaCallbackRoute = AuthLudoyaCallbackRouteImport.update({
-  id: '/auth/ludoya/callback',
-  path: '/auth/ludoya/callback',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AppRentalsRequestsRoute = AppRentalsRequestsRouteImport.update({
-  id: '/requests',
-  path: '/requests',
-  getParentRoute: () => AppRentalsRoute,
-} as any)
-const AppRentalsHistoryRoute = AppRentalsHistoryRouteImport.update({
-  id: '/history',
-  path: '/history',
-  getParentRoute: () => AppRentalsRoute,
-} as any)
-const AppRentalsActiveRoute = AppRentalsActiveRouteImport.update({
-  id: '/active',
-  path: '/active',
-  getParentRoute: () => AppRentalsRoute,
-} as any)
-const ApiPublicUploadMyAvatarRoute = ApiPublicUploadMyAvatarRouteImport.update({
-  id: '/api/public/upload-my-avatar',
-  path: '/api/public/upload-my-avatar',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiPublicUploadInviteAvatarRoute =
-  ApiPublicUploadInviteAvatarRouteImport.update({
-    id: '/api/public/upload-invite-avatar',
-    path: '/api/public/upload-invite-avatar',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const ApiPublicSyncBggRoute = ApiPublicSyncBggRouteImport.update({
-  id: '/api/public/sync-bgg',
-  path: '/api/public/sync-bgg',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiPublicLudoyaImageRoute = ApiPublicLudoyaImageRouteImport.update({
-  id: '/api/public/ludoya-image',
-  path: '/api/public/ludoya-image',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiPublicContactRoute = ApiPublicContactRouteImport.update({
-  id: '/api/public/contact',
-  path: '/api/public/contact',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminRentalsSettingsRoute = AdminRentalsSettingsRouteImport.update({
-  id: '/settings',
-  path: '/settings',
-  getParentRoute: () => AdminRentalsRoute,
-} as any)
-const AdminRentalsHistoryRoute = AdminRentalsHistoryRouteImport.update({
-  id: '/history',
-  path: '/history',
-  getParentRoute: () => AdminRentalsRoute,
-} as any)
-const AdminRentalsCatalogRoute = AdminRentalsCatalogRouteImport.update({
-  id: '/catalog',
-  path: '/catalog',
-  getParentRoute: () => AdminRentalsRoute,
-} as any)
-const AdminRentalsActiveRoute = AdminRentalsActiveRouteImport.update({
-  id: '/active',
-  path: '/active',
-  getParentRoute: () => AdminRentalsRoute,
-} as any)
-const AdminRegistrationsIdRoute = AdminRegistrationsIdRouteImport.update({
+const AdminBlogIdRoute = AdminBlogIdRouteImport.update({
   id: '/$id',
   path: '/$id',
-  getParentRoute: () => AdminRegistrationsRoute,
+  getParentRoute: () => AdminBlogRoute,
 } as any)
-const AdminPagesPageIdRoute = AdminPagesPageIdRouteImport.update({
-  id: '/pages/$pageId',
-  path: '/pages/$pageId',
-  getParentRoute: () => AdminRoute,
+const AdminBlogNewRoute = AdminBlogNewRouteImport.update({
+  id: '/new',
+  path: '/new',
+  getParentRoute: () => AdminBlogRoute,
 } as any)
-const AdminMediaNewRoute = AdminMediaNewRouteImport.update({
-  id: '/media/new',
-  path: '/media/new',
-  getParentRoute: () => AdminRoute,
+const AdminContentIndexRoute = AdminContentIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminContentRoute,
 } as any)
-const AdminMediaIdRoute = AdminMediaIdRouteImport.update({
-  id: '/media/$id',
-  path: '/media/$id',
-  getParentRoute: () => AdminRoute,
+const AdminContentPageKeyRoute = AdminContentPageKeyRouteImport.update({
+  id: '/$pageKey',
+  path: '/$pageKey',
+  getParentRoute: () => AdminContentRoute,
 } as any)
-const AdminKonektumUsuariosRoute = AdminKonektumUsuariosRouteImport.update({
-  id: '/usuarios',
-  path: '/usuarios',
-  getParentRoute: () => AdminKonektumRoute,
+const AdminContentRedirectsRoute = AdminContentRedirectsRouteImport.update({
+  id: '/redirects',
+  path: '/redirects',
+  getParentRoute: () => AdminContentRoute,
 } as any)
-const AdminKonektumPlantillasRoute = AdminKonektumPlantillasRouteImport.update({
-  id: '/plantillas',
-  path: '/plantillas',
-  getParentRoute: () => AdminKonektumRoute,
+const AdminContentUrlsRoute = AdminContentUrlsRouteImport.update({
+  id: '/urls',
+  path: '/urls',
+  getParentRoute: () => AdminContentRoute,
 } as any)
-const AdminKonektumEmailRoute = AdminKonektumEmailRouteImport.update({
-  id: '/email',
-  path: '/email',
-  getParentRoute: () => AdminKonektumRoute,
-} as any)
-const AdminKonektumConfiguracionRoute =
-  AdminKonektumConfiguracionRouteImport.update({
-    id: '/configuracion',
-    path: '/configuracion',
-    getParentRoute: () => AdminKonektumRoute,
-  } as any)
-const AdminKonektumAnaliticaRoute = AdminKonektumAnaliticaRouteImport.update({
-  id: '/analitica',
-  path: '/analitica',
-  getParentRoute: () => AdminKonektumRoute,
-} as any)
-const AdminFinanzasImpuestosRoute = AdminFinanzasImpuestosRouteImport.update({
-  id: '/impuestos',
-  path: '/impuestos',
-  getParentRoute: () => AdminFinanzasRoute,
-} as any)
-const AdminFinanzasGastosRoute = AdminFinanzasGastosRouteImport.update({
-  id: '/gastos',
-  path: '/gastos',
-  getParentRoute: () => AdminFinanzasRoute,
-} as any)
-const AdminFinanzasFacturasRoute = AdminFinanzasFacturasRouteImport.update({
-  id: '/facturas',
-  path: '/facturas',
-  getParentRoute: () => AdminFinanzasRoute,
-} as any)
-const AdminFinanzasCuotasRoute = AdminFinanzasCuotasRouteImport.update({
-  id: '/cuotas',
-  path: '/cuotas',
-  getParentRoute: () => AdminFinanzasRoute,
-} as any)
-const AdminFinanzasColaboracionesRoute =
-  AdminFinanzasColaboracionesRouteImport.update({
-    id: '/colaboraciones',
-    path: '/colaboraciones',
-    getParentRoute: () => AdminFinanzasRoute,
-  } as any)
-const AdminFinanzasCategoriasRoute = AdminFinanzasCategoriasRouteImport.update({
-  id: '/categorias',
-  path: '/categorias',
+const AdminFinanzasIndexRoute = AdminFinanzasIndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => AdminFinanzasRoute,
 } as any)
 const AdminFinanzasAportacionesRoute =
@@ -850,35 +673,236 @@ const AdminFinanzasAportacionesRoute =
     path: '/aportaciones',
     getParentRoute: () => AdminFinanzasRoute,
   } as any)
-const AdminContentUrlsRoute = AdminContentUrlsRouteImport.update({
-  id: '/urls',
-  path: '/urls',
-  getParentRoute: () => AdminContentRoute,
+const AdminFinanzasCategoriasRoute = AdminFinanzasCategoriasRouteImport.update({
+  id: '/categorias',
+  path: '/categorias',
+  getParentRoute: () => AdminFinanzasRoute,
 } as any)
-const AdminContentRedirectsRoute = AdminContentRedirectsRouteImport.update({
-  id: '/redirects',
-  path: '/redirects',
-  getParentRoute: () => AdminContentRoute,
+const AdminFinanzasColaboracionesRoute =
+  AdminFinanzasColaboracionesRouteImport.update({
+    id: '/colaboraciones',
+    path: '/colaboraciones',
+    getParentRoute: () => AdminFinanzasRoute,
+  } as any)
+const AdminFinanzasCuotasRoute = AdminFinanzasCuotasRouteImport.update({
+  id: '/cuotas',
+  path: '/cuotas',
+  getParentRoute: () => AdminFinanzasRoute,
 } as any)
-const AdminContentPageKeyRoute = AdminContentPageKeyRouteImport.update({
-  id: '/$pageKey',
-  path: '/$pageKey',
-  getParentRoute: () => AdminContentRoute,
+const AdminFinanzasFacturasRoute = AdminFinanzasFacturasRouteImport.update({
+  id: '/facturas',
+  path: '/facturas',
+  getParentRoute: () => AdminFinanzasRoute,
 } as any)
-const AdminBlogNewRoute = AdminBlogNewRouteImport.update({
-  id: '/new',
-  path: '/new',
-  getParentRoute: () => AdminBlogRoute,
+const AdminFinanzasGastosRoute = AdminFinanzasGastosRouteImport.update({
+  id: '/gastos',
+  path: '/gastos',
+  getParentRoute: () => AdminFinanzasRoute,
 } as any)
-const AdminBlogIdRoute = AdminBlogIdRouteImport.update({
+const AdminFinanzasImpuestosRoute = AdminFinanzasImpuestosRouteImport.update({
+  id: '/impuestos',
+  path: '/impuestos',
+  getParentRoute: () => AdminFinanzasRoute,
+} as any)
+const AdminKonektumIndexRoute = AdminKonektumIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminKonektumRoute,
+} as any)
+const AdminKonektumAnaliticaRoute = AdminKonektumAnaliticaRouteImport.update({
+  id: '/analitica',
+  path: '/analitica',
+  getParentRoute: () => AdminKonektumRoute,
+} as any)
+const AdminKonektumConfiguracionRoute =
+  AdminKonektumConfiguracionRouteImport.update({
+    id: '/configuracion',
+    path: '/configuracion',
+    getParentRoute: () => AdminKonektumRoute,
+  } as any)
+const AdminKonektumEmailRoute = AdminKonektumEmailRouteImport.update({
+  id: '/email',
+  path: '/email',
+  getParentRoute: () => AdminKonektumRoute,
+} as any)
+const AdminKonektumPlantillasRoute = AdminKonektumPlantillasRouteImport.update({
+  id: '/plantillas',
+  path: '/plantillas',
+  getParentRoute: () => AdminKonektumRoute,
+} as any)
+const AdminKonektumUsuariosRoute = AdminKonektumUsuariosRouteImport.update({
+  id: '/usuarios',
+  path: '/usuarios',
+  getParentRoute: () => AdminKonektumRoute,
+} as any)
+const AdminMediaIndexRoute = AdminMediaIndexRouteImport.update({
+  id: '/media/',
+  path: '/media/',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminMediaIdRoute = AdminMediaIdRouteImport.update({
+  id: '/media/$id',
+  path: '/media/$id',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminMediaNewRoute = AdminMediaNewRouteImport.update({
+  id: '/media/new',
+  path: '/media/new',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminPagesPageIdRoute = AdminPagesPageIdRouteImport.update({
+  id: '/pages/$pageId',
+  path: '/pages/$pageId',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminRegistrationsIndexRoute = AdminRegistrationsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminRegistrationsRoute,
+} as any)
+const AdminRegistrationsIdRoute = AdminRegistrationsIdRouteImport.update({
   id: '/$id',
   path: '/$id',
-  getParentRoute: () => AdminBlogRoute,
+  getParentRoute: () => AdminRegistrationsRoute,
 } as any)
-const EventSlugCancelarParticipantIdRoute =
-  EventSlugCancelarParticipantIdRouteImport.update({
-    id: '/$eventSlug/cancelar/$participantId',
-    path: '/$eventSlug/cancelar/$participantId',
+const AdminRentalsIndexRoute = AdminRentalsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminRentalsRoute,
+} as any)
+const AdminRentalsActiveRoute = AdminRentalsActiveRouteImport.update({
+  id: '/active',
+  path: '/active',
+  getParentRoute: () => AdminRentalsRoute,
+} as any)
+const AdminRentalsCatalogRoute = AdminRentalsCatalogRouteImport.update({
+  id: '/catalog',
+  path: '/catalog',
+  getParentRoute: () => AdminRentalsRoute,
+} as any)
+const AdminRentalsHistoryRoute = AdminRentalsHistoryRouteImport.update({
+  id: '/history',
+  path: '/history',
+  getParentRoute: () => AdminRentalsRoute,
+} as any)
+const AdminRentalsSettingsRoute = AdminRentalsSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => AdminRentalsRoute,
+} as any)
+const ApiPublicContactRoute = ApiPublicContactRouteImport.update({
+  id: '/api/public/contact',
+  path: '/api/public/contact',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicLudoyaImageRoute = ApiPublicLudoyaImageRouteImport.update({
+  id: '/api/public/ludoya-image',
+  path: '/api/public/ludoya-image',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicSyncBggRoute = ApiPublicSyncBggRouteImport.update({
+  id: '/api/public/sync-bgg',
+  path: '/api/public/sync-bgg',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicUploadInviteAvatarRoute =
+  ApiPublicUploadInviteAvatarRouteImport.update({
+    id: '/api/public/upload-invite-avatar',
+    path: '/api/public/upload-invite-avatar',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicUploadMyAvatarRoute = ApiPublicUploadMyAvatarRouteImport.update({
+  id: '/api/public/upload-my-avatar',
+  path: '/api/public/upload-my-avatar',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppRentalsIndexRoute = AppRentalsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AppRentalsRoute,
+} as any)
+const AppRentalsActiveRoute = AppRentalsActiveRouteImport.update({
+  id: '/active',
+  path: '/active',
+  getParentRoute: () => AppRentalsRoute,
+} as any)
+const AppRentalsHistoryRoute = AppRentalsHistoryRouteImport.update({
+  id: '/history',
+  path: '/history',
+  getParentRoute: () => AppRentalsRoute,
+} as any)
+const AppRentalsRequestsRoute = AppRentalsRequestsRouteImport.update({
+  id: '/requests',
+  path: '/requests',
+  getParentRoute: () => AppRentalsRoute,
+} as any)
+const AuthLudoyaCallbackRoute = AuthLudoyaCallbackRouteImport.update({
+  id: '/auth/ludoya/callback',
+  path: '/auth/ludoya/callback',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EventIdAccessRoute = EventIdAccessRouteImport.update({
+  id: '/event/$id/access',
+  path: '/event/$id/access',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EventIdCheckinRoute = EventIdCheckinRouteImport.update({
+  id: '/event/$id/checkin',
+  path: '/event/$id/checkin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EventIdJoinRoute = EventIdJoinRouteImport.update({
+  id: '/event/$id/join',
+  path: '/event/$id/join',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EventIdSelectRoute = EventIdSelectRouteImport.update({
+  id: '/event/$id/select',
+  path: '/event/$id/select',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EventIdTablesRoute = EventIdTablesRouteImport.update({
+  id: '/event/$id/tables',
+  path: '/event/$id/tables',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const InscripcionBajaTokenRoute = InscripcionBajaTokenRouteImport.update({
+  id: '/inscripcion/baja/$token',
+  path: '/inscripcion/baja/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SSeriesSlugIndexRoute = SSeriesSlugIndexRouteImport.update({
+  id: '/s/$seriesSlug/',
+  path: '/s/$seriesSlug/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SSeriesSlugJoinRoute = SSeriesSlugJoinRouteImport.update({
+  id: '/s/$seriesSlug/join',
+  path: '/s/$seriesSlug/join',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ActividadesJuegosGameIdIndexRoute =
+  ActividadesJuegosGameIdIndexRouteImport.update({
+    id: '/actividades_/juegos/$gameId/',
+    path: '/actividades/juegos/$gameId/',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ActividadesJuegosInvitacionTokenRoute =
+  ActividadesJuegosInvitacionTokenRouteImport.update({
+    id: '/actividades_/juegos/invitacion/$token',
+    path: '/actividades/juegos/invitacion/$token',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ActividadesJuegosJugarIndexRoute =
+  ActividadesJuegosJugarIndexRouteImport.update({
+    id: '/actividades_/juegos/jugar/',
+    path: '/actividades/juegos/jugar/',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ActividadesJuegosJugarSessionIdRoute =
+  ActividadesJuegosJugarSessionIdRouteImport.update({
+    id: '/actividades_/juegos/jugar/$sessionId',
+    path: '/actividades/juegos/jugar/$sessionId',
     getParentRoute: () => rootRouteImport,
   } as any)
 const AdminKonektumEventosIndexRoute =
@@ -887,22 +911,32 @@ const AdminKonektumEventosIndexRoute =
     path: '/eventos/',
     getParentRoute: () => AdminKonektumRoute,
   } as any)
-const ActividadesJuegosJugarIndexRoute =
-  ActividadesJuegosJugarIndexRouteImport.update({
-    id: '/actividades_/juegos/jugar/',
-    path: '/actividades/juegos/jugar/',
+const AdminKonektumEventosIdRoute = AdminKonektumEventosIdRouteImport.update({
+  id: '/eventos/$id',
+  path: '/eventos/$id',
+  getParentRoute: () => AdminKonektumRoute,
+} as any)
+const AdminKonektumEventosNuevoRoute =
+  AdminKonektumEventosNuevoRouteImport.update({
+    id: '/eventos/nuevo',
+    path: '/eventos/nuevo',
+    getParentRoute: () => AdminKonektumRoute,
+  } as any)
+const ApiPublicHooksFeaturedDispatchRoute =
+  ApiPublicHooksFeaturedDispatchRouteImport.update({
+    id: '/api/public/hooks/featured-dispatch',
+    path: '/api/public/hooks/featured-dispatch',
     getParentRoute: () => rootRouteImport,
   } as any)
-const ActividadesJuegosGameIdIndexRoute =
-  ActividadesJuegosGameIdIndexRouteImport.update({
-    id: '/actividades_/juegos/$gameId/',
-    path: '/actividades/juegos/$gameId/',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const LovableEmailQueueProcessRoute =
-  LovableEmailQueueProcessRouteImport.update({
-    id: '/lovable/email/queue/process',
-    path: '/lovable/email/queue/process',
+const ApiPublicKonFnRoute = ApiPublicKonFnRouteImport.update({
+  id: '/api/public/kon/$fn',
+  path: '/api/public/kon/$fn',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicRegistroIcsTokenRoute =
+  ApiPublicRegistroIcsTokenRouteImport.update({
+    id: '/api/public/registro-ics/$token',
+    path: '/api/public/registro-ics/$token',
     getParentRoute: () => rootRouteImport,
   } as any)
 const EventIdCancelParticipantIdRoute =
@@ -911,44 +945,10 @@ const EventIdCancelParticipantIdRoute =
     path: '/event/$id/cancel/$participantId',
     getParentRoute: () => rootRouteImport,
   } as any)
-const ApiPublicRegistroIcsTokenRoute =
-  ApiPublicRegistroIcsTokenRouteImport.update({
-    id: '/api/public/registro-ics/$token',
-    path: '/api/public/registro-ics/$token',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const ApiPublicKonFnRoute = ApiPublicKonFnRouteImport.update({
-  id: '/api/public/kon/$fn',
-  path: '/api/public/kon/$fn',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiPublicHooksFeaturedDispatchRoute =
-  ApiPublicHooksFeaturedDispatchRouteImport.update({
-    id: '/api/public/hooks/featured-dispatch',
-    path: '/api/public/hooks/featured-dispatch',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const AdminKonektumEventosNuevoRoute =
-  AdminKonektumEventosNuevoRouteImport.update({
-    id: '/eventos/nuevo',
-    path: '/eventos/nuevo',
-    getParentRoute: () => AdminKonektumRoute,
-  } as any)
-const AdminKonektumEventosIdRoute = AdminKonektumEventosIdRouteImport.update({
-  id: '/eventos/$id',
-  path: '/eventos/$id',
-  getParentRoute: () => AdminKonektumRoute,
-} as any)
-const ActividadesJuegosJugarSessionIdRoute =
-  ActividadesJuegosJugarSessionIdRouteImport.update({
-    id: '/actividades_/juegos/jugar/$sessionId',
-    path: '/actividades/juegos/jugar/$sessionId',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const ActividadesJuegosInvitacionTokenRoute =
-  ActividadesJuegosInvitacionTokenRouteImport.update({
-    id: '/actividades_/juegos/invitacion/$token',
-    path: '/actividades/juegos/invitacion/$token',
+const LovableEmailQueueProcessRoute =
+  LovableEmailQueueProcessRouteImport.update({
+    id: '/lovable/email/queue/process',
+    path: '/lovable/email/queue/process',
     getParentRoute: () => rootRouteImport,
   } as any)
 const ActividadesJuegosGameIdPartidasSessionIdRoute =
@@ -1985,172 +1985,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/torneos': {
-      id: '/torneos'
-      path: '/torneos'
-      fullPath: '/torneos'
-      preLoaderRoute: typeof TorneosRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/terminos': {
-      id: '/terminos'
-      path: '/terminos'
-      fullPath: '/terminos'
-      preLoaderRoute: typeof TerminosRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/tarda-de-jocs-i-cuina-japonesa': {
-      id: '/tarda-de-jocs-i-cuina-japonesa'
-      path: '/tarda-de-jocs-i-cuina-japonesa'
-      fullPath: '/tarda-de-jocs-i-cuina-japonesa'
-      preLoaderRoute: typeof TardaDeJocsICuinaJaponesaRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/super-admin': {
-      id: '/super-admin'
-      path: '/super-admin'
-      fullPath: '/super-admin'
-      preLoaderRoute: typeof SuperAdminRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/sobre-nosotros': {
-      id: '/sobre-nosotros'
-      path: '/sobre-nosotros'
-      fullPath: '/sobre-nosotros'
-      preLoaderRoute: typeof SobreNosotrosRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/slow-friending-ludico': {
-      id: '/slow-friending-ludico'
-      path: '/slow-friending-ludico'
-      fullPath: '/slow-friending-ludico'
-      preLoaderRoute: typeof SlowFriendingLudicoRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/sitemap.xml': {
-      id: '/sitemap.xml'
-      path: '/sitemap.xml'
-      fullPath: '/sitemap.xml'
-      preLoaderRoute: typeof SitemapDotxmlRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/roles-ocultos': {
-      id: '/roles-ocultos'
-      path: '/roles-ocultos'
-      fullPath: '/roles-ocultos'
-      preLoaderRoute: typeof RolesOcultosRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/repeat-response': {
-      id: '/repeat-response'
-      path: '/repeat-response'
-      fullPath: '/repeat-response'
-      preLoaderRoute: typeof RepeatResponseRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/privacidad': {
-      id: '/privacidad'
-      path: '/privacidad'
-      fullPath: '/privacidad'
-      preLoaderRoute: typeof PrivacidadRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/medios': {
-      id: '/medios'
-      path: '/medios'
-      fullPath: '/medios'
-      preLoaderRoute: typeof MediosRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/ludoteca': {
-      id: '/ludoteca'
-      path: '/ludoteca'
-      fullPath: '/ludoteca'
-      preLoaderRoute: typeof LudotecaRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/login': {
-      id: '/login'
-      path: '/login'
-      fullPath: '/login'
-      preLoaderRoute: typeof LoginRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/crush-response': {
-      id: '/crush-response'
-      path: '/crush-response'
-      fullPath: '/crush-response'
-      preLoaderRoute: typeof CrushResponseRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/cookies': {
-      id: '/cookies'
-      path: '/cookies'
-      fullPath: '/cookies'
-      preLoaderRoute: typeof CookiesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/contacto': {
-      id: '/contacto'
-      path: '/contacto'
-      fullPath: '/contacto'
-      preLoaderRoute: typeof ContactoRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/como-funciona': {
-      id: '/como-funciona'
-      path: '/como-funciona'
-      fullPath: '/como-funciona'
-      preLoaderRoute: typeof ComoFuncionaRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/catan': {
-      id: '/catan'
-      path: '/catan'
-      fullPath: '/catan'
-      preLoaderRoute: typeof CatanRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/blood-on-the-clocktower': {
-      id: '/blood-on-the-clocktower'
-      path: '/blood-on-the-clocktower'
-      fullPath: '/blood-on-the-clocktower'
-      preLoaderRoute: typeof BloodOnTheClocktowerRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/blog': {
-      id: '/blog'
-      path: '/blog'
-      fullPath: '/blog'
-      preLoaderRoute: typeof BlogRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/aviso-legal': {
-      id: '/aviso-legal'
-      path: '/aviso-legal'
-      fullPath: '/aviso-legal'
-      preLoaderRoute: typeof AvisoLegalRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/app': {
-      id: '/app'
-      path: '/app'
-      fullPath: '/app'
-      preLoaderRoute: typeof AppRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin': {
-      id: '/admin'
-      path: '/admin'
-      fullPath: '/admin'
-      preLoaderRoute: typeof AdminRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/actividades': {
-      id: '/actividades'
-      path: '/actividades'
-      fullPath: '/actividades'
-      preLoaderRoute: typeof ActividadesRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/$': {
@@ -2160,452 +1999,172 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SplatRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+    '/actividades': {
+      id: '/actividades'
+      path: '/actividades'
+      fullPath: '/actividades'
+      preLoaderRoute: typeof ActividadesRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/en/': {
-      id: '/en/'
-      path: '/en'
-      fullPath: '/en/'
-      preLoaderRoute: typeof EnIndexRouteImport
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/ca/': {
-      id: '/ca/'
-      path: '/ca'
-      fullPath: '/ca/'
-      preLoaderRoute: typeof CaIndexRouteImport
+    '/app': {
+      id: '/app'
+      path: '/app'
+      fullPath: '/app'
+      preLoaderRoute: typeof AppRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/app/': {
-      id: '/app/'
-      path: '/'
-      fullPath: '/app/'
-      preLoaderRoute: typeof AppIndexRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/admin/': {
-      id: '/admin/'
-      path: '/'
-      fullPath: '/admin/'
-      preLoaderRoute: typeof AdminIndexRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/verificar/$id': {
-      id: '/verificar/$id'
-      path: '/verificar/$id'
-      fullPath: '/verificar/$id'
-      preLoaderRoute: typeof VerificarIdRouteImport
+    '/aviso-legal': {
+      id: '/aviso-legal'
+      path: '/aviso-legal'
+      fullPath: '/aviso-legal'
+      preLoaderRoute: typeof AvisoLegalRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/invite/$token': {
-      id: '/invite/$token'
-      path: '/invite/$token'
-      fullPath: '/invite/$token'
-      preLoaderRoute: typeof InviteTokenRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/inscripcion/$slug': {
-      id: '/inscripcion/$slug'
-      path: '/inscripcion/$slug'
-      fullPath: '/inscripcion/$slug'
-      preLoaderRoute: typeof InscripcionSlugRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/en/tournaments': {
-      id: '/en/tournaments'
-      path: '/en/tournaments'
-      fullPath: '/en/tournaments'
-      preLoaderRoute: typeof EnTournamentsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/en/terms': {
-      id: '/en/terms'
-      path: '/en/terms'
-      fullPath: '/en/terms'
-      preLoaderRoute: typeof EnTermsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/en/slow-friending': {
-      id: '/en/slow-friending'
-      path: '/en/slow-friending'
-      fullPath: '/en/slow-friending'
-      preLoaderRoute: typeof EnSlowFriendingRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/en/privacy': {
-      id: '/en/privacy'
-      path: '/en/privacy'
-      fullPath: '/en/privacy'
-      preLoaderRoute: typeof EnPrivacyRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/en/media': {
-      id: '/en/media'
-      path: '/en/media'
-      fullPath: '/en/media'
-      preLoaderRoute: typeof EnMediaRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/en/ludoteca': {
-      id: '/en/ludoteca'
-      path: '/en/ludoteca'
-      fullPath: '/en/ludoteca'
-      preLoaderRoute: typeof EnLudotecaRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/en/legal-notice': {
-      id: '/en/legal-notice'
-      path: '/en/legal-notice'
-      fullPath: '/en/legal-notice'
-      preLoaderRoute: typeof EnLegalNoticeRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/en/how-it-works': {
-      id: '/en/how-it-works'
-      path: '/en/how-it-works'
-      fullPath: '/en/how-it-works'
-      preLoaderRoute: typeof EnHowItWorksRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/en/hidden-roles': {
-      id: '/en/hidden-roles'
-      path: '/en/hidden-roles'
-      fullPath: '/en/hidden-roles'
-      preLoaderRoute: typeof EnHiddenRolesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/en/cookies': {
-      id: '/en/cookies'
-      path: '/en/cookies'
-      fullPath: '/en/cookies'
-      preLoaderRoute: typeof EnCookiesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/en/contact': {
-      id: '/en/contact'
-      path: '/en/contact'
-      fullPath: '/en/contact'
-      preLoaderRoute: typeof EnContactRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/en/catan': {
-      id: '/en/catan'
-      path: '/en/catan'
-      fullPath: '/en/catan'
-      preLoaderRoute: typeof EnCatanRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/en/blood-on-the-clocktower': {
-      id: '/en/blood-on-the-clocktower'
-      path: '/en/blood-on-the-clocktower'
-      fullPath: '/en/blood-on-the-clocktower'
-      preLoaderRoute: typeof EnBloodOnTheClocktowerRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/en/blog': {
-      id: '/en/blog'
-      path: '/en/blog'
-      fullPath: '/en/blog'
-      preLoaderRoute: typeof EnBlogRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/en/activities': {
-      id: '/en/activities'
-      path: '/en/activities'
-      fullPath: '/en/activities'
-      preLoaderRoute: typeof EnActivitiesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/en/about': {
-      id: '/en/about'
-      path: '/en/about'
-      fullPath: '/en/about'
-      preLoaderRoute: typeof EnAboutRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/ca/tornejos': {
-      id: '/ca/tornejos'
-      path: '/ca/tornejos'
-      fullPath: '/ca/tornejos'
-      preLoaderRoute: typeof CaTornejosRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/ca/termes': {
-      id: '/ca/termes'
-      path: '/ca/termes'
-      fullPath: '/ca/termes'
-      preLoaderRoute: typeof CaTermesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/ca/slow-friending-ludic': {
-      id: '/ca/slow-friending-ludic'
-      path: '/ca/slow-friending-ludic'
-      fullPath: '/ca/slow-friending-ludic'
-      preLoaderRoute: typeof CaSlowFriendingLudicRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/ca/rols-ocults': {
-      id: '/ca/rols-ocults'
-      path: '/ca/rols-ocults'
-      fullPath: '/ca/rols-ocults'
-      preLoaderRoute: typeof CaRolsOcultsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/ca/qui-som': {
-      id: '/ca/qui-som'
-      path: '/ca/qui-som'
-      fullPath: '/ca/qui-som'
-      preLoaderRoute: typeof CaQuiSomRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/ca/privacitat': {
-      id: '/ca/privacitat'
-      path: '/ca/privacitat'
-      fullPath: '/ca/privacitat'
-      preLoaderRoute: typeof CaPrivacitatRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/ca/mitjans': {
-      id: '/ca/mitjans'
-      path: '/ca/mitjans'
-      fullPath: '/ca/mitjans'
-      preLoaderRoute: typeof CaMitjansRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/ca/ludoteca': {
-      id: '/ca/ludoteca'
-      path: '/ca/ludoteca'
-      fullPath: '/ca/ludoteca'
-      preLoaderRoute: typeof CaLudotecaRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/ca/cookies': {
-      id: '/ca/cookies'
-      path: '/ca/cookies'
-      fullPath: '/ca/cookies'
-      preLoaderRoute: typeof CaCookiesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/ca/contacte': {
-      id: '/ca/contacte'
-      path: '/ca/contacte'
-      fullPath: '/ca/contacte'
-      preLoaderRoute: typeof CaContacteRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/ca/com-funciona': {
-      id: '/ca/com-funciona'
-      path: '/ca/com-funciona'
-      fullPath: '/ca/com-funciona'
-      preLoaderRoute: typeof CaComFuncionaRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/ca/catan': {
-      id: '/ca/catan'
-      path: '/ca/catan'
-      fullPath: '/ca/catan'
-      preLoaderRoute: typeof CaCatanRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/ca/blood-on-the-clocktower': {
-      id: '/ca/blood-on-the-clocktower'
-      path: '/ca/blood-on-the-clocktower'
-      fullPath: '/ca/blood-on-the-clocktower'
-      preLoaderRoute: typeof CaBloodOnTheClocktowerRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/ca/blog': {
-      id: '/ca/blog'
-      path: '/ca/blog'
-      fullPath: '/ca/blog'
-      preLoaderRoute: typeof CaBlogRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/ca/avis-legal': {
-      id: '/ca/avis-legal'
-      path: '/ca/avis-legal'
-      fullPath: '/ca/avis-legal'
-      preLoaderRoute: typeof CaAvisLegalRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/ca/activitats': {
-      id: '/ca/activitats'
-      path: '/ca/activitats'
-      fullPath: '/ca/activitats'
-      preLoaderRoute: typeof CaActivitatsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/app/votaciones': {
-      id: '/app/votaciones'
-      path: '/votaciones'
-      fullPath: '/app/votaciones'
-      preLoaderRoute: typeof AppVotacionesRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/app/rentals': {
-      id: '/app/rentals'
-      path: '/rentals'
-      fullPath: '/app/rentals'
-      preLoaderRoute: typeof AppRentalsRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/app/profile': {
-      id: '/app/profile'
-      path: '/profile'
-      fullPath: '/app/profile'
-      preLoaderRoute: typeof AppProfileRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/app/partidas': {
-      id: '/app/partidas'
-      path: '/partidas'
-      fullPath: '/app/partidas'
-      preLoaderRoute: typeof AppPartidasRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/app/kleffers': {
-      id: '/app/kleffers'
-      path: '/kleffers'
-      fullPath: '/app/kleffers'
-      preLoaderRoute: typeof AppKleffersRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/app/karma': {
-      id: '/app/karma'
-      path: '/karma'
-      fullPath: '/app/karma'
-      preLoaderRoute: typeof AppKarmaRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/app/insignias': {
-      id: '/app/insignias'
-      path: '/insignias'
-      fullPath: '/app/insignias'
-      preLoaderRoute: typeof AppInsigniasRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/app/carnet': {
-      id: '/app/carnet'
-      path: '/carnet'
-      fullPath: '/app/carnet'
-      preLoaderRoute: typeof AppCarnetRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/admin/usuarios': {
-      id: '/admin/usuarios'
-      path: '/usuarios'
-      fullPath: '/admin/usuarios'
-      preLoaderRoute: typeof AdminUsuariosRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/team': {
-      id: '/admin/team'
-      path: '/team'
-      fullPath: '/admin/team'
-      preLoaderRoute: typeof AdminTeamRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/rentals': {
-      id: '/admin/rentals'
-      path: '/rentals'
-      fullPath: '/admin/rentals'
-      preLoaderRoute: typeof AdminRentalsRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/registrations': {
-      id: '/admin/registrations'
-      path: '/registrations'
-      fullPath: '/admin/registrations'
-      preLoaderRoute: typeof AdminRegistrationsRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/polls': {
-      id: '/admin/polls'
-      path: '/polls'
-      fullPath: '/admin/polls'
-      preLoaderRoute: typeof AdminPollsRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/members': {
-      id: '/admin/members'
-      path: '/members'
-      fullPath: '/admin/members'
-      preLoaderRoute: typeof AdminMembersRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/konektum': {
-      id: '/admin/konektum'
-      path: '/konektum'
-      fullPath: '/admin/konektum'
-      preLoaderRoute: typeof AdminKonektumRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/karma': {
-      id: '/admin/karma'
-      path: '/karma'
-      fullPath: '/admin/karma'
-      preLoaderRoute: typeof AdminKarmaRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/invitations': {
-      id: '/admin/invitations'
-      path: '/invitations'
-      fullPath: '/admin/invitations'
-      preLoaderRoute: typeof AdminInvitationsRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/finanzas': {
-      id: '/admin/finanzas'
-      path: '/finanzas'
-      fullPath: '/admin/finanzas'
-      preLoaderRoute: typeof AdminFinanzasRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/content': {
-      id: '/admin/content'
-      path: '/content'
-      fullPath: '/admin/content'
-      preLoaderRoute: typeof AdminContentRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/blog': {
-      id: '/admin/blog'
+    '/blog': {
+      id: '/blog'
       path: '/blog'
-      fullPath: '/admin/blog'
-      preLoaderRoute: typeof AdminBlogRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/$eventSlug/usuario': {
-      id: '/$eventSlug/usuario'
-      path: '/$eventSlug/usuario'
-      fullPath: '/$eventSlug/usuario'
-      preLoaderRoute: typeof EventSlugUsuarioRouteImport
+      fullPath: '/blog'
+      preLoaderRoute: typeof BlogRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/$eventSlug/seleccion': {
-      id: '/$eventSlug/seleccion'
-      path: '/$eventSlug/seleccion'
-      fullPath: '/$eventSlug/seleccion'
-      preLoaderRoute: typeof EventSlugSeleccionRouteImport
+    '/blood-on-the-clocktower': {
+      id: '/blood-on-the-clocktower'
+      path: '/blood-on-the-clocktower'
+      fullPath: '/blood-on-the-clocktower'
+      preLoaderRoute: typeof BloodOnTheClocktowerRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/$eventSlug/registro': {
-      id: '/$eventSlug/registro'
-      path: '/$eventSlug/registro'
-      fullPath: '/$eventSlug/registro'
-      preLoaderRoute: typeof EventSlugRegistroRouteImport
+    '/catan': {
+      id: '/catan'
+      path: '/catan'
+      fullPath: '/catan'
+      preLoaderRoute: typeof CatanRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/$eventSlug/mesas': {
-      id: '/$eventSlug/mesas'
-      path: '/$eventSlug/mesas'
-      fullPath: '/$eventSlug/mesas'
-      preLoaderRoute: typeof EventSlugMesasRouteImport
+    '/como-funciona': {
+      id: '/como-funciona'
+      path: '/como-funciona'
+      fullPath: '/como-funciona'
+      preLoaderRoute: typeof ComoFuncionaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/contacto': {
+      id: '/contacto'
+      path: '/contacto'
+      fullPath: '/contacto'
+      preLoaderRoute: typeof ContactoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/cookies': {
+      id: '/cookies'
+      path: '/cookies'
+      fullPath: '/cookies'
+      preLoaderRoute: typeof CookiesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/crush-response': {
+      id: '/crush-response'
+      path: '/crush-response'
+      fullPath: '/crush-response'
+      preLoaderRoute: typeof CrushResponseRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ludoteca': {
+      id: '/ludoteca'
+      path: '/ludoteca'
+      fullPath: '/ludoteca'
+      preLoaderRoute: typeof LudotecaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/medios': {
+      id: '/medios'
+      path: '/medios'
+      fullPath: '/medios'
+      preLoaderRoute: typeof MediosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacidad': {
+      id: '/privacidad'
+      path: '/privacidad'
+      fullPath: '/privacidad'
+      preLoaderRoute: typeof PrivacidadRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/repeat-response': {
+      id: '/repeat-response'
+      path: '/repeat-response'
+      fullPath: '/repeat-response'
+      preLoaderRoute: typeof RepeatResponseRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/roles-ocultos': {
+      id: '/roles-ocultos'
+      path: '/roles-ocultos'
+      fullPath: '/roles-ocultos'
+      preLoaderRoute: typeof RolesOcultosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/slow-friending-ludico': {
+      id: '/slow-friending-ludico'
+      path: '/slow-friending-ludico'
+      fullPath: '/slow-friending-ludico'
+      preLoaderRoute: typeof SlowFriendingLudicoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sobre-nosotros': {
+      id: '/sobre-nosotros'
+      path: '/sobre-nosotros'
+      fullPath: '/sobre-nosotros'
+      preLoaderRoute: typeof SobreNosotrosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/super-admin': {
+      id: '/super-admin'
+      path: '/super-admin'
+      fullPath: '/super-admin'
+      preLoaderRoute: typeof SuperAdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tarda-de-jocs-i-cuina-japonesa': {
+      id: '/tarda-de-jocs-i-cuina-japonesa'
+      path: '/tarda-de-jocs-i-cuina-japonesa'
+      fullPath: '/tarda-de-jocs-i-cuina-japonesa'
+      preLoaderRoute: typeof TardaDeJocsICuinaJaponesaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/terminos': {
+      id: '/terminos'
+      path: '/terminos'
+      fullPath: '/terminos'
+      preLoaderRoute: typeof TerminosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/torneos': {
+      id: '/torneos'
+      path: '/torneos'
+      fullPath: '/torneos'
+      preLoaderRoute: typeof TorneosRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/$eventSlug/check-in': {
@@ -2615,68 +2174,453 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EventSlugCheckInRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/s/$seriesSlug/': {
-      id: '/s/$seriesSlug/'
-      path: '/s/$seriesSlug'
-      fullPath: '/s/$seriesSlug/'
-      preLoaderRoute: typeof SSeriesSlugIndexRouteImport
+    '/$eventSlug/mesas': {
+      id: '/$eventSlug/mesas'
+      path: '/$eventSlug/mesas'
+      fullPath: '/$eventSlug/mesas'
+      preLoaderRoute: typeof EventSlugMesasRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/app/rentals/': {
-      id: '/app/rentals/'
-      path: '/'
-      fullPath: '/app/rentals/'
-      preLoaderRoute: typeof AppRentalsIndexRouteImport
-      parentRoute: typeof AppRentalsRoute
+    '/$eventSlug/registro': {
+      id: '/$eventSlug/registro'
+      path: '/$eventSlug/registro'
+      fullPath: '/$eventSlug/registro'
+      preLoaderRoute: typeof EventSlugRegistroRouteImport
+      parentRoute: typeof rootRouteImport
     }
-    '/admin/rentals/': {
-      id: '/admin/rentals/'
-      path: '/'
-      fullPath: '/admin/rentals/'
-      preLoaderRoute: typeof AdminRentalsIndexRouteImport
-      parentRoute: typeof AdminRentalsRoute
+    '/$eventSlug/seleccion': {
+      id: '/$eventSlug/seleccion'
+      path: '/$eventSlug/seleccion'
+      fullPath: '/$eventSlug/seleccion'
+      preLoaderRoute: typeof EventSlugSeleccionRouteImport
+      parentRoute: typeof rootRouteImport
     }
-    '/admin/registrations/': {
-      id: '/admin/registrations/'
-      path: '/'
-      fullPath: '/admin/registrations/'
-      preLoaderRoute: typeof AdminRegistrationsIndexRouteImport
-      parentRoute: typeof AdminRegistrationsRoute
+    '/$eventSlug/usuario': {
+      id: '/$eventSlug/usuario'
+      path: '/$eventSlug/usuario'
+      fullPath: '/$eventSlug/usuario'
+      preLoaderRoute: typeof EventSlugUsuarioRouteImport
+      parentRoute: typeof rootRouteImport
     }
-    '/admin/media/': {
-      id: '/admin/media/'
-      path: '/media'
-      fullPath: '/admin/media/'
-      preLoaderRoute: typeof AdminMediaIndexRouteImport
+    '/admin/': {
+      id: '/admin/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
       parentRoute: typeof AdminRoute
     }
-    '/admin/konektum/': {
-      id: '/admin/konektum/'
-      path: '/'
-      fullPath: '/admin/konektum/'
-      preLoaderRoute: typeof AdminKonektumIndexRouteImport
-      parentRoute: typeof AdminKonektumRoute
+    '/admin/blog': {
+      id: '/admin/blog'
+      path: '/blog'
+      fullPath: '/admin/blog'
+      preLoaderRoute: typeof AdminBlogRouteImport
+      parentRoute: typeof AdminRoute
     }
-    '/admin/finanzas/': {
-      id: '/admin/finanzas/'
-      path: '/'
-      fullPath: '/admin/finanzas/'
-      preLoaderRoute: typeof AdminFinanzasIndexRouteImport
-      parentRoute: typeof AdminFinanzasRoute
+    '/admin/content': {
+      id: '/admin/content'
+      path: '/content'
+      fullPath: '/admin/content'
+      preLoaderRoute: typeof AdminContentRouteImport
+      parentRoute: typeof AdminRoute
     }
-    '/admin/content/': {
-      id: '/admin/content/'
-      path: '/'
-      fullPath: '/admin/content/'
-      preLoaderRoute: typeof AdminContentIndexRouteImport
-      parentRoute: typeof AdminContentRoute
+    '/admin/finanzas': {
+      id: '/admin/finanzas'
+      path: '/finanzas'
+      fullPath: '/admin/finanzas'
+      preLoaderRoute: typeof AdminFinanzasRouteImport
+      parentRoute: typeof AdminRoute
     }
-    '/admin/blog/': {
-      id: '/admin/blog/'
+    '/admin/invitations': {
+      id: '/admin/invitations'
+      path: '/invitations'
+      fullPath: '/admin/invitations'
+      preLoaderRoute: typeof AdminInvitationsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/karma': {
+      id: '/admin/karma'
+      path: '/karma'
+      fullPath: '/admin/karma'
+      preLoaderRoute: typeof AdminKarmaRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/konektum': {
+      id: '/admin/konektum'
+      path: '/konektum'
+      fullPath: '/admin/konektum'
+      preLoaderRoute: typeof AdminKonektumRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/members': {
+      id: '/admin/members'
+      path: '/members'
+      fullPath: '/admin/members'
+      preLoaderRoute: typeof AdminMembersRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/polls': {
+      id: '/admin/polls'
+      path: '/polls'
+      fullPath: '/admin/polls'
+      preLoaderRoute: typeof AdminPollsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/registrations': {
+      id: '/admin/registrations'
+      path: '/registrations'
+      fullPath: '/admin/registrations'
+      preLoaderRoute: typeof AdminRegistrationsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/rentals': {
+      id: '/admin/rentals'
+      path: '/rentals'
+      fullPath: '/admin/rentals'
+      preLoaderRoute: typeof AdminRentalsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/team': {
+      id: '/admin/team'
+      path: '/team'
+      fullPath: '/admin/team'
+      preLoaderRoute: typeof AdminTeamRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/usuarios': {
+      id: '/admin/usuarios'
+      path: '/usuarios'
+      fullPath: '/admin/usuarios'
+      preLoaderRoute: typeof AdminUsuariosRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/app/': {
+      id: '/app/'
       path: '/'
-      fullPath: '/admin/blog/'
-      preLoaderRoute: typeof AdminBlogIndexRouteImport
-      parentRoute: typeof AdminBlogRoute
+      fullPath: '/app/'
+      preLoaderRoute: typeof AppIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/carnet': {
+      id: '/app/carnet'
+      path: '/carnet'
+      fullPath: '/app/carnet'
+      preLoaderRoute: typeof AppCarnetRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/insignias': {
+      id: '/app/insignias'
+      path: '/insignias'
+      fullPath: '/app/insignias'
+      preLoaderRoute: typeof AppInsigniasRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/karma': {
+      id: '/app/karma'
+      path: '/karma'
+      fullPath: '/app/karma'
+      preLoaderRoute: typeof AppKarmaRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/kleffers': {
+      id: '/app/kleffers'
+      path: '/kleffers'
+      fullPath: '/app/kleffers'
+      preLoaderRoute: typeof AppKleffersRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/partidas': {
+      id: '/app/partidas'
+      path: '/partidas'
+      fullPath: '/app/partidas'
+      preLoaderRoute: typeof AppPartidasRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/profile': {
+      id: '/app/profile'
+      path: '/profile'
+      fullPath: '/app/profile'
+      preLoaderRoute: typeof AppProfileRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/rentals': {
+      id: '/app/rentals'
+      path: '/rentals'
+      fullPath: '/app/rentals'
+      preLoaderRoute: typeof AppRentalsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/votaciones': {
+      id: '/app/votaciones'
+      path: '/votaciones'
+      fullPath: '/app/votaciones'
+      preLoaderRoute: typeof AppVotacionesRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/ca/': {
+      id: '/ca/'
+      path: '/ca'
+      fullPath: '/ca/'
+      preLoaderRoute: typeof CaIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ca/activitats': {
+      id: '/ca/activitats'
+      path: '/ca/activitats'
+      fullPath: '/ca/activitats'
+      preLoaderRoute: typeof CaActivitatsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ca/avis-legal': {
+      id: '/ca/avis-legal'
+      path: '/ca/avis-legal'
+      fullPath: '/ca/avis-legal'
+      preLoaderRoute: typeof CaAvisLegalRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ca/blog': {
+      id: '/ca/blog'
+      path: '/ca/blog'
+      fullPath: '/ca/blog'
+      preLoaderRoute: typeof CaBlogRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ca/blood-on-the-clocktower': {
+      id: '/ca/blood-on-the-clocktower'
+      path: '/ca/blood-on-the-clocktower'
+      fullPath: '/ca/blood-on-the-clocktower'
+      preLoaderRoute: typeof CaBloodOnTheClocktowerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ca/catan': {
+      id: '/ca/catan'
+      path: '/ca/catan'
+      fullPath: '/ca/catan'
+      preLoaderRoute: typeof CaCatanRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ca/com-funciona': {
+      id: '/ca/com-funciona'
+      path: '/ca/com-funciona'
+      fullPath: '/ca/com-funciona'
+      preLoaderRoute: typeof CaComFuncionaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ca/contacte': {
+      id: '/ca/contacte'
+      path: '/ca/contacte'
+      fullPath: '/ca/contacte'
+      preLoaderRoute: typeof CaContacteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ca/cookies': {
+      id: '/ca/cookies'
+      path: '/ca/cookies'
+      fullPath: '/ca/cookies'
+      preLoaderRoute: typeof CaCookiesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ca/ludoteca': {
+      id: '/ca/ludoteca'
+      path: '/ca/ludoteca'
+      fullPath: '/ca/ludoteca'
+      preLoaderRoute: typeof CaLudotecaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ca/mitjans': {
+      id: '/ca/mitjans'
+      path: '/ca/mitjans'
+      fullPath: '/ca/mitjans'
+      preLoaderRoute: typeof CaMitjansRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ca/privacitat': {
+      id: '/ca/privacitat'
+      path: '/ca/privacitat'
+      fullPath: '/ca/privacitat'
+      preLoaderRoute: typeof CaPrivacitatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ca/qui-som': {
+      id: '/ca/qui-som'
+      path: '/ca/qui-som'
+      fullPath: '/ca/qui-som'
+      preLoaderRoute: typeof CaQuiSomRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ca/rols-ocults': {
+      id: '/ca/rols-ocults'
+      path: '/ca/rols-ocults'
+      fullPath: '/ca/rols-ocults'
+      preLoaderRoute: typeof CaRolsOcultsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ca/slow-friending-ludic': {
+      id: '/ca/slow-friending-ludic'
+      path: '/ca/slow-friending-ludic'
+      fullPath: '/ca/slow-friending-ludic'
+      preLoaderRoute: typeof CaSlowFriendingLudicRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ca/termes': {
+      id: '/ca/termes'
+      path: '/ca/termes'
+      fullPath: '/ca/termes'
+      preLoaderRoute: typeof CaTermesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ca/tornejos': {
+      id: '/ca/tornejos'
+      path: '/ca/tornejos'
+      fullPath: '/ca/tornejos'
+      preLoaderRoute: typeof CaTornejosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/en/': {
+      id: '/en/'
+      path: '/en'
+      fullPath: '/en/'
+      preLoaderRoute: typeof EnIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/en/about': {
+      id: '/en/about'
+      path: '/en/about'
+      fullPath: '/en/about'
+      preLoaderRoute: typeof EnAboutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/en/activities': {
+      id: '/en/activities'
+      path: '/en/activities'
+      fullPath: '/en/activities'
+      preLoaderRoute: typeof EnActivitiesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/en/blog': {
+      id: '/en/blog'
+      path: '/en/blog'
+      fullPath: '/en/blog'
+      preLoaderRoute: typeof EnBlogRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/en/blood-on-the-clocktower': {
+      id: '/en/blood-on-the-clocktower'
+      path: '/en/blood-on-the-clocktower'
+      fullPath: '/en/blood-on-the-clocktower'
+      preLoaderRoute: typeof EnBloodOnTheClocktowerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/en/catan': {
+      id: '/en/catan'
+      path: '/en/catan'
+      fullPath: '/en/catan'
+      preLoaderRoute: typeof EnCatanRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/en/contact': {
+      id: '/en/contact'
+      path: '/en/contact'
+      fullPath: '/en/contact'
+      preLoaderRoute: typeof EnContactRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/en/cookies': {
+      id: '/en/cookies'
+      path: '/en/cookies'
+      fullPath: '/en/cookies'
+      preLoaderRoute: typeof EnCookiesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/en/hidden-roles': {
+      id: '/en/hidden-roles'
+      path: '/en/hidden-roles'
+      fullPath: '/en/hidden-roles'
+      preLoaderRoute: typeof EnHiddenRolesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/en/how-it-works': {
+      id: '/en/how-it-works'
+      path: '/en/how-it-works'
+      fullPath: '/en/how-it-works'
+      preLoaderRoute: typeof EnHowItWorksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/en/legal-notice': {
+      id: '/en/legal-notice'
+      path: '/en/legal-notice'
+      fullPath: '/en/legal-notice'
+      preLoaderRoute: typeof EnLegalNoticeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/en/ludoteca': {
+      id: '/en/ludoteca'
+      path: '/en/ludoteca'
+      fullPath: '/en/ludoteca'
+      preLoaderRoute: typeof EnLudotecaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/en/media': {
+      id: '/en/media'
+      path: '/en/media'
+      fullPath: '/en/media'
+      preLoaderRoute: typeof EnMediaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/en/privacy': {
+      id: '/en/privacy'
+      path: '/en/privacy'
+      fullPath: '/en/privacy'
+      preLoaderRoute: typeof EnPrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/en/slow-friending': {
+      id: '/en/slow-friending'
+      path: '/en/slow-friending'
+      fullPath: '/en/slow-friending'
+      preLoaderRoute: typeof EnSlowFriendingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/en/terms': {
+      id: '/en/terms'
+      path: '/en/terms'
+      fullPath: '/en/terms'
+      preLoaderRoute: typeof EnTermsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/en/tournaments': {
+      id: '/en/tournaments'
+      path: '/en/tournaments'
+      fullPath: '/en/tournaments'
+      preLoaderRoute: typeof EnTournamentsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/inscripcion/$slug': {
+      id: '/inscripcion/$slug'
+      path: '/inscripcion/$slug'
+      fullPath: '/inscripcion/$slug'
+      preLoaderRoute: typeof InscripcionSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/invite/$token': {
+      id: '/invite/$token'
+      path: '/invite/$token'
+      fullPath: '/invite/$token'
+      preLoaderRoute: typeof InviteTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/verificar/$id': {
+      id: '/verificar/$id'
+      path: '/verificar/$id'
+      fullPath: '/verificar/$id'
+      preLoaderRoute: typeof VerificarIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/$eventSlug/cancelar/$participantId': {
+      id: '/$eventSlug/cancelar/$participantId'
+      path: '/$eventSlug/cancelar/$participantId'
+      fullPath: '/$eventSlug/cancelar/$participantId'
+      preLoaderRoute: typeof EventSlugCancelarParticipantIdRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/actividades_/juegos/': {
       id: '/actividades_/juegos/'
@@ -2685,284 +2629,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ActividadesJuegosIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/s/$seriesSlug/join': {
-      id: '/s/$seriesSlug/join'
-      path: '/s/$seriesSlug/join'
-      fullPath: '/s/$seriesSlug/join'
-      preLoaderRoute: typeof SSeriesSlugJoinRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/inscripcion/baja/$token': {
-      id: '/inscripcion/baja/$token'
-      path: '/inscripcion/baja/$token'
-      fullPath: '/inscripcion/baja/$token'
-      preLoaderRoute: typeof InscripcionBajaTokenRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/event/$id/tables': {
-      id: '/event/$id/tables'
-      path: '/event/$id/tables'
-      fullPath: '/event/$id/tables'
-      preLoaderRoute: typeof EventIdTablesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/event/$id/select': {
-      id: '/event/$id/select'
-      path: '/event/$id/select'
-      fullPath: '/event/$id/select'
-      preLoaderRoute: typeof EventIdSelectRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/event/$id/join': {
-      id: '/event/$id/join'
-      path: '/event/$id/join'
-      fullPath: '/event/$id/join'
-      preLoaderRoute: typeof EventIdJoinRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/event/$id/checkin': {
-      id: '/event/$id/checkin'
-      path: '/event/$id/checkin'
-      fullPath: '/event/$id/checkin'
-      preLoaderRoute: typeof EventIdCheckinRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/event/$id/access': {
-      id: '/event/$id/access'
-      path: '/event/$id/access'
-      fullPath: '/event/$id/access'
-      preLoaderRoute: typeof EventIdAccessRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/auth/ludoya/callback': {
-      id: '/auth/ludoya/callback'
-      path: '/auth/ludoya/callback'
-      fullPath: '/auth/ludoya/callback'
-      preLoaderRoute: typeof AuthLudoyaCallbackRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/app/rentals/requests': {
-      id: '/app/rentals/requests'
-      path: '/requests'
-      fullPath: '/app/rentals/requests'
-      preLoaderRoute: typeof AppRentalsRequestsRouteImport
-      parentRoute: typeof AppRentalsRoute
-    }
-    '/app/rentals/history': {
-      id: '/app/rentals/history'
-      path: '/history'
-      fullPath: '/app/rentals/history'
-      preLoaderRoute: typeof AppRentalsHistoryRouteImport
-      parentRoute: typeof AppRentalsRoute
-    }
-    '/app/rentals/active': {
-      id: '/app/rentals/active'
-      path: '/active'
-      fullPath: '/app/rentals/active'
-      preLoaderRoute: typeof AppRentalsActiveRouteImport
-      parentRoute: typeof AppRentalsRoute
-    }
-    '/api/public/upload-my-avatar': {
-      id: '/api/public/upload-my-avatar'
-      path: '/api/public/upload-my-avatar'
-      fullPath: '/api/public/upload-my-avatar'
-      preLoaderRoute: typeof ApiPublicUploadMyAvatarRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/upload-invite-avatar': {
-      id: '/api/public/upload-invite-avatar'
-      path: '/api/public/upload-invite-avatar'
-      fullPath: '/api/public/upload-invite-avatar'
-      preLoaderRoute: typeof ApiPublicUploadInviteAvatarRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/sync-bgg': {
-      id: '/api/public/sync-bgg'
-      path: '/api/public/sync-bgg'
-      fullPath: '/api/public/sync-bgg'
-      preLoaderRoute: typeof ApiPublicSyncBggRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/ludoya-image': {
-      id: '/api/public/ludoya-image'
-      path: '/api/public/ludoya-image'
-      fullPath: '/api/public/ludoya-image'
-      preLoaderRoute: typeof ApiPublicLudoyaImageRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/contact': {
-      id: '/api/public/contact'
-      path: '/api/public/contact'
-      fullPath: '/api/public/contact'
-      preLoaderRoute: typeof ApiPublicContactRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/rentals/settings': {
-      id: '/admin/rentals/settings'
-      path: '/settings'
-      fullPath: '/admin/rentals/settings'
-      preLoaderRoute: typeof AdminRentalsSettingsRouteImport
-      parentRoute: typeof AdminRentalsRoute
-    }
-    '/admin/rentals/history': {
-      id: '/admin/rentals/history'
-      path: '/history'
-      fullPath: '/admin/rentals/history'
-      preLoaderRoute: typeof AdminRentalsHistoryRouteImport
-      parentRoute: typeof AdminRentalsRoute
-    }
-    '/admin/rentals/catalog': {
-      id: '/admin/rentals/catalog'
-      path: '/catalog'
-      fullPath: '/admin/rentals/catalog'
-      preLoaderRoute: typeof AdminRentalsCatalogRouteImport
-      parentRoute: typeof AdminRentalsRoute
-    }
-    '/admin/rentals/active': {
-      id: '/admin/rentals/active'
-      path: '/active'
-      fullPath: '/admin/rentals/active'
-      preLoaderRoute: typeof AdminRentalsActiveRouteImport
-      parentRoute: typeof AdminRentalsRoute
-    }
-    '/admin/registrations/$id': {
-      id: '/admin/registrations/$id'
-      path: '/$id'
-      fullPath: '/admin/registrations/$id'
-      preLoaderRoute: typeof AdminRegistrationsIdRouteImport
-      parentRoute: typeof AdminRegistrationsRoute
-    }
-    '/admin/pages/$pageId': {
-      id: '/admin/pages/$pageId'
-      path: '/pages/$pageId'
-      fullPath: '/admin/pages/$pageId'
-      preLoaderRoute: typeof AdminPagesPageIdRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/media/new': {
-      id: '/admin/media/new'
-      path: '/media/new'
-      fullPath: '/admin/media/new'
-      preLoaderRoute: typeof AdminMediaNewRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/media/$id': {
-      id: '/admin/media/$id'
-      path: '/media/$id'
-      fullPath: '/admin/media/$id'
-      preLoaderRoute: typeof AdminMediaIdRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/konektum/usuarios': {
-      id: '/admin/konektum/usuarios'
-      path: '/usuarios'
-      fullPath: '/admin/konektum/usuarios'
-      preLoaderRoute: typeof AdminKonektumUsuariosRouteImport
-      parentRoute: typeof AdminKonektumRoute
-    }
-    '/admin/konektum/plantillas': {
-      id: '/admin/konektum/plantillas'
-      path: '/plantillas'
-      fullPath: '/admin/konektum/plantillas'
-      preLoaderRoute: typeof AdminKonektumPlantillasRouteImport
-      parentRoute: typeof AdminKonektumRoute
-    }
-    '/admin/konektum/email': {
-      id: '/admin/konektum/email'
-      path: '/email'
-      fullPath: '/admin/konektum/email'
-      preLoaderRoute: typeof AdminKonektumEmailRouteImport
-      parentRoute: typeof AdminKonektumRoute
-    }
-    '/admin/konektum/configuracion': {
-      id: '/admin/konektum/configuracion'
-      path: '/configuracion'
-      fullPath: '/admin/konektum/configuracion'
-      preLoaderRoute: typeof AdminKonektumConfiguracionRouteImport
-      parentRoute: typeof AdminKonektumRoute
-    }
-    '/admin/konektum/analitica': {
-      id: '/admin/konektum/analitica'
-      path: '/analitica'
-      fullPath: '/admin/konektum/analitica'
-      preLoaderRoute: typeof AdminKonektumAnaliticaRouteImport
-      parentRoute: typeof AdminKonektumRoute
-    }
-    '/admin/finanzas/impuestos': {
-      id: '/admin/finanzas/impuestos'
-      path: '/impuestos'
-      fullPath: '/admin/finanzas/impuestos'
-      preLoaderRoute: typeof AdminFinanzasImpuestosRouteImport
-      parentRoute: typeof AdminFinanzasRoute
-    }
-    '/admin/finanzas/gastos': {
-      id: '/admin/finanzas/gastos'
-      path: '/gastos'
-      fullPath: '/admin/finanzas/gastos'
-      preLoaderRoute: typeof AdminFinanzasGastosRouteImport
-      parentRoute: typeof AdminFinanzasRoute
-    }
-    '/admin/finanzas/facturas': {
-      id: '/admin/finanzas/facturas'
-      path: '/facturas'
-      fullPath: '/admin/finanzas/facturas'
-      preLoaderRoute: typeof AdminFinanzasFacturasRouteImport
-      parentRoute: typeof AdminFinanzasRoute
-    }
-    '/admin/finanzas/cuotas': {
-      id: '/admin/finanzas/cuotas'
-      path: '/cuotas'
-      fullPath: '/admin/finanzas/cuotas'
-      preLoaderRoute: typeof AdminFinanzasCuotasRouteImport
-      parentRoute: typeof AdminFinanzasRoute
-    }
-    '/admin/finanzas/colaboraciones': {
-      id: '/admin/finanzas/colaboraciones'
-      path: '/colaboraciones'
-      fullPath: '/admin/finanzas/colaboraciones'
-      preLoaderRoute: typeof AdminFinanzasColaboracionesRouteImport
-      parentRoute: typeof AdminFinanzasRoute
-    }
-    '/admin/finanzas/categorias': {
-      id: '/admin/finanzas/categorias'
-      path: '/categorias'
-      fullPath: '/admin/finanzas/categorias'
-      preLoaderRoute: typeof AdminFinanzasCategoriasRouteImport
-      parentRoute: typeof AdminFinanzasRoute
-    }
-    '/admin/finanzas/aportaciones': {
-      id: '/admin/finanzas/aportaciones'
-      path: '/aportaciones'
-      fullPath: '/admin/finanzas/aportaciones'
-      preLoaderRoute: typeof AdminFinanzasAportacionesRouteImport
-      parentRoute: typeof AdminFinanzasRoute
-    }
-    '/admin/content/urls': {
-      id: '/admin/content/urls'
-      path: '/urls'
-      fullPath: '/admin/content/urls'
-      preLoaderRoute: typeof AdminContentUrlsRouteImport
-      parentRoute: typeof AdminContentRoute
-    }
-    '/admin/content/redirects': {
-      id: '/admin/content/redirects'
-      path: '/redirects'
-      fullPath: '/admin/content/redirects'
-      preLoaderRoute: typeof AdminContentRedirectsRouteImport
-      parentRoute: typeof AdminContentRoute
-    }
-    '/admin/content/$pageKey': {
-      id: '/admin/content/$pageKey'
-      path: '/$pageKey'
-      fullPath: '/admin/content/$pageKey'
-      preLoaderRoute: typeof AdminContentPageKeyRouteImport
-      parentRoute: typeof AdminContentRoute
-    }
-    '/admin/blog/new': {
-      id: '/admin/blog/new'
-      path: '/new'
-      fullPath: '/admin/blog/new'
-      preLoaderRoute: typeof AdminBlogNewRouteImport
+    '/admin/blog/': {
+      id: '/admin/blog/'
+      path: '/'
+      fullPath: '/admin/blog/'
+      preLoaderRoute: typeof AdminBlogIndexRouteImport
       parentRoute: typeof AdminBlogRoute
     }
     '/admin/blog/$id': {
@@ -2972,25 +2643,340 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminBlogIdRouteImport
       parentRoute: typeof AdminBlogRoute
     }
-    '/$eventSlug/cancelar/$participantId': {
-      id: '/$eventSlug/cancelar/$participantId'
-      path: '/$eventSlug/cancelar/$participantId'
-      fullPath: '/$eventSlug/cancelar/$participantId'
-      preLoaderRoute: typeof EventSlugCancelarParticipantIdRouteImport
-      parentRoute: typeof rootRouteImport
+    '/admin/blog/new': {
+      id: '/admin/blog/new'
+      path: '/new'
+      fullPath: '/admin/blog/new'
+      preLoaderRoute: typeof AdminBlogNewRouteImport
+      parentRoute: typeof AdminBlogRoute
     }
-    '/admin/konektum/eventos/': {
-      id: '/admin/konektum/eventos/'
-      path: '/eventos'
-      fullPath: '/admin/konektum/eventos/'
-      preLoaderRoute: typeof AdminKonektumEventosIndexRouteImport
+    '/admin/content/': {
+      id: '/admin/content/'
+      path: '/'
+      fullPath: '/admin/content/'
+      preLoaderRoute: typeof AdminContentIndexRouteImport
+      parentRoute: typeof AdminContentRoute
+    }
+    '/admin/content/$pageKey': {
+      id: '/admin/content/$pageKey'
+      path: '/$pageKey'
+      fullPath: '/admin/content/$pageKey'
+      preLoaderRoute: typeof AdminContentPageKeyRouteImport
+      parentRoute: typeof AdminContentRoute
+    }
+    '/admin/content/redirects': {
+      id: '/admin/content/redirects'
+      path: '/redirects'
+      fullPath: '/admin/content/redirects'
+      preLoaderRoute: typeof AdminContentRedirectsRouteImport
+      parentRoute: typeof AdminContentRoute
+    }
+    '/admin/content/urls': {
+      id: '/admin/content/urls'
+      path: '/urls'
+      fullPath: '/admin/content/urls'
+      preLoaderRoute: typeof AdminContentUrlsRouteImport
+      parentRoute: typeof AdminContentRoute
+    }
+    '/admin/finanzas/': {
+      id: '/admin/finanzas/'
+      path: '/'
+      fullPath: '/admin/finanzas/'
+      preLoaderRoute: typeof AdminFinanzasIndexRouteImport
+      parentRoute: typeof AdminFinanzasRoute
+    }
+    '/admin/finanzas/aportaciones': {
+      id: '/admin/finanzas/aportaciones'
+      path: '/aportaciones'
+      fullPath: '/admin/finanzas/aportaciones'
+      preLoaderRoute: typeof AdminFinanzasAportacionesRouteImport
+      parentRoute: typeof AdminFinanzasRoute
+    }
+    '/admin/finanzas/categorias': {
+      id: '/admin/finanzas/categorias'
+      path: '/categorias'
+      fullPath: '/admin/finanzas/categorias'
+      preLoaderRoute: typeof AdminFinanzasCategoriasRouteImport
+      parentRoute: typeof AdminFinanzasRoute
+    }
+    '/admin/finanzas/colaboraciones': {
+      id: '/admin/finanzas/colaboraciones'
+      path: '/colaboraciones'
+      fullPath: '/admin/finanzas/colaboraciones'
+      preLoaderRoute: typeof AdminFinanzasColaboracionesRouteImport
+      parentRoute: typeof AdminFinanzasRoute
+    }
+    '/admin/finanzas/cuotas': {
+      id: '/admin/finanzas/cuotas'
+      path: '/cuotas'
+      fullPath: '/admin/finanzas/cuotas'
+      preLoaderRoute: typeof AdminFinanzasCuotasRouteImport
+      parentRoute: typeof AdminFinanzasRoute
+    }
+    '/admin/finanzas/facturas': {
+      id: '/admin/finanzas/facturas'
+      path: '/facturas'
+      fullPath: '/admin/finanzas/facturas'
+      preLoaderRoute: typeof AdminFinanzasFacturasRouteImport
+      parentRoute: typeof AdminFinanzasRoute
+    }
+    '/admin/finanzas/gastos': {
+      id: '/admin/finanzas/gastos'
+      path: '/gastos'
+      fullPath: '/admin/finanzas/gastos'
+      preLoaderRoute: typeof AdminFinanzasGastosRouteImport
+      parentRoute: typeof AdminFinanzasRoute
+    }
+    '/admin/finanzas/impuestos': {
+      id: '/admin/finanzas/impuestos'
+      path: '/impuestos'
+      fullPath: '/admin/finanzas/impuestos'
+      preLoaderRoute: typeof AdminFinanzasImpuestosRouteImport
+      parentRoute: typeof AdminFinanzasRoute
+    }
+    '/admin/konektum/': {
+      id: '/admin/konektum/'
+      path: '/'
+      fullPath: '/admin/konektum/'
+      preLoaderRoute: typeof AdminKonektumIndexRouteImport
       parentRoute: typeof AdminKonektumRoute
     }
-    '/actividades_/juegos/jugar/': {
-      id: '/actividades_/juegos/jugar/'
-      path: '/actividades/juegos/jugar'
-      fullPath: '/actividades/juegos/jugar/'
-      preLoaderRoute: typeof ActividadesJuegosJugarIndexRouteImport
+    '/admin/konektum/analitica': {
+      id: '/admin/konektum/analitica'
+      path: '/analitica'
+      fullPath: '/admin/konektum/analitica'
+      preLoaderRoute: typeof AdminKonektumAnaliticaRouteImport
+      parentRoute: typeof AdminKonektumRoute
+    }
+    '/admin/konektum/configuracion': {
+      id: '/admin/konektum/configuracion'
+      path: '/configuracion'
+      fullPath: '/admin/konektum/configuracion'
+      preLoaderRoute: typeof AdminKonektumConfiguracionRouteImport
+      parentRoute: typeof AdminKonektumRoute
+    }
+    '/admin/konektum/email': {
+      id: '/admin/konektum/email'
+      path: '/email'
+      fullPath: '/admin/konektum/email'
+      preLoaderRoute: typeof AdminKonektumEmailRouteImport
+      parentRoute: typeof AdminKonektumRoute
+    }
+    '/admin/konektum/plantillas': {
+      id: '/admin/konektum/plantillas'
+      path: '/plantillas'
+      fullPath: '/admin/konektum/plantillas'
+      preLoaderRoute: typeof AdminKonektumPlantillasRouteImport
+      parentRoute: typeof AdminKonektumRoute
+    }
+    '/admin/konektum/usuarios': {
+      id: '/admin/konektum/usuarios'
+      path: '/usuarios'
+      fullPath: '/admin/konektum/usuarios'
+      preLoaderRoute: typeof AdminKonektumUsuariosRouteImport
+      parentRoute: typeof AdminKonektumRoute
+    }
+    '/admin/media/': {
+      id: '/admin/media/'
+      path: '/media'
+      fullPath: '/admin/media/'
+      preLoaderRoute: typeof AdminMediaIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/media/$id': {
+      id: '/admin/media/$id'
+      path: '/media/$id'
+      fullPath: '/admin/media/$id'
+      preLoaderRoute: typeof AdminMediaIdRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/media/new': {
+      id: '/admin/media/new'
+      path: '/media/new'
+      fullPath: '/admin/media/new'
+      preLoaderRoute: typeof AdminMediaNewRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/pages/$pageId': {
+      id: '/admin/pages/$pageId'
+      path: '/pages/$pageId'
+      fullPath: '/admin/pages/$pageId'
+      preLoaderRoute: typeof AdminPagesPageIdRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/registrations/': {
+      id: '/admin/registrations/'
+      path: '/'
+      fullPath: '/admin/registrations/'
+      preLoaderRoute: typeof AdminRegistrationsIndexRouteImport
+      parentRoute: typeof AdminRegistrationsRoute
+    }
+    '/admin/registrations/$id': {
+      id: '/admin/registrations/$id'
+      path: '/$id'
+      fullPath: '/admin/registrations/$id'
+      preLoaderRoute: typeof AdminRegistrationsIdRouteImport
+      parentRoute: typeof AdminRegistrationsRoute
+    }
+    '/admin/rentals/': {
+      id: '/admin/rentals/'
+      path: '/'
+      fullPath: '/admin/rentals/'
+      preLoaderRoute: typeof AdminRentalsIndexRouteImport
+      parentRoute: typeof AdminRentalsRoute
+    }
+    '/admin/rentals/active': {
+      id: '/admin/rentals/active'
+      path: '/active'
+      fullPath: '/admin/rentals/active'
+      preLoaderRoute: typeof AdminRentalsActiveRouteImport
+      parentRoute: typeof AdminRentalsRoute
+    }
+    '/admin/rentals/catalog': {
+      id: '/admin/rentals/catalog'
+      path: '/catalog'
+      fullPath: '/admin/rentals/catalog'
+      preLoaderRoute: typeof AdminRentalsCatalogRouteImport
+      parentRoute: typeof AdminRentalsRoute
+    }
+    '/admin/rentals/history': {
+      id: '/admin/rentals/history'
+      path: '/history'
+      fullPath: '/admin/rentals/history'
+      preLoaderRoute: typeof AdminRentalsHistoryRouteImport
+      parentRoute: typeof AdminRentalsRoute
+    }
+    '/admin/rentals/settings': {
+      id: '/admin/rentals/settings'
+      path: '/settings'
+      fullPath: '/admin/rentals/settings'
+      preLoaderRoute: typeof AdminRentalsSettingsRouteImport
+      parentRoute: typeof AdminRentalsRoute
+    }
+    '/api/public/contact': {
+      id: '/api/public/contact'
+      path: '/api/public/contact'
+      fullPath: '/api/public/contact'
+      preLoaderRoute: typeof ApiPublicContactRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/ludoya-image': {
+      id: '/api/public/ludoya-image'
+      path: '/api/public/ludoya-image'
+      fullPath: '/api/public/ludoya-image'
+      preLoaderRoute: typeof ApiPublicLudoyaImageRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/sync-bgg': {
+      id: '/api/public/sync-bgg'
+      path: '/api/public/sync-bgg'
+      fullPath: '/api/public/sync-bgg'
+      preLoaderRoute: typeof ApiPublicSyncBggRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/upload-invite-avatar': {
+      id: '/api/public/upload-invite-avatar'
+      path: '/api/public/upload-invite-avatar'
+      fullPath: '/api/public/upload-invite-avatar'
+      preLoaderRoute: typeof ApiPublicUploadInviteAvatarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/upload-my-avatar': {
+      id: '/api/public/upload-my-avatar'
+      path: '/api/public/upload-my-avatar'
+      fullPath: '/api/public/upload-my-avatar'
+      preLoaderRoute: typeof ApiPublicUploadMyAvatarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/app/rentals/': {
+      id: '/app/rentals/'
+      path: '/'
+      fullPath: '/app/rentals/'
+      preLoaderRoute: typeof AppRentalsIndexRouteImport
+      parentRoute: typeof AppRentalsRoute
+    }
+    '/app/rentals/active': {
+      id: '/app/rentals/active'
+      path: '/active'
+      fullPath: '/app/rentals/active'
+      preLoaderRoute: typeof AppRentalsActiveRouteImport
+      parentRoute: typeof AppRentalsRoute
+    }
+    '/app/rentals/history': {
+      id: '/app/rentals/history'
+      path: '/history'
+      fullPath: '/app/rentals/history'
+      preLoaderRoute: typeof AppRentalsHistoryRouteImport
+      parentRoute: typeof AppRentalsRoute
+    }
+    '/app/rentals/requests': {
+      id: '/app/rentals/requests'
+      path: '/requests'
+      fullPath: '/app/rentals/requests'
+      preLoaderRoute: typeof AppRentalsRequestsRouteImport
+      parentRoute: typeof AppRentalsRoute
+    }
+    '/auth/ludoya/callback': {
+      id: '/auth/ludoya/callback'
+      path: '/auth/ludoya/callback'
+      fullPath: '/auth/ludoya/callback'
+      preLoaderRoute: typeof AuthLudoyaCallbackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/event/$id/access': {
+      id: '/event/$id/access'
+      path: '/event/$id/access'
+      fullPath: '/event/$id/access'
+      preLoaderRoute: typeof EventIdAccessRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/event/$id/checkin': {
+      id: '/event/$id/checkin'
+      path: '/event/$id/checkin'
+      fullPath: '/event/$id/checkin'
+      preLoaderRoute: typeof EventIdCheckinRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/event/$id/join': {
+      id: '/event/$id/join'
+      path: '/event/$id/join'
+      fullPath: '/event/$id/join'
+      preLoaderRoute: typeof EventIdJoinRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/event/$id/select': {
+      id: '/event/$id/select'
+      path: '/event/$id/select'
+      fullPath: '/event/$id/select'
+      preLoaderRoute: typeof EventIdSelectRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/event/$id/tables': {
+      id: '/event/$id/tables'
+      path: '/event/$id/tables'
+      fullPath: '/event/$id/tables'
+      preLoaderRoute: typeof EventIdTablesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/inscripcion/baja/$token': {
+      id: '/inscripcion/baja/$token'
+      path: '/inscripcion/baja/$token'
+      fullPath: '/inscripcion/baja/$token'
+      preLoaderRoute: typeof InscripcionBajaTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/s/$seriesSlug/': {
+      id: '/s/$seriesSlug/'
+      path: '/s/$seriesSlug'
+      fullPath: '/s/$seriesSlug/'
+      preLoaderRoute: typeof SSeriesSlugIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/s/$seriesSlug/join': {
+      id: '/s/$seriesSlug/join'
+      path: '/s/$seriesSlug/join'
+      fullPath: '/s/$seriesSlug/join'
+      preLoaderRoute: typeof SSeriesSlugJoinRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/actividades_/juegos/$gameId/': {
@@ -3000,46 +2986,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ActividadesJuegosGameIdIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/lovable/email/queue/process': {
-      id: '/lovable/email/queue/process'
-      path: '/lovable/email/queue/process'
-      fullPath: '/lovable/email/queue/process'
-      preLoaderRoute: typeof LovableEmailQueueProcessRouteImport
+    '/actividades_/juegos/invitacion/$token': {
+      id: '/actividades_/juegos/invitacion/$token'
+      path: '/actividades/juegos/invitacion/$token'
+      fullPath: '/actividades/juegos/invitacion/$token'
+      preLoaderRoute: typeof ActividadesJuegosInvitacionTokenRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/event/$id/cancel/$participantId': {
-      id: '/event/$id/cancel/$participantId'
-      path: '/event/$id/cancel/$participantId'
-      fullPath: '/event/$id/cancel/$participantId'
-      preLoaderRoute: typeof EventIdCancelParticipantIdRouteImport
+    '/actividades_/juegos/jugar/': {
+      id: '/actividades_/juegos/jugar/'
+      path: '/actividades/juegos/jugar'
+      fullPath: '/actividades/juegos/jugar/'
+      preLoaderRoute: typeof ActividadesJuegosJugarIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/public/registro-ics/$token': {
-      id: '/api/public/registro-ics/$token'
-      path: '/api/public/registro-ics/$token'
-      fullPath: '/api/public/registro-ics/$token'
-      preLoaderRoute: typeof ApiPublicRegistroIcsTokenRouteImport
+    '/actividades_/juegos/jugar/$sessionId': {
+      id: '/actividades_/juegos/jugar/$sessionId'
+      path: '/actividades/juegos/jugar/$sessionId'
+      fullPath: '/actividades/juegos/jugar/$sessionId'
+      preLoaderRoute: typeof ActividadesJuegosJugarSessionIdRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/public/kon/$fn': {
-      id: '/api/public/kon/$fn'
-      path: '/api/public/kon/$fn'
-      fullPath: '/api/public/kon/$fn'
-      preLoaderRoute: typeof ApiPublicKonFnRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/hooks/featured-dispatch': {
-      id: '/api/public/hooks/featured-dispatch'
-      path: '/api/public/hooks/featured-dispatch'
-      fullPath: '/api/public/hooks/featured-dispatch'
-      preLoaderRoute: typeof ApiPublicHooksFeaturedDispatchRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/konektum/eventos/nuevo': {
-      id: '/admin/konektum/eventos/nuevo'
-      path: '/eventos/nuevo'
-      fullPath: '/admin/konektum/eventos/nuevo'
-      preLoaderRoute: typeof AdminKonektumEventosNuevoRouteImport
+    '/admin/konektum/eventos/': {
+      id: '/admin/konektum/eventos/'
+      path: '/eventos'
+      fullPath: '/admin/konektum/eventos/'
+      preLoaderRoute: typeof AdminKonektumEventosIndexRouteImport
       parentRoute: typeof AdminKonektumRoute
     }
     '/admin/konektum/eventos/$id': {
@@ -3049,18 +3021,46 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminKonektumEventosIdRouteImport
       parentRoute: typeof AdminKonektumRoute
     }
-    '/actividades_/juegos/jugar/$sessionId': {
-      id: '/actividades_/juegos/jugar/$sessionId'
-      path: '/actividades/juegos/jugar/$sessionId'
-      fullPath: '/actividades/juegos/jugar/$sessionId'
-      preLoaderRoute: typeof ActividadesJuegosJugarSessionIdRouteImport
+    '/admin/konektum/eventos/nuevo': {
+      id: '/admin/konektum/eventos/nuevo'
+      path: '/eventos/nuevo'
+      fullPath: '/admin/konektum/eventos/nuevo'
+      preLoaderRoute: typeof AdminKonektumEventosNuevoRouteImport
+      parentRoute: typeof AdminKonektumRoute
+    }
+    '/api/public/hooks/featured-dispatch': {
+      id: '/api/public/hooks/featured-dispatch'
+      path: '/api/public/hooks/featured-dispatch'
+      fullPath: '/api/public/hooks/featured-dispatch'
+      preLoaderRoute: typeof ApiPublicHooksFeaturedDispatchRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/actividades_/juegos/invitacion/$token': {
-      id: '/actividades_/juegos/invitacion/$token'
-      path: '/actividades/juegos/invitacion/$token'
-      fullPath: '/actividades/juegos/invitacion/$token'
-      preLoaderRoute: typeof ActividadesJuegosInvitacionTokenRouteImport
+    '/api/public/kon/$fn': {
+      id: '/api/public/kon/$fn'
+      path: '/api/public/kon/$fn'
+      fullPath: '/api/public/kon/$fn'
+      preLoaderRoute: typeof ApiPublicKonFnRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/registro-ics/$token': {
+      id: '/api/public/registro-ics/$token'
+      path: '/api/public/registro-ics/$token'
+      fullPath: '/api/public/registro-ics/$token'
+      preLoaderRoute: typeof ApiPublicRegistroIcsTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/event/$id/cancel/$participantId': {
+      id: '/event/$id/cancel/$participantId'
+      path: '/event/$id/cancel/$participantId'
+      fullPath: '/event/$id/cancel/$participantId'
+      preLoaderRoute: typeof EventIdCancelParticipantIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lovable/email/queue/process': {
+      id: '/lovable/email/queue/process'
+      path: '/lovable/email/queue/process'
+      fullPath: '/lovable/email/queue/process'
+      preLoaderRoute: typeof LovableEmailQueueProcessRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/actividades_/juegos/$gameId/partidas/$sessionId': {
