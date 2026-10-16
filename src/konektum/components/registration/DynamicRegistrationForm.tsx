@@ -91,9 +91,9 @@ const DynamicRegistrationForm = ({
 
   return (
     <Card className="animate-fade-in">
-      <CardHeader className="space-y-4">
+      <CardHeader className="space-y-5 p-4 sm:p-8">
         <div className="text-center space-y-2">
-          <CardTitle className="font-display text-2xl leading-tight">{eventName}</CardTitle>
+          <CardTitle className="font-display text-2xl sm:text-3xl leading-tight">{eventName}</CardTitle>
           <CardDescription className="text-base">
             {registrationSubtitle ||
               (eventLang === "en"
@@ -111,7 +111,7 @@ const DynamicRegistrationForm = ({
           description={registrationDescription}
         />
       </CardHeader>
-      <CardContent>
+      <CardContent className="p-4 pt-0 sm:p-8 sm:pt-0">
         <form onSubmit={handleSubmit} className="space-y-4" noValidate>
           {(errors.length > 0 || consentError) && (
             <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-3 text-sm font-medium text-destructive animate-fade-in">
