@@ -8,6 +8,7 @@ import { Switch } from "@/konektum/ui/switch";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/konektum/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/konektum/ui/select";
 import { Textarea } from "@/konektum/ui/textarea";
+import { HIGHLIGHT_PRESETS, normalizeHighlights, type HighlightRow } from "@/lib/registrations-content";
 import { Loader2, Save, Eye, ClipboardList, Lock, KeyRound, Bell } from "lucide-react";
 import { useToast } from "@/konektum/hooks/use-toast";
 import { supabase } from "@/konektum/supabase";
@@ -85,6 +86,7 @@ interface EventSettingsEditorProps {
   paymentAmountCents?: number | null;
   paymentCurrency?: string | null;
   paymentInstructions?: string | null;
+  registrationHighlights?: any;
   customTables?: CustomTableLayout | null;
   seriesId?: string | null;
   onUpdate: (updates: Record<string, any>) => void;
@@ -134,6 +136,7 @@ const EventSettingsEditor = ({
   paymentAmountCents: initialPaymentAmountCents = null,
   paymentCurrency: initialPaymentCurrency = "EUR",
   paymentInstructions: initialPaymentInstructions = null,
+  registrationHighlights: initialHighlights = null,
   customTables: initialCustomTables = null,
   seriesId: initialSeriesId = null,
   onUpdate,
@@ -157,6 +160,7 @@ const EventSettingsEditor = ({
     initialPaymentAmountCents != null ? (initialPaymentAmountCents / 100).toString() : "",
   );
   const [formPaymentCurrency, setFormPaymentCurrency] = useState<string>(initialPaymentCurrency || "EUR");
+  const [formHighlights, setFormHighlights] = useState<HighlightRow[]>(normalizeHighlights(initialHighlights));
   const [formPaymentInstructions, setFormPaymentInstructions] = useState<string>(initialPaymentInstructions || "");
   const [formTableSize, setFormTableSize] = useState(tableSize);
   const [formRoundDuration, setFormRoundDuration] = useState(roundDuration);
@@ -424,6 +428,7 @@ const EventSettingsEditor = ({
           ? Math.round(Number(formPaymentAmount) * 100)
           : null,
         payment_currency: formPaymentCurrency || "EUR",
+        registration_highlights: formHighlights.filter((h) => h.label.trim() && h.text.trim()),
         payment_instructions: formPaymentTrackingEnabled && formPaymentInstructions.trim() ? formPaymentInstructions.trim() : null,
         payment_reminders_enabled: formPaymentTrackingEnabled && formPaymentRemindersEnabled,
         payment_reminder_first_hours: Math.max(1, Number(formPaymentReminderFirstHours) || 24),
@@ -1218,6 +1223,31 @@ const EventSettingsEditor = ({
           </Card>
 
           <Card>
+            <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base">Datos destacados del formulario</CardTitle>
+              <CardDescription>Fecha, lugar y precio se muestran solos. Añade aquí otros datos (plazas, idiomas, juegos…) para destacarlos en la ficha.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {formHighlights.map((h, i) => (
+                <div key={i} className="grid grid-cols-[3.5rem_1fr] sm:grid-cols-[3.5rem_9rem_1fr_auto] gap-2 items-start">
+                  <Input value={h.emoji} maxLength={4} className="text-center" onChange={(e) => setFormHighlights((p) => p.map((x, j) => j === i ? { ...x, emoji: e.target.value } : x))} />
+                  <Input value={h.label} placeholder="Etiqueta" onChange={(e) => setFormHighlights((p) => p.map((x, j) => j === i ? { ...x, label: e.target.value } : x))} />
+                  <Input value={h.text} placeholder="Texto" className="col-span-2 sm:col-span-1" onChange={(e) => setFormHighlights((p) => p.map((x, j) => j === i ? { ...x, text: e.target.value } : x))} />
+                  <Button type="button" variant="ghost" size="sm" className="col-span-2 sm:col-span-1" onClick={() => setFormHighlights((p) => p.filter((_, j) => j !== i))}>Quitar</Button>
+                </div>
+              ))}
+              <div className="flex flex-wrap gap-2">
+                {HIGHLIGHT_PRESETS.filter((p) => !["Lugar", "Precio", "Fecha"].includes(p.label)).map((p) => (
+                  <Button key={p.label} type="button" variant="outline" size="sm" onClick={() => setFormHighlights((prev) => [...prev, { emoji: p.emoji, label: p.label, text: "" }])}>
+                    {p.emoji} {p.label}
+                  </Button>
+                ))}
+                <Button type="button" variant="outline" size="sm" onClick={() => setFormHighlights((prev) => [...prev, { emoji: "✨", label: "", text: "" }])}>+ Otro</Button>
+              </div>
+              <p className="text-xs text-muted-foreground">Recuerda guardar los ajustes.</p>
+            </CardContent>
+          </Card>
             <CardHeader>
               <CardTitle className="text-base">Seguimiento de pagos</CardTitle>
               <CardDescription>
