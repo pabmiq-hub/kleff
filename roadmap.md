@@ -1,3 +1,4 @@
+- [ ] Juegos: importar lecturas teatrales por acto, panel del anfitrión y aviso privado al lector; proteger la solución hasta la revelación y verificar el flujo
 - [ ] Diagnosticar selecciones y acciones Super Like de extremo a extremo
 - [x] Juegos: asesinato automático al entrar en el Acto 2 en todos los modos; 4 pruebas del motor y 14 de reglas superadas
 - [ ] Corregir causas de bloqueos, fallos parciales y errores de envío
