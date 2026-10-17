@@ -12,7 +12,7 @@ import { MMAdminGate } from "@/components/mm/AdminGate";
 import { MMAvatar, describeEvent, fmtClock, sessionTopicName, useBroadcast, useCountdown } from "@/components/mm/shared";
 import { PlayerView, Results } from "@/components/mm/PlayerView";
 import { MM_LANGS } from "@/lib/mm/i18n";
-import { isSessionLanguageLocked } from "@/lib/mm/session-rules";
+import { isSessionLanguageLocked, shouldTriggerMurder } from "@/lib/mm/session-rules";
 import { mmControlSession, mmGetSessionAdmin, mmManagePlayers, mmViewAsPlayer } from "@/lib/mm/admin.functions";
 
 export const Route = createFileRoute("/actividades_/juegos/$gameId/partidas/$sessionId")({
@@ -349,7 +349,7 @@ function SessionPlanning({ d, act }: { d: any; act: (a: any, extra?: Record<stri
               <p className="text-xl font-bold">{next.position}. {next.name}</p>
               <p className="text-xs text-ink/60">
                 {next.duration_minutes} min · {next.evidences} evidencia(s)
-                {next.key === "investigation" && !s.murder_triggered_at && s.control_mode !== "manual" ? " · lanza el asesinato" : ""}
+                {shouldTriggerMurder(next, s) ? " · lanza el asesinato" : ""}
                 {next.key === "conclusion" ? " · abre la votación" : ""}
               </p>
               {next.narrative_text && <p className="mt-2 text-sm text-ink/80">{next.narrative_text}</p>}

@@ -2,6 +2,11 @@ type GameLimits = { min_players: number; max_players: number };
 type Character = { id: string; victim?: boolean; is_killer?: boolean | null };
 type Player = { id: string; character_id?: string | null };
 
+/** The murder belongs to the second act, regardless of its imported key or control mode. */
+export function shouldTriggerMurder(act: { position: number }, session: { murder_triggered_at?: string | null }) {
+  return act.position === 2 && !session.murder_triggered_at;
+}
+
 export function isSessionLanguageLocked(session: { status: string; characters_released_at?: string | null }) {
   return session.status !== "lobby" || Boolean(session.characters_released_at);
 }
