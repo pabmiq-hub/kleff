@@ -32,7 +32,7 @@ export const mmImportGame = createServerFn({ method: "POST" })
     const g = parsed.data;
     const { data: exists } = await db().from("mm_games").select("id").eq("slug", g.game.slug).maybeSingle();
     if (exists) return { ok: false as const, errors: [`Ya existe un juego con el slug «${g.game.slug}»`] };
-    const { data: game, error } = await db().from("mm_games").insert({ ...g.game, status: "draft" }).select("id").single();
+    const { data: game, error } = await db().from("mm_games").insert({ ...g.game, readings: g.readings, status: "draft" }).select("id").single();
     if (error) return { ok: false as const, errors: [error.message] };
     try {
       const must = (r: any) => {

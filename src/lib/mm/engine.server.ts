@@ -2,6 +2,7 @@
 // with the service role; is_killer is never included in another player's payload.
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { sessionEligibility, planCharacterAssignments, shouldTriggerMurder } from "./session-rules";
+import { playerReadings } from "./readings";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const db = () => supabaseAdmin as any;
@@ -449,6 +450,7 @@ export async function buildPlayerState(playerId: string) {
         };
       }),
     attendees: (players ?? []).map((p: any) => ({ id: p.id, display_name: p.display_name, confirmed: !!p.confirmed_at, ready: p.ready, online: !!p.last_seen_at && now - new Date(p.last_seen_at).getTime() < ONLINE_MS })),
+    readings: playerReadings(game.readings ?? [], { ...s, act: acts.find((a) => a.id === s.current_act_id) }, myChar?.ref ?? null),
     secrets: visibleSecrets,
     objectives: (objectives ?? [])
       .filter((o: any) => s.status !== "lobby" && reached(o.act_id))
@@ -504,6 +506,17 @@ export async function buildAdminState(sessionId: string) {
   const now = Date.now();
   return {
     session: { ...publicSession(s, acts, game), murder_event: game.murder_event, blind_mode: s.blind_mode, scheduled_at: s.scheduled_at, archived: s.archived },
+    readings: await (async () => {
+      const { loadTr } = await import("./translate.server");
+      const translated = (await loadTr(s.game_id, s.language)).row("mm_games", game);
+      return (translated.readings ?? []).map((r: any, i: number) => {
+        const character = (chars ?? []).find((c: any) => c.ref === r.reader);
+        const player = character && (players ?? []).find((p: any) => p.character_id === character.id);
+        return { ...r, id: String(i), text: hideKiller ? null : r.text,
+          reader_name: character?.name ?? "Anfitrión", player_name: player?.display_name ?? null,
+          missing_reader: r.reader !== "host" && !player };
+      });
+    })(),
     eligibility: sessionEligibility(game, chars ?? [], players ?? [], !!s.characters_released_at),
     final_reveal: game.final_reveal,
     translations: tr ?? [],

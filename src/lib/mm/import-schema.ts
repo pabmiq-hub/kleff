@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { readingSchema } from "./readings";
 
 const json = z.record(z.any()).default({});
 const actKey = z.enum(["intro", "investigation", "conclusion"]);
@@ -61,6 +62,7 @@ export const mmImportSchema = z
         }),
       )
       .default([]),
+    readings: z.array(readingSchema).default([]),
     joint_actions: z
       .array(z.object({ name: z.string().min(1), description: z.string().optional(), available_from_act: z.string().optional(), requirements: z.array(z.any()).default([]), results: z.array(z.any()).default([]) }))
       .default([]),
@@ -75,6 +77,15 @@ export const mmImportSchema = z
     const checkAct = (a: string | undefined, path: (string | number)[]) => {
       if (a && !acts.has(a as never)) err(path, `El acto «${a}» no existe`);
     };
+    g.readings.forEach((r, i) => {
+      checkAct(r.act, ["readings", i, "act"]);
+      if (r.reader !== "host" && !g.characters.some((c) => c.ref === r.reader && !c.victim))
+        err(["readings", i, "reader"], "El lector debe ser un personaje jugable existente o «host» (anfitrión)");
+      if (r.trigger === "murder" && r.act !== "investigation")
+        err(["readings", i, "trigger"], "La lectura del asesinato debe pertenecer a investigation");
+      if (r.trigger === "final_reveal" && r.act !== "conclusion")
+        err(["readings", i, "trigger"], "La lectura de la solución debe pertenecer a conclusion");
+    });
     g.characters.forEach((c, i) => {
       c.secrets.forEach((s, j) => s.known_by.forEach((r) => !refs.has(r) && err(["characters", i, "secrets", j, "known_by"], `Personaje «${r}» inexistente`)));
       c.objectives.forEach((o, j) => checkAct(o.act, ["characters", i, "objectives", j, "act"]));

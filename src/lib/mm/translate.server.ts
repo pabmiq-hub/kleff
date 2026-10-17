@@ -6,7 +6,7 @@ import { db } from "./engine.server";
 import { MM_LANGS, type MMLang } from "./i18n";
 
 export const TR_FIELDS: Record<string, string[]> = {
-  mm_games: ["title", "synopsis", "briefing", "murder_event", "final_reveal"],
+  mm_games: ["title", "synopsis", "briefing", "murder_event", "final_reveal", "readings"],
   mm_acts: ["name", "narrative_text"],
   mm_characters: ["description", "alibi", "public_summary", "costume", "relationships"],
   mm_secrets: ["content"],
@@ -17,7 +17,7 @@ export const TR_FIELDS: Record<string, string[]> = {
   mm_joint_actions: ["name", "description"],
 };
 
-const SKIP_KEYS = new Set(["ref", "character", "type", "key", "font_display"]);
+const SKIP_KEYS = new Set(["ref", "character", "reader", "act", "trigger", "type", "key", "font_display"]);
 const isText = (v: unknown): v is string => typeof v === "string" && /\p{L}/u.test(v) && v.trim().length > 1;
 
 function walk(prefix: string, value: unknown, visit: (key: string, v: string) => string | void): unknown {
