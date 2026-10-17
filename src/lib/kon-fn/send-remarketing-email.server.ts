@@ -61,22 +61,11 @@ serve(async (req: Request) => {
       : registration_link;
 
     // Get Resend config - organizer's own or platform default
-    let resendApiKey = Deno.env.get("RESEND_API_KEY")!;
-    let senderEmail = "hola@kleff.es";
-    let senderName = "KLEFF";
+    const resendApiKey = Deno.env.get("RESEND_API_KEY")!;
+    const senderEmail = "hola@kleff.es";
+    const senderName = "KLEFF";
 
-    const { data: resendConfig } = await supabase
-      .from("organizer_resend_config")
-      .select("*")
-      .eq("organizer_id", organizer_id)
-      .eq("is_verified", true)
-      .single();
-
-    if (resendConfig) {
-      resendApiKey = resendConfig.resend_api_key;
-      senderEmail = resendConfig.sender_email;
-      senderName = resendConfig.sender_name || org.company_name || "KLEFF";
-    }
+    // Always send from the verified KLEFF domain.
 
     // Create campaign record
     const { data: campaign, error: campaignError } = await supabase
