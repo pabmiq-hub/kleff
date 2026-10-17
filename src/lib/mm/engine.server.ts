@@ -326,19 +326,27 @@ export async function buildPlayerState(playerId: string) {
   const { data: me } = await db().from("mm_session_players").select("*").eq("id", playerId).single();
   if (!me) throw new Error("Jugador no encontrado");
   const { data: s } = await db().from("mm_sessions").select("*").eq("id", me.session_id).single();
-  const [{ data: game }, acts, { data: chars }, { data: players }] = await Promise.all([
+  const { loadTr } = await import("./translate.server");
+  const [{ data: gameRaw }, actsRaw, { data: charsRaw }, { data: players }, tr] = await Promise.all([
     db().from("mm_games").select("*").eq("id", s.game_id).single(),
     loadActs(s.game_id),
     db().from("mm_characters").select("*").eq("game_id", s.game_id),
-    db().from("mm_session_players").select("id, display_name, character_id, last_seen_at, ready").eq("session_id", s.id),
+    db().from("mm_session_players").select("id, display_name, character_id, last_seen_at, ready, confirmed_at").eq("session_id", s.id),
+    loadTr(s.game_id, s.language),
   ]);
+  const game = tr.row("mm_games", gameRaw);
+  const acts = tr.rows("mm_acts", actsRaw);
+  const chars = tr.rows("mm_characters", charsRaw);
+  const released = !!s.characters_released_at;
   const actPos = (id: string | null) => (id ? acts.find((a) => a.id === id)?.position ?? 0 : 0);
   const curPos = s.status === "lobby" ? 0 : actPos(s.current_act_id);
   const reached = (actId: string | null) => !actId || actPos(actId) <= curPos;
-  const myChar = (chars ?? []).find((c: any) => c.id === me.character_id) ?? null;
-  const charIds = (chars ?? []).map((c: any) => c.id);
+  // Characters stay hidden from players until the host hands them out.
+  const myChar = released ? (chars ?? []).find((c: any) => c.id === me.character_id) ?? null : null;
+  const myCharId = myChar?.id ?? null;
+  const charIds = released ? (chars ?? []).map((c: any) => c.id) : [];
 
-  const [{ data: secrets }, { data: objectives }, { data: pobj }, { data: items }, { data: abilities }, { data: pab }, { data: evidences }, { data: unlocks }, { data: vote }] =
+  const [{ data: secretsRaw }, { data: objectivesRaw }, { data: pobj }, { data: itemsRaw }, { data: abilitiesRaw }, { data: pab }, { data: evidencesRaw }, { data: unlocks }, { data: vote }] =
     await Promise.all([
       charIds.length ? db().from("mm_secrets").select("*").in("character_id", charIds) : { data: [] },
       myChar ? db().from("mm_objectives").select("*").eq("character_id", myChar.id) : { data: [] },
@@ -350,6 +358,11 @@ export async function buildPlayerState(playerId: string) {
       db().from("mm_player_unlocks").select("*").eq("session_player_id", me.id),
       db().from("mm_votes").select("accused_character_id, motive_text, method_text, submitted_at").eq("session_id", s.id).eq("voter_player_id", me.id).maybeSingle(),
     ]);
+  const secrets = tr.rows("mm_secrets", secretsRaw);
+  const objectives = tr.rows("mm_objectives", objectivesRaw);
+  const items = tr.rows("mm_items", itemsRaw);
+  const abilities = tr.rows("mm_abilities", abilitiesRaw);
+  const evidences = tr.rows("mm_evidences", evidencesRaw);
   const unlockedSecret = new Set((unlocks ?? []).map((u: any) => u.secret_id).filter(Boolean));
   const unlockedEv = new Set((unlocks ?? []).map((u: any) => u.evidence_id).filter(Boolean));
   const charName = (id: string) => (chars ?? []).find((c: any) => c.id === id)?.name ?? "";
