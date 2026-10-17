@@ -370,8 +370,8 @@ export async function buildPlayerState(playerId: string) {
   const now = Date.now();
 
   const visibleSecrets = (secrets ?? [])
-    .filter((x: any) => x.character_id === me.character_id || (me.character_id && (x.known_by ?? []).includes(me.character_id)) || unlockedSecret.has(x.id))
-    .map((x: any) => ({ id: x.id, content: x.content, owner: charName(x.character_id), own: x.character_id === me.character_id }));
+    .filter((x: any) => x.character_id === myCharId || (myCharId && (x.known_by ?? []).includes(myCharId)) || unlockedSecret.has(x.id))
+    .map((x: any) => ({ id: x.id, content: x.content, owner: charName(x.character_id), own: x.character_id === myCharId }));
 
   const visibleEvidences = (evidences ?? [])
     .filter((e: any) => {
@@ -379,7 +379,7 @@ export async function buildPlayerState(playerId: string) {
       if (s.status === "lobby") return false;
       const auto = !e.unlock_rule || e.unlock_rule.type === "auto" || !e.unlock_rule.type;
       if (!auto || !reached(e.act_id)) return false;
-      return e.scope === "common" || e.target_character_id === me.character_id;
+      return e.scope === "common" || e.target_character_id === myCharId;
     })
     .map((e: any) => ({ id: e.id, title: e.title, content: e.content, image_url: e.image_url, scope: e.scope, reveal_style: e.reveal_style, act: acts.find((a) => a.id === e.act_id)?.name ?? null }));
 
@@ -389,11 +389,14 @@ export async function buildPlayerState(playerId: string) {
       id: me.id,
       display_name: me.display_name,
       ready: me.ready,
+      confirmed: !!me.confirmed_at,
       character: myChar
         ? {
             id: myChar.id,
             name: myChar.name,
             description: myChar.description,
+            public_summary: myChar.public_summary,
+            costume: myChar.costume,
             alibi: myChar.alibi,
             relationships: myChar.relationships,
             avatar_config: myChar.avatar_config,
@@ -403,19 +406,22 @@ export async function buildPlayerState(playerId: string) {
           }
         : null,
     },
+    // Public cast: who is in the story (bio/summary only). Who plays whom is only shown after the hand-out.
     cast: (chars ?? [])
-      .filter((c: any) => !c.victim || murdered)
+      .filter((c: any) => !c.victim || murdered || !!c.public_summary)
       .map((c: any) => {
-        const p = (players ?? []).find((x: any) => x.character_id === c.id);
+        const p = released ? (players ?? []).find((x: any) => x.character_id === c.id) : null;
         return {
           character_id: c.id,
           name: c.name,
+          summary: c.public_summary || c.description || null,
           avatar_config: c.avatar_config,
           avatar_url: c.avatar_url,
-          is_victim: murdered && !!c.victim,
+          is_victim: !!c.victim && (murdered || !!c.public_summary),
           player: p ? { id: p.id, display_name: p.display_name, online: !!p.last_seen_at && now - new Date(p.last_seen_at).getTime() < ONLINE_MS, ready: p.ready } : null,
         };
       }),
+    attendees: (players ?? []).map((p: any) => ({ id: p.id, display_name: p.display_name, confirmed: !!p.confirmed_at, ready: p.ready, online: !!p.last_seen_at && now - new Date(p.last_seen_at).getTime() < ONLINE_MS })),
     secrets: visibleSecrets,
     objectives: (objectives ?? [])
       .filter((o: any) => s.status !== "lobby" && reached(o.act_id))
