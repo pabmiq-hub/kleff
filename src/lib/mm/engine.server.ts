@@ -89,7 +89,7 @@ async function loadActs(gameId: string) {
   return (data ?? []) as any[];
 }
 
-async function initPlayerRows(session: Session) {
+export async function initPlayerRows(session: Session) {
   const { data: players } = await db().from("mm_session_players").select("id, character_id").eq("session_id", session.id);
   for (const p of players ?? []) {
     if (!p.character_id) continue;
@@ -104,9 +104,74 @@ async function initPlayerRows(session: Session) {
   }
 }
 
+/* --------------------------- character hand-out -------------------------- */
+
+/** Email a player the character they have been given (localized to the session language). */
+export async function notifyAssignment(playerId: string): Promise<boolean> {
+  const { data: p } = await db().from("mm_session_players").select("id, email, display_name, access_code, character_id, session_id").eq("id", playerId).maybeSingle();
+  if (!p?.email || !p.character_id) return false;
+  const { data: s } = await db().from("mm_sessions").select("game_id, language, scheduled_at").eq("id", p.session_id).single();
+  const { loadTr } = await import("./translate.server");
+  const tr = await loadTr(s.game_id, s.language);
+  const [{ data: g }, { data: c }] = await Promise.all([
+    db().from("mm_games").select("id, title, briefing").eq("id", s.game_id).single(),
+    db().from("mm_characters").select("*").eq("id", p.character_id).single(),
+  ]);
+  const game = tr.row("mm_games", g);
+  const ch = tr.row("mm_characters", c);
+  const { sendAssignmentEmail } = await import("./emails.server");
+  await sendAssignmentEmail({
+    email: p.email,
+    name: p.display_name,
+    code: p.access_code,
+    gameTitle: game.title,
+    character: { name: ch.name, summary: ch.public_summary || ch.description, costume: ch.costume },
+    briefing: game.briefing,
+    scheduledAt: s.scheduled_at,
+    lang: s.language,
+  });
+  await db().from("mm_session_players").update({ assignment_notified_at: new Date().toISOString() }).eq("id", p.id);
+  return true;
+}
+
+/**
+ * Hand out characters to everyone registered (killer first, so the murderer is
+ * always played), reveal them to players and email each one. Idempotent.
+ */
+export async function releaseCharacters(sessionId: string, reason: string) {
+  const { data: s } = await db().from("mm_sessions").select("*").eq("id", sessionId).single();
+  if (!s || s.characters_released_at) return { assigned: 0, notified: 0, missing: [] as string[], already: true };
+  const [{ data: chars }, { data: players }] = await Promise.all([
+    db().from("mm_characters").select("id, name, is_killer, victim").eq("game_id", s.game_id),
+    db().from("mm_session_players").select("id, character_id, ready, registered_at").eq("session_id", sessionId).order("registered_at"),
+  ]);
+  const playable = (chars ?? []).filter((c: any) => !c.victim);
+  const taken = new Set((players ?? []).map((p: any) => p.character_id).filter(Boolean));
+  const free = playable.filter((c: any) => !taken.has(c.id));
+  const others = free.filter((c: any) => !c.is_killer).sort(() => Math.random() - 0.5);
+  const queue = [...others, ...free.filter((c: any) => c.is_killer)]; // pop() takes the killer first
+  const waiting = (players ?? []).filter((p: any) => !p.character_id).sort((a: any, b: any) => Number(b.ready) - Number(a.ready));
+  let assigned = 0;
+  for (const p of waiting) {
+    const c = queue.pop();
+    if (!c) break;
+    await db().from("mm_session_players").update({ character_id: c.id }).eq("id", p.id);
+    assigned++;
+  }
+  const { data: upd } = await db().from("mm_sessions").update({ characters_released_at: new Date().toISOString(), release_at: null }).eq("id", sessionId).is("characters_released_at", null).select("id");
+  if (!upd?.length) return { assigned, notified: 0, missing: [], already: true };
+  await logEvent(sessionId, "characters_released", { reason, assigned });
+  await broadcast(sessionTopic(sessionId), "characters_released", {});
+  let notified = 0;
+  const { data: all } = await db().from("mm_session_players").select("id, email, character_id").eq("session_id", sessionId);
+  for (const p of all ?? []) if (p.email && p.character_id && (await notifyAssignment(p.id).catch(() => false))) notified++;
+  return { assigned, notified, missing: queue.map((c: any) => c.name), already: false };
+}
+
 export async function startSession(sessionId: string, reason: string) {
   const { data: s } = await db().from("mm_sessions").select("*").eq("id", sessionId).single();
   if (!s || s.status !== "lobby") return;
+  if (!s.characters_released_at) await releaseCharacters(sessionId, "start");
   const acts = await loadActs(s.game_id);
   if (!acts.length) throw new Error("El juego no tiene actos");
   const first = acts[0];
