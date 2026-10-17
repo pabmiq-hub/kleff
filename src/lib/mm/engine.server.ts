@@ -1,7 +1,7 @@
 // Murder Mystery engine (server-only). All player reads/writes go through here
 // with the service role; is_killer is never included in another player's payload.
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
-import { sessionEligibility, planCharacterAssignments } from "./session-rules";
+import { sessionEligibility, planCharacterAssignments, shouldTriggerMurder } from "./session-rules";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const db = () => supabaseAdmin as any;
@@ -229,14 +229,15 @@ export async function advanceAct(sessionId: string, fromActId: string | null, re
     act_ends_at: s.status === "paused" ? null : new Date(now.getTime() + next.duration_minutes * 60000).toISOString(),
     paused_remaining_seconds: s.status === "paused" ? next.duration_minutes * 60 : null,
   };
-  if (next.key === "investigation" && s.control_mode !== "manual" && !s.murder_triggered_at) patch.murder_triggered_at = now.toISOString();
+  if (shouldTriggerMurder(next, s)) patch.murder_triggered_at = now.toISOString();
   if (next.key === "conclusion") patch.voting_open = true;
   let q = db().from("mm_sessions").update(patch).eq("id", sessionId);
   q = fromActId ? q.eq("current_act_id", fromActId) : q.is("current_act_id", null);
-  const { data: upd } = await q.select("id");
+  const { data: upd, error } = await q.select("id");
+  if (error) throw new Error("No se pudo avanzar de acto. Vuelve a intentarlo.");
   if (!upd?.length) return;
   await logEvent(sessionId, "act_changed", { act: next.name, position: next.position, reason });
-  if (patch.murder_triggered_at) await logEvent(sessionId, "murder_triggered", { reason: "auto" });
+  if (patch.murder_triggered_at) await logEvent(sessionId, "murder_triggered", { reason, act_id: next.id });
   if (patch.voting_open) await logEvent(sessionId, "voting_opened", {});
   await broadcast(sessionTopic(sessionId), "act_changed", { act_id: next.id });
 }

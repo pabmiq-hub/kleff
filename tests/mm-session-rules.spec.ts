@@ -1,9 +1,18 @@
 import { test, expect } from '@playwright/test';
-import { isSessionLanguageLocked, sessionEligibility, planCharacterAssignments } from '../src/lib/mm/session-rules';
+import { isSessionLanguageLocked, sessionEligibility, planCharacterAssignments, shouldTriggerMurder } from '../src/lib/mm/session-rules';
 
 const game = { min_players: 4, max_players: 8 };
 const chars = Array.from({ length: 8 }, (_, i) => ({ id: `c${i}`, is_killer: i === 0, victim: false }));
 const players = (n: number) => Array.from({ length: n }, (_, i) => ({ id: `p${i}`, character_id: null as string | null }));
+
+test('murder belongs to act two and not acts one or three', () => {
+  expect(shouldTriggerMurder({ position: 1 }, {})).toBe(false);
+  expect(shouldTriggerMurder({ position: 2 }, {})).toBe(true);
+  expect(shouldTriggerMurder({ position: 3 }, {})).toBe(false);
+});
+test('entering act two cannot repeat a murder already launched', () => {
+  expect(shouldTriggerMurder({ position: 2 }, { murder_triggered_at: '2026-10-17T17:47:00Z' })).toBe(false);
+});
 
 test('minimum four blocks three players and reports one missing', () => {
   const result = sessionEligibility(game, chars, players(3));
