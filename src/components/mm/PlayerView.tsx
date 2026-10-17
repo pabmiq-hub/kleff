@@ -3,10 +3,12 @@ import { AnimatePresence, motion } from "framer-motion";
 import { User, Lock, ListChecks, Backpack, FileSearch, Handshake, Gavel } from "lucide-react";
 import { MMAvatar, MMShell, fmtClock, useCountdown } from "./shared";
 import { ActIntro, FinalReveal, FlipCard, MurderOverlay, SealedDoc } from "./animations";
+import { mmT, mmLocale, type MMKey } from "@/lib/mm/i18n";
 
 type Tab = "personaje" | "secretos" | "objetivos" | "inventario" | "evidencias" | "acciones" | "acusacion";
 
 export interface PlayerActions {
+  confirm: () => Promise<void>;
   ready: () => Promise<void>;
   toggleObjective: (id: string) => Promise<void>;
   vote: (v: { accusedCharacterId: string; motive: string; method: string }) => Promise<void>;
@@ -26,6 +28,7 @@ function useSeen(key: string) {
 export function PlayerView({ state, actions, readOnly }: { state: any; actions?: PlayerActions; readOnly?: boolean }) {
   const s = state.session;
   const me = state.me;
+  const t = (k: MMKey, v?: Record<string, string | number>) => mmT(s.language, k, v);
   const [tab, setTab] = useState<Tab>("personaje");
   const remaining = useCountdown(s.act_ends_at, s.server_now, s.paused_remaining_seconds);
   const [overlay, setOverlay] = useState<null | "act" | "murder" | "reveal">(null);
@@ -62,17 +65,17 @@ export function PlayerView({ state, actions, readOnly }: { state: any; actions?:
   }, [tab, badgeIds[tab].join(",")]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const tabs: { id: Tab; label: string; icon: any; hidden?: boolean }[] = [
-    { id: "personaje", label: "Personaje", icon: User },
-    { id: "secretos", label: "Secretos", icon: Lock },
-    { id: "objetivos", label: "Objetivos", icon: ListChecks },
-    { id: "inventario", label: "Inventario", icon: Backpack },
-    { id: "evidencias", label: "Evidencias", icon: FileSearch },
-    { id: "acciones", label: "Acciones", icon: Handshake },
-    { id: "acusacion", label: "Acusar", icon: Gavel, hidden: !s.voting_open && !state.vote },
+    { id: "personaje", label: t("tab_character"), icon: User },
+    { id: "secretos", label: t("tab_secrets"), icon: Lock },
+    { id: "objetivos", label: t("tab_objectives"), icon: ListChecks },
+    { id: "inventario", label: t("tab_inventory"), icon: Backpack },
+    { id: "evidencias", label: t("tab_evidence"), icon: FileSearch },
+    { id: "acciones", label: t("tab_actions"), icon: Handshake },
+    { id: "acusacion", label: t("tab_accuse"), icon: Gavel, hidden: !s.voting_open && !state.vote },
   ];
 
   const ch = me.character;
-  const statusLabel = s.status === "lobby" ? "Sala de espera" : s.status === "paused" ? "En pausa" : s.status === "finished" ? "Finalizada" : s.act?.name ?? "";
+  const statusLabel = s.status === "lobby" ? t("status_lobby") : s.status === "paused" ? t("status_paused") : s.status === "finished" ? t("status_finished") : s.act ? `${t("act_of", { n: s.act.position, total: s.acts.length })} · ${s.act.name}` : "";
 
   return (
     <MMShell theme={s.game.theme}>
@@ -97,58 +100,66 @@ export function PlayerView({ state, actions, readOnly }: { state: any; actions?:
             </div>
           )}
         </div>
-        {readOnly && <p className="mx-auto mt-2 max-w-2xl rounded bg-[var(--mm-accent)]/20 px-2 py-1 text-center text-xs">Vista de solo lectura del administrador</p>}
+        {(s.status === "running" || s.status === "paused") && s.act && <ActProgress acts={s.acts} current={s.act.position} label={t("final_reveal_step")} />}
+        {readOnly && <p className="mx-auto mt-2 max-w-2xl rounded bg-[var(--mm-accent)]/20 px-2 py-1 text-center text-xs">{t("readonly")}</p>}
       </header>
 
       <main className="mx-auto max-w-2xl px-4 pb-28 pt-4">
-        {s.status === "lobby" && <Lobby state={state} actions={actions} readOnly={readOnly} />}
-        {s.status === "paused" && <div className="mb-4 rounded-xl bg-[var(--mm-surface)] p-4 text-center">⏸ La partida está en pausa</div>}
-        {s.status === "finished" && state.results && <Results results={state.results} onReplay={() => setOverlay("reveal")} />}
+        {s.status === "lobby" && <Lobby state={state} actions={actions} readOnly={readOnly} t={t} />}
+        {s.status === "paused" && <div className="mb-4 rounded-xl bg-[var(--mm-surface)] p-4 text-center">{t("paused_banner")}</div>}
+        {s.status === "finished" && state.results && <Results results={state.results} lang={s.language} onReplay={() => setOverlay("reveal")} />}
         {s.murder_triggered_at && s.status !== "finished" && s.murder_event && (
           <div className="mb-4 rounded-xl border border-[var(--mm-primary)]/50 bg-[var(--mm-primary)]/15 p-3 text-sm">
             <strong>{s.murder_event.title}</strong> {s.murder_event.text}
           </div>
         )}
+        {s.status !== "lobby" && s.status !== "finished" && s.act && (
+          <div className="mb-4 rounded-xl border border-[var(--mm-accent)]/40 bg-[var(--mm-surface)] p-4">
+            <p className="text-[10px] uppercase tracking-widest text-[var(--mm-accent)]">{t("act_of", { n: s.act.position, total: s.acts.length })}</p>
+            <p className="text-lg font-bold" style={{ fontFamily: "var(--mm-font)" }}>{s.act.name}</p>
+            {s.act.narrative_text && <p className="mt-1 text-sm opacity-80">{s.act.narrative_text}</p>}
+          </div>
+        )}
 
         <AnimatePresence mode="wait">
           <motion.section key={tab} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.18 }}>
-            {tab === "personaje" && <CharacterTab state={state} storePrefix={storePrefix} />}
+            {tab === "personaje" && <CharacterTab state={state} storePrefix={storePrefix} t={t} />}
             {tab === "secretos" && (
-              <List empty="No tienes secretos todavía.">
+              <List empty={t("no_secrets")}>
                 {state.secrets.map((x: any) => (
-                  <SealedDoc key={x.id} id={`${storePrefix}-${x.id}`} label={x.own ? "Tu secreto" : `Secreto de ${x.owner}`}>
+                  <SealedDoc key={x.id} id={`${storePrefix}-${x.id}`} label={x.own ? t("your_secret") : t("secret_of", { name: x.owner })}>
                     <p>{x.content}</p>
                   </SealedDoc>
                 ))}
               </List>
             )}
-            {tab === "objetivos" && <ObjectivesTab state={state} actions={actions} readOnly={readOnly} />}
+            {tab === "objetivos" && <ObjectivesTab state={state} actions={actions} readOnly={readOnly} t={t} />}
             {tab === "inventario" && (
               <div className="space-y-6">
-                <Section title="Objetos">
-                  <List empty="Tu inventario está vacío.">
+                <Section title={t("items")}>
+                  <List empty={t("empty_inventory")}>
                     {state.items.map((i: any) => (
                       <Card key={i.id} title={i.name} body={i.description} />
                     ))}
                   </List>
                 </Section>
-                <Section title="Habilidades">
-                  <List empty="Sin habilidades disponibles en este acto.">
+                <Section title={t("abilities")}>
+                  <List empty={t("no_abilities")}>
                     {state.abilities.map((a: any) => (
-                      <Card key={a.id} title={a.name} body={a.description} extra={`${a.uses_left}/${a.max_uses} usos`} />
+                      <Card key={a.id} title={a.name} body={a.description} extra={t("uses", { a: a.uses_left, b: a.max_uses })} />
                     ))}
                   </List>
                 </Section>
-                <p className="text-xs opacity-60">Usar habilidades y entregar objetos llegará en la próxima fase.</p>
+                <p className="text-xs opacity-60">{t("next_phase_inventory")}</p>
               </div>
             )}
             {tab === "evidencias" && (
-              <List empty="Aún no se ha liberado ninguna evidencia.">
+              <List empty={t("no_evidence")}>
                 {state.evidences.map((e: any, i: number) => (
                   <motion.div key={e.id} initial={{ opacity: 0, rotate: i % 2 ? 2 : -2, y: -10 }} animate={{ opacity: 1, rotate: i % 2 ? 0.6 : -0.6, y: 0 }} className="relative rounded-md bg-[var(--mm-text)] p-4 pt-6 text-[var(--mm-bg)] shadow-lg">
                     <span className="absolute left-1/2 top-1.5 h-3 w-3 -translate-x-1/2 rounded-full bg-[var(--mm-primary)]" />
                     <p className="text-[10px] uppercase tracking-widest opacity-60">
-                      {e.scope === "personal" ? "Pista personal" : "Ficha del caso"}
+                      {e.scope === "personal" ? t("personal_clue") : t("case_file")}
                       {e.act ? ` · ${e.act}` : ""}
                     </p>
                     <p className="font-bold" style={{ fontFamily: "var(--mm-font)" }}>
@@ -162,10 +173,10 @@ export function PlayerView({ state, actions, readOnly }: { state: any; actions?:
             )}
             {tab === "acciones" && (
               <div className="rounded-xl bg-[var(--mm-surface)] p-5 text-center text-sm opacity-80">
-                Las acciones conjuntas (combinar objetos, habilidades y fragmentos con otros jugadores) se activarán en la próxima fase del módulo.
+                {t("joint_soon")}
               </div>
             )}
-            {tab === "acusacion" && <VoteTab state={state} actions={actions} readOnly={readOnly} />}
+            {tab === "acusacion" && <VoteTab state={state} actions={actions} readOnly={readOnly} t={t} />}
           </motion.section>
         </AnimatePresence>
       </main>
@@ -216,9 +227,67 @@ function Card({ title, body, extra }: { title: string; body?: string | null; ext
   );
 }
 
-function CharacterTab({ state, storePrefix }: { state: any; storePrefix: string }) {
+type TFn = (k: MMKey, v?: Record<string, string | number>) => string;
+
+function ActProgress({ acts, current, label }: { acts: any[]; current: number; label: string }) {
+  return (
+    <div className="mx-auto mt-2 flex max-w-2xl items-center gap-1">
+      {acts.map((a) => (
+        <div key={a.id} title={a.name} className={`h-1.5 flex-1 rounded-full ${a.position < current ? "bg-[var(--mm-accent)]" : a.position === current ? "animate-pulse bg-[var(--mm-primary)]" : "bg-[var(--mm-text)]/15"}`} />
+      ))}
+      <span className="ml-1 text-[10px] opacity-60">{label}</span>
+    </div>
+  );
+}
+
+function CastList({ state, t }: { state: any; t: TFn }) {
+  const [open, setOpen] = useState<string | null>(null);
+  return (
+    <Section title={t("cast")}>
+      <p className="mb-2 text-xs opacity-60">{t("cast_hint")}</p>
+      <div className="space-y-2">
+        {state.cast.map((c: any) => {
+          const isOpen = open === c.character_id;
+          return (
+            <button key={c.character_id} onClick={() => setOpen(isOpen ? null : c.character_id)} className="flex w-full items-start gap-3 rounded-xl bg-[var(--mm-surface)] p-3 text-left">
+              <div className="relative">
+                <MMAvatar name={c.name} config={c.avatar_config} url={c.avatar_url} size={48} dimmed={c.is_victim} />
+                {c.player?.online && <span className="absolute bottom-0 right-0 h-3 w-3 animate-pulse rounded-full border-2 border-[var(--mm-bg)] bg-[var(--mm-accent)]" />}
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="font-semibold leading-tight">{c.name}</p>
+                <p className="text-xs opacity-60">{c.is_victim ? t("victim") : c.player ? t("played_by", { name: c.player.display_name }) : t("unassigned")}</p>
+                {c.summary && <p className={`mt-1 text-sm opacity-85 ${isOpen ? "" : "line-clamp-2"}`}>{c.summary}</p>}
+              </div>
+            </button>
+          );
+        })}
+      </div>
+    </Section>
+  );
+}
+
+function CharacterTab({ state, storePrefix, t }: { state: any; storePrefix: string; t: TFn }) {
   const ch = state.me.character;
-  if (!ch) return <p className="py-6 text-center opacity-70">Aún no se te ha asignado personaje.</p>;
+  const s = state.session;
+  if (!ch)
+    return (
+      <div className="space-y-5">
+        <div className="rounded-2xl bg-[var(--mm-surface)] p-5 text-center">
+          <span className="text-4xl">🎭</span>
+          <p className="mt-2 text-sm opacity-85">{s.characters_released_at ? t("not_assigned") : t("pending_release")}</p>
+          {!s.characters_released_at && s.release_at && (
+            <p className="mt-2 text-xs text-[var(--mm-accent)]">{t("release_on", { date: new Date(s.release_at).toLocaleString(mmLocale(s.language), { dateStyle: "full", timeStyle: "short" }) })}</p>
+          )}
+        </div>
+        {(s.game.briefing || s.game.synopsis) && (
+          <Section title={t("briefing")}>
+            <p className="whitespace-pre-line rounded-xl bg-[var(--mm-surface)] p-4 text-sm">{s.game.briefing || s.game.synopsis}</p>
+          </Section>
+        )}
+        {state.cast.length > 0 && <CastList state={state} t={t} />}
+      </div>
+    );
   return (
     <div className="space-y-5">
       <FlipCard
@@ -227,7 +296,7 @@ function CharacterTab({ state, storePrefix }: { state: any; storePrefix: string 
           <>
             <span className="text-5xl">🎭</span>
             <span className="mt-3 text-xl font-bold" style={{ fontFamily: "var(--mm-font)" }}>
-              Tu papel
+              {t("your_role")}
             </span>
           </>
         }
@@ -237,17 +306,22 @@ function CharacterTab({ state, storePrefix }: { state: any; storePrefix: string 
           <h2 className="mt-3 text-2xl font-extrabold" style={{ fontFamily: "var(--mm-font)" }}>
             {ch.name}
           </h2>
-          {ch.is_killer && <p className="mx-auto mt-2 w-fit rounded-full bg-[var(--mm-primary)] px-3 py-1 text-xs font-bold">Eres el asesino. Que nadie lo sepa.</p>}
-          {ch.description && <p className="mt-3 text-sm opacity-90">{ch.description}</p>}
+          {ch.is_killer && <p className="mx-auto mt-2 w-fit rounded-full bg-[var(--mm-primary)] px-3 py-1 text-xs font-bold">{t("you_are_killer")}</p>}
+          {ch.description && <p className="mt-3 whitespace-pre-line text-sm opacity-90">{ch.description}</p>}
         </div>
       </FlipCard>
+      {ch.costume && (
+        <Section title={t("costume")}>
+          <p className="rounded-xl bg-[var(--mm-surface)] p-4 text-sm">{ch.costume}</p>
+        </Section>
+      )}
       {ch.alibi && (
-        <Section title="Tu coartada">
+        <Section title={t("your_alibi")}>
           <p className="rounded-xl bg-[var(--mm-surface)] p-4 text-sm">{ch.alibi}</p>
         </Section>
       )}
       {Array.isArray(ch.relationships) && ch.relationships.length > 0 && (
-        <Section title="Relaciones">
+        <Section title={t("relationships")}>
           <ul className="space-y-2">
             {ch.relationships.map((r: any, i: number) => (
               <li key={i} className="rounded-xl bg-[var(--mm-surface)] p-3 text-sm">
@@ -257,65 +331,75 @@ function CharacterTab({ state, storePrefix }: { state: any; storePrefix: string 
           </ul>
         </Section>
       )}
-      <Section title="Elenco">
-        <div className="grid grid-cols-3 gap-3 sm:grid-cols-4">
-          {state.cast.map((c: any) => (
-            <div key={c.character_id} className="flex flex-col items-center text-center">
-              <div className="relative">
-                <MMAvatar name={c.name} config={c.avatar_config} url={c.avatar_url} size={56} dimmed={c.is_victim} />
-                {c.player?.online && <span className="absolute bottom-0 right-0 h-3 w-3 animate-pulse rounded-full border-2 border-[var(--mm-bg)] bg-[var(--mm-accent)]" />}
-              </div>
-              <p className="mt-1 text-xs font-semibold leading-tight">{c.name}</p>
-              <p className="text-[10px] opacity-60">{c.is_victim ? "Víctima" : c.player?.display_name ?? "—"}</p>
-            </div>
-          ))}
-        </div>
-      </Section>
+      {(s.game.briefing || s.game.synopsis) && s.status === "lobby" && (
+        <Section title={t("briefing")}>
+          <p className="whitespace-pre-line rounded-xl bg-[var(--mm-surface)] p-4 text-sm">{s.game.briefing || s.game.synopsis}</p>
+        </Section>
+      )}
+      <CastList state={state} t={t} />
     </div>
   );
 }
 
-function Lobby({ state, actions, readOnly }: { state: any; actions?: PlayerActions; readOnly?: boolean }) {
+function Lobby({ state, actions, readOnly, t }: { state: any; actions?: PlayerActions; readOnly?: boolean; t: TFn }) {
   const [busy, setBusy] = useState(false);
-  const players = state.cast.filter((c: any) => c.player);
+  const released = !!state.session.characters_released_at;
+  const me = state.me;
+  const run = async (fn?: () => Promise<void>) => {
+    setBusy(true);
+    await fn?.();
+    setBusy(false);
+  };
+  const steps: [string, boolean][] = [
+    [t("step_confirm"), me.confirmed],
+    [t("step_wait_role"), released],
+    [t("step_read_role"), released && !!me.character],
+    [t("step_ready"), me.ready],
+  ];
   return (
-    <div className="mb-6 rounded-2xl bg-[var(--mm-surface)] p-5 text-center">
-      <p className="text-lg font-bold" style={{ fontFamily: "var(--mm-font)" }}>
+    <div className="mb-6 rounded-2xl bg-[var(--mm-surface)] p-5">
+      <p className="text-center text-lg font-bold" style={{ fontFamily: "var(--mm-font)" }}>
         {state.session.game.title}
       </p>
-      <p className="mt-1 text-sm opacity-70">Esperando a que empiece la partida…</p>
+      <p className="mt-1 text-center text-sm opacity-70">{t("waiting_start")}</p>
+      <p className="mt-4 text-xs uppercase tracking-wider text-[var(--mm-accent)]">{t("steps_title")}</p>
+      <ol className="mt-2 space-y-1.5 text-sm">
+        {steps.map(([label, done], i) => (
+          <li key={i} className={`flex items-start gap-2 ${done ? "opacity-60" : ""}`}>
+            <span className={`grid h-5 w-5 shrink-0 place-items-center rounded-full text-[11px] ${done ? "bg-[var(--mm-accent)] text-[var(--mm-bg)]" : "border border-[var(--mm-text)]/40"}`}>{done ? "✓" : i + 1}</span>
+            <span className={done ? "line-through" : ""}>{label}</span>
+          </li>
+        ))}
+      </ol>
       <div className="mt-4 flex flex-wrap justify-center gap-2">
-        {players.map((c: any) => (
-          <span key={c.character_id} className="flex items-center gap-1.5 rounded-full bg-[var(--mm-bg)] px-2 py-1 text-xs">
-            <span className={`h-2 w-2 rounded-full ${c.player.online ? "animate-pulse bg-[var(--mm-accent)]" : "bg-[var(--mm-text)]/30"}`} />
-            {c.player.display_name} {c.player.ready && "✓"}
+        {(state.attendees ?? []).map((p: any) => (
+          <span key={p.id} className="flex items-center gap-1.5 rounded-full bg-[var(--mm-bg)] px-2 py-1 text-xs">
+            <span className={`h-2 w-2 rounded-full ${p.online ? "animate-pulse bg-[var(--mm-accent)]" : "bg-[var(--mm-text)]/30"}`} />
+            {p.display_name} {p.ready ? "✓✓" : p.confirmed ? "✓" : ""}
           </span>
         ))}
       </div>
-      {!readOnly && (
-        <button
-          disabled={state.me.ready || busy}
-          onClick={async () => {
-            setBusy(true);
-            await actions?.ready();
-            setBusy(false);
-          }}
-          className="mt-5 w-full rounded-xl bg-[var(--mm-primary)] py-3 font-semibold disabled:opacity-60"
-        >
-          {state.me.ready ? "¡Listo! Esperando al resto" : "Estoy listo"}
-        </button>
-      )}
+      {!readOnly &&
+        (!released ? (
+          <button disabled={me.confirmed || busy} onClick={() => run(actions?.confirm)} className="mt-5 w-full rounded-xl bg-[var(--mm-primary)] py-3 font-semibold disabled:opacity-60">
+            {me.confirmed ? t("confirmed_wait") : t("confirm_attendance")}
+          </button>
+        ) : (
+          <button disabled={me.ready || busy} onClick={() => run(actions?.ready)} className="mt-5 w-full rounded-xl bg-[var(--mm-primary)] py-3 font-semibold disabled:opacity-60">
+            {me.ready ? t("ready_wait") : t("ready")}
+          </button>
+        ))}
     </div>
   );
 }
 
-function ObjectivesTab({ state, actions, readOnly }: { state: any; actions?: PlayerActions; readOnly?: boolean }) {
+function ObjectivesTab({ state, actions, readOnly, t }: { state: any; actions?: PlayerActions; readOnly?: boolean; t: TFn }) {
   const groups = new Map<string, any[]>();
   for (const o of [...state.objectives].sort((a, b) => a.act_position - b.act_position)) {
-    const k = o.act ?? "General";
+    const k = o.act ?? t("general");
     groups.set(k, [...(groups.get(k) ?? []), o]);
   }
-  if (!groups.size) return <p className="py-6 text-center text-sm opacity-60">Tus objetivos aparecerán cuando empiece la partida.</p>;
+  if (!groups.size) return <p className="py-6 text-center text-sm opacity-60">{t("objectives_later")}</p>;
   return (
     <div className="space-y-5">
       {[...groups].map(([act, list]) => (
@@ -334,7 +418,7 @@ function ObjectivesTab({ state, actions, readOnly }: { state: any; actions?: Pla
                 <span className="flex-1 text-sm">
                   {o.text}
                   <span className="block text-[10px] opacity-60">
-                    {o.points} pts · {o.completion_type === "manual" ? "márcalo tú" : o.completion_type === "admin" ? "lo valida el anfitrión" : "automático"}
+                    {t("pts", { n: o.points })} · {o.completion_type === "manual" ? t("mark_yourself") : o.completion_type === "admin" ? t("host_validates") : t("automatic")}
                   </span>
                 </span>
               </button>
@@ -346,7 +430,7 @@ function ObjectivesTab({ state, actions, readOnly }: { state: any; actions?: Pla
   );
 }
 
-function VoteTab({ state, actions, readOnly }: { state: any; actions?: PlayerActions; readOnly?: boolean }) {
+function VoteTab({ state, actions, readOnly, t }: { state: any; actions?: PlayerActions; readOnly?: boolean; t: TFn }) {
   const [accused, setAccused] = useState<string>("");
   const [motive, setMotive] = useState("");
   const [method, setMethod] = useState("");
@@ -355,16 +439,16 @@ function VoteTab({ state, actions, readOnly }: { state: any; actions?: PlayerAct
     const name = state.cast.find((c: any) => c.character_id === state.vote.accused_character_id)?.name;
     return (
       <div className="rounded-2xl bg-[var(--mm-surface)] p-5 text-center">
-        <p className="text-sm opacity-70">Tu acusación está registrada</p>
+        <p className="text-sm opacity-70">{t("vote_registered")}</p>
         <p className="mt-2 text-2xl font-bold">{name}</p>
-        <p className="mt-2 text-sm opacity-80">Espera a la revelación final.</p>
+        <p className="mt-2 text-sm opacity-80">{t("wait_reveal")}</p>
       </div>
     );
   }
   const suspects = state.cast.filter((c: any) => !c.is_victim);
   return (
     <div className="space-y-4">
-      <p className="text-sm opacity-80">Elige a quién acusas. Una vez enviada, tu acusación no se puede cambiar.</p>
+      <p className="text-sm opacity-80">{t("vote_intro")}</p>
       <div className="grid grid-cols-2 gap-3">
         {suspects.map((c: any) => (
           <button key={c.character_id} onClick={() => setAccused(c.character_id)} className={`flex flex-col items-center rounded-xl p-3 ${accused === c.character_id ? "bg-[var(--mm-primary)]" : "bg-[var(--mm-surface)]"}`}>
@@ -373,31 +457,31 @@ function VoteTab({ state, actions, readOnly }: { state: any; actions?: PlayerAct
           </button>
         ))}
       </div>
-      <textarea value={motive} onChange={(e) => setMotive(e.target.value)} placeholder="Móvil: ¿por qué lo hizo?" className="w-full rounded-xl bg-[var(--mm-surface)] p-3 text-sm" rows={3} />
-      <textarea value={method} onChange={(e) => setMethod(e.target.value)} placeholder="Método: ¿cómo lo hizo?" className="w-full rounded-xl bg-[var(--mm-surface)] p-3 text-sm" rows={3} />
+      <textarea value={motive} onChange={(e) => setMotive(e.target.value)} placeholder={t("motive_ph")} className="w-full rounded-xl bg-[var(--mm-surface)] p-3 text-sm" rows={3} />
+      <textarea value={method} onChange={(e) => setMethod(e.target.value)} placeholder={t("method_ph")} className="w-full rounded-xl bg-[var(--mm-surface)] p-3 text-sm" rows={3} />
       <button
         disabled={readOnly || !accused || busy}
         onClick={async () => {
-          if (!confirm("¿Enviar tu acusación? No podrás cambiarla.")) return;
+          if (!confirm(t("vote_confirm"))) return;
           setBusy(true);
           await actions?.vote({ accusedCharacterId: accused, motive, method });
           setBusy(false);
         }}
         className="w-full rounded-xl bg-[var(--mm-primary)] py-3 font-semibold disabled:opacity-50"
       >
-        Enviar acusación
+        {t("send_accusation")}
       </button>
     </div>
   );
 }
 
-export function Results({ results, onReplay }: { results: any; onReplay?: () => void }) {
+export function Results({ results, onReplay, lang }: { results: any; onReplay?: () => void; lang?: string }) {
   return (
     <div className="mb-6 space-y-3 rounded-2xl bg-[var(--mm-surface)] p-5">
       <div className="flex items-center gap-3">
         {results.killer && <MMAvatar name={results.killer.name} config={results.killer.avatar_config} url={results.killer.avatar_url} size={56} />}
         <div>
-          <p className="text-xs uppercase tracking-widest opacity-70">El asesino era</p>
+          <p className="text-xs uppercase tracking-widest opacity-70">{mmT(lang, "killer_was")}</p>
           <p className="text-xl font-bold text-[var(--mm-primary)]">{results.killer?.name}</p>
         </div>
       </div>
@@ -407,7 +491,7 @@ export function Results({ results, onReplay }: { results: any; onReplay?: () => 
             <span className="w-5 text-center font-bold">{i + 1}</span>
             {r.character && <MMAvatar name={r.character.name} config={r.character.avatar_config} url={r.character.avatar_url} size={28} />}
             <span className="min-w-0 flex-1 truncate">
-              {r.display_name} <span className="opacity-60">→ {r.accused ?? "sin voto"}</span>
+              {r.display_name} <span className="opacity-60">→ {r.accused ?? mmT(lang, "no_vote")}</span>
             </span>
             <span>{r.correct ? "✅" : "❌"}</span>
             <span className="w-12 text-right font-mono">{r.score} pts</span>
@@ -416,7 +500,7 @@ export function Results({ results, onReplay }: { results: any; onReplay?: () => 
       </ol>
       {onReplay && (
         <button onClick={onReplay} className="text-sm text-[var(--mm-accent)] underline">
-          Volver a ver la revelación
+          {mmT(lang, "replay_reveal")}
         </button>
       )}
     </div>
