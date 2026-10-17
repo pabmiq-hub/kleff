@@ -462,11 +462,49 @@ export async function buildAdminState(sessionId: string) {
         db().from("mm_player_abilities").select("*, mm_abilities(max_uses)").in("session_player_id", pids),
       ])
     : [{ data: [] }, { data: [] }, { data: [] }];
+  const charIds = (chars ?? []).map((c: any) => c.id);
+  const inChars = (t: string) => (charIds.length ? db().from(t).select("*").in("character_id", charIds) : Promise.resolve({ data: [] }));
+  const [{ data: secrets }, { data: objectives }, { data: items }, { data: abilities }, { data: evidences }, { data: tr }] = await Promise.all([
+    inChars("mm_secrets"),
+    inChars("mm_objectives"),
+    inChars("mm_items"),
+    inChars("mm_abilities"),
+    db().from("mm_evidences").select("id, act_id, scope, target_character_id").eq("game_id", s.game_id),
+    db().from("mm_translations").select("lang, source_hash, created_at").eq("game_id", s.game_id),
+  ]);
+  const actName = (id: string | null) => (id ? acts.find((a) => a.id === id)?.name ?? null : null);
+  const cName = (id: string) => (chars ?? []).find((c: any) => c.id === id)?.name ?? "?";
   const now = Date.now();
   return {
     session: { ...publicSession(s, acts, game), murder_event: game.murder_event, blind_mode: s.blind_mode, scheduled_at: s.scheduled_at, archived: s.archived },
     final_reveal: game.final_reveal,
-    characters: (chars ?? []).map((c: any) => ({ id: c.id, name: c.name, victim: c.victim, avatar_config: c.avatar_config, avatar_url: c.avatar_url, is_killer: hideKiller ? null : c.is_killer })),
+    translations: tr ?? [],
+    acts_full: acts.map((a) => ({
+      id: a.id,
+      key: a.key,
+      name: a.name,
+      position: a.position,
+      duration_minutes: a.duration_minutes,
+      narrative_text: a.narrative_text,
+      evidences: (evidences ?? []).filter((e: any) => e.act_id === a.id).length,
+    })),
+    characters: (chars ?? []).map((c: any) => ({
+      id: c.id,
+      name: c.name,
+      victim: c.victim,
+      avatar_config: c.avatar_config,
+      avatar_url: c.avatar_url,
+      is_killer: hideKiller ? null : c.is_killer,
+      description: c.description,
+      public_summary: c.public_summary,
+      costume: c.costume,
+      alibi: c.alibi,
+      relationships: c.relationships,
+      secrets: (secrets ?? []).filter((x: any) => x.character_id === c.id).map((x: any) => ({ id: x.id, content: x.content, known_by: (x.known_by ?? []).map(cName) })),
+      objectives: (objectives ?? []).filter((x: any) => x.character_id === c.id).map((x: any) => ({ id: x.id, text: x.text, points: x.points, completion_type: x.completion_type, act: actName(x.act_id) })),
+      items: (items ?? []).filter((x: any) => x.character_id === c.id).map((x: any) => ({ id: x.id, name: x.name, description: x.description, from: actName(x.available_from_act_id) })),
+      abilities: (abilities ?? []).filter((x: any) => x.character_id === c.id).map((x: any) => ({ id: x.id, name: x.name, description: x.description, max_uses: x.max_uses, from: actName(x.available_from_act_id) })),
+    })),
     players: (players ?? []).map((p: any) => {
       const objs = (pobj ?? []).filter((o: any) => o.session_player_id === p.id);
       const abs = (pab ?? []).filter((o: any) => o.session_player_id === p.id);
