@@ -11,6 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { MMAdminGate } from "@/components/mm/AdminGate";
 import { MMAvatar, describeEvent, fmtClock, sessionTopicName, useBroadcast, useCountdown } from "@/components/mm/shared";
 import { PlayerView, Results } from "@/components/mm/PlayerView";
+import { AdminReadings } from "@/components/mm/AdminReadings";
 import { MM_LANGS } from "@/lib/mm/i18n";
 import { isSessionLanguageLocked, shouldTriggerMurder } from "@/lib/mm/session-rules";
 import { mmControlSession, mmGetSessionAdmin, mmManagePlayers, mmViewAsPlayer } from "@/lib/mm/admin.functions";
@@ -146,6 +147,7 @@ function Panel() {
       </div>
 
       <SessionPlanning d={d} act={act} />
+      <AdminReadings state={d} />
 
       {s.status === "finished" && d.results && <div className="rounded-2xl bg-ink p-2 text-cream"><Results results={d.results} /></div>}
 

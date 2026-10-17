@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { User, Lock, ListChecks, Backpack, FileSearch, Handshake, Gavel } from "lucide-react";
+import { User, Lock, ListChecks, Backpack, FileSearch, Handshake, Gavel, BookOpen } from "lucide-react";
 import { MMAvatar, MMShell, fmtClock, useCountdown } from "./shared";
 import { ActIntro, FinalReveal, FlipCard, MurderOverlay, SealedDoc } from "./animations";
 import { mmT, mmLocale, type MMKey } from "@/lib/mm/i18n";
@@ -120,6 +120,14 @@ export function PlayerView({ state, actions, readOnly }: { state: any; actions?:
             {s.act.narrative_text && <p className="mt-1 text-sm opacity-80">{s.act.narrative_text}</p>}
           </div>
         )}
+
+        {(state.readings ?? []).map((reading: any, i: number) => (
+          <article key={`${reading.act}-${i}`} role="status" className="mb-4 min-w-0 rounded-lg border-2 border-primary bg-card p-4 text-card-foreground">
+            <p className="flex items-start gap-2 font-semibold text-primary"><BookOpen className="mt-0.5 h-5 w-5 shrink-0" />{t("reading_cue")}</p>
+            <h2 className="mt-2 break-words text-lg font-bold">{reading.title}</h2>
+            <p className="mt-2 whitespace-pre-wrap break-words text-sm leading-relaxed">{reading.text}</p>
+          </article>
+        ))}
 
         <AnimatePresence mode="wait">
           <motion.section key={tab} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.18 }}>

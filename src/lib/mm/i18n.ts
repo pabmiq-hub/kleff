@@ -8,6 +8,7 @@ export const MM_LANGS = [
 export type MMLang = (typeof MM_LANGS)[number]["code"];
 
 const es = {
+  reading_cue: "Te toca leer esto en voz alta al grupo",
   tab_character: "Personaje",
   tab_secrets: "Secretos",
   tab_objectives: "Objetivos",
@@ -81,6 +82,7 @@ const es = {
 type Dict = typeof es;
 
 const ca: Dict = {
+  reading_cue: "Et toca llegir això en veu alta al grup",
   tab_character: "Personatge",
   tab_secrets: "Secrets",
   tab_objectives: "Objectius",
@@ -153,6 +155,7 @@ const ca: Dict = {
 };
 
 const en: Dict = {
+  reading_cue: "It’s your turn to read this aloud to the group",
   tab_character: "Character",
   tab_secrets: "Secrets",
   tab_objectives: "Goals",
@@ -226,6 +229,7 @@ const en: Dict = {
 
 const fr: Dict = {
   ...en,
+  reading_cue: "C’est à toi de lire ceci à voix haute au groupe",
   tab_character: "Personnage",
   tab_secrets: "Secrets",
   tab_objectives: "Objectifs",
