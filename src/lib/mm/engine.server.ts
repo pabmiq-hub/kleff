@@ -279,7 +279,11 @@ function publicSession(s: Session, acts: any[], game: any) {
     voting_open: s.voting_open,
     revealed_at: s.revealed_at,
     server_now: new Date().toISOString(),
-    game: { id: game.id, title: game.title, theme: game.theme, cover_url: game.cover_url },
+    language: s.language ?? "es",
+    scheduled_at: s.scheduled_at,
+    characters_released_at: s.characters_released_at,
+    release_at: s.release_at,
+    game: { id: game.id, title: game.title, theme: game.theme, cover_url: game.cover_url, synopsis: game.synopsis, briefing: game.briefing },
   };
 }
 
