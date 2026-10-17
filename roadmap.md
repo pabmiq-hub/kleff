@@ -1,4 +1,5 @@
-- [ ] Juegos: importar lecturas teatrales por acto, panel del anfitrión y aviso privado al lector; proteger la solución hasta la revelación y verificar el flujo
+- [x] Juegos: lecturas teatrales importadas, panel por acto y aviso privado; solución protegida, 27 pruebas y flujo real de jugador verificados, partida temporal eliminada
+- [ ] Juegos lecturas: aplicar columna en base de respaldo (herramienta de migración bloqueada por preferencias) y verificar panel con sesión de administrador (credenciales disponibles no permiten acceso)
 - [ ] Diagnosticar selecciones y acciones Super Like de extremo a extremo
 - [x] Juegos: asesinato automático al entrar en el Acto 2 en todos los modos; 4 pruebas del motor y 14 de reglas superadas
 - [ ] Corregir causas de bloqueos, fallos parciales y errores de envío
