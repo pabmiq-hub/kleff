@@ -125,6 +125,11 @@ export const EVENT_LABELS: Record<string, string> = {
   vote_submitted: "envió su acusación",
   invitations_sent: "Invitaciones enviadas",
   code_regenerated: "Código regenerado",
+  characters_released: "Personajes repartidos y enviados por email",
+  release_scheduled: "Reparto de personajes programado",
+  language_changed: "Idioma de la partida cambiado",
+  player_confirmed: "confirmó su asistencia",
+  character_reassigned: "recibió un personaje (sustitución)",
 };
 
 export function describeEvent(e: { type: string; payload: any }, playerName?: string) {
