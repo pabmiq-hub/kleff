@@ -9,7 +9,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { MMAdminGate } from "@/components/mm/AdminGate";
 import { MMAvatar } from "@/components/mm/shared";
-import { mmCreateSession, mmGetGame, mmUpdateCharacterAvatar, mmUpdateGame } from "@/lib/mm/admin.functions";
+import { MM_LANGS } from "@/lib/mm/i18n";
+import { mmControlSession, mmCreateSession, mmGetGame, mmUpdateCharacterAvatar, mmUpdateGame } from "@/lib/mm/admin.functions";
 
 export const Route = createFileRoute("/actividades_/juegos/$gameId/")({
   head: () => ({
@@ -169,11 +170,15 @@ function GameDetail() {
 
 function NewSessionDialog({ open, onOpenChange, gameId }: { open: boolean; onOpenChange: (o: boolean) => void; gameId: string }) {
   const create = useServerFn(mmCreateSession);
+  const control = useServerFn(mmControlSession);
   const navigate = useNavigate();
   const [name, setName] = useState("");
   const [when, setWhen] = useState("");
   const [mode, setMode] = useState<"manual" | "timer" | "auto">("manual");
   const [blind, setBlind] = useState(false);
+  const [lang, setLang] = useState("es");
+  const [early, setEarly] = useState(true);
+  const [busy, setBusy] = useState(false);
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
@@ -196,14 +201,35 @@ function NewSessionDialog({ open, onOpenChange, gameId }: { open: boolean; onOpe
           <label className="flex items-center gap-2 text-sm">
             <input type="checkbox" checked={blind} onChange={(e) => setBlind(e.target.checked)} /> Modo ciego (no ver quién es el asesino hasta el final)
           </label>
+          <label className="block text-sm">
+            Idioma de la partida
+            <select value={lang} onChange={(e) => setLang(e.target.value)} className="mt-1 w-full rounded-md border border-ink/20 bg-background p-2">
+              {MM_LANGS.map((l) => <option key={l.code} value={l.code}>{l.label}</option>)}
+            </select>
+          </label>
+          <label className="flex items-center gap-2 text-sm">
+            <input type="checkbox" checked={early} disabled={!when} onChange={(e) => setEarly(e.target.checked)} /> Repartir personajes automáticamente 24 h antes (requiere fecha)
+          </label>
           <Button
             className="w-full"
+            disabled={busy}
             onClick={async () => {
-              const r = await create({ data: { gameId, name, scheduled_at: when ? new Date(when).toISOString() : null, control_mode: mode, blind_mode: blind } });
+              setBusy(true);
+              const at = when ? new Date(when) : null;
+              const r = await create({ data: { gameId, name, scheduled_at: at ? at.toISOString() : null, control_mode: mode, blind_mode: blind, language: "es", release_at: at && early ? new Date(at.getTime() - 24 * 3600 * 1000).toISOString() : null } });
+              if (lang !== "es") {
+                toast.info("Traduciendo el juego… puede tardar un minuto");
+                try {
+                  await control({ data: { sessionId: r.sessionId, action: "set_language", language: lang as any } });
+                } catch (e) {
+                  toast.error((e as Error).message);
+                }
+              }
+              setBusy(false);
               void navigate({ to: "/actividades/juegos/$gameId/partidas/$sessionId", params: { gameId, sessionId: r.sessionId } });
             }}
           >
-            Crear partida
+            {busy ? "Creando…" : "Crear partida"}
           </Button>
         </div>
       </DialogContent>

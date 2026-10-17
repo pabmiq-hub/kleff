@@ -89,7 +89,7 @@ async function loadActs(gameId: string) {
   return (data ?? []) as any[];
 }
 
-async function initPlayerRows(session: Session) {
+export async function initPlayerRows(session: Session) {
   const { data: players } = await db().from("mm_session_players").select("id, character_id").eq("session_id", session.id);
   for (const p of players ?? []) {
     if (!p.character_id) continue;
@@ -104,9 +104,74 @@ async function initPlayerRows(session: Session) {
   }
 }
 
+/* --------------------------- character hand-out -------------------------- */
+
+/** Email a player the character they have been given (localized to the session language). */
+export async function notifyAssignment(playerId: string): Promise<boolean> {
+  const { data: p } = await db().from("mm_session_players").select("id, email, display_name, access_code, character_id, session_id").eq("id", playerId).maybeSingle();
+  if (!p?.email || !p.character_id) return false;
+  const { data: s } = await db().from("mm_sessions").select("game_id, language, scheduled_at").eq("id", p.session_id).single();
+  const { loadTr } = await import("./translate.server");
+  const tr = await loadTr(s.game_id, s.language);
+  const [{ data: g }, { data: c }] = await Promise.all([
+    db().from("mm_games").select("id, title, briefing").eq("id", s.game_id).single(),
+    db().from("mm_characters").select("*").eq("id", p.character_id).single(),
+  ]);
+  const game = tr.row("mm_games", g);
+  const ch = tr.row("mm_characters", c);
+  const { sendAssignmentEmail } = await import("./emails.server");
+  await sendAssignmentEmail({
+    email: p.email,
+    name: p.display_name,
+    code: p.access_code,
+    gameTitle: game.title,
+    character: { name: ch.name, summary: ch.public_summary || ch.description, costume: ch.costume },
+    briefing: game.briefing,
+    scheduledAt: s.scheduled_at,
+    lang: s.language,
+  });
+  await db().from("mm_session_players").update({ assignment_notified_at: new Date().toISOString() }).eq("id", p.id);
+  return true;
+}
+
+/**
+ * Hand out characters to everyone registered (killer first, so the murderer is
+ * always played), reveal them to players and email each one. Idempotent.
+ */
+export async function releaseCharacters(sessionId: string, reason: string) {
+  const { data: s } = await db().from("mm_sessions").select("*").eq("id", sessionId).single();
+  if (!s || s.characters_released_at) return { assigned: 0, notified: 0, missing: [] as string[], already: true };
+  const [{ data: chars }, { data: players }] = await Promise.all([
+    db().from("mm_characters").select("id, name, is_killer, victim").eq("game_id", s.game_id),
+    db().from("mm_session_players").select("id, character_id, ready, registered_at").eq("session_id", sessionId).order("registered_at"),
+  ]);
+  const playable = (chars ?? []).filter((c: any) => !c.victim);
+  const taken = new Set((players ?? []).map((p: any) => p.character_id).filter(Boolean));
+  const free = playable.filter((c: any) => !taken.has(c.id));
+  const others = free.filter((c: any) => !c.is_killer).sort(() => Math.random() - 0.5);
+  const queue = [...others, ...free.filter((c: any) => c.is_killer)]; // pop() takes the killer first
+  const waiting = (players ?? []).filter((p: any) => !p.character_id).sort((a: any, b: any) => Number(b.ready) - Number(a.ready));
+  let assigned = 0;
+  for (const p of waiting) {
+    const c = queue.pop();
+    if (!c) break;
+    await db().from("mm_session_players").update({ character_id: c.id }).eq("id", p.id);
+    assigned++;
+  }
+  const { data: upd } = await db().from("mm_sessions").update({ characters_released_at: new Date().toISOString(), release_at: null }).eq("id", sessionId).is("characters_released_at", null).select("id");
+  if (!upd?.length) return { assigned, notified: 0, missing: [], already: true };
+  await logEvent(sessionId, "characters_released", { reason, assigned });
+  await broadcast(sessionTopic(sessionId), "characters_released", {});
+  let notified = 0;
+  const { data: all } = await db().from("mm_session_players").select("id, email, character_id").eq("session_id", sessionId);
+  for (const p of all ?? []) if (p.email && p.character_id && (await notifyAssignment(p.id).catch(() => false))) notified++;
+  return { assigned, notified, missing: queue.map((c: any) => c.name), already: false };
+}
+
 export async function startSession(sessionId: string, reason: string) {
   const { data: s } = await db().from("mm_sessions").select("*").eq("id", sessionId).single();
   if (!s || s.status !== "lobby") return;
+  if (!s.characters_released_at) await releaseCharacters(sessionId, "start");
   const acts = await loadActs(s.game_id);
   if (!acts.length) throw new Error("El juego no tiene actos");
   const first = acts[0];
@@ -170,10 +235,14 @@ export async function tick(sessionId: string) {
   const { data: s } = await db().from("mm_sessions").select("*").eq("id", sessionId).maybeSingle();
   if (!s || s.status === "finished") return;
   const now = Date.now();
+  if (s.status === "lobby" && !s.characters_released_at && s.release_at && new Date(s.release_at).getTime() <= now) {
+    await releaseCharacters(sessionId, "scheduled");
+    s.characters_released_at = new Date().toISOString();
+  }
   if (s.status === "lobby" && s.control_mode === "auto") {
     const { data: ps } = await db().from("mm_session_players").select("ready").eq("session_id", sessionId);
     const scheduled = s.scheduled_at && new Date(s.scheduled_at).getTime() <= now;
-    if (ps?.length && (ps.every((p: any) => p.ready) || scheduled)) await startSession(sessionId, "auto");
+    if (ps?.length && ((s.characters_released_at && ps.every((p: any) => p.ready)) || scheduled)) await startSession(sessionId, "auto");
     return;
   }
   if (s.status !== "running") return;
@@ -210,7 +279,11 @@ function publicSession(s: Session, acts: any[], game: any) {
     voting_open: s.voting_open,
     revealed_at: s.revealed_at,
     server_now: new Date().toISOString(),
-    game: { id: game.id, title: game.title, theme: game.theme, cover_url: game.cover_url },
+    language: s.language ?? "es",
+    scheduled_at: s.scheduled_at,
+    characters_released_at: s.characters_released_at,
+    release_at: s.release_at,
+    game: { id: game.id, title: game.title, theme: game.theme, cover_url: game.cover_url, synopsis: game.synopsis, briefing: game.briefing },
   };
 }
 
@@ -253,19 +326,27 @@ export async function buildPlayerState(playerId: string) {
   const { data: me } = await db().from("mm_session_players").select("*").eq("id", playerId).single();
   if (!me) throw new Error("Jugador no encontrado");
   const { data: s } = await db().from("mm_sessions").select("*").eq("id", me.session_id).single();
-  const [{ data: game }, acts, { data: chars }, { data: players }] = await Promise.all([
+  const { loadTr } = await import("./translate.server");
+  const [{ data: gameRaw }, actsRaw, { data: charsRaw }, { data: players }, tr] = await Promise.all([
     db().from("mm_games").select("*").eq("id", s.game_id).single(),
     loadActs(s.game_id),
     db().from("mm_characters").select("*").eq("game_id", s.game_id),
-    db().from("mm_session_players").select("id, display_name, character_id, last_seen_at, ready").eq("session_id", s.id),
+    db().from("mm_session_players").select("id, display_name, character_id, last_seen_at, ready, confirmed_at").eq("session_id", s.id),
+    loadTr(s.game_id, s.language),
   ]);
+  const game = tr.row("mm_games", gameRaw);
+  const acts = tr.rows("mm_acts", actsRaw);
+  const chars = tr.rows("mm_characters", charsRaw);
+  const released = !!s.characters_released_at;
   const actPos = (id: string | null) => (id ? acts.find((a) => a.id === id)?.position ?? 0 : 0);
   const curPos = s.status === "lobby" ? 0 : actPos(s.current_act_id);
   const reached = (actId: string | null) => !actId || actPos(actId) <= curPos;
-  const myChar = (chars ?? []).find((c: any) => c.id === me.character_id) ?? null;
-  const charIds = (chars ?? []).map((c: any) => c.id);
+  // Characters stay hidden from players until the host hands them out.
+  const myChar = released ? (chars ?? []).find((c: any) => c.id === me.character_id) ?? null : null;
+  const myCharId = myChar?.id ?? null;
+  const charIds = released ? (chars ?? []).map((c: any) => c.id) : [];
 
-  const [{ data: secrets }, { data: objectives }, { data: pobj }, { data: items }, { data: abilities }, { data: pab }, { data: evidences }, { data: unlocks }, { data: vote }] =
+  const [{ data: secretsRaw }, { data: objectivesRaw }, { data: pobj }, { data: itemsRaw }, { data: abilitiesRaw }, { data: pab }, { data: evidencesRaw }, { data: unlocks }, { data: vote }] =
     await Promise.all([
       charIds.length ? db().from("mm_secrets").select("*").in("character_id", charIds) : { data: [] },
       myChar ? db().from("mm_objectives").select("*").eq("character_id", myChar.id) : { data: [] },
@@ -277,6 +358,11 @@ export async function buildPlayerState(playerId: string) {
       db().from("mm_player_unlocks").select("*").eq("session_player_id", me.id),
       db().from("mm_votes").select("accused_character_id, motive_text, method_text, submitted_at").eq("session_id", s.id).eq("voter_player_id", me.id).maybeSingle(),
     ]);
+  const secrets = tr.rows("mm_secrets", secretsRaw);
+  const objectives = tr.rows("mm_objectives", objectivesRaw);
+  const items = tr.rows("mm_items", itemsRaw);
+  const abilities = tr.rows("mm_abilities", abilitiesRaw);
+  const evidences = tr.rows("mm_evidences", evidencesRaw);
   const unlockedSecret = new Set((unlocks ?? []).map((u: any) => u.secret_id).filter(Boolean));
   const unlockedEv = new Set((unlocks ?? []).map((u: any) => u.evidence_id).filter(Boolean));
   const charName = (id: string) => (chars ?? []).find((c: any) => c.id === id)?.name ?? "";
@@ -284,8 +370,8 @@ export async function buildPlayerState(playerId: string) {
   const now = Date.now();
 
   const visibleSecrets = (secrets ?? [])
-    .filter((x: any) => x.character_id === me.character_id || (me.character_id && (x.known_by ?? []).includes(me.character_id)) || unlockedSecret.has(x.id))
-    .map((x: any) => ({ id: x.id, content: x.content, owner: charName(x.character_id), own: x.character_id === me.character_id }));
+    .filter((x: any) => x.character_id === myCharId || (myCharId && (x.known_by ?? []).includes(myCharId)) || unlockedSecret.has(x.id))
+    .map((x: any) => ({ id: x.id, content: x.content, owner: charName(x.character_id), own: x.character_id === myCharId }));
 
   const visibleEvidences = (evidences ?? [])
     .filter((e: any) => {
@@ -293,7 +379,7 @@ export async function buildPlayerState(playerId: string) {
       if (s.status === "lobby") return false;
       const auto = !e.unlock_rule || e.unlock_rule.type === "auto" || !e.unlock_rule.type;
       if (!auto || !reached(e.act_id)) return false;
-      return e.scope === "common" || e.target_character_id === me.character_id;
+      return e.scope === "common" || e.target_character_id === myCharId;
     })
     .map((e: any) => ({ id: e.id, title: e.title, content: e.content, image_url: e.image_url, scope: e.scope, reveal_style: e.reveal_style, act: acts.find((a) => a.id === e.act_id)?.name ?? null }));
 
@@ -303,11 +389,14 @@ export async function buildPlayerState(playerId: string) {
       id: me.id,
       display_name: me.display_name,
       ready: me.ready,
+      confirmed: !!me.confirmed_at,
       character: myChar
         ? {
             id: myChar.id,
             name: myChar.name,
             description: myChar.description,
+            public_summary: myChar.public_summary,
+            costume: myChar.costume,
             alibi: myChar.alibi,
             relationships: myChar.relationships,
             avatar_config: myChar.avatar_config,
@@ -317,19 +406,22 @@ export async function buildPlayerState(playerId: string) {
           }
         : null,
     },
+    // Public cast: who is in the story (bio/summary only). Who plays whom is only shown after the hand-out.
     cast: (chars ?? [])
-      .filter((c: any) => !c.victim || murdered)
+      .filter((c: any) => !c.victim || murdered || !!c.public_summary)
       .map((c: any) => {
-        const p = (players ?? []).find((x: any) => x.character_id === c.id);
+        const p = released ? (players ?? []).find((x: any) => x.character_id === c.id) : null;
         return {
           character_id: c.id,
           name: c.name,
+          summary: c.public_summary || c.description || null,
           avatar_config: c.avatar_config,
           avatar_url: c.avatar_url,
           is_victim: murdered && !!c.victim,
           player: p ? { id: p.id, display_name: p.display_name, online: !!p.last_seen_at && now - new Date(p.last_seen_at).getTime() < ONLINE_MS, ready: p.ready } : null,
         };
       }),
+    attendees: (players ?? []).map((p: any) => ({ id: p.id, display_name: p.display_name, confirmed: !!p.confirmed_at, ready: p.ready, online: !!p.last_seen_at && now - new Date(p.last_seen_at).getTime() < ONLINE_MS })),
     secrets: visibleSecrets,
     objectives: (objectives ?? [])
       .filter((o: any) => s.status !== "lobby" && reached(o.act_id))
@@ -370,11 +462,49 @@ export async function buildAdminState(sessionId: string) {
         db().from("mm_player_abilities").select("*, mm_abilities(max_uses)").in("session_player_id", pids),
       ])
     : [{ data: [] }, { data: [] }, { data: [] }];
+  const charIds = (chars ?? []).map((c: any) => c.id);
+  const inChars = (t: string) => (charIds.length ? db().from(t).select("*").in("character_id", charIds) : Promise.resolve({ data: [] }));
+  const [{ data: secrets }, { data: objectives }, { data: items }, { data: abilities }, { data: evidences }, { data: tr }] = await Promise.all([
+    inChars("mm_secrets"),
+    inChars("mm_objectives"),
+    inChars("mm_items"),
+    inChars("mm_abilities"),
+    db().from("mm_evidences").select("id, act_id, scope, target_character_id").eq("game_id", s.game_id),
+    db().from("mm_translations").select("lang, source_hash, created_at").eq("game_id", s.game_id),
+  ]);
+  const actName = (id: string | null) => (id ? acts.find((a) => a.id === id)?.name ?? null : null);
+  const cName = (id: string) => (chars ?? []).find((c: any) => c.id === id)?.name ?? "?";
   const now = Date.now();
   return {
     session: { ...publicSession(s, acts, game), murder_event: game.murder_event, blind_mode: s.blind_mode, scheduled_at: s.scheduled_at, archived: s.archived },
     final_reveal: game.final_reveal,
-    characters: (chars ?? []).map((c: any) => ({ id: c.id, name: c.name, victim: c.victim, avatar_config: c.avatar_config, avatar_url: c.avatar_url, is_killer: hideKiller ? null : c.is_killer })),
+    translations: tr ?? [],
+    acts_full: acts.map((a) => ({
+      id: a.id,
+      key: a.key,
+      name: a.name,
+      position: a.position,
+      duration_minutes: a.duration_minutes,
+      narrative_text: a.narrative_text,
+      evidences: (evidences ?? []).filter((e: any) => e.act_id === a.id).length,
+    })),
+    characters: (chars ?? []).map((c: any) => ({
+      id: c.id,
+      name: c.name,
+      victim: c.victim,
+      avatar_config: c.avatar_config,
+      avatar_url: c.avatar_url,
+      is_killer: hideKiller ? null : c.is_killer,
+      description: c.description,
+      public_summary: c.public_summary,
+      costume: c.costume,
+      alibi: c.alibi,
+      relationships: c.relationships,
+      secrets: (secrets ?? []).filter((x: any) => x.character_id === c.id).map((x: any) => ({ id: x.id, content: x.content, known_by: (x.known_by ?? []).map(cName) })),
+      objectives: (objectives ?? []).filter((x: any) => x.character_id === c.id).map((x: any) => ({ id: x.id, text: x.text, points: x.points, completion_type: x.completion_type, act: actName(x.act_id) })),
+      items: (items ?? []).filter((x: any) => x.character_id === c.id).map((x: any) => ({ id: x.id, name: x.name, description: x.description, from: actName(x.available_from_act_id) })),
+      abilities: (abilities ?? []).filter((x: any) => x.character_id === c.id).map((x: any) => ({ id: x.id, name: x.name, description: x.description, max_uses: x.max_uses, from: actName(x.available_from_act_id) })),
+    })),
     players: (players ?? []).map((p: any) => {
       const objs = (pobj ?? []).filter((o: any) => o.session_player_id === p.id);
       const abs = (pab ?? []).filter((o: any) => o.session_player_id === p.id);
@@ -386,6 +516,8 @@ export async function buildAdminState(sessionId: string) {
         character_id: p.character_id,
         access_code: p.access_code,
         ready: p.ready,
+        confirmed: !!p.confirmed_at,
+        notified: !!p.assignment_notified_at,
         online: !!p.last_seen_at && now - new Date(p.last_seen_at).getTime() < ONLINE_MS,
         last_seen_at: p.last_seen_at,
         voted: (votes ?? []).some((v: any) => v.voter_player_id === p.id),

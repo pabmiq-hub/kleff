@@ -10,7 +10,7 @@ export const mmGetInvitation = createServerFn({ method: "POST" })
   .inputValidator((d: { token: string }) => ({ token: z.string().min(10).max(80).parse(d.token) }))
   .handler(async ({ data }) => {
     const { db } = await eng();
-    const { data: inv } = await db().from("mm_invitations").select("id, email, status, session_id, mm_sessions(name, status, mm_games(title, synopsis, cover_url, theme))").eq("token", data.token).maybeSingle();
+    const { data: inv } = await db().from("mm_invitations").select("id, email, status, session_id, mm_sessions(name, status, language, scheduled_at, game_id, mm_games(id, title, synopsis, briefing, cover_url, theme))").eq("token", data.token).maybeSingle();
     if (!inv) return { found: false as const };
     return {
       found: true as const,
@@ -18,7 +18,15 @@ export const mmGetInvitation = createServerFn({ method: "POST" })
       registered: inv.status === "registered",
       session_name: inv.mm_sessions?.name as string,
       finished: inv.mm_sessions?.status === "finished",
-      game: inv.mm_sessions?.mm_games as { title: string; synopsis: string | null; cover_url: string | null; theme: Record<string, string> },
+      language: (inv.mm_sessions?.language ?? "es") as string,
+      scheduled_at: (inv.mm_sessions?.scheduled_at ?? null) as string | null,
+      game: (await (await import("./translate.server")).loadTr(inv.mm_sessions?.game_id, inv.mm_sessions?.language)).row("mm_games", inv.mm_sessions?.mm_games) as {
+        title: string;
+        synopsis: string | null;
+        briefing: string | null;
+        cover_url: string | null;
+        theme: Record<string, string>;
+      },
     };
   });
 
@@ -27,13 +35,13 @@ export const mmRegisterInvitation = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const e = await eng();
     const { db } = e;
-    const { data: inv } = await db().from("mm_invitations").select("*, mm_sessions(id, game_id, status, mm_games(title))").eq("token", data.token).maybeSingle();
+    const { data: inv } = await db().from("mm_invitations").select("*, mm_sessions(id, game_id, status, language, characters_released_at, mm_games(id, title))").eq("token", data.token).maybeSingle();
     if (!inv) throw new Error("Invitación no válida");
     if (inv.status === "registered") throw new Error("Esta invitación ya se ha usado. Entra con tu código personal.");
     const s = inv.mm_sessions;
     if (s.status === "finished") throw new Error("Esta partida ya ha terminado");
     let characterId = inv.character_id as string | null;
-    if (!characterId) {
+    if (!characterId && s.characters_released_at) {
       const [{ data: chars }, { data: players }, { data: invs }] = await Promise.all([
         db().from("mm_characters").select("id").eq("game_id", s.game_id).eq("victim", false),
         db().from("mm_session_players").select("character_id").eq("session_id", s.id),
@@ -52,7 +60,7 @@ export const mmRegisterInvitation = createServerFn({ method: "POST" })
       .select("id")
       .single();
     if (error) throw new Error(error.message);
-    if (s.status !== "lobby") {
+    if (s.status !== "lobby" && characterId) {
       // late join: create objective/ability rows
       const [{ data: objs }, { data: abs }] = await Promise.all([
         db().from("mm_objectives").select("id").eq("character_id", characterId),
@@ -63,7 +71,10 @@ export const mmRegisterInvitation = createServerFn({ method: "POST" })
     }
     await e.logEvent(s.id, "player_registered", { name: data.displayName }, p.id);
     const { sendCodeEmail } = await import("./emails.server");
-    await sendCodeEmail(inv.email, data.displayName, code, s.mm_games?.title ?? "Murder Mystery");
+    const { loadTr } = await import("./translate.server");
+    const title = (await loadTr(s.game_id, s.language)).row("mm_games", s.mm_games ?? { id: s.game_id, title: "Murder Mystery" }).title;
+    await sendCodeEmail(inv.email, data.displayName, code, title, s.language);
+    if (s.characters_released_at && characterId) await e.notifyAssignment(p.id).catch(() => false);
     await e.broadcast(e.sessionTopic(s.id), "players", {});
     return { code, sessionId: s.id as string, token: await e.signPlayerToken(p.id, s.id) };
   });
@@ -99,7 +110,7 @@ export const mmPlayerState = createServerFn({ method: "POST" })
   });
 
 const actionSchema = auth.extend({
-  action: z.enum(["ready", "toggle_objective", "vote"]),
+  action: z.enum(["confirm", "ready", "toggle_objective", "vote"]),
   objectiveId: z.string().uuid().optional(),
   accusedCharacterId: z.string().uuid().optional(),
   motive: z.string().max(1000).optional(),
@@ -114,8 +125,13 @@ export const mmPlayerAction = createServerFn({ method: "POST" })
     const { sp, s } = await e.verifyPlayerToken(data.token, data.sessionId);
     const { data: session } = await db().from("mm_sessions").select("status, voting_open, game_id").eq("id", s).single();
     switch (data.action) {
+      case "confirm":
+        await db().from("mm_session_players").update({ confirmed_at: new Date().toISOString() }).eq("id", sp).is("confirmed_at", null);
+        await e.logEvent(s, "player_confirmed", {}, sp);
+        await e.broadcast(e.sessionTopic(s), "players", {});
+        break;
       case "ready":
-        await db().from("mm_session_players").update({ ready: true }).eq("id", sp);
+        await db().from("mm_session_players").update({ ready: true, confirmed_at: new Date().toISOString() }).eq("id", sp);
         await e.logEvent(s, "player_ready", {}, sp);
         await e.broadcast(e.sessionTopic(s), "players", {});
         await e.tick(s);
