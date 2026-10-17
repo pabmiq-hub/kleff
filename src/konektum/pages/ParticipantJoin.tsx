@@ -17,7 +17,7 @@ import { supabase } from "@/konektum/supabase";
 import { translations, Language } from "@/konektum/i18n/translations";
 import { AGE_RANGES } from "@/konektum/lib/excelParser";
 import B2BRegistrationForm, { B2BFormData } from "@/konektum/components/registration/B2BRegistrationForm";
-import EventHighlights from "@/konektum/components/registration/EventHighlights";
+import EventHighlights, { PaymentNotice } from "@/konektum/components/registration/EventHighlights";
 import DynamicRegistrationForm from "@/konektum/components/registration/DynamicRegistrationForm";
 import type { FormField } from "@/konektum/components/event/RegistrationFormEditor";
 import { RichTextRenderer } from "@/konektum/ui/rich-text-renderer";
@@ -1235,6 +1235,7 @@ const ParticipantJoin = ({
               paymentInfo={paymentInfo}
               highlights={highlights}
               description={registrationDescription}
+              showPayment={false}
             />
           </CardHeader>
           <CardContent>
@@ -1599,14 +1600,17 @@ const ParticipantJoin = ({
                   )}
 
                   {(showStep2 || showWaitlistMode) && (
-                    <GDPRConsent
-                      lang={eventLang}
-                      dataConsent={dataConsent}
-                      marketingConsent={marketingConsent}
-                      onDataConsentChange={(v) => { setDataConsent(v); if (v) clearErr("dataConsent"); }}
-                      onMarketingConsentChange={setMarketingConsent}
-                      error={hasErr("dataConsent")}
-                    />
+                    <>
+                      <GDPRConsent
+                        lang={eventLang}
+                        dataConsent={dataConsent}
+                        marketingConsent={marketingConsent}
+                        onDataConsentChange={(v) => { setDataConsent(v); if (v) clearErr("dataConsent"); }}
+                        onMarketingConsentChange={setMarketingConsent}
+                        error={hasErr("dataConsent")}
+                      />
+                      <PaymentNotice lang={eventLang} paymentInfo={paymentInfo} />
+                    </>
                   )}
 
                   {showStep1Only ? (

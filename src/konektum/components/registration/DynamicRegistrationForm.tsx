@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/konektum/ui/checkbox";
 import { Loader2 } from "lucide-react";
 import type { FormField } from "@/konektum/components/event/RegistrationFormEditor";
-import EventHighlights, { type PaymentInfo } from "@/konektum/components/registration/EventHighlights";
+import EventHighlights, { PaymentNotice, type PaymentInfo } from "@/konektum/components/registration/EventHighlights";
 import GDPRConsent from "@/konektum/components/registration/GDPRConsent";
 import { FieldError } from "@/konektum/ui/field-error";
 import { errorInputClass, fieldErrorMessage, scrollToFirstError } from "@/konektum/lib/formErrors";
@@ -109,6 +109,7 @@ const DynamicRegistrationForm = ({
           paymentInfo={paymentInfo}
           highlights={highlights}
           description={registrationDescription}
+          showPayment={false}
         />
       </CardHeader>
       <CardContent className="p-4 pt-0 sm:p-8 sm:pt-0">
@@ -252,6 +253,8 @@ const DynamicRegistrationForm = ({
             onMarketingConsentChange={setMarketingConsent}
             error={consentError}
           />
+
+          <PaymentNotice lang={eventLang} paymentInfo={paymentInfo} />
 
           <Button
             type="submit"
