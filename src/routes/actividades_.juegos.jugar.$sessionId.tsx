@@ -74,6 +74,7 @@ function Play() {
     <PlayerView
       state={state}
       actions={{
+        confirm: () => run({ action: "confirm" }),
         ready: () => run({ action: "ready" }),
         toggleObjective: (objectiveId) => run({ action: "toggle_objective", objectiveId }),
         vote: (v) => run({ action: "vote", ...v }),
