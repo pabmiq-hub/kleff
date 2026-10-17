@@ -1,0 +1,2 @@
+ALTER TABLE IF EXISTS public.mm_games ADD COLUMN IF NOT EXISTS readings jsonb NOT NULL DEFAULT '[]'::jsonb;
+COMMENT ON COLUMN public.mm_games.readings IS 'Theatrical readings with act, reader character ref or host, title, text and trigger; player access filtered server-side.';
