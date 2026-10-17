@@ -1,0 +1,46 @@
+import { test, expect } from '@playwright/test';
+import { isSessionLanguageLocked, sessionEligibility, planCharacterAssignments } from '../src/lib/mm/session-rules';
+
+const game = { min_players: 4, max_players: 8 };
+const chars = Array.from({ length: 8 }, (_, i) => ({ id: `c${i}`, is_killer: i === 0, victim: false }));
+const players = (n: number) => Array.from({ length: n }, (_, i) => ({ id: `p${i}`, character_id: null as string | null }));
+
+test('minimum four blocks three players and reports one missing', () => {
+  const result = sessionEligibility(game, chars, players(3));
+  expect(result.missing).toBe(1);
+  expect(result.allowed).toBe(false);
+  expect(sessionEligibility(game, chars, players(4)).allowed).toBe(true);
+});
+test('maximum eight blocks nine players', () => {
+  expect(sessionEligibility(game, chars, players(9)).allowed).toBe(false);
+});
+test('victims cannot receive player assignments', () => {
+  expect(sessionEligibility(game, [...chars, { id: 'victim', victim: true, is_killer: false }], [{ id: 'p', character_id: 'victim' }, ...players(3)]).allowed).toBe(false);
+});
+test('duplicate characters block the distribution', () => {
+  expect(sessionEligibility(game, chars, players(4).map(p => ({ ...p, character_id: 'c1' }))).allowed).toBe(false);
+});
+test('release covers the killer even if all players were assigned other characters', () => {
+  const input = players(4).map((p, i) => ({ ...p, character_id: `c${i + 1}` }));
+  const plan = planCharacterAssignments(chars, input, () => 0.5);
+  expect(plan.some(a => a.characterId === 'c0')).toBe(true);
+  expect(new Set(plan.map(a => a.characterId)).size).toBe(4);
+  expect(sessionEligibility(game, chars, plan.map(a => ({ id: a.playerId, character_id: a.characterId })), true).allowed).toBe(true);
+});
+test('start is blocked when the killer loses their player after release', () => {
+  expect(sessionEligibility(game, chars, players(4).map((p, i) => ({ ...p, character_id: `c${i + 1}` })), true).allowed).toBe(false);
+});
+test('start requires every player to have a character', () => {
+  expect(sessionEligibility(game, chars, players(4), true).allowed).toBe(false);
+});
+test('language stays editable only in unreleased lobby', () => {
+  expect(isSessionLanguageLocked({ status: 'lobby', characters_released_at: null })).toBe(false);
+});
+test('language locks immediately after release', () => {
+  expect(isSessionLanguageLocked({ status: 'lobby', characters_released_at: '2026-10-17T17:43:00Z' })).toBe(true);
+});
+for (const status of ['running', 'paused', 'finished']) {
+  test(`language remains locked when ${status}, even without release timestamp`, () => {
+    expect(isSessionLanguageLocked({ status })).toBe(true);
+  });
+}

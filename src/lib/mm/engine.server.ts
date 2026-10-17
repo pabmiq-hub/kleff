@@ -1,6 +1,7 @@
 // Murder Mystery engine (server-only). All player reads/writes go through here
 // with the service role; is_killer is never included in another player's payload.
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
+import { sessionEligibility, planCharacterAssignments } from "./session-rules";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const db = () => supabaseAdmin as any;
@@ -140,22 +141,31 @@ export async function notifyAssignment(playerId: string): Promise<boolean> {
  */
 export async function releaseCharacters(sessionId: string, reason: string) {
   const { data: s } = await db().from("mm_sessions").select("*").eq("id", sessionId).single();
-  if (!s || s.characters_released_at) return { assigned: 0, notified: 0, missing: [] as string[], already: true };
-  const [{ data: chars }, { data: players }] = await Promise.all([
+  if (!s) throw new Error("Partida no encontrada");
+  if (s.characters_released_at) return { assigned: 0, notified: 0, missing: [] as string[], already: true };
+  if (s.status !== "lobby") throw new Error("Solo se puede repartir antes de iniciar la partida");
+  const [{ data: chars, error: charsError }, { data: players, error: playersError }, { data: game, error: gameError }] = await Promise.all([
     db().from("mm_characters").select("id, name, is_killer, victim").eq("game_id", s.game_id),
     db().from("mm_session_players").select("id, character_id, ready, registered_at").eq("session_id", sessionId).order("registered_at"),
+    db().from("mm_games").select("min_players, max_players").eq("id", s.game_id).single(),
   ]);
+  if (charsError || playersError || gameError || !game) throw new Error("No se pudo comprobar el reparto");
+  const eligibility = sessionEligibility(game, chars ?? [], players ?? []);
+  if (!eligibility.allowed) throw new Error(eligibility.issues.join(" "));
   const playable = (chars ?? []).filter((c: any) => !c.victim);
-  const taken = new Set((players ?? []).map((p: any) => p.character_id).filter(Boolean));
-  const free = playable.filter((c: any) => !taken.has(c.id));
-  const others = free.filter((c: any) => !c.is_killer).sort(() => Math.random() - 0.5);
-  const queue = [...others, ...free.filter((c: any) => c.is_killer)]; // pop() takes the killer first
-  const waiting = (players ?? []).filter((p: any) => !p.character_id).sort((a: any, b: any) => Number(b.ready) - Number(a.ready));
+  const plan = planCharacterAssignments(chars ?? [], players ?? []);
+  const planned = sessionEligibility(game, chars ?? [], plan.map((a) => ({ id: a.playerId, character_id: a.characterId })), true);
+  if (!planned.allowed) throw new Error(planned.issues.join(" "));
+  // Clear only changed assignments first, avoiding unique-character collisions.
+  const changed = plan.filter((a) => (players ?? []).find((p: any) => p.id === a.playerId)?.character_id !== a.characterId);
+  for (const a of changed) {
+    const { error } = await db().from("mm_session_players").update({ character_id: null, ready: false }).eq("id", a.playerId).eq("session_id", sessionId);
+    if (error) throw new Error("No se pudo preparar el reparto");
+  }
   let assigned = 0;
-  for (const p of waiting) {
-    const c = queue.pop();
-    if (!c) break;
-    await db().from("mm_session_players").update({ character_id: c.id }).eq("id", p.id);
+  for (const a of changed) {
+    const { error } = await db().from("mm_session_players").update({ character_id: a.characterId }).eq("id", a.playerId).eq("session_id", sessionId);
+    if (error) throw new Error("No se pudo completar el reparto. Vuelve a intentarlo.");
     assigned++;
   }
   const { data: upd } = await db().from("mm_sessions").update({ characters_released_at: new Date().toISOString(), release_at: null }).eq("id", sessionId).is("characters_released_at", null).select("id");
@@ -165,15 +175,29 @@ export async function releaseCharacters(sessionId: string, reason: string) {
   let notified = 0;
   const { data: all } = await db().from("mm_session_players").select("id, email, character_id").eq("session_id", sessionId);
   for (const p of all ?? []) if (p.email && p.character_id && (await notifyAssignment(p.id).catch(() => false))) notified++;
-  return { assigned, notified, missing: queue.map((c: any) => c.name), already: false };
+  return { assigned, notified, missing: playable.filter((c: any) => !plan.some((a) => a.characterId === c.id)).map((c: any) => c.name), already: false };
+}
+
+async function getSessionEligibility(s: Session, requireAssignments = false) {
+  const [{ data: game, error: ge }, { data: chars, error: ce }, { data: players, error: pe }] = await Promise.all([
+    db().from("mm_games").select("min_players, max_players").eq("id", s.game_id).single(),
+    db().from("mm_characters").select("id, victim, is_killer").eq("game_id", s.game_id),
+    db().from("mm_session_players").select("id, character_id").eq("session_id", s.id),
+  ]);
+  if (ge || ce || pe || !game) throw new Error("No se pudo comprobar el mínimo de jugadores");
+  return sessionEligibility(game, chars ?? [], players ?? [], requireAssignments);
 }
 
 export async function startSession(sessionId: string, reason: string) {
   const { data: s } = await db().from("mm_sessions").select("*").eq("id", sessionId).single();
   if (!s || s.status !== "lobby") return;
-  if (!s.characters_released_at) await releaseCharacters(sessionId, "start");
   const acts = await loadActs(s.game_id);
   if (!acts.length) throw new Error("El juego no tiene actos");
+  const eligibility = await getSessionEligibility(s, !!s.characters_released_at);
+  if (!eligibility.allowed) throw new Error(eligibility.issues.join(" "));
+  if (!s.characters_released_at) await releaseCharacters(sessionId, "start");
+  const finalEligibility = await getSessionEligibility(s, true);
+  if (!finalEligibility.allowed) throw new Error(finalEligibility.issues.join(" "));
   const first = acts[0];
   const now = new Date();
   const { data: upd } = await db()
@@ -236,13 +260,15 @@ export async function tick(sessionId: string) {
   if (!s || s.status === "finished") return;
   const now = Date.now();
   if (s.status === "lobby" && !s.characters_released_at && s.release_at && new Date(s.release_at).getTime() <= now) {
-    await releaseCharacters(sessionId, "scheduled");
-    s.characters_released_at = new Date().toISOString();
+    if ((await getSessionEligibility(s)).allowed) {
+      await releaseCharacters(sessionId, "scheduled");
+      s.characters_released_at = new Date().toISOString();
+    }
   }
   if (s.status === "lobby" && s.control_mode === "auto") {
     const { data: ps } = await db().from("mm_session_players").select("ready").eq("session_id", sessionId);
     const scheduled = s.scheduled_at && new Date(s.scheduled_at).getTime() <= now;
-    if (ps?.length && ((s.characters_released_at && ps.every((p: any) => p.ready)) || scheduled)) await startSession(sessionId, "auto");
+    if (ps?.length && ((s.characters_released_at && ps.every((p: any) => p.ready)) || scheduled) && (await getSessionEligibility(s, !!s.characters_released_at)).allowed) await startSession(sessionId, "auto");
     return;
   }
   if (s.status !== "running") return;
@@ -477,6 +503,7 @@ export async function buildAdminState(sessionId: string) {
   const now = Date.now();
   return {
     session: { ...publicSession(s, acts, game), murder_event: game.murder_event, blind_mode: s.blind_mode, scheduled_at: s.scheduled_at, archived: s.archived },
+    eligibility: sessionEligibility(game, chars ?? [], players ?? [], !!s.characters_released_at),
     final_reveal: game.final_reveal,
     translations: tr ?? [],
     acts_full: acts.map((a) => ({
