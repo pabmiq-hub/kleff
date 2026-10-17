@@ -12,6 +12,7 @@ import { MMAdminGate } from "@/components/mm/AdminGate";
 import { MMAvatar, describeEvent, fmtClock, sessionTopicName, useBroadcast, useCountdown } from "@/components/mm/shared";
 import { PlayerView, Results } from "@/components/mm/PlayerView";
 import { MM_LANGS } from "@/lib/mm/i18n";
+import { isSessionLanguageLocked } from "@/lib/mm/session-rules";
 import { mmControlSession, mmGetSessionAdmin, mmManagePlayers, mmViewAsPlayer } from "@/lib/mm/admin.functions";
 
 export const Route = createFileRoute("/actividades_/juegos/$gameId/partidas/$sessionId")({
@@ -120,8 +121,14 @@ function Panel() {
       </div>
 
       {/* Controls */}
+      {s.status === "lobby" && d.eligibility && (
+        <div role={d.eligibility.allowed ? "status" : "alert"} className={`border-l-4 p-3 text-sm ${d.eligibility.allowed ? "border-primary bg-primary/10" : "border-destructive bg-destructive/10 text-destructive"}`}>
+          <p className="font-semibold">Jugadores: {d.eligibility.registered} · Mínimo: {d.eligibility.minimum} · Máximo: {d.eligibility.maximum}</p>
+          {d.eligibility.allowed ? <p>Mínimo completo. La partida puede comenzar.</p> : d.eligibility.issues.map((issue: string) => <p key={issue}>{issue}</p>)}
+        </div>
+      )}
       <div className="flex flex-wrap gap-2">
-        {s.status === "lobby" && <Button onClick={() => act("start")}>Iniciar partida</Button>}
+        {s.status === "lobby" && <Button disabled={!d.eligibility?.allowed} onClick={() => act("start")}>Iniciar partida</Button>}
         {s.status === "running" && <Button variant="outline" onClick={() => act("pause")}>Pausar</Button>}
         {s.status === "paused" && <Button onClick={() => act("resume")}>Reanudar</Button>}
         {(s.status === "running" || s.status === "paused") && (
@@ -308,6 +315,7 @@ function SessionPlanning({ d, act }: { d: any; act: (a: any, extra?: Record<stri
   const confirmed = d.players.filter((p: any) => p.confirmed).length;
   const killerFree = unassigned.some((c: any) => c.is_killer);
   const released = !!s.characters_released_at;
+  const languageLocked = isSessionLanguageLocked(s);
   const tr = (d.translations ?? []).find((t: any) => t.lang === s.language);
   const run = async (key: string, fn: () => Promise<void>) => {
     setBusy(key);
@@ -386,7 +394,7 @@ function SessionPlanning({ d, act }: { d: any; act: (a: any, extra?: Record<stri
               )}
               {s.release_at && <p className="text-xs text-ink/60">Programado para {fmt(s.release_at)} (se ejecuta en cuanto alguien abre la partida a partir de esa hora).</p>}
               <Button
-                disabled={!!busy || !d.players.length}
+                disabled={!!busy || !d.eligibility?.allowed || s.status !== "lobby"}
                 onClick={() =>
                   confirm(`¿Repartir personajes ahora a ${d.players.length} jugador(es) y enviarles el email «Se te ha asignado…»?`) &&
                   run("rel", () => act("release"))
@@ -407,22 +415,24 @@ function SessionPlanning({ d, act }: { d: any; act: (a: any, extra?: Record<stri
         </div>
         <div className="space-y-3 rounded-2xl border border-ink/10 bg-card p-4">
           <h2 className="text-lg font-semibold">Idioma de la partida</h2>
+          {languageLocked && <p role="status" className="rounded-lg bg-ink/5 p-2 text-sm font-semibold">Idioma fijado: {MM_LANGS.find((l) => l.code === s.language)?.label ?? s.language} (bloqueado tras el reparto o inicio).</p>}
           <p className="text-sm text-ink/70">Los jugadores verán la interfaz, los textos del juego y los emails en este idioma. El juego se traduce automáticamente la primera vez y se guarda.</p>
           <div className="flex flex-wrap gap-2">
             {MM_LANGS.map((l) => (
-              <button
+              <Button
                 key={l.code}
-                disabled={!!busy}
+                variant="outline"
+                disabled={!!busy || languageLocked}
                 onClick={() => run("lang", () => act("set_language", { language: l.code }))}
                 className={`rounded-lg border px-3 py-1.5 text-sm ${s.language === l.code ? "border-primary bg-primary/10" : "border-ink/15"}`}
               >
                 {l.label}
-              </button>
+              </Button>
             ))}
           </div>
           {busy === "lang" && <p className="text-sm text-ink/60">Traduciendo el juego… puede tardar un minuto.</p>}
           {s.language !== "es" && tr && <p className="text-xs text-ink/60">Traducción guardada el {fmt(tr.created_at)}{tr.source_hash ? "" : " (incompleta: vuelve a pulsar el idioma para completarla)"}.</p>}
-          <p className="text-xs text-ink/50">Si actualizas el JSON del juego, vuelve a pulsar el idioma para regenerar la traducción.</p>
+          {!languageLocked && <p className="text-xs text-ink/50">Si actualizas el JSON del juego, vuelve a pulsar el idioma para regenerar la traducción antes de repartir.</p>}
         </div>
       </section>
 

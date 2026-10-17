@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { mmImportSchema, formatImportErrors } from "./import-schema";
+import { isSessionLanguageLocked } from "./session-rules";
 
 async function guard(userId: string) {
   const { assertSuperAdmin } = await import("@/lib/assert-role.server");
@@ -232,16 +233,19 @@ export const mmControlSession = createServerFn({ method: "POST" })
         return { ok: true, ...r };
       }
       case "schedule_release":
+        if (isSessionLanguageLocked(s)) throw new Error("El reparto solo se puede programar antes del reparto y del inicio");
         await db().from("mm_sessions").update({ release_at: data.releaseAt || null }).eq("id", sid);
         await logEvent(sid, "release_scheduled", { at: data.releaseAt ?? null });
         break;
       case "set_language": {
+        if (isSessionLanguageLocked(s)) throw new Error("El idioma está fijado: ya se han repartido los personajes o se ha iniciado la partida.");
         const lang = data.language ?? "es";
         if (lang !== "es") {
           const { translateGame } = await import("./translate.server");
           await translateGame(s.game_id, lang);
         }
-        await db().from("mm_sessions").update({ language: lang }).eq("id", sid);
+        const { data: updated, error } = await db().from("mm_sessions").update({ language: lang }).eq("id", sid).eq("status", "lobby").is("characters_released_at", null).select("id");
+        if (error || !updated?.length) throw new Error("El idioma no se ha cambiado: la partida ya ha repartido personajes o ha comenzado.");
         await logEvent(sid, "language_changed", { language: lang });
         await pub("language");
         break;
