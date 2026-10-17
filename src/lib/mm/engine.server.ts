@@ -417,7 +417,7 @@ export async function buildPlayerState(playerId: string) {
           summary: c.public_summary || c.description || null,
           avatar_config: c.avatar_config,
           avatar_url: c.avatar_url,
-          is_victim: !!c.victim && (murdered || !!c.public_summary),
+          is_victim: murdered && !!c.victim,
           player: p ? { id: p.id, display_name: p.display_name, online: !!p.last_seen_at && now - new Date(p.last_seen_at).getTime() < ONLINE_MS, ready: p.ready } : null,
         };
       }),
