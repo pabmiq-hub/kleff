@@ -43,7 +43,7 @@ export const mmImportGame = createServerFn({ method: "POST" })
       const chars = must(
         await db()
           .from("mm_characters")
-          .insert(g.characters.map((c) => ({ game_id: game.id, ref: c.ref, name: c.name, description: c.description, alibi: c.alibi, relationships: c.relationships, is_killer: c.is_killer, victim: c.victim, avatar_config: c.avatar_config, avatar_url: c.avatar_url ?? null })))
+          .insert(g.characters.map((c) => ({ game_id: game.id, ref: c.ref, name: c.name, description: c.description, public_summary: c.public_summary ?? null, costume: c.costume ?? null, alibi: c.alibi, relationships: c.relationships, is_killer: c.is_killer, victim: c.victim, avatar_config: c.avatar_config, avatar_url: c.avatar_url ?? null })))
           .select("id, ref"),
       );
       const cid = (ref: string) => chars.find((c: any) => c.ref === ref)?.id;
@@ -121,12 +121,12 @@ export const mmUpdateCharacterAvatar = createServerFn({ method: "POST" })
 
 export const mmCreateSession = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: { gameId: string; name: string; scheduled_at?: string | null; control_mode: "manual" | "timer" | "auto"; blind_mode: boolean }) => d)
+  .inputValidator((d: { gameId: string; name: string; scheduled_at?: string | null; control_mode: "manual" | "timer" | "auto"; blind_mode: boolean; language?: string; release_at?: string | null }) => d)
   .handler(async ({ data, context }) => {
     const { db } = await guard(context.userId);
     const { data: s, error } = await db()
       .from("mm_sessions")
-      .insert({ game_id: data.gameId, name: data.name || "Partida", scheduled_at: data.scheduled_at || null, control_mode: data.control_mode, blind_mode: data.blind_mode, created_by: context.userId })
+      .insert({ game_id: data.gameId, name: data.name || "Partida", scheduled_at: data.scheduled_at || null, control_mode: data.control_mode, blind_mode: data.blind_mode, language: data.language || "es", release_at: data.release_at || null, created_by: context.userId })
       .select("id")
       .single();
     if (error) throw new Error(error.message);
@@ -152,7 +152,9 @@ export const mmViewAsPlayer = createServerFn({ method: "POST" })
 
 const controlSchema = z.object({
   sessionId: id,
-  action: z.enum(["start", "pause", "resume", "add_minutes", "advance", "murder", "voting_open", "voting_close", "finish", "archive", "set_mode", "set_blind", "admin_objective"]),
+  action: z.enum(["start", "pause", "resume", "add_minutes", "advance", "murder", "voting_open", "voting_close", "finish", "archive", "set_mode", "set_blind", "admin_objective", "release", "schedule_release", "set_language"]),
+  releaseAt: z.string().nullable().optional(),
+  language: z.enum(["es", "ca", "en", "fr"]).optional(),
   minutes: z.number().int().optional(),
   mode: z.enum(["manual", "timer", "auto"]).optional(),
   blind: z.boolean().optional(),
@@ -225,6 +227,25 @@ export const mmControlSession = createServerFn({ method: "POST" })
       case "set_blind":
         await db().from("mm_sessions").update({ blind_mode: !!data.blind }).eq("id", sid);
         break;
+      case "release": {
+        const r = await eng.releaseCharacters(sid, "admin");
+        return { ok: true, ...r };
+      }
+      case "schedule_release":
+        await db().from("mm_sessions").update({ release_at: data.releaseAt || null }).eq("id", sid);
+        await logEvent(sid, "release_scheduled", { at: data.releaseAt ?? null });
+        break;
+      case "set_language": {
+        const lang = data.language ?? "es";
+        if (lang !== "es") {
+          const { translateGame } = await import("./translate.server");
+          await translateGame(s.game_id, lang);
+        }
+        await db().from("mm_sessions").update({ language: lang }).eq("id", sid);
+        await logEvent(sid, "language_changed", { language: lang });
+        await pub("language");
+        break;
+      }
       case "admin_objective": {
         const { data: row } = await db().from("mm_player_objectives").select("completed").eq("session_player_id", data.playerId).eq("objective_id", data.objectiveId).maybeSingle();
         const completed = !row?.completed;
@@ -253,9 +274,10 @@ export const mmManagePlayers = createServerFn({ method: "POST" })
     const eng = await guard(context.userId);
     const { db, logEvent } = eng;
     const sid = id.parse(data.sessionId);
-    const { data: s } = await db().from("mm_sessions").select("id, name, game_id, mm_games(title)").eq("id", sid).single();
+    const { data: s } = await db().from("mm_sessions").select("id, name, game_id, language, scheduled_at, mm_games(title)").eq("id", sid).single();
     if (!s) throw new Error("Partida no encontrada");
-    const title = s.mm_games?.title ?? "Murder Mystery";
+    const { loadTr } = await import("./translate.server");
+    const title = (await loadTr(s.game_id, s.language)).row("mm_games", { id: s.game_id, title: s.mm_games?.title ?? "Murder Mystery" }).title;
     switch (data.action) {
       case "invite": {
         const emails = Array.from(new Set((data.emails ?? []).map((e) => e.trim().toLowerCase()).filter((e) => /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(e))));
@@ -263,7 +285,7 @@ export const mmManagePlayers = createServerFn({ method: "POST" })
         for (const email of emails) {
           const token = eng.newToken();
           await db().from("mm_invitations").insert({ session_id: sid, email, token, sent_at: new Date().toISOString() });
-          await (await mmEmails()).sendInviteEmail(email, token, title, s.name);
+          await (await mmEmails()).sendInviteEmail(email, token, title, s.name, s.language, s.scheduled_at);
         }
         await logEvent(sid, "invitations_sent", { count: emails.length });
         return { ok: true, count: emails.length };
@@ -271,12 +293,12 @@ export const mmManagePlayers = createServerFn({ method: "POST" })
       case "resend": {
         if (data.invitationId) {
           const { data: inv } = await db().from("mm_invitations").select("*").eq("id", data.invitationId).single();
-          await (await mmEmails()).sendInviteEmail(inv.email, inv.token, title, s.name);
+          await (await mmEmails()).sendInviteEmail(inv.email, inv.token, title, s.name, s.language, s.scheduled_at);
           await db().from("mm_invitations").update({ sent_at: new Date().toISOString() }).eq("id", inv.id);
         } else if (data.playerId) {
           const { data: p } = await db().from("mm_session_players").select("*").eq("id", data.playerId).single();
           if (!p?.email) throw new Error("Este jugador no tiene email");
-          await (await mmEmails()).sendCodeEmail(p.email, p.display_name, p.access_code, title);
+          await (await mmEmails()).sendCodeEmail(p.email, p.display_name, p.access_code, title, s.language);
         }
         return { ok: true };
       }
@@ -285,6 +307,15 @@ export const mmManagePlayers = createServerFn({ method: "POST" })
         if (data.playerId) {
           if (data.characterId) await db().from("mm_session_players").update({ character_id: null }).eq("session_id", sid).eq("character_id", data.characterId);
           await db().from("mm_session_players").update({ character_id: data.characterId ?? null }).eq("id", data.playerId);
+          // Substitution after the hand-out: brief the new player and set up their game rows.
+          const { data: ss } = await db().from("mm_sessions").select("*").eq("id", sid).single();
+          if (data.characterId && ss?.characters_released_at) {
+            if (ss.status !== "lobby") await eng.initPlayerRows(ss);
+            const sent = await eng.notifyAssignment(data.playerId).catch(() => false);
+            await logEvent(sid, "character_reassigned", {}, data.playerId);
+            await eng.broadcast(eng.sessionTopic(sid), "players", {});
+            return { ok: true, notified: sent };
+          }
         }
         return { ok: true };
       }
@@ -321,3 +352,12 @@ export const mmManagePlayers = createServerFn({ method: "POST" })
     }
   });
 
+
+export const mmTranslateGame = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { gameId: string; lang: "ca" | "en" | "fr"; force?: boolean }) => ({ gameId: id.parse(d.gameId), lang: z.enum(["ca", "en", "fr"]).parse(d.lang), force: !!d.force }))
+  .handler(async ({ data, context }) => {
+    await guard(context.userId);
+    const { translateGame } = await import("./translate.server");
+    return translateGame(data.gameId, data.lang, data.force);
+  });

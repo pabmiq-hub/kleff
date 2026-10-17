@@ -16,6 +16,7 @@ export const mmImportSchema = z
       theme: json,
       murder_event: json,
       final_reveal: json,
+      briefing: z.string().optional(),
     }),
     acts: z
       .array(z.object({ key: actKey, name: z.string().min(1), narrative_text: z.string().optional(), duration_minutes: z.number().int().min(1), intro_animation: z.string().optional() }))
@@ -26,6 +27,8 @@ export const mmImportSchema = z
           ref: z.string().min(1),
           name: z.string().min(1),
           description: z.string().optional(),
+          public_summary: z.string().optional(),
+          costume: z.string().optional(),
           alibi: z.string().optional(),
           relationships: z.array(z.any()).default([]),
           is_killer: z.boolean().default(false),
