@@ -516,6 +516,8 @@ export async function buildAdminState(sessionId: string) {
         character_id: p.character_id,
         access_code: p.access_code,
         ready: p.ready,
+        confirmed: !!p.confirmed_at,
+        notified: !!p.assignment_notified_at,
         online: !!p.last_seen_at && now - new Date(p.last_seen_at).getTime() < ONLINE_MS,
         last_seen_at: p.last_seen_at,
         voted: (votes ?? []).some((v: any) => v.voter_player_id === p.id),
