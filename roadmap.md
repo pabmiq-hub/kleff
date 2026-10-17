@@ -1,4 +1,5 @@
 - [ ] Diagnosticar selecciones y acciones Super Like de extremo a extremo
+- [ ] Juegos: vincular automáticamente el asesinato al Acto 2 en todos los modos y comprobar que no se repite
 - [ ] Corregir causas de bloqueos, fallos parciales y errores de envío
 - [ ] Verificar localmente y contra producción sin alterar datos reales
 - [x] Adaptar Konektum a móviles: controles, avisos de pago y tarjetas de participantes sin desbordes (revisión visual autenticada pendiente: la conexión de acceso no responde)
