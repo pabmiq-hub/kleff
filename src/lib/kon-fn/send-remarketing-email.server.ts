@@ -8,6 +8,7 @@ const Deno = {
 };
 
 import { createClient } from "@/lib/kon-fn/client.server";
+import { canManageKonektum } from "@/lib/kon-fn/_shared/konAccess";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -43,43 +44,28 @@ serve(async (req: Request) => {
 
     const { organizer_id, target_event_id, target_event_name, registration_link, subject, body, recipients } = await req.json();
 
-    // Verify organizer owns this
+    // Club-owned module: super admin or delegated Konektum permission, or organizer owner.
     const { data: org } = await supabase
       .from("organizers")
-      .select("id, company_name, slug")
+      .select("id, company_name, slug, user_id")
       .eq("id", organizer_id)
-      .eq("user_id", user.id)
       .single();
     if (!org) throw new Error("Organizer not found");
+    if (org.user_id !== user.id && !(await canManageKonektum(user.id))) {
+      throw new Error("Forbidden");
+    }
+    if (!Array.isArray(recipients) || recipients.length === 0) throw new Error("No recipients");
 
     const canonicalRegistrationLink = target_event_id && org.slug
       ? `https://kleff.es/o/${org.slug}/join/${target_event_id}`
       : registration_link;
 
-    // Check for CRM feature
-    const { data: hasFeature } = await supabase.rpc("has_feature", {
-      _user_id: user.id,
-      _feature_code: "crm",
-    });
-    if (!hasFeature) throw new Error("CRM feature not available in your plan");
-
     // Get Resend config - organizer's own or platform default
-    let resendApiKey = Deno.env.get("RESEND_API_KEY")!;
-    let senderEmail = "hola@kleff.es";
-    let senderName = "KLEFF";
+    const resendApiKey = Deno.env.get("RESEND_API_KEY")!;
+    const senderEmail = "hola@kleff.es";
+    const senderName = "KLEFF";
 
-    const { data: resendConfig } = await supabase
-      .from("organizer_resend_config")
-      .select("*")
-      .eq("organizer_id", organizer_id)
-      .eq("is_verified", true)
-      .single();
-
-    if (resendConfig) {
-      resendApiKey = resendConfig.resend_api_key;
-      senderEmail = resendConfig.sender_email;
-      senderName = resendConfig.sender_name || org.company_name || "KLEFF";
-    }
+    // Always send from the verified KLEFF domain.
 
     // Create campaign record
     const { data: campaign, error: campaignError } = await supabase
