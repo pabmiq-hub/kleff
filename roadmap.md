@@ -4,6 +4,7 @@
 - [x] Adaptar Konektum a móviles: controles, avisos de pago y tarjetas de participantes sin desbordes (revisión visual autenticada pendiente: la conexión de acceso no responde)
 - [x] Juegos (Murder Mystery) fase 1: tablas mm_*, importación JSON + demo, partidas, invitaciones, códigos, panel admin y jugador, actos/temporizador, votación, revelación
 - [x] Juegos: reparto de personajes 24 h antes, confirmación de asistencia, sustitución de bajas, idiomas (es/ca/en/fr), fichas completas y acto actual/siguiente
-- [ ] Juegos: validar mínimo y reparto coherente; bloquear idioma tras reparto/inicio y probar reglas
+- [x] Juegos: mínimo y reparto coherente en inicio/reparto manual y automático; idioma bloqueado tras reparto/inicio; 12 pruebas de reglas superadas
+- [ ] Juegos: verificar reparto e idioma en una partida con acceso de administrador a la base propia (sin sesión disponible)
 - [ ] Juegos fase 2: acciones conjuntas, fragmentos, uso de habilidades, entrega de objetos, objetivos automáticos
 - [ ] Juegos fase 3: avance programado sin nadie conectado (cron), presencia en tiempo real, animaciones Lottie
