@@ -17,10 +17,32 @@ interface Props {
   paymentInfo?: PaymentInfo | null;
   highlights?: unknown;
   description?: string | null;
+  /** Whether the payment notice renders here. Set false to place it right before the submit button instead. */
+  showPayment?: boolean;
 }
 
-/** Ficha destacada + descripción visible + aviso de pago para formularios públicos de Konektum. */
-export default function EventHighlights({ lang, eventDate, eventTime, eventLocation, paymentInfo, highlights, description }: Props) {
+/** Caja de pago destacada para formularios públicos de Konektum. */
+export function PaymentNotice({ lang, paymentInfo }: { lang: string; paymentInfo?: PaymentInfo | null }) {
+  const isEn = lang === "en";
+  const pay = paymentInfo || { enabled: false, amountCents: null, currency: "EUR", instructions: null };
+  const hasPrice = pay.enabled && pay.amountCents != null;
+  const price = hasPrice ? (pay.amountCents === 0 ? (isEn ? "Free" : "Gratis") : `${(pay.amountCents / 100).toFixed(2)} ${pay.currency}`) : null;
+
+  if (!(pay.enabled && (hasPrice || pay.instructions) && pay.amountCents !== 0)) return null;
+
+  return (
+    <div className="rounded-xl border-2 border-primary/40 bg-primary/5 p-4 sm:p-5 text-sm space-y-2">
+      <p className="font-semibold text-foreground">
+        💳 {isEn ? "Payment required to confirm your spot" : "Hay que pagar para confirmar tu plaza"}
+        {hasPrice && `: ${price}`}
+      </p>
+      {pay.instructions && <p className="whitespace-pre-line text-foreground/80">{pay.instructions}</p>}
+    </div>
+  );
+}
+
+/** Ficha destacada + descripción visible para formularios públicos de Konektum. */
+export default function EventHighlights({ lang, eventDate, eventTime, eventLocation, paymentInfo, highlights, description, showPayment = true }: Props) {
   const isEn = lang === "en";
   const pay = paymentInfo || { enabled: false, amountCents: null, currency: "EUR", instructions: null };
   const hasPrice = pay.enabled && pay.amountCents != null;
@@ -54,15 +76,7 @@ export default function EventHighlights({ lang, eventDate, eventTime, eventLocat
           <RichTextRenderer content={description} />
         </div>
       )}
-      {pay.enabled && (hasPrice || pay.instructions) && pay.amountCents !== 0 && (
-        <div className="rounded-xl border-2 border-primary/40 bg-primary/5 p-4 sm:p-5 text-sm space-y-2">
-          <p className="font-semibold text-foreground">
-            💳 {isEn ? "Payment required to confirm your spot" : "Hay que pagar para confirmar tu plaza"}
-            {hasPrice && `: ${price}`}
-          </p>
-          {pay.instructions && <p className="whitespace-pre-line text-foreground/80">{pay.instructions}</p>}
-        </div>
-      )}
+      {showPayment && <PaymentNotice lang={lang} paymentInfo={paymentInfo} />}
     </div>
   );
 }
