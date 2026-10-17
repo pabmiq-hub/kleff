@@ -235,10 +235,14 @@ export async function tick(sessionId: string) {
   const { data: s } = await db().from("mm_sessions").select("*").eq("id", sessionId).maybeSingle();
   if (!s || s.status === "finished") return;
   const now = Date.now();
+  if (s.status === "lobby" && !s.characters_released_at && s.release_at && new Date(s.release_at).getTime() <= now) {
+    await releaseCharacters(sessionId, "scheduled");
+    s.characters_released_at = new Date().toISOString();
+  }
   if (s.status === "lobby" && s.control_mode === "auto") {
     const { data: ps } = await db().from("mm_session_players").select("ready").eq("session_id", sessionId);
     const scheduled = s.scheduled_at && new Date(s.scheduled_at).getTime() <= now;
-    if (ps?.length && (ps.every((p: any) => p.ready) || scheduled)) await startSession(sessionId, "auto");
+    if (ps?.length && ((s.characters_released_at && ps.every((p: any) => p.ready)) || scheduled)) await startSession(sessionId, "auto");
     return;
   }
   if (s.status !== "running") return;
