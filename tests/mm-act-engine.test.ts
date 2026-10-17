@@ -36,7 +36,6 @@ mock.module('../src/integrations/supabase/client.server', () => ({
 const { advanceAct } = await import('../src/lib/mm/engine.server');
 // Realtime is exercised without sending anything to the live backend.
 mock.module('../src/lib/mm/translate.server', () => ({}));
-const originalFetch = globalThis.fetch;
 globalThis.fetch = mock(async () => new Response('{}')) as unknown as typeof fetch;
 
 for (const mode of ['manual', 'timer', 'auto']) {
