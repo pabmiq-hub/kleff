@@ -13,4 +13,5 @@
 - [ ] Juegos camino B: copiar esquema al respaldo (migraciones bloqueadas por preferencias); adaptar y validar el JSON real de Claude (archivo no facilitado); reglas privadas avanzadas de grants/rescue_hints/auto-completion no implementadas
 - [ ] Juegos fase 2 restante: objetivos automáticos y reglas narrativas avanzadas
 - [ ] Juegos fase 3: avance programado sin nadie conectado (cron), presencia en tiempo real, animaciones Lottie
-- [ ] Juegos: conservar avatar_svg e imágenes originales de Claude al importar y verificar validación y visualización.
+- [x] Juegos: conservar avatar_svg e imágenes originales de Claude en nuevas importaciones; 44 pruebas y visualización del SVG en MMAvatar verificadas.
+- [ ] Juegos avatares: verificar importación completa con administrador y recuperar dibujos del juego existente (sin sesión propia ni JSON original disponible).
