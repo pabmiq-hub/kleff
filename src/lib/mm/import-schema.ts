@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { readingSchema } from "./readings";
 import { useSchema } from "./interactions";
+import { importedAvatarUrl, normalizeAvatarUrl, sanitizeAvatarSvg } from "./avatar-import";
 
 const json = z.record(z.any()).default({});
 const actKey = z.enum(["intro", "investigation", "conclusion"]);
@@ -37,7 +38,8 @@ export const mmImportSchema = z
           is_killer: z.boolean().default(false),
           victim: z.boolean().default(false),
           avatar_config: json,
-          avatar_url: z.string().optional(),
+           avatar_url: z.string().nullish().refine((value) => !value || normalizeAvatarUrl(value) !== null, "El avatar debe ser una imagen HTTPS o una imagen incrustada válida"),
+           avatar_svg: z.string().nullish().refine((value) => !value || sanitizeAvatarSvg(value) !== null, "avatar_svg debe ser un dibujo SVG válido, sin scripts ni recursos externos"),
           secrets: z.array(z.object({ content: z.string().min(1), known_by: z.array(z.string()).default([]), unlock_rule: z.any().optional() })).default([]),
           objectives: z
             .array(z.object({ act: z.string().optional(), text: z.string().min(1), completion_type: z.enum(["manual", "auto", "admin"]).default("manual"), auto_rule: z.any().optional(), points: z.number().int().default(1) }))
@@ -47,7 +49,7 @@ export const mmImportSchema = z
             .default([]),
           items: z.array(z.object({ ref: z.string().optional(), name: z.string().min(1), description: z.string().optional(), image_url: z.string().optional(), available_from_act: z.string().optional(), type: z.enum(["item", "money"]).default("item"), amount: z.number().int().min(0).max(2147483647).default(0), currency: z.literal("EUR").default("EUR"), use: useSchema.optional() })).default([]),
           fragments: z.array(z.object({ label: z.string().min(1), value: z.string().optional(), group_key: z.string().min(1) })).default([]),
-        }),
+         }).transform((character) => ({ ...character, avatar_url: importedAvatarUrl(character) })),
       )
       .min(1, "Debe haber al menos un personaje"),
     evidences: z

@@ -4,3 +4,4 @@
 - Juegos act transitions use a shared murder-trigger rule in the engine and administration, so imported act keys and control modes cannot bypass the narrative event.
 - Juegos theatrical readings are stored on the game and translated with its content; a shared server-side filter restricts player delivery by reader, act and reveal trigger to prevent early solution leaks.
 - Juegos interaction plans are constructed only after HMAC validation; a service-role-only SQL function locks the session and commits acceptance, balances, uses, ownership and unlocks atomically to prevent replay and concurrent overspending.
+- Juegos imports validate original avatar SVGs as self-contained XML and store them as image data URLs in the existing avatar_url field; original artwork takes precedence over DiceBear without adding schema or exposing markup inline.
