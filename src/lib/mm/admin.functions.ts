@@ -53,14 +53,14 @@ export const mmImportGame = createServerFn({ method: "POST" })
         const owner = cid(c.ref);
         c.secrets.forEach((s) => rows.secrets.push({ character_id: owner, content: s.content, known_by: s.known_by.map(cid), unlock_rule: s.unlock_rule ?? null }));
         c.objectives.forEach((o) => rows.objectives.push({ character_id: owner, act_id: actId(o.act), text: o.text, completion_type: o.completion_type, auto_rule: o.auto_rule ?? null, points: o.points }));
-        c.abilities.forEach((a) => rows.abilities.push({ character_id: owner, name: a.name, description: a.description, effect_type: a.effect_type, effect_config: a.effect_config, max_uses: a.max_uses, available_from_act_id: actId(a.available_from_act) }));
-        c.items.forEach((i) => rows.items.push({ character_id: owner, name: i.name, description: i.description, image_url: i.image_url, available_from_act_id: actId(i.available_from_act) }));
+        c.abilities.forEach((a) => rows.abilities.push({ character_id: owner, ref: a.ref, use_config: a.use ?? {}, name: a.name, description: a.description, effect_type: a.effect_type, effect_config: a.effect_config, max_uses: a.max_uses, available_from_act_id: actId(a.available_from_act) }));
+        c.items.forEach((i) => rows.items.push({ character_id: owner, ref: i.ref, type: i.type, amount: i.amount, currency: i.currency, use_config: i.use ?? {}, name: i.name, description: i.description, image_url: i.image_url, available_from_act_id: actId(i.available_from_act) }));
         c.fragments.forEach((f) => rows.fragments.push({ game_id: game.id, character_id: owner, label: f.label, value: f.value, group_key: f.group_key }));
       }
       for (const [t, list] of [["mm_secrets", rows.secrets], ["mm_objectives", rows.objectives], ["mm_abilities", rows.abilities], ["mm_items", rows.items], ["mm_fragments", rows.fragments]] as const)
         if (list.length) must(await db().from(t).insert(list));
       if (g.evidences.length)
-        must(await db().from("mm_evidences").insert(g.evidences.map((e) => ({ game_id: game.id, act_id: actId(e.act), title: e.title, content: e.content, image_url: e.image_url, scope: e.scope, target_character_id: e.target ? cid(e.target) : null, unlock_rule: e.unlock_rule, reveal_style: e.reveal_style }))));
+        must(await db().from("mm_evidences").insert(g.evidences.map((e) => ({ game_id: game.id, act_id: actId(e.act), title: e.title, content: e.content, image_url: e.image_url, scope: e.scope, target_character_id: e.target ? cid(e.target) : null, unlock_rule: { ...e.unlock_rule, ref: e.ref }, reveal_style: e.reveal_style }))));
       if (g.joint_actions.length)
         must(
           await db()
@@ -68,6 +68,8 @@ export const mmImportGame = createServerFn({ method: "POST" })
             .insert(
               g.joint_actions.map((j) => ({
                 game_id: game.id,
+                ref: j.ref,
+                proposal_text: j.proposal_text,
                 name: j.name,
                 description: j.description,
                 available_from_act_id: actId(j.available_from_act),

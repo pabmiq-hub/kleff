@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { readingSchema } from "./readings";
+import { useSchema } from "./interactions";
 
 const json = z.record(z.any()).default({});
 const actKey = z.enum(["intro", "investigation", "conclusion"]);
@@ -18,6 +19,7 @@ export const mmImportSchema = z
       murder_event: json,
       final_reveal: json,
       briefing: z.string().optional(),
+      economy: z.object({ currency: z.literal("EUR").default("EUR"), richest_award: z.number().int().min(0).default(20), income_events: z.array(z.object({ ref: z.string(), character: z.string(), act: actKey, amount: z.number().int().positive(), title: z.string().optional() })).default([]) }).optional(),
     }),
     acts: z
       .array(z.object({ key: actKey, name: z.string().min(1), narrative_text: z.string().optional(), duration_minutes: z.number().int().min(1), intro_animation: z.string().optional() }))
@@ -41,9 +43,9 @@ export const mmImportSchema = z
             .array(z.object({ act: z.string().optional(), text: z.string().min(1), completion_type: z.enum(["manual", "auto", "admin"]).default("manual"), auto_rule: z.any().optional(), points: z.number().int().default(1) }))
             .default([]),
           abilities: z
-            .array(z.object({ name: z.string().min(1), description: z.string().optional(), effect_type: z.string().optional(), effect_config: json, max_uses: z.number().int().min(0).default(1), available_from_act: z.string().optional() }))
+            .array(z.object({ ref: z.string().optional(), name: z.string().min(1), description: z.string().optional(), effect_type: z.string().optional(), effect_config: json, use: useSchema.optional(), max_uses: z.number().int().min(0).default(1), available_from_act: z.string().optional() }))
             .default([]),
-          items: z.array(z.object({ name: z.string().min(1), description: z.string().optional(), image_url: z.string().optional(), available_from_act: z.string().optional() })).default([]),
+          items: z.array(z.object({ ref: z.string().optional(), name: z.string().min(1), description: z.string().optional(), image_url: z.string().optional(), available_from_act: z.string().optional(), type: z.enum(["item", "money"]).default("item"), amount: z.number().int().min(0).max(2147483647).default(0), currency: z.literal("EUR").default("EUR"), use: useSchema.optional() })).default([]),
           fragments: z.array(z.object({ label: z.string().min(1), value: z.string().optional(), group_key: z.string().min(1) })).default([]),
         }),
       )
@@ -52,7 +54,7 @@ export const mmImportSchema = z
       .array(
         z.object({
           act: z.string().optional(),
-          title: z.string().min(1),
+          ref: z.string().optional(), title: z.string().min(1),
           content: z.string().optional(),
           image_url: z.string().optional(),
           scope: z.enum(["common", "personal"]).default("common"),
@@ -64,7 +66,7 @@ export const mmImportSchema = z
       .default([]),
     readings: z.array(readingSchema).default([]),
     joint_actions: z
-      .array(z.object({ name: z.string().min(1), description: z.string().optional(), available_from_act: z.string().optional(), requirements: z.array(z.any()).default([]), results: z.array(z.any()).default([]) }))
+      .array(z.object({ ref: z.string().optional(), name: z.string().min(1), description: z.string().optional(), proposal_text: z.string().optional(), requires_acceptance: z.boolean().default(true), available_from_act: z.string().optional(), requirements: z.array(z.object({ role: z.string(), character: z.string().optional(), item: z.string().optional(), ability: z.string().optional(), fragment: z.string().optional() })).min(1), results: z.array(z.object({ role: z.string().optional(), text: z.string().optional(), evidence: z.string().optional(), secret: z.string().optional() })).default([]) }))
       .default([]),
   })
   .superRefine((g, ctx) => {
@@ -87,10 +89,19 @@ export const mmImportSchema = z
         err(["readings", i, "trigger"], "La lectura de la solución debe pertenecer a conclusion");
     });
     g.characters.forEach((c, i) => {
+      if (c.items.filter(x => x.type === "money").length > 1) err(["characters", i, "items"], "Un personaje solo puede tener una cartera");
       c.secrets.forEach((s, j) => s.known_by.forEach((r) => !refs.has(r) && err(["characters", i, "secrets", j, "known_by"], `Personaje «${r}» inexistente`)));
       c.objectives.forEach((o, j) => checkAct(o.act, ["characters", i, "objectives", j, "act"]));
       c.abilities.forEach((o, j) => checkAct(o.available_from_act, ["characters", i, "abilities", j]));
       c.items.forEach((o, j) => checkAct(o.available_from_act, ["characters", i, "items", j]));
+    });
+    const jointRefs = new Set(g.joint_actions.flatMap(j => [j.ref, j.name].filter(Boolean)));
+    g.characters.forEach((c, i) => [...c.items, ...c.abilities].forEach(x => {
+      if (x.use?.mode === "joint_action" && (!x.use.action || !jointRefs.has(x.use.action))) err(["characters", i], "La acción indicada en use.action no existe");
+    }));
+    g.game.economy?.income_events.forEach((e, i) => {
+      if (!refs.has(e.character)) err(["game", "economy", "income_events", i], "Personaje del ingreso inexistente");
+      checkAct(e.act, ["game", "economy", "income_events", i]);
     });
     g.evidences.forEach((e, i) => {
       checkAct(e.act, ["evidences", i, "act"]);
