@@ -123,7 +123,7 @@ export async function playerInteractionState(playerId: string, sessionId: string
   const myResources = c.resources.filter((r: any) => r.player_id === playerId);
   return {
     wallet: c.wallets.find((w: any) => w.session_player_id === playerId) ?? null,
-    inventory: myResources.filter((r: any) => r.kind === "item").map((r: any) => { const i = tr.row("mm_items", r); return { id: i.id, name: i.name, description: i.description, image_url: i.image_url }; }),
+    inventory: myResources.filter((r: any) => r.kind === "item").map((r: any) => { const i = tr.row("mm_items", r); return { id: i.id, name: i.name, description: i.description, type: i.type, image_url: i.image_url }; }),
     fragments: myResources.filter((r: any) => r.kind === "fragment").map((r: any) => ({ id: r.id, label: r.label, value: r.value, group_key: r.group_key })),
     joint_actions: c.s.status === "running" ? c.joint.filter((j: any) => j.requirements.some((r: any) => !r.character_id || r.character_id === "cualquiera" || r.character_id === c.players.find((p: any) => p.id === playerId)?.character_id)).map((raw: any) => {
       const j = tr.row("mm_joint_actions", raw);

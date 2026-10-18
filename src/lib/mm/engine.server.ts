@@ -566,7 +566,7 @@ export async function buildAdminState(sessionId: string) {
       relationships: c.relationships,
       secrets: (secrets ?? []).filter((x: any) => x.character_id === c.id).map((x: any) => ({ id: x.id, content: x.content, known_by: (x.known_by ?? []).map(cName) })),
       objectives: (objectives ?? []).filter((x: any) => x.character_id === c.id).map((x: any) => ({ id: x.id, text: x.text, points: x.points, completion_type: x.completion_type, act: actName(x.act_id) })),
-      items: (items ?? []).filter((x: any) => x.character_id === c.id).map((x: any) => ({ id: x.id, name: x.name, description: x.description, from: actName(x.available_from_act_id) })),
+      items: (items ?? []).filter((x: any) => x.character_id === c.id).map((x: any) => ({ id: x.id, name: x.name, description: x.description, type: x.type, image_url: x.image_url, from: actName(x.available_from_act_id) })),
       abilities: (abilities ?? []).filter((x: any) => x.character_id === c.id).map((x: any) => ({ id: x.id, name: x.name, description: x.description, max_uses: x.max_uses, from: actName(x.available_from_act_id) })),
     })),
     players: (players ?? []).map((p: any) => {

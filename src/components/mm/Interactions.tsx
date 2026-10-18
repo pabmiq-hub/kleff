@@ -5,6 +5,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
+import { MMItemArt } from "./shared";
 
 export function Interactions({ state, run, readOnly, inventory = false }: { state: any; run?: (data: any) => Promise<void>; readOnly?: boolean; inventory?: boolean }) {
   const [proposal, setProposal] = useState<any>(null);
@@ -28,7 +29,7 @@ export function Interactions({ state, run, readOnly, inventory = false }: { stat
         <Button disabled={!active || busy || state.wallet.amount < 1} onClick={() => open({ kind: "money", name: "Pagar", count: 2 })}><Send />Pagar</Button>
       </section>}
       {(state.items ?? []).map((i: any) => <article key={i.id} className="rounded-lg bg-card p-4 text-card-foreground">
-        <h3 className="font-semibold">{i.name}</h3><p className="mt-1 text-sm">{i.description}</p>
+        <div className="flex gap-3"><MMItemArt item={i} /><div className="min-w-0"><h3 className="font-semibold">{i.name}</h3><p className="mt-1 text-sm">{i.description}</p></div></div>
         <Button className="mt-3" size="sm" variant="outline" disabled={!active || busy} onClick={() => open({ kind: "item", sourceId: i.id, name: i.name, count: 2 })}><Send />Entregar</Button>
       </article>)}
       {(state.abilities ?? []).map((a: any) => <article key={a.id} className="rounded-lg bg-card p-4 text-card-foreground">
