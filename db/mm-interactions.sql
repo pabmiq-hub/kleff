@@ -52,6 +52,8 @@ BEGIN
  PERFORM mm_init_interactions(_session);
  IF _command='propose' THEN
   IF (_plan->>'act_id')::uuid IS DISTINCT FROM s.current_act_id THEN RAISE EXCEPTION 'El acto ha cambiado'; END IF;
+  UPDATE mm_action_requests SET status='expired',resolved_at=now()
+  WHERE session_id=_session AND status='pending' AND (payload->>'act_id')::uuid IS DISTINCT FROM s.current_act_id;
   IF EXISTS(SELECT 1 FROM mm_action_requests WHERE session_id=_session AND from_player=_actor AND status='pending' AND payload->>'source_id'=_plan->>'source_id') THEN RAISE EXCEPTION 'Ya hay una propuesta pendiente'; END IF;
   FOR pid IN SELECT jsonb_array_elements_text(_plan->'targets')::uuid LOOP
    IF pid=_actor OR NOT EXISTS(SELECT 1 FROM mm_session_players WHERE id=pid AND session_id=_session AND character_id IS NOT NULL) THEN RAISE EXCEPTION 'Destinatario no válido'; END IF;

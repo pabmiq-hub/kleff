@@ -243,6 +243,8 @@ export async function advanceAct(sessionId: string, fromActId: string | null, re
   await logEvent(sessionId, "act_changed", { act: next.name, position: next.position, reason });
   if (patch.murder_triggered_at) await logEvent(sessionId, "murder_triggered", { reason, act_id: next.id });
   if (patch.voting_open) await logEvent(sessionId, "voting_opened", {});
+  const income = await db().rpc("mm_apply_income", { _session: sessionId });
+  if (income.error) throw new Error("El acto ha avanzado, pero no se pudieron aplicar los ingresos");
   await broadcast(sessionTopic(sessionId), "act_changed", { act_id: next.id });
 }
 

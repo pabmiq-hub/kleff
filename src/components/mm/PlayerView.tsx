@@ -482,7 +482,7 @@ export function Results({ results, onReplay, lang }: { results: any; onReplay?: 
               {r.display_name} <span className="opacity-60">→ {r.accused ?? mmT(lang, "no_vote")}</span>
             </span>
             <span>{r.correct ? "✅" : "❌"}</span>
-            <span className="w-12 text-right font-mono">{r.score} pts</span>
+            <span className="shrink-0 text-right font-mono">{r.score} pts{r.richest_bonus > 0 && <span className="block text-xs opacity-70">+{r.richest_bonus} · EUR</span>}</span>
           </li>
         ))}
       </ol>
