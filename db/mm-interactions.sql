@@ -109,3 +109,25 @@ BEGIN
 END; $$;
 REVOKE ALL ON FUNCTION public.mm_commit_interaction(uuid,uuid,text,uuid,jsonb) FROM PUBLIC,anon,authenticated;
 GRANT EXECUTE ON FUNCTION public.mm_commit_interaction(uuid,uuid,text,uuid,jsonb) TO service_role;
+CREATE OR REPLACE FUNCTION public.mm_apply_income(_session uuid) RETURNS void
+LANGUAGE plpgsql SECURITY DEFINER SET search_path=public AS $$
+DECLARE s mm_sessions; ev jsonb; p uuid; current_pos integer; ev_pos integer;
+BEGIN
+ SELECT * INTO s FROM mm_sessions WHERE id=_session FOR UPDATE;
+ IF s.status NOT IN ('running','paused') THEN RETURN; END IF;
+ PERFORM mm_init_interactions(_session);
+ SELECT position INTO current_pos FROM mm_acts WHERE id=s.current_act_id;
+ FOR ev IN SELECT jsonb_array_elements(coalesce((SELECT economy->'income_events' FROM mm_games WHERE id=s.game_id),'[]')) LOOP
+  SELECT position INTO ev_pos FROM mm_acts WHERE game_id=s.game_id AND key=ev->>'act';
+  IF ev_pos IS NULL OR ev_pos>current_pos THEN CONTINUE; END IF;
+  SELECT sp.id INTO p FROM mm_session_players sp JOIN mm_characters c ON c.id=sp.character_id WHERE sp.session_id=s.id AND c.ref=ev->>'character';
+  IF p IS NULL THEN CONTINUE; END IF;
+  INSERT INTO mm_income_receipts(session_player_id,event_ref) VALUES(p,ev->>'ref') ON CONFLICT DO NOTHING;
+  IF FOUND THEN
+   UPDATE mm_wallets SET amount=amount+(ev->>'amount')::int WHERE session_player_id=p;
+   INSERT INTO mm_event_log(session_id,player_id,type,payload) VALUES(s.id,p,'income_received',jsonb_build_object('amount',ev->'amount','ref',ev->>'ref'));
+  END IF;
+ END LOOP;
+END; $$;
+REVOKE ALL ON FUNCTION public.mm_apply_income(uuid) FROM PUBLIC,anon,authenticated;
+GRANT EXECUTE ON FUNCTION public.mm_apply_income(uuid) TO service_role;

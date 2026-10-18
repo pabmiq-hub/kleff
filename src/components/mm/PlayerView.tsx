@@ -145,25 +145,6 @@ export function PlayerView({ state, actions, readOnly }: { state: any; actions?:
             )}
             {tab === "objetivos" && <ObjectivesTab state={state} actions={actions} readOnly={readOnly} t={t} />}
             {tab === "inventario" && <Interactions state={state} run={actions?.interact} readOnly={readOnly} inventory />}
-            {false && (
-              <div className="space-y-6">
-                <Section title={t("items")}>
-                  <List empty={t("empty_inventory")}>
-                    {state.items.map((i: any) => (
-                      <Card key={i.id} title={i.name} body={i.description} />
-                    ))}
-                  </List>
-                </Section>
-                <Section title={t("abilities")}>
-                  <List empty={t("no_abilities")}>
-                    {state.abilities.map((a: any) => (
-                      <Card key={a.id} title={a.name} body={a.description} extra={t("uses", { a: a.uses_left, b: a.max_uses })} />
-                    ))}
-                  </List>
-                </Section>
-                <p className="text-xs opacity-60">{t("next_phase_inventory")}</p>
-              </div>
-            )}
             {tab === "evidencias" && (
               <List empty={t("no_evidence")}>
                 {state.evidences.map((e: any, i: number) => (
