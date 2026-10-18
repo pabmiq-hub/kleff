@@ -739,7 +739,7 @@ export const adminUpdateForm = createServerFn({ method: "POST" })
       const { cancelScheduledReminders, scheduleReminderEmails, sendPaymentReminderEmail } =
         await import("@/lib/registrations-email.server");
       const fa = (after ?? {}) as { reminder_enabled?: boolean; payment_required?: boolean; payment_reminder_enabled?: boolean; payment_reminder_hours?: number };
-      const list = (rows ?? []) as Array<{
+      const list = (rows ?? []) as unknown as Array<{
         id: string; cancel_token: string; email_contact: string | null; guests_count: number | null;
         data: Record<string, unknown> | null; reminder_email_ids: string[] | null;
         payment_reminder_email_id: string | null; payment_status: string | null; created_at: string;
