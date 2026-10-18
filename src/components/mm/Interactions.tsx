@@ -48,7 +48,7 @@ export function Interactions({ state, run, readOnly, inventory = false }: { stat
       <h3 className="font-semibold">{r.title}{r.amount ? ` · ${r.amount} EUR` : ""}</h3>
       <p className="mt-1 text-sm">{label(r.from_player)} → {r.to_players.map(label).join(", ")}</p>
       <p className="mt-2 whitespace-pre-wrap text-sm">{r.proposal_text}</p>
-      <p className="mt-2 text-xs text-muted-foreground">{{ pending: "Pendiente de aceptación", completed: "Completada", rejected: "Rechazada", expired: "Caducada" }[r.status as string] ?? r.status}</p>
+      <p className="mt-2 text-xs text-muted-foreground">{({ pending: "Pendiente de aceptación", completed: "Completada", rejected: "Rechazada", expired: "Caducada" } as Record<string, string>)[r.status] ?? r.status}</p>
       {r.results.map((text: string, i: number) => <p key={i} className="mt-3 whitespace-pre-wrap text-sm">{text}</p>)}
       {r.status === "pending" && active && <div className="mt-3 flex flex-wrap gap-2">
         {r.from_player === state.me.id ? <Button size="sm" variant="outline" disabled={busy} onClick={() => execute({ kind: "cancel", requestId: r.id })}><X />Cancelar</Button> : <>

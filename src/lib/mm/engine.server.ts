@@ -3,6 +3,7 @@
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { sessionEligibility, planCharacterAssignments, shouldTriggerMurder } from "./session-rules";
 import { playerReadings } from "./readings";
+import { richestBonus } from "./interactions";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const db = () => supabaseAdmin as any;
@@ -331,7 +332,6 @@ export async function computeResults(sessionId: string) {
     db().from("mm_games").select("economy").eq("id", s.game_id).single(),
     db().from("mm_wallets").select("session_player_id, amount").in("session_player_id", (players ?? []).map((p: any) => p.id)),
   ]);
-  const richest = Math.max(0, ...(balances ?? []).map((w: any) => w.amount));
   const { data: chars } = await db().from("mm_characters").select("id, name, is_killer, avatar_config, avatar_url").eq("game_id", s.game_id);
   const killer = (chars ?? []).find((c: any) => c.is_killer) ?? null;
   const rows = (players ?? []).map((p: any) => {
@@ -340,6 +340,8 @@ export async function computeResults(sessionId: string) {
     const objPoints = objs.filter((o: any) => o.completed).reduce((n: number, o: any) => n + (o.mm_objectives?.points ?? 0), 0);
     const correct = !!v && !!killer && v.accused_character_id === killer.id;
     const ch = (chars ?? []).find((c: any) => c.id === p.character_id);
+    const money = (balances ?? []).find((w: any) => w.session_player_id === p.id)?.amount ?? 0;
+    const bonus = gameEconomy?.economy && Object.keys(gameEconomy.economy).length ? richestBonus(money, (balances ?? []).map((w: any) => w.amount), gameEconomy.economy.richest_award ?? 20) : 0;
     return {
       player_id: p.id,
       display_name: p.display_name,
@@ -350,9 +352,9 @@ export async function computeResults(sessionId: string) {
       correct,
       objectives_done: objs.filter((o: any) => o.completed).length,
       objectives_total: objs.length,
-      money: (balances ?? []).find((w: any) => w.session_player_id === p.id)?.amount ?? 0,
-      richest_bonus: gameEconomy?.economy && Object.keys(gameEconomy.economy).length && richest > 0 && (balances ?? []).some((w: any) => w.session_player_id === p.id && w.amount === richest) ? (gameEconomy.economy.richest_award ?? 20) : 0,
-      score: objPoints + (correct ? 3 : 0) + (gameEconomy?.economy && Object.keys(gameEconomy.economy).length && richest > 0 && (balances ?? []).some((w: any) => w.session_player_id === p.id && w.amount === richest) ? (gameEconomy.economy.richest_award ?? 20) : 0),
+      money,
+      richest_bonus: bonus,
+      score: objPoints + (correct ? 3 : 0) + bonus,
     };
   });
   rows.sort((a: any, b: any) => b.score - a.score);

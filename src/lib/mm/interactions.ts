@@ -18,6 +18,10 @@ export function transferBalances(from: number, to: number, amount: number) {
     throw new Error("Cantidad no válida o saldo insuficiente");
   return { from: from - amount, to: to + amount };
 }
+export function richestBonus(balance: number, balances: number[], award: number) {
+  const max = Math.max(0, ...balances);
+  return max > 0 && balance === max ? award : 0;
+}
 export function matchRoles(requirements: any[], participants: any[], resources: any[]) {
   if (participants.length !== requirements.length || new Set(participants.map(p => p.id)).size !== participants.length)
     throw new Error("Cada papel necesita un participante distinto");
