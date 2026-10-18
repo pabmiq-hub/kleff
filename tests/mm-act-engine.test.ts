@@ -10,6 +10,7 @@ const acts = [
 
 mock.module('../src/integrations/supabase/client.server', () => ({
   supabaseAdmin: {
+    rpc() { return Promise.resolve({ data: null, error: null }); },
     from(table: string) {
       let patch: Record<string, unknown> | undefined;
       const filters: Array<[string, unknown]> = [];
