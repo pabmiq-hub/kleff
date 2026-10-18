@@ -2,6 +2,24 @@ import { useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNod
 import { createAvatar } from "@dicebear/core";
 import { avataaars } from "@dicebear/collection";
 import { supabase } from "@/integrations/supabase/client";
+import { itemCategory, ITEM_CATEGORY_LABEL, normalizeAvatarConfig } from "@/lib/mm/item-art";
+
+const CATEGORY_EMOJI = { money: "💰", key: "🗝️", document: "📜", potion: "🧪", weapon: "🗡️", tool: "🔦", jewel: "💍", object: "📦" } as const;
+
+/** Item illustration with a category badge so players can tell objects apart at a glance. */
+export function MMItemArt({ item, size = 64 }: { item: { name: string; description?: string | null; type?: string | null; image_url?: string | null }; size?: number }) {
+  const cat = itemCategory(item);
+  return (
+    <div className="relative shrink-0" style={{ width: size, height: size }}>
+      {item.image_url ? (
+        <img src={item.image_url} alt={item.name} width={size} height={size} loading="lazy" className="h-full w-full rounded-xl bg-muted object-contain" />
+      ) : (
+        <div className="flex h-full w-full items-center justify-center rounded-xl bg-muted" style={{ fontSize: size * 0.45 }} aria-hidden>{CATEGORY_EMOJI[cat]}</div>
+      )}
+      <span title={ITEM_CATEGORY_LABEL[cat]} className="absolute -bottom-1 -right-1 rounded-full border border-border bg-background px-1 text-xs leading-5">{CATEGORY_EMOJI[cat]}</span>
+    </div>
+  );
+}
 
 /* --------------------------------- avatar -------------------------------- */
 
@@ -23,7 +41,7 @@ export function MMAvatar({
   const src = useMemo(() => {
     if (url) return url;
     try {
-      return createAvatar(avataaars, { seed: name, backgroundColor: ["transparent"], ...(config ?? {}) } as any).toDataUri();
+      return createAvatar(avataaars, { seed: name, backgroundColor: ["transparent"], ...normalizeAvatarConfig(config) } as any).toDataUri();
     } catch {
       return createAvatar(avataaars, { seed: name }).toDataUri();
     }

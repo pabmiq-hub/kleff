@@ -78,11 +78,22 @@ export const mmImportGame = createServerFn({ method: "POST" })
               })),
             ),
         );
-      return { ok: true as const, gameId: game.id as string };
     } catch (e) {
       await db().from("mm_games").delete().eq("id", game.id); // cascades: all-or-nothing import
       return { ok: false as const, errors: [(e as Error).message] };
     }
+    const { fillGameItemArt } = await import("./item-art.server");
+    const art = await fillGameItemArt(db, game.id);
+    return { ok: true as const, gameId: game.id as string, art };
+  });
+
+export const mmGenerateItemArt = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { gameId: string }) => ({ gameId: id.parse(d.gameId) }))
+  .handler(async ({ data, context }) => {
+    const { db } = await guard(context.userId);
+    const { fillGameItemArt } = await import("./item-art.server");
+    return fillGameItemArt(db, data.gameId);
   });
 
 export const mmGetGame = createServerFn({ method: "POST" })
