@@ -3,3 +3,4 @@
 - Juegos session eligibility, assignment planning and language locking use shared pure rules enforced by server controls and displayed by administration, so manual and automatic paths cannot bypass game limits.
 - Juegos act transitions use a shared murder-trigger rule in the engine and administration, so imported act keys and control modes cannot bypass the narrative event.
 - Juegos theatrical readings are stored on the game and translated with its content; a shared server-side filter restricts player delivery by reader, act and reveal trigger to prevent early solution leaks.
+- Juegos interaction plans are constructed only after HMAC validation; a service-role-only SQL function locks the session and commits acceptance, balances, uses, ownership and unlocks atomically to prevent replay and concurrent overspending.

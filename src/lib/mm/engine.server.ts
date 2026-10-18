@@ -92,6 +92,8 @@ async function loadActs(gameId: string) {
 }
 
 export async function initPlayerRows(session: Session) {
+  const initialized = await db().rpc("mm_init_interactions", { _session: session.id });
+  if (initialized.error) throw new Error("No se pudo preparar el inventario de la partida");
   const { data: players } = await db().from("mm_session_players").select("id, character_id").eq("session_id", session.id);
   for (const p of players ?? []) {
     if (!p.character_id) continue;
@@ -411,6 +413,9 @@ export async function buildPlayerState(playerId: string) {
     })
     .map((e: any) => ({ id: e.id, title: e.title, content: e.content, image_url: e.image_url, scope: e.scope, reveal_style: e.reveal_style, act: acts.find((a) => a.id === e.act_id)?.name ?? null }));
 
+  const { playerInteractionState } = await import("./interaction.server");
+  const interactionState = released && s.status !== "lobby" ? await playerInteractionState(playerId, s.id) : { wallet: null, inventory: [], fragments: [], joint_actions: [], requests: [] };
+
   return {
     session: publicSession(s, acts, game),
     me: {
@@ -459,7 +464,11 @@ export async function buildPlayerState(playerId: string) {
         const act = acts.find((a) => a.id === o.act_id);
         return { id: o.id, text: o.text, completion_type: o.completion_type, points: o.points, act: act?.name ?? null, act_position: act?.position ?? 0, current: act?.id === s.current_act_id, completed: !!po?.completed };
       }),
-    items: (items ?? []).filter((i: any) => reached(i.available_from_act_id)).map((i: any) => ({ id: i.id, name: i.name, description: i.description, image_url: i.image_url })),
+    wallet: interactionState.wallet,
+    fragments: interactionState.fragments,
+    joint_actions: interactionState.joint_actions,
+    requests: interactionState.requests,
+    items: interactionState.inventory,
     abilities: (abilities ?? [])
       .filter((a: any) => reached(a.available_from_act_id))
       .map((a: any) => ({ id: a.id, name: a.name, description: a.description, effect_type: a.effect_type, max_uses: a.max_uses, uses_left: (pab ?? []).find((x: any) => x.ability_id === a.id)?.uses_left ?? a.max_uses })),

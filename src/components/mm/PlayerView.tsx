@@ -4,6 +4,7 @@ import { User, Lock, ListChecks, Backpack, FileSearch, Handshake, Gavel, BookOpe
 import { MMAvatar, MMShell, fmtClock, useCountdown } from "./shared";
 import { ActIntro, FinalReveal, FlipCard, MurderOverlay, SealedDoc } from "./animations";
 import { mmT, mmLocale, type MMKey } from "@/lib/mm/i18n";
+import { Interactions } from "./Interactions";
 
 type Tab = "personaje" | "secretos" | "objetivos" | "inventario" | "evidencias" | "acciones" | "acusacion";
 
@@ -12,6 +13,7 @@ export interface PlayerActions {
   ready: () => Promise<void>;
   toggleObjective: (id: string) => Promise<void>;
   vote: (v: { accusedCharacterId: string; motive: string; method: string }) => Promise<void>;
+  interact?: (data: any) => Promise<void>;
 }
 
 function useSeen(key: string) {
@@ -54,7 +56,7 @@ export function PlayerView({ state, actions, readOnly }: { state: any; actions?:
       objetivos: state.objectives.map((x: any) => x.id),
       inventario: [...state.items.map((x: any) => x.id), ...state.abilities.map((x: any) => x.id)],
       evidencias: state.evidences.map((x: any) => x.id),
-      acciones: [],
+      acciones: (state.requests ?? []).filter((r: any) => r.status === "pending" && r.to_players.includes(me.id)).map((r: any) => r.id),
       acusacion: s.voting_open ? ["voting"] : [],
     }),
     [state, s.voting_open],
@@ -142,7 +144,8 @@ export function PlayerView({ state, actions, readOnly }: { state: any; actions?:
               </List>
             )}
             {tab === "objetivos" && <ObjectivesTab state={state} actions={actions} readOnly={readOnly} t={t} />}
-            {tab === "inventario" && (
+            {tab === "inventario" && <Interactions state={state} run={actions?.interact} readOnly={readOnly} inventory />}
+            {false && (
               <div className="space-y-6">
                 <Section title={t("items")}>
                   <List empty={t("empty_inventory")}>
@@ -179,11 +182,7 @@ export function PlayerView({ state, actions, readOnly }: { state: any; actions?:
                 ))}
               </List>
             )}
-            {tab === "acciones" && (
-              <div className="rounded-xl bg-[var(--mm-surface)] p-5 text-center text-sm opacity-80">
-                {t("joint_soon")}
-              </div>
-            )}
+            {tab === "acciones" && <Interactions state={state} run={actions?.interact} readOnly={readOnly} />}
             {tab === "acusacion" && <VoteTab state={state} actions={actions} readOnly={readOnly} t={t} />}
           </motion.section>
         </AnimatePresence>
