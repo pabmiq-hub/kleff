@@ -719,29 +719,54 @@ export const adminUpdateForm = createServerFn({ method: "POST" })
     // If anything shown in the reminder changed, cancel queued reminders and reschedule them.
     let rescheduled = 0;
     const prev = (before ?? {}) as Record<string, unknown>;
-    const changed = REMINDER_FIELDS.some(
-      (k) => k in patch && JSON.stringify(patch[k] ?? null) !== JSON.stringify(prev[k] ?? null),
-    );
-    if (before && changed) {
+    const differs = (k: string) =>
+      k in patch && JSON.stringify(patch[k] ?? null) !== JSON.stringify(prev[k] ?? null);
+    const changed = REMINDER_FIELDS.some(differs);
+    const PAYMENT_FIELDS = [
+      "event_date", "event_location", "title", "slug", "description",
+      "payment_required", "payment_reminder_enabled", "payment_reminder_hours",
+      "payment_amount_cents", "payment_currency", "payment_instructions",
+    ];
+    const paymentChanged = PAYMENT_FIELDS.some(differs);
+    if (before && (changed || paymentChanged)) {
       const { data: after } = await supabaseAdmin
         .from("registration_forms").select("*").eq("id", data.id).maybeSingle();
       const { data: rows } = await supabaseAdmin
         .from("registration_responses")
-        .select("id, cancel_token, email_contact, guests_count, data, reminder_email_ids")
+        .select("id, cancel_token, email_contact, guests_count, data, reminder_email_ids, payment_reminder_email_id, payment_status, created_at")
         .eq("form_id", data.id)
         .is("cancelled_at", null);
-      const { cancelScheduledReminders, scheduleReminderEmails } = await import("@/lib/registrations-email.server");
-      const list = (rows ?? []) as Array<{
+      const { cancelScheduledReminders, scheduleReminderEmails, sendPaymentReminderEmail } =
+        await import("@/lib/registrations-email.server");
+      const fa = (after ?? {}) as { reminder_enabled?: boolean; payment_required?: boolean; payment_reminder_enabled?: boolean; payment_reminder_hours?: number };
+      const list = (rows ?? []) as unknown as Array<{
         id: string; cancel_token: string; email_contact: string | null; guests_count: number | null;
         data: Record<string, unknown> | null; reminder_email_ids: string[] | null;
+        payment_reminder_email_id: string | null; payment_status: string | null; created_at: string;
       }>;
       for (let i = 0; i < list.length; i += 5) {
         await Promise.allSettled(list.slice(i, i + 5).map(async (r) => {
-          await cancelScheduledReminders(Array.isArray(r.reminder_email_ids) ? r.reminder_email_ids : []);
-          const ids = await scheduleReminderEmails(after as never, r);
-          await supabaseAdmin.from("registration_responses")
-            .update({ reminder_email_ids: ids } as never).eq("id", r.id);
-          if (ids.length) rescheduled++;
+          if (changed) {
+            await cancelScheduledReminders(Array.isArray(r.reminder_email_ids) ? r.reminder_email_ids : []);
+            const ids = fa.reminder_enabled === false ? [] : await scheduleReminderEmails(after as never, r);
+            await supabaseAdmin.from("registration_responses")
+              .update({ reminder_email_ids: ids } as never).eq("id", r.id);
+            if (ids.length) rescheduled++;
+          }
+          if (paymentChanged && r.payment_reminder_email_id) {
+            // Rendered HTML is frozen at scheduling time: always cancel and rebuild.
+            await cancelScheduledReminders([r.payment_reminder_email_id]);
+            let newId: string | null = null;
+            const hours = fa.payment_reminder_hours === 48 ? 48 : 24;
+            const at = new Date(new Date(r.created_at).getTime() + hours * 3600_000);
+            if (fa.payment_required && fa.payment_reminder_enabled && r.payment_status === "pending"
+              && at.getTime() > Date.now() + 60_000) {
+              newId = await sendPaymentReminderEmail(after as never, r, at.toISOString());
+            }
+            await supabaseAdmin.from("registration_responses")
+              .update({ payment_reminder_email_id: newId } as never).eq("id", r.id);
+            if (newId) rescheduled++;
+          }
         }));
       }
     }
