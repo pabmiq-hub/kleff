@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Progress } from "@/components/ui/progress";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { MMAdminGate } from "@/components/mm/AdminGate";
-import { MMAvatar, describeEvent, fmtClock, sessionTopicName, useBroadcast, useCountdown } from "@/components/mm/shared";
+import { MMAvatar, MMItemArt, describeEvent, fmtClock, sessionTopicName, useBroadcast, useCountdown } from "@/components/mm/shared";
 import { PlayerView, Results } from "@/components/mm/PlayerView";
 import { AdminReadings } from "@/components/mm/AdminReadings";
 import { MM_LANGS } from "@/lib/mm/i18n";
@@ -484,7 +484,7 @@ function SessionPlanning({ d, act }: { d: any; act: (a: any, extra?: Record<stri
                 )}
                 {c.items.length > 0 && (
                   <Field label="Objetos">
-                    <ul className="list-disc pl-5">{c.items.map((x: any) => <li key={x.id}><strong>{x.name}</strong>{x.description ? ` — ${x.description}` : ""}{x.from ? <span className="text-ink/50"> (desde {x.from})</span> : null}</li>)}</ul>
+                    <ul className="space-y-3">{c.items.map((x: any) => <li key={x.id} className="flex gap-3"><MMItemArt item={x} size={48} /><span><strong>{x.name}</strong>{x.description ? ` — ${x.description}` : ""}{x.from ? <span className="text-ink/50"> (desde {x.from})</span> : null}</span></li>)}</ul>
                   </Field>
                 )}
                 {c.abilities.length > 0 && (
