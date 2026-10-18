@@ -9,5 +9,6 @@
 - [x] Juegos: reparto de personajes 24 h antes, confirmación de asistencia, sustitución de bajas, idiomas (es/ca/en/fr), fichas completas y acto actual/siguiente
 - [x] Juegos: mínimo y reparto coherente en inicio/reparto manual y automático; idioma bloqueado tras reparto/inicio; 12 pruebas de reglas superadas
 - [ ] Juegos: verificar reparto e idioma en una partida con acceso de administrador a la base propia (sin sesión disponible)
-- [ ] Juegos fase 2: acciones conjuntas, fragmentos, uso de habilidades, entrega de objetos, objetivos automáticos
+- [ ] Juegos camino B: dinero con aceptación, acciones conjuntas, habilidades y entrega de objetos; importación, seguridad y prueba con dos jugadores
+- [ ] Juegos fase 2 restante: objetivos automáticos y reglas narrativas avanzadas
 - [ ] Juegos fase 3: avance programado sin nadie conectado (cron), presencia en tiempo real, animaciones Lottie
