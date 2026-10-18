@@ -327,6 +327,11 @@ export async function computeResults(sessionId: string) {
     ),
   ]);
   const { data: s } = await db().from("mm_sessions").select("game_id").eq("id", sessionId).single();
+  const [{ data: gameEconomy }, { data: balances }] = await Promise.all([
+    db().from("mm_games").select("economy").eq("id", s.game_id).single(),
+    db().from("mm_wallets").select("session_player_id, amount").in("session_player_id", (players ?? []).map((p: any) => p.id)),
+  ]);
+  const richest = Math.max(0, ...(balances ?? []).map((w: any) => w.amount));
   const { data: chars } = await db().from("mm_characters").select("id, name, is_killer, avatar_config, avatar_url").eq("game_id", s.game_id);
   const killer = (chars ?? []).find((c: any) => c.is_killer) ?? null;
   const rows = (players ?? []).map((p: any) => {
@@ -345,7 +350,9 @@ export async function computeResults(sessionId: string) {
       correct,
       objectives_done: objs.filter((o: any) => o.completed).length,
       objectives_total: objs.length,
-      score: objPoints + (correct ? 3 : 0),
+      money: (balances ?? []).find((w: any) => w.session_player_id === p.id)?.amount ?? 0,
+      richest_bonus: gameEconomy?.economy && Object.keys(gameEconomy.economy).length && richest > 0 && (balances ?? []).some((w: any) => w.session_player_id === p.id && w.amount === richest) ? (gameEconomy.economy.richest_award ?? 20) : 0,
+      score: objPoints + (correct ? 3 : 0) + (gameEconomy?.economy && Object.keys(gameEconomy.economy).length && richest > 0 && (balances ?? []).some((w: any) => w.session_player_id === p.id && w.amount === richest) ? (gameEconomy.economy.richest_award ?? 20) : 0),
     };
   });
   rows.sort((a: any, b: any) => b.score - a.score);
@@ -513,6 +520,7 @@ export async function buildAdminState(sessionId: string) {
   const actName = (id: string | null) => (id ? acts.find((a) => a.id === id)?.name ?? null : null);
   const cName = (id: string) => (chars ?? []).find((c: any) => c.id === id)?.name ?? "?";
   const now = Date.now();
+  const { data: wallets } = pids.length ? await db().from("mm_wallets").select("*").in("session_player_id", pids) : { data: [] };
   return {
     session: { ...publicSession(s, acts, game), murder_event: game.murder_event, blind_mode: s.blind_mode, scheduled_at: s.scheduled_at, archived: s.archived },
     readings: await (async () => {
@@ -527,6 +535,8 @@ export async function buildAdminState(sessionId: string) {
       });
     })(),
     eligibility: sessionEligibility(game, chars ?? [], players ?? [], !!s.characters_released_at),
+    economy: game.economy ?? {},
+    wallets: (wallets ?? []).map((w: any) => ({ ...w, name: (players ?? []).find((p: any) => p.id === w.session_player_id)?.display_name })),
     final_reveal: game.final_reveal,
     translations: tr ?? [],
     acts_full: acts.map((a) => ({

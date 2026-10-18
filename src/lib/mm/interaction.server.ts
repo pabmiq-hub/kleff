@@ -35,6 +35,7 @@ export async function interactionContext(sessionId: string) {
 
 export async function interact(playerId: string, sessionId: string, input: any) {
   const c = await interactionContext(sessionId);
+  const tr = await loadTr(c.s.game_id, c.s.language);
   if (c.s.status !== "running") throw new Error("La partida no está activa");
   const me = c.players.find((p: any) => p.id === playerId);
   if (!me?.character_id) throw new Error("No tienes personaje asignado");
@@ -61,8 +62,9 @@ export async function interact(playerId: string, sessionId: string, input: any) 
       let results: any[] = [];
       let roles: any[] = people.map(p => ({ ...p, role: "all" }));
       if (input.kind === "joint") {
-        const j = c.joint.find((x: any) => x.id === input.sourceId);
-        if (!j) throw new Error("Acción no disponible");
+        const raw = c.joint.find((x: any) => x.id === input.sourceId);
+        if (!raw) throw new Error("Acción no disponible");
+        const j = tr.row("mm_joint_actions", raw);
         roles = matchRoles(j.requirements, people, c.resources);
         plan.joint_id = j.id; plan.title = j.name; plan.proposal_text = j.proposal_text ?? j.description;
         results = j.results;
@@ -74,8 +76,9 @@ export async function interact(playerId: string, sessionId: string, input: any) 
           }
         }
       } else {
-        const a = c.resources.find((r: any) => r.id === input.sourceId && r.player_id === me.id && r.kind === "ability" && r.uses_left > 0);
-        if (!a || input.targetIds.length !== 1) throw new Error("Habilidad o destinatario no válido");
+        const raw = c.resources.find((r: any) => r.id === input.sourceId && r.player_id === me.id && r.kind === "ability" && r.uses_left > 0);
+        if (!raw || input.targetIds.length !== 1) throw new Error("Habilidad o destinatario no válido");
+        const a = tr.row("mm_abilities", raw);
         if (a.use_config?.action) throw new Error("Utiliza esta habilidad desde la acción conjunta correspondiente");
         const config = a.effect_config ?? {};
         results = config.results ?? (config.text ? [{ text: config.text }] : config.evidence ? [{ evidence: config.evidence }] : []);
@@ -99,7 +102,7 @@ export async function interact(playerId: string, sessionId: string, input: any) 
       // Combining all fragments of a group unlocks only its associated evidence.
       const ownedFragments = c.resources.filter((r: any) => r.kind === "fragment" && people.some(p => p.id === r.player_id));
       for (const ev of evidence.filter((e: any) => e.unlock_rule?.type === "fragments")) {
-        const group = c.resources.filter((r: any) => r.kind === "fragment" && r.group_key === ev.unlock_rule.group_key);
+        const group = await query(db().from("mm_fragments").select("id").eq("game_id", c.s.game_id).eq("group_key", ev.unlock_rule.group_key));
         if (group.length && group.every((f: any) => ownedFragments.some((o: any) => o.id === f.id)))
           for (const p of people) plan.unlocks.push({ player_id: p.id, evidence_id: ev.id });
       }
