@@ -148,6 +148,11 @@ function Panel() {
 
       <SessionPlanning d={d} act={act} />
       <AdminReadings state={d} />
+      {(d.wallets ?? []).length > 0 && <section className="border-b border-border pb-4">
+        <h2 className="font-semibold">Dinero ficticio</h2>
+        <div className="mt-3 flex flex-wrap gap-4">{d.wallets.map((w: any) => <p key={w.session_player_id} className="text-sm">{w.name}: <strong>{w.amount} {w.currency}</strong></p>)}</div>
+        {(d.economy?.income_events ?? []).map((e: any) => <p key={e.ref} className="mt-2 text-sm text-muted-foreground">{e.title ?? e.ref} · {e.act} · +{e.amount} EUR</p>)}
+      </section>}
 
       {s.status === "finished" && d.results && <div className="rounded-2xl bg-ink p-2 text-cream"><Results results={d.results} /></div>}
 
@@ -271,7 +276,7 @@ function Panel() {
 
         <section className="space-y-2 rounded-2xl border border-ink/10 bg-card p-4 lg:col-span-2">
           <h2 className="text-lg font-semibold">Acciones conjuntas</h2>
-          {d.action_requests.length ? d.action_requests.map((r: any) => <p key={r.id} className="text-sm">{r.status} · {new Date(r.created_at).toLocaleTimeString("es-ES")}</p>) : <p className="text-sm text-ink/50">Ninguna todavía (se activan en la fase 2).</p>}
+          {d.action_requests.length ? d.action_requests.map((r: any) => <p key={r.id} className="text-sm">{r.payload?.title} · {r.status} · {new Date(r.created_at).toLocaleTimeString("es-ES")}</p>) : <p className="text-sm text-ink/50">Ninguna todavía.</p>}
         </section>
       </div>
 

@@ -12,12 +12,12 @@ export const TR_FIELDS: Record<string, string[]> = {
   mm_secrets: ["content"],
   mm_objectives: ["text"],
   mm_items: ["name", "description"],
-  mm_abilities: ["name", "description"],
+  mm_abilities: ["name", "description", "effect_config", "use_config"],
   mm_evidences: ["title", "content"],
-  mm_joint_actions: ["name", "description"],
+  mm_joint_actions: ["name", "description", "proposal_text", "results"],
 };
 
-const SKIP_KEYS = new Set(["ref", "character", "reader", "act", "trigger", "type", "key", "font_display"]);
+const SKIP_KEYS = new Set(["ref", "character", "reader", "act", "trigger", "type", "key", "font_display", "role", "evidence", "secret", "action", "mode"]);
 const isText = (v: unknown): v is string => typeof v === "string" && /\p{L}/u.test(v) && v.trim().length > 1;
 
 function walk(prefix: string, value: unknown, visit: (key: string, v: string) => string | void): unknown {

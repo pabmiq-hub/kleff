@@ -104,6 +104,8 @@ export const mmPlayerState = createServerFn({ method: "POST" })
     const e = await eng();
     const { sp, s } = await e.verifyPlayerToken(data.token, data.sessionId);
     await e.tick(s);
+    const income = await e.db().rpc("mm_apply_income", { _session: s });
+    if (income.error) throw new Error("No se pudieron actualizar los ingresos de la partida");
     await e.db().from("mm_session_players").update({ last_seen_at: new Date().toISOString() }).eq("id", sp);
     const state = await e.buildPlayerState(sp);
     return { ...state, token: await e.signPlayerToken(sp, s) } as any;
