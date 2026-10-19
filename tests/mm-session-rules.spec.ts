@@ -53,3 +53,21 @@ for (const status of ['running', 'paused', 'finished']) {
     expect(isSessionLanguageLocked({ status })).toBe(true);
   });
 }
+
+test('with fewer players than characters the first characters of the cast are dealt, killer first', () => {
+  const cast = Array.from({ length: 11 }, (_, i) => ({ id: `c${i}`, is_killer: i === 0, victim: false, sort_order: i }));
+  const plan = planCharacterAssignments(cast, players(7), () => 0.99);
+  expect(plan.map(a => a.characterId)).toEqual(['c0', 'c1', 'c2', 'c3', 'c4', 'c5', 'c6']);
+});
+test('a character order never takes a preassigned seat away from a player', () => {
+  const cast = Array.from({ length: 11 }, (_, i) => ({ id: `c${i}`, is_killer: i === 0, victim: false, sort_order: i }));
+  const input = players(7).map((p, i) => (i === 0 ? { ...p, character_id: 'c9' } : p));
+  const plan = planCharacterAssignments(cast, input, () => 0.5);
+  expect(plan[0].characterId).toBe('c9');
+  expect(plan.some(a => a.characterId === 'c0')).toBe(true);
+  expect(new Set(plan.map(a => a.characterId)).size).toBe(7);
+});
+test('games without an order keep the random deal', () => {
+  const cast = Array.from({ length: 8 }, (_, i) => ({ id: `c${i}`, is_killer: i === 0, victim: false, sort_order: 0 }));
+  expect(planCharacterAssignments(cast, players(4), () => 0).map(a => a.characterId)).not.toEqual(planCharacterAssignments(cast, players(4), () => 0.99).map(a => a.characterId));
+});

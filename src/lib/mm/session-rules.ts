@@ -1,5 +1,5 @@
 type GameLimits = { min_players: number; max_players: number };
-type Character = { id: string; victim?: boolean; is_killer?: boolean | null };
+type Character = { id: string; victim?: boolean; is_killer?: boolean | null; sort_order?: number | null };
 type Player = { id: string; character_id?: string | null };
 
 /** The murder belongs to the second act, regardless of its imported key or control mode. */
@@ -37,10 +37,15 @@ export function planCharacterAssignments(characters: Character[], players: Playe
   const taken = new Set(assignments.map((a) => a.characterId).filter(Boolean));
   const free = playable.filter((c) => !taken.has(c.id));
   const others = free.filter((c) => !c.is_killer);
-  for (let i = others.length - 1; i > 0; i--) {
-    const j = Math.floor(random() * (i + 1));
-    [others[i], others[j]] = [others[j], others[i]];
-  }
+  // Imported games keep their cast order (sort_order): essential characters are dealt first. Games without
+  // an order (all zeros) keep the previous behaviour and are dealt at random.
+  const ordered = others.some((c) => (c.sort_order ?? 0) !== (others[0]?.sort_order ?? 0));
+  if (ordered) others.sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
+  else
+    for (let i = others.length - 1; i > 0; i--) {
+      const j = Math.floor(random() * (i + 1));
+      [others[i], others[j]] = [others[j], others[i]];
+    }
   const queue = [...free.filter((c) => c.is_killer), ...others];
   for (const a of assignments) if (!a.characterId) a.characterId = queue.shift()?.id ?? null;
   for (const killer of playable.filter((c) => c.is_killer)) {
