@@ -1,9 +1,16 @@
 import { describe, test, expect } from "bun:test";
-import { transferBalances, matchRoles, interactionInput, richestBonus } from "../src/lib/mm/interactions";
+import { transferBalances, matchRoles, interactionInput, richestBonus, jointActionStatus } from "../src/lib/mm/interactions";
 import { mmImportSchema } from "../src/lib/mm/import-schema";
 import { DEMO_GAME } from "../src/lib/mm/demo-game";
 
 describe("dinero y consentimiento", () => {
+  const request = { from_player: "a", to_players: ["b"], status: "completed", payload: { kind: "joint", source_id: "uv", act_id: "act1" } };
+  test("una acción completada bloquea al proponente", () => expect(jointActionStatus("uv", "a", "act1", [request])).toBe("completed"));
+  test("una acción completada bloquea también al receptor incluso en otro acto", () => expect(jointActionStatus("uv", "b", "act2", [request])).toBe("completed"));
+  test("una propuesta pendiente bloquea al receptor", () => expect(jointActionStatus("uv", "b", "act1", [{ ...request, status: "pending" }])).toBe("pending"));
+  test("una propuesta rechazada permite volver a proponer", () => expect(jointActionStatus("uv", "b", "act1", [{ ...request, status: "rejected" }])).toBe(null));
+  test("una propuesta de otro acto caduca y permite reintento", () => expect(jointActionStatus("uv", "b", "act2", [{ ...request, status: "pending" }])).toBe(null));
+  test("otros participantes no quedan bloqueados", () => expect(jointActionStatus("uv", "c", "act1", [request])).toBe(null));
   test("el más rico recibe 20 puntos", () => { expect(richestBonus(100, [100,30],20)).toBe(20); expect(richestBonus(30,[100,30],20)).toBe(0); });
   test("empate de dinero premia a ambos y cero no premia", () => { expect(richestBonus(100,[100,100],20)).toBe(20); expect(richestBonus(0,[0,0],20)).toBe(0); });
   test("permite pago parcial: 30 de 100 sumados a 10", () => expect(transferBalances(100, 10, 30)).toEqual({ from: 70, to: 40 }));
