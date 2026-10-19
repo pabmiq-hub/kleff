@@ -1,3 +1,5 @@
+- [x] Juegos: aplicar sort_order y reparto ordenado en la base propia; comprobar importación de personajes mediante la misma API que usa el importador
+- [ ] Juegos: copiar sort_order y reparto ordenado al respaldo (herramienta de migración deshabilitada por preferencias)
 - [x] Juegos: reparto atómico sin personajes duplicados; correcciones manuales conservadas; ocho repartos simultáneos verificados
 - [x] Juegos: impedir repetir acciones conjuntas pendientes/completadas desde cualquiera de los participantes; aceptación real con dos jugadores verificada
 - [ ] Juegos concurrencia: copiar db/mm-concurrency.sql a la base de respaldo (migraciones bloqueadas por preferencias)
