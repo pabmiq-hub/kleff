@@ -320,10 +320,9 @@ export const mmManagePlayers = createServerFn({ method: "POST" })
         return { ok: true };
       }
       case "assign": {
-        if (data.invitationId) await db().from("mm_invitations").update({ character_id: data.characterId ?? null }).eq("id", data.invitationId);
+        const { error } = await db().rpc("mm_assign_characters", { _session: sid, _mode: "assign", _player: data.playerId ?? null, _invitation: data.invitationId ?? null, _character: data.characterId ?? null });
+        if (error) throw new Error(error.message);
         if (data.playerId) {
-          if (data.characterId) await db().from("mm_session_players").update({ character_id: null }).eq("session_id", sid).eq("character_id", data.characterId);
-          await db().from("mm_session_players").update({ character_id: data.characterId ?? null }).eq("id", data.playerId);
           // Substitution after the hand-out: brief the new player and set up their game rows.
           const { data: ss } = await db().from("mm_sessions").select("*").eq("id", sid).single();
           if (data.characterId && ss?.characters_released_at) {
@@ -337,20 +336,14 @@ export const mmManagePlayers = createServerFn({ method: "POST" })
         return { ok: true };
       }
       case "random_assign": {
-        const [{ data: chars }, { data: players }, { data: invs }] = await Promise.all([
-          db().from("mm_characters").select("id").eq("game_id", s.game_id).eq("victim", false),
-          db().from("mm_session_players").select("id, character_id").eq("session_id", sid),
-          db().from("mm_invitations").select("id, character_id, status").eq("session_id", sid).eq("status", "sent"),
-        ]);
-        const taken = new Set([...(players ?? []), ...(invs ?? [])].map((x: any) => x.character_id).filter(Boolean));
-        const free = (chars ?? []).map((c: any) => c.id).filter((c: string) => !taken.has(c)).sort(() => Math.random() - 0.5);
-        for (const p of (players ?? []).filter((p: any) => !p.character_id)) if (free.length) await db().from("mm_session_players").update({ character_id: free.pop() }).eq("id", p.id);
-        for (const i of (invs ?? []).filter((i: any) => !i.character_id)) if (free.length) await db().from("mm_invitations").update({ character_id: free.pop() }).eq("id", i.id);
+        const { error } = await db().rpc("mm_assign_characters", { _session: sid, _mode: "random" });
+        if (error) throw new Error(error.message);
         return { ok: true };
       }
       case "add_player": {
         const code = await eng.newAccessCode();
-        await db().from("mm_session_players").insert({ session_id: sid, display_name: data.displayName?.trim() || "Jugador", character_id: data.characterId ?? null, access_code: code });
+        const { error } = await db().from("mm_session_players").insert({ session_id: sid, display_name: data.displayName?.trim() || "Jugador", character_id: data.characterId ?? null, access_code: code });
+        if (error) throw new Error(error.code === "23505" ? "El personaje ya está asignado" : error.message);
         await logEvent(sid, "player_added", { name: data.displayName });
         return { ok: true, code };
       }

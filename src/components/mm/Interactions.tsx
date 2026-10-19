@@ -41,7 +41,7 @@ export function Interactions({ state, run, readOnly, inventory = false }: { stat
     {!inventory && <>
       {(state.joint_actions ?? []).map((j: any) => <article key={j.id} className="rounded-lg bg-card p-4 text-card-foreground">
         <h3 className="font-semibold">{j.name}</h3><p className="mt-1 text-sm">{j.description}</p>
-        <Button className="mt-3" disabled={!active || busy} onClick={() => open({ kind: "joint", sourceId: j.id, name: j.name, count: j.count })}><Send />Proponer</Button>
+        <Button className="mt-3" disabled={!active || busy || !!j.status} onClick={() => open({ kind: "joint", sourceId: j.id, name: j.name, count: j.count })}>{j.status === "completed" ? <Check /> : <Send />}{j.status === "completed" ? "Completada" : j.status === "pending" ? "Propuesta pendiente" : "Proponer"}</Button>
       </article>)}
       {(state.requests ?? []).length === 0 && <p className="text-sm opacity-70">Sin propuestas.</p>}
     </>}

@@ -1,5 +1,5 @@
 import { db } from "./engine.server";
-import { matchRoles, transferBalances } from "./interactions";
+import { matchRoles, transferBalances, jointActionStatus } from "./interactions";
 import { loadTr } from "./translate.server";
 
 async function query(q: any) {
@@ -111,7 +111,7 @@ export async function interact(playerId: string, sessionId: string, input: any) 
   const result = await db().rpc("mm_commit_interaction", { _session: sessionId, _actor: playerId, _command: command, _request: input.requestId ?? null, _plan: plan });
   if (result.error) {
     const msg = result.error.message;
-    if (/Saldo insuficiente|Habilidad agotada|objeto|acto|pendiente|activa|destinatario/i.test(msg)) throw new Error(msg);
+    if (/Saldo insuficiente|Habilidad agotada|objeto|acto|pendiente|completada|activa|destinatario/i.test(msg)) throw new Error(msg);
     throw new Error("No se pudo resolver la propuesta");
   }
 }
@@ -119,7 +119,7 @@ export async function interact(playerId: string, sessionId: string, input: any) 
 export async function playerInteractionState(playerId: string, sessionId: string) {
   const c = await interactionContext(sessionId);
   const tr = await loadTr(c.s.game_id, c.s.language);
-  const requests = await query(db().from("mm_action_requests").select("id, from_player, to_players, status, payload, result, created_at").eq("session_id", sessionId).or(`from_player.eq.${playerId},to_players.cs.{${playerId}}`).order("created_at", { ascending: false }).limit(100));
+  const requests = await query(db().from("mm_action_requests").select("id, from_player, to_players, status, payload, result, created_at").eq("session_id", sessionId).or(`from_player.eq.${playerId},to_players.cs.{${playerId}}`).order("created_at", { ascending: false }));
   const myResources = c.resources.filter((r: any) => r.player_id === playerId);
   return {
     wallet: c.wallets.find((w: any) => w.session_player_id === playerId) ?? null,
@@ -127,7 +127,7 @@ export async function playerInteractionState(playerId: string, sessionId: string
     fragments: myResources.filter((r: any) => r.kind === "fragment").map((r: any) => ({ id: r.id, label: r.label, value: r.value, group_key: r.group_key })),
     joint_actions: c.s.status === "running" ? c.joint.filter((j: any) => j.requirements.some((r: any) => !r.character_id || r.character_id === "cualquiera" || r.character_id === c.players.find((p: any) => p.id === playerId)?.character_id)).map((raw: any) => {
       const j = tr.row("mm_joint_actions", raw);
-      return { id: j.id, name: j.name, description: j.description, proposal_text: j.proposal_text, count: j.requirements.length };
+      return { id: j.id, name: j.name, description: j.description, proposal_text: j.proposal_text, count: j.requirements.length, status: jointActionStatus(j.id, playerId, c.s.current_act_id, requests) };
     }) : [],
     requests: requests.map((r: any) => ({ id: r.id, from_player: r.from_player, to_players: r.to_players, status: r.status === "pending" && r.payload.act_id !== c.s.current_act_id ? "expired" : r.status, title: r.payload.title, proposal_text: r.payload.proposal_text, kind: r.payload.kind, amount: r.payload.amount, accepted: r.payload.accepted ?? [], results: r.status === "completed" ? (r.result ?? []).filter((x: any) => x.player_id === playerId).map((x: any) => x.text) : [] })),
   };

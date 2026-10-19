@@ -40,26 +40,12 @@ export const mmRegisterInvitation = createServerFn({ method: "POST" })
     if (inv.status === "registered") throw new Error("Esta invitación ya se ha usado. Entra con tu código personal.");
     const s = inv.mm_sessions;
     if (s.status === "finished") throw new Error("Esta partida ya ha terminado");
-    let characterId = inv.character_id as string | null;
-    if (!characterId && s.characters_released_at) {
-      const [{ data: chars }, { data: players }, { data: invs }] = await Promise.all([
-        db().from("mm_characters").select("id").eq("game_id", s.game_id).eq("victim", false),
-        db().from("mm_session_players").select("character_id").eq("session_id", s.id),
-        db().from("mm_invitations").select("character_id").eq("session_id", s.id).eq("status", "sent").neq("id", inv.id),
-      ]);
-      const taken = new Set([...(players ?? []), ...(invs ?? [])].map((x: any) => x.character_id).filter(Boolean));
-      const free = (chars ?? []).map((c: any) => c.id).filter((c: string) => !taken.has(c));
-      characterId = free.length ? free[Math.floor(Math.random() * free.length)] : null;
-    }
     const code = await e.newAccessCode();
-    const { data: claimed } = await db().from("mm_invitations").update({ status: "registered" }).eq("id", inv.id).eq("status", "sent").select("id");
-    if (!claimed?.length) throw new Error("Esta invitación ya se ha usado");
-    const { data: p, error } = await db()
-      .from("mm_session_players")
-      .insert({ session_id: s.id, character_id: characterId, invitation_id: inv.id, display_name: data.displayName, email: inv.email, access_code: code })
-      .select("id")
-      .single();
+    const { data: playerId, error } = await db().rpc("mm_register_player", { _invitation: inv.id, _name: data.displayName, _code: code });
     if (error) throw new Error(error.message);
+    const { data: p, error: readError } = await db().from("mm_session_players").select("id,character_id").eq("id", playerId).single();
+    if (readError || !p) throw new Error("No se pudo recuperar tu inscripción");
+    const characterId = p.character_id;
     if (s.status !== "lobby" && characterId) {
       // late join: create objective/ability rows
       const [{ data: objs }, { data: abs }] = await Promise.all([

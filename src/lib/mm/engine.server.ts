@@ -1,7 +1,7 @@
 // Murder Mystery engine (server-only). All player reads/writes go through here
 // with the service role; is_killer is never included in another player's payload.
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
-import { sessionEligibility, planCharacterAssignments, shouldTriggerMurder } from "./session-rules";
+import { sessionEligibility, shouldTriggerMurder } from "./session-rules";
 import { playerReadings } from "./readings";
 import { richestBonus } from "./interactions";
 
@@ -144,42 +144,16 @@ export async function notifyAssignment(playerId: string): Promise<boolean> {
  * always played), reveal them to players and email each one. Idempotent.
  */
 export async function releaseCharacters(sessionId: string, reason: string) {
-  const { data: s } = await db().from("mm_sessions").select("*").eq("id", sessionId).single();
-  if (!s) throw new Error("Partida no encontrada");
-  if (s.characters_released_at) return { assigned: 0, notified: 0, missing: [] as string[], already: true };
-  if (s.status !== "lobby") throw new Error("Solo se puede repartir antes de iniciar la partida");
-  const [{ data: chars, error: charsError }, { data: players, error: playersError }, { data: game, error: gameError }] = await Promise.all([
-    db().from("mm_characters").select("id, name, is_killer, victim").eq("game_id", s.game_id),
-    db().from("mm_session_players").select("id, character_id, ready, registered_at").eq("session_id", sessionId).order("registered_at"),
-    db().from("mm_games").select("min_players, max_players").eq("id", s.game_id).single(),
-  ]);
-  if (charsError || playersError || gameError || !game) throw new Error("No se pudo comprobar el reparto");
-  const eligibility = sessionEligibility(game, chars ?? [], players ?? []);
-  if (!eligibility.allowed) throw new Error(eligibility.issues.join(" "));
-  const playable = (chars ?? []).filter((c: any) => !c.victim);
-  const plan = planCharacterAssignments(chars ?? [], players ?? []);
-  const planned = sessionEligibility(game, chars ?? [], plan.map((a) => ({ id: a.playerId, character_id: a.characterId })), true);
-  if (!planned.allowed) throw new Error(planned.issues.join(" "));
-  // Clear only changed assignments first, avoiding unique-character collisions.
-  const changed = plan.filter((a) => (players ?? []).find((p: any) => p.id === a.playerId)?.character_id !== a.characterId);
-  for (const a of changed) {
-    const { error } = await db().from("mm_session_players").update({ character_id: null, ready: false }).eq("id", a.playerId).eq("session_id", sessionId);
-    if (error) throw new Error("No se pudo preparar el reparto");
-  }
-  let assigned = 0;
-  for (const a of changed) {
-    const { error } = await db().from("mm_session_players").update({ character_id: a.characterId }).eq("id", a.playerId).eq("session_id", sessionId);
-    if (error) throw new Error("No se pudo completar el reparto. Vuelve a intentarlo.");
-    assigned++;
-  }
-  const { data: upd } = await db().from("mm_sessions").update({ characters_released_at: new Date().toISOString(), release_at: null }).eq("id", sessionId).is("characters_released_at", null).select("id");
-  if (!upd?.length) return { assigned, notified: 0, missing: [], already: true };
+  const { data: result, error } = await db().rpc("mm_assign_characters", { _session: sessionId, _mode: "release" });
+  if (error) throw new Error(error.message);
+  const { assigned, missing, already } = result as { assigned: number; missing: string[]; already: boolean };
+  if (already) return { assigned, notified: 0, missing, already };
   await logEvent(sessionId, "characters_released", { reason, assigned });
   await broadcast(sessionTopic(sessionId), "characters_released", {});
   let notified = 0;
   const { data: all } = await db().from("mm_session_players").select("id, email, character_id").eq("session_id", sessionId);
   for (const p of all ?? []) if (p.email && p.character_id && (await notifyAssignment(p.id).catch(() => false))) notified++;
-  return { assigned, notified, missing: playable.filter((c: any) => !plan.some((a) => a.characterId === c.id)).map((c: any) => c.name), already: false };
+  return { assigned, notified, missing, already: false };
 }
 
 async function getSessionEligibility(s: Session, requireAssignments = false) {
