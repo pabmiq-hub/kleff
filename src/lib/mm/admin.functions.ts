@@ -44,7 +44,7 @@ export const mmImportGame = createServerFn({ method: "POST" })
       const chars = must(
         await db()
           .from("mm_characters")
-          .insert(g.characters.map((c) => ({ game_id: game.id, ref: c.ref, name: c.name, description: c.description, public_summary: c.public_summary ?? null, costume: c.costume ?? null, alibi: c.alibi, relationships: c.relationships, is_killer: c.is_killer, victim: c.victim, avatar_config: c.avatar_config, avatar_url: c.avatar_url ?? null })))
+          .insert(g.characters.map((c, order) => ({ game_id: game.id, sort_order: order, ref: c.ref, name: c.name, description: c.description, public_summary: c.public_summary ?? null, costume: c.costume ?? null, alibi: c.alibi, relationships: c.relationships, is_killer: c.is_killer, victim: c.victim, avatar_config: c.avatar_config, avatar_url: c.avatar_url ?? null })))
           .select("id, ref"),
       );
       const cid = (ref: string) => chars.find((c: any) => c.ref === ref)?.id;
@@ -83,8 +83,9 @@ export const mmImportGame = createServerFn({ method: "POST" })
       return { ok: false as const, errors: [(e as Error).message] };
     }
     const { fillGameItemArt } = await import("./item-art.server");
-    const art = await fillGameItemArt(db, game.id);
-    return { ok: true as const, gameId: game.id as string, art };
+    const { fillGameEvidenceArt } = await import("./evidence-art.server");
+    const [art, evidenceArt] = await Promise.all([fillGameItemArt(db, game.id), fillGameEvidenceArt(db, game.id)]);
+    return { ok: true as const, gameId: game.id as string, art, evidenceArt };
   });
 
 export const mmGenerateItemArt = createServerFn({ method: "POST" })
@@ -94,6 +95,15 @@ export const mmGenerateItemArt = createServerFn({ method: "POST" })
     const { db } = await guard(context.userId);
     const { fillGameItemArt } = await import("./item-art.server");
     return fillGameItemArt(db, data.gameId);
+  });
+
+export const mmGenerateEvidenceArt = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { gameId: string; force?: boolean }) => ({ gameId: id.parse(d.gameId), force: !!d.force }))
+  .handler(async ({ data, context }) => {
+    const { db } = await guard(context.userId);
+    const { fillGameEvidenceArt } = await import("./evidence-art.server");
+    return fillGameEvidenceArt(db, data.gameId, { force: data.force });
   });
 
 export const mmGetGame = createServerFn({ method: "POST" })
