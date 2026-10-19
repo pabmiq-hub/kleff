@@ -22,7 +22,7 @@ class AssignmentConcurrency(unittest.TestCase):
           insert into mm_games(id,slug,title,min_players,max_players) values('{cls.game}','test-{cls.game}','Prueba aislada',2,2);
           insert into mm_characters(id,game_id,ref,name,is_killer) values
             ('{cls.chars[0]}','{cls.game}','a','Personaje A',true),('{cls.chars[1]}','{cls.game}','b','Personaje B',false);
-          insert into mm_acts(id,game_id,key,name,position,duration_minutes) values('{cls.act}','{cls.game}','act1','Acto de prueba',1,60);
+          insert into mm_acts(id,game_id,key,name,position,duration_minutes) values('{cls.act}','{cls.game}','intro','Acto de prueba',1,60);
           insert into mm_sessions(id,game_id,name) values('{cls.session}','{cls.game}','Prueba aislada');
           insert into mm_session_players(id,session_id,display_name,access_code) values
             ('{cls.players[0]}','{cls.session}','Prueba A','TEST-{uuid.uuid4()}'),('{cls.players[1]}','{cls.session}','Prueba B','TEST-{uuid.uuid4()}');
