@@ -25,7 +25,7 @@ class AssignmentConcurrency(unittest.TestCase):
           insert into mm_acts(id,game_id,key,name,position,duration_minutes) values('{cls.act}','{cls.game}','intro','Acto de prueba',1,60);
           insert into mm_sessions(id,game_id,name) values('{cls.session}','{cls.game}','Prueba aislada');
           insert into mm_session_players(id,session_id,display_name,access_code) values
-            ('{cls.players[0]}','{cls.session}','Prueba A','TEST-{uuid.uuid4().hex[:12]}'),('{cls.players[1]}','{cls.session}','Prueba B','TEST-{uuid.uuid4().hex[:12]}');
+            ('{cls.players[0]}','{cls.session}','Prueba A','TEST-{uuid.uuid4().hex[:12].upper()}'),('{cls.players[1]}','{cls.session}','Prueba B','TEST-{uuid.uuid4().hex[:12].upper()}');
           insert into mm_joint_actions(id,game_id,name,requirements,results) values('{cls.action}','{cls.game}','Acción de prueba','[{{"role":"a"}},{{"role":"b"}}]','[]');
         """)
 
