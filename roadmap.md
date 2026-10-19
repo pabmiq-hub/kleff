@@ -1,5 +1,6 @@
-- [ ] Juegos: reparto atómico sin personajes duplicados; conservar las correcciones manuales existentes
-- [ ] Juegos: impedir repetir acciones conjuntas pendientes/completadas desde cualquiera de los participantes y verificar ambos flujos
+- [x] Juegos: reparto atómico sin personajes duplicados; correcciones manuales conservadas; ocho repartos simultáneos verificados
+- [x] Juegos: impedir repetir acciones conjuntas pendientes/completadas desde cualquiera de los participantes; aceptación real con dos jugadores verificada
+- [ ] Juegos concurrencia: copiar db/mm-concurrency.sql a la base de respaldo (migraciones bloqueadas por preferencias)
 - [x] Juegos: lecturas teatrales importadas, panel por acto y aviso privado; solución protegida, 27 pruebas y flujo real de jugador verificados, partida temporal eliminada
 - [ ] Juegos lecturas: aplicar columna en base de respaldo (herramienta de migración bloqueada por preferencias) y verificar panel con sesión de administrador (credenciales disponibles no permiten acceso)
 - [ ] Diagnosticar selecciones y acciones Super Like de extremo a extremo
