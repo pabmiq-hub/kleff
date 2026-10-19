@@ -218,6 +218,12 @@ export function PublicRegistrationPage({ form, questions, responsesCount, attend
                 {form.payment_instructions && <p className="text-muted-foreground mt-1 whitespace-pre-line">{form.payment_instructions}</p>}
               </div>
             )}
+            <div className="rounded-lg border border-coral/40 bg-coral/10 p-4 text-sm text-foreground">
+              <p>
+                Al inscribirte te comprometes a asistir a <strong>{form.title}</strong>. Si no puedes venir, date de baja con el botón «Darme de baja» del correo de confirmación o de los recordatorios, o escríbenos a{" "}
+                <a href="mailto:hola@kleff.es" className="underline font-medium">hola@kleff.es</a> avisando de tu no asistencia.
+              </p>
+            </div>
             <Button type="submit" disabled={submitting} className="w-full bg-coral hover:bg-coral/90 text-white">
               {submitting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />} Enviar inscripción
             </Button>
