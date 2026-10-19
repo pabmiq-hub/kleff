@@ -158,6 +158,7 @@ import { Route as ActividadesJuegosJugarSessionIdRouteImport } from './routes/ac
 import { Route as AdminKonektumEventosIndexRouteImport } from './routes/admin.konektum.eventos.index'
 import { Route as AdminKonektumEventosIdRouteImport } from './routes/admin.konektum.eventos.$id'
 import { Route as AdminKonektumEventosNuevoRouteImport } from './routes/admin.konektum.eventos.nuevo'
+import { Route as ApiPublicHooksEventThanksRouteImport } from './routes/api.public.hooks.event-thanks'
 import { Route as ApiPublicHooksFeaturedDispatchRouteImport } from './routes/api.public.hooks.featured-dispatch'
 import { Route as ApiPublicKonFnRouteImport } from './routes/api.public.kon.$fn'
 import { Route as ApiPublicRegistroIcsTokenRouteImport } from './routes/api.public.registro-ics.$token'
@@ -922,6 +923,12 @@ const AdminKonektumEventosNuevoRoute =
     path: '/eventos/nuevo',
     getParentRoute: () => AdminKonektumRoute,
   } as any)
+const ApiPublicHooksEventThanksRoute =
+  ApiPublicHooksEventThanksRouteImport.update({
+    id: '/api/public/hooks/event-thanks',
+    path: '/api/public/hooks/event-thanks',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicHooksFeaturedDispatchRoute =
   ApiPublicHooksFeaturedDispatchRouteImport.update({
     id: '/api/public/hooks/featured-dispatch',
@@ -1105,6 +1112,7 @@ export interface FileRoutesByFullPath {
   '/actividades/juegos/jugar/$sessionId': typeof ActividadesJuegosJugarSessionIdRoute
   '/admin/konektum/eventos/$id': typeof AdminKonektumEventosIdRoute
   '/admin/konektum/eventos/nuevo': typeof AdminKonektumEventosNuevoRoute
+  '/api/public/hooks/event-thanks': typeof ApiPublicHooksEventThanksRoute
   '/api/public/hooks/featured-dispatch': typeof ApiPublicHooksFeaturedDispatchRoute
   '/api/public/kon/$fn': typeof ApiPublicKonFnRoute
   '/api/public/registro-ics/$token': typeof ApiPublicRegistroIcsTokenRoute
@@ -1253,6 +1261,7 @@ export interface FileRoutesByTo {
   '/actividades/juegos/jugar/$sessionId': typeof ActividadesJuegosJugarSessionIdRoute
   '/admin/konektum/eventos/$id': typeof AdminKonektumEventosIdRoute
   '/admin/konektum/eventos/nuevo': typeof AdminKonektumEventosNuevoRoute
+  '/api/public/hooks/event-thanks': typeof ApiPublicHooksEventThanksRoute
   '/api/public/hooks/featured-dispatch': typeof ApiPublicHooksFeaturedDispatchRoute
   '/api/public/kon/$fn': typeof ApiPublicKonFnRoute
   '/api/public/registro-ics/$token': typeof ApiPublicRegistroIcsTokenRoute
@@ -1411,6 +1420,7 @@ export interface FileRoutesById {
   '/actividades_/juegos/jugar/$sessionId': typeof ActividadesJuegosJugarSessionIdRoute
   '/admin/konektum/eventos/$id': typeof AdminKonektumEventosIdRoute
   '/admin/konektum/eventos/nuevo': typeof AdminKonektumEventosNuevoRoute
+  '/api/public/hooks/event-thanks': typeof ApiPublicHooksEventThanksRoute
   '/api/public/hooks/featured-dispatch': typeof ApiPublicHooksFeaturedDispatchRoute
   '/api/public/kon/$fn': typeof ApiPublicKonFnRoute
   '/api/public/registro-ics/$token': typeof ApiPublicRegistroIcsTokenRoute
@@ -1570,6 +1580,7 @@ export interface FileRouteTypes {
     | '/actividades/juegos/jugar/$sessionId'
     | '/admin/konektum/eventos/$id'
     | '/admin/konektum/eventos/nuevo'
+    | '/api/public/hooks/event-thanks'
     | '/api/public/hooks/featured-dispatch'
     | '/api/public/kon/$fn'
     | '/api/public/registro-ics/$token'
@@ -1718,6 +1729,7 @@ export interface FileRouteTypes {
     | '/actividades/juegos/jugar/$sessionId'
     | '/admin/konektum/eventos/$id'
     | '/admin/konektum/eventos/nuevo'
+    | '/api/public/hooks/event-thanks'
     | '/api/public/hooks/featured-dispatch'
     | '/api/public/kon/$fn'
     | '/api/public/registro-ics/$token'
@@ -1875,6 +1887,7 @@ export interface FileRouteTypes {
     | '/actividades_/juegos/jugar/$sessionId'
     | '/admin/konektum/eventos/$id'
     | '/admin/konektum/eventos/nuevo'
+    | '/api/public/hooks/event-thanks'
     | '/api/public/hooks/featured-dispatch'
     | '/api/public/kon/$fn'
     | '/api/public/registro-ics/$token'
@@ -1973,6 +1986,7 @@ export interface RootRouteChildren {
   SSeriesSlugIndexRoute: typeof SSeriesSlugIndexRoute
   ActividadesJuegosInvitacionTokenRoute: typeof ActividadesJuegosInvitacionTokenRoute
   ActividadesJuegosJugarSessionIdRoute: typeof ActividadesJuegosJugarSessionIdRoute
+  ApiPublicHooksEventThanksRoute: typeof ApiPublicHooksEventThanksRoute
   ApiPublicHooksFeaturedDispatchRoute: typeof ApiPublicHooksFeaturedDispatchRoute
   ApiPublicKonFnRoute: typeof ApiPublicKonFnRoute
   ApiPublicRegistroIcsTokenRoute: typeof ApiPublicRegistroIcsTokenRoute
@@ -3028,6 +3042,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminKonektumEventosNuevoRouteImport
       parentRoute: typeof AdminKonektumRoute
     }
+    '/api/public/hooks/event-thanks': {
+      id: '/api/public/hooks/event-thanks'
+      path: '/api/public/hooks/event-thanks'
+      fullPath: '/api/public/hooks/event-thanks'
+      preLoaderRoute: typeof ApiPublicHooksEventThanksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/hooks/featured-dispatch': {
       id: '/api/public/hooks/featured-dispatch'
       path: '/api/public/hooks/featured-dispatch'
@@ -3367,6 +3388,7 @@ const rootRouteChildren: RootRouteChildren = {
   SSeriesSlugIndexRoute: SSeriesSlugIndexRoute,
   ActividadesJuegosInvitacionTokenRoute: ActividadesJuegosInvitacionTokenRoute,
   ActividadesJuegosJugarSessionIdRoute: ActividadesJuegosJugarSessionIdRoute,
+  ApiPublicHooksEventThanksRoute: ApiPublicHooksEventThanksRoute,
   ApiPublicHooksFeaturedDispatchRoute: ApiPublicHooksFeaturedDispatchRoute,
   ApiPublicKonFnRoute: ApiPublicKonFnRoute,
   ApiPublicRegistroIcsTokenRoute: ApiPublicRegistroIcsTokenRoute,
