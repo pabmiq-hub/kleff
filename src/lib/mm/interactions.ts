@@ -22,6 +22,13 @@ export function richestBonus(balance: number, balances: number[], award: number)
   const max = Math.max(0, ...balances);
   return max > 0 && balance === max ? award : 0;
 }
+export function jointActionStatus(sourceId: string, playerId: string, actId: string | null, requests: any[]): "pending" | "completed" | null {
+  const involved = requests.filter(r => r.payload?.kind === "joint" && r.payload.source_id === sourceId &&
+    (r.from_player === playerId || r.to_players.includes(playerId)));
+  if (involved.some(r => r.status === "completed")) return "completed";
+  if (involved.some(r => r.status === "pending" && r.payload.act_id === actId)) return "pending";
+  return null;
+}
 export function matchRoles(requirements: any[], participants: any[], resources: any[]) {
   if (participants.length !== requirements.length || new Set(participants.map(p => p.id)).size !== participants.length)
     throw new Error("Cada papel necesita un participante distinto");

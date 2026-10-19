@@ -1,7 +1,8 @@
 - Murder Mystery module ("Juegos") lives in src/lib/mm + src/components/mm with tables prefixed mm_; players never use Supabase Auth: all player reads/writes go through server functions that verify an HMAC player token, so is_killer and other characters' data never reach the browser.
 - Juegos routes use the `actividades_` file prefix so they don't nest under the public /actividades page.
-- Juegos session eligibility, assignment planning and language locking use shared pure rules enforced by server controls and displayed by administration, so manual and automatic paths cannot bypass game limits.
+- Juegos character release, manual/random assignment and invitation registration use service-role-only SQL operations sharing a session lock, with a unique character index; SQL rechecks game limits and the UI uses pure eligibility rules so concurrent allocators cannot duplicate characters.
 - Juegos act transitions use a shared murder-trigger rule in the engine and administration, so imported act keys and control modes cannot bypass the narrative event.
 - Juegos theatrical readings are stored on the game and translated with its content; a shared server-side filter restricts player delivery by reader, act and reveal trigger to prevent early solution leaks.
 - Juegos interaction plans are constructed only after HMAC validation; a service-role-only SQL function locks the session and commits acceptance, balances, uses, ownership and unlocks atomically to prevent replay and concurrent overspending.
+- Juegos joint-action availability derives from participant-scoped request history, with a database insert trigger under the same session lock preventing reversed or repeated proposals; payments and item transfers remain repeatable.
 - Juegos imports validate original avatar SVGs as self-contained XML and store them as image data URLs in the existing avatar_url field; original artwork takes precedence over DiceBear without adding schema or exposing markup inline.
