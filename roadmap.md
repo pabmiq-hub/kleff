@@ -15,3 +15,5 @@
 - [ ] Juegos fase 3: avance programado sin nadie conectado (cron), presencia en tiempo real, animaciones Lottie
 - [x] Juegos: conservar avatar_svg e imágenes originales de Claude en nuevas importaciones; 44 pruebas y visualización del SVG en MMAvatar verificadas.
 - [ ] Juegos avatares: verificar importación completa con administrador y recuperar dibujos del juego existente (sin sesión propia ni JSON original disponible).
+- [x] Bajas: aviso de baja garantizado; cajita de compromiso; agradecimiento + reseña Google a las 12:00 del día siguiente
+- [ ] Copiar columna thanks_sent_at a la base de respaldo (migraciones bloqueadas)

@@ -463,8 +463,10 @@ export const cancelRegistration = createServerFn({ method: "POST" })
           guests: r.guests_count ?? 0,
           formId: f.id,
         });
-        const to = f.notify_emails?.length ? f.notify_emails : [TEAM_INBOX];
-        void sendEmailSafe({ to, subject: tpl.subject, html: tpl.html, tags: [{ name: "type", value: "registration_cancelled" }] });
+        const to = Array.from(new Set([...(f.notify_emails ?? []), TEAM_INBOX].map((e) => e.trim().toLowerCase()).filter(Boolean)));
+        // Must be awaited: the worker stops once the response is returned.
+        const sent = await sendEmailSafe({ to, subject: tpl.subject, html: tpl.html, tags: [{ name: "type", value: "registration_cancelled" }] });
+        if (!sent) console.error("[registrations] cancel notification not delivered", { formId: f.id, to });
       }
     } catch (err) {
       console.error("[registrations] cancel notification error:", err);

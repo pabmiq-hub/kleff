@@ -254,6 +254,27 @@ export function registrationEventEmail(opts: {
   return { subject: opts.subject, html };
 }
 
+// ---------- Post-event thank you + Google review ----------
+export function eventThanksEmail(opts: { formTitle: string; userName?: string | null }): { subject: string; html: string } {
+  const name = opts.userName ? ` ${escape(opts.userName)}` : "";
+  const title = escape(opts.formTitle);
+  const subject = `¡Gracias por venir a ${opts.formTitle}! ⭐`;
+  const html = layout({
+    title: subject,
+    preview: subject,
+    bodyHtml: `
+      <h1 style="font-family:Georgia,serif;font-size:24px;margin:0 0 12px;">¡Gracias por venir! 🎲</h1>
+      <p style="margin:0 0 12px;">Hola${name},</p>
+      <p style="margin:0 0 12px;">Muchas gracias por asistir a <strong>${title}</strong>. Esperamos que lo pasaras genial.</p>
+      <p style="margin:0 0 12px;">Nos ayudaría muchísimo a mantener las actividades de la Associació Lúdica que nos valoraras con <strong>5 ⭐ en Google</strong>. Solo te llevará un minuto.</p>
+      <p style="margin:18px 0 0;">¡Nos vemos en la próxima!<br>El equipo de KLEFF</p>
+    `,
+    ctaLabel: "⭐ Dejar una reseña en Google",
+    ctaUrl: "https://share.google/6SsE7kmya2Zhtg0Re",
+  });
+  return { subject, html };
+}
+
 // ---------- Registration cancelled (to team) ----------
 export function registrationCancelTeamEmail(opts: {
   formTitle: string;
