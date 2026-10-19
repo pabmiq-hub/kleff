@@ -271,7 +271,7 @@ async function fetchThings(ids: number[]): Promise<BggGameRecord[]> {
   return out;
 }
 
-async function syncBggCollection(supabase: ReturnType<typeof createClient>) {
+async function syncBggCollection(supabase: ReturnType<typeof createClient<any>>) {
   const ids = await fetchCollectionIds();
   if (ids.length === 0) {
     return { fetched: 0, inserted: 0, updated: 0, removedInactive: 0 };
