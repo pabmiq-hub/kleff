@@ -8,6 +8,7 @@ const Deno = {
 };
 
 import { createClient } from "@/lib/kon-fn/client.server";
+import { participantVariant, variantEventName, variantTemplates } from "@/lib/kon-fn/_shared/variantTemplates";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -361,7 +362,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     const { data: eventsToProcess, error: eventsError } = await supabase
       .from("events")
-      .select("id, name, organizer_id, email_template, scheduled_email_at, module, language")
+      .select("id, name, secondary_event_name, organizer_id, email_template, scheduled_email_at, module, language")
       .not("scheduled_email_at", "is", null)
       .is("emails_sent_at", null)
       .eq("is_test_event", false)

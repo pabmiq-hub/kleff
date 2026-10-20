@@ -9,6 +9,7 @@ const Deno = {
 };
 
 import { createClient } from "@/lib/kon-fn/client.server";
+import { participantVariant, variantEventName, variantTemplates } from "@/lib/kon-fn/_shared/variantTemplates";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -435,7 +436,7 @@ const handler = async (req: Request): Promise<Response> => {
     // Verify user is the event organizer - include module and professional template
     const { data: event } = await supabase
       .from("events")
-      .select("name, email_template, organizer_id, module, language, is_test_event, test_config")
+      .select("name, secondary_event_name, email_template, organizer_id, module, language, is_test_event, test_config")
       .eq("id", event_id)
       .single();
     if (!event) {

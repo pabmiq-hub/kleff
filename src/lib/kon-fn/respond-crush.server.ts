@@ -8,6 +8,7 @@ const Deno = {
 };
 
 import { createClient } from "@/lib/kon-fn/client.server";
+import { participantVariant, variantEventName, variantTemplates } from "@/lib/kon-fn/_shared/variantTemplates";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
