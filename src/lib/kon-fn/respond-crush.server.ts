@@ -172,20 +172,21 @@ serve(async (req: Request) => {
 
     const { data: event } = await supabase
       .from("events")
-      .select("id, name, status, current_round, rounds, language, email_template")
+      .select("id, name, secondary_event_name, status, current_round, rounds, language, email_template")
       .eq("id", cr.event_id)
       .maybeSingle();
 
     const { data: people } = await supabase
       .from("participants")
-      .select("id, name, email, phone")
+      .select("id, name, email, phone, registration_variant")
       .in("id", [cr.requester_id, cr.target_id]);
     const requester = people?.find((p: any) => p.id === cr.requester_id);
     const target = people?.find((p: any) => p.id === cr.target_id);
 
     const lang = (event as any)?.language === "en" ? "en" : "es";
-    const storedTpl = ((event as any)?.email_template as any)?.communication_templates_v2;
-    const eventName = (event as any)?.name || "";
+    // Each recipient gets the event name and texts of the link they registered with.
+    const eventNameFor = (p: any) => variantEventName(event, participantVariant(p)) || "";
+    const tplFor = (p: any) => variantTemplates((event as any)?.email_template, participantVariant(p));
 
     if (action === "decline") {
       await supabase
@@ -201,8 +202,8 @@ serve(async (req: Request) => {
           partnerName: target?.name || "",
           partnerEmail: target?.email || "",
           partnerPhone: (target as any)?.phone || "",
-          eventName, lang, variant: "declined",
-          storedTpl,
+          eventName: eventNameFor(requester), lang, variant: "declined",
+          storedTpl: tplFor(requester),
         });
       }
 
@@ -248,7 +249,7 @@ serve(async (req: Request) => {
         partnerName: target.name || "",
         partnerEmail: target.email || "",
         partnerPhone: (target as any).phone || "",
-        eventName, lang, variant: "mutual", scheduledRound, storedTpl,
+        eventName: eventNameFor(requester), lang, variant: "mutual", scheduledRound, storedTpl: tplFor(requester),
       });
     }
     if (target?.email && requester) {
@@ -261,7 +262,7 @@ serve(async (req: Request) => {
         partnerName: requester.name || "",
         partnerEmail: requester.email || "",
         partnerPhone: (requester as any).phone || "",
-        eventName, lang, variant: "mutual", scheduledRound, storedTpl,
+        eventName: eventNameFor(target), lang, variant: "mutual", scheduledRound, storedTpl: tplFor(target),
       });
     }
 
