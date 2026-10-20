@@ -58,7 +58,7 @@ serve(async (req) => {
     // Get event info
     const { data: event, error: eventError } = await supabase
       .from('events')
-      .select('name, slug, language, email_template, organizer_id, super_like_enabled, is_test_event, test_config')
+      .select('name, secondary_event_name, slug, language, email_template, organizer_id, super_like_enabled, is_test_event, test_config')
       .eq('id', eventId)
       .single();
 
@@ -92,7 +92,7 @@ serve(async (req) => {
     // Get recipient info
     const { data: recipient, error: recipientError } = await supabase
       .from('participants')
-      .select('id, name, email')
+      .select('id, name, email, registration_variant')
       .eq('id', recipientId)
       .eq('event_id', eventId)
       .single();
@@ -106,9 +106,11 @@ serve(async (req) => {
 
     const isEn = event.language === 'en';
 
-    // Read customized template from event
+    // Read customized template from event, using the texts of the link the recipient registered with
     const emailTemplate = event.email_template as any;
-    const communicationTemplate = emailTemplate?.communication_templates_v2 || emailTemplate || {};
+    const recipientVariant = participantVariant(recipient);
+    const eventName = variantEventName(event, recipientVariant);
+    const communicationTemplate = variantTemplates(emailTemplate, recipientVariant);
     const tpl = communicationTemplate?.super_like;
     const primaryColor = communicationTemplate?.primaryColor || emailTemplate?.primaryColor || '#e11d48';
     const logoUrl = communicationTemplate?.logoUrl || emailTemplate?.logoUrl || 'https://kleff.es/kleff-logo.png';
@@ -120,12 +122,12 @@ serve(async (req) => {
     // Template variables
     const vars: Record<string, string> = {
       "{{nombre}}": recipient.name,
-      "{{evento}}": event.name,
+      "{{evento}}": eventName,
     };
 
     const subject = tpl?.subject
       ? replaceVariables(tpl.subject, vars)
-      : (isEn ? `✨ Someone selected you at ${event.name}!` : `✨ ¡Alguien te ha seleccionado en ${event.name}!`);
+      : (isEn ? `✨ Someone selected you at ${eventName}!` : `✨ ¡Alguien te ha seleccionado en ${eventName}!`);
 
     const greeting = tpl?.greeting
       ? replaceVariables(tpl.greeting, vars)
