@@ -192,7 +192,7 @@ serve(async (req) => {
         ${isEn ? "Anonymous notification" : "Notificación anónima"}
       </div>
       <div style="font-size:16px;color:#78350f;font-weight:600;line-height:1.4;">
-        ${isEn ? "An attendee at " : "Un asistente de "}<strong>${escapeHtml(event.name)}</strong>${isEn ? " has given you their only Super Like of the event." : " te ha dado su único Super Like del evento."}
+        ${isEn ? "An attendee at " : "Un asistente de "}<strong>${escapeHtml(eventName)}</strong>${isEn ? " has given you their only Super Like of the event." : " te ha dado su único Super Like del evento."}
       </div>
       <div style="font-size:13px;color:#92400e;margin-top:10px;font-style:italic;">
         ${isEn ? "Will it be a match? Submit your selections to find out." : "¿Habrá match? Envía tus selecciones para descubrirlo."}
