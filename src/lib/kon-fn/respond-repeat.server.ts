@@ -8,6 +8,7 @@ const Deno = {
 };
 
 import { createClient } from "@/lib/kon-fn/client.server";
+import { participantVariant, variantEventName, variantTemplates } from "@/lib/kon-fn/_shared/variantTemplates";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -164,18 +165,21 @@ serve(async (req: Request) => {
     // Load event + requester info upfront — needed for emails in every branch
     const { data: event } = await supabase
       .from("events")
-      .select("id, name, status, current_round, rounds, tables, language, email_template")
+      .select("id, name, secondary_event_name, status, current_round, rounds, tables, language, email_template")
       .eq("id", rr.event_id)
       .maybeSingle();
 
     const { data: requester } = await supabase
       .from("participants")
-      .select("name, email")
+      .select("name, email, registration_variant")
       .eq("id", rr.requester_id)
       .maybeSingle();
 
     const eventLang = event?.language === "en" ? "en" : "es";
-    const storedTpl = (event?.email_template as any)?.communication_templates_v2;
+    // The requester gets the event name and texts of the link they registered with.
+    const requesterVariant = participantVariant(requester);
+    const storedTpl = variantTemplates(event?.email_template, requesterVariant);
+    const requesterEventName = variantEventName(event, requesterVariant) || "";
 
     const notifyRequester = async (status: "accepted" | "declined" | "expired", scheduledRound?: number) => {
       if (!requester?.email) return;
@@ -183,7 +187,7 @@ serve(async (req: Request) => {
         resendApiKey,
         requesterEmail: requester.email,
         requesterName: requester.name || "",
-        eventName: event?.name || "",
+        eventName: requesterEventName,
         eventLang,
         status,
         scheduledRound,

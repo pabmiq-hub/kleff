@@ -9,6 +9,7 @@ const Deno = {
 };
 
 import { createClient } from "@/lib/kon-fn/client.server";
+import { participantVariant, variantEventName, variantTemplates } from "@/lib/kon-fn/_shared/variantTemplates";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -435,7 +436,7 @@ const handler = async (req: Request): Promise<Response> => {
     // Verify user is the event organizer - include module and professional template
     const { data: event } = await supabase
       .from("events")
-      .select("name, email_template, organizer_id, module, language, is_test_event, test_config")
+      .select("name, secondary_event_name, email_template, organizer_id, module, language, is_test_event, test_config")
       .eq("id", event_id)
       .single();
     if (!event) {
@@ -469,28 +470,30 @@ const handler = async (req: Request): Promise<Response> => {
     console.log("Authorization verified - user is event organizer");
 
     const defaultTpl = event.language === 'en' ? DEFAULT_TEMPLATE_EN : DEFAULT_TEMPLATE;
-    const communicationTemplate = (event.email_template as any)?.communication_templates_v2 || null;
-    const template: EmailTemplate = !isProfessional && communicationTemplate?.matches
+    // Builds the social template from a (possibly variant-merged) communication bundle.
+    const buildSocialTemplate = (comm: any): EmailTemplate => comm?.matches
       ? {
           withMatches: {
-            subject: communicationTemplate.matches.subject || defaultTpl.withMatches.subject,
-            greeting: communicationTemplate.matches.greeting || defaultTpl.withMatches.greeting,
-            intro: communicationTemplate.matches.intro || defaultTpl.withMatches.intro,
-            friendshipTitle: communicationTemplate.matches.extraFields?.friendshipTitle || defaultTpl.withMatches.friendshipTitle,
-            datingTitle: communicationTemplate.matches.extraFields?.datingTitle || defaultTpl.withMatches.datingTitle,
-            closing: communicationTemplate.matches.closing || defaultTpl.withMatches.closing,
-            signature: communicationTemplate.matches.signature || defaultTpl.withMatches.signature,
+            subject: comm.matches.subject || defaultTpl.withMatches.subject,
+            greeting: comm.matches.greeting || defaultTpl.withMatches.greeting,
+            intro: comm.matches.intro || defaultTpl.withMatches.intro,
+            friendshipTitle: comm.matches.extraFields?.friendshipTitle || defaultTpl.withMatches.friendshipTitle,
+            datingTitle: comm.matches.extraFields?.datingTitle || defaultTpl.withMatches.datingTitle,
+            closing: comm.matches.closing || defaultTpl.withMatches.closing,
+            signature: comm.matches.signature || defaultTpl.withMatches.signature,
           },
           withoutMatches: {
-            subject: communicationTemplate.matches_without?.subject || defaultTpl.withoutMatches.subject,
-            greeting: communicationTemplate.matches_without?.greeting || defaultTpl.withoutMatches.greeting,
-            message: communicationTemplate.matches_without?.message || defaultTpl.withoutMatches.message,
-            closing: communicationTemplate.matches_without?.closing || defaultTpl.withoutMatches.closing,
-            signature: communicationTemplate.matches_without?.signature || defaultTpl.withoutMatches.signature,
+            subject: comm.matches_without?.subject || defaultTpl.withoutMatches.subject,
+            greeting: comm.matches_without?.greeting || defaultTpl.withoutMatches.greeting,
+            message: comm.matches_without?.message || defaultTpl.withoutMatches.message,
+            closing: comm.matches_without?.closing || defaultTpl.withoutMatches.closing,
+            signature: comm.matches_without?.signature || defaultTpl.withoutMatches.signature,
           },
-          primaryColor: communicationTemplate.primaryColor || defaultTpl.primaryColor,
+          primaryColor: comm.primaryColor || defaultTpl.primaryColor,
         }
       : (email_template || (event.email_template as EmailTemplate) || defaultTpl);
+    const communicationTemplate = (event.email_template as any)?.communication_templates_v2 || null;
+    const template: EmailTemplate = buildSocialTemplate(communicationTemplate);
     const socialBranding = {
       primaryColor: communicationTemplate?.primaryColor || template.primaryColor,
       logoUrl: communicationTemplate?.logoUrl || null,
@@ -529,7 +532,7 @@ const handler = async (req: Request): Promise<Response> => {
     } else {
       let query = supabase
         .from("participants")
-        .select("id, name, email, phone")
+        .select("id, name, email, phone, registration_variant")
         .eq("event_id", event_id)
         .eq("checked_in", true);
       if (participant_ids && participant_ids.length > 0) {
@@ -720,16 +723,19 @@ const handler = async (req: Request): Promise<Response> => {
         if (hasConnections) stats.withMatches++;
         else stats.withoutMatches++;
       } else {
-        // Social event: use matches and social template
+        // Social event: use matches and the template of the link the participant registered with
+        const variant = participantVariant(participant);
+        const eventName = variantEventName(event, variant);
+        const tpl = variant === "secondary" ? buildSocialTemplate(variantTemplates(event.email_template, variant)) : template;
         const pm = matchesByParticipant.get(participant.id);
         const friendshipMatches = pm?.friendship || [];
         const datingMatches = pm?.dating || [];
         const hasMatches = friendshipMatches.length > 0 || datingMatches.length > 0;
-        
-        subject = hasMatches 
-          ? replaceVariables(template.withMatches.subject, { nombre: participant.name, evento: event.name }) 
-          : replaceVariables(template.withoutMatches.subject, { nombre: participant.name, evento: event.name });
-        html = generateEmailHtml(template, participant.name, event.name, friendshipMatches, datingMatches, orgBranding || undefined, socialBranding);
+
+        subject = hasMatches
+          ? replaceVariables(tpl.withMatches.subject, { nombre: participant.name, evento: eventName })
+          : replaceVariables(tpl.withoutMatches.subject, { nombre: participant.name, evento: eventName });
+        html = generateEmailHtml(tpl, participant.name, eventName, friendshipMatches, datingMatches, orgBranding || undefined, socialBranding);
         
         if (hasMatches) stats.withMatches++;
         else stats.withoutMatches++;
