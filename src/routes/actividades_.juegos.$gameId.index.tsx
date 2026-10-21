@@ -2,7 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus, Sparkles, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -10,7 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { MMAdminGate } from "@/components/mm/AdminGate";
 import { MMAvatar } from "@/components/mm/shared";
 import { MM_LANGS } from "@/lib/mm/i18n";
-import { mmControlSession, mmCreateSession, mmGetGame, mmUpdateCharacterAvatar, mmUpdateGame } from "@/lib/mm/admin.functions";
+import { mmControlSession, mmCreateSession, mmGenerateEvidenceArt, mmGenerateItemArt, mmGetGame, mmUpdateCharacterAvatar, mmUpdateGame } from "@/lib/mm/admin.functions";
 
 export const Route = createFileRoute("/actividades_/juegos/$gameId/")({
   head: () => ({
@@ -42,6 +42,26 @@ function GameDetail() {
   const [newOpen, setNewOpen] = useState(false);
   const [editing, setEditing] = useState<any>(null);
   const load = () => get({ data: { gameId } }).then(setD).catch((e) => toast.error(e.message));
+  const genItems = useServerFn(mmGenerateItemArt);
+  const genEvidences = useServerFn(mmGenerateEvidenceArt);
+  const [artBusy, setArtBusy] = useState(false);
+  const genArt = async () => {
+    setArtBusy(true);
+    try {
+      const it = await genItems({ data: { gameId } });
+      const ev = await genEvidences({ data: { gameId } });
+      const ok = it.generated + ev.generated;
+      const ko = it.failed + ev.failed;
+      if (ok === 0 && ko === 0) toast.success("Todos los objetos y evidencias ya tenían ilustración.");
+      else if (ko) toast.warning(`${ok} ilustraciones creadas; ${ko} han fallado. Vuelve a pulsar para reintentarlas.`);
+      else toast.success(`${ok} ilustraciones creadas (${it.generated} objetos, ${ev.generated} evidencias).`);
+      void load();
+    } catch (e: any) {
+      toast.error(e.message);
+    } finally {
+      setArtBusy(false);
+    }
+  };
   useEffect(() => {
     void load();
   }, [gameId]);
@@ -58,6 +78,9 @@ function GameDetail() {
             {g.min_players}–{g.max_players} jugadores · {g.duration_minutes} min · {g.status === "published" ? "Publicado" : "Borrador"}
           </p>
         </div>
+        <Button variant="outline" disabled={artBusy} onClick={genArt}>
+          <Sparkles className="mr-2 h-4 w-4" /> {artBusy ? "Generando ilustraciones…" : "Generar ilustraciones"}
+        </Button>
         <Button variant="outline" onClick={async () => { await update({ data: { gameId, status: g.status === "published" ? "draft" : "published" } }); void load(); }}>
           {g.status === "published" ? "Pasar a borrador" : "Publicar"}
         </Button>

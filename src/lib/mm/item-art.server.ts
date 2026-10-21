@@ -27,11 +27,14 @@ export async function fillGameItemArt(db: () => any, gameId: string): Promise<{ 
   const todo = (items ?? []).filter((i: any) => !i.image_url);
   let generated = 0;
   let failed = 0;
-  for (let i = 0; i < todo.length; i += 4) {
+  // Small batches with a pause (and one retry) so Gemini's concurrency quota doesn't cut items off.
+  const attempt = async (it: any) => (await generateItemArt(it).catch(() => null)) ?? (await new Promise((r) => setTimeout(r, 1500)), generateItemArt(it).catch(() => null));
+  for (let i = 0; i < todo.length; i += 2) {
+    if (i > 0) await new Promise((r) => setTimeout(r, 800));
     await Promise.all(
-      todo.slice(i, i + 4).map(async (it: any) => {
+      todo.slice(i, i + 2).map(async (it: any) => {
         try {
-          const url = await generateItemArt(it);
+          const url = await attempt(it);
           if (!url) return void failed++;
           const { error } = await db().from("mm_items").update({ image_url: url }).eq("id", it.id);
           if (error) failed++;
