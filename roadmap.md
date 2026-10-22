@@ -1,3 +1,6 @@
+- [x] Project monitoring: campos de pago y destacados presentes en la base activa; consulta exacta HTTP 200 y formulario verificado en vista previa y kleff.es; aviso obsoleto
+- [x] Project monitoring: series_id y protección de enlaces presentes en la base activa; dos grupos de ediciones existentes y lectura API verificada; aviso obsoleto
+- [x] Project monitoring: páginas de partidas y acceso de jugadores existentes; accesos verificados en vista previa y kleff.es; aviso obsoleto
 - [x] Juegos: aplicar sort_order y reparto ordenado en la base propia; comprobar importación de personajes mediante la misma API que usa el importador
 - [ ] Juegos: copiar sort_order y reparto ordenado al respaldo (herramienta de migración deshabilitada por preferencias)
 - [x] Juegos: reparto atómico sin personajes duplicados; correcciones manuales conservadas; ocho repartos simultáneos verificados
