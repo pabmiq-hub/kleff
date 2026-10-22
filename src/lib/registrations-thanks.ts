@@ -1,7 +1,7 @@
 // Pure rule: post-event thank-you emails go out at 12:00 (Europe/Madrid)
 // on the day after the event.
 
-export const GOOGLE_REVIEW_URL = "https://share.google/6SsE7kmya2Zhtg0Re";
+export const GOOGLE_REVIEW_URL = "https://g.page/r/CXntdwa3Ms3XEBE/review";
 const TZ = "Europe/Madrid";
 
 function madridParts(d: Date) {

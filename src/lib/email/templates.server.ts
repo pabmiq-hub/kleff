@@ -270,7 +270,7 @@ export function eventThanksEmail(opts: { formTitle: string; userName?: string | 
       <p style="margin:18px 0 0;">¡Nos vemos en la próxima!<br>El equipo de KLEFF</p>
     `,
     ctaLabel: "⭐ Dejar una reseña en Google",
-    ctaUrl: "https://share.google/6SsE7kmya2Zhtg0Re",
+    ctaUrl: "https://g.page/r/CXntdwa3Ms3XEBE/review",
   });
   return { subject, html };
 }
