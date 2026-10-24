@@ -1,3 +1,4 @@
+- [ ] Konektum: corregir selección de género/conexión con traducción automática y mostrar el formulario inglés sin alterar los valores guardados; verificar el flujo público real
 - [x] Project monitoring: campos de pago y destacados presentes en la base activa; consulta exacta HTTP 200 y formulario verificado en vista previa y kleff.es; aviso obsoleto
 - [x] Project monitoring: series_id y protección de enlaces presentes en la base activa; dos grupos de ediciones existentes y lectura API verificada; aviso obsoleto
 - [x] Project monitoring: páginas de partidas y acceso de jugadores existentes; accesos verificados en vista previa y kleff.es; aviso obsoleto
