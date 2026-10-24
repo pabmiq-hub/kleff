@@ -75,4 +75,12 @@ describe("current Konektum bands and translated genders", () => {
     expect(registrationAgeFields(fields, ranges)).toEqual([fields[1]]);
     expect(registrationAgeFields(fields, ["25-32", "33-40"])[0]?.options).toEqual(["25-32", "33-40"]);
   });
+  test("single actual-age question is derived automatically when birth date is present", () => {
+    const fields = [
+      { id: "birth_date", type: "date" as const, label: "Nacimiento", required: true, system: true },
+      { id: "age_range", type: "select" as const, label: "Edad", required: true, system: true, options: ["33-40"] },
+    ];
+    expect(registrationAgeFields(fields, ranges)).toEqual([fields[0]]);
+    expect(registrationAgeValues({ birth_date: "1990-01-01", age_range: "33-40" }, ranges).age_range).toBe("18+");
+  });
 });

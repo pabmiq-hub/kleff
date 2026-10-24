@@ -8,7 +8,7 @@ const Deno = {
 };
 
 import { createClient } from "@/lib/kon-fn/client.server";
-import { ageRangeForBirthDate, matchingQuota, countQuotaParticipants } from "@/konektum/lib/registration-quotas";
+import { ageRangeForBirthDate, matchingQuota, countQuotaParticipants, singleAgeBand } from "@/konektum/lib/registration-quotas";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -72,6 +72,11 @@ serve(async (req) => {
       return new Response(JSON.stringify({ error: "Evento no encontrado" }), {
         status: 404,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    if (singleAgeBand(event.custom_age_ranges) && ageRangeForBirthDate(birthDate, event.custom_age_ranges) === "Otro") {
+      return new Response(JSON.stringify({ error: 'Tu edad no está dentro de la franja de este evento' }), {
+        status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
