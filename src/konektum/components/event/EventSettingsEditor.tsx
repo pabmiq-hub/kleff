@@ -1446,6 +1446,7 @@ const EventSettingsEditor = ({
         registrationSubtitle={formRegSubtitle || null}
         registrationDescription={formRegDescription || null}
         eventLang={formLanguage}
+        ageRanges={formPreferences.ageRanges}
         highlights={formHighlights}
         paymentInfo={{
           enabled: formPaymentTrackingEnabled,

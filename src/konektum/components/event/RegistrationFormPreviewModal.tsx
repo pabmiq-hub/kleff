@@ -23,6 +23,7 @@ interface RegistrationFormPreviewModalProps {
   eventLang: "es" | "en";
   highlights?: any;
   paymentInfo?: any;
+  ageRanges?: string[] | null;
 }
 
 const RegistrationFormPreviewModal = ({
@@ -38,6 +39,7 @@ const RegistrationFormPreviewModal = ({
   eventLang,
   highlights,
   paymentInfo,
+  ageRanges,
 }: RegistrationFormPreviewModalProps) => {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -51,6 +53,7 @@ const RegistrationFormPreviewModal = ({
         <div className="px-4 pb-4">
           <DynamicRegistrationForm
             fields={fields}
+            ageRanges={ageRanges}
             eventName={eventName}
             eventDate={parseEventDate(eventDate)}
             eventTime={eventTime}
