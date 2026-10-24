@@ -9,6 +9,7 @@ const Deno = {
 
 import { createClient } from "@/lib/kon-fn/client.server";
 import { seatInPreliminaryRound } from "@/lib/kon-fn/_shared/preliminarySeat";
+import { ageRangeForBirthDate, matchingQuota, countQuotaParticipants, effectivePreferredAgeRange } from "@/konektum/lib/registration-quotas";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -45,47 +46,6 @@ async function generateUniqueCode(supabase: any): Promise<string> {
   }
   
   throw new Error('Could not generate unique verification code');
-}
-
-// Calculate age range from birth date
-function parseRange(range: any): { label: string; min: number; max: number } | null {
-  if (typeof range === 'object' && range !== null && range.min !== undefined) {
-    return { label: range.label || String(range.min), min: range.min, max: range.max ?? 100 };
-  }
-  const str = String(range);
-  if (str.includes('+')) {
-    const num = parseInt(str.replace(/[^0-9]/g, ''));
-    if (isNaN(num)) return null;
-    return { label: str, min: num, max: 100 };
-  }
-  const parts = str.replace(/–/g, '-').split('-').map(n => parseInt(n.trim()));
-  if (parts.length === 2 && !isNaN(parts[0]) && !isNaN(parts[1])) {
-    return { label: str, min: parts[0], max: parts[1] };
-  }
-  return null;
-}
-
-function calculateAgeRange(birthDate: string, customAgeRanges: any[] | null): string {
-  const today = new Date();
-  const birth = new Date(birthDate);
-  let age = today.getFullYear() - birth.getFullYear();
-  const monthDiff = today.getMonth() - birth.getMonth();
-  
-  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
-    age--;
-  }
-  
-  const defaultRanges = ["18–24", "25–32", "33–40", "41–50", "+ 50"];
-  const rawRanges = customAgeRanges && customAgeRanges.length > 0 ? customAgeRanges : defaultRanges;
-  
-  for (const raw of rawRanges) {
-    const parsed = parseRange(raw);
-    if (parsed && age >= parsed.min && age <= parsed.max) {
-      return parsed.label;
-    }
-  }
-  
-  return "Otro";
 }
 
 function buildEventStartDate(eventDate: string, eventTime?: string | null): Date {
@@ -433,41 +393,24 @@ serve(async (req) => {
       );
     }
 
-    const ageRange = calculateAgeRange(birthDate, event.custom_age_ranges as any[] | null);
-
-    // Tolerant quota matching: normalize dashes, case, whitespace
-    const normalizeKey = (v: any) => String(v ?? '')
-      .toLowerCase()
-      .trim()
-      .replace(/–/g, '-')
-      .replace(/\s+/g, '');
+    const ageRange = ageRangeForBirthDate(birthDate, event.custom_age_ranges);
 
     const socialForceWaitlist = body.forceWaitlist === true;
     let quotaFullDetected = false;
 
     if (event.registration_requirements_enabled && event.slot_quotas) {
       const quotas = event.slot_quotas as any[];
-      const matchingQuota = quotas.find(
-        (q: any) =>
-          normalizeKey(q.gender) === normalizeKey(gender) &&
-          normalizeKey(q.ageRange) === normalizeKey(ageRange)
-      );
-
-      if (matchingQuota) {
+      const quota = matchingQuota(quotas, { gender, birth_date: birthDate }, event.custom_age_ranges);
+      if (quota) {
         const { data: allParts } = await supabase
           .from('participants')
-          .select('id, gender, age_range, cancelled_at, is_fake')
+          .select('id, gender, age_range, birth_date, cancelled_at, is_fake')
           .eq('event_id', eventId);
 
-        const currentCount = (allParts || []).filter(
-          (p: any) =>
-            !p.cancelled_at &&
-            !p.is_fake &&
-            normalizeKey(p.gender) === normalizeKey(matchingQuota.gender) &&
-            normalizeKey(p.age_range) === normalizeKey(matchingQuota.ageRange)
-        ).length;
+        if (allParts == null) throw new Error('No se pudieron consultar las plazas');
+        const currentCount = countQuotaParticipants(allParts, quota, event.custom_age_ranges);
 
-        if (currentCount >= matchingQuota.maxSlots) {
+        if (currentCount >= quota.maxSlots) {
           quotaFullDetected = true;
           if (socialIsFromWaitlist) {
             return new Response(
@@ -535,7 +478,7 @@ serve(async (req) => {
           age_range: ageRange,
           preference: preference || null,
           dating_preference: datingPreference || null,
-          preferred_age_range: preferredAgeRange || null,
+          preferred_age_range: effectivePreferredAgeRange(preferredAgeRange, event.custom_age_ranges),
           is_returning_participant: isReturningParticipant || false,
           position: nextPosition,
           marketing_consent: marketingConsent,
@@ -647,7 +590,7 @@ serve(async (req) => {
         age_range: ageRange,
         preference: preference || null,
         dating_preference: datingPreference || null,
-        preferred_age_range: preferredAgeRange || null,
+        preferred_age_range: effectivePreferredAgeRange(preferredAgeRange, event.custom_age_ranges),
         is_returning_participant: isReturningParticipant || isActuallyReturning,
         verification_code: verificationCode,
         checked_in: shouldAutoCheckin,

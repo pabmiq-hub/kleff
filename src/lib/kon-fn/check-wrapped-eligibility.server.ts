@@ -8,47 +8,12 @@ const Deno = {
 };
 
 import { createClient } from "@/lib/kon-fn/client.server";
+import { ageRangeForBirthDate, matchingQuota, countQuotaParticipants } from "@/konektum/lib/registration-quotas";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
-
-function normalizeKey(v: unknown) {
-  return String(v ?? "").toLowerCase().trim().replace(/–/g, "-").replace(/\s+/g, "");
-}
-
-function parseRange(range: any): { label: string; min: number; max: number } | null {
-  if (typeof range === "object" && range !== null && range.min !== undefined) {
-    return { label: range.label || String(range.min), min: range.min, max: range.max ?? 100 };
-  }
-  const str = String(range);
-  if (str.includes("+")) {
-    const num = parseInt(str.replace(/[^0-9]/g, ""));
-    if (isNaN(num)) return null;
-    return { label: str, min: num, max: 100 };
-  }
-  const parts = str.replace(/–/g, "-").split("-").map((n) => parseInt(n.trim()));
-  if (parts.length === 2 && !isNaN(parts[0]) && !isNaN(parts[1])) {
-    return { label: str, min: parts[0], max: parts[1] };
-  }
-  return null;
-}
-
-function calculateAgeRange(birthDate: string, customAgeRanges: any[] | null): string {
-  const today = new Date();
-  const birth = new Date(birthDate);
-  let age = today.getFullYear() - birth.getFullYear();
-  const m = today.getMonth() - birth.getMonth();
-  if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) age--;
-  const defaults = ["18–24", "25–32", "33–40", "41–50", "+ 50"];
-  const raws = customAgeRanges && customAgeRanges.length > 0 ? customAgeRanges : defaults;
-  for (const r of raws) {
-    const parsed = parseRange(r);
-    if (parsed && age >= parsed.min && age <= parsed.max) return parsed.label;
-  }
-  return "Otro";
-}
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
@@ -129,23 +94,16 @@ serve(async (req) => {
     let quotaFull = false;
     let ageRangeLabel: string | null = null;
     if (event.registration_requirements_enabled && event.slot_quotas) {
-      ageRangeLabel = calculateAgeRange(birthDate, event.custom_age_ranges as any[] | null);
+      ageRangeLabel = ageRangeForBirthDate(birthDate, event.custom_age_ranges);
       const quotas = event.slot_quotas as any[];
-      const match = quotas.find(
-        (q: any) =>
-          normalizeKey(q.gender) === normalizeKey(gender) &&
-          normalizeKey(q.ageRange) === normalizeKey(ageRangeLabel),
-      );
+      const match = matchingQuota(quotas, { gender, birth_date: birthDate }, event.custom_age_ranges);
       if (match) {
         const { data: all } = await supabase
           .from("participants")
-          .select("id, gender, age_range")
+          .select("gender, birth_date, age_range, cancelled_at, is_fake")
           .eq("event_id", eventId);
-        const count = (all || []).filter(
-          (p: any) =>
-            normalizeKey(p.gender) === normalizeKey(match.gender) &&
-            normalizeKey(p.age_range) === normalizeKey(match.ageRange),
-        ).length;
+        if (all == null) throw new Error('No se pudieron consultar las plazas');
+        const count = countQuotaParticipants(all, match, event.custom_age_ranges);
         if (count >= match.maxSlots) quotaFull = true;
       }
     }

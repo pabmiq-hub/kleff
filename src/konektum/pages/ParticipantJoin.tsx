@@ -1,5 +1,8 @@
 // @ts-nocheck
 import { useState, useEffect } from "react";
+import { useServerFn } from "@tanstack/react-start";
+import { getKonQuotaAvailability } from "@/lib/kon-public.functions";
+import { ageRangeForBirthDate, genderKey, normalizeQuotaKey, synchronizeQuotas } from "@/konektum/lib/registration-quotas";
 import { useParams } from "@/konektum/router";
 import { Button } from "@/konektum/ui/button";
 import { Input } from "@/konektum/ui/input";
@@ -97,6 +100,7 @@ const ParticipantJoin = ({
   /** Event title as shown to the audience of this specific link. */
   eventNameOverride?: string | null;
 } = {}) => {
+  const getQuotaAvailability = useServerFn(getKonQuotaAvailability);
   const { id: routeEventId } = useParams();
   const eventId = eventIdOverride || routeEventId;
   const eb = useEventBranding(eventId);
@@ -212,16 +216,14 @@ const ParticipantJoin = ({
   const [spokenLanguages, setSpokenLanguages] = useState<string[]>([]);
 
 
-  // Normalize for tolerant comparisons (dashes, case, whitespace)
-  const normalizeKey = (v: any) =>
-    String(v ?? '').toLowerCase().trim().replace(/–/g, '-').replace(/\s+/g, '');
+  const normalizeKey = normalizeQuotaKey;
 
   // Dedicated public link: the gender is fixed by the link, so we preselect it
   // and hide the selector from the participant.
   const genderLocked = Boolean(variantGender);
   useEffect(() => {
     if (!variantGender) return;
-    const match = eventGenders.find((g) => normalizeKey(g) === normalizeKey(variantGender));
+    const match = eventGenders.find((g) => genderKey(g) === genderKey(variantGender));
     setGender((prev) => prev || match || variantGender);
   }, [variantGender, eventGenders]);
 
@@ -341,7 +343,7 @@ const ParticipantJoin = ({
       // Load quota configuration and current counts
       if (data.registration_requirements_enabled && data.slot_quotas) {
         setQuotasEnabled(true);
-        const quotas = data.slot_quotas as unknown as SlotQuota[];
+        const quotas = synchronizeQuotas(data.slot_quotas as unknown as SlotQuota[], data.custom_age_ranges);
         setSlotQuotas(quotas);
         
         await loadAllQuotaCounts(eventId, quotas);
@@ -392,28 +394,9 @@ const ParticipantJoin = ({
     checkEvent();
   }, [eventId]);
 
-  // Load ALL quota counts upfront with tolerant matching
-  const loadAllQuotaCounts = async (eventId: string, quotas: SlotQuota[]) => {
-    const { data: allParts } = await supabase
-      .from('participants')
-      .select('id, gender, age_range')
-      .eq('event_id', eventId);
-
-    const statuses: QuotaStatus[] = quotas.map((quota) => {
-      const current = (allParts || []).filter(
-        (p: any) =>
-          normalizeKey(p.gender) === normalizeKey(quota.gender) &&
-          normalizeKey(p.age_range) === normalizeKey(quota.ageRange)
-      ).length;
-      return {
-        gender: quota.gender,
-        ageRange: quota.ageRange,
-        current,
-        max: quota.maxSlots,
-        available: Math.max(0, quota.maxSlots - current),
-      };
-    });
-
+  // Only aggregate counts cross the public boundary; old birth dates stay private.
+  const loadAllQuotaCounts = async (eventId: string, _quotas: SlotQuota[]) => {
+    const statuses = await getQuotaAvailability({ data: { eventId } });
     setQuotaStatuses(statuses);
     return statuses;
   };
@@ -423,7 +406,7 @@ const ParticipantJoin = ({
 
     const status = statuses.find(
       (q) =>
-        normalizeKey(q.gender) === normalizeKey(gender) &&
+        genderKey(q.gender) === genderKey(gender) &&
         normalizeKey(q.ageRange) === normalizeKey(calculatedAgeRange)
     );
     if (!status) return null;
@@ -431,34 +414,8 @@ const ParticipantJoin = ({
     return { available: status.available > 0, remaining: status.available, total: status.max };
   };
 
-  // Calculate age range from birth date
-  const calculateAgeRange = (dateString: string): string => {
-    if (!dateString) return "";
-    
-    const today = new Date();
-    const birth = new Date(dateString);
-    let age = today.getFullYear() - birth.getFullYear();
-    const monthDiff = today.getMonth() - birth.getMonth();
-    
-    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
-      age--;
-    }
-    
-    // Find matching age range
-    for (const range of eventAgeRanges) {
-      if (range.includes('+')) {
-        const num = parseInt(range.replace(/[^0-9]/g, ''));
-        if (!isNaN(num) && age >= num) return range;
-        continue;
-      }
-      const parts = range.replace(/–/g, '-').split('-').map(n => parseInt(n.trim()));
-      if (parts.length === 2 && !isNaN(parts[0]) && !isNaN(parts[1]) && age >= parts[0] && age <= parts[1]) {
-        return range;
-      }
-    }
-    
-    return "Otro";
-  };
+  const calculateAgeRange = (dateString: string): string =>
+    dateString ? ageRangeForBirthDate(dateString, eventAgeRanges) : "";
 
   useEffect(() => {
     if (birthDate) {
@@ -474,7 +431,7 @@ const ParticipantJoin = ({
 
     const status = quotaStatuses.find(
       (q) =>
-        normalizeKey(q.gender) === normalizeKey(gender) &&
+        genderKey(q.gender) === genderKey(gender) &&
         normalizeKey(q.ageRange) === normalizeKey(calculatedAgeRange)
     );
     if (!status) return null;
@@ -1112,6 +1069,8 @@ const ParticipantJoin = ({
       if (formValues.gender) body.gender = formValues.gender;
       if (formValues.preference) body.preference = formValues.preference;
       if (formValues.dating_preference) body.datingPreference = formValues.dating_preference;
+      const preferred = formValues.preferred_age_range;
+      body.preferredAgeRange = singleAgeRange ?? (Array.isArray(preferred) ? preferred.join(', ') : preferred);
 
       // Professional system fields
       if (formValues.entity_type) {
@@ -1173,6 +1132,7 @@ const ParticipantJoin = ({
         <main className="container mx-auto px-3 sm:px-6 py-6 sm:py-10 max-w-3xl">
           <DynamicRegistrationForm
             fields={customRegistrationForm.fields}
+            ageRanges={eventAgeRanges}
             eventName={eventName}
             eventDate={eventDate}
             eventTime={eventTime}
