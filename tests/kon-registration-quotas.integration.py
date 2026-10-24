@@ -40,6 +40,15 @@ async def main():
         write("kon_events", "PATCH", {
             "custom_age_ranges": ["18+"],
             "slot_quotas": [{"gender": "Mujer", "ageRange": "18+", "maxSlots": 1}],
+            "custom_registration_form": {"formMode": "custom", "fields": [
+                {"id": "name", "type": "text", "label": "Nombre y apellidos", "required": True, "system": True},
+                {"id": "email", "type": "email", "label": "Email", "required": True, "system": True},
+                {"id": "phone", "type": "phone", "label": "Teléfono", "required": True, "system": True},
+                {"id": "birth_date", "type": "date", "label": "Fecha de nacimiento", "required": True, "system": True},
+                {"id": "gender", "type": "select", "label": "Género", "required": True, "system": True, "options": ["Mujer", "Hombre"]},
+                {"id": "preference", "type": "select", "label": "Tipo de conexión", "required": True, "system": True, "options": ["Solo amistad"]},
+                {"id": "preferred_age_range", "type": "multiselect", "label": "Rango de edad preferido", "required": True, "system": True, "options": ["33-40", "41+"]},
+            ]},
         }, f"?id=eq.{event_id}")
         payload = {
             "eventId": event_id, "name": "Nueva inscripción de prueba", "email": f"quota-{event_id}@example.invalid",
@@ -52,11 +61,6 @@ async def main():
         assert response.ok and response.json().get("quotaFull") is True, "Eligibility must agree with registration"
 
         write("kon_events", "PATCH", {"slot_quotas": [{"gender": "Mujer", "ageRange": "18+", "maxSlots": 2}]}, f"?id=eq.{event_id}")
-        response = requests.post(f"{BASE}/api/public/kon/register-participant", json=payload, timeout=30)
-        assert response.ok and response.json().get("success") is True, "One free place must allow registration"
-        saved = requests.get(f"{url}/kon_participants", headers=headers, params={"event_id": f"eq.{event_id}", "select": "age_range,preferred_age_range", "email": f"eq.{payload['email']}"}, timeout=30)
-        assert saved.ok and saved.json() == [{"age_range": "18+", "preferred_age_range": "18+"}], "Single current band must replace stale submitted preference"
-
         async with async_playwright() as playwright:
             browser = await playwright.chromium.launch(headless=True)
             try:
@@ -64,15 +68,37 @@ async def main():
                     page = await browser.new_page(viewport={"width": width, "height": height})
                     errors = []
                     page.on("pageerror", lambda error: errors.append(str(error)))
+                    # No test emails: these are separate UI follow-up calls, not registration itself.
+                    await page.route("**/api/public/kon/send-*", lambda route: route.fulfill(status=200, json={"success": True}))
                     await page.goto(f"{BASE}/event/{event_id}/join", wait_until="domcontentloaded")
                     await page.locator("form").wait_for(timeout=60000)
                     counts = await page.evaluate("""async id => {
                         const {getKonQuotaAvailability} = await import('/src/lib/kon-public.functions.ts');
                         return getKonQuotaAvailability({data:{eventId:id}});
                     }""", event_id)
-                    assert counts == [{"gender": "Mujer", "ageRange": "18+", "current": 2, "max": 2, "available": 0}]
+                    expected = 1 if width == 1280 else 2
+                    assert counts == [{"gender": "Mujer", "ageRange": "18+", "current": expected, "max": 2, "available": 2 - expected}]
                     assert await page.get_by_text("33-40", exact=True).count() == 0
                     assert await page.get_by_text("41+", exact=True).count() == 0
+                    assert await page.get_by_text("Rango de edad preferido", exact=True).count() == 0
+                    if width == 1280:
+                        form = page.locator("form")
+                        await form.locator('input[type="text"]').fill(payload["name"])
+                        await form.locator('input[type="email"]').fill(payload["email"])
+                        await form.locator('input[type="tel"]').fill(payload["phone"])
+                        await form.locator('input[type="date"]').fill(payload["birthDate"])
+                        await form.get_by_role("combobox").nth(0).click()
+                        await page.get_by_role("option", name="Woman", exact=True).click()
+                        await form.get_by_role("combobox").nth(1).click()
+                        await page.get_by_role("option", name="Friendship only", exact=True).click()
+                        await form.get_by_role("checkbox").first.check()
+                        reject = page.get_by_role("button", name="Rechazar", exact=True)
+                        if await reject.count():
+                            await reject.click()
+                        await form.get_by_role("button", name="Register", exact=True).click()
+                        await page.get_by_text("Registration complete!", exact=True).wait_for(timeout=30000)
+                        saved = requests.get(f"{url}/kon_participants", headers=headers, params={"event_id": f"eq.{event_id}", "select": "age_range,preferred_age_range", "email": f"eq.{payload['email']}"}, timeout=30)
+                        assert saved.ok and saved.json() == [{"age_range": "18+", "preferred_age_range": "18+"}], "Single current band must read back as 18+ after UI registration"
                     assert not errors, errors
                     screenshots = Path("/tmp/browser/kon-quotas")
                     screenshots.mkdir(parents=True, exist_ok=True)
