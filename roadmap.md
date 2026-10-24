@@ -1,3 +1,4 @@
+- [ ] Konektum: sincronizar franja de edad única en formularios/plazas y agrupar géneros equivalentes ES/EN; comprobar configuración y conteos con pruebas
 - [x] Konektum: selecciones protegidas frente a traducción automática y formulario inglés sin alterar valores guardados; género/conexión/ligue verificados en el evento real a 1280px y 360px, sin enviar inscripciones; 11 pruebas superadas
 - [x] Project monitoring: campos de pago y destacados presentes en la base activa; consulta exacta HTTP 200 y formulario verificado en vista previa y kleff.es; aviso obsoleto
 - [x] Project monitoring: series_id y protección de enlaces presentes en la base activa; dos grupos de ediciones existentes y lectura API verificada; aviso obsoleto
