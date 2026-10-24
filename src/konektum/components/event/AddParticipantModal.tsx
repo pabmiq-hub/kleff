@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { RadioGroup, RadioGroupItem } from "@/konektum/ui/radio-group";
 import { X } from "lucide-react";
 import MultiSelectAge from "@/konektum/ui/multi-select-age";
+import { ageRangeForBirthDate, effectivePreferredAgeRange, singleAgeBand, uniqueGenderLabels, genderKey } from "@/konektum/lib/registration-quotas";
 import { 
   Participant, 
   AGE_RANGES, 
@@ -35,7 +36,7 @@ interface AddParticipantModalProps {
 
 const AddParticipantModal = ({ onClose, onAdd, customPreferences, initialValues, embedded }: AddParticipantModalProps) => {
   const ageRanges = customPreferences?.ageRanges || [...AGE_RANGES];
-  const genders = customPreferences?.genders || [...GENDERS];
+  const genders = uniqueGenderLabels(customPreferences?.genders || [...GENDERS]);
   const preferences = customPreferences?.preferences || [...PREFERENCES];
   const datingPreferences = customPreferences?.datingPreferences || [...DATING_PREFERENCES];
   const preferredAgeRanges = [...ageRanges, "Cualquier rango de edad"];
@@ -43,11 +44,11 @@ const AddParticipantModal = ({ onClose, onAdd, customPreferences, initialValues,
   // Filter dating preferences based on selected gender
   const getFilteredDatingPreferences = (selectedGender: string, allPrefs: string[]): string[] => {
     if (!selectedGender) return allPrefs;
-    const genderNorm = selectedGender.toLowerCase();
+    const genderNorm = genderKey(selectedGender);
     return allPrefs.filter(pref => {
       const prefLower = pref.toLowerCase();
-      if (prefLower.startsWith("soy un hombre")) return genderNorm === "hombre";
-      if (prefLower.startsWith("soy una mujer")) return genderNorm === "mujer";
+      if (prefLower.startsWith("soy un hombre")) return genderNorm === "man";
+      if (prefLower.startsWith("soy una mujer")) return genderNorm === "woman";
       if (prefLower === "no binario") return genderNorm === "no binario" || genderNorm === "prefiero no decirlo";
       return true;
     });
@@ -63,33 +64,12 @@ const AddParticipantModal = ({ onClose, onAdd, customPreferences, initialValues,
   );
   const [preference, setPreference] = useState(initialValues?.preference || preferences[0] || "Amistad y ligue");
   const [datingPreference, setDatingPreference] = useState(initialValues?.datingPreference || "");
-  const [gender, setGender] = useState(initialValues?.gender || "");
+  const [gender, setGender] = useState(uniqueGenderLabels([initialValues?.gender])[0] || "");
   const [isReturningParticipant, setIsReturningParticipant] = useState<string>(
     initialValues?.isReturningParticipant === true ? "yes" : initialValues?.isReturningParticipant === false ? "no" : ""
   );
 
-  const calculateAgeRange = (dateString: string): string => {
-    if (!dateString) return "";
-    const today = new Date();
-    const birth = new Date(dateString);
-    let age = today.getFullYear() - birth.getFullYear();
-    const monthDiff = today.getMonth() - birth.getMonth();
-    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
-      age--;
-    }
-    for (const range of ageRanges) {
-      if (range.includes('+')) {
-        const num = parseInt(range.replace(/[^0-9]/g, ''));
-        if (!isNaN(num) && age >= num) return range;
-        continue;
-      }
-      const parts = range.replace(/–/g, '-').split('-').map(n => parseInt(n.trim()));
-      if (parts.length === 2 && !isNaN(parts[0]) && !isNaN(parts[1]) && age >= parts[0] && age <= parts[1]) {
-        return range;
-      }
-    }
-    return "Otro";
-  };
+  const calculateAgeRange = (dateString: string): string => dateString ? ageRangeForBirthDate(dateString, ageRanges) : "";
 
   const getAge = (dateString: string): number => {
     if (!dateString) return 0;
@@ -120,7 +100,7 @@ const AddParticipantModal = ({ onClose, onAdd, customPreferences, initialValues,
       return; // The UI already shows a warning
     }
 
-    const preferredAgeRange = selectedAgeRanges.join(', ');
+    const preferredAgeRange = effectivePreferredAgeRange(selectedAgeRanges.join(', '), ageRanges) || '';
     
     const participant: Participant = {
       id: Math.random().toString(36).substring(2, 11),
@@ -242,7 +222,7 @@ const AddParticipantModal = ({ onClose, onAdd, customPreferences, initialValues,
         </RadioGroup>
       </div>
 
-      <div className="space-y-2">
+      {!singleAgeBand(ageRanges) && <div className="space-y-2">
         <Label>Rango de edad preferido (puedes seleccionar varios)</Label>
         <MultiSelectAge
           options={preferredAgeRanges}
@@ -250,7 +230,7 @@ const AddParticipantModal = ({ onClose, onAdd, customPreferences, initialValues,
           onChange={setSelectedAgeRanges}
           placeholder="Selecciona los rangos que buscas"
         />
-      </div>
+      </div>}
 
       <div className="space-y-2">
         <Label>Preferencia</Label>
