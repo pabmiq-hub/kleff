@@ -82,7 +82,7 @@ export function synchronizeQuotas(quotas: RegistrationQuota[], ranges?: AgeBand[
   for (const quota of quotas) {
     const key = `${genderKey(quota.gender)}:${normalizeQuotaKey(quota.ageRange)}`;
     const prior = distinct.get(key);
-    distinct.set(key, { ...quota, maxSlots: Math.max(prior?.maxSlots ?? 0, quota.maxSlots) });
+    distinct.set(key, { ...quota, gender: prior?.gender ?? quota.gender, maxSlots: Math.max(prior?.maxSlots ?? 0, quota.maxSlots) });
   }
   if (!single) return [...distinct.values()];
   const merged = new Map<string, RegistrationQuota>();
