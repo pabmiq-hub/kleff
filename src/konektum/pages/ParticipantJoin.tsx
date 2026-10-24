@@ -1215,7 +1215,7 @@ const ParticipantJoin = ({
 
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background" lang={eventLang}>
       <BrandedHeader logoUrl={eb.logoUrl} companyName={eb.companyName} isWhiteLabel={eb.isWhiteLabel} centered />
 
       <main className="container mx-auto px-3 sm:px-6 py-6 sm:py-10 max-w-3xl">
@@ -1615,11 +1615,10 @@ const ParticipantJoin = ({
 
                   {showStep1Only ? (
                     <Button type="button" variant="hero" className="w-full mt-6" onClick={handleWizardContinue} disabled={checkingEligibility}>
-                      {checkingEligibility ? (
-                        <><Loader2 className="w-4 h-4 mr-2 animate-spin" />{eventLang === 'en' ? 'Checking...' : 'Comprobando...'}</>
-                      ) : (
-                        eventLang === 'en' ? 'Continue' : 'Continuar'
-                      )}
+                      <span aria-hidden="true">{checkingEligibility && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}</span>
+                      <span>{checkingEligibility
+                        ? (eventLang === 'en' ? 'Checking...' : 'Comprobando...')
+                        : (eventLang === 'en' ? 'Continue' : 'Continuar')}</span>
                     </Button>
                   ) : (
                     <Button
@@ -1628,16 +1627,10 @@ const ParticipantJoin = ({
                       className="w-full mt-6"
                       disabled={isSubmitting}
                     >
-                      {isSubmitting ? (
-                        <>
-                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                          {t.join.submitting}
-                        </>
-                      ) : showWaitlistMode ? (
-                        eventLang === 'en' ? 'Join waitlist' : 'Apuntarme a la lista de espera'
-                      ) : (
-                        t.join.submitButton
-                      )}
+                      <span aria-hidden="true">{isSubmitting && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}</span>
+                      <span>{isSubmitting ? t.join.submitting : showWaitlistMode
+                        ? (eventLang === 'en' ? 'Join waitlist' : 'Apuntarme a la lista de espera')
+                        : t.join.submitButton}</span>
                     </Button>
                   )}
                 </form>

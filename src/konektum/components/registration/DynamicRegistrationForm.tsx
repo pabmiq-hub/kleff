@@ -13,6 +13,7 @@ import EventHighlights, { PaymentNotice, type PaymentInfo } from "@/konektum/com
 import GDPRConsent from "@/konektum/components/registration/GDPRConsent";
 import { FieldError } from "@/konektum/ui/field-error";
 import { errorInputClass, fieldErrorMessage, scrollToFirstError } from "@/konektum/lib/formErrors";
+import { registrationFieldLabel, registrationOptionLabel, registrationPlaceholder } from "@/konektum/lib/registration-field-labels";
 
 
 interface DynamicRegistrationFormProps {
@@ -90,7 +91,7 @@ const DynamicRegistrationForm = ({
   };
 
   return (
-    <Card className="animate-fade-in">
+    <Card className="animate-fade-in" lang={eventLang}>
       <CardHeader className="space-y-5 p-4 sm:p-8">
         <div className="text-center space-y-2">
           <CardTitle className="font-display text-2xl sm:text-3xl leading-tight">{eventName}</CardTitle>
@@ -123,6 +124,8 @@ const DynamicRegistrationForm = ({
           )}
           {fields.map((field) => {
             const hasError = errors.includes(field.id);
+            const label = registrationFieldLabel(field, field.label, eventLang);
+            const placeholder = registrationPlaceholder(field, field.placeholder, eventLang);
             return (
             <div
               key={field.id}
@@ -130,7 +133,7 @@ const DynamicRegistrationForm = ({
               data-field-error={hasError ? "true" : undefined}
             >
               <Label className={hasError ? "text-destructive" : undefined}>
-                {field.label}
+                <span>{label}</span>
                 {field.required && <span className="text-destructive ml-1">*</span>}
               </Label>
               {field.description && (
@@ -146,7 +149,7 @@ const DynamicRegistrationForm = ({
                   type={field.type === "phone" ? "tel" : field.type}
                   value={(values[field.id] as string) || ""}
                   onChange={(e) => setValue(field.id, e.target.value)}
-                  placeholder={field.placeholder || field.label}
+                  placeholder={placeholder || label}
                   aria-invalid={hasError}
                   className={hasError ? errorInputClass : undefined}
                 />
@@ -157,7 +160,7 @@ const DynamicRegistrationForm = ({
                 <Textarea
                   value={(values[field.id] as string) || ""}
                   onChange={(e) => setValue(field.id, e.target.value)}
-                  placeholder={field.placeholder || field.label}
+                  placeholder={placeholder || label}
                   rows={3}
                   aria-invalid={hasError}
                   className={hasError ? errorInputClass : undefined}
@@ -184,7 +187,7 @@ const DynamicRegistrationForm = ({
                   <SelectTrigger className={hasError ? errorInputClass : undefined}>
                     <SelectValue
                       placeholder={
-                        field.placeholder ||
+                        placeholder ||
                         (eventLang === "en" ? "Select..." : "Seleccionar...")
                       }
                     />
@@ -192,7 +195,7 @@ const DynamicRegistrationForm = ({
                   <SelectContent>
                     {(field.options || []).map((opt) => (
                       <SelectItem key={opt} value={opt}>
-                        {opt}
+                        {registrationOptionLabel(field, opt, eventLang)}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -219,7 +222,7 @@ const DynamicRegistrationForm = ({
                           checked={selected}
                           onCheckedChange={() => toggleMultiSelect(field.id, opt)}
                         />
-                        <span className="text-sm">{opt}</span>
+                        <span className="text-sm">{registrationOptionLabel(field, opt, eventLang)}</span>
                       </label>
                     );
                   })}
@@ -235,7 +238,7 @@ const DynamicRegistrationForm = ({
                     className={hasError ? "border-destructive" : undefined}
                   />
                   <span className="text-sm">
-                    {field.placeholder || field.label}
+                    {placeholder || label}
                   </span>
                 </label>
               )}
@@ -262,16 +265,10 @@ const DynamicRegistrationForm = ({
             className="w-full mt-6"
             disabled={isSubmitting}
           >
-            {isSubmitting ? (
-              <>
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                {eventLang === "en" ? "Registering..." : "Registrando..."}
-              </>
-            ) : eventLang === "en" ? (
-              "Register"
-            ) : (
-              "Inscribirme"
-            )}
+            <span aria-hidden="true">{isSubmitting && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}</span>
+            <span>{isSubmitting
+              ? (eventLang === "en" ? "Registering..." : "Registrando...")
+              : (eventLang === "en" ? "Register" : "Inscribirme")}</span>
           </Button>
         </form>
       </CardContent>

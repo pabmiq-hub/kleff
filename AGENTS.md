@@ -1,3 +1,5 @@
+- Konektum Select placeholders and portaled item labels use stable element wrappers, not DOM prototype patches, so browser translators cannot detach React-owned nodes during selection.
+- Konektum custom registration forms translate only known built-in display labels by event language; original option values and organizer-authored copy stay unchanged to preserve quotas, matching and participant history.
 - Murder Mystery module ("Juegos") lives in src/lib/mm + src/components/mm with tables prefixed mm_; players never use Supabase Auth: all player reads/writes go through server functions that verify an HMAC player token, so is_killer and other characters' data never reach the browser.
 - Juegos routes use the `actividades_` file prefix so they don't nest under the public /actividades page.
 - Juegos character release, manual/random assignment and invitation registration use service-role-only SQL operations sharing a session lock, with a unique character index; SQL rechecks game limits and the UI uses pure eligibility rules so concurrent allocators cannot duplicate characters.

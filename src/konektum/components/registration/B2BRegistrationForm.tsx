@@ -129,7 +129,7 @@ const B2BRegistrationForm = ({
   };
 
   return (
-    <Card className="animate-fade-in">
+    <Card className="animate-fade-in" lang={eventLang}>
       <CardHeader className="text-center">
         <CardTitle className="font-display text-2xl">{b2b.joinEvent} {eventName}</CardTitle>
         <CardDescription>
@@ -321,7 +321,7 @@ const B2BRegistrationForm = ({
             {step > 1 && (
               <Button type="button" variant="outline" onClick={handleBack} className="flex-1">
                 <ArrowLeft className="w-4 h-4 mr-2" />
-                {b2b.back}
+                <span>{b2b.back}</span>
               </Button>
             )}
             {step < totalSteps ? (
@@ -332,7 +332,7 @@ const B2BRegistrationForm = ({
                 disabled={!canAdvance(step)}
                 className="flex-1"
               >
-                {b2b.next}
+                <span>{b2b.next}</span>
                 <ArrowRight className="w-4 h-4 ml-2" />
               </Button>
             ) : (
@@ -342,14 +342,8 @@ const B2BRegistrationForm = ({
                 disabled={isSubmitting || !canAdvance(4) || !dataConsent}
                 className="flex-1"
               >
-                {isSubmitting ? (
-                  <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    {b2b.submitting}
-                  </>
-                ) : (
-                  b2b.submitButton
-                )}
+                <span aria-hidden="true">{isSubmitting && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}</span>
+                <span>{isSubmitting ? b2b.submitting : b2b.submitButton}</span>
               </Button>
             )}
           </div>
