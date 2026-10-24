@@ -74,6 +74,7 @@ import {
 } from "@/konektum/lib/gameMode";
 import { isCustomTablesEnabled, computeCustomDistribution, getCustomTableFill } from "@/konektum/lib/customTableLayout";
 import { areDatingCompatible } from "@/konektum/lib/datingCompatibility";
+import { genderKey, uniqueGenderLabels, profileAgeRange, matchingQuota, countQuotaParticipants, synchronizeQuotas } from "@/konektum/lib/registration-quotas";
 
 interface ParticipantExclusion {
   id: string;
@@ -310,35 +311,19 @@ const EventDetail = () => {
   // Helper to determine if this is a professional event
   const isProfessionalEvent = eventData?.module === "professional";
 
-  const normalizeQuotaKey = (value: any) => String(value ?? '')
-    .toLowerCase()
-    .trim()
-    .replace(/–/g, '-')
-    .replace(/\s+/g, '');
-
   const getSlotQuotas = (): SlotQuotaConfig[] => {
     const quotas = (eventData as any)?.slot_quotas;
-    return Array.isArray(quotas) ? quotas : [];
+    return synchronizeQuotas(Array.isArray(quotas) ? quotas : [], eventData?.custom_age_ranges);
   };
 
   const quotasAreEnabled = () => {
     return !!(eventData as any)?.registration_requirements_enabled && getSlotQuotas().length > 0;
   };
 
-  const getMatchingQuota = (gender?: string | null, ageRange?: string | null) => {
-    return getSlotQuotas().find((quota) =>
-      normalizeQuotaKey(quota.gender) === normalizeQuotaKey(gender) &&
-      normalizeQuotaKey(quota.ageRange) === normalizeQuotaKey(ageRange)
-    );
-  };
+  const getMatchingQuota = (profile: any) => matchingQuota(getSlotQuotas(), profile, eventData?.custom_age_ranges);
 
   const countParticipantsForQuota = (quota: SlotQuotaConfig, participantPool: DbParticipant[] = participants) => {
-    return participantPool.filter((participant: any) =>
-      !participant.cancelled_at &&
-      !participant.is_fake &&
-      normalizeQuotaKey(participant.gender) === normalizeQuotaKey(quota.gender) &&
-      normalizeQuotaKey(participant.age_range) === normalizeQuotaKey(quota.ageRange)
-    ).length;
+    return countQuotaParticipants(participantPool, quota, eventData?.custom_age_ranges);
   };
 
   const getWaitlistPromotionEligibility = (entry: any, participantPool: DbParticipant[] = participants) => {
@@ -346,7 +331,7 @@ const EventDetail = () => {
       return { allowed: true, message: null as string | null };
     }
 
-    const quota = getMatchingQuota(entry.gender, entry.age_range);
+    const quota = getMatchingQuota(entry);
     if (!quota) {
       return { allowed: true, message: null as string | null };
     }
@@ -3725,8 +3710,8 @@ const EventDetail = () => {
       
       // Social filters
       if (!isProfessionalEvent) {
-        if (filterGender !== "all" && p.gender !== filterGender) return false;
-        if (filterAgeRange !== "all" && p.age_range !== filterAgeRange) return false;
+        if (filterGender !== "all" && genderKey(p.gender) !== genderKey(filterGender)) return false;
+        if (filterAgeRange !== "all" && profileAgeRange(p, eventData?.custom_age_ranges) !== filterAgeRange) return false;
         if (filterPreferredAgeRange !== "all" && !p.preferred_age_range?.includes(filterPreferredAgeRange)) return false;
         if (filterPreference !== "all" && p.preference !== filterPreference) return false;
         if (filterLanguages.length > 0) {
@@ -3846,8 +3831,8 @@ const EventDetail = () => {
   };
 
   // Get unique values for filter options - Social
-  const uniqueGenders = [...new Set(participants.map(p => p.gender).filter(Boolean))];
-  const uniqueAgeRanges = [...new Set(participants.map(p => p.age_range).filter(Boolean))];
+  const uniqueGenders = uniqueGenderLabels(participants.map(p => p.gender));
+  const uniqueAgeRanges = [...new Set(participants.map(p => profileAgeRange(p, eventData?.custom_age_ranges)).filter(Boolean))];
   const uniquePreferredAgeRanges = [...new Set(
     participants.flatMap(p => p.preferred_age_range?.split(', ') || []).filter(Boolean)
   )];
@@ -4638,7 +4623,7 @@ const EventDetail = () => {
                               >
                                 <option value="all">Género</option>
                                 {uniqueGenders.map(g => (
-                                  <option key={g} value={g!}>{g}</option>
+                                  <option key={g} value={g}>{g}</option>
                                 ))}
                               </select>
                               
@@ -5246,21 +5231,12 @@ const EventDetail = () => {
                 </CardHeader>
                 <CardContent>
                   {(() => {
-                    const normalizeKey = (v: any) => String(v ?? '').toLowerCase().trim().replace(/–/g, '-').replace(/\s+/g, '');
-                    const quotas = ((eventData as any).slot_quotas as Array<{ gender: string; ageRange: string; maxSlots: number }>) || [];
-                    const activeParticipants = participants.filter((p: any) => !p.is_fake && !p.cancelled_at);
+                    const quotas = getSlotQuotas();
                     const rows = quotas.map((q) => {
-                      const current = activeParticipants.filter((p: any) =>
-                        normalizeKey(p.gender) === normalizeKey(q.gender) &&
-                        normalizeKey(p.age_range) === normalizeKey(q.ageRange)
-                      ).length;
+                      const current = countParticipantsForQuota(q);
                       const available = Math.max(0, q.maxSlots - current);
                       const pct = q.maxSlots > 0 ? Math.min(100, Math.round((current / q.maxSlots) * 100)) : 0;
-                      const waitingCount = waitlistEntries.filter((w: any) =>
-                        w.status === 'waiting' &&
-                        normalizeKey(w.gender) === normalizeKey(q.gender) &&
-                        normalizeKey(w.age_range) === normalizeKey(q.ageRange)
-                      ).length;
+                      const waitingCount = countQuotaParticipants(waitlistEntries.filter((w: any) => w.status === 'waiting'), q, eventData?.custom_age_ranges);
                       return { ...q, current, available, pct, waitingCount };
                     });
                     const totalMax = rows.reduce((s, r) => s + r.maxSlots, 0);
