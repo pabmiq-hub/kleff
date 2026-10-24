@@ -1105,6 +1105,16 @@ const ParticipantJoin = ({
         return;
       }
 
+      if (data.waitlisted) {
+        await supabase.functions.invoke("send-waitlist-confirmation", {
+          body: { eventId, name: data.name || formValues.name, email: data.email || emailVal, position: data.position },
+        });
+        setIsWaitlistSubmission(true);
+        setIsSubmitted(true);
+        setIsSubmitting(false);
+        return;
+      }
+
       const baseUrl = window.location.origin;
       if (data.autoCheckedIn && data.verificationCode) {
         await supabase.functions.invoke("send-checkin-code", {

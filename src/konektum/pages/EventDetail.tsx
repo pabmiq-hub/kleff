@@ -4900,6 +4900,7 @@ const EventDetail = () => {
                       <ParticipantCard
                         key={participant.id}
                         participant={participant}
+                        ageRanges={eventData?.custom_age_ranges}
                         index={index}
                         isProfessional={isProfessionalEvent}
                         eventStatus={eventStatus}

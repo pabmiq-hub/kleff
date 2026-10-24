@@ -9,7 +9,7 @@ const Deno = {
 
 import { createClient } from "@/lib/kon-fn/client.server";
 import { seatInPreliminaryRound } from "@/lib/kon-fn/_shared/preliminarySeat";
-import { ageRangeForBirthDate, matchingQuota, countQuotaParticipants, effectivePreferredAgeRange } from "@/konektum/lib/registration-quotas";
+import { ageRangeForBirthDate, matchingQuota, countQuotaParticipants, effectivePreferredAgeRange, singleAgeBand } from "@/konektum/lib/registration-quotas";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -394,6 +394,11 @@ serve(async (req) => {
     }
 
     const ageRange = ageRangeForBirthDate(birthDate, event.custom_age_ranges);
+    if (singleAgeBand(event.custom_age_ranges) && ageRange === "Otro") {
+      return new Response(JSON.stringify({ error: 'Tu edad no está dentro de la franja de este evento' }), {
+        status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
 
     const socialForceWaitlist = body.forceWaitlist === true;
     let quotaFullDetected = false;
