@@ -1,3 +1,5 @@
+- Konektum registration-quotas.ts is the shared age/gender quota policy for public registration, eligibility and administration; compare known gender aliases and reclassify historical rows using birth dates/current event bands, without rewriting original participant data.
+- Konektum public availability returns aggregate counts only; birth dates used to reclassify quotas stay server-side, and custom age fields derive from the event configuration rather than saved form options.
 - Konektum Select placeholders and portaled item labels use stable element wrappers, not DOM prototype patches, so browser translators cannot detach React-owned nodes during selection.
 - Konektum custom registration forms translate only known built-in display labels by event language; original option values and organizer-authored copy stay unchanged to preserve quotas, matching and participant history.
 - Murder Mystery module ("Juegos") lives in src/lib/mm + src/components/mm with tables prefixed mm_; players never use Supabase Auth: all player reads/writes go through server functions that verify an HMAC player token, so is_killer and other characters' data never reach the browser.

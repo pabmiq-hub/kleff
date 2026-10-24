@@ -43,6 +43,7 @@ type EventModule = "social" | "professional";
 import EventSeriesManager from "@/konektum/components/event/EventSeriesManager";
 import { createSeriesEventsFromBase, type SeriesDateEntry } from "@/konektum/lib/eventSeries";
 import { slugifyEventName, slugifyEventDraft } from "@/konektum/lib/publicUrls";
+import { synchronizeQuotas } from "@/konektum/lib/registration-quotas";
 
 type B2BRotationType = "client_fixed" | "provider_fixed";
 type RegistrationFormMode = "auto" | "template" | "custom";
@@ -416,7 +417,7 @@ const CreateEvent = () => {
       custom_dating_preferences: hasCustomPreferences ? eventPreferences.datingPreferences : null,
       professional_config: professionalConfig,
       registration_requirements_enabled: eventModule === "social" ? registrationRequirementsEnabled : false,
-      slot_quotas: (eventModule === "social" && registrationRequirementsEnabled ? slotQuotas : null) as unknown as Json,
+      slot_quotas: (eventModule === "social" && registrationRequirementsEnabled ? synchronizeQuotas(slotQuotas, eventPreferences.ageRanges) : null) as unknown as Json,
       quota_waitlist_enabled: true,
       group_rounds: (eventModule === "social" && groupRoundsEnabled && groupRounds.length > 0 ? groupRounds : null) as unknown as Json,
       custom_registration_form: customFormEnabled && customFormFields.length > 0
@@ -1352,7 +1353,10 @@ const CreateEvent = () => {
                 <div className="pt-2">
                   <EventPreferencesEditor
                     value={eventPreferences}
-                    onChange={setEventPreferences}
+                    onChange={(preferences) => {
+                      setEventPreferences(preferences);
+                      setSlotQuotas(quotas => synchronizeQuotas(quotas, preferences.ageRanges));
+                    }}
                   />
                 </div>
 
@@ -1361,7 +1365,7 @@ const CreateEvent = () => {
                   <EventQuotasEditor
                     enabled={registrationRequirementsEnabled}
                     onEnabledChange={setRegistrationRequirementsEnabled}
-                    quotas={slotQuotas}
+                    quotas={synchronizeQuotas(slotQuotas, eventPreferences.ageRanges)}
                     onQuotasChange={setSlotQuotas}
                     availableGenders={eventPreferences.genders}
                     availableAgeRanges={eventPreferences.ageRanges}

@@ -23,6 +23,7 @@ import { Checkbox } from "@/konektum/ui/checkbox";
 import { LANGUAGE_OPTIONS, normalizeLanguages } from "@/konektum/lib/languages";
 import { type SocialGameAnswers } from "@/konektum/lib/socialGame";
 import { normalizeIcebreakers } from "@/konektum/lib/icebreakers";
+import { ageRangeForBirthDate, effectivePreferredAgeRange, singleAgeBand, uniqueGenderLabels } from "@/konektum/lib/registration-quotas";
 
 
 // Default professional options
@@ -105,7 +106,7 @@ const EditParticipantModal = ({
 
   // Use custom preferences if provided, otherwise use defaults
   const ageRanges = customPreferences?.ageRanges || [...AGE_RANGES];
-  const genders = customPreferences?.genders || [...GENDERS];
+  const genders = uniqueGenderLabels(customPreferences?.genders || [...GENDERS]);
   const preferences = customPreferences?.preferences || [...PREFERENCES];
   const datingPreferences = customPreferences?.datingPreferences || [...DATING_PREFERENCES];
   const preferredAgeRanges = [...ageRanges, "Cualquier rango"];
@@ -258,7 +259,7 @@ const EditParticipantModal = ({
     preferred_age_range: participant.preferred_age_range || "",
     preference: participant.preference || "",
     dating_preference: participant.dating_preference || "",
-    gender: participant.gender || "",
+    gender: uniqueGenderLabels([participant.gender])[0] || "",
     birth_date: participant.birth_date || "",
     is_returning_participant: participant.is_returning_participant === true ? "yes" : participant.is_returning_participant === false ? "no" : "",
   });
@@ -266,28 +267,7 @@ const EditParticipantModal = ({
   // Calculate age range from birth date
   const [calculatedAgeRange, setCalculatedAgeRange] = useState("");
 
-  const calculateAgeRange = (dateString: string): string => {
-    if (!dateString) return "";
-    const today = new Date();
-    const birth = new Date(dateString);
-    let age = today.getFullYear() - birth.getFullYear();
-    const monthDiff = today.getMonth() - birth.getMonth();
-    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
-      age--;
-    }
-    for (const range of ageRanges) {
-      if (range.includes('+')) {
-        const num = parseInt(range.replace(/[^0-9]/g, ''));
-        if (!isNaN(num) && age >= num) return range;
-        continue;
-      }
-      const parts = range.replace(/–/g, '-').split('-').map(n => parseInt(n.trim()));
-      if (parts.length === 2 && !isNaN(parts[0]) && !isNaN(parts[1]) && age >= parts[0] && age <= parts[1]) {
-        return range;
-      }
-    }
-    return "Otro";
-  };
+  const calculateAgeRange = (dateString: string): string => dateString ? ageRangeForBirthDate(dateString, ageRanges) : "";
 
   const getAge = (dateString: string): number => {
     if (!dateString) return 0;
@@ -359,7 +339,7 @@ const EditParticipantModal = ({
       // Add social fields
       const ageRange = formData.birth_date ? calculateAgeRange(formData.birth_date) : formData.age_range;
       updateData.age_range = ageRange || null;
-      updateData.preferred_age_range = formData.preferred_age_range || null;
+      updateData.preferred_age_range = effectivePreferredAgeRange(formData.preferred_age_range, ageRanges);
       updateData.preference = formData.preference || null;
       updateData.dating_preference = formData.dating_preference || null;
       updateData.gender = formData.gender || null;
@@ -464,7 +444,7 @@ const EditParticipantModal = ({
           : null,
       } : {
         age_range: (formData.birth_date ? calculateAgeRange(formData.birth_date) : formData.age_range) || null,
-        preferred_age_range: formData.preferred_age_range || null,
+        preferred_age_range: effectivePreferredAgeRange(formData.preferred_age_range, ageRanges),
         preference: formData.preference || null,
         dating_preference: formData.dating_preference || null,
         gender: formData.gender || null,
@@ -549,7 +529,7 @@ const EditParticipantModal = ({
         </RadioGroup>
       </div>
 
-      <div className="space-y-2">
+      {!singleAgeBand(ageRanges) && <div className="space-y-2">
         <Label htmlFor="preferred_age_range">Rango de edad preferido</Label>
         <Select
           value={formData.preferred_age_range}
@@ -564,7 +544,7 @@ const EditParticipantModal = ({
             ))}
           </SelectContent>
         </Select>
-      </div>
+      </div>}
 
       <div className="space-y-2">
         <Label htmlFor="preference">Tipo de conexión</Label>

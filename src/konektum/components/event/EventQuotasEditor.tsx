@@ -1,11 +1,11 @@
 // @ts-nocheck
-import { useState } from "react";
 import { Button } from "@/konektum/ui/button";
 import { Input } from "@/konektum/ui/input";
 import { Label } from "@/konektum/ui/label";
 import { Switch } from "@/konektum/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/konektum/ui/select";
 import { Plus, Trash2, Users } from "lucide-react";
+import { genderKey, normalizeQuotaKey, uniqueGenderLabels } from "@/konektum/lib/registration-quotas";
 
 export interface SlotQuota {
   gender: string;
@@ -59,7 +59,7 @@ const EventQuotasEditor = ({
   const getDuplicateWarning = (index: number): boolean => {
     const current = quotas[index];
     return quotas.some((q, i) => 
-      i !== index && q.gender === current.gender && q.ageRange === current.ageRange
+      i !== index && genderKey(q.gender) === genderKey(current.gender) && normalizeQuotaKey(q.ageRange) === normalizeQuotaKey(current.ageRange)
     );
   };
 
@@ -107,14 +107,14 @@ const EventQuotasEditor = ({
                 >
                   <div className="flex-1 grid grid-cols-3 gap-2">
                     <Select 
-                      value={quota.gender} 
+                      value={uniqueGenderLabels([quota.gender])[0]}
                       onValueChange={(v) => updateQuota(index, 'gender', v)}
                     >
                       <SelectTrigger className="h-9">
                         <SelectValue placeholder="Género" />
                       </SelectTrigger>
                       <SelectContent>
-                        {availableGenders.map((g) => (
+                        {uniqueGenderLabels(availableGenders).map((g) => (
                           <SelectItem key={g} value={g}>{g}</SelectItem>
                         ))}
                       </SelectContent>

@@ -16,6 +16,7 @@ import {
 import { Eye, UserCheck, Send, Trash2, Loader2, Mail, Calendar, Key, User, Heart, Users, Handshake, Bell, Sparkles, RotateCcw, FlaskConical, CreditCard, CheckCircle2, BellRing, Cake } from "lucide-react";
 import InlineEmailEditor from "./InlineEmailEditor";
 import { normalizePreference } from "@/konektum/lib/analyticsNormalization";
+import { genderLabel, profileAgeRange } from "@/konektum/lib/registration-quotas";
 
 interface ParticipantCardProps {
   participant: {
@@ -58,16 +59,18 @@ interface ParticipantCardProps {
   isSendingSelectionReminder?: boolean;
   isSendingPaymentReminder?: boolean;
   eventStartAt?: Date | null;
+  ageRanges?: string[] | null;
 }
 
 const getGenderBadge = (gender: string | null) => {
-  switch (gender) {
+  const label = genderLabel(gender);
+  switch (label) {
     case "Mujer":
       return { label: "Mujer", className: "bg-pink-50 text-pink-600 dark:bg-pink-950/40 dark:text-pink-300 border-pink-200 dark:border-pink-800/50" };
     case "Hombre":
       return { label: "Hombre", className: "bg-blue-50 text-blue-600 dark:bg-blue-950/40 dark:text-blue-300 border-blue-200 dark:border-blue-800/50" };
     default:
-      return gender ? { label: gender, className: "bg-muted text-muted-foreground border-border" } : null;
+      return gender ? { label, className: "bg-muted text-muted-foreground border-border" } : null;
   }
 };
 
@@ -105,6 +108,7 @@ const ParticipantCard = ({
   isSendingSelectionReminder,
   isSendingPaymentReminder,
   eventStartAt,
+  ageRanges,
 }: ParticipantCardProps) => {
   const isPaid = participant.payment_status === "paid";
   const paidAtMs = participant.paid_at ? new Date(participant.paid_at).getTime() : null;
@@ -374,7 +378,7 @@ const ParticipantCard = ({
           {!isProfessional && participant.age_range && (
             <div className="flex items-center gap-1.5">
               <User className="w-3 h-3 shrink-0 text-muted-foreground/60" />
-              <span>{participant.age_range}</span>
+              <span>{profileAgeRange(participant, ageRanges)}</span>
             </div>
           )}
 

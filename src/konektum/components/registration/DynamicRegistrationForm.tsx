@@ -14,6 +14,7 @@ import GDPRConsent from "@/konektum/components/registration/GDPRConsent";
 import { FieldError } from "@/konektum/ui/field-error";
 import { errorInputClass, fieldErrorMessage, scrollToFirstError } from "@/konektum/lib/formErrors";
 import { registrationFieldLabel, registrationOptionLabel, registrationPlaceholder } from "@/konektum/lib/registration-field-labels";
+import { registrationAgeFields, registrationAgeValues } from "@/konektum/lib/registration-form-config";
 
 
 interface DynamicRegistrationFormProps {
@@ -29,6 +30,7 @@ interface DynamicRegistrationFormProps {
   onSubmit: (values: Record<string, any>) => void;
   paymentInfo?: PaymentInfo | null;
   highlights?: unknown;
+  ageRanges?: string[] | null;
 }
 
 const DynamicRegistrationForm = ({
@@ -44,12 +46,14 @@ const DynamicRegistrationForm = ({
   onSubmit,
   paymentInfo,
   highlights,
+  ageRanges,
 }: DynamicRegistrationFormProps) => {
   const [values, setValues] = useState<Record<string, any>>({});
   const [dataConsent, setDataConsent] = useState(false);
   const [marketingConsent, setMarketingConsent] = useState(false);
   const [errors, setErrors] = useState<string[]>([]);
   const [consentError, setConsentError] = useState(false);
+  const activeFields = registrationAgeFields(fields, ageRanges);
 
 
   const setValue = (fieldId: string, value: any) => {
@@ -68,7 +72,7 @@ const DynamicRegistrationForm = ({
   };
 
   const missingFields = () =>
-    fields
+    activeFields
       .filter((f) => f.required)
       .filter((f) => {
         const val = values[f.id];
@@ -87,7 +91,7 @@ const DynamicRegistrationForm = ({
       scrollToFirstError();
       return;
     }
-    onSubmit({ ...values, marketingConsent });
+    onSubmit(registrationAgeValues({ ...values, marketingConsent }, ageRanges));
   };
 
   return (
@@ -122,7 +126,7 @@ const DynamicRegistrationForm = ({
                 : "Completa los campos destacados en rojo."}
             </div>
           )}
-          {fields.map((field) => {
+          {activeFields.map((field) => {
             const hasError = errors.includes(field.id);
             const label = registrationFieldLabel(field, field.label, eventLang);
             const placeholder = registrationPlaceholder(field, field.placeholder, eventLang);

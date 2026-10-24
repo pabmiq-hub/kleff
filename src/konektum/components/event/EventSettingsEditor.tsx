@@ -34,6 +34,7 @@ import IcebreakersEditor from "./IcebreakersEditor";
 import { normalizeIcebreakers, serializeIcebreakers, type IcebreakersConfig } from "@/konektum/lib/icebreakers";
 import { slugifyEventName, slugifyEventDraft } from "@/konektum/lib/publicUrls";
 import { DEFAULT_WRAPPED_QUESTIONS, getWrappedQuestions, type WrappedQuestion } from "@/konektum/lib/wrappedQuestions";
+import { synchronizeQuotas } from "@/konektum/lib/registration-quotas";
 
 const AVAILABLE_LANGUAGE_OPTIONS: { code: string; label: string }[] = [
   { code: "es", label: "Castellano" },
@@ -421,7 +422,7 @@ const EventSettingsEditor = ({
         reminder_scheduled_at: formReminderMode === "custom" && formReminderScheduledAt ? formReminderScheduledAt : null,
         tables_generation_mode: formTablesGenerationMode,
         registration_requirements_enabled: !isProfessional ? formRegRequirementsEnabled : false,
-        slot_quotas: !isProfessional && formRegRequirementsEnabled ? formSlotQuotas : null,
+        slot_quotas: !isProfessional && formRegRequirementsEnabled ? synchronizeQuotas(formSlotQuotas, formPreferences.ageRanges) : null,
         quota_waitlist_enabled: !isProfessional ? formQuotaWaitlistEnabled : true,
         waitlist_promotion_mode: formWaitlistPromotionMode === "manual" ? "manual" : "auto",
         payment_tracking_enabled: formPaymentTrackingEnabled,
@@ -810,7 +811,10 @@ const EventSettingsEditor = ({
           {!isProfessional && (
             <EventPreferencesEditor
               value={formPreferences}
-              onChange={setFormPreferences}
+              onChange={(preferences) => {
+                setFormPreferences(preferences);
+                setFormSlotQuotas(quotas => synchronizeQuotas(quotas, preferences.ageRanges));
+              }}
             />
           )}
 
@@ -818,7 +822,7 @@ const EventSettingsEditor = ({
             <EventQuotasEditor
               enabled={formRegRequirementsEnabled}
               onEnabledChange={setFormRegRequirementsEnabled}
-              quotas={formSlotQuotas}
+              quotas={synchronizeQuotas(formSlotQuotas, formPreferences.ageRanges)}
               onQuotasChange={setFormSlotQuotas}
               availableGenders={formPreferences.genders}
               availableAgeRanges={formPreferences.ageRanges}
@@ -1442,6 +1446,7 @@ const EventSettingsEditor = ({
         registrationSubtitle={formRegSubtitle || null}
         registrationDescription={formRegDescription || null}
         eventLang={formLanguage}
+        ageRanges={formPreferences.ageRanges}
         highlights={formHighlights}
         paymentInfo={{
           enabled: formPaymentTrackingEnabled,

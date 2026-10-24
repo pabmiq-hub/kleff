@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { countQuotaParticipants, synchronizeQuotas, type RegistrationQuota } from "@/konektum/lib/registration-quotas";
 
 export interface KonPublicEvent {
   id: string;
@@ -51,4 +52,28 @@ export const resolveKonEvent = createServerFn({ method: "GET" })
       variantDescription: isSecondary ? row.secondary_registration_description ?? null : null,
       variantGender: isSecondary ? row.secondary_target_gender ?? null : row.primary_target_gender ?? null,
     };
+  });
+
+/** Public aggregate only: birth dates and individual registrations stay server-side. */
+export const getKonQuotaAvailability = createServerFn({ method: "POST" })
+  .inputValidator((data: { eventId: string }) => {
+    if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(data.eventId)) throw new Error("Evento inválido");
+    return { eventId: data.eventId };
+  })
+  .handler(async ({ data }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const client = supabaseAdmin as unknown as { from: (t: string) => any };
+    const { data: event, error } = await client.from("kon_events_public")
+      .select("id, status, custom_age_ranges, registration_requirements_enabled, slot_quotas")
+      .eq("id", data.eventId).maybeSingle();
+    if (error || !event) throw new Error("No se pudieron consultar las plazas");
+    if (!["pending", "active"].includes(event.status) || !event.registration_requirements_enabled) return [];
+    const quotas = synchronizeQuotas(Array.isArray(event.slot_quotas) ? event.slot_quotas as RegistrationQuota[] : [], event.custom_age_ranges);
+    const { data: people, error: countError } = await client.from("kon_participants")
+      .select("gender, age_range, birth_date, cancelled_at, is_fake").eq("event_id", event.id);
+    if (countError) throw new Error("No se pudieron consultar las plazas");
+    return quotas.map(q => {
+      const current = countQuotaParticipants(people ?? [], q, event.custom_age_ranges);
+      return { gender: q.gender, ageRange: q.ageRange, current, max: q.maxSlots, available: Math.max(0, q.maxSlots - current) };
+    });
   });
