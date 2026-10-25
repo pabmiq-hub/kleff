@@ -157,20 +157,6 @@ function FinanzasDashboardPage() {
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Colaboraciones</CardTitle>
-          </CardHeader>
-          <CardContent className="text-sm space-y-1">
-            <p>
-              Saldo total disponible: <strong>{eur(data.colaboraciones.saldoTotal)}</strong>
-            </p>
-            <p className="text-ink/60">Total gastado histórico: {eur(data.colaboraciones.gastadoTotal)}</p>
-            <Link to="/admin/finanzas/colaboraciones" className="text-sm font-semibold text-coral underline">
-              Ver cuentas →
-            </Link>
-          </CardContent>
-        </Card>
       </div>
     </div>
   );
