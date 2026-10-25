@@ -268,6 +268,18 @@ export const submitRegistration = createServerFn({ method: "POST" })
       throw new Error("Esta edición ya se ha celebrado");
     }
     const guests = f.allow_guests ? Math.min(data.guests, f.max_guests_per_response) : 0;
+    if (data.emailContact) {
+      const { data: dup } = await supabaseAdmin
+        .from("registration_responses")
+        .select("id")
+        .eq("form_id", f.id)
+        .is("cancelled_at", null)
+        .ilike("email_contact", data.emailContact.trim().replace(/[%_\\]/g, "\\$&"))
+        .limit(1);
+      if (dup && dup.length > 0) {
+        throw new Error("Ya hay una inscripción con este correo electrónico en este evento. Si necesitas cambiarla, escríbenos a hola@kleff.es.");
+      }
+    }
     if (f.max_responses) {
       const { data: rows } = await supabaseAdmin
         .from("registration_responses")
