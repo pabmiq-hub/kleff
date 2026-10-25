@@ -50,16 +50,31 @@ function FinanzasDashboardPage() {
         </select>
       </div>
 
-      <Card className="border-coral/40">
-        <CardContent className="p-6">
-          <p className="text-sm text-ink/60">Saldo actual estimado</p>
-          <p className="font-display text-5xl font-bold mt-1">{eur(data.saldoEstimado)}</p>
-          <p className="text-xs text-ink/60 mt-3">
-            Ingresos acumulados {eur(data.ingresosTotales)} − gastos {eur(data.gastosTotales)} − provisión de
-            impuestos pendiente {eur(data.provisionImpuestos)}.
-          </p>
-        </CardContent>
-      </Card>
+      <div className="grid gap-4 md:grid-cols-2">
+        <Card className="border-coral/40">
+          <CardContent className="p-6">
+            <p className="text-sm text-ink/60">Saldo actual estimado</p>
+            <p className="font-display text-5xl font-bold mt-1">{eur(data.saldoEstimado)}</p>
+            <p className="text-xs text-ink/60 mt-3">
+              Ingresos acumulados {eur(data.ingresosTotales)} − gastos {eur(data.gastosTotales)} − provisión de
+              impuestos pendiente {eur(data.provisionImpuestos)}.
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card className="border-coral/40">
+          <CardContent className="p-6">
+            <p className="text-sm text-ink/60">Saldo en colaboraciones</p>
+            <p className="font-display text-5xl font-bold mt-1">{eur(data.colaboraciones.saldoTotal)}</p>
+            <p className="text-xs text-ink/60 mt-3">
+              Total gastado histórico {eur(data.colaboraciones.gastadoTotal)}.{" "}
+              <Link to="/admin/finanzas/colaboraciones" className="font-semibold text-coral underline">
+                Ver cuentas →
+              </Link>
+            </p>
+          </CardContent>
+        </Card>
+      </div>
 
       <div className="grid gap-4 md:grid-cols-2">
         <Card>
@@ -142,20 +157,6 @@ function FinanzasDashboardPage() {
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Colaboraciones</CardTitle>
-          </CardHeader>
-          <CardContent className="text-sm space-y-1">
-            <p>
-              Saldo total disponible: <strong>{eur(data.colaboraciones.saldoTotal)}</strong>
-            </p>
-            <p className="text-ink/60">Total gastado histórico: {eur(data.colaboraciones.gastadoTotal)}</p>
-            <Link to="/admin/finanzas/colaboraciones" className="text-sm font-semibold text-coral underline">
-              Ver cuentas →
-            </Link>
-          </CardContent>
-        </Card>
       </div>
     </div>
   );
