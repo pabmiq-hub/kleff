@@ -500,7 +500,7 @@ export async function buildAdminState(sessionId: string) {
   const now = Date.now();
   const { data: wallets } = pids.length ? await db().from("mm_wallets").select("*").in("session_player_id", pids) : { data: [] };
   return {
-    session: { ...publicSession(s, acts, game), murder_event: game.murder_event, blind_mode: s.blind_mode, scheduled_at: s.scheduled_at, archived: s.archived },
+    session: { ...publicSession(s, acts, game), murder_event: game.murder_event, blind_mode: s.blind_mode, scheduled_at: s.scheduled_at, archived: s.archived, join_enabled: !!s.join_enabled },
     readings: await (async () => {
       const { loadTr } = await import("./translate.server");
       const translated = (await loadTr(s.game_id, s.language)).row("mm_games", game);

@@ -17,7 +17,7 @@ export const mmListGames = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     const { db } = await guard(context.userId);
-    const { data, error } = await db().from("mm_games").select("id, slug, title, synopsis, cover_url, min_players, max_players, duration_minutes, status, theme, created_at").order("created_at", { ascending: false });
+    const { data, error } = await db().from("mm_games").select("id, slug, title, synopsis, cover_url, min_players, max_players, duration_minutes, status, theme, genre, difficulty, created_at").order("created_at", { ascending: false });
     if (error) throw new Error(error.message);
     return data as any[];
   });
@@ -124,13 +124,36 @@ export const mmGetGame = createServerFn({ method: "POST" })
     return { game, acts: acts ?? [], characters: characters ?? [], evidences: evidences ?? [], joint_actions: joint ?? [], sessions: sessions ?? [] } as any;
   });
 
+const gameEditSchema = z.object({
+  gameId: id,
+  status: z.enum(["draft", "published"]).optional(),
+  delete: z.boolean().optional(),
+  title: z.string().trim().min(1).max(120).optional(),
+  synopsis: z.string().trim().max(2000).nullish(),
+  cover_url: z.string().trim().max(500).nullish(),
+  genre: z.string().trim().max(60).nullish(),
+  difficulty: z.enum(["facil", "media", "dificil"]).nullish(),
+});
+
 export const mmUpdateGame = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: { gameId: string; status?: "draft" | "published"; delete?: boolean }) => d)
+  .inputValidator((d: z.infer<typeof gameEditSchema>) => gameEditSchema.parse(d))
   .handler(async ({ data, context }) => {
     const { db } = await guard(context.userId);
     if (data.delete) await db().from("mm_games").delete().eq("id", data.gameId);
     else if (data.status) await db().from("mm_games").update({ status: data.status }).eq("id", data.gameId);
+    else {
+      const patch: Record<string, unknown> = {};
+      if (data.title !== undefined) patch.title = data.title;
+      if (data.synopsis !== undefined) patch.synopsis = data.synopsis || null;
+      if (data.cover_url !== undefined) patch.cover_url = data.cover_url || null;
+      if (data.genre !== undefined) patch.genre = data.genre || null;
+      if (data.difficulty !== undefined) patch.difficulty = data.difficulty || null;
+      if (Object.keys(patch).length) {
+        const { error } = await db().from("mm_games").update(patch).eq("id", data.gameId);
+        if (error) throw new Error(error.message);
+      }
+    }
     return { ok: true };
   });
 
@@ -176,12 +199,13 @@ export const mmViewAsPlayer = createServerFn({ method: "POST" })
 
 const controlSchema = z.object({
   sessionId: id,
-  action: z.enum(["start", "pause", "resume", "add_minutes", "advance", "murder", "voting_open", "voting_close", "finish", "archive", "set_mode", "set_blind", "admin_objective", "release", "schedule_release", "set_language"]),
+  action: z.enum(["start", "pause", "resume", "add_minutes", "advance", "murder", "voting_open", "voting_close", "finish", "archive", "set_mode", "set_blind", "set_join_open", "admin_objective", "release", "schedule_release", "set_language"]),
   releaseAt: z.string().nullable().optional(),
   language: z.enum(["es", "ca", "en", "fr"]).optional(),
   minutes: z.number().int().optional(),
   mode: z.enum(["manual", "timer", "auto"]).optional(),
   blind: z.boolean().optional(),
+  open: z.boolean().optional(),
   expectedActId: z.string().uuid().nullable().optional(),
   playerId: z.string().uuid().optional(),
   objectiveId: z.string().uuid().optional(),
@@ -250,6 +274,11 @@ export const mmControlSession = createServerFn({ method: "POST" })
         break;
       case "set_blind":
         await db().from("mm_sessions").update({ blind_mode: !!data.blind }).eq("id", sid);
+        break;
+      case "set_join_open":
+        if (s.status !== "lobby") throw new Error("El enlace de inscripción solo se puede abrir en la sala de espera");
+        await db().from("mm_sessions").update({ join_enabled: !!data.open }).eq("id", sid);
+        await logEvent(sid, "join_link_toggled", { open: !!data.open });
         break;
       case "release": {
         const r = await eng.releaseCharacters(sid, "admin");
