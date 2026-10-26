@@ -147,6 +147,33 @@ export const mmImportSchema = z
         if (ref && ref !== "cualquiera" && !refs.has(ref)) err(["joint_actions", i, "requirements", j], `Personaje «${ref}» inexistente`);
       });
     });
+    // Castle map
+    const actOrder = (k?: string) => (k ? g.acts.findIndex((a) => a.key === k) : -1);
+    const evRefs = new Set(g.evidences.map((e) => e.ref).filter(Boolean));
+    const itemKeys = new Set(g.characters.flatMap((c) => c.items.flatMap((x) => [x.ref, x.name].filter(Boolean) as string[])));
+    const abilityKeys = new Set(g.characters.flatMap((c) => c.abilities.flatMap((x) => [x.ref, x.name].filter(Boolean) as string[])));
+    const locRefs = new Set<string>();
+    const featRefs = new Set<string>();
+    g.locations.forEach((l, i) => {
+      if (locRefs.has(l.ref)) err(["locations", i, "ref"], `Lugar con «ref» repetido: ${l.ref}`);
+      locRefs.add(l.ref);
+      g.locations.slice(0, i).forEach((o) => {
+        if (Math.abs(o.x - l.x) < 22 && Math.abs(o.y - l.y) < 18) err(["locations", i], `«${l.name}» está demasiado cerca de «${o.name}» en el plano (mínimo 22 en horizontal o 18 en vertical)`);
+      });
+      l.features.forEach((f, j) => {
+        const p = ["locations", i, "features", j];
+        if (featRefs.has(f.ref)) err([...p, "ref"], `Elemento con «ref» repetido: ${f.ref}`);
+        featRefs.add(f.ref);
+        if (f.act && l.act && actOrder(f.act) < actOrder(l.act)) err([...p, "act"], `«${f.name}» no puede estar en un acto anterior a su lugar`);
+        if (f.act && !l.act) void 0;
+        if (!f.act && l.act && actOrder(l.act) > 0) void 0; // inherits the place's act at runtime
+        if (f.evidence && !evRefs.has(f.evidence)) err([...p, "evidence"], `Prueba «${f.evidence}» inexistente`);
+        const r = f.requires;
+        if (r.character && r.character !== "cualquiera" && !refs.has(r.character)) err([...p, "requires", "character"], `Personaje «${r.character}» inexistente`);
+        if (r.item && !itemKeys.has(r.item)) err([...p, "requires", "item"], `Objeto «${r.item}» inexistente`);
+        if (r.ability && !abilityKeys.has(r.ability)) err([...p, "requires", "ability"], `Habilidad «${r.ability}» inexistente`);
+      });
+    });
   });
 
 export type MMImport = z.infer<typeof mmImportSchema>;
