@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { MMAdminGate } from "@/components/mm/AdminGate";
 import { MMAvatar } from "@/components/mm/shared";
+import { AdminGameMap } from "@/components/mm/AdminGameMap";
 import { ImagePicker } from "@/components/cms/ImagePicker";
 import { MM_LANGS } from "@/lib/mm/i18n";
 import { DIFFICULTY_LABEL } from "@/lib/mm/game-meta";
@@ -136,6 +137,7 @@ function GameDetail() {
               ))}
             </ol>
           </section>
+          <AdminGameMap gameId={g.id} />
           <section>
             <h2 className="mb-3 text-lg font-semibold">Evidencias</h2>
             <div className="grid gap-2 sm:grid-cols-2">
