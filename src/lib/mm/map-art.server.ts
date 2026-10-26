@@ -21,7 +21,7 @@ async function drawSvg(system: string, user: string, viewBox: string, minShapes:
  * Fills the castle plan, room and feature drawings that are missing (or all with `force`).
  * The plan always ends up with at least the server-side fallback, so pins always line up. Never throws.
  */
-export async function fillGameMapArt(db: () => any, gameId: string, opts: { force?: boolean } = {}): Promise<{ generated: number; failed: number; fallback: boolean }> {
+export async function fillGameMapArt(db: () => any, gameId: string, opts: { force?: boolean; target?: { kind: "map" | "location" | "feature"; id: string } } = {}): Promise<{ generated: number; failed: number; fallback: boolean }> {
   const [{ data: game }, { data: locs }, { data: feats }] = await Promise.all([
     db().from("mm_games").select("id, title, synopsis, map_url").eq("id", gameId).single(),
     db().from("mm_locations").select("*").eq("game_id", gameId).order("sort_order"),
@@ -33,28 +33,35 @@ export async function fillGameMapArt(db: () => any, gameId: string, opts: { forc
   let failed = 0;
   let fallback = false;
   if (!game || !locations.length) return { generated, failed, fallback };
+  const target = opts.target;
+  if (target && !(target.kind === "map" ? target.id === gameId : (target.kind === "location" ? locations : features).some((row) => row.id === target.id))) {
+    throw new Error("Ilustración no encontrada en este juego.");
+  }
   const pts = locations.map((l) => ({ name: l.name, description: l.description, x: Number(l.x), y: Number(l.y) }));
 
-  if (opts.force || !game.map_url) {
+  if ((!target || target.kind === "map") && (opts.force || !game.map_url)) {
     const url = await drawSvg(MAP_ART_SYSTEM, mapArtPrompt(game, pts), MAP_VIEWBOX, Math.max(6, 2 * locations.length));
-    if (url) generated++;
-    else {
+    if (!url) {
       failed++;
-      fallback = true;
+      if (!target) fallback = true;
     }
-    await db().from("mm_games").update({ map_url: url ?? svgDataUri(fallbackMapSvg(pts)) }).eq("id", gameId);
+    if (url || !target) {
+      const { error } = await db().from("mm_games").update({ map_url: url ?? svgDataUri(fallbackMapSvg(pts)) }).eq("id", gameId);
+      if (error) failed++;
+      else if (url) generated++;
+    }
   }
 
   type Job = { table: string; id: string; run: () => Promise<string | null> };
   const jobs: Job[] = [];
   for (const l of locations) {
-    if (opts.force || !l.image_url) {
+    if ((!target || (target.kind === "location" && target.id === l.id)) && (opts.force || !l.image_url)) {
       const names = features.filter((f) => f.location_id === l.id).map((f) => f.name);
       jobs.push({ table: "mm_locations", id: l.id, run: () => drawSvg(SCENE_ART_SYSTEM, roomArtPrompt(game, l, names), SCENE_VIEWBOX, 4) });
     }
   }
   for (const f of features) {
-    if (opts.force || !f.image_url) {
+    if ((!target || (target.kind === "feature" && target.id === f.id)) && (opts.force || !f.image_url)) {
       const room = locations.find((l) => l.id === f.location_id) ?? { name: "" };
       jobs.push({ table: "mm_location_features", id: f.id, run: () => drawSvg(SCENE_ART_SYSTEM, featureArtPrompt(game, room, f), SCENE_VIEWBOX, 4) });
     }
