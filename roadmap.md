@@ -28,3 +28,6 @@
 - [ ] Juegos avatares: verificar importación completa con administrador y recuperar dibujos del juego existente (sin sesión propia ni JSON original disponible).
 - [x] Bajas: aviso de baja garantizado; cajita de compromiso; agradecimiento + reseña Google a las 12:00 del día siguiente
 - [ ] Copiar columna thanks_sent_at a la base de respaldo (migraciones bloqueadas)
+- [x] Juegos: enlace público de inscripción (nombre+correo, código y email al momento); 5 reglas de integración y página pública verificadas
+- [x] Juegos: editor de ficha (título, sinopsis, carátula, género, dificultad) y biblioteca con buscador y filtros; genre/difficulty opcionales en el JSON
+- [ ] Juegos enlace público: copiar db/mm-open-join.sql a la base de respaldo (migraciones bloqueadas por preferencias)
