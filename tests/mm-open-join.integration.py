@@ -35,7 +35,7 @@ try:
     """)
 
     def join(name, email, expect_error=None):
-        out = sql(f"SELECT public.mm_join_session('{session_id}', '{name}', '{email}', 'TEST-0001');")
+        out = sql(f"SELECT public.mm_join_session('{session_id}', '{name}', '{email}', 'TEST-' || replace(gen_random_uuid()::text, '-', ''));")
         if expect_error is None:
             uuid.UUID(out)  # must return a player id
         else:
@@ -43,7 +43,7 @@ try:
 
     def join_error(name, email):
         r = subprocess.run(
-            ["psql", url, "-tA", "-c", f"SELECT public.mm_join_session('{session_id}', '{name}', '{email}', 'TEST-0002');"],
+            ["psql", url, "-tA", "-c", f"SELECT public.mm_join_session('{session_id}', '{name}', '{email}', 'TEST-' || replace(gen_random_uuid()::text, '-', ''));"],
             capture_output=True, text=True, env={**os.environ, "PGSSLMODE": "require"},
         )
         assert r.returncode != 0, "expected the join to fail"
