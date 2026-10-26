@@ -94,7 +94,18 @@ export const mmPlayerState = createServerFn({ method: "POST" })
     if (income.error) throw new Error("No se pudieron actualizar los ingresos de la partida");
     await e.db().from("mm_session_players").update({ last_seen_at: new Date().toISOString() }).eq("id", sp);
     const state = await e.buildPlayerState(sp);
-    return { ...state, token: await e.signPlayerToken(sp, s) } as any;
+    const { playerMapState } = await import("./map.server");
+    const map = await playerMapState(sp).catch(() => null);
+    return { ...state, map, token: await e.signPlayerToken(sp, s) } as any;
+  });
+
+export const mmConsultFeature = createServerFn({ method: "POST" })
+  .inputValidator((d: z.infer<typeof auth> & { featureId: string }) => auth.extend({ featureId: z.string().uuid() }).parse(d))
+  .handler(async ({ data }) => {
+    const e = await eng();
+    const { sp } = await e.verifyPlayerToken(data.token, data.sessionId);
+    const { consultFeature } = await import("./map.server");
+    return consultFeature(sp, data.featureId);
   });
 
 const actionSchema = auth.extend({
