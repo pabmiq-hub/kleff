@@ -35,4 +35,5 @@
 - [ ] Juegos carátulas: verificar subida y guardado completos con una sesión de superadministrador de la base propia (no hay sesión disponible).
 
 - [ ] Mapa del castillo: importar el JSON v12 y repasar las 10 comprobaciones con dos jugadores (falta el JSON v12); copiar db/mm-map.sql a la base de respaldo
-- [ ] Juegos: galería de ilustraciones por juego con objetos, evidencias, plano, salas y elementos; ampliar y regenerar un dibujo sin sustituir los demás; comprobar acceso y visualización.
+- [x] Juegos: pestaña Ilustraciones con objetos, evidencias, plano, salas y elementos; filtros, ampliación y regeneración individual; 51 pruebas superadas, cinco generaciones reales con Gemini y lectura posterior en juego temporal eliminado; vista con 92 imágenes reales comprobada en ordenador y móvil, compilación correcta.
+- [ ] Juegos galería: verificar el recorrido completo desde la ficha con sesión de superadministrador (la sesión propia no está disponible; la herramienta no encuentra una cuenta del solicitante); publicar para kleff.es.
