@@ -31,3 +31,4 @@
 - [x] Juegos: enlace público de inscripción (nombre+correo, código y email al momento); 5 reglas de integración y página pública verificadas
 - [x] Juegos: editor de ficha (título, sinopsis, carátula, género, dificultad) y biblioteca con buscador y filtros; genre/difficulty opcionales en el JSON
 - [ ] Juegos enlace público: copiar db/mm-open-join.sql a la base de respaldo (migraciones bloqueadas por preferencias)
+- [ ] Juegos: subir carátulas desde el ordenador en Editar ficha, con vista previa, cambio/eliminación y URL alternativa; verificar subida y guardado.
