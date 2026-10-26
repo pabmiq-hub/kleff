@@ -1,10 +1,12 @@
 import { aiText } from "@/lib/ai.server";
+import { LABEL_RULES } from "./map-art";
 import { itemCategory, sanitizeSvg, svgDataUri } from "./item-art";
 
 const SYSTEM = `You are an illustrator producing flat cartoon icons that match the DiceBear "Avataaars" avatar style:
 bold clean shapes, flat fills, soft pastel/saturated palette, 2-3px dark outline (#262E33), subtle single-tone shading, no gradients except optional one soft highlight, no text, no letters.
 Return ONLY one SVG element: viewBox="0 0 128 128", width="128" height="128", centered object on a soft circular background (#F3EBDD), at most ~40 shapes.
-Never use <script>, <image>, <foreignObject>, external links, fonts or event attributes.`;
+Never use <script>, <image>, <foreignObject>, external links, fonts or event attributes.
+${LABEL_RULES}`;
 
 /** Generates an Avataaars-style SVG for one item; returns a data URI or null. */
 export async function generateItemArt(item: { name: string; description?: string | null; type?: string | null }): Promise<string | null> {

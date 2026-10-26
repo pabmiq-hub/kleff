@@ -1,3 +1,4 @@
+import { LABEL_RULES } from "./map-art";
 // Shared, browser-safe helpers for tangible evidence illustrations in Juegos.
 // Pure functions only (no server imports) so they can be unit tested.
 
@@ -46,7 +47,8 @@ Return ONLY one SVG element with viewBox="0 0 360 240", width="360" height="240"
 Background: a dark wooden table (#2B2019) with a few faint horizontal grain lines. Show ONE physical object seen from above, slightly rotated (between -4 and 4 degrees), with a soft drop shadow, filling about 70% of the canvas.
 Text: only short labels in Spanish (max 6 lines, max 5 words per line, font-family Courier New, monospace or Georgia, serif). Make sure every label fits inside its object; never let text run off the edge.
 Draw what the evidence describes and nothing else. Never reveal who the culprit is, never draw faces, never add text that is not in the evidence.
-At most ~60 shapes. Never use <script>, <image>, <foreignObject>, external links, web fonts or event attributes.`;
+At most ~60 shapes. Never use <script>, <image>, <foreignObject>, external links, web fonts or event attributes.
+${LABEL_RULES}`;
 
 export function evidenceArtPrompt(e: { title: string; content?: string | null; reveal_style?: string | null; scope?: string | null }): { kind: EvidenceKind; user: string } {
   const kind = evidenceArtKind(e);
