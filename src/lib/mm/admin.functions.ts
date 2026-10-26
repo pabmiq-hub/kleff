@@ -59,8 +59,34 @@ export const mmImportGame = createServerFn({ method: "POST" })
       }
       for (const [t, list] of [["mm_secrets", rows.secrets], ["mm_objectives", rows.objectives], ["mm_abilities", rows.abilities], ["mm_items", rows.items], ["mm_fragments", rows.fragments]] as const)
         if (list.length) must(await db().from(t).insert(list));
-      if (g.evidences.length)
-        must(await db().from("mm_evidences").insert(g.evidences.map((e) => ({ game_id: game.id, act_id: actId(e.act), title: e.title, content: e.content, image_url: e.image_url, scope: e.scope, target_character_id: e.target ? cid(e.target) : null, unlock_rule: { ...e.unlock_rule, ref: e.ref }, reveal_style: e.reveal_style }))));
+      const evRows = g.evidences.length
+        ? must(await db().from("mm_evidences").insert(g.evidences.map((e) => ({ game_id: game.id, act_id: actId(e.act), title: e.title, content: e.content, image_url: e.image_url, scope: e.scope, target_character_id: e.target ? cid(e.target) : null, unlock_rule: { ...e.unlock_rule, ref: e.ref }, reveal_style: e.reveal_style }))).select("id, unlock_rule"))
+        : [];
+      if (g.locations.length) {
+        const locRows = must(
+          await db()
+            .from("mm_locations")
+            .insert(g.locations.map((l, i) => ({ game_id: game.id, ref: l.ref, name: l.name, description: l.description ?? null, act_id: actId(l.act), x: l.x, y: l.y, image_url: l.image_url ?? null, sort_order: i })))
+            .select("id, ref"),
+        );
+        const featRows = g.locations.flatMap((l) =>
+          l.features.map((f, i) => ({
+            game_id: game.id,
+            location_id: locRows.find((r: any) => r.ref === l.ref)!.id,
+            ref: f.ref,
+            name: f.name,
+            teaser: f.teaser ?? null,
+            locked_hint: f.locked_hint ?? null,
+            content: f.content,
+            image_url: f.image_url ?? null,
+            act_id: actId(f.act),
+            requires: f.requires,
+            evidence_id: f.evidence ? evRows.find((e: any) => e.unlock_rule?.ref === f.evidence)?.id ?? null : null,
+            sort_order: i,
+          })),
+        );
+        if (featRows.length) must(await db().from("mm_location_features").insert(featRows));
+      }
       if (g.joint_actions.length)
         must(
           await db()
@@ -84,8 +110,9 @@ export const mmImportGame = createServerFn({ method: "POST" })
     }
     const { fillGameItemArt } = await import("./item-art.server");
     const { fillGameEvidenceArt } = await import("./evidence-art.server");
-    const [art, evidenceArt] = await Promise.all([fillGameItemArt(db, game.id), fillGameEvidenceArt(db, game.id)]);
-    return { ok: true as const, gameId: game.id as string, art, evidenceArt };
+    const { fillGameMapArt } = await import("./map-art.server");
+    const [art, evidenceArt, mapArt] = await Promise.all([fillGameItemArt(db, game.id), fillGameEvidenceArt(db, game.id), fillGameMapArt(db, game.id)]);
+    return { ok: true as const, gameId: game.id as string, art, evidenceArt, mapArt };
   });
 
 export const mmGenerateItemArt = createServerFn({ method: "POST" })
@@ -104,6 +131,58 @@ export const mmGenerateEvidenceArt = createServerFn({ method: "POST" })
     const { db } = await guard(context.userId);
     const { fillGameEvidenceArt } = await import("./evidence-art.server");
     return fillGameEvidenceArt(db, data.gameId, { force: data.force });
+  });
+
+export const mmGenerateMapArt = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { gameId: string; force?: boolean }) => ({ gameId: id.parse(d.gameId), force: !!d.force }))
+  .handler(async ({ data, context }) => {
+    const { db } = await guard(context.userId);
+    const { fillGameMapArt } = await import("./map-art.server");
+    return fillGameMapArt(db, data.gameId, { force: data.force });
+  });
+
+/** Admin overview of the castle map: places, features, requirements and drawing status. */
+export const mmGetGameMap = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { gameId: string }) => ({ gameId: id.parse(d.gameId) }))
+  .handler(async ({ data, context }) => {
+    const { db } = await guard(context.userId);
+    const g = data.gameId;
+    const [{ data: game }, { data: acts }, { data: locs }, { data: feats }, { data: chars }, { data: evs }] = await Promise.all([
+      db().from("mm_games").select("map_url").eq("id", g).single(),
+      db().from("mm_acts").select("id, name").eq("game_id", g),
+      db().from("mm_locations").select("id, ref, name, act_id, x, y, image_url").eq("game_id", g).order("sort_order"),
+      db().from("mm_location_features").select("id, location_id, ref, name, act_id, requires, evidence_id, image_url").eq("game_id", g).order("sort_order"),
+      db().from("mm_characters").select("id, ref, name").eq("game_id", g),
+      db().from("mm_evidences").select("id, title").eq("game_id", g),
+    ]);
+    const charIds = (chars ?? []).map((c: any) => c.id);
+    const [{ data: items }, { data: abil }] = charIds.length
+      ? await Promise.all([db().from("mm_items").select("ref, name").in("character_id", charIds), db().from("mm_abilities").select("ref, name").in("character_id", charIds)])
+      : [{ data: [] }, { data: [] }];
+    const has = (list: any[] | null, k: string) => (list ?? []).some((x: any) => x.ref === k || x.name === k);
+    const actName = (a: string | null) => (acts ?? []).find((x: any) => x.id === a)?.name ?? null;
+    const features = (feats ?? []).map((f: any) => {
+      const r = f.requires ?? {};
+      const warnings: string[] = [];
+      if (r.character && r.character !== "cualquiera" && !(chars ?? []).some((c: any) => c.ref === r.character)) warnings.push(`Nadie es el personaje «${r.character}»`);
+      if (r.item && !has(items, r.item)) warnings.push(`Nadie tiene el objeto «${r.item}»`);
+      if (r.ability && !has(abil, r.ability)) warnings.push(`Nadie tiene la habilidad «${r.ability}»`);
+      return {
+        id: f.id,
+        location_id: f.location_id,
+        name: f.name,
+        act: actName(f.act_id),
+        requires: { character: r.character ? (chars ?? []).find((c: any) => c.ref === r.character)?.name ?? r.character : null, item: r.item ?? null, ability: r.ability ?? null },
+        evidence: (evs ?? []).find((e: any) => e.id === f.evidence_id)?.title ?? null,
+        has_image: !!f.image_url,
+        warnings,
+      };
+    });
+    const locations = (locs ?? []).map((l: any) => ({ id: l.id, name: l.name, act: actName(l.act_id), has_image: !!l.image_url }));
+    const missing = (game?.map_url ? 0 : locations.length ? 1 : 0) + locations.filter((l: any) => !l.has_image).length + features.filter((f: any) => !f.has_image).length;
+    return { map_url: game?.map_url ?? null, locations, features, missing };
   });
 
 export const mmGetGame = createServerFn({ method: "POST" })

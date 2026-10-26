@@ -4,7 +4,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { MMShell, sessionTopicName, useBroadcast } from "@/components/mm/shared";
 import { PlayerView } from "@/components/mm/PlayerView";
-import { mmPlayerAction, mmPlayerState } from "@/lib/mm/player.functions";
+import { mmConsultFeature, mmPlayerAction, mmPlayerState } from "@/lib/mm/player.functions";
 import { mmInteract } from "@/lib/mm/interaction.functions";
 
 export const Route = createFileRoute("/actividades_/juegos/jugar/$sessionId")({
@@ -28,6 +28,7 @@ function Play() {
   const getState = useServerFn(mmPlayerState);
   const doAction = useServerFn(mmPlayerAction);
   const interact = useServerFn(mmInteract);
+  const consultFn = useServerFn(mmConsultFeature);
   const [state, setState] = useState<any>(null);
   const [err, setErr] = useState("");
   const key = `mm-token-${sessionId}`;
@@ -80,6 +81,11 @@ function Play() {
         ready: () => run({ action: "ready" }),
         toggleObjective: (objectiveId) => run({ action: "toggle_objective", objectiveId }),
         vote: (v) => run({ action: "vote", ...v }),
+        consult: async (featureId) => {
+          const r = await consultFn({ data: { token: localStorage.getItem(key) ?? "", sessionId, featureId } });
+          await load();
+          return r;
+        },
         interact: async (data) => {
           await interact({ data: { token: localStorage.getItem(key) ?? "", sessionId, ...data } });
           await load();

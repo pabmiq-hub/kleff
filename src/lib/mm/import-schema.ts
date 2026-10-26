@@ -12,6 +12,7 @@ export const mmImportSchema = z
       slug: z.string().min(2).regex(/^[a-z0-9-]+$/, "El slug solo admite minúsculas, números y guiones"),
       title: z.string().min(1),
       synopsis: z.string().optional(),
+      map_url: z.string().optional(),
       cover_url: z.string().optional(),
       genre: z.string().trim().max(60).optional(),
       difficulty: z.enum(["facil", "media", "dificil"]).optional(),
@@ -69,6 +70,34 @@ export const mmImportSchema = z
       )
       .default([]),
     readings: z.array(readingSchema).default([]),
+    locations: z
+      .array(
+        z.object({
+          ref: z.string().min(1),
+          name: z.string().min(1),
+          description: z.string().optional(),
+          x: z.number().min(0).max(100),
+          y: z.number().min(0).max(100),
+          act: actKey.optional(),
+          image_url: z.string().optional(),
+          features: z
+            .array(
+              z.object({
+                ref: z.string().min(1),
+                name: z.string().min(1),
+                teaser: z.string().optional(),
+                locked_hint: z.string().optional(),
+                content: z.string({ required_error: "Cada elemento debe tener «content»" }).min(1, "Cada elemento debe tener «content»"),
+                act: actKey.optional(),
+                image_url: z.string().optional(),
+                requires: z.object({ character: z.string().optional(), item: z.string().optional(), ability: z.string().optional() }).default({}),
+                evidence: z.string().optional(),
+              }),
+            )
+            .default([]),
+        }),
+      )
+      .default([]),
     joint_actions: z
       .array(z.object({ ref: z.string().optional(), name: z.string().min(1), description: z.string().optional(), proposal_text: z.string().optional(), requires_acceptance: z.boolean().default(true), available_from_act: z.string().optional(), requirements: z.array(z.object({ role: z.string(), character: z.string().optional(), item: z.string().optional(), ability: z.string().optional(), fragment: z.string().optional() })).min(1), results: z.array(z.object({ role: z.string().optional(), text: z.string().optional(), evidence: z.string().optional(), secret: z.string().optional() })).default([]) }))
       .default([]),
@@ -116,6 +145,31 @@ export const mmImportSchema = z
       ja.requirements.forEach((r: any, j: number) => {
         const ref = r?.character;
         if (ref && ref !== "cualquiera" && !refs.has(ref)) err(["joint_actions", i, "requirements", j], `Personaje «${ref}» inexistente`);
+      });
+    });
+    // Castle map
+    const actOrder = (k?: string) => (k ? g.acts.findIndex((a) => a.key === k) : -1);
+    const evRefs = new Set(g.evidences.map((e) => e.ref).filter(Boolean));
+    const itemKeys = new Set(g.characters.flatMap((c) => c.items.flatMap((x) => [x.ref, x.name].filter(Boolean) as string[])));
+    const abilityKeys = new Set(g.characters.flatMap((c) => c.abilities.flatMap((x) => [x.ref, x.name].filter(Boolean) as string[])));
+    const locRefs = new Set<string>();
+    const featRefs = new Set<string>();
+    g.locations.forEach((l, i) => {
+      if (locRefs.has(l.ref)) err(["locations", i, "ref"], `Lugar con «ref» repetido: ${l.ref}`);
+      locRefs.add(l.ref);
+      g.locations.slice(0, i).forEach((o) => {
+        if (Math.abs(o.x - l.x) < 22 && Math.abs(o.y - l.y) < 18) err(["locations", i], `«${l.name}» está demasiado cerca de «${o.name}» en el plano (mínimo 22 en horizontal o 18 en vertical)`);
+      });
+      l.features.forEach((f, j) => {
+        const p = ["locations", i, "features", j];
+        if (featRefs.has(f.ref)) err([...p, "ref"], `Elemento con «ref» repetido: ${f.ref}`);
+        featRefs.add(f.ref);
+        if (f.act && l.act && actOrder(f.act) < actOrder(l.act)) err([...p, "act"], `«${f.name}» no puede estar en un acto anterior a su lugar`);
+        if (f.evidence && !evRefs.has(f.evidence)) err([...p, "evidence"], `Prueba «${f.evidence}» inexistente`);
+        const r = f.requires;
+        if (r.character && r.character !== "cualquiera" && !refs.has(r.character)) err([...p, "requires", "character"], `Personaje «${r.character}» inexistente`);
+        if (r.item && !itemKeys.has(r.item)) err([...p, "requires", "item"], `Objeto «${r.item}» inexistente`);
+        if (r.ability && !abilityKeys.has(r.ability)) err([...p, "requires", "ability"], `Habilidad «${r.ability}» inexistente`);
       });
     });
   });
