@@ -33,3 +33,5 @@
 - [ ] Juegos enlace público: copiar db/mm-open-join.sql a la base de respaldo (migraciones bloqueadas por preferencias)
 - [x] Juegos: subir carátulas desde el ordenador en Editar ficha, con vista previa, cambio/eliminación y URL alternativa; guardado bloqueado durante la subida, 30 pruebas de Juegos superadas y compilación correcta.
 - [ ] Juegos carátulas: verificar subida y guardado completos con una sesión de superadministrador de la base propia (no hay sesión disponible).
+
+- [ ] Mapa del castillo: importar el JSON v12 y repasar las 10 comprobaciones con dos jugadores (falta el JSON v12); copiar db/mm-map.sql a la base de respaldo
