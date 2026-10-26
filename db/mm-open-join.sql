@@ -34,7 +34,7 @@ BEGIN
   IF c IS NULL THEN RAISE EXCEPTION 'No quedan personajes disponibles'; END IF;
  END IF;
  INSERT INTO mm_invitations(session_id,email,token,status,sent_at,character_id,source)
-  VALUES(s.id,_email,encode(gen_random_bytes(16),'hex'),'registered',now(),c,'link') RETURNING id INTO iid;
+  VALUES(s.id,_email,replace(gen_random_uuid()::text,'-',''),'registered',now(),c,'link') RETURNING id INTO iid;
  INSERT INTO mm_session_players(session_id,character_id,invitation_id,display_name,email,access_code)
   VALUES(s.id,c,iid,_name,_email,_code) RETURNING id INTO pid;
  RETURN pid;
