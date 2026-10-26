@@ -3,6 +3,7 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { mmImportSchema, formatImportErrors } from "./import-schema";
 import { isSessionLanguageLocked } from "./session-rules";
+import { regenerateArtSchema, type RegenerateArtInput } from "./art-gallery";
 
 async function guard(userId: string) {
   const { assertSuperAdmin } = await import("@/lib/assert-role.server");
@@ -12,6 +13,34 @@ async function guard(userId: string) {
 const mmEmails = () => import("./emails.server");
 
 const id = z.string().uuid();
+
+export const mmGetGameArt = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { gameId: string }) => ({ gameId: id.parse(d.gameId) }))
+  .handler(async ({ data, context }) => {
+    const { data: role, error } = await context.supabase.from("user_roles").select("role").eq("user_id", context.userId).eq("role", "super_admin").maybeSingle();
+    if (error || !role) throw new Error("Esta zona es solo para administradores.");
+    const { db } = await import("./engine.server");
+    const { getGameArt } = await import("./art-gallery.server");
+    return getGameArt(db, data.gameId);
+  });
+
+export const mmRegenerateGameArt = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: RegenerateArtInput) => regenerateArtSchema.parse(d))
+  .handler(async ({ data, context }) => {
+    const { data: role, error } = await context.supabase.from("user_roles").select("role").eq("user_id", context.userId).eq("role", "super_admin").maybeSingle();
+    if (error || !role) throw new Error("Esta zona es solo para administradores.");
+    const { db } = await import("./engine.server");
+    const { regenerateGameArt } = await import("./art-gallery.server");
+    try {
+      await regenerateGameArt(db, data);
+    } catch (e) {
+      console.error("[mm-gallery-art]", e);
+      throw new Error("No se ha podido regenerar la ilustración. Se conserva el dibujo anterior.");
+    }
+    return { ok: true };
+  });
 
 export const mmListGames = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])

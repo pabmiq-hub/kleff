@@ -11,6 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { MMAdminGate } from "@/components/mm/AdminGate";
 import { MMAvatar } from "@/components/mm/shared";
 import { AdminGameMap } from "@/components/mm/AdminGameMap";
+import { AdminArtGallery } from "@/components/mm/AdminArtGallery";
 import { ImagePicker } from "@/components/cms/ImagePicker";
 import { MM_LANGS } from "@/lib/mm/i18n";
 import { DIFFICULTY_LABEL } from "@/lib/mm/game-meta";
@@ -20,9 +21,9 @@ export const Route = createFileRoute("/actividades_/juegos/$gameId/")({
   head: () => ({
     meta: [
       { title: "Ficha del juego — KLEFF Juegos" },
-      { name: "description", content: "Personajes, actos, evidencias e histórico de partidas del juego." },
+      { name: "description", content: "Personajes, actos, galería de ilustraciones e histórico de partidas del juego." },
       { property: "og:title", content: "Ficha del juego — KLEFF" },
-      { property: "og:description", content: "Gestiona un juego de misterio y sus partidas." },
+      { property: "og:description", content: "Gestiona un juego de misterio, sus ilustraciones y sus partidas." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "robots", content: "noindex, nofollow" },
@@ -98,8 +99,9 @@ function GameDetail() {
       </div>
 
       <Tabs defaultValue="info">
-        <TabsList className="flex w-full flex-wrap justify-start">
+        <TabsList className="flex h-auto w-full flex-wrap justify-start">
           <TabsTrigger value="info">Juego</TabsTrigger>
+          <TabsTrigger value="art">Ilustraciones</TabsTrigger>
           <TabsTrigger value="sessions">Histórico de partidas ({d.sessions.length})</TabsTrigger>
         </TabsList>
         <TabsContent value="info" className="space-y-6 pt-4">
@@ -173,6 +175,9 @@ function GameDetail() {
           >
             <Trash2 className="mr-2 h-4 w-4" /> Borrar juego
           </Button>
+        </TabsContent>
+        <TabsContent value="art" className="pt-4">
+          <AdminArtGallery gameId={gameId} />
         </TabsContent>
         <TabsContent value="sessions" className="pt-4">
           {d.sessions.length === 0 ? (
