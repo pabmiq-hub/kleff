@@ -155,6 +155,7 @@ import { Route as ActividadesJuegosGameIdIndexRouteImport } from './routes/activ
 import { Route as ActividadesJuegosInvitacionTokenRouteImport } from './routes/actividades_.juegos.invitacion.$token'
 import { Route as ActividadesJuegosJugarIndexRouteImport } from './routes/actividades_.juegos.jugar.index'
 import { Route as ActividadesJuegosJugarSessionIdRouteImport } from './routes/actividades_.juegos.jugar.$sessionId'
+import { Route as ActividadesJuegosUnirseSessionIdRouteImport } from './routes/actividades_.juegos.unirse.$sessionId'
 import { Route as AdminKonektumEventosIndexRouteImport } from './routes/admin.konektum.eventos.index'
 import { Route as AdminKonektumEventosIdRouteImport } from './routes/admin.konektum.eventos.$id'
 import { Route as AdminKonektumEventosNuevoRouteImport } from './routes/admin.konektum.eventos.nuevo'
@@ -906,6 +907,12 @@ const ActividadesJuegosJugarSessionIdRoute =
     path: '/actividades/juegos/jugar/$sessionId',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ActividadesJuegosUnirseSessionIdRoute =
+  ActividadesJuegosUnirseSessionIdRouteImport.update({
+    id: '/actividades_/juegos/unirse/$sessionId',
+    path: '/actividades/juegos/unirse/$sessionId',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const AdminKonektumEventosIndexRoute =
   AdminKonektumEventosIndexRouteImport.update({
     id: '/eventos/',
@@ -1110,6 +1117,7 @@ export interface FileRoutesByFullPath {
   '/s/$seriesSlug/': typeof SSeriesSlugIndexRoute
   '/actividades/juegos/invitacion/$token': typeof ActividadesJuegosInvitacionTokenRoute
   '/actividades/juegos/jugar/$sessionId': typeof ActividadesJuegosJugarSessionIdRoute
+  '/actividades/juegos/unirse/$sessionId': typeof ActividadesJuegosUnirseSessionIdRoute
   '/admin/konektum/eventos/$id': typeof AdminKonektumEventosIdRoute
   '/admin/konektum/eventos/nuevo': typeof AdminKonektumEventosNuevoRoute
   '/api/public/hooks/event-thanks': typeof ApiPublicHooksEventThanksRoute
@@ -1259,6 +1267,7 @@ export interface FileRoutesByTo {
   '/s/$seriesSlug': typeof SSeriesSlugIndexRoute
   '/actividades/juegos/invitacion/$token': typeof ActividadesJuegosInvitacionTokenRoute
   '/actividades/juegos/jugar/$sessionId': typeof ActividadesJuegosJugarSessionIdRoute
+  '/actividades/juegos/unirse/$sessionId': typeof ActividadesJuegosUnirseSessionIdRoute
   '/admin/konektum/eventos/$id': typeof AdminKonektumEventosIdRoute
   '/admin/konektum/eventos/nuevo': typeof AdminKonektumEventosNuevoRoute
   '/api/public/hooks/event-thanks': typeof ApiPublicHooksEventThanksRoute
@@ -1418,6 +1427,7 @@ export interface FileRoutesById {
   '/s/$seriesSlug/': typeof SSeriesSlugIndexRoute
   '/actividades_/juegos/invitacion/$token': typeof ActividadesJuegosInvitacionTokenRoute
   '/actividades_/juegos/jugar/$sessionId': typeof ActividadesJuegosJugarSessionIdRoute
+  '/actividades_/juegos/unirse/$sessionId': typeof ActividadesJuegosUnirseSessionIdRoute
   '/admin/konektum/eventos/$id': typeof AdminKonektumEventosIdRoute
   '/admin/konektum/eventos/nuevo': typeof AdminKonektumEventosNuevoRoute
   '/api/public/hooks/event-thanks': typeof ApiPublicHooksEventThanksRoute
@@ -1578,6 +1588,7 @@ export interface FileRouteTypes {
     | '/s/$seriesSlug/'
     | '/actividades/juegos/invitacion/$token'
     | '/actividades/juegos/jugar/$sessionId'
+    | '/actividades/juegos/unirse/$sessionId'
     | '/admin/konektum/eventos/$id'
     | '/admin/konektum/eventos/nuevo'
     | '/api/public/hooks/event-thanks'
@@ -1727,6 +1738,7 @@ export interface FileRouteTypes {
     | '/s/$seriesSlug'
     | '/actividades/juegos/invitacion/$token'
     | '/actividades/juegos/jugar/$sessionId'
+    | '/actividades/juegos/unirse/$sessionId'
     | '/admin/konektum/eventos/$id'
     | '/admin/konektum/eventos/nuevo'
     | '/api/public/hooks/event-thanks'
@@ -1885,6 +1897,7 @@ export interface FileRouteTypes {
     | '/s/$seriesSlug/'
     | '/actividades_/juegos/invitacion/$token'
     | '/actividades_/juegos/jugar/$sessionId'
+    | '/actividades_/juegos/unirse/$sessionId'
     | '/admin/konektum/eventos/$id'
     | '/admin/konektum/eventos/nuevo'
     | '/api/public/hooks/event-thanks'
@@ -1986,6 +1999,7 @@ export interface RootRouteChildren {
   SSeriesSlugIndexRoute: typeof SSeriesSlugIndexRoute
   ActividadesJuegosInvitacionTokenRoute: typeof ActividadesJuegosInvitacionTokenRoute
   ActividadesJuegosJugarSessionIdRoute: typeof ActividadesJuegosJugarSessionIdRoute
+  ActividadesJuegosUnirseSessionIdRoute: typeof ActividadesJuegosUnirseSessionIdRoute
   ApiPublicHooksEventThanksRoute: typeof ApiPublicHooksEventThanksRoute
   ApiPublicHooksFeaturedDispatchRoute: typeof ApiPublicHooksFeaturedDispatchRoute
   ApiPublicKonFnRoute: typeof ApiPublicKonFnRoute
@@ -3021,6 +3035,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ActividadesJuegosJugarSessionIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/actividades_/juegos/unirse/$sessionId': {
+      id: '/actividades_/juegos/unirse/$sessionId'
+      path: '/actividades/juegos/unirse/$sessionId'
+      fullPath: '/actividades/juegos/unirse/$sessionId'
+      preLoaderRoute: typeof ActividadesJuegosUnirseSessionIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/konektum/eventos/': {
       id: '/admin/konektum/eventos/'
       path: '/eventos'
@@ -3388,6 +3409,7 @@ const rootRouteChildren: RootRouteChildren = {
   SSeriesSlugIndexRoute: SSeriesSlugIndexRoute,
   ActividadesJuegosInvitacionTokenRoute: ActividadesJuegosInvitacionTokenRoute,
   ActividadesJuegosJugarSessionIdRoute: ActividadesJuegosJugarSessionIdRoute,
+  ActividadesJuegosUnirseSessionIdRoute: ActividadesJuegosUnirseSessionIdRoute,
   ApiPublicHooksEventThanksRoute: ApiPublicHooksEventThanksRoute,
   ApiPublicHooksFeaturedDispatchRoute: ApiPublicHooksFeaturedDispatchRoute,
   ApiPublicKonFnRoute: ApiPublicKonFnRoute,
