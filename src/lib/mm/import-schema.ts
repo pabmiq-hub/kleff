@@ -165,8 +165,6 @@ export const mmImportSchema = z
         if (featRefs.has(f.ref)) err([...p, "ref"], `Elemento con «ref» repetido: ${f.ref}`);
         featRefs.add(f.ref);
         if (f.act && l.act && actOrder(f.act) < actOrder(l.act)) err([...p, "act"], `«${f.name}» no puede estar en un acto anterior a su lugar`);
-        if (f.act && !l.act) void 0;
-        if (!f.act && l.act && actOrder(l.act) > 0) void 0; // inherits the place's act at runtime
         if (f.evidence && !evRefs.has(f.evidence)) err([...p, "evidence"], `Prueba «${f.evidence}» inexistente`);
         const r = f.requires;
         if (r.character && r.character !== "cualquiera" && !refs.has(r.character)) err([...p, "requires", "character"], `Personaje «${r.character}» inexistente`);
