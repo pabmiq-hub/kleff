@@ -35,3 +35,4 @@
 - [ ] Juegos carátulas: verificar subida y guardado completos con una sesión de superadministrador de la base propia (no hay sesión disponible).
 
 - [ ] Mapa del castillo: importar el JSON v12 y repasar las 10 comprobaciones con dos jugadores (falta el JSON v12); copiar db/mm-map.sql a la base de respaldo
+- [ ] Juegos: galería de ilustraciones por juego con objetos, evidencias, plano, salas y elementos; ampliar y regenerar un dibujo sin sustituir los demás; comprobar acceso y visualización.
