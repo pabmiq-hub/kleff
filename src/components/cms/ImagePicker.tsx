@@ -12,9 +12,10 @@ type Props = {
   className?: string;
   height?: string; // tailwind class
   label?: string;
+  onUploadingChange?: (uploading: boolean) => void;
 };
 
-export function ImagePicker({ url, onChange, className = "", height = "h-32", label = "Subir imagen" }: Props) {
+export function ImagePicker({ url, onChange, className = "", height = "h-32", label = "Subir imagen", onUploadingChange }: Props) {
   const upload = useServerFn(uploadMedia);
   const [uploading, setUploading] = useState(false);
 
@@ -30,6 +31,7 @@ export function ImagePicker({ url, onChange, className = "", height = "h-32", la
         return;
       }
       setUploading(true);
+      onUploadingChange?.(true);
       try {
         // Resized + re-encoded in the browser before it ever leaves the device.
         const payload = await optimizeToUploadPayload(file, { maxSize: 1920 });
@@ -39,6 +41,7 @@ export function ImagePicker({ url, onChange, className = "", height = "h-32", la
         toast.error((e as Error).message);
       } finally {
         setUploading(false);
+        onUploadingChange?.(false);
       }
     };
     input.click();
@@ -50,9 +53,9 @@ export function ImagePicker({ url, onChange, className = "", height = "h-32", la
         <img loading="lazy" decoding="async" src={url} alt="" className={`rounded-lg w-full object-cover ${height}`} />
         <div className="absolute top-1.5 right-1.5 flex gap-1">
           <Button size="sm" variant="ghost" onClick={pickFile} disabled={uploading} className="bg-ink/80 text-cream hover:bg-ink h-7 px-2 text-xs">
-            Cambiar
+            {uploading ? "Subiendo…" : "Cambiar"}
           </Button>
-          <Button size="sm" variant="ghost" onClick={() => onChange("")} className="bg-ink/80 text-cream hover:bg-red-500 h-7 w-7 p-0">
+          <Button size="sm" variant="ghost" onClick={() => onChange("")} disabled={uploading} aria-label="Eliminar imagen" title="Eliminar imagen" className="bg-ink/80 text-cream hover:bg-destructive h-7 w-7 p-0">
             <X className="h-3 w-3" />
           </Button>
         </div>

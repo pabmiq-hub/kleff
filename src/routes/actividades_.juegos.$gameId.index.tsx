@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { MMAdminGate } from "@/components/mm/AdminGate";
 import { MMAvatar } from "@/components/mm/shared";
+import { ImagePicker } from "@/components/cms/ImagePicker";
 import { MM_LANGS } from "@/lib/mm/i18n";
 import { DIFFICULTY_LABEL } from "@/lib/mm/game-meta";
 import { mmControlSession, mmCreateSession, mmGenerateEvidenceArt, mmGenerateItemArt, mmGetGame, mmUpdateCharacterAvatar, mmUpdateGame } from "@/lib/mm/admin.functions";
@@ -206,6 +207,7 @@ function GameEditor({ game, onClose }: { game: any; onClose: () => void }) {
   const [genre, setGenre] = useState(game.genre ?? "");
   const [difficulty, setDifficulty] = useState(game.difficulty ?? "");
   const [busy, setBusy] = useState(false);
+  const [uploadingCover, setUploadingCover] = useState(false);
   return (
     <Dialog open onOpenChange={(o) => !o && onClose()}>
       <DialogContent className="max-h-[90vh] overflow-y-auto">
@@ -221,11 +223,12 @@ function GameEditor({ game, onClose }: { game: any; onClose: () => void }) {
             Descripción breve (la ven los jugadores al apuntarse)
             <Textarea rows={4} value={synopsis} onChange={(e) => setSynopsis(e.target.value)} />
           </label>
-          <label className="block text-sm">
-            Carátula (URL de imagen)
-            <Input value={cover} onChange={(e) => setCover(e.target.value)} placeholder="https://…" />
-          </label>
-          {cover && <img src={cover} alt="Vista previa de la carátula" className="max-h-40 w-full rounded-xl object-cover" />}
+          <div className="space-y-2">
+            <p className="text-sm">Carátula</p>
+            <ImagePicker url={cover} onChange={setCover} label="Subir carátula" height="aspect-video" onUploadingChange={setUploadingCover} />
+            <label className="block text-sm" htmlFor="mm-game-cover-url">O usar una URL de imagen</label>
+            <Input id="mm-game-cover-url" value={cover} onChange={(e) => setCover(e.target.value)} placeholder="https://…" disabled={uploadingCover || busy} />
+          </div>
           <div className="grid grid-cols-2 gap-3">
             <label className="block text-sm">
               Género
@@ -247,7 +250,7 @@ function GameEditor({ game, onClose }: { game: any; onClose: () => void }) {
           <p className="text-xs text-ink/50">El número de jugadores y la duración vienen del guion (JSON) y no se pueden editar aquí.</p>
           <Button
             className="w-full"
-            disabled={busy || !title.trim()}
+            disabled={busy || uploadingCover || !title.trim()}
             onClick={async () => {
               setBusy(true);
               try {
@@ -261,7 +264,7 @@ function GameEditor({ game, onClose }: { game: any; onClose: () => void }) {
               }
             }}
           >
-            {busy ? "Guardando…" : "Guardar"}
+            {uploadingCover ? "Subiendo carátula…" : busy ? "Guardando…" : "Guardar"}
           </Button>
         </div>
       </DialogContent>
