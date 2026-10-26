@@ -13,6 +13,8 @@ export const mmImportSchema = z
       title: z.string().min(1),
       synopsis: z.string().optional(),
       cover_url: z.string().optional(),
+      genre: z.string().trim().max(60).optional(),
+      difficulty: z.enum(["facil", "media", "dificil"]).optional(),
       min_players: z.number().int().min(1),
       max_players: z.number().int().min(1),
       duration_minutes: z.number().int().min(1),

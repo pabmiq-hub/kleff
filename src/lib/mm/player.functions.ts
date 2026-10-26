@@ -148,3 +148,58 @@ export const mmPlayerAction = createServerFn({ method: "POST" })
     }
     return { ok: true };
   });
+
+/* ------------------------- open join link (public) ------------------------ */
+
+export const mmGetJoinInfo = createServerFn({ method: "POST" })
+  .inputValidator((d: { sessionId: string }) => ({ sessionId: z.string().uuid().parse(d.sessionId) }))
+  .handler(async ({ data }) => {
+    const { db } = await eng();
+    const { data: s } = await db()
+      .from("mm_sessions")
+      .select("id, name, status, language, scheduled_at, join_enabled, game_id, mm_games(id, title, synopsis, cover_url, theme, min_players, max_players, duration_minutes, genre, difficulty)")
+      .eq("id", data.sessionId)
+      .maybeSingle();
+    if (!s) return { found: false as const };
+    const [{ count: registered }, { count: playable }] = await Promise.all([
+      db().from("mm_session_players").select("id", { count: "exact", head: true }).eq("session_id", s.id),
+      db().from("mm_characters").select("id", { count: "exact", head: true }).eq("game_id", s.game_id).eq("victim", false),
+    ]);
+    const capacity = Math.min(s.mm_games?.max_players ?? 0, playable ?? 0);
+    const game = (await (await import("./translate.server")).loadTr(s.game_id, s.language)).row("mm_games", s.mm_games);
+    return {
+      found: true as const,
+      open: !!s.join_enabled && s.status === "lobby",
+      status: s.status as string,
+      session_name: s.name as string,
+      language: (s.language ?? "es") as string,
+      scheduled_at: (s.scheduled_at ?? null) as string | null,
+      spots_left: Math.max(0, capacity - (registered ?? 0)),
+      game: game as { title: string; synopsis: string | null; cover_url: string | null; theme: Record<string, string>; min_players: number; max_players: number; duration_minutes: number; genre: string | null; difficulty: string | null },
+    };
+  });
+
+export const mmJoinSession = createServerFn({ method: "POST" })
+  .inputValidator((d: { sessionId: string; displayName: string; email: string }) => ({
+    sessionId: z.string().uuid().parse(d.sessionId),
+    displayName: z.string().trim().min(1).max(60).parse(d.displayName),
+    email: z.string().trim().toLowerCase().max(120).regex(/^[^@\s]+@[^@\s]+\.[^@\s]+$/, "Email no válido").parse(d.email),
+  }))
+  .handler(async ({ data }) => {
+    const e = await eng();
+    const { db } = e;
+    const code = await e.newAccessCode();
+    const { data: playerId, error } = await db().rpc("mm_join_session", { _session: data.sessionId, _name: data.displayName, _email: data.email, _code: code });
+    if (error) throw new Error(error.message);
+    const { data: p, error: readError } = await db().from("mm_session_players").select("id, character_id").eq("id", playerId).single();
+    if (readError || !p) throw new Error("No se pudo recuperar tu inscripción");
+    const { data: s } = await db().from("mm_sessions").select("id, game_id, language, characters_released_at, mm_games(id, title)").eq("id", data.sessionId).single();
+    await e.logEvent(s.id, "player_registered", { name: data.displayName, via: "link" }, p.id);
+    const { sendCodeEmail } = await import("./emails.server");
+    const { loadTr } = await import("./translate.server");
+    const title = (await loadTr(s.game_id, s.language)).row("mm_games", s.mm_games ?? { id: s.game_id, title: "Murder Mystery" }).title;
+    await sendCodeEmail(data.email, data.displayName, code, title, s.language);
+    if (s.characters_released_at && p.character_id) await e.notifyAssignment(p.id).catch(() => false);
+    await e.broadcast(e.sessionTopic(s.id), "players", {});
+    return { code, sessionId: s.id as string, token: await e.signPlayerToken(p.id, s.id) };
+  });

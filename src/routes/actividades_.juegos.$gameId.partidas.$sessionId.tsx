@@ -207,6 +207,25 @@ function Panel() {
         {/* Invitations */}
         <section className="space-y-3 rounded-2xl border border-ink/10 bg-card p-4">
           <h2 className="text-lg font-semibold">Invitaciones</h2>
+          {s.status === "lobby" && (
+            <div className="space-y-2 rounded-xl border border-primary/30 bg-primary/5 p-3">
+              <div className="flex items-center justify-between gap-2">
+                <p className="text-sm font-semibold">Enlace público de inscripción</p>
+                <label className="flex items-center gap-2 text-sm">
+                  <input type="checkbox" checked={!!s.join_enabled} onChange={(e) => act("set_join_open", { open: e.target.checked })} /> Abierto
+                </label>
+              </div>
+              {s.join_enabled && (
+                <div className="flex gap-2">
+                  <Input readOnly value={`${window.location.origin}/actividades/juegos/unirse/${sessionId}`} onFocus={(e) => e.target.select()} className="font-mono text-xs" />
+                  <Button variant="outline" onClick={() => { void navigator.clipboard.writeText(`${window.location.origin}/actividades/juegos/unirse/${sessionId}`); toast.success("Enlace copiado"); }}>
+                    <Copy className="mr-1 h-4 w-4" /> Copiar
+                  </Button>
+                </div>
+              )}
+              <p className="text-xs text-ink/60">Cada persona se apunta con su nombre y correo, y recibe su código al momento. El enlace se cierra solo al iniciar la partida.</p>
+            </div>
+          )}
           <Textarea placeholder="Emails separados por comas o saltos de línea" value={emails} onChange={(e) => setEmails(e.target.value)} rows={3} />
           <Button onClick={async () => { const r = await mp("invite", { emails: emails.split(/[\s,;]+/) }); if (r) { toast.success(`${r.count} invitación(es) enviadas`); setEmails(""); } }}>Enviar invitaciones</Button>
           <ul className="space-y-2">

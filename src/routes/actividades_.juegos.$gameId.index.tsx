@@ -2,14 +2,16 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { Plus, Sparkles, Trash2 } from "lucide-react";
+import { Pencil, Plus, Sparkles, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { MMAdminGate } from "@/components/mm/AdminGate";
 import { MMAvatar } from "@/components/mm/shared";
 import { MM_LANGS } from "@/lib/mm/i18n";
+import { DIFFICULTY_LABEL } from "@/lib/mm/game-meta";
 import { mmControlSession, mmCreateSession, mmGenerateEvidenceArt, mmGenerateItemArt, mmGetGame, mmUpdateCharacterAvatar, mmUpdateGame } from "@/lib/mm/admin.functions";
 
 export const Route = createFileRoute("/actividades_/juegos/$gameId/")({
@@ -41,6 +43,7 @@ function GameDetail() {
   const [d, setD] = useState<any>(null);
   const [newOpen, setNewOpen] = useState(false);
   const [editing, setEditing] = useState<any>(null);
+  const [editGame, setEditGame] = useState(false);
   const load = () => get({ data: { gameId } }).then(setD).catch((e) => toast.error(e.message));
   const genItems = useServerFn(mmGenerateItemArt);
   const genEvidences = useServerFn(mmGenerateEvidenceArt);
@@ -75,9 +78,12 @@ function GameDetail() {
         <div className="mr-auto min-w-0">
           <h1 className="font-display text-3xl font-bold">{g.title}</h1>
           <p className="text-sm text-ink/60">
-            {g.min_players}–{g.max_players} jugadores · {g.duration_minutes} min · {g.status === "published" ? "Publicado" : "Borrador"}
+            {g.min_players}–{g.max_players} jugadores · {g.duration_minutes} min{g.genre ? ` · ${g.genre}` : ""}{g.difficulty ? ` · ${DIFFICULTY_LABEL[g.difficulty] ?? g.difficulty}` : ""} · {g.status === "published" ? "Publicado" : "Borrador"}
           </p>
         </div>
+        <Button variant="outline" onClick={() => setEditGame(true)}>
+          <Pencil className="mr-2 h-4 w-4" /> Editar ficha
+        </Button>
         <Button variant="outline" disabled={artBusy} onClick={genArt}>
           <Sparkles className="mr-2 h-4 w-4" /> {artBusy ? "Generando ilustraciones…" : "Generar ilustraciones"}
         </Button>
@@ -187,7 +193,79 @@ function GameDetail() {
 
       <NewSessionDialog open={newOpen} onOpenChange={setNewOpen} gameId={gameId} />
       {editing && <AvatarEditor character={editing} onClose={() => { setEditing(null); void load(); }} />}
+      {editGame && <GameEditor game={g} onClose={() => { setEditGame(false); void load(); }} />}
     </div>
+  );
+}
+
+function GameEditor({ game, onClose }: { game: any; onClose: () => void }) {
+  const update = useServerFn(mmUpdateGame);
+  const [title, setTitle] = useState(game.title ?? "");
+  const [synopsis, setSynopsis] = useState(game.synopsis ?? "");
+  const [cover, setCover] = useState(game.cover_url ?? "");
+  const [genre, setGenre] = useState(game.genre ?? "");
+  const [difficulty, setDifficulty] = useState(game.difficulty ?? "");
+  const [busy, setBusy] = useState(false);
+  return (
+    <Dialog open onOpenChange={(o) => !o && onClose()}>
+      <DialogContent className="max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Editar ficha del juego</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-3">
+          <label className="block text-sm">
+            Título
+            <Input value={title} onChange={(e) => setTitle(e.target.value)} />
+          </label>
+          <label className="block text-sm">
+            Descripción breve (la ven los jugadores al apuntarse)
+            <Textarea rows={4} value={synopsis} onChange={(e) => setSynopsis(e.target.value)} />
+          </label>
+          <label className="block text-sm">
+            Carátula (URL de imagen)
+            <Input value={cover} onChange={(e) => setCover(e.target.value)} placeholder="https://…" />
+          </label>
+          {cover && <img src={cover} alt="Vista previa de la carátula" className="max-h-40 w-full rounded-xl object-cover" />}
+          <div className="grid grid-cols-2 gap-3">
+            <label className="block text-sm">
+              Género
+              <Input value={genre} onChange={(e) => setGenre(e.target.value)} placeholder="Terror gótico, comedia…" list="mm-genres" />
+              <datalist id="mm-genres">
+                {["Misterio", "Terror", "Comedia", "Histórico", "Fantasía", "Noir", "Ciencia ficción"].map((x) => <option key={x} value={x} />)}
+              </datalist>
+            </label>
+            <label className="block text-sm">
+              Dificultad
+              <select value={difficulty} onChange={(e) => setDifficulty(e.target.value)} className="mt-1 w-full rounded-md border border-ink/20 bg-background p-2">
+                <option value="">Sin definir</option>
+                <option value="facil">Fácil</option>
+                <option value="media">Media</option>
+                <option value="dificil">Difícil</option>
+              </select>
+            </label>
+          </div>
+          <p className="text-xs text-ink/50">El número de jugadores y la duración vienen del guion (JSON) y no se pueden editar aquí.</p>
+          <Button
+            className="w-full"
+            disabled={busy || !title.trim()}
+            onClick={async () => {
+              setBusy(true);
+              try {
+                await update({ data: { gameId: game.id, title: title.trim(), synopsis, cover_url: cover, genre, difficulty: (difficulty || null) as any } });
+                toast.success("Ficha guardada");
+                onClose();
+              } catch (e) {
+                toast.error((e as Error).message);
+              } finally {
+                setBusy(false);
+              }
+            }}
+          >
+            {busy ? "Guardando…" : "Guardar"}
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }
 
