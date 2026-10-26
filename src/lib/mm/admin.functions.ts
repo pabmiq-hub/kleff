@@ -181,7 +181,7 @@ export const mmGetGameMap = createServerFn({ method: "POST" })
       };
     });
     const locations = (locs ?? []).map((l: any) => ({ id: l.id, name: l.name, act: actName(l.act_id), has_image: !!l.image_url }));
-    const missing = (game?.map_url ? 0 : locations.length ? 1 : 0) + locations.filter((l) => !l.has_image).length + features.filter((f) => !f.has_image).length;
+    const missing = (game?.map_url ? 0 : locations.length ? 1 : 0) + locations.filter((l: any) => !l.has_image).length + features.filter((f: any) => !f.has_image).length;
     return { map_url: game?.map_url ?? null, locations, features, missing };
   });
 
