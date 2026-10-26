@@ -12,6 +12,7 @@ export const mmImportSchema = z
       slug: z.string().min(2).regex(/^[a-z0-9-]+$/, "El slug solo admite minúsculas, números y guiones"),
       title: z.string().min(1),
       synopsis: z.string().optional(),
+      map_url: z.string().optional(),
       cover_url: z.string().optional(),
       genre: z.string().trim().max(60).optional(),
       difficulty: z.enum(["facil", "media", "dificil"]).optional(),
@@ -69,6 +70,34 @@ export const mmImportSchema = z
       )
       .default([]),
     readings: z.array(readingSchema).default([]),
+    locations: z
+      .array(
+        z.object({
+          ref: z.string().min(1),
+          name: z.string().min(1),
+          description: z.string().optional(),
+          x: z.number().min(0).max(100),
+          y: z.number().min(0).max(100),
+          act: actKey.optional(),
+          image_url: z.string().optional(),
+          features: z
+            .array(
+              z.object({
+                ref: z.string().min(1),
+                name: z.string().min(1),
+                teaser: z.string().optional(),
+                locked_hint: z.string().optional(),
+                content: z.string({ required_error: "Cada elemento debe tener «content»" }).min(1, "Cada elemento debe tener «content»"),
+                act: actKey.optional(),
+                image_url: z.string().optional(),
+                requires: z.object({ character: z.string().optional(), item: z.string().optional(), ability: z.string().optional() }).default({}),
+                evidence: z.string().optional(),
+              }),
+            )
+            .default([]),
+        }),
+      )
+      .default([]),
     joint_actions: z
       .array(z.object({ ref: z.string().optional(), name: z.string().min(1), description: z.string().optional(), proposal_text: z.string().optional(), requires_acceptance: z.boolean().default(true), available_from_act: z.string().optional(), requirements: z.array(z.object({ role: z.string(), character: z.string().optional(), item: z.string().optional(), ability: z.string().optional(), fragment: z.string().optional() })).min(1), results: z.array(z.object({ role: z.string().optional(), text: z.string().optional(), evidence: z.string().optional(), secret: z.string().optional() })).default([]) }))
       .default([]),
