@@ -1,12 +1,13 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { User, Lock, ListChecks, Backpack, FileSearch, Handshake, Gavel, BookOpen } from "lucide-react";
+import { User, Lock, ListChecks, Backpack, FileSearch, Handshake, Gavel, BookOpen, Map as MapIcon } from "lucide-react";
 import { MMAvatar, MMShell, fmtClock, useCountdown } from "./shared";
 import { ActIntro, FinalReveal, FlipCard, MurderOverlay, SealedDoc } from "./animations";
 import { mmT, mmLocale, type MMKey } from "@/lib/mm/i18n";
 import { Interactions } from "./Interactions";
+import { MapTab } from "./MapTab";
 
-type Tab = "personaje" | "secretos" | "objetivos" | "inventario" | "evidencias" | "acciones" | "acusacion";
+type Tab = "personaje" | "secretos" | "objetivos" | "inventario" | "evidencias" | "mapa" | "acciones" | "acusacion";
 
 export interface PlayerActions {
   confirm: () => Promise<void>;
@@ -14,6 +15,7 @@ export interface PlayerActions {
   toggleObjective: (id: string) => Promise<void>;
   vote: (v: { accusedCharacterId: string; motive: string; method: string }) => Promise<void>;
   interact?: (data: any) => Promise<void>;
+  consult?: (featureId: string) => Promise<{ content: string; image_url: string | null; evidence_title: string | null }>;
 }
 
 function useSeen(key: string) {
@@ -56,6 +58,7 @@ export function PlayerView({ state, actions, readOnly }: { state: any; actions?:
       objetivos: state.objectives.map((x: any) => x.id),
       inventario: [...state.items.map((x: any) => x.id), ...state.abilities.map((x: any) => x.id)],
       evidencias: state.evidences.map((x: any) => x.id),
+      mapa: (state.map?.locations ?? []).map((l: any) => l.id),
       acciones: (state.requests ?? []).filter((r: any) => r.status === "pending" && r.to_players.includes(me.id)).map((r: any) => r.id),
       acusacion: s.voting_open ? ["voting"] : [],
     }),
@@ -72,6 +75,7 @@ export function PlayerView({ state, actions, readOnly }: { state: any; actions?:
     { id: "objetivos", label: t("tab_objectives"), icon: ListChecks },
     { id: "inventario", label: t("tab_inventory"), icon: Backpack },
     { id: "evidencias", label: t("tab_evidence"), icon: FileSearch },
+    { id: "mapa", label: "Mapa", icon: MapIcon, hidden: !state.map },
     { id: "acciones", label: t("tab_actions"), icon: Handshake },
     { id: "acusacion", label: t("tab_accuse"), icon: Gavel, hidden: !s.voting_open && !state.vote },
   ];
@@ -163,6 +167,7 @@ export function PlayerView({ state, actions, readOnly }: { state: any; actions?:
                 ))}
               </List>
             )}
+            {tab === "mapa" && state.map && <MapTab map={state.map} consult={actions?.consult} readOnly={readOnly} />}
             {tab === "acciones" && <Interactions state={state} run={actions?.interact} readOnly={readOnly} />}
             {tab === "acusacion" && <VoteTab state={state} actions={actions} readOnly={readOnly} t={t} />}
           </motion.section>
