@@ -1,3 +1,4 @@
+- [x] Juegos: Rol/Secretos/Objetivos agrupados en Personaje; 5 botones (4 sin mapa), Acusar destacado y voto registrado; 33 pruebas superadas, acceso de jugador, objetivo y voto guardados en partida temporal eliminada, avisos leídos conservados al recargar y revisión a 360px/1280px sin errores; pendiente publicar.
 - [x] Konektum: franja única sincronizada en formularios/plazas y géneros ES/EN agrupados; inscripción completa en evento temporal, lectura de 18+, cuotas llenas y 24 inscritos reales verificados, sin alterar datos reales
 - [ ] Konektum franjas: verificar guardar ajustes desde el panel con sesión propia de administrador (la sesión gestionada no corresponde a la base propia y la contraseña disponible no permite acceder)
 - [x] Konektum: selecciones protegidas frente a traducción automática y formulario inglés sin alterar valores guardados; género/conexión/ligue verificados en el evento real a 1280px y 360px, sin enviar inscripciones; 11 pruebas superadas
