@@ -15,6 +15,7 @@ import { AdminArtGallery } from "@/components/mm/AdminArtGallery";
 import { ImagePicker } from "@/components/cms/ImagePicker";
 import { MM_LANGS } from "@/lib/mm/i18n";
 import { DIFFICULTY_LABEL } from "@/lib/mm/game-meta";
+import { sessionSlugSchema } from "@/lib/mm/session-links";
 import { mmControlSession, mmCreateSession, mmGenerateEvidenceArt, mmGenerateItemArt, mmGetGame, mmUpdateCharacterAvatar, mmUpdateGame } from "@/lib/mm/admin.functions";
 
 export const Route = createFileRoute("/actividades_/juegos/$gameId/")({
@@ -284,6 +285,7 @@ function NewSessionDialog({ open, onOpenChange, gameId }: { open: boolean; onOpe
   const control = useServerFn(mmControlSession);
   const navigate = useNavigate();
   const [name, setName] = useState("");
+  const [slug, setSlug] = useState("");
   const [when, setWhen] = useState("");
   const [mode, setMode] = useState<"manual" | "timer" | "auto">("manual");
   const [blind, setBlind] = useState(false);
@@ -298,6 +300,13 @@ function NewSessionDialog({ open, onOpenChange, gameId }: { open: boolean; onOpe
         </DialogHeader>
         <div className="space-y-3">
           <Input placeholder="Nombre (ej. Viernes 18 oct)" value={name} onChange={(e) => setName(e.target.value)} />
+          <label className="block text-sm">
+            Nombre del enlace (opcional)
+            <div className="mt-1 flex min-w-0 items-center gap-2">
+              <span className="shrink-0 text-sm text-muted-foreground">/j/</span>
+              <Input aria-label="Nombre del enlace" value={slug} onChange={(e) => setSlug(e.target.value)} placeholder="dracula-viernes" autoCapitalize="none" autoCorrect="off" spellCheck={false} maxLength={80} className="min-w-0 font-mono" />
+            </div>
+          </label>
           <label className="block text-sm">
             Fecha y hora (opcional)
             <Input type="datetime-local" value={when} onChange={(e) => setWhen(e.target.value)} />
@@ -325,9 +334,12 @@ function NewSessionDialog({ open, onOpenChange, gameId }: { open: boolean; onOpe
             className="w-full"
             disabled={busy}
             onClick={async () => {
+              const parsed = slug.trim() ? sessionSlugSchema.safeParse(slug) : null;
+              if (parsed && !parsed.success) { toast.error(parsed.error.issues[0]?.message ?? "Enlace no válido."); return; }
               setBusy(true);
+              try {
               const at = when ? new Date(when) : null;
-              const r = await create({ data: { gameId, name, scheduled_at: at ? at.toISOString() : null, control_mode: mode, blind_mode: blind, language: "es", release_at: at && early ? new Date(at.getTime() - 24 * 3600 * 1000).toISOString() : null } });
+              const r = await create({ data: { gameId, name, slug: parsed?.success ? parsed.data : undefined, scheduled_at: at ? at.toISOString() : null, control_mode: mode, blind_mode: blind, language: "es", release_at: at && early ? new Date(at.getTime() - 24 * 3600 * 1000).toISOString() : null } });
               if (lang !== "es") {
                 toast.info("Traduciendo el juego… puede tardar un minuto");
                 try {
@@ -336,8 +348,9 @@ function NewSessionDialog({ open, onOpenChange, gameId }: { open: boolean; onOpe
                   toast.error((e as Error).message);
                 }
               }
-              setBusy(false);
               void navigate({ to: "/actividades/juegos/$gameId/partidas/$sessionId", params: { gameId, sessionId: r.sessionId } });
+              } catch (e) { toast.error((e as Error).message); }
+              finally { setBusy(false); }
             }}
           >
             {busy ? "Creando…" : "Crear partida"}
