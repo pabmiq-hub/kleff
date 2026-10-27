@@ -16,7 +16,7 @@ export function AdminSessionLink({ session, onSaved, onToggle }: { session: { id
   useEffect(() => setOrigin(window.location.origin), []);
   useEffect(() => { setSlug(session.join_slug ?? ""); setError(""); }, [session.join_slug]);
   const parsed = sessionSlugSchema.safeParse(slug);
-  const changed = parsed.success && parsed.data !== session.join_slug;
+  const changed = parsed.success ? parsed.data !== session.join_slug : slug !== (session.join_slug ?? "");
   const currentUrl = origin + sessionJoinPath(session.id, session.join_slug);
   return (
     <div className="space-y-3 border-l-2 border-primary pl-3">
