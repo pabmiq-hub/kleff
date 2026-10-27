@@ -4,6 +4,7 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { mmImportSchema, formatImportErrors } from "./import-schema";
 import { isSessionLanguageLocked } from "./session-rules";
 import { regenerateArtSchema, type RegenerateArtInput } from "./art-gallery";
+import { sessionSlugSchema } from "./session-links";
 
 async function guard(userId: string) {
   const { assertSuperAdmin } = await import("@/lib/assert-role.server");
@@ -276,15 +277,15 @@ export const mmUpdateCharacterAvatar = createServerFn({ method: "POST" })
 
 export const mmCreateSession = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: { gameId: string; name: string; scheduled_at?: string | null; control_mode: "manual" | "timer" | "auto"; blind_mode: boolean; language?: string; release_at?: string | null }) => d)
+  .inputValidator((d: { gameId: string; name: string; scheduled_at?: string | null; control_mode: "manual" | "timer" | "auto"; blind_mode: boolean; language?: string; release_at?: string | null; slug?: string }) => ({ ...d, slug: d.slug?.trim() ? sessionSlugSchema.parse(d.slug) : undefined }))
   .handler(async ({ data, context }) => {
     const { db } = await guard(context.userId);
     const { data: s, error } = await db()
       .from("mm_sessions")
-      .insert({ game_id: data.gameId, name: data.name || "Partida", scheduled_at: data.scheduled_at || null, control_mode: data.control_mode, blind_mode: data.blind_mode, language: data.language || "es", release_at: data.release_at || null, created_by: context.userId })
+      .insert({ game_id: data.gameId, name: data.name || "Partida", scheduled_at: data.scheduled_at || null, control_mode: data.control_mode, blind_mode: data.blind_mode, language: data.language || "es", release_at: data.release_at || null, created_by: context.userId, ...(data.slug ? { join_slug: data.slug } : {}) })
       .select("id")
       .single();
-    if (error) throw new Error(error.message);
+    if (error) throw new Error(error.code === "23505" ? "Este enlace ya lo usa otra partida. Elige otro." : error.message);
     return { sessionId: s.id as string };
   });
 
