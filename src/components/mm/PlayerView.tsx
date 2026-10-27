@@ -25,6 +25,7 @@ function useSeen(key: string) {
   const [seen, setSeen] = useState<Set<string>>(new Set());
   useEffect(() => setSeen(new Set(JSON.parse(localStorage.getItem(key) ?? "[]"))), [key]);
   const mark = (ids: string[]) => {
+    if (!ids.length) return;
     const next = new Set([...seen, ...ids]);
     localStorage.setItem(key, JSON.stringify([...next]));
     setSeen(next);
@@ -103,10 +104,10 @@ export function PlayerView({ state, actions, readOnly }: { state: any; actions?:
           <div className="flex min-w-0 items-center gap-3 sm:flex-1">
             {ch && <MMAvatar name={ch.name} config={ch.avatar_config} url={ch.avatar_url} size={44} />}
             <div className="min-w-0">
-            <p className="truncate font-bold" style={{ fontFamily: "var(--mm-font)" }}>
-              {ch?.name ?? me.display_name}
-            </p>
-            <p className="truncate text-xs opacity-70">{statusLabel}</p>
+              <p className="truncate font-bold" style={{ fontFamily: "var(--mm-font)" }}>
+                {ch?.name ?? me.display_name}
+              </p>
+              <p className="truncate text-xs opacity-70">{statusLabel}</p>
             </div>
           </div>
           {(s.status === "running" || s.status === "paused") && (
