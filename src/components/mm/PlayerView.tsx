@@ -1,13 +1,16 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { User, Lock, ListChecks, Backpack, FileSearch, Handshake, Gavel, BookOpen, Map as MapIcon } from "lucide-react";
+import { BookOpen } from "lucide-react";
 import { MMAvatar, MMShell, fmtClock, useCountdown } from "./shared";
 import { ActIntro, FinalReveal, FlipCard, MurderOverlay, SealedDoc } from "./animations";
 import { mmT, mmLocale, type MMKey } from "@/lib/mm/i18n";
 import { Interactions } from "./Interactions";
 import { MapTab } from "./MapTab";
+import { CharacterNavigation, PlayerNavigation } from "./PlayerNavigation";
+import { Tabs, TabsContent } from "@/components/ui/tabs";
+import { isCharacterTab, votingPrompt, type CharacterTabId, type PlayerTab } from "@/lib/mm/player-navigation";
 
-type Tab = "personaje" | "secretos" | "objetivos" | "inventario" | "evidencias" | "mapa" | "acciones" | "acusacion";
+type Tab = PlayerTab;
 
 export interface PlayerActions {
   confirm: () => Promise<void>;
@@ -34,6 +37,14 @@ export function PlayerView({ state, actions, readOnly }: { state: any; actions?:
   const me = state.me;
   const t = (k: MMKey, v?: Record<string, string | number>) => mmT(s.language, k, v);
   const [tab, setTab] = useState<Tab>("personaje");
+  const [characterTab, setCharacterTab] = useState<CharacterTabId>("personaje");
+  const panelRef = useRef<HTMLDivElement>(null);
+  const selectTab = (next: Tab) => {
+    const target = next === "personaje" ? characterTab : next;
+    setTab(target);
+    if (isCharacterTab(target)) setCharacterTab(target);
+    panelRef.current?.scrollIntoView({ block: "start", behavior: "instant" });
+  };
   const remaining = useCountdown(s.act_ends_at, s.server_now, s.paused_remaining_seconds);
   const [overlay, setOverlay] = useState<null | "act" | "murder" | "reveal">(null);
   const prev = useRef<{ act?: string; murder?: string | null; status?: string } | null>(null);
@@ -69,16 +80,12 @@ export function PlayerView({ state, actions, readOnly }: { state: any; actions?:
     mark(badgeIds[tab]);
   }, [tab, badgeIds[tab].join(",")]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const tabs: { id: Tab; label: string; icon: any; hidden?: boolean }[] = [
-    { id: "personaje", label: t("tab_character"), icon: User },
-    { id: "secretos", label: t("tab_secrets"), icon: Lock },
-    { id: "objetivos", label: t("tab_objectives"), icon: ListChecks },
-    { id: "inventario", label: t("tab_inventory"), icon: Backpack },
-    { id: "evidencias", label: t("tab_evidence"), icon: FileSearch },
-    { id: "mapa", label: "Mapa", icon: MapIcon, hidden: !state.map },
-    { id: "acciones", label: t("tab_actions"), icon: Handshake },
-    { id: "acusacion", label: t("tab_accuse"), icon: Gavel, hidden: !s.voting_open && !state.vote },
-  ];
+  const fresh = Object.fromEntries(Object.entries(badgeIds).map(([id, ids]) => [id, ids.some((id) => !seen.has(id))])) as Record<Tab, boolean>;
+  const votePrompt = votingPrompt(s.voting_open, !!state.vote);
+  useEffect(() => {
+    if (tab === "acusacion" && !votePrompt) setTab(characterTab);
+    if (tab === "mapa" && !state.map) setTab(characterTab);
+  }, [tab, votePrompt, state.map, characterTab]);
 
   const ch = me.character;
   const statusLabel = s.status === "lobby" ? t("status_lobby") : s.status === "paused" ? t("status_paused") : s.status === "finished" ? t("status_finished") : s.act ? `${t("act_of", { n: s.act.position, total: s.acts.length })} · ${s.act.name}` : "";
@@ -92,16 +99,18 @@ export function PlayerView({ state, actions, readOnly }: { state: any; actions?:
       </AnimatePresence>
 
       <header className="sticky top-0 z-30 border-b border-[var(--mm-accent)]/20 bg-[var(--mm-bg)]/95 px-4 py-3 backdrop-blur">
-        <div className="mx-auto flex max-w-2xl items-center gap-3">
-          {ch && <MMAvatar name={ch.name} config={ch.avatar_config} url={ch.avatar_url} size={44} />}
-          <div className="min-w-0 flex-1">
+        <div className="mx-auto grid max-w-2xl grid-cols-[minmax(0,1fr)_auto] items-center gap-3 sm:flex">
+          <div className="flex min-w-0 items-center gap-3 sm:flex-1">
+            {ch && <MMAvatar name={ch.name} config={ch.avatar_config} url={ch.avatar_url} size={44} />}
+            <div className="min-w-0">
             <p className="truncate font-bold" style={{ fontFamily: "var(--mm-font)" }}>
               {ch?.name ?? me.display_name}
             </p>
             <p className="truncate text-xs opacity-70">{statusLabel}</p>
+            </div>
           </div>
           {(s.status === "running" || s.status === "paused") && (
-            <div className={`rounded-lg bg-[var(--mm-surface)] px-3 py-1.5 font-mono text-xl tabular-nums ${remaining !== null && remaining < 60 ? "text-[var(--mm-primary)]" : ""}`}>
+            <div className={`shrink-0 rounded-lg bg-[var(--mm-surface)] px-3 py-1.5 font-mono text-xl tabular-nums ${remaining !== null && remaining < 60 ? "text-[var(--mm-primary)]" : ""}`}>
               {fmtClock(remaining)}
             </div>
           )}
@@ -110,7 +119,7 @@ export function PlayerView({ state, actions, readOnly }: { state: any; actions?:
         {readOnly && <p className="mx-auto mt-2 max-w-2xl rounded bg-[var(--mm-accent)]/20 px-2 py-1 text-center text-xs">{t("readonly")}</p>}
       </header>
 
-      <main className="mx-auto max-w-2xl px-4 pb-28 pt-4">
+      <main className={`mx-auto max-w-2xl px-4 pt-4 ${votePrompt === "accuse" ? "pb-[calc(10rem+env(safe-area-inset-bottom))]" : votePrompt === "recorded" ? "pb-[calc(8rem+env(safe-area-inset-bottom))]" : "pb-[calc(6rem+env(safe-area-inset-bottom))]"}`}>
         {s.status === "lobby" && <Lobby state={state} actions={actions} readOnly={readOnly} t={t} />}
         {s.status === "paused" && <div className="mb-4 rounded-xl bg-[var(--mm-surface)] p-4 text-center">{t("paused_banner")}</div>}
         {s.status === "finished" && state.results && <Results results={state.results} lang={s.language} onReplay={() => setOverlay("reveal")} />}
@@ -135,7 +144,15 @@ export function PlayerView({ state, actions, readOnly }: { state: any; actions?:
           </article>
         ))}
 
+        <div ref={panelRef} className="scroll-mt-40">
+        <Tabs value={tab} onValueChange={(value) => {
+          if (!isCharacterTab(value)) return;
+          setCharacterTab(value);
+          setTab(value);
+        }}>
+        {isCharacterTab(tab) && <CharacterNavigation language={s.language} fresh={fresh} />}
         <AnimatePresence mode="wait">
+          <TabsContent key={tab} value={tab} asChild>
           <motion.section key={tab} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.18 }}>
             {tab === "personaje" && <CharacterTab state={state} storePrefix={storePrefix} t={t} />}
             {tab === "secretos" && (
@@ -171,26 +188,13 @@ export function PlayerView({ state, actions, readOnly }: { state: any; actions?:
             {tab === "acciones" && <Interactions state={state} run={actions?.interact} readOnly={readOnly} />}
             {tab === "acusacion" && <VoteTab state={state} actions={actions} readOnly={readOnly} t={t} />}
           </motion.section>
+          </TabsContent>
         </AnimatePresence>
+        </Tabs>
+        </div>
       </main>
 
-      <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-[var(--mm-accent)]/20 bg-[var(--mm-bg)]/95 backdrop-blur" style={{ paddingBottom: "env(safe-area-inset-bottom)" }}>
-        <div className="mx-auto flex max-w-2xl">
-          {tabs
-            .filter((t) => !t.hidden)
-            .map((t) => {
-              const fresh = badgeIds[t.id].some((x) => !seen.has(x));
-              const Icon = t.icon;
-              return (
-                <button key={t.id} onClick={() => setTab(t.id)} className={`relative flex min-w-0 flex-1 flex-col items-center gap-0.5 py-2 text-[10px] ${tab === t.id ? "text-[var(--mm-accent)]" : "opacity-70"}`}>
-                  <Icon className="h-5 w-5" />
-                  <span className="truncate">{t.label}</span>
-                  {fresh && tab !== t.id && <span className="absolute right-1/4 top-1.5 h-2 w-2 animate-pulse rounded-full bg-[var(--mm-primary)]" />}
-                </button>
-              );
-            })}
-        </div>
-      </nav>
+      <PlayerNavigation tab={tab} language={s.language} hasMap={!!state.map} votingOpen={s.voting_open} hasVote={!!state.vote} fresh={fresh} onSelect={selectTab} />
     </MMShell>
   );
 }
