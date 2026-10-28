@@ -5,7 +5,11 @@ const ec = [{ entry_id: "a", category_id: "x" }, { entry_id: "b", category_id: "
 
 describe("concurso", () => {
   test("solo cuenta votos a participantes de esa categoría", () => {
-    expect(validVotes({ x: "b", y: "b" }, ec)).toEqual([{ category_id: "x", entry_id: "b" }]);
+    expect(validVotes([{ category_id: "x", entry_id: "b" }, { category_id: "y", entry_id: "b" }], ec)).toEqual([{ category_id: "x", entry_id: "b" }]);
+  });
+  test("varios votos en la misma categoría, sin repetir el mismo", () => {
+    const v = [{ category_id: "x", entry_id: "a" }, { category_id: "x", entry_id: "b" }, { category_id: "x", entry_id: "a" }];
+    expect(validVotes(v, ec)).toEqual([{ category_id: "x", entry_id: "a" }, { category_id: "x", entry_id: "b" }]);
   });
   test("clasificación por categoría ordenada por votos", () => {
     const r = tally([{ id: "x", name: "X" }], ec, [{ category_id: "x", entry_id: "b" }, { category_id: "x", entry_id: "b" }, { category_id: "x", entry_id: "a" }]);

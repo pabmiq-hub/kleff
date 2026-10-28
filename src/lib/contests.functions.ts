@@ -149,17 +149,17 @@ export const getPublicContest = createServerFn({ method: "GET" })
     const contest = check(await db.from("contests").select("id,name,status").eq("slug", data.slug).maybeSingle()) as any;
     if (!contest || contest.status === "draft") return null;
     const { categories, entries } = await loadContest(db, contest.id);
-    let mine: { nickname: string; votes: Record<string, string> } | null = null;
+    let mine: { nickname: string; votes: { category_id: string; entry_id: string }[] } | null = null;
     if (data.token) {
       const v = check(await db.from("contest_voters").select("nickname,contest_votes(category_id,entry_id)").eq("contest_id", contest.id).eq("token", data.token).maybeSingle()) as any;
-      if (v) mine = { nickname: v.nickname, votes: Object.fromEntries(v.contest_votes.map((x: any) => [x.category_id, x.entry_id])) };
+      if (v) mine = { nickname: v.nickname, votes: v.contest_votes };
     }
     return { name: contest.name as string, open: contest.status === "open", categories, entries, mine };
   });
 
 export const submitContestVotes = createServerFn({ method: "POST" })
-  .inputValidator((d: { slug: string; nickname: string; votes: Record<string, string>; token?: string | null }) =>
-    z.object({ slug: z.string().max(60), nickname: z.string().trim().min(1).max(60), votes: z.record(z.string().uuid(), z.string().uuid()), token: z.string().max(80).nullish() }).parse(d))
+  .inputValidator((d: { slug: string; nickname: string; votes: { category_id: string; entry_id: string }[]; token?: string | null }) =>
+    z.object({ slug: z.string().max(60), nickname: z.string().trim().min(1).max(60), votes: z.array(z.object({ category_id: z.string().uuid(), entry_id: z.string().uuid() })).max(500), token: z.string().max(80).nullish() }).parse(d))
   .handler(async ({ data }) => {
     const db = await pub();
     const contest = check(await db.from("contests").select("id,status").eq("slug", data.slug).maybeSingle()) as any;

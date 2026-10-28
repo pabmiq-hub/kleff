@@ -36,7 +36,7 @@ CREATE TABLE IF NOT EXISTS public.contest_votes (
   voter_id uuid NOT NULL REFERENCES public.contest_voters(id) ON DELETE CASCADE,
   category_id uuid NOT NULL REFERENCES public.contest_categories(id) ON DELETE CASCADE,
   entry_id uuid NOT NULL REFERENCES public.contest_entries(id) ON DELETE CASCADE,
-  PRIMARY KEY (voter_id, category_id)
+  PRIMARY KEY (voter_id, category_id, entry_id)
 );
 GRANT ALL ON public.contests, public.contest_categories, public.contest_entries,
   public.contest_entry_categories, public.contest_voters, public.contest_votes TO service_role;
