@@ -13,7 +13,8 @@ import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { ArrowLeft, Copy, Gift, Pencil, Plus, Trash2, Trophy, X } from "lucide-react";
+import { ArrowLeft, Copy, Gift, Pencil, Plus, QrCode, Trash2, Trophy, X } from "lucide-react";
+import { QRCodeSVG } from "qrcode.react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/admin/concurso")({
@@ -96,6 +97,7 @@ function ContestDetail({ id, onBack }: { id: string; onBack: () => void }) {
   const [newCat, setNewCat] = useState("");
   const [draft, setDraft] = useState<EntryDraft | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [showQr, setShowQr] = useState(false);
 
   const load = useCallback(async () => {
     try {
@@ -131,9 +133,10 @@ function ContestDetail({ id, onBack }: { id: string; onBack: () => void }) {
           </Select>
         </div>
         <Button onClick={() => run(() => update({ data: { id, ...form } }), "Guardado")}>Guardar</Button>
-        <div className="flex items-center gap-2 text-sm md:col-span-4">
+        <div className="flex flex-wrap items-center gap-2 text-sm md:col-span-4">
           <span className="truncate font-mono">{url}</span>
           <Button size="sm" variant="outline" onClick={() => { navigator.clipboard.writeText(url); toast.success("Enlace copiado"); }}><Copy className="mr-1 h-3 w-3" />Copiar</Button>
+          <Button size="sm" variant="outline" onClick={() => setShowQr(true)}><QrCode className="mr-1 h-3 w-3" />Código QR</Button>
           <a href={`/concurso/${d.contest.slug}`} target="_blank" rel="noreferrer" className="text-primary underline">Abrir</a>
         </div>
       </section>
@@ -227,6 +230,19 @@ function ContestDetail({ id, onBack }: { id: string; onBack: () => void }) {
             <Button disabled={!draft?.name.trim() || !draft?.photoUrl || !draft?.categoryIds.length || uploading}
               onClick={() => draft && run(async () => { await saveEntry({ data: { contestId: id, ...draft } }); setDraft(null); }, "Guardado")}>Guardar</Button>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showQr} onOpenChange={setShowQr}>
+        <DialogContent className="max-w-xs">
+          <DialogHeader><DialogTitle>QR de votación</DialogTitle></DialogHeader>
+          <div className="flex flex-col items-center gap-3">
+            <div className="rounded-lg border bg-white p-3">
+              <QRCodeSVG value={url} size={208} marginSize={0} />
+            </div>
+            <p className="break-all text-center font-mono text-xs">{url}</p>
+            <p className="text-center text-xs text-muted-foreground">Los votantes pueden escanear este código para ver a los participantes y votar.</p>
+          </div>
         </DialogContent>
       </Dialog>
     </div>
