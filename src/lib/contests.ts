@@ -5,15 +5,17 @@ export function normalizeContestSlug(v: string) {
 }
 export const contestSlugSchema = z.string().min(3).max(48).regex(/^[a-z0-9]+(-[a-z0-9]+)*$/);
 
-/** Only one vote per category, and only for entries competing in that category. */
-export function validVotes(
-  votes: Record<string, string>,
-  entryCategories: { entry_id: string; category_id: string }[],
-) {
+export type ContestVote = { category_id: string; entry_id: string };
+/** Any number of votes, several per category allowed; only for entries competing in that category, without duplicates. */
+export function validVotes(votes: ContestVote[], entryCategories: ContestVote[]) {
   const allowed = new Set(entryCategories.map((e) => `${e.entry_id}:${e.category_id}`));
-  return Object.entries(votes)
-    .filter(([cat, entry]) => allowed.has(`${entry}:${cat}`))
-    .map(([category_id, entry_id]) => ({ category_id, entry_id }));
+  const seen = new Set<string>();
+  return votes.filter((v) => {
+    const k = `${v.entry_id}:${v.category_id}`;
+    if (!allowed.has(k) || seen.has(k)) return false;
+    seen.add(k);
+    return true;
+  }).map(({ category_id, entry_id }) => ({ category_id, entry_id }));
 }
 
 /** Ranking per category, most votes first. */

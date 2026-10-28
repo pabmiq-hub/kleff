@@ -31,7 +31,7 @@ function ContestVotePage() {
   const key = `kleff-contest-${slug}`;
   const [data, setData] = useState<Data | undefined>(undefined);
   const [nickname, setNickname] = useState("");
-  const [votes, setVotes] = useState<Record<string, string>>({});
+  const [votes, setVotes] = useState<{ category_id: string; entry_id: string }[]>([]);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
 
@@ -62,25 +62,20 @@ function ContestVotePage() {
       <header className="text-center">
         <h1 className="font-display text-3xl">{data.name}</h1>
         <p className="mt-2 text-muted-foreground">
-          {data.open ? "Toca una categoría debajo de la foto para votar a ese participante. Un voto por categoría; guarda tus votos para entrar en el sorteo." : "La votación está cerrada."}
+          {data.open ? "Toca las categorías debajo de cada foto para votar. Puedes votar a varios participantes, también en la misma categoría, o dar un solo voto. Guarda tus votos para entrar en el sorteo." : "La votación está cerrada."}
         </p>
         {saved && <p className="mt-2 inline-flex items-center gap-1 rounded-full bg-primary/10 px-3 py-1 text-sm text-primary"><Check className="h-4 w-4" />Tus votos están guardados{data.open ? " · puedes cambiarlos" : ""}</p>}
       </header>
 
-      {(() => {
-        const active = data.categories.filter((c) => data.entries.some((e) => e.categoryIds.includes(c.id)));
-        const done = active.filter((c) => votes[c.id]).length;
-        if (!active.length) return null;
-        return (
-          <p className="text-center text-sm text-muted-foreground">
-            Has votado en {done} de {active.length} {active.length === 1 ? "categoría" : "categorías"}.
-          </p>
-        );
-      })()}
+      {votes.length > 0 && (
+        <p className="text-center text-sm text-muted-foreground">
+          Llevas {votes.length} {votes.length === 1 ? "voto" : "votos"}.
+        </p>
+      )}
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
         {data.entries.map((e) => {
-          const anyOn = e.categoryIds.some((cid) => votes[cid] === e.id);
+          const anyOn = votes.some((v) => v.entry_id === e.id);
           return (
             <div key={e.id} className={`overflow-hidden rounded-lg border-2 bg-card ${anyOn ? "border-primary" : "border-transparent"}`}>
               <img src={e.photo_url} alt={e.name} className="aspect-square w-full object-cover" loading="lazy" />
@@ -90,10 +85,10 @@ function ContestVotePage() {
                   {e.categoryIds.map((cid) => {
                     const cat = data.categories.find((c) => c.id === cid);
                     if (!cat) return null;
-                    const on = votes[cid] === e.id;
+                    const on = votes.some((v) => v.entry_id === e.id && v.category_id === cid);
                     return (
                       <button key={cid} type="button" disabled={!data.open} aria-pressed={on}
-                        onClick={() => { setVotes({ ...votes, [cid]: e.id }); setSaved(false); }}
+                        onClick={() => { setVotes(on ? votes.filter((v) => !(v.entry_id === e.id && v.category_id === cid)) : [...votes, { category_id: cid, entry_id: e.id }]); setSaved(false); }}
                         className={`rounded-full border px-2 py-0.5 text-xs transition ${on ? "border-primary bg-primary text-primary-foreground" : "border-border text-muted-foreground hover:border-primary/50"}`}>
                         {cat.name}
                       </button>
@@ -110,7 +105,7 @@ function ContestVotePage() {
         <div className="fixed inset-x-0 bottom-0 border-t bg-background/95 p-3 backdrop-blur">
           <div className="mx-auto flex max-w-3xl gap-2">
             <Input value={nickname} onChange={(e) => { setNickname(e.target.value); setSaved(false); }} placeholder="Tu nombre o apodo" maxLength={60} />
-            <Button onClick={save} disabled={saving || !nickname.trim() || !Object.keys(votes).length}>{saving ? "Guardando…" : "Guardar votos"}</Button>
+            <Button onClick={save} disabled={saving || !nickname.trim() || !votes.length}>{saving ? "Guardando…" : "Guardar votos"}</Button>
           </div>
         </div>
       )}
