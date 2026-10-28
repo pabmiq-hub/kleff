@@ -99,7 +99,7 @@ export const mmImportSchema = z
       )
       .default([]),
     joint_actions: z
-      .array(z.object({ ref: z.string().optional(), name: z.string().min(1), description: z.string().optional(), proposal_text: z.string().optional(), requires_acceptance: z.boolean().default(true), available_from_act: z.string().optional(), requirements: z.array(z.object({ role: z.string(), character: z.string().optional(), item: z.string().optional(), ability: z.string().optional(), fragment: z.string().optional() })).min(1), results: z.array(z.object({ role: z.string().optional(), text: z.string().optional(), evidence: z.string().optional(), secret: z.string().optional() })).default([]) }))
+      .array(z.object({ ref: z.string().optional(), name: z.string().min(1), description: z.string().optional(), proposal_text: z.string().optional(), requires_acceptance: z.boolean().default(true), available_from_act: z.string().optional(), requirements: z.array(z.object({ role: z.string(), character: z.string().optional(), item: z.string().optional(), ability: z.string().optional(), fragment: z.string().optional() })).min(1), results: z.array(z.object({ role: z.string().optional(), text: z.string().optional(), evidence: z.string().optional(), secret: z.string().optional(), money: z.number().int().optional() })).default([]) }))
       .default([]),
   })
   .superRefine((g, ctx) => {
