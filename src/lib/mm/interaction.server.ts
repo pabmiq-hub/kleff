@@ -58,6 +58,16 @@ export async function interact(playerId: string, sessionId: string, input: any) 
       if (!item || input.targetIds.length !== 1) throw new Error("Objeto o destinatario no válido");
       plan.title = item.name;
       plan.resources = [{ kind: "item", id: item.id, player_id: me.id }];
+      // Receiver always gets a notice; items may also carry an on_receive text/evidence.
+      const receiver = people[1];
+      const onReceive = item.use_config?.on_receive ?? {};
+      plan.results.push({ player_id: receiver.id, text: `Has recibido «${item.name}». Ya está en tu inventario.` });
+      if (onReceive.text) plan.results.push({ player_id: receiver.id, text: onReceive.text });
+      if (onReceive.evidence) {
+        const evidence = await query(db().from("mm_evidences").select("id, title, unlock_rule").eq("game_id", c.s.game_id));
+        const ev = evidence.find((e: any) => [e.id, e.title, e.unlock_rule?.ref].includes(onReceive.evidence));
+        if (ev) plan.unlocks.push({ player_id: receiver.id, evidence_id: ev.id });
+      }
     } else {
       let results: any[] = [];
       let roles: any[] = people.map(p => ({ ...p, role: "all" }));
