@@ -67,29 +67,44 @@ function ContestVotePage() {
         {saved && <p className="mt-2 inline-flex items-center gap-1 rounded-full bg-primary/10 px-3 py-1 text-sm text-primary"><Check className="h-4 w-4" />Tus votos están guardados{data.open ? " · puedes cambiarlos" : ""}</p>}
       </header>
 
-      {data.categories.map((c) => {
-        const entries = data.entries.filter((e) => e.categoryIds.includes(c.id));
-        if (!entries.length) return null;
+      {(() => {
+        const active = data.categories.filter((c) => data.entries.some((e) => e.categoryIds.includes(c.id)));
+        const done = active.filter((c) => votes[c.id]).length;
+        if (!active.length) return null;
         return (
-          <section key={c.id} className="space-y-3">
-            <h2 className="font-display text-xl">{c.name}</h2>
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-              {entries.map((e) => {
-                const on = votes[c.id] === e.id;
-                return (
-                  <button key={e.id} type="button" disabled={!data.open} aria-pressed={on}
-                    onClick={() => { setVotes({ ...votes, [c.id]: e.id }); setSaved(false); }}
-                    className={`relative overflow-hidden rounded-lg border-2 bg-card text-left transition ${on ? "border-primary ring-2 ring-primary/40" : "border-transparent"}`}>
-                    <img src={e.photo_url} alt={e.name} className="aspect-square w-full object-cover" loading="lazy" />
-                    <div className="p-2 text-sm font-medium">{e.name}</div>
-                    {on && <span className="absolute right-2 top-2 rounded-full bg-primary p-1 text-primary-foreground"><Check className="h-4 w-4" /></span>}
-                  </button>
-                );
-              })}
-            </div>
-          </section>
+          <p className="text-center text-sm text-muted-foreground">
+            Has votado en {done} de {active.length} {active.length === 1 ? "categoría" : "categorías"}.
+          </p>
         );
-      })}
+      })()}
+
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+        {data.entries.map((e) => {
+          const anyOn = e.categoryIds.some((cid) => votes[cid] === e.id);
+          return (
+            <div key={e.id} className={`overflow-hidden rounded-lg border-2 bg-card ${anyOn ? "border-primary" : "border-transparent"}`}>
+              <img src={e.photo_url} alt={e.name} className="aspect-square w-full object-cover" loading="lazy" />
+              <div className="space-y-1.5 p-2">
+                <div className="text-sm font-medium">{e.name}</div>
+                <div className="flex flex-wrap gap-1">
+                  {e.categoryIds.map((cid) => {
+                    const cat = data.categories.find((c) => c.id === cid);
+                    if (!cat) return null;
+                    const on = votes[cid] === e.id;
+                    return (
+                      <button key={cid} type="button" disabled={!data.open} aria-pressed={on}
+                        onClick={() => { setVotes({ ...votes, [cid]: e.id }); setSaved(false); }}
+                        className={`rounded-full border px-2 py-0.5 text-xs transition ${on ? "border-primary bg-primary text-primary-foreground" : "border-border text-muted-foreground hover:border-primary/50"}`}>
+                        {cat.name}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
 
       {data.open && (
         <div className="fixed inset-x-0 bottom-0 border-t bg-background/95 p-3 backdrop-blur">
