@@ -62,7 +62,7 @@ function ContestVotePage() {
       <header className="text-center">
         <h1 className="font-display text-3xl">{data.name}</h1>
         <p className="mt-2 text-muted-foreground">
-          {data.open ? "Elige un favorito en cada categoría y guarda tus votos para entrar en el sorteo." : "La votación está cerrada."}
+          {data.open ? "Toca una categoría debajo de la foto para votar a ese participante. Un voto por categoría; guarda tus votos para entrar en el sorteo." : "La votación está cerrada."}
         </p>
         {saved && <p className="mt-2 inline-flex items-center gap-1 rounded-full bg-primary/10 px-3 py-1 text-sm text-primary"><Check className="h-4 w-4" />Tus votos están guardados{data.open ? " · puedes cambiarlos" : ""}</p>}
       </header>
