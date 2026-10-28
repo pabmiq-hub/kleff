@@ -42,6 +42,7 @@ import { Route as EventSlugSeleccionRouteImport } from './routes/$eventSlug.sele
 import { Route as EventSlugUsuarioRouteImport } from './routes/$eventSlug.usuario'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as AdminBlogRouteImport } from './routes/admin.blog'
+import { Route as AdminConcursoRouteImport } from './routes/admin.concurso'
 import { Route as AdminContentRouteImport } from './routes/admin.content'
 import { Route as AdminFinanzasRouteImport } from './routes/admin.finanzas'
 import { Route as AdminInvitationsRouteImport } from './routes/admin.invitations'
@@ -79,6 +80,7 @@ import { Route as CaRolsOcultsRouteImport } from './routes/ca.rols-ocults'
 import { Route as CaSlowFriendingLudicRouteImport } from './routes/ca.slow-friending-ludic'
 import { Route as CaTermesRouteImport } from './routes/ca.termes'
 import { Route as CaTornejosRouteImport } from './routes/ca.tornejos'
+import { Route as ConcursoSlugRouteImport } from './routes/concurso.$slug'
 import { Route as EnIndexRouteImport } from './routes/en.index'
 import { Route as EnAboutRouteImport } from './routes/en.about'
 import { Route as EnActivitiesRouteImport } from './routes/en.activities'
@@ -334,6 +336,11 @@ const AdminBlogRoute = AdminBlogRouteImport.update({
   path: '/blog',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminConcursoRoute = AdminConcursoRouteImport.update({
+  id: '/concurso',
+  path: '/concurso',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminContentRoute = AdminContentRouteImport.update({
   id: '/content',
   path: '/content',
@@ -517,6 +524,11 @@ const CaTermesRoute = CaTermesRouteImport.update({
 const CaTornejosRoute = CaTornejosRouteImport.update({
   id: '/ca/tornejos',
   path: '/ca/tornejos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ConcursoSlugRoute = ConcursoSlugRouteImport.update({
+  id: '/concurso/$slug',
+  path: '/concurso/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
 const EnIndexRoute = EnIndexRouteImport.update({
@@ -1011,6 +1023,7 @@ export interface FileRoutesByFullPath {
   '/$eventSlug/seleccion': typeof EventSlugSeleccionRoute
   '/$eventSlug/usuario': typeof EventSlugUsuarioRoute
   '/admin/blog': typeof AdminBlogRouteWithChildren
+  '/admin/concurso': typeof AdminConcursoRoute
   '/admin/content': typeof AdminContentRouteWithChildren
   '/admin/finanzas': typeof AdminFinanzasRouteWithChildren
   '/admin/invitations': typeof AdminInvitationsRoute
@@ -1046,6 +1059,7 @@ export interface FileRoutesByFullPath {
   '/ca/slow-friending-ludic': typeof CaSlowFriendingLudicRoute
   '/ca/termes': typeof CaTermesRoute
   '/ca/tornejos': typeof CaTornejosRoute
+  '/concurso/$slug': typeof ConcursoSlugRoute
   '/en/about': typeof EnAboutRoute
   '/en/activities': typeof EnActivitiesRoute
   '/en/blog': typeof EnBlogRoute
@@ -1168,6 +1182,7 @@ export interface FileRoutesByTo {
   '/$eventSlug/registro': typeof EventSlugRegistroRoute
   '/$eventSlug/seleccion': typeof EventSlugSeleccionRoute
   '/$eventSlug/usuario': typeof EventSlugUsuarioRoute
+  '/admin/concurso': typeof AdminConcursoRoute
   '/admin/invitations': typeof AdminInvitationsRoute
   '/admin/karma': typeof AdminKarmaRoute
   '/admin/members': typeof AdminMembersRoute
@@ -1197,6 +1212,7 @@ export interface FileRoutesByTo {
   '/ca/slow-friending-ludic': typeof CaSlowFriendingLudicRoute
   '/ca/termes': typeof CaTermesRoute
   '/ca/tornejos': typeof CaTornejosRoute
+  '/concurso/$slug': typeof ConcursoSlugRoute
   '/en/about': typeof EnAboutRoute
   '/en/activities': typeof EnActivitiesRoute
   '/en/blog': typeof EnBlogRoute
@@ -1323,6 +1339,7 @@ export interface FileRoutesById {
   '/$eventSlug/seleccion': typeof EventSlugSeleccionRoute
   '/$eventSlug/usuario': typeof EventSlugUsuarioRoute
   '/admin/blog': typeof AdminBlogRouteWithChildren
+  '/admin/concurso': typeof AdminConcursoRoute
   '/admin/content': typeof AdminContentRouteWithChildren
   '/admin/finanzas': typeof AdminFinanzasRouteWithChildren
   '/admin/invitations': typeof AdminInvitationsRoute
@@ -1358,6 +1375,7 @@ export interface FileRoutesById {
   '/ca/slow-friending-ludic': typeof CaSlowFriendingLudicRoute
   '/ca/termes': typeof CaTermesRoute
   '/ca/tornejos': typeof CaTornejosRoute
+  '/concurso/$slug': typeof ConcursoSlugRoute
   '/en/about': typeof EnAboutRoute
   '/en/activities': typeof EnActivitiesRoute
   '/en/blog': typeof EnBlogRoute
@@ -1485,6 +1503,7 @@ export interface FileRouteTypes {
     | '/$eventSlug/seleccion'
     | '/$eventSlug/usuario'
     | '/admin/blog'
+    | '/admin/concurso'
     | '/admin/content'
     | '/admin/finanzas'
     | '/admin/invitations'
@@ -1520,6 +1539,7 @@ export interface FileRouteTypes {
     | '/ca/slow-friending-ludic'
     | '/ca/termes'
     | '/ca/tornejos'
+    | '/concurso/$slug'
     | '/en/about'
     | '/en/activities'
     | '/en/blog'
@@ -1642,6 +1662,7 @@ export interface FileRouteTypes {
     | '/$eventSlug/registro'
     | '/$eventSlug/seleccion'
     | '/$eventSlug/usuario'
+    | '/admin/concurso'
     | '/admin/invitations'
     | '/admin/karma'
     | '/admin/members'
@@ -1671,6 +1692,7 @@ export interface FileRouteTypes {
     | '/ca/slow-friending-ludic'
     | '/ca/termes'
     | '/ca/tornejos'
+    | '/concurso/$slug'
     | '/en/about'
     | '/en/activities'
     | '/en/blog'
@@ -1796,6 +1818,7 @@ export interface FileRouteTypes {
     | '/$eventSlug/seleccion'
     | '/$eventSlug/usuario'
     | '/admin/blog'
+    | '/admin/concurso'
     | '/admin/content'
     | '/admin/finanzas'
     | '/admin/invitations'
@@ -1831,6 +1854,7 @@ export interface FileRouteTypes {
     | '/ca/slow-friending-ludic'
     | '/ca/termes'
     | '/ca/tornejos'
+    | '/concurso/$slug'
     | '/en/about'
     | '/en/activities'
     | '/en/blog'
@@ -1972,6 +1996,7 @@ export interface RootRouteChildren {
   CaSlowFriendingLudicRoute: typeof CaSlowFriendingLudicRoute
   CaTermesRoute: typeof CaTermesRoute
   CaTornejosRoute: typeof CaTornejosRoute
+  ConcursoSlugRoute: typeof ConcursoSlugRoute
   EnAboutRoute: typeof EnAboutRoute
   EnActivitiesRoute: typeof EnActivitiesRoute
   EnBlogRoute: typeof EnBlogRoute
@@ -2257,6 +2282,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminBlogRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/concurso': {
+      id: '/admin/concurso'
+      path: '/concurso'
+      fullPath: '/admin/concurso'
+      preLoaderRoute: typeof AdminConcursoRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/content': {
       id: '/admin/content'
       path: '/content'
@@ -2514,6 +2546,13 @@ declare module '@tanstack/react-router' {
       path: '/ca/tornejos'
       fullPath: '/ca/tornejos'
       preLoaderRoute: typeof CaTornejosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/concurso/$slug': {
+      id: '/concurso/$slug'
+      path: '/concurso/$slug'
+      fullPath: '/concurso/$slug'
+      preLoaderRoute: typeof ConcursoSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/en/': {
@@ -3258,6 +3297,7 @@ const AdminRentalsRouteWithChildren = AdminRentalsRoute._addFileChildren(
 
 interface AdminRouteChildren {
   AdminBlogRoute: typeof AdminBlogRouteWithChildren
+  AdminConcursoRoute: typeof AdminConcursoRoute
   AdminContentRoute: typeof AdminContentRouteWithChildren
   AdminFinanzasRoute: typeof AdminFinanzasRouteWithChildren
   AdminInvitationsRoute: typeof AdminInvitationsRoute
@@ -3278,6 +3318,7 @@ interface AdminRouteChildren {
 
 const AdminRouteChildren: AdminRouteChildren = {
   AdminBlogRoute: AdminBlogRouteWithChildren,
+  AdminConcursoRoute: AdminConcursoRoute,
   AdminContentRoute: AdminContentRouteWithChildren,
   AdminFinanzasRoute: AdminFinanzasRouteWithChildren,
   AdminInvitationsRoute: AdminInvitationsRoute,
@@ -3390,6 +3431,7 @@ const rootRouteChildren: RootRouteChildren = {
   CaSlowFriendingLudicRoute: CaSlowFriendingLudicRoute,
   CaTermesRoute: CaTermesRoute,
   CaTornejosRoute: CaTornejosRoute,
+  ConcursoSlugRoute: ConcursoSlugRoute,
   EnAboutRoute: EnAboutRoute,
   EnActivitiesRoute: EnActivitiesRoute,
   EnBlogRoute: EnBlogRoute,
