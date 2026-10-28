@@ -50,7 +50,7 @@ export const mmImportSchema = z
           abilities: z
             .array(z.object({ ref: z.string().optional(), name: z.string().min(1), description: z.string().optional(), effect_type: z.string().optional(), effect_config: json, use: useSchema.optional(), max_uses: z.number().int().min(0).default(1), available_from_act: z.string().optional() }))
             .default([]),
-          items: z.array(z.object({ ref: z.string().optional(), name: z.string().min(1), description: z.string().optional(), image_url: z.string().optional(), available_from_act: z.string().optional(), type: z.enum(["item", "money"]).default("item"), amount: z.number().int().min(0).max(2147483647).default(0), currency: z.literal("EUR").default("EUR"), use: useSchema.optional() })).default([]),
+          items: z.array(z.object({ ref: z.string().optional(), name: z.string().min(1), description: z.string().optional(), image_url: z.string().optional(), available_from_act: z.string().optional(), type: z.enum(["item", "money"]).default("item"), amount: z.number().int().min(0).max(2147483647).default(0), currency: z.literal("EUR").default("EUR"), use: useSchema.optional(), on_receive: z.object({ text: z.string().optional(), evidence: z.string().optional() }).optional() })).default([]),
           fragments: z.array(z.object({ label: z.string().min(1), value: z.string().optional(), group_key: z.string().min(1) })).default([]),
          }).transform((character) => ({ ...character, avatar_url: importedAvatarUrl(character) })),
       )
