@@ -301,15 +301,18 @@ export async function tick(sessionId: string) {
 
 const ONLINE_MS = 35_000;
 
-function publicSession(s: Session, acts: any[], game: any) {
+function publicSession(s: Session, acts: any[], game: any, hideFuture = false) {
   const act = acts.find((a) => a.id === s.current_act_id) ?? null;
+  // Players only see acts already reached: future act names/keys can spoil the story.
+  const curPos = s.status === "lobby" ? 0 : (act?.position ?? 0);
+  const mask = (a: any) => hideFuture && s.status !== "finished" && a.position > curPos;
   return {
     id: s.id,
     name: s.name,
     status: s.status,
     control_mode: s.control_mode,
     act: act ? { id: act.id, key: act.key, name: act.name, position: act.position, narrative_text: act.narrative_text, duration_minutes: act.duration_minutes } : null,
-    acts: acts.map((a) => ({ id: a.id, key: a.key, name: a.name, position: a.position })),
+    acts: acts.map((a) => ({ id: a.id, key: mask(a) ? null : a.key, name: mask(a) ? null : a.name, position: a.position })),
     act_started_at: s.act_started_at,
     act_ends_at: s.act_ends_at,
     paused_remaining_seconds: s.paused_remaining_seconds,
@@ -435,7 +438,7 @@ export async function buildPlayerState(playerId: string) {
   const interactionState = released && s.status !== "lobby" ? await playerInteractionState(playerId, s.id) : { wallet: null, inventory: [], fragments: [], joint_actions: [], requests: [] };
 
   return {
-    session: publicSession(s, acts, game),
+    session: publicSession(s, acts, game, true),
     me: {
       id: me.id,
       display_name: me.display_name,
