@@ -85,6 +85,7 @@ function AdminLayout() {
       items: [
         { label: "Socios", to: "/admin/members", match: ["/admin/members", "/admin/invitations"], icon: <Users className="h-4 w-4" />, show: sa },
         { label: "Participación", to: "/admin/polls", match: ["/admin/polls", "/admin/karma"], icon: <Vote className="h-4 w-4" />, show: sa },
+        { label: "Concurso", to: "/admin/concurso", icon: <Vote className="h-4 w-4" />, show: sa },
       ],
     },
     {
