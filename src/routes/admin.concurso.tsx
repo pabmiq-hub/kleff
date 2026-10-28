@@ -97,6 +97,7 @@ function ContestDetail({ id, onBack }: { id: string; onBack: () => void }) {
   const [newCat, setNewCat] = useState("");
   const [draft, setDraft] = useState<EntryDraft | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [showQr, setShowQr] = useState(false);
 
   const load = useCallback(async () => {
     try {
@@ -229,6 +230,19 @@ function ContestDetail({ id, onBack }: { id: string; onBack: () => void }) {
             <Button disabled={!draft?.name.trim() || !draft?.photoUrl || !draft?.categoryIds.length || uploading}
               onClick={() => draft && run(async () => { await saveEntry({ data: { contestId: id, ...draft } }); setDraft(null); }, "Guardado")}>Guardar</Button>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showQr} onOpenChange={setShowQr}>
+        <DialogContent className="max-w-xs">
+          <DialogHeader><DialogTitle>QR de votación</DialogTitle></DialogHeader>
+          <div className="flex flex-col items-center gap-3">
+            <div className="rounded-lg border bg-white p-3">
+              <QRCodeSVG value={url} size={208} marginSize={0} />
+            </div>
+            <p className="break-all text-center font-mono text-xs">{url}</p>
+            <p className="text-center text-xs text-muted-foreground">Los votantes pueden escanear este código para ver a los participantes y votar.</p>
+          </div>
         </DialogContent>
       </Dialog>
     </div>
