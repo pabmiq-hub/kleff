@@ -422,10 +422,11 @@ export async function buildPlayerState(playerId: string) {
 
   const visibleEvidences = (evidences ?? [])
     .filter((e: any) => {
+      // Unlocks grant an evidence to this player, but never before its act: future acts stay hidden.
+      if (s.status === "lobby" || !reached(e.act_id)) return false;
       if (unlockedEv.has(e.id)) return true;
-      if (s.status === "lobby") return false;
       const auto = !e.unlock_rule || e.unlock_rule.type === "auto" || !e.unlock_rule.type;
-      if (!auto || !reached(e.act_id)) return false;
+      if (!auto) return false;
       return e.scope === "common" || e.target_character_id === myCharId;
     })
     .map((e: any) => ({ id: e.id, title: e.title, content: e.content, image_url: e.image_url, scope: e.scope, reveal_style: e.reveal_style, act: acts.find((a) => a.id === e.act_id)?.name ?? null }));
