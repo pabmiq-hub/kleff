@@ -308,7 +308,7 @@ export const mmViewAsPlayer = createServerFn({ method: "POST" })
 
 const controlSchema = z.object({
   sessionId: id,
-  action: z.enum(["start", "pause", "resume", "add_minutes", "advance", "murder", "voting_open", "voting_close", "finish", "archive", "set_mode", "set_blind", "set_join_open", "admin_objective", "release", "schedule_release", "set_language"]),
+  action: z.enum(["start", "pause", "resume", "add_minutes", "advance", "retreat", "murder", "voting_open", "voting_close", "finish", "archive", "set_mode", "set_blind", "set_join_open", "admin_objective", "release", "schedule_release", "set_language"]),
   releaseAt: z.string().nullable().optional(),
   language: z.enum(["es", "ca", "en", "fr"]).optional(),
   minutes: z.number().int().optional(),
@@ -357,6 +357,9 @@ export const mmControlSession = createServerFn({ method: "POST" })
       }
       case "advance":
         await eng.advanceAct(sid, data.expectedActId ?? s.current_act_id, "admin");
+        break;
+      case "retreat":
+        await eng.recedeAct(sid, data.expectedActId ?? s.current_act_id, "admin");
         break;
       case "murder":
         if (s.murder_triggered_at) break;

@@ -211,6 +211,8 @@ export async function advanceAct(sessionId: string, fromActId: string | null, re
   if (next.key === "conclusion") patch.voting_open = true;
   let q = db().from("mm_sessions").update(patch).eq("id", sessionId);
   q = fromActId ? q.eq("current_act_id", fromActId) : q.is("current_act_id", null);
+  // A pause landing while a timer tick is in flight must not advance the act.
+  if (reason === "timer") q = q.eq("status", "running");
   const { data: upd, error } = await q.select("id");
   if (error) throw new Error("No se pudo avanzar de acto. Vuelve a intentarlo.");
   if (!upd?.length) return;
@@ -220,6 +222,35 @@ export async function advanceAct(sessionId: string, fromActId: string | null, re
   const income = await db().rpc("mm_apply_income", { _session: sessionId });
   if (income.error) throw new Error("El acto ha avanzado, pero no se pudieron aplicar los ingresos");
   await broadcast(sessionTopic(sessionId), "act_changed", { act_id: next.id });
+}
+
+/** Idempotent: only goes back if the session is still on `fromActId`. Admin-only recovery tool. */
+export async function recedeAct(sessionId: string, fromActId: string | null, reason: string) {
+  const { data: s } = await db().from("mm_sessions").select("*").eq("id", sessionId).single();
+  if (!s || s.status === "finished" || s.status === "lobby") return;
+  if ((s.current_act_id ?? null) !== fromActId) return;
+  const acts = await loadActs(s.game_id);
+  const idx = acts.findIndex((a) => a.id === s.current_act_id);
+  const prev = acts[idx - 1];
+  if (!prev) return;
+  const now = new Date();
+  const patch: Record<string, unknown> = {
+    current_act_id: prev.id,
+    act_started_at: now.toISOString(),
+    act_ends_at: s.status === "paused" ? null : new Date(now.getTime() + prev.duration_minutes * 60000).toISOString(),
+    paused_remaining_seconds: s.status === "paused" ? prev.duration_minutes * 60 : null,
+  };
+  // The murder belongs to act two: going back before it re-arms the trigger, and leaving the
+  // conclusion act closes the vote again so players stop seeing the accusation prompt.
+  if (prev.position < 2) patch.murder_triggered_at = null;
+  if (s.voting_open) patch.voting_open = false;
+  let q = db().from("mm_sessions").update(patch).eq("id", sessionId);
+  q = fromActId ? q.eq("current_act_id", fromActId) : q.is("current_act_id", null);
+  const { data: upd, error } = await q.select("id");
+  if (error) throw new Error("No se pudo retroceder de acto. Vuelve a intentarlo.");
+  if (!upd?.length) return;
+  await logEvent(sessionId, "act_changed", { act: prev.name, position: prev.position, reason });
+  await broadcast(sessionTopic(sessionId), "act_changed", { act_id: prev.id });
 }
 
 export async function finishSession(sessionId: string, reason: string) {
@@ -247,9 +278,10 @@ export async function tick(sessionId: string) {
     }
   }
   if (s.status === "lobby" && s.control_mode === "auto") {
+    // The scheduled time never starts the session by itself: only the admin's "Iniciar partida"
+    // button does. In auto mode the session also starts once every player is ready.
     const { data: ps } = await db().from("mm_session_players").select("ready").eq("session_id", sessionId);
-    const scheduled = s.scheduled_at && new Date(s.scheduled_at).getTime() <= now;
-    if (ps?.length && ((s.characters_released_at && ps.every((p: any) => p.ready)) || scheduled) && (await getSessionEligibility(s, !!s.characters_released_at)).allowed) await startSession(sessionId, "auto");
+    if (ps?.length && s.characters_released_at && ps.every((p: any) => p.ready) && (await getSessionEligibility(s, true)).allowed) await startSession(sessionId, "auto");
     return;
   }
   if (s.status !== "running") return;

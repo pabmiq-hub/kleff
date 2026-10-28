@@ -138,6 +138,7 @@ function Panel() {
             <Button variant="outline" onClick={() => act("add_minutes", { minutes: -1 })}>−1 min</Button>
             <Button variant="outline" onClick={() => act("add_minutes", { minutes: 1 })}>+1 min</Button>
             <Button variant="outline" onClick={() => act("add_minutes", { minutes: 5 })}>+5 min</Button>
+            <Button variant="outline" disabled={!s.act || s.act.position <= 1} onClick={() => confirm("¿Retroceder al acto anterior? Los jugadores dejarán de ver la información de este acto.") && act("retreat", { expectedActId: s.act?.id ?? null })}>Retroceder de acto</Button>
             <Button onClick={() => confirm("¿Avanzar al siguiente acto?") && act("advance", { expectedActId: s.act?.id ?? null })}>Avanzar de acto</Button>
             {!s.murder_triggered_at && <Button variant="destructive" onClick={() => setMurderPreview(true)}>Lanzar evento del asesinato</Button>}
             <Button variant="outline" onClick={() => act(s.voting_open ? "voting_close" : "voting_open")}>{s.voting_open ? "Cerrar votación" : "Abrir votación"}</Button>
