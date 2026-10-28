@@ -48,7 +48,7 @@ export async function interact(playerId: string, sessionId: string, input: any) 
     if (new Set(input.targetIds).size !== input.targetIds.length || input.targetIds.includes(playerId)) throw new Error("Destinatarios no válidos");
     const people = [me, ...input.targetIds.map((id: string) => c.players.find((p: any) => p.id === id))];
     if (people.some(p => !p?.character_id)) throw new Error("Destinatario no válido");
-    plan = { kind: input.kind, source_id: input.sourceId ?? "money", targets: input.targetIds, act_id: c.s.current_act_id, resources: [], results: [], unlocks: [] };
+    plan = { kind: input.kind, source_id: input.sourceId ?? "money", targets: input.targetIds, act_id: c.s.current_act_id, resources: [], results: [], unlocks: [], money: [] };
     if (input.kind === "money") {
       if (input.targetIds.length !== 1 || !input.amount) throw new Error("Elige destinatario y cantidad");
       transferBalances(c.wallets.find((w: any) => w.session_player_id === me.id)?.amount ?? 0, c.wallets.find((w: any) => w.session_player_id === people[1].id)?.amount ?? 0, input.amount);
@@ -91,6 +91,11 @@ export async function interact(playerId: string, sessionId: string, input: any) 
         const audience = r.role ? roles.filter(x => x.role === r.role) : roles;
         for (const p of audience) {
           if (r.text) plan.results.push({ player_id: p.id, text: r.text });
+          if (Number.isInteger(r.money) && r.money !== 0) {
+            const cur = c.wallets.find((w: any) => w.session_player_id === p.id)?.currency ?? "EUR";
+            plan.money.push({ player_id: p.id, amount: r.money });
+            plan.results.push({ player_id: p.id, text: r.money > 0 ? `+${r.money} ${cur} añadidos a tu cartera.` : `${r.money} ${cur} descontados de tu cartera.` });
+          }
           if (r.evidence) {
             const ev = evidence.find((e: any) => [e.id, e.title, e.unlock_rule?.ref].includes(r.evidence));
             if (!ev) throw new Error("La evidencia de la acción no existe");
