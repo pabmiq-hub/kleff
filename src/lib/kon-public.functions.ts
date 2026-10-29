@@ -26,16 +26,41 @@ export const resolveKonEvent = createServerFn({ method: "GET" })
       "id, name, slug, secondary_slug, secondary_event_name, secondary_registration_subtitle, secondary_registration_description, secondary_target_gender, primary_target_gender";
     const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(data.slug);
 
+    const fullColumns = `${columns}, series_id, status, date`;
+    const isOpen = (r: any) => r && ["pending", "active"].includes(r.status);
+    // Next open edition of a series (earliest upcoming pending/active event).
+    const seriesCurrent = async (seriesId: string) => {
+      const res = await client.from("kon_events").select(fullColumns)
+        .eq("series_id", seriesId).in("status", ["pending", "active"])
+        .order("date", { ascending: true }).limit(1);
+      return (res.data ?? [])[0] ?? null;
+    };
+
     let row: any = null;
     if (isUuid) {
-      const res = await client.from("kon_events").select(columns).eq("id", data.slug).maybeSingle();
+      const res = await client.from("kon_events").select(fullColumns).eq("id", data.slug).maybeSingle();
       row = res.data;
     } else {
-      const res = await client.from("kon_events").select(columns).eq("slug", data.slug).maybeSingle();
-      row = res.data;
+      // A series slug always points at its currently open edition.
+      const series = await client.from("kon_event_series").select("id").eq("slug", data.slug).maybeSingle();
+      if (series.data?.id) row = await seriesCurrent(series.data.id);
       if (!row) {
-        const alt = await client.from("kon_events").select(columns).eq("secondary_slug", data.slug).maybeSingle();
+        const res = await client.from("kon_events").select(fullColumns).eq("slug", data.slug).maybeSingle();
+        row = res.data;
+      }
+      if (!row) {
+        const alt = await client.from("kon_events").select(fullColumns).eq("secondary_slug", data.slug).maybeSingle();
         row = alt.data;
+      }
+      // A closed edition's own slug forwards to the series' next open edition.
+      if (row && !isOpen(row) && row.series_id) {
+        const next = await seriesCurrent(row.series_id);
+        if (next) {
+          const wasSecondary = row.secondary_slug === data.slug && row.slug !== data.slug;
+          row = next;
+          if (wasSecondary && next.secondary_slug) data = { slug: next.secondary_slug };
+          else data = { slug: next.slug ?? data.slug };
+        }
       }
     }
 
