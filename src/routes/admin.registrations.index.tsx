@@ -4,8 +4,8 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ClipboardList, Plus, ExternalLink, Trash2, Users, Loader2, Pencil, Settings, FileText, Link2 } from "lucide-react";
-import { adminListForms, adminCreateForm, adminDeleteForm } from "@/lib/registrations.functions";
+import { ClipboardList, Plus, ExternalLink, Trash2, Users, Loader2, Pencil, Settings, FileText, Link2, Copy } from "lucide-react";
+import { adminListForms, adminCreateForm, adminDeleteForm, adminCopyForm } from "@/lib/registrations.functions";
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { useAdminAccess } from "@/hooks/useAdminAccess";
@@ -27,6 +27,8 @@ function AdminRegistrations() {
   const listFn = useServerFn(adminListForms);
   const createFn = useServerFn(adminCreateForm);
   const deleteFn = useServerFn(adminDeleteForm);
+  const copyFn = useServerFn(adminCopyForm);
+  const [copyingId, setCopyingId] = useState<string | null>(null);
   const [forms, setForms] = useState<FormRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -86,6 +88,19 @@ function AdminRegistrations() {
       toast.error((e as Error).message);
     } finally {
       setCreating(false);
+    }
+  };
+
+  const handleCopy = async (id: string) => {
+    setCopyingId(id);
+    try {
+      const { id: newId } = await copyFn({ data: { id } });
+      toast.success("Evento copiado como borrador");
+      router.navigate({ to: "/admin/registrations/$id", params: { id: newId } });
+    } catch (e) {
+      toast.error((e as Error).message);
+    } finally {
+      setCopyingId(null);
     }
   };
 
@@ -269,6 +284,7 @@ function AdminRegistrations() {
                       {!isSuperAdmin ? <><Users className="h-3.5 w-3.5" /> Ver inscritos</> : f.is_published ? <><Settings className="h-3.5 w-3.5" /> Gestionar</> : <><Pencil className="h-3.5 w-3.5" /> Editar</>}
                     </Link>
                     {f.is_published && <a href={`/${f.slug}`} target="_blank" rel="noreferrer" className="inline-flex items-center justify-center h-8 w-8 rounded-md text-ink/70 hover:text-ink hover:bg-ink/10" title="Ver pública"><ExternalLink className="h-3.5 w-3.5" /></a>}
+                    {isSuperAdmin && f.kind === "form" && <Button size="sm" variant="ghost" disabled={copyingId === f.id} onClick={() => handleCopy(f.id)} className="text-ink/70 hover:text-ink hover:bg-ink/10 h-8 w-8 p-0" title="Copiar evento">{copyingId === f.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Copy className="h-3.5 w-3.5" />}</Button>}
                     {isSuperAdmin && <Button size="sm" variant="ghost" onClick={() => handleDelete(f.id, f.title || f.slug)} className="text-ink/70 hover:text-red-500 hover:bg-red-500/10 h-8 w-8 p-0" title="Eliminar"><Trash2 className="h-3.5 w-3.5" /></Button>}
                   </div>
                 </td>
