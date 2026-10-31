@@ -40,3 +40,5 @@
 - [ ] Mapa del castillo: importar el JSON v12 y repasar las 10 comprobaciones con dos jugadores (falta el JSON v12); copiar db/mm-map.sql a la base de respaldo
 - [x] Juegos: pestaña Ilustraciones con objetos, evidencias, plano, salas y elementos; filtros, ampliación y regeneración individual; 51 pruebas superadas, cinco generaciones reales con Gemini y lectura posterior en juego temporal eliminado; vista con 92 imágenes reales comprobada en ordenador y móvil, compilación correcta.
 - [ ] Juegos galería: verificar el recorrido completo desde la ficha con sesión de superadministrador (la sesión propia no está disponible; la herramienta no encuentra una cuenta del solicitante); publicar para kleff.es.
+- [x] Konektum: «Enviar comunicado» en «Más» con título, texto con formato, vista previa y baja opcional; 4 pruebas, acceso sin sesión rechazado
+- [ ] Konektum comunicado: probar la ventana y un envío real desde el panel (no hay sesión de administrador de la base propia disponible)
