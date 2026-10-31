@@ -6153,6 +6153,27 @@ const EventDetail = () => {
           />
         )}
 
+        {id && (
+          <SendAnnouncementDialog
+            open={showAnnouncement}
+            onOpenChange={setShowAnnouncement}
+            eventId={id}
+            eventName={eventData?.name || ""}
+            isEn={eventData?.language === "en"}
+            recipients={activeParticipants.map((p) => ({ id: p.id, name: p.name, email: p.email }))}
+            branding={(() => {
+              const tpl = (eventData?.email_template || {}) as any;
+              const ct = tpl.communication_templates_v2 || tpl;
+              return {
+                brandName: ct.brandName || tpl.brandName,
+                primaryColor: ct.primaryColor || tpl.primaryColor,
+                logoUrl: ct.logoUrl || tpl.logoUrl,
+                logoHeight: ct.logoHeight ?? tpl.logoHeight,
+              };
+            })()}
+          />
+        )}
+
         {/* Schedule Email Dialog */}
         <ScheduleEmailDialog
           open={showScheduleDialog}
