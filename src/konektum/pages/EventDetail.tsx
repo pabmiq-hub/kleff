@@ -4,7 +4,7 @@ import { useParams, Link, useNavigate } from "@/konektum/router";
 import { Button } from "@/konektum/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/konektum/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/konektum/ui/tabs";
-import { ArrowLeft, Users, QrCode, Table2, Download, Play, CheckCircle2, Plus, Upload, Trash2, FileSpreadsheet, Loader2, UserCheck, Mail, Send, Settings2, ClipboardList, UserX, Eye, Clock, X, Check, Lock, Handshake, BarChart3, Filter, Heart, ArrowUpAZ, ArrowDownZA, RotateCcw, Ban, Search, UserMinus, History, Sparkles, Copy, MoreVertical, ChevronDown, DoorOpen, DoorClosed, ListOrdered, Bell, CreditCard, BellRing, Languages } from "lucide-react";
+import { ArrowLeft, Users, QrCode, Table2, Download, Play, CheckCircle2, Plus, Upload, Trash2, FileSpreadsheet, Loader2, UserCheck, Mail, Send, Settings2, ClipboardList, UserX, Eye, Clock, X, Check, Lock, Handshake, BarChart3, Filter, Heart, ArrowUpAZ, ArrowDownZA, RotateCcw, Ban, Search, UserMinus, History, Sparkles, Copy, MoreVertical, ChevronDown, DoorOpen, DoorClosed, ListOrdered, Bell, CreditCard, BellRing, Languages, Megaphone } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -44,6 +44,7 @@ import EventCompatibilityTab from "@/konektum/components/event/EventCompatibilit
 import EditParticipantModal from "@/konektum/components/event/EditParticipantModal";
 import { requiresGameAnswers } from "@/konektum/lib/icebreakers";
 import ScheduleEmailDialog from "@/konektum/components/event/ScheduleEmailDialog";
+import SendAnnouncementDialog from "@/konektum/components/event/SendAnnouncementDialog";
 import { useToast } from "@/konektum/hooks/use-toast";
 import { Badge } from "@/konektum/ui/badge";
 import RoundTimer from "@/konektum/components/event/RoundTimer";
@@ -252,6 +253,7 @@ const EventDetail = () => {
   const [repeatRequests, setRepeatRequests] = useState<RepeatRequestRow[]>([]);
   const [crushRequests, setCrushRequests] = useState<CrushRequestRow[]>([]);
   const [showQR, setShowQR] = useState(false);
+  const [showAnnouncement, setShowAnnouncement] = useState(false);
   const [showJoinQR, setShowJoinQR] = useState(false);
   const [showCheckinQR, setShowCheckinQR] = useState(false);
   const [showTablesQR, setShowTablesQR] = useState(false);
@@ -4452,6 +4454,11 @@ const EventDetail = () => {
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => setShowAnnouncement(true)}>
+                          <Megaphone className="w-4 h-4 mr-2" />
+                          Enviar comunicado
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
                         {/* Send reminder to all */}
                         {participants.length > 0 && participants.filter(p => p.email).length > 0 && (
                           <>
@@ -6143,6 +6150,27 @@ const EventDetail = () => {
             isProfessional={isProfessionalEvent}
             onSave={handleSaveEmailTemplate}
             onClose={() => setShowEmailEditor(false)}
+          />
+        )}
+
+        {id && (
+          <SendAnnouncementDialog
+            open={showAnnouncement}
+            onOpenChange={setShowAnnouncement}
+            eventId={id}
+            eventName={eventData?.name || ""}
+            isEn={eventData?.language === "en"}
+            recipients={activeParticipants.map((p) => ({ id: p.id, name: p.name, email: p.email }))}
+            branding={(() => {
+              const tpl = (eventData?.email_template || {}) as any;
+              const ct = tpl.communication_templates_v2 || tpl;
+              return {
+                brandName: ct.brandName || tpl.brandName,
+                primaryColor: ct.primaryColor || tpl.primaryColor,
+                logoUrl: ct.logoUrl || tpl.logoUrl,
+                logoHeight: ct.logoHeight ?? tpl.logoHeight,
+              };
+            })()}
           />
         )}
 
