@@ -11,7 +11,7 @@ import {
 } from "@/konektum/ui/dialog";
 import { RichTextEditor } from "@/konektum/ui/rich-text-editor";
 import { hasAnnouncementText, renderAnnouncementEmail } from "@/konektum/lib/announcement";
-import { toast } from "sonner";
+import { useToast } from "@/konektum/hooks/use-toast";
 
 interface Recipient { id: string; name: string; email?: string | null }
 
@@ -30,6 +30,7 @@ export default function SendAnnouncementDialog({ open, onOpenChange, eventId, ev
   const [bodyHtml, setBodyHtml] = useState("");
   const [includeCancel, setIncludeCancel] = useState(true);
   const [sending, setSending] = useState(false);
+  const { toast } = useToast();
 
   const withEmail = recipients.filter((r) => r.email);
   const canSend = subject.trim().length > 0 && hasAnnouncementText(bodyHtml) && withEmail.length > 0 && !sending;
@@ -69,19 +70,19 @@ export default function SendAnnouncementDialog({ open, onOpenChange, eventId, ev
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
       if (data?.skipped) {
-        toast.info("Evento de prueba: no se ha enviado ningún correo");
+        toast({ title: "Evento de prueba", description: "No se ha enviado ningún correo" });
       } else {
         const sent = data?.stats?.sent ?? 0;
         const failed = data?.stats?.failed ?? 0;
-        if (failed > 0) toast.warning(`Comunicado enviado a ${sent} personas · ${failed} fallaron`);
-        else toast.success(`Comunicado enviado a ${sent} ${sent === 1 ? "persona" : "personas"}`);
+        if (failed > 0) toast({ title: "Comunicado enviado con fallos", description: `Enviado a ${sent} · ${failed} fallaron`, variant: "destructive" });
+        else toast({ title: "Comunicado enviado", description: `Enviado a ${sent} ${sent === 1 ? "persona" : "personas"}` });
       }
       setSubject("");
       setBodyHtml("");
       setIncludeCancel(true);
       onOpenChange(false);
     } catch (e: any) {
-      toast.error(e?.message || "No se pudo enviar el comunicado");
+      toast({ title: "Error", description: e?.message || "No se pudo enviar el comunicado", variant: "destructive" });
     } finally {
       setSending(false);
     }
