@@ -651,6 +651,55 @@ export const adminDuplicateEdition = createServerFn({ method: "POST" })
     return { id: newId };
   });
 
+/**
+ * Copies a native form as an independent event (own link, not part of a series):
+ * same configuration and questions, unpublished draft, no registrations.
+ */
+export const adminCopyForm = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator(z.object({ id: z.string().uuid() }))
+  .handler(async ({ data, context }) => {
+    await assertSuperAdmin(context.userId);
+    const { data: base, error } = await supabaseAdmin
+      .from("registration_forms").select("*").eq("id", data.id).single();
+    if (error || !base) throw new Error(error?.message ?? "Evento no encontrado");
+    const b = base as Record<string, unknown>;
+    if (b.kind === "external") throw new Error("Solo se pueden copiar eventos con inscripción nativa");
+    const baseSlug = `${String(b.slug).slice(0, 100)}-copia`;
+    let slug = baseSlug;
+    for (let n = 2; n < 100; n++) {
+      const { data: clash } = await supabaseAdmin
+        .from("registration_forms").select("id").eq("slug", slug).maybeSingle();
+      if (!clash) break;
+      slug = `${baseSlug}-${n}`;
+    }
+    const clone: Record<string, unknown> = { ...b };
+    for (const k of ["id", "created_at", "updated_at"]) delete clone[k];
+    Object.assign(clone, {
+      slug,
+      title: `${String(b.title ?? "")} (copia)`.slice(0, 200),
+      series_id: null,
+      is_published: false,
+      reminder_sent_at: null,
+    });
+    const { data: row, error: insErr } = await supabaseAdmin
+      .from("registration_forms").insert(clone as never).select("id").single();
+    if (insErr) throw new Error(insErr.message);
+    const newId = (row as { id: string }).id;
+    const { data: qs } = await supabaseAdmin
+      .from("registration_questions").select("*").eq("form_id", data.id);
+    const qrows = ((qs ?? []) as Array<Record<string, unknown>>).map((q) => {
+      const c: Record<string, unknown> = { ...q, form_id: newId };
+      delete c.id; delete c.created_at; delete c.updated_at;
+      return c;
+    });
+    if (qrows.length) {
+      const { error: qErr } = await supabaseAdmin.from("registration_questions").insert(qrows as never);
+      if (qErr) throw new Error(qErr.message);
+    }
+    return { id: newId };
+  });
+
 export const adminUpdateForm = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator(z.object({
