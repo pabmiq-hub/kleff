@@ -75,7 +75,7 @@ import {
 } from "@/konektum/lib/gameMode";
 import { isCustomTablesEnabled, computeCustomDistribution, getCustomTableFill } from "@/konektum/lib/customTableLayout";
 import { areDatingCompatible } from "@/konektum/lib/datingCompatibility";
-import { genderKey, uniqueGenderLabels, profileAgeRange, matchingQuota, countQuotaParticipants, synchronizeQuotas } from "@/konektum/lib/registration-quotas";
+import { genderKey, uniqueGenderLabels, profileAgeRange, matchingQuota, countQuotaParticipants, synchronizeQuotas, parityGroup, parityTargetPerGender, otherSeatCap, allowsParitySeat } from "@/konektum/lib/registration-quotas";
 
 interface ParticipantExclusion {
   id: string;
@@ -1172,8 +1172,9 @@ const EventDetail = () => {
     
     for (const member of tableMembers) {
       const participant = participantsList.find(p => p.id === member.id);
-      if (participant?.gender === "Hombre") men++;
-      else if (participant?.gender === "Mujer") women++;
+      const group = parityGroup(participant?.gender);
+      if (group === "man") men++;
+      else if (group === "woman") women++;
       else other++;
     }
     
@@ -1181,36 +1182,18 @@ const EventDetail = () => {
   };
 
   // Helper function to check if adding a participant would maintain gender balance
+  // «Otro género» / unknown = neutral seat; spread with otherCap (see registration-quotas).
   const wouldMaintainGenderBalance = (
     participant: DbParticipant, 
     tableMembers: { id: string; name: string }[], 
     participantsList: DbParticipant[],
     targetSize: number,
     menAvailable: number,
-    womenAvailable: number
+    womenAvailable: number,
+    otherCap: number = Infinity
   ): boolean => {
-    const { men, women } = countTableGenders(tableMembers, participantsList);
-    const targetPerGender = Math.floor(targetSize / 2);
-    
-    // If minority gender, always allow
-    const participantGender = participant.gender;
-    
-    if (participantGender === "Hombre") {
-      // Check if we still need men
-      if (men < targetPerGender) return true;
-      // If we have enough men, only add if we can't find women
-      if (womenAvailable === 0 && women >= targetPerGender) return true;
-      return false;
-    } else if (participantGender === "Mujer") {
-      // Check if we still need women
-      if (women < targetPerGender) return true;
-      // If we have enough women, only add if we can't find men
-      if (menAvailable === 0 && men >= targetPerGender) return true;
-      return false;
-    }
-    
-    // Non-binary or unknown - always allow
-    return true;
+    const counts = countTableGenders(tableMembers, participantsList);
+    return allowsParitySeat(participant.gender, counts, targetSize, { men: menAvailable, women: womenAvailable }, otherCap);
   };
 
   // Calculate optimal table distribution to avoid tables with only 2 people
@@ -1414,18 +1397,22 @@ const EventDetail = () => {
         });
         
         // Count available genders for parity
-        const menAvailable = availableParticipants.filter(p => p.gender === "Hombre").length;
-        const womenAvailable = availableParticipants.filter(p => p.gender === "Mujer").length;
+        const menAvailable = availableParticipants.filter(p => parityGroup(p.gender) === "man").length;
+        const womenAvailable = availableParticipants.filter(p => parityGroup(p.gender) === "woman").length;
+        const otherCap = otherSeatCap(
+          sortedParticipants.filter(p => parityGroup(p.gender) === "other").length,
+          effectiveNumTables,
+        );
         
         for (const participant of availableParticipants) {
           if (table.length >= targetSize) break;
           
           // Check gender parity if enabled
           if (genderParity && table.length > 0) {
-            const remainingMen = availableParticipants.filter(p => !usedParticipants.has(p.id) && p.gender === "Hombre").length;
-            const remainingWomen = availableParticipants.filter(p => !usedParticipants.has(p.id) && p.gender === "Mujer").length;
+            const remainingMen = availableParticipants.filter(p => !usedParticipants.has(p.id) && parityGroup(p.gender) === "man").length;
+            const remainingWomen = availableParticipants.filter(p => !usedParticipants.has(p.id) && parityGroup(p.gender) === "woman").length;
             
-            if (!wouldMaintainGenderBalance(participant, table, participantsList, targetSize, remainingMen, remainingWomen)) {
+            if (!wouldMaintainGenderBalance(participant, table, participantsList, targetSize, remainingMen, remainingWomen, otherCap)) {
               continue;
             }
           }
@@ -1741,8 +1728,8 @@ const EventDetail = () => {
         const availableRotators = rotators.filter(r => !usedRotators.has(r.id));
         
         // Count available genders for parity
-        const menAvailable = availableRotators.filter(r => r.gender === "Hombre").length;
-        const womenAvailable = availableRotators.filter(r => r.gender === "Mujer").length;
+        const menAvailable = availableRotators.filter(r => parityGroup(r.gender) === "man").length;
+        const womenAvailable = availableRotators.filter(r => parityGroup(r.gender) === "woman").length;
 
         // Filter out excluded rotators first AND those who already played this dynamic
         const validRotators = availableRotators.filter(rotator => {
@@ -1826,16 +1813,20 @@ const EventDetail = () => {
           
           // Add gender parity bonus/penalty
           if (genderParity) {
-            const { men, women } = countTableGenders(table, participantsList);
-            const targetPerGender = Math.floor(targetSize / 2);
+            const { men, women, other } = countTableGenders(table, participantsList);
+            const targetPerGender = parityTargetPerGender(targetSize, other);
+            const group = parityGroup(rotator.gender);
             
-            if (rotator.gender === "Hombre" && men < targetPerGender) {
+            if (group === "man" && men < targetPerGender) {
               score += 10;
-            } else if (rotator.gender === "Mujer" && women < targetPerGender) {
+            } else if (group === "woman" && women < targetPerGender) {
               score += 10;
-            } else if (rotator.gender === "Hombre" && men >= targetPerGender && womenAvailable > 0) {
+            } else if (group === "man" && men >= targetPerGender && womenAvailable > 0) {
               score -= 20;
-            } else if (rotator.gender === "Mujer" && women >= targetPerGender && menAvailable > 0) {
+            } else if (group === "woman" && women >= targetPerGender && menAvailable > 0) {
+              score -= 20;
+            } else if (group === "other" && other > 0) {
+              // Neutral seat: spread «Otro género» across tables before repeating.
               score -= 20;
             }
           }
@@ -2036,9 +2027,10 @@ const EventDetail = () => {
   };
 
   const getGenderIcon = (gender: string | null) => {
-    if (gender === "Mujer") return <span className="text-pink-500" title="Mujer">♀</span>;
-    if (gender === "Hombre") return <span className="text-blue-500" title="Hombre">♂</span>;
-    if (gender === "No binario") return <span className="text-purple-500" title="No binario">⚧</span>;
+    const key = genderKey(gender);
+    if (key === "woman") return <span className="text-pink-500" title="Mujer">♀</span>;
+    if (key === "man") return <span className="text-blue-500" title="Hombre">♂</span>;
+    if (key === "non-binary") return <span className="text-purple-500" title="Otro género">⚧</span>;
     return null;
   };
 

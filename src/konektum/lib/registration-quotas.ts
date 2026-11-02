@@ -8,6 +8,8 @@ export function genderKey(value: unknown): string {
   const aliases: Record<string, string> = {
     hombre: "man", man: "man", mujer: "woman", woman: "woman",
     nobinario: "non-binary", "non-binary": "non-binary", nonbinary: "non-binary",
+    "otrogénero": "non-binary", otrogenero: "non-binary", othergender: "non-binary",
+    "altregènere": "non-binary", altregenere: "non-binary",
     prefieronodecirlo: "prefer-not-to-say", prefernottosay: "prefer-not-to-say",
   };
   return aliases[key] ?? key;
@@ -16,7 +18,7 @@ export function genderKey(value: unknown): string {
 export function genderLabel(value: unknown, lang: string = "es"): string {
   const labels: Record<string, [string, string]> = {
     man: ["Hombre", "Man"], woman: ["Mujer", "Woman"],
-    "non-binary": ["No binario", "Non-binary"],
+    "non-binary": ["Otro género", "Other gender"],
     "prefer-not-to-say": ["Prefiero no decirlo", "Prefer not to say"],
   };
   return labels[genderKey(value)]?.[lang === "en" ? 1 : 0] ?? String(value ?? "");
@@ -109,4 +111,67 @@ export function countQuotaParticipants(people: Profile[], quota: RegistrationQuo
 /** Hidden single-band preference is derived, never a stale answer from the form. */
 export function effectivePreferredAgeRange(value: string | null | undefined, ranges?: AgeBand[] | null): string | null {
   return singleAgeBand(ranges) ?? value ?? null;
+}
+/* ------------------------------------------------------------------ *
+ * "Otro género" + table parity (neutral seat, spread across tables)
+ * ------------------------------------------------------------------ */
+
+/** Canonical label offered in quotas and forms for people who are neither man nor woman. */
+export const OTHER_GENDER_LABEL = { es: "Otro género", en: "Other gender" } as const;
+
+/** Make sure every gender that has a quota can actually be chosen in the form. */
+export function withQuotaGenders(genders: string[], quotas: { gender: string }[] | null | undefined, lang: string = "es"): string[] {
+  const out = [...genders];
+  const keys = new Set(out.map(genderKey));
+  for (const q of quotas ?? []) {
+    const key = genderKey(q.gender);
+    if (!key || keys.has(key)) continue;
+    keys.add(key);
+    out.push(genderLabel(q.gender, lang));
+  }
+  return out;
+}
+
+export type ParityGroup = "man" | "woman" | "other";
+
+/** Man/woman count for parity; everyone else occupies a neutral seat. */
+export function parityGroup(value: unknown): ParityGroup {
+  const key = genderKey(value);
+  return key === "man" || key === "woman" ? key : "other";
+}
+
+export type ParityCounts = { men: number; women: number; other: number };
+
+export function countParity(values: unknown[]): ParityCounts {
+  const c = { men: 0, women: 0, other: 0 };
+  for (const v of values) {
+    const g = parityGroup(v);
+    if (g === "man") c.men++; else if (g === "woman") c.women++; else c.other++;
+  }
+  return c;
+}
+
+/** Seats per binary gender once neutral seats are discounted. */
+export function parityTargetPerGender(targetSize: number, otherSeated: number): number {
+  return otherSeated > 0 ? Math.ceil((targetSize - otherSeated) / 2) : Math.floor(targetSize / 2);
+}
+
+/** Max neutral seats per table so they are spread out (1 per table before repeating). */
+export function otherSeatCap(otherTotal: number, tableCount: number): number {
+  return Math.max(1, Math.ceil(otherTotal / Math.max(1, tableCount)));
+}
+
+/** Can this person take the next seat without breaking parity/dispersion? */
+export function allowsParitySeat(
+  value: unknown,
+  table: ParityCounts,
+  targetSize: number,
+  remaining: { men: number; women: number },
+  otherCap: number = Infinity,
+): boolean {
+  const group = parityGroup(value);
+  if (group === "other") return table.other < otherCap;
+  const target = parityTargetPerGender(targetSize, table.other);
+  if (group === "man") return table.men < target || (remaining.women === 0 && table.women >= target);
+  return table.women < target || (remaining.men === 0 && table.men >= target);
 }

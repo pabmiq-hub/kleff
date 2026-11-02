@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { getKonQuotaAvailability } from "@/lib/kon-public.functions";
-import { ageRangeForBirthDate, genderKey, normalizeQuotaKey, synchronizeQuotas } from "@/konektum/lib/registration-quotas";
+import { ageRangeForBirthDate, genderKey, normalizeQuotaKey, synchronizeQuotas, withQuotaGenders } from "@/konektum/lib/registration-quotas";
 import { useParams } from "@/konektum/router";
 import { Button } from "@/konektum/ui/button";
 import { Input } from "@/konektum/ui/input";
@@ -174,7 +174,8 @@ const ParticipantJoin = ({
       if (prefLower.startsWith("i'm a woman")) return genderNorm === "woman" || genderNorm === "mujer";
       // Non-binary
       if (prefLower === "no binario" || prefLower === "non-binary") {
-        return genderNorm === "no binario" || genderNorm === "non-binary" || genderNorm === "prefiero no decirlo" || genderNorm === "prefer not to say";
+        const key = genderKey(selectedGender);
+        return key === "non-binary" || key === "prefer-not-to-say";
       }
       return true;
     });
@@ -345,6 +346,8 @@ const ParticipantJoin = ({
         setQuotasEnabled(true);
         const quotas = synchronizeQuotas(data.slot_quotas as unknown as SlotQuota[], data.custom_age_ranges);
         setSlotQuotas(quotas);
+        // Un género con cuota (p. ej. «Otro género») siempre debe poder elegirse.
+        setEventGenders(prev => withQuotaGenders(prev, quotas, lang));
         
         await loadAllQuotaCounts(eventId, quotas);
       }

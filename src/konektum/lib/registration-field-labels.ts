@@ -13,7 +13,7 @@ const englishLabels: Record<string, Record<string, string>> = {
 const englishOptions: Record<string, Record<string, string>> = {
   gender: {
     Hombre: "Man", Mujer: "Woman", "No binario": "Non-binary",
-    "Prefiero no decirlo": "Prefer not to say",
+    "Otro género": "Other gender", "Prefiero no decirlo": "Prefer not to say",
   },
   preference: {
     "Amistad y ligue": "Friendship & dating", "Solo amistad": "Friendship only",
