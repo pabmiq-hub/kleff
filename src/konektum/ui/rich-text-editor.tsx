@@ -107,7 +107,7 @@ export function RichTextEditor({ value, onChange, placeholder, className, minHei
     },
     editorProps: {
       attributes: {
-        class: "prose prose-sm max-w-none focus:outline-none px-3 py-2",
+        class: "kon-rich-text prose prose-sm max-w-none focus:outline-none px-3 py-2",
         style: `min-height: ${minHeight}`,
       },
     },

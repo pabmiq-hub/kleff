@@ -14,7 +14,7 @@ export function RichTextRenderer({ content, className }: RichTextRendererProps) 
   const isHtml = /<[a-z][\s\S]*>/i.test(content);
 
   if (!isHtml) {
-    return <span className={cn("whitespace-pre-line", className)}>{content}</span>;
+    return <span className={cn("whitespace-pre-line block", className)}>{content}</span>;
   }
 
   const sanitized = DOMPurify.sanitize(content, {
@@ -30,7 +30,7 @@ export function RichTextRenderer({ content, className }: RichTextRendererProps) 
   return (
     <div
       className={cn(
-        "prose prose-sm max-w-none",
+        "kon-rich-text prose prose-sm max-w-none",
         "[&_a]:text-primary [&_a]:underline",
         "[&_img]:max-w-full [&_img]:h-auto [&_img]:rounded",
         "[&_blockquote]:border-l-4 [&_blockquote]:border-primary/30 [&_blockquote]:pl-4 [&_blockquote]:italic",

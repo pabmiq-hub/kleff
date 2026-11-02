@@ -709,3 +709,15 @@
 @utility animate-slide-in-right {
   animation: kon-slide-in-right 0.4s ease-out forwards;
 }
+
+/* Konektum rich text (event descriptions, editor): keeps blank lines,
+   headings, lists and alignment visible without the typography plugin. */
+@layer components {
+  .kon-rich-text p { margin: 0; min-height: 1lh; }
+  .kon-rich-text h1 { font-size: 1.5em; font-weight: 700; line-height: 1.25; margin: 0.4em 0 0.2em; }
+  .kon-rich-text h2 { font-size: 1.25em; font-weight: 700; line-height: 1.3; margin: 0.4em 0 0.2em; }
+  .kon-rich-text h3 { font-size: 1.1em; font-weight: 600; line-height: 1.35; margin: 0.3em 0 0.15em; }
+  .kon-rich-text ul { list-style: disc; padding-left: 1.5em; }
+  .kon-rich-text ol { list-style: decimal; padding-left: 1.5em; }
+  .kon-rich-text hr { margin: 0.75em 0; border-top: 1px solid var(--border); }
+}
