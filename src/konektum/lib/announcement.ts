@@ -8,6 +8,7 @@ const ALLOWED_TAGS = new Set([
   "ul", "ol", "li", "blockquote", "h1", "h2", "h3", "hr",
 ]);
 const VOID_TAGS = new Set(["br", "hr"]);
+const ALIGNABLE_TAGS = new Set(["p", "h1", "h2", "h3", "li", "blockquote"]);
 const DROP_WITH_CONTENT = /<(script|style|iframe|object|embed|noscript|template)\b[\s\S]*?<\/\1\s*>/gi;
 
 export const escapeHtml = (value: string): string =>
@@ -63,12 +64,20 @@ export function sanitizeAnnouncementHtml(input: string): string {
       open.push("a");
       continue;
     }
-    out.push(`<${tag}>`);
+    const styles: string[] = [];
+    if (tag === "p") styles.push("margin:0");
+    if (ALIGNABLE_TAGS.has(tag)) {
+      const align = /text-align\s*:\s*(left|center|right|justify)/i.exec(match[2] || "");
+      if (align) styles.push(`text-align:${align[1].toLowerCase()}`);
+    }
+    out.push(styles.length ? `<${tag} style="${styles.join(";")};">` : `<${tag}>`);
     open.push(tag);
   }
   out.push(source.slice(last));
   while (open.length) out.push(`</${open.pop()}>`);
-  return out.join("");
+  // Blank lines typed in the editor arrive as empty paragraphs; give them a
+  // non-breaking space so email clients keep the gap instead of collapsing it.
+  return out.join("").replace(/<p( style="[^"]*")?>(\s|<br>)*<\/p>/g, (_m, st) => `<p${st ?? ""}>&nbsp;</p>`);
 }
 
 /** True when the rich text has some visible text (not just empty paragraphs). */
