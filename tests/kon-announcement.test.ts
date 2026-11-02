@@ -27,4 +27,14 @@ describe("Konektum comunicado", () => {
     const without = renderAnnouncementEmail({ subject: "T", bodyHtml: "<p>x</p>", cancelUrl: null }).html;
     expect(without).not.toContain("Darme de baja del evento");
   });
+  test("blank lines between paragraphs are kept", () => {
+    const out = sanitizeAnnouncementHtml("<p>Uno</p><p></p><p>Dos</p>");
+    expect(out).toContain("&nbsp;</p>");
+    expect(out.match(/<p/g)?.length).toBe(3);
+  });
+  test("justified text keeps its alignment, other styles are dropped", () => {
+    const out = sanitizeAnnouncementHtml('<p style="text-align: justify; color: red">Texto</p>');
+    expect(out).toContain("text-align:justify");
+    expect(out).not.toContain("red");
+  });
 });
