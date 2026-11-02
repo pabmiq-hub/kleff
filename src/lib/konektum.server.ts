@@ -1,3 +1,4 @@
+import { parityGroup } from "@/konektum/lib/registration-quotas";
 // Server-only access layer to the Konektum data, now living inside the KLEFF
 // database under the `kon_` table prefix.
 
@@ -494,9 +495,9 @@ export async function generateKonektumTables(eventId: string) {
 }
 
 function interleaveByGender(pool: KonParticipant[]): KonParticipant[] {
-  const a = pool.filter((p) => p.gender === "male");
-  const b = pool.filter((p) => p.gender === "female");
-  const rest = pool.filter((p) => p.gender !== "male" && p.gender !== "female");
+  const a = pool.filter((p) => parityGroup(p.gender) === "man");
+  const b = pool.filter((p) => parityGroup(p.gender) === "woman");
+  const rest = pool.filter((p) => parityGroup(p.gender) === "other");
   const out: KonParticipant[] = [];
   const max = Math.max(a.length, b.length);
   for (let i = 0; i < max; i++) {
