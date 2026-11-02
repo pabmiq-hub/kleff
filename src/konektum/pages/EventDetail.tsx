@@ -2027,9 +2027,10 @@ const EventDetail = () => {
   };
 
   const getGenderIcon = (gender: string | null) => {
-    if (gender === "Mujer") return <span className="text-pink-500" title="Mujer">♀</span>;
-    if (gender === "Hombre") return <span className="text-blue-500" title="Hombre">♂</span>;
-    if (gender === "No binario") return <span className="text-purple-500" title="No binario">⚧</span>;
+    const key = genderKey(gender);
+    if (key === "woman") return <span className="text-pink-500" title="Mujer">♀</span>;
+    if (key === "man") return <span className="text-blue-500" title="Hombre">♂</span>;
+    if (key === "non-binary") return <span className="text-purple-500" title="Otro género">⚧</span>;
     return null;
   };
 
