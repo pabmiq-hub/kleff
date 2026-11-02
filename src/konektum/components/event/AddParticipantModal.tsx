@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { RadioGroup, RadioGroupItem } from "@/konektum/ui/radio-group";
 import { X } from "lucide-react";
 import MultiSelectAge from "@/konektum/ui/multi-select-age";
-import { ageRangeForBirthDate, effectivePreferredAgeRange, singleAgeBand, uniqueGenderLabels, genderKey } from "@/konektum/lib/registration-quotas";
+import { ageRangeForBirthDate, effectivePreferredAgeRange, singleAgeBand, uniqueGenderLabels, genderKey, OTHER_GENDER_LABEL } from "@/konektum/lib/registration-quotas";
 import { 
   Participant, 
   AGE_RANGES, 
@@ -36,7 +36,7 @@ interface AddParticipantModalProps {
 
 const AddParticipantModal = ({ onClose, onAdd, customPreferences, initialValues, embedded }: AddParticipantModalProps) => {
   const ageRanges = customPreferences?.ageRanges || [...AGE_RANGES];
-  const genders = uniqueGenderLabels(customPreferences?.genders || [...GENDERS]);
+  const genders = uniqueGenderLabels([...(customPreferences?.genders || [...GENDERS]), OTHER_GENDER_LABEL.es]);
   const preferences = customPreferences?.preferences || [...PREFERENCES];
   const datingPreferences = customPreferences?.datingPreferences || [...DATING_PREFERENCES];
   const preferredAgeRanges = [...ageRanges, "Cualquier rango de edad"];

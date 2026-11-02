@@ -23,7 +23,7 @@ import { Checkbox } from "@/konektum/ui/checkbox";
 import { LANGUAGE_OPTIONS, normalizeLanguages } from "@/konektum/lib/languages";
 import { type SocialGameAnswers } from "@/konektum/lib/socialGame";
 import { normalizeIcebreakers } from "@/konektum/lib/icebreakers";
-import { ageRangeForBirthDate, effectivePreferredAgeRange, singleAgeBand, uniqueGenderLabels } from "@/konektum/lib/registration-quotas";
+import { ageRangeForBirthDate, effectivePreferredAgeRange, singleAgeBand, uniqueGenderLabels, OTHER_GENDER_LABEL } from "@/konektum/lib/registration-quotas";
 
 
 // Default professional options
@@ -106,7 +106,7 @@ const EditParticipantModal = ({
 
   // Use custom preferences if provided, otherwise use defaults
   const ageRanges = customPreferences?.ageRanges || [...AGE_RANGES];
-  const genders = uniqueGenderLabels(customPreferences?.genders || [...GENDERS]);
+  const genders = uniqueGenderLabels([...(customPreferences?.genders || [...GENDERS]), OTHER_GENDER_LABEL.es]);
   const preferences = customPreferences?.preferences || [...PREFERENCES];
   const datingPreferences = customPreferences?.datingPreferences || [...DATING_PREFERENCES];
   const preferredAgeRanges = [...ageRanges, "Cualquier rango"];
