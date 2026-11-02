@@ -5,7 +5,7 @@ import { Label } from "@/konektum/ui/label";
 import { Switch } from "@/konektum/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/konektum/ui/select";
 import { Plus, Trash2, Users } from "lucide-react";
-import { genderKey, normalizeQuotaKey, uniqueGenderLabels } from "@/konektum/lib/registration-quotas";
+import { genderKey, normalizeQuotaKey, OTHER_GENDER_LABEL, uniqueGenderLabels } from "@/konektum/lib/registration-quotas";
 
 export interface SlotQuota {
   gender: string;
@@ -77,6 +77,9 @@ const EventQuotasEditor = ({
             <p className="text-xs text-muted-foreground mt-0.5">
               Limita cuántas plazas hay disponibles por género y rango de edad
             </p>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              «Otro género» es para quien no se siente hombre ni mujer: aparece en el formulario y, con paridad activada, ocupa una plaza neutra repartida entre mesas.
+            </p>
           </div>
         </div>
         <Switch
@@ -114,7 +117,7 @@ const EventQuotasEditor = ({
                         <SelectValue placeholder="Género" />
                       </SelectTrigger>
                       <SelectContent>
-                        {uniqueGenderLabels(availableGenders).map((g) => (
+                        {uniqueGenderLabels([...availableGenders, "Hombre", "Mujer", OTHER_GENDER_LABEL.es]).map((g) => (
                           <SelectItem key={g} value={g}>{g}</SelectItem>
                         ))}
                       </SelectContent>
