@@ -1,3 +1,4 @@
+import { withSeo } from "@/cms/seo";
 import { createFileRoute } from "@tanstack/react-router";
 import { TournamentsPage } from "@/components/pages/TournamentsPage";
 import { getPageContent } from "@/lib/content.functions";
@@ -5,7 +6,8 @@ import { getPageContent } from "@/lib/content.functions";
 export const Route = createFileRoute("/torneos")({
   loader: () => getPageContent({ data: { pageKey: "tournaments" } }).then((pageContent) => ({ pageContent })),
   staleTime: 5 * 60 * 1000,
-  head: () => ({
+  head: ({ loaderData }) =>
+    withSeo(loaderData, {
     meta: [
       { title: "Torneos en KLEFF — Comunidad con torneos casi cada semana en Barcelona" },
       {

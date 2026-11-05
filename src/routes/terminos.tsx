@@ -1,10 +1,12 @@
+import { withSeo } from "@/cms/seo";
 import { createFileRoute } from "@tanstack/react-router";
 import { getPageContent } from "@/lib/content.functions";
 import { LegalPage } from "@/components/pages/LegalPage";
 
 export const Route = createFileRoute("/terminos")({
   loader: () => getPageContent({ data: { pageKey: "terms" } }).then((pageContent) => ({ pageContent })),
-  head: () => ({
+  head: ({ loaderData }) =>
+    withSeo(loaderData, {
     meta: [
       { title: "Términos y Condiciones — KLEFF" },
       { name: "description", content: "Términos y condiciones de uso del sitio web y los servicios de KLEFF." },

@@ -1,10 +1,12 @@
+import { withSeo } from "@/cms/seo";
 import { createFileRoute } from "@tanstack/react-router";
 import { getPageContent } from "@/lib/content.functions";
 import { LegalPage } from "@/components/pages/LegalPage";
 
 export const Route = createFileRoute("/privacidad")({
   loader: () => getPageContent({ data: { pageKey: "privacy" } }).then((pageContent) => ({ pageContent })),
-  head: () => ({
+  head: ({ loaderData }) =>
+    withSeo(loaderData, {
     meta: [
       { title: "Política de Privacidad — KLEFF" },
       { name: "description", content: "Política de privacidad de KLEFF conforme al RGPD y la LOPDGDD." },

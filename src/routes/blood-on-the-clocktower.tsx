@@ -1,3 +1,4 @@
+import { withSeo } from "@/cms/seo";
 import { createFileRoute } from "@tanstack/react-router";
 import { ClocktowerPage } from "@/components/pages/ClocktowerPage";
 import { getPageContent } from "@/lib/content.functions";
@@ -5,7 +6,8 @@ import { getPageContent } from "@/lib/content.functions";
 export const Route = createFileRoute("/blood-on-the-clocktower")({
   loader: () => getPageContent({ data: { pageKey: "clocktower" } }).then((pageContent) => ({ pageContent })),
   staleTime: 5 * 60 * 1000,
-  head: () => ({
+  head: ({ loaderData }) =>
+    withSeo(loaderData, {
     meta: [
       { title: "Blood on the Clocktower en KLEFF — Comunidad y partidas semanales en Barcelona" },
       {

@@ -1,10 +1,12 @@
+import { withSeo } from "@/cms/seo";
 import { createFileRoute } from "@tanstack/react-router";
 import { getPageContent } from "@/lib/content.functions";
 import { LudotecaPage } from "@/components/pages/LudotecaPage";
 
 export const Route = createFileRoute("/ludoteca")({
   loader: () => getPageContent({ data: { pageKey: "ludoteca" } }).then((pageContent) => ({ pageContent })),
-  head: () => ({
+  head: ({ loaderData }) =>
+    withSeo(loaderData, {
     meta: [
       { title: "Ludoteca KLEFF — Nuestra colección de juegos de mesa" },
       {
