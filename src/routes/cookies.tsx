@@ -1,10 +1,12 @@
+import { withSeo } from "@/cms/seo";
 import { createFileRoute } from "@tanstack/react-router";
 import { getPageContent } from "@/lib/content.functions";
 import { LegalPage } from "@/components/pages/LegalPage";
 
 export const Route = createFileRoute("/cookies")({
   loader: () => getPageContent({ data: { pageKey: "cookies" } }).then((pageContent) => ({ pageContent })),
-  head: () => ({
+  head: ({ loaderData }) =>
+    withSeo(loaderData, {
     meta: [
       { title: "Política de Cookies — KLEFF" },
       { name: "description", content: "Política de cookies de KLEFF: tipos de cookies, finalidad y cómo configurarlas." },

@@ -1,10 +1,12 @@
+import { withSeo } from "@/cms/seo";
 import { createFileRoute } from "@tanstack/react-router";
 import { getPageContent } from "@/lib/content.functions";
 import { ContactPage } from "@/components/pages/ContactPage";
 
 export const Route = createFileRoute("/contacto")({
   loader: () => getPageContent({ data: { pageKey: "contact" } }).then((pageContent) => ({ pageContent })),
-  head: () => ({
+  head: ({ loaderData }) =>
+    withSeo(loaderData, {
     meta: [
       { title: "Contacto — KLEFF" },
       { name: "description", content: "Contacta con KLEFF para colaborar, organizar eventos privados o resolver dudas." },

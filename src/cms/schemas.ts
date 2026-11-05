@@ -1560,7 +1560,7 @@ const activitiesSchema: PageSchema = {
 
 import { LEGAL_SCHEMAS } from "./legalSchemas";
 
-export const PAGE_SCHEMAS: PageSchema[] = [
+const BASE_PAGE_SCHEMAS: PageSchema[] = [
   homeSchema,
   clocktowerSchema,
   catanSchema,
@@ -1575,6 +1575,26 @@ export const PAGE_SCHEMAS: PageSchema[] = [
   activitiesSchema,
   ...LEGAL_SCHEMAS,
 ];
+
+function seoSection(pageKey: string): SectionSchema {
+  return {
+    key: `${pageKey}.seo`,
+    label: "SEO y redes sociales",
+    description:
+      "Lo que aparece en Google, buscadores con IA y al compartir el enlace en WhatsApp o Telegram. Déjalo vacío para usar el texto por defecto.",
+    fields: {
+      title: { kind: "text", label: "Título (ideal 50-60 caracteres)" },
+      description: { kind: "textarea", label: "Descripción (ideal 140-160 caracteres)", rows: 3 },
+      image: { kind: "image", label: "Imagen para compartir", help: "Horizontal, 1200×630 px." },
+    },
+    defaults: { title: "", description: "", image: "" },
+  };
+}
+
+export const PAGE_SCHEMAS: PageSchema[] = BASE_PAGE_SCHEMAS.map((p) => ({
+  ...p,
+  sections: [...p.sections, seoSection(p.key)],
+}));
 
 export function getPageSchema(key: string): PageSchema | undefined {
   return PAGE_SCHEMAS.find((p) => p.key === key);

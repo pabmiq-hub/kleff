@@ -1,10 +1,12 @@
+import { withSeo } from "@/cms/seo";
 import { createFileRoute } from "@tanstack/react-router";
 import { getPageContent } from "@/lib/content.functions";
 import { AboutPage } from "@/components/pages/AboutPage";
 
 export const Route = createFileRoute("/sobre-nosotros")({
   loader: () => getPageContent({ data: { pageKey: "about" } }).then((pageContent) => ({ pageContent })),
-  head: () => ({
+  head: ({ loaderData }) =>
+    withSeo(loaderData, {
     meta: [
       { title: "Quiénes somos — KLEFF" },
       {

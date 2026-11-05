@@ -1,3 +1,4 @@
+import { withSeo } from "@/cms/seo";
 import { createFileRoute } from "@tanstack/react-router";
 import { CatanPage } from "@/components/pages/CatanPage";
 import { getPageContent } from "@/lib/content.functions";
@@ -5,7 +6,8 @@ import { getPageContent } from "@/lib/content.functions";
 export const Route = createFileRoute("/catan")({
   loader: () => getPageContent({ data: { pageKey: "catan" } }).then((pageContent) => ({ pageContent })),
   staleTime: 5 * 60 * 1000,
-  head: () => ({
+  head: ({ loaderData }) =>
+    withSeo(loaderData, {
     meta: [
       { title: "Catan en KLEFF — Comunidad activa, torneos mensuales en Barcelona" },
       {

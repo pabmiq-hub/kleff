@@ -1,3 +1,4 @@
+import { withSeo } from "@/cms/seo";
 import { createFileRoute } from "@tanstack/react-router";
 import { HomePage } from "@/components/pages/HomePage";
 import { getMeetupEvents } from "@/lib/meetup.functions";
@@ -12,7 +13,8 @@ export const Route = createFileRoute("/")({
     return { ...meetup, pageContent };
   },
   staleTime: 15 * 60 * 1000,
-  head: () => ({
+  head: ({ loaderData }) =>
+    withSeo(loaderData, {
     meta: [
       { title: "KLEFF — Juegos de mesa en Barcelona" },
       {

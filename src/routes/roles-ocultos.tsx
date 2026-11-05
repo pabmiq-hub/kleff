@@ -1,3 +1,4 @@
+import { withSeo } from "@/cms/seo";
 import { createFileRoute } from "@tanstack/react-router";
 import { HiddenRolesPage } from "@/components/pages/HiddenRolesPage";
 import { getPageContent } from "@/lib/content.functions";
@@ -5,7 +6,8 @@ import { getPageContent } from "@/lib/content.functions";
 export const Route = createFileRoute("/roles-ocultos")({
   loader: () => getPageContent({ data: { pageKey: "hiddenRoles" } }).then((pageContent) => ({ pageContent })),
   staleTime: 5 * 60 * 1000,
-  head: () => ({
+  head: ({ loaderData }) =>
+    withSeo(loaderData, {
     meta: [
       { title: "Roles Ocultos en KLEFF — Comunidad de deducción social, mentiras e identidades secretas" },
       {

@@ -1,3 +1,4 @@
+import { withSeo } from "@/cms/seo";
 import { createFileRoute } from "@tanstack/react-router";
 import { MediaPage } from "@/components/pages/MediaPage";
 import { getInstagramPosts } from "@/lib/media.functions";
@@ -13,7 +14,8 @@ export const Route = createFileRoute("/medios")({
     ]);
     return { mediaItems, igPosts, pageContent };
   },
-  head: () => ({
+  head: ({ loaderData }) =>
+    withSeo(loaderData, {
     meta: [
       { title: "Media — KLEFF" },
       {

@@ -1,3 +1,4 @@
+import { withSeo } from "@/cms/seo";
 import { createFileRoute } from "@tanstack/react-router";
 import { ActivitiesPage } from "@/components/pages/ActivitiesPage";
 import { getPageContent } from "@/lib/content.functions";
@@ -5,7 +6,8 @@ import { getPageContent } from "@/lib/content.functions";
 export const Route = createFileRoute("/actividades")({
   loader: () =>
     getPageContent({ data: { pageKey: "activities" } }).then((pageContent) => ({ pageContent })),
-  head: () => ({
+  head: ({ loaderData }) =>
+    withSeo(loaderData, {
     meta: [
       { title: "Actividades — Noches de juegos, torneos y eventos | KLEFF" },
       {

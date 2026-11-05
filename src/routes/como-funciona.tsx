@@ -1,10 +1,12 @@
+import { withSeo } from "@/cms/seo";
 import { createFileRoute } from "@tanstack/react-router";
 import { getPageContent } from "@/lib/content.functions";
 import { HowItWorksPage } from "@/components/pages/HowItWorksPage";
 
 export const Route = createFileRoute("/como-funciona")({
   loader: () => getPageContent({ data: { pageKey: "how" } }).then((pageContent) => ({ pageContent })),
-  head: () => ({
+  head: ({ loaderData }) =>
+    withSeo(loaderData, {
     meta: [
       { title: "Cómo funciona — KLEFF" },
       {
