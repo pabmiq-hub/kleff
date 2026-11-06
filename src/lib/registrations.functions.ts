@@ -1277,3 +1277,128 @@ export const adminListAnnouncements = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { announcements: (rows ?? []) as unknown as RegistrationAnnouncement[] };
   });
+
+// ---------------- INVITE PAST REGISTRANTS ----------------
+
+const inviteSchema = z.object({
+  source_form_ids: z.array(z.string().uuid()).max(500),
+  all_sources: z.boolean().default(false),
+  include_cancelled: z.boolean().default(false),
+  target: z.discriminatedUnion("kind", [
+    z.object({ kind: z.literal("form"), form_id: z.string().uuid() }),
+    z.object({ kind: z.literal("external"), url: z.string().url().max(1000), title: z.string().min(1).max(200), date_label: z.string().max(200).optional() }),
+  ]),
+  button_label: z.string().max(80).optional(),
+  subject: z.string().max(200).default(""),
+  body_html: z.string().max(20000).default(""),
+});
+type InviteInput = z.infer<typeof inviteSchema>;
+
+async function resolveInvite(data: InviteInput) {
+  const { buildInviteAudience, isSafeHttpUrl } = await import("@/lib/registrations-invite");
+  const { siteUrl, participantName } = await import("@/lib/registrations-email.server");
+  const { formatMadrid } = await import("@/lib/email/templates/helpers.server").catch(() => ({ formatMadrid: null as null | ((d: string) => string) }));
+
+  let target: { title: string; url: string; dateLabel: string | null; location: string | null; formId: string | null };
+  if (data.target.kind === "form") {
+    const f = await loadFormOrThrow(data.target.form_id);
+    target = {
+      title: f.title,
+      url: `${siteUrl()}/${f.slug}`,
+      dateLabel: f.event_date ? (formatMadrid ? formatMadrid(f.event_date) : new Date(f.event_date).toLocaleString("es-ES", { timeZone: "Europe/Madrid", dateStyle: "full", timeStyle: "short" })) : null,
+      location: f.event_location ?? null,
+      formId: f.id,
+    };
+  } else {
+    if (!isSafeHttpUrl(data.target.url)) throw new Error("Enlace externo no válido");
+    target = { title: data.target.title, url: data.target.url, dateLabel: data.target.date_label?.trim() || null, location: null, formId: null };
+  }
+
+  let q = supabaseAdmin.from("registration_responses").select("email_contact, data, created_at, cancelled_at, form_id").not("email_contact", "is", null);
+  if (!data.all_sources) {
+    if (!data.source_form_ids.length) return { target, audience: { recipients: [], found: 0, skippedRegistered: 0, skippedCancelled: 0 } };
+    q = q.in("form_id", data.source_form_ids);
+  }
+  const { data: rows, error } = await q.limit(20000);
+  if (error) throw new Error(error.message);
+
+  let registered: string[] = [];
+  if (target.formId) {
+    const { data: reg } = await supabaseAdmin.from("registration_responses").select("email_contact").eq("form_id", target.formId).is("cancelled_at", null);
+    registered = ((reg ?? []) as Array<{ email_contact: string | null }>).map((r) => r.email_contact ?? "");
+  }
+  let suppressed: string[] = [];
+  try {
+    const { data: sup } = await supabaseAdmin.from("suppressed_emails").select("email");
+    suppressed = ((sup ?? []) as Array<{ email: string }>).map((s) => s.email);
+  } catch { /* table optional */ }
+
+  const audience = buildInviteAudience(
+    ((rows ?? []) as Array<{ email_contact: string | null; data: Record<string, unknown> | null; created_at: string; cancelled_at: string | null; form_id: string }>)
+      .filter((r) => r.form_id !== target.formId)
+      .map((r) => ({ email: r.email_contact, name: participantName(r.data) ?? null, created_at: r.created_at, cancelled: !!r.cancelled_at })),
+    { includeCancelled: data.include_cancelled, alreadyRegistered: registered, suppressed },
+  );
+  return { target, audience };
+}
+
+async function buildInviteHtml(data: InviteInput, target: Awaited<ReturnType<typeof resolveInvite>>["target"], name: string | null) {
+  const { renderInviteEmail } = await import("@/lib/registrations-invite");
+  const { sanitizeHtml } = await import("@/lib/sanitize.server");
+  return renderInviteEmail({
+    name,
+    bodyHtml: sanitizeHtml(data.body_html || ""),
+    title: target.title,
+    dateLabel: target.dateLabel,
+    location: target.location,
+    url: target.url,
+    buttonLabel: data.button_label?.trim() || "Ver evento e inscribirme",
+  });
+}
+
+/** Counts unique recipients and renders the invitation preview. */
+export const adminPreviewInvite = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator(inviteSchema)
+  .handler(async ({ data, context }) => {
+    await assertSuperAdmin(context.userId);
+    const { target, audience } = await resolveInvite(data);
+    const html = await buildInviteHtml(data, target, audience.recipients[0]?.name ?? "Marta");
+    return { html, recipients: audience.recipients.length, found: audience.found, skippedRegistered: audience.skippedRegistered, skippedCancelled: audience.skippedCancelled, targetUrl: target.url };
+  });
+
+/** Sends one invitation per unique email. */
+export const adminSendInvite = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator(inviteSchema)
+  .handler(async ({ data, context }) => {
+    await assertSuperAdmin(context.userId);
+    if (!data.subject.trim()) throw new Error("Falta el asunto");
+    const { sendEmailSafe } = await import("@/lib/email/send.server");
+    const { target, audience } = await resolveInvite(data);
+    let sent = 0;
+    let failed = 0;
+    const BATCH = 5;
+    for (let i = 0; i < audience.recipients.length; i += BATCH) {
+      const slice = audience.recipients.slice(i, i + BATCH);
+      const results = await Promise.allSettled(slice.map(async (r) => {
+        const html = await buildInviteHtml(data, target, r.name);
+        const res = await sendEmailSafe({ to: r.email, subject: data.subject.trim(), html, tags: [{ name: "type", value: "registration_invite" }] });
+        if (!res) throw new Error("send failed");
+      }));
+      for (const res of results) res.status === "fulfilled" ? (sent += 1) : (failed += 1);
+    }
+    if (target.formId) {
+      await supabaseAdmin.from("registration_announcements").insert({
+        form_id: target.formId,
+        subject: `[Invitación] ${data.subject.trim()}`,
+        body_html: data.body_html,
+        blocks: {},
+        recipients_count: sent,
+        failed_count: failed,
+        sent_at: new Date().toISOString(),
+        created_by: context.userId,
+      } as never);
+    }
+    return { sent, failed };
+  });
