@@ -1297,7 +1297,7 @@ type InviteInput = z.infer<typeof inviteSchema>;
 async function resolveInvite(data: InviteInput) {
   const { buildInviteAudience, isSafeHttpUrl } = await import("@/lib/registrations-invite");
   const { siteUrl, participantName } = await import("@/lib/registrations-email.server");
-  const { formatMadrid } = await import("@/lib/email/templates/helpers.server").catch(() => ({ formatMadrid: null as null | ((d: string) => string) }));
+  const { formatMadrid } = await import("@/lib/registrations-calendar");
 
   let target: { title: string; url: string; dateLabel: string | null; location: string | null; formId: string | null };
   if (data.target.kind === "form") {
@@ -1305,7 +1305,7 @@ async function resolveInvite(data: InviteInput) {
     target = {
       title: f.title,
       url: `${siteUrl()}/${f.slug}`,
-      dateLabel: f.event_date ? (formatMadrid ? formatMadrid(f.event_date) : new Date(f.event_date).toLocaleString("es-ES", { timeZone: "Europe/Madrid", dateStyle: "full", timeStyle: "short" })) : null,
+      dateLabel: f.event_date ? formatMadrid(f.event_date) : null,
       location: f.event_location ?? null,
       formId: f.id,
     };
