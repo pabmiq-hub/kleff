@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import {
   finListFacturas,
   finCreateFactura,
+  finUpdateFactura,
   finSetFacturaCobrada,
   finDeleteFactura,
   type Factura,
@@ -16,7 +17,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Trash2 } from "lucide-react";
+import { Pencil, Plus, Trash2 } from "lucide-react";
 import { eur, fechaCorta, todayISO } from "@/lib/finanzas-ui";
 
 export const Route = createFileRoute("/admin/finanzas/facturas")({ component: FacturasPage });
