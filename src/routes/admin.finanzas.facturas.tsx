@@ -66,18 +66,23 @@ function FacturasPage() {
 
   const submit = async () => {
     try {
-      await create({
-        data: {
-          fecha_emision: form.fecha_emision,
-          entidad_nombre: form.entidad_nombre,
-          entidad_nif: form.entidad_nif || null,
-          base_imponible: base,
-          porcentaje_iva: Number(form.porcentaje_iva) || 0,
-          concepto: form.concepto || null,
-        },
-      });
-      toast.success("Factura creada");
+      const payload = {
+        fecha_emision: form.fecha_emision,
+        entidad_nombre: form.entidad_nombre,
+        entidad_nif: form.entidad_nif || null,
+        base_imponible: base,
+        porcentaje_iva: Number(form.porcentaje_iva) || 0,
+        concepto: form.concepto || null,
+      };
+      if (editing) {
+        await update({ data: { id: editing.id, ...payload } });
+        toast.success("Factura actualizada");
+      } else {
+        await create({ data: payload });
+        toast.success("Factura creada");
+      }
       setOpen(false);
+      setEditing(null);
       setForm(EMPTY);
       await reload();
     } catch (e) {
