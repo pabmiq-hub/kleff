@@ -95,7 +95,7 @@ function FacturasPage() {
       <div className="flex items-center justify-between">
         <p className="text-sm text-ink/60">{rows.length} facturas emitidas</p>
         {canFinanzasWrite && (
-          <Button onClick={() => setOpen(true)}>
+          <Button onClick={openCreate}>
             <Plus className="h-4 w-4 mr-1" /> Nueva factura
           </Button>
         )}
@@ -142,6 +142,9 @@ function FacturasPage() {
                 </TableCell>
                 {canFinanzasWrite && (
                   <TableCell className="text-right whitespace-nowrap">
+                    <Button size="icon" variant="ghost" title="Editar factura" onClick={() => openEdit(f)}>
+                      <Pencil className="h-4 w-4" />
+                    </Button>
                     <Button
                       size="sm"
                       variant="secondary"
@@ -173,7 +176,7 @@ function FacturasPage() {
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Nueva factura</DialogTitle>
+            <DialogTitle>{editing ? `Editar factura ${editing.numero_factura}` : "Nueva factura"}</DialogTitle>
           </DialogHeader>
           <div className="space-y-3">
             <div className="grid grid-cols-2 gap-3">
