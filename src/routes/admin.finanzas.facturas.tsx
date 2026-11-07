@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import {
   finListFacturas,
   finCreateFactura,
+  finUpdateFactura,
   finSetFacturaCobrada,
   finDeleteFactura,
   type Factura,
@@ -16,7 +17,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Trash2 } from "lucide-react";
+import { Pencil, Plus, Trash2 } from "lucide-react";
 import { eur, fechaCorta, todayISO } from "@/lib/finanzas-ui";
 
 export const Route = createFileRoute("/admin/finanzas/facturas")({ component: FacturasPage });
@@ -26,13 +27,34 @@ const EMPTY = { fecha_emision: todayISO(), entidad_nombre: "", entidad_nif: "", 
 function FacturasPage() {
   const list = useServerFn(finListFacturas);
   const create = useServerFn(finCreateFactura);
+  const update = useServerFn(finUpdateFactura);
   const setCobrada = useServerFn(finSetFacturaCobrada);
   const remove = useServerFn(finDeleteFactura);
   const { canFinanzasWrite } = useAdminAccess();
 
   const [rows, setRows] = useState<Factura[]>([]);
   const [open, setOpen] = useState(false);
+  const [editing, setEditing] = useState<Factura | null>(null);
   const [form, setForm] = useState(EMPTY);
+
+  const openCreate = () => {
+    setEditing(null);
+    setForm(EMPTY);
+    setOpen(true);
+  };
+
+  const openEdit = (f: Factura) => {
+    setEditing(f);
+    setForm({
+      fecha_emision: f.fecha_emision,
+      entidad_nombre: f.entidad_nombre,
+      entidad_nif: f.entidad_nif ?? "",
+      base_imponible: String(f.base_imponible),
+      porcentaje_iva: String(f.porcentaje_iva),
+      concepto: f.concepto ?? "",
+    });
+    setOpen(true);
+  };
 
   const reload = useCallback(async () => setRows((await list()) as Factura[]), [list]);
   useEffect(() => {
@@ -44,18 +66,23 @@ function FacturasPage() {
 
   const submit = async () => {
     try {
-      await create({
-        data: {
-          fecha_emision: form.fecha_emision,
-          entidad_nombre: form.entidad_nombre,
-          entidad_nif: form.entidad_nif || null,
-          base_imponible: base,
-          porcentaje_iva: Number(form.porcentaje_iva) || 0,
-          concepto: form.concepto || null,
-        },
-      });
-      toast.success("Factura creada");
+      const payload = {
+        fecha_emision: form.fecha_emision,
+        entidad_nombre: form.entidad_nombre,
+        entidad_nif: form.entidad_nif || null,
+        base_imponible: base,
+        porcentaje_iva: Number(form.porcentaje_iva) || 0,
+        concepto: form.concepto || null,
+      };
+      if (editing) {
+        await update({ data: { id: editing.id, ...payload } });
+        toast.success("Factura actualizada");
+      } else {
+        await create({ data: payload });
+        toast.success("Factura creada");
+      }
       setOpen(false);
+      setEditing(null);
       setForm(EMPTY);
       await reload();
     } catch (e) {
@@ -68,7 +95,7 @@ function FacturasPage() {
       <div className="flex items-center justify-between">
         <p className="text-sm text-ink/60">{rows.length} facturas emitidas</p>
         {canFinanzasWrite && (
-          <Button onClick={() => setOpen(true)}>
+          <Button onClick={openCreate}>
             <Plus className="h-4 w-4 mr-1" /> Nueva factura
           </Button>
         )}
@@ -115,6 +142,9 @@ function FacturasPage() {
                 </TableCell>
                 {canFinanzasWrite && (
                   <TableCell className="text-right whitespace-nowrap">
+                    <Button size="icon" variant="ghost" title="Editar factura" onClick={() => openEdit(f)}>
+                      <Pencil className="h-4 w-4" />
+                    </Button>
                     <Button
                       size="sm"
                       variant="secondary"
@@ -146,7 +176,7 @@ function FacturasPage() {
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Nueva factura</DialogTitle>
+            <DialogTitle>{editing ? `Editar factura ${editing.numero_factura}` : "Nueva factura"}</DialogTitle>
           </DialogHeader>
           <div className="space-y-3">
             <div className="grid grid-cols-2 gap-3">

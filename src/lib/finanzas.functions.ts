@@ -313,6 +313,32 @@ export const finCreateFactura = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+export const finUpdateFactura = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z
+      .object({
+        id: z.string().uuid(),
+        fecha_emision: z.string(),
+        entidad_nombre: z.string().min(1).max(200),
+        entidad_nif: z.string().max(40).nullable().optional(),
+        base_imponible: z.number().min(0),
+        porcentaje_iva: z.number().min(0).max(100).default(21),
+        concepto: z.string().max(1000).nullable().optional(),
+      })
+      .parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    await assertFinanzasWrite(context.userId);
+    const { id, ...rest } = data;
+    const { error } = await db
+      .from("facturas")
+      .update({ ...rest, entidad_nif: rest.entidad_nif ?? null, concepto: rest.concepto ?? null })
+      .eq("id", id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
 export const finSetFacturaCobrada = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) =>
