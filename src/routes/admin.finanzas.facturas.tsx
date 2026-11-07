@@ -27,13 +27,34 @@ const EMPTY = { fecha_emision: todayISO(), entidad_nombre: "", entidad_nif: "", 
 function FacturasPage() {
   const list = useServerFn(finListFacturas);
   const create = useServerFn(finCreateFactura);
+  const update = useServerFn(finUpdateFactura);
   const setCobrada = useServerFn(finSetFacturaCobrada);
   const remove = useServerFn(finDeleteFactura);
   const { canFinanzasWrite } = useAdminAccess();
 
   const [rows, setRows] = useState<Factura[]>([]);
   const [open, setOpen] = useState(false);
+  const [editing, setEditing] = useState<Factura | null>(null);
   const [form, setForm] = useState(EMPTY);
+
+  const openCreate = () => {
+    setEditing(null);
+    setForm(EMPTY);
+    setOpen(true);
+  };
+
+  const openEdit = (f: Factura) => {
+    setEditing(f);
+    setForm({
+      fecha_emision: f.fecha_emision,
+      entidad_nombre: f.entidad_nombre,
+      entidad_nif: f.entidad_nif ?? "",
+      base_imponible: String(f.base_imponible),
+      porcentaje_iva: String(f.porcentaje_iva),
+      concepto: f.concepto ?? "",
+    });
+    setOpen(true);
+  };
 
   const reload = useCallback(async () => setRows((await list()) as Factura[]), [list]);
   useEffect(() => {
