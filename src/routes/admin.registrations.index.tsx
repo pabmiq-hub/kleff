@@ -9,6 +9,8 @@ import { adminListForms, adminCreateForm, adminDeleteForm, adminCopyForm } from 
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { useAdminAccess } from "@/hooks/useAdminAccess";
+import { InviteDialog } from "@/components/registrations/InviteDialog";
+import { Mail } from "lucide-react";
 
 export const Route = createFileRoute("/admin/registrations/")({
   head: () => ({ meta: [{ title: "Inscripciones — Admin KLEFF" }, { name: "robots", content: "noindex, nofollow" }] }),
@@ -45,6 +47,7 @@ function AdminRegistrations() {
   const [externalUrl, setExternalUrl] = useState("");
   const [externalMode, setExternalMode] = useState<"redirect" | "iframe">("redirect");
   const [creating, setCreating] = useState(false);
+  const [inviteOpen, setInviteOpen] = useState(false);
 
   const reload = async () => {
     setLoading(true);
@@ -150,6 +153,11 @@ function AdminRegistrations() {
             Crea formularios de inscripción accesibles en <code className="text-coral">kleff.es/&lt;slug&gt;</code>.
           </p>
         </div>
+        <div className="flex gap-2 flex-wrap">
+        {isSuperAdmin && (
+          <Button variant="outline" onClick={() => setInviteOpen(true)} className="border-ink/20"><Mail className="h-4 w-4 mr-2" /> Invitar participantes</Button>
+        )}
+        <InviteDialog open={inviteOpen} onOpenChange={setInviteOpen} forms={forms} />
         <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) resetDialog(); }}>
           {isSuperAdmin && (
             <DialogTrigger asChild>
@@ -229,6 +237,7 @@ function AdminRegistrations() {
             </DialogFooter>
           </DialogContent>
         </Dialog>
+        </div>
       </header>
 
       <div className="flex flex-wrap items-center gap-2">
