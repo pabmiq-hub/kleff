@@ -277,7 +277,9 @@ export const finListFacturas = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }): Promise<Factura[]> => {
     await assertFinanzasRead(context.userId);
-    const { data, error } = await db.from("facturas").select("*").order("fecha_emision", { ascending: false });
+    const { data, error } = await db.from("facturas").select("*")
+      .order("numero_factura", { ascending: false })
+      .order("fecha_emision", { ascending: false });
     if (error) throw new Error(error.message);
     return (data ?? []).map((f: Factura) => ({
       ...f,
@@ -739,7 +741,7 @@ export const finDashboard = createServerFn({ method: "POST" })
       ingresosTotales: r2(ingresosTotales),
       gastosTotales: r2(gastosTotales),
       provisionImpuestos: r2(provisionImpuestos),
-      saldoEstimado: r2(ingresosTotales - gastosTotales - provisionImpuestos),
+      saldoEstimado: r2(ingresosTotales - gastosTotales),
       trimestres: trimestres.map((t) => ({ ...t, ingresos: r2(t.ingresos), gastos: r2(t.gastos) })),
       cuotas: { pagado, exento, pendiente: Math.max(0, total - pagado - exento), total },
       impuestosTrimestreActual:

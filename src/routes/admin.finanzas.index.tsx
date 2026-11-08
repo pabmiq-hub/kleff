@@ -56,8 +56,9 @@ function FinanzasDashboardPage() {
             <p className="text-sm text-ink/60">Saldo actual estimado</p>
             <p className="font-display text-5xl font-bold mt-1">{eur(data.saldoEstimado)}</p>
             <p className="text-xs text-ink/60 mt-3">
-              Ingresos acumulados {eur(data.ingresosTotales)} − gastos {eur(data.gastosTotales)} − provisión de
-              impuestos pendiente {eur(data.provisionImpuestos)}.
+              Aportaciones + facturas cobradas (base imponible) {eur(data.ingresosTotales)} − gastos{" "}
+              {eur(data.gastosTotales)}. El IVA va aparte como previsión de impuestos (
+              {eur(data.provisionImpuestos)}).
             </p>
           </CardContent>
         </Card>
