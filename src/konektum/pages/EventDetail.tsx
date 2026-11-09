@@ -4908,6 +4908,19 @@ const EventDetail = () => {
                         onToggleCheckin={handleToggleCheckin}
                         onSendCode={handleSendCode}
                         onDelete={handleDeleteParticipant}
+                        onCancel={async (pId) => {
+                          const nowIso = new Date().toISOString();
+                          const { error } = await supabase.from("participants").update({ cancelled_at: nowIso }).eq("id", pId);
+                          if (error) {
+                            toast({ title: "No se pudo dar de baja", description: error.message, variant: "destructive" });
+                            return;
+                          }
+                          if (participant.global_participant_id) {
+                            await supabase.from("global_participants").update({ status: "cancelled", updated_at: nowIso }).eq("id", participant.global_participant_id);
+                          }
+                          setParticipants(prev => prev.map(p => p.id === pId ? { ...p, cancelled_at: nowIso } : p));
+                          toast({ title: "Participante dado de baja", description: `${participant.name} se ha movido a «Bajas del evento».` });
+                        }}
                         onEmailUpdated={handleUpdateParticipantEmail}
                         onSendReminder={participant.email ? (pId) => handleSendReminder([pId], "event") : undefined}
                         isSendingReminder={isSendingReminder}
