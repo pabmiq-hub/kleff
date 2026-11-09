@@ -4965,7 +4965,14 @@ const EventDetail = () => {
                       <div key={participant.id} className="flex items-center justify-between p-3 border rounded-lg bg-background">
                         <div className="flex items-center gap-3">
                           <div>
-                            <p className="font-medium text-sm">{participant.name}</p>
+                            <p className="font-medium text-sm flex items-center gap-2 flex-wrap">
+                              {participant.name}
+                              {participant.payment_status === "paid" ? (
+                                <Badge className="bg-primary/15 text-primary border-primary/30 hover:bg-primary/15">✓ Pagado</Badge>
+                              ) : (
+                                <Badge variant="outline" className="text-muted-foreground">Sin pagar</Badge>
+                              )}
+                            </p>
                             <p className="text-xs text-muted-foreground">
                               {participant.email || participant.phone || "Sin contacto"}
                               {participant.cancelled_at && (
