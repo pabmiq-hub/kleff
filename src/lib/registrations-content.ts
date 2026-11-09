@@ -50,3 +50,27 @@ export function plainTextToHtml(text: string): string {
     })
     .join("");
 }
+
+/** Structured info blocks stored alongside highlight rows (kind:"section"); old readers skip them. */
+export type EventSectionKey = "how" | "important";
+export type EventSections = Record<EventSectionKey, string>;
+
+export function readEventSections(value: unknown): EventSections {
+  const out: EventSections = { how: "", important: "" };
+  if (!Array.isArray(value)) return out;
+  for (const v of value) {
+    if (v && typeof v === "object" && (v as any).kind === "section" && typeof (v as any).html === "string") {
+      const k = (v as any).key;
+      if (k === "how" || k === "important") out[k as EventSectionKey] = (v as any).html;
+    }
+  }
+  return out;
+}
+
+export function mergeEventSections(rows: HighlightRow[], sections: EventSections): unknown[] {
+  const isEmpty = (h: string) => !h.replace(/<[^>]*>|&nbsp;/g, "").trim();
+  const extra = (Object.keys(sections) as EventSectionKey[])
+    .filter((k) => !isEmpty(sections[k]))
+    .map((k) => ({ kind: "section", key: k, html: sections[k] }));
+  return [...rows, ...extra];
+}

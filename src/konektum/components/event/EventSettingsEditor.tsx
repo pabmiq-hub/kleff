@@ -9,7 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/konektum/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/konektum/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/konektum/ui/select";
 import { Textarea } from "@/konektum/ui/textarea";
-import { HIGHLIGHT_PRESETS, normalizeHighlights, type HighlightRow } from "@/lib/registrations-content";
+import { HIGHLIGHT_PRESETS, normalizeHighlights, readEventSections, mergeEventSections, type HighlightRow, type EventSections } from "@/lib/registrations-content";
 import { Loader2, Save, Eye, ClipboardList, Lock, KeyRound, Bell } from "lucide-react";
 import { useToast } from "@/konektum/hooks/use-toast";
 import { supabase } from "@/konektum/supabase";
@@ -163,6 +163,7 @@ const EventSettingsEditor = ({
   );
   const [formPaymentCurrency, setFormPaymentCurrency] = useState<string>(initialPaymentCurrency || "EUR");
   const [formHighlights, setFormHighlights] = useState<HighlightRow[]>(normalizeHighlights(initialHighlights));
+  const [formSections, setFormSections] = useState<EventSections>(readEventSections(initialHighlights));
   const [formPaymentInstructions, setFormPaymentInstructions] = useState<string>(initialPaymentInstructions || "");
   const [formTableSize, setFormTableSize] = useState(tableSize);
   const [formRoundDuration, setFormRoundDuration] = useState(roundDuration);
@@ -430,7 +431,7 @@ const EventSettingsEditor = ({
           ? Math.round(Number(formPaymentAmount) * 100)
           : null,
         payment_currency: formPaymentCurrency || "EUR",
-        registration_highlights: formHighlights.filter((h) => h.label.trim() && h.text.trim()),
+        registration_highlights: mergeEventSections(formHighlights.filter((h) => h.label.trim() && h.text.trim()), formSections),
         payment_instructions: formPaymentTrackingEnabled && formPaymentInstructions.trim() ? formPaymentInstructions.trim() : null,
         payment_reminders_enabled: formPaymentTrackingEnabled && formPaymentRemindersEnabled,
         payment_reminder_first_hours: Math.max(1, Number(formPaymentReminderFirstHours) || 24),
@@ -677,13 +678,25 @@ const EventSettingsEditor = ({
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="reg-description">Descripción adicional</Label>
+              <Label htmlFor="reg-description">📖 Acerca del evento</Label>
+              <p className="text-xs text-muted-foreground">Presentación breve y ambiente. Fecha, lugar y precio ya salen en la ficha: no hace falta repetirlos.</p>
               <RichTextEditor
                 value={formRegDescription}
                 onChange={setFormRegDescription}
                 placeholder={formLanguage === "en" ? "e.g. Additional event info, dress code, location details..." : "Ej: Información adicional del evento, código de vestimenta, ubicación..."}
                 minHeight="120px"
               />
+            </div>
+
+            <div className="space-y-2">
+              <Label>⚙️ ¿Cómo funciona?</Label>
+              <p className="text-xs text-muted-foreground">Pasos o dinámica del evento. Se muestra en una tarjeta propia.</p>
+              <RichTextEditor value={formSections.how} onChange={(v) => setFormSections((p) => ({ ...p, how: v }))} minHeight="120px" />
+            </div>
+            <div className="space-y-2">
+              <Label>⚠️ Importante</Label>
+              <p className="text-xs text-muted-foreground">Avisos imprescindibles (proceso de registro, requisitos…). Se muestra en una caja destacada.</p>
+              <RichTextEditor value={formSections.important} onChange={(v) => setFormSections((p) => ({ ...p, important: v }))} minHeight="100px" />
             </div>
 
             {/* Custom Registration Form Fields */}
@@ -1447,7 +1460,7 @@ const EventSettingsEditor = ({
         registrationDescription={formRegDescription || null}
         eventLang={formLanguage}
         ageRanges={formPreferences.ageRanges}
-        highlights={formHighlights}
+        highlights={mergeEventSections(formHighlights, formSections)}
         paymentInfo={{
           enabled: formPaymentTrackingEnabled,
           amountCents: formPaymentAmount !== "" && !isNaN(Number(formPaymentAmount)) ? Math.round(Number(formPaymentAmount) * 100) : null,

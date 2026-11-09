@@ -1,6 +1,6 @@
 // @ts-nocheck
 import { RichTextRenderer } from "@/konektum/ui/rich-text-renderer";
-import { normalizeHighlights } from "@/lib/registrations-content";
+import { normalizeHighlights, readEventSections } from "@/lib/registrations-content";
 
 export type PaymentInfo = {
   enabled: boolean;
@@ -56,6 +56,7 @@ export default function EventHighlights({ lang, eventDate, eventTime, eventLocat
     if (h.label.trim() && h.text.trim()) rows.push({ icon: h.emoji || "•", label: h.label, value: h.text });
   }
 
+  const sections = readEventSections(highlights);
   return (
     <div className="space-y-5 text-left">
       {rows.length > 0 && (
@@ -75,6 +76,18 @@ export default function EventHighlights({ lang, eventDate, eventTime, eventLocat
         <div className="text-sm sm:text-base text-foreground/85 leading-relaxed">
           <RichTextRenderer content={description} />
         </div>
+      )}
+      {sections.how && (
+        <section className="rounded-xl border p-4 sm:p-5 space-y-2">
+          <h3 className="font-display text-base font-semibold">⚙️ {isEn ? "How does it work?" : "¿Cómo funciona?"}</h3>
+          <div className="text-sm sm:text-base text-foreground/85 leading-relaxed"><RichTextRenderer content={sections.how} /></div>
+        </section>
+      )}
+      {sections.important && (
+        <section className="rounded-xl border-2 border-primary/40 bg-primary/5 p-4 sm:p-5 space-y-2">
+          <h3 className="font-display text-base font-semibold">⚠️ {isEn ? "Important" : "Importante"}</h3>
+          <div className="text-sm sm:text-base text-foreground/85 leading-relaxed"><RichTextRenderer content={sections.important} /></div>
+        </section>
       )}
       {showPayment && <PaymentNotice lang={lang} paymentInfo={paymentInfo} />}
     </div>
