@@ -4955,7 +4955,8 @@ const EventDetail = () => {
                     Bajas del evento
                   </CardTitle>
                   <CardDescription>
-                    {cancelledParticipants.length} {cancelledParticipants.length === 1 ? "persona se ha dado de baja" : "personas se han dado de baja"}. No cuentan como no-show. Puedes restaurarlas si necesitas recuperarlas durante el evento.
+                    {cancelledParticipants.length} {cancelledParticipants.length === 1 ? "persona se ha dado de baja" : "personas se han dado de baja"}
+                    {(() => { const paid = cancelledParticipants.filter(p => p.payment_status === "paid").length; return paid > 0 ? ` · ${paid} ${paid === 1 ? "había pagado" : "habían pagado"}` : ""; })()}. No cuentan como no-show. Puedes restaurarlas si necesitas recuperarlas durante el evento.
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
