@@ -9,7 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/konektum/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/konektum/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/konektum/ui/select";
 import { Textarea } from "@/konektum/ui/textarea";
-import { HIGHLIGHT_PRESETS, normalizeHighlights, type HighlightRow } from "@/lib/registrations-content";
+import { HIGHLIGHT_PRESETS, normalizeHighlights, readEventSections, mergeEventSections, type HighlightRow, type EventSections } from "@/lib/registrations-content";
 import { Loader2, Save, Eye, ClipboardList, Lock, KeyRound, Bell } from "lucide-react";
 import { useToast } from "@/konektum/hooks/use-toast";
 import { supabase } from "@/konektum/supabase";
