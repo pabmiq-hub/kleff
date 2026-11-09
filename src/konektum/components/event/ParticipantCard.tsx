@@ -13,7 +13,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/konektum/ui/alert-dialog";
-import { Eye, UserCheck, Send, Trash2, Loader2, Mail, Calendar, Key, User, Heart, Users, Handshake, Bell, Sparkles, RotateCcw, FlaskConical, CreditCard, CheckCircle2, BellRing, Cake } from "lucide-react";
+import { Eye, UserCheck, Send, Trash2, Loader2, Mail, Calendar, Key, User, Heart, Users, Handshake, Bell, Sparkles, RotateCcw, FlaskConical, CreditCard, CheckCircle2, BellRing, Cake, UserMinus } from "lucide-react";
 import InlineEmailEditor from "./InlineEmailEditor";
 import { normalizePreference } from "@/konektum/lib/analyticsNormalization";
 import { genderLabel, profileAgeRange } from "@/konektum/lib/registration-quotas";
@@ -49,6 +49,7 @@ interface ParticipantCardProps {
   onToggleCheckin: (id: string, currentState: boolean | null) => void;
   onSendCode: (id: string) => void;
   onDelete: (id: string) => void;
+  onCancel?: (id: string) => void;
   onEmailUpdated: (id: string, email: string) => void;
   onSendReminder?: (id: string) => void;
   isSendingReminder?: boolean;
@@ -98,6 +99,7 @@ const ParticipantCard = ({
   onToggleCheckin,
   onSendCode,
   onDelete,
+  onCancel,
   onEmailUpdated,
   onSendReminder,
   isSendingReminder,
@@ -345,9 +347,31 @@ const ParticipantCard = ({
               </Tooltip>
             )}
 
+            {onCancel && (
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-destructive" title="Dar de baja">
+                    <UserMinus className="w-3.5 h-3.5" />
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>¿Dar de baja a {participant.name}?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Pasará a la sección «Bajas del evento» conservando sus datos y su estado de pago. Podrás restaurarlo después.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                    <AlertDialogAction onClick={() => onCancel(participant.id)}>Dar de baja</AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            )}
+
             <AlertDialog>
               <AlertDialogTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-destructive">
+                <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-destructive" title="Eliminar definitivamente">
                   <Trash2 className="w-3.5 h-3.5" />
                 </Button>
               </AlertDialogTrigger>

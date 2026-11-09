@@ -4908,6 +4908,19 @@ const EventDetail = () => {
                         onToggleCheckin={handleToggleCheckin}
                         onSendCode={handleSendCode}
                         onDelete={handleDeleteParticipant}
+                        onCancel={async (pId) => {
+                          const nowIso = new Date().toISOString();
+                          const { error } = await supabase.from("participants").update({ cancelled_at: nowIso }).eq("id", pId);
+                          if (error) {
+                            toast({ title: "No se pudo dar de baja", description: error.message, variant: "destructive" });
+                            return;
+                          }
+                          if (participant.global_participant_id) {
+                            await supabase.from("global_participants").update({ status: "cancelled", updated_at: nowIso }).eq("id", participant.global_participant_id);
+                          }
+                          setParticipants(prev => prev.map(p => p.id === pId ? { ...p, cancelled_at: nowIso } : p));
+                          toast({ title: "Participante dado de baja", description: `${participant.name} se ha movido a «Bajas del evento».` });
+                        }}
                         onEmailUpdated={handleUpdateParticipantEmail}
                         onSendReminder={participant.email ? (pId) => handleSendReminder([pId], "event") : undefined}
                         isSendingReminder={isSendingReminder}
@@ -4942,7 +4955,8 @@ const EventDetail = () => {
                     Bajas del evento
                   </CardTitle>
                   <CardDescription>
-                    {cancelledParticipants.length} {cancelledParticipants.length === 1 ? "persona se ha dado de baja" : "personas se han dado de baja"}. No cuentan como no-show. Puedes restaurarlas si necesitas recuperarlas durante el evento.
+                    {cancelledParticipants.length} {cancelledParticipants.length === 1 ? "persona se ha dado de baja" : "personas se han dado de baja"}
+                    {(() => { const paid = cancelledParticipants.filter(p => p.payment_status === "paid").length; return paid > 0 ? ` · ${paid} ${paid === 1 ? "había pagado" : "habían pagado"}` : ""; })()}. No cuentan como no-show. Puedes restaurarlas si necesitas recuperarlas durante el evento.
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -4951,7 +4965,14 @@ const EventDetail = () => {
                       <div key={participant.id} className="flex items-center justify-between p-3 border rounded-lg bg-background">
                         <div className="flex items-center gap-3">
                           <div>
-                            <p className="font-medium text-sm">{participant.name}</p>
+                            <p className="font-medium text-sm flex items-center gap-2 flex-wrap">
+                              {participant.name}
+                              {participant.payment_status === "paid" ? (
+                                <Badge className="bg-primary/15 text-primary border-primary/30 hover:bg-primary/15">✓ Pagado</Badge>
+                              ) : (
+                                <Badge variant="outline" className="text-muted-foreground">Sin pagar</Badge>
+                              )}
+                            </p>
                             <p className="text-xs text-muted-foreground">
                               {participant.email || participant.phone || "Sin contacto"}
                               {participant.cancelled_at && (
