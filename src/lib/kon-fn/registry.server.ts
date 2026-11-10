@@ -28,6 +28,7 @@ const LOADERS: Record<string, () => Promise<{ default: Handler }>> = {
   "respond-repeat": () => import("./respond-repeat.server"),
   "respond-wrapped-table": () => import("./respond-wrapped-table.server"),
   "send-announcement-email": () => import("./send-announcement-email.server"),
+  "send-closing-thanks": () => import("./send-closing-thanks.server"),
   "send-automatic-codes": () => import("./send-automatic-codes.server"),
   "send-checkin-code": () => import("./send-checkin-code.server"),
   "send-match-emails": () => import("./send-match-emails.server"),
