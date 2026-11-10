@@ -3401,6 +3401,19 @@ const EventDetail = () => {
       // Mark no-show participants
       await markNoShowParticipants();
 
+      // Thank-you + deadline + Google review email to checked-in attendees.
+      let thanksSent = 0;
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        const { data: thanks } = await supabase.functions.invoke('send-closing-thanks', {
+          body: { event_id: id },
+          headers: session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : undefined,
+        });
+        thanksSent = thanks?.stats?.sent || 0;
+      } catch (e) {
+        console.error("closing thanks email failed", e);
+      }
+
       setEventStatus("completed");
       await loadEventData();
       setShowCloseEventDialog(false);
@@ -3408,7 +3421,7 @@ const EventDetail = () => {
       
       toast({
         title: "Evento cerrado",
-        description: `Los emails de resultados se enviarán automáticamente en ${deadlineHours}h (${scheduledAt.toLocaleString("es-ES", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}).`,
+        description: `${thanksSent ? `Correo de agradecimiento enviado a ${thanksSent} participantes. ` : ""}Los emails de resultados se enviarán automáticamente en ${deadlineHours}h (${scheduledAt.toLocaleString("es-ES", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}).`,
       });
     } catch (error: any) {
       console.error("Error:", error);
