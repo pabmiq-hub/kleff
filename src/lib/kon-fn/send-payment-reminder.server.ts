@@ -152,7 +152,8 @@ async function processEvent(
       "id, name, email, registration_variant, created_at, payment_status, payment_reminder_count, payment_last_reminder_at"
     )
     .eq("event_id", event.id)
-    .neq("payment_status", "paid")
+    .or("payment_status.is.null,payment_status.not.in.(paid,refunded)")
+    .is("cancelled_at", null)
     .eq("is_fake", false);
 
   if (participantIds && participantIds.length > 0) {
