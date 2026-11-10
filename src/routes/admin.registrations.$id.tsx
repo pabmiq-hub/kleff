@@ -126,6 +126,28 @@ function RegistrationEditor() {
               <Eye className="h-4 w-4" /> Ver pública
             </a>
           )}
+          {form.kind === "form" && (
+            <Button
+              variant="outline"
+              disabled={togglingPub}
+              onClick={async () => {
+                const isClosed = !!form.closes_at && new Date(form.closes_at) < new Date();
+                const next = isClosed ? null : new Date().toISOString();
+                setTogglingPub(true);
+                try {
+                  await updateFn({ data: { id: form.id, patch: { closes_at: next } } });
+                  setData((d) => d ? { ...d, form: { ...d.form, closes_at: next } } : d);
+                  toast.success(isClosed ? "Inscripciones abiertas de nuevo" : "Inscripciones cerradas: nadie más podrá apuntarse");
+                } catch (e) {
+                  toast.error((e as Error).message);
+                } finally {
+                  setTogglingPub(false);
+                }
+              }}
+            >
+              {form.closes_at && new Date(form.closes_at) < new Date() ? "🔒 Cerradas · Abrir" : "Cerrar inscripciones"}
+            </Button>
+          )}
           <Button onClick={togglePublish} disabled={togglingPub} className={isPublished ? "bg-ink/10 hover:bg-ink/20 text-ink" : "bg-coral hover:bg-coral/90 text-white"}>
             {togglingPub ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : isPublished ? <EyeOff className="h-4 w-4 mr-2" /> : <Globe className="h-4 w-4 mr-2" />}
             {isPublished ? "Despublicar" : "Publicar"}

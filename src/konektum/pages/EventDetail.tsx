@@ -4956,7 +4956,7 @@ const EventDetail = () => {
                   </CardTitle>
                   <CardDescription>
                     {cancelledParticipants.length} {cancelledParticipants.length === 1 ? "persona se ha dado de baja" : "personas se han dado de baja"}
-                    {(() => { const paid = cancelledParticipants.filter(p => p.payment_status === "paid").length; return paid > 0 ? ` · ${paid} ${paid === 1 ? "había pagado" : "habían pagado"}` : ""; })()}. No cuentan como no-show. Puedes restaurarlas si necesitas recuperarlas durante el evento.
+                    {(() => { const paid = cancelledParticipants.filter(p => p.payment_status === "paid").length; const refunded = cancelledParticipants.filter(p => p.payment_status === "refunded").length; return (paid > 0 ? ` · ${paid} ${paid === 1 ? "había pagado" : "habían pagado"}` : "") + (refunded > 0 ? ` · ${refunded} ${refunded === 1 ? "devuelto" : "devueltos"}` : ""); })()}. No cuentan como no-show. Puedes restaurarlas si necesitas recuperarlas durante el evento.
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -4969,6 +4969,8 @@ const EventDetail = () => {
                               {participant.name}
                               {participant.payment_status === "paid" ? (
                                 <Badge className="bg-primary/15 text-primary border-primary/30 hover:bg-primary/15">✓ Pagado</Badge>
+                              ) : participant.payment_status === "refunded" ? (
+                                <Badge variant="outline" className="border-accent text-accent-foreground bg-accent/30">↩ Devuelto</Badge>
                               ) : (
                                 <Badge variant="outline" className="text-muted-foreground">Sin pagar</Badge>
                               )}
@@ -4982,6 +4984,27 @@ const EventDetail = () => {
                           </div>
                         </div>
                         <div className="flex items-center gap-2">
+                          {(participant.payment_status === "paid" || participant.payment_status === "refunded") && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={async () => {
+                                const next = participant.payment_status === "paid" ? "refunded" : "paid";
+                                const { error } = await supabase
+                                  .from("participants")
+                                  .update({ payment_status: next } as any)
+                                  .eq("id", participant.id);
+                                if (error) {
+                                  toast({ title: "Error", description: error.message, variant: "destructive" });
+                                  return;
+                                }
+                                setParticipants(prev => prev.map(p => p.id === participant.id ? { ...p, payment_status: next } : p));
+                                toast({ title: next === "refunded" ? "Marcado como devuelto" : "Devolución deshecha" });
+                              }}
+                            >
+                              {participant.payment_status === "paid" ? "Devolver" : "Deshacer devolución"}
+                            </Button>
+                          )}
                           <Button
                             size="sm"
                             variant="outline"
