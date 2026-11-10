@@ -1,5 +1,5 @@
-import { describe, expect, it } from "vitest";
-import { renderClosingThanksEmail, KON_GOOGLE_REVIEW_URL } from "./closing-thanks";
+import { describe, expect, test as it } from "bun:test";
+import { renderClosingThanksEmail, KON_GOOGLE_REVIEW_URL } from "../src/konektum/lib/closing-thanks";
 
 const base = {
   name: "Laura Pérez", eventName: "Slow Friending", hours: 48,
