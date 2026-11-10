@@ -389,7 +389,8 @@ const handler = async (req: Request): Promise<Response> => {
       .from("participants")
       .select("id, name, email, registration_variant")
       .eq("event_id", event_id)
-      .in("id", participant_ids);
+      .in("id", participant_ids)
+      .is("cancelled_at", null);
 
     const stats = { total: 0, sent: 0, noEmail: 0, failed: 0 };
     const errors: string[] = [];

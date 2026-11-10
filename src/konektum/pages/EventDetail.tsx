@@ -4845,7 +4845,7 @@ const EventDetail = () => {
 
                       {(eventData as any)?.payment_tracking_enabled && (() => {
                         const unpaidWithEmail = participants.filter(
-                          (p: any) => p.payment_status !== "paid" && p.email && !p.is_fake
+                          (p: any) => p.payment_status !== "paid" && p.payment_status !== "refunded" && !p.cancelled_at && p.email && !p.is_fake
                         );
                         if (unpaidWithEmail.length === 0) return null;
                         // Hide bulk reminder once the event has started
