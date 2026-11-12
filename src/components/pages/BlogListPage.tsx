@@ -1,7 +1,7 @@
 import { useI18n } from "@/i18n/I18nProvider";
 import { SiteLayout } from "@/components/site/SiteLayout";
 import { Link } from "@tanstack/react-router";
-import { Calendar, Newspaper } from "lucide-react";
+import { Calendar, Newspaper, PenLine } from "lucide-react";
 import type { BlogPostSummary } from "@/lib/blog.functions";
 import { getOptimizedImageUrl, getResponsiveImageSrcSet } from "@/lib/image-delivery";
 
@@ -45,6 +45,7 @@ export function BlogListPage({ posts }: { posts: BlogPostSummary[] }) {
       <section className="bg-gradient-hero">
         <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 pt-20 md:pt-28 pb-12 text-center">
           <div className="inline-flex items-center gap-2 rounded-full bg-primary-soft/60 px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-coral-deep">
+            <PenLine className="h-3.5 w-3.5" />
             {copy.eyebrow}
           </div>
           <h1 className="mt-5 text-4xl sm:text-5xl md:text-6xl font-display font-semibold text-foreground">
