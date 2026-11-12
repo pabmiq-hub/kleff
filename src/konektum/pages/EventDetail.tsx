@@ -44,6 +44,7 @@ import EventCompatibilityTab from "@/konektum/components/event/EventCompatibilit
 import EditParticipantModal from "@/konektum/components/event/EditParticipantModal";
 import { requiresGameAnswers } from "@/konektum/lib/icebreakers";
 import ScheduleEmailDialog from "@/konektum/components/event/ScheduleEmailDialog";
+import PaymentsHistoryDialog from "@/konektum/components/event/PaymentsHistoryDialog";
 import SendAnnouncementDialog from "@/konektum/components/event/SendAnnouncementDialog";
 import { useToast } from "@/konektum/hooks/use-toast";
 import { Badge } from "@/konektum/ui/badge";
@@ -258,6 +259,7 @@ const EventDetail = () => {
   const [showCheckinQR, setShowCheckinQR] = useState(false);
   const [showTablesQR, setShowTablesQR] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showPayments, setShowPayments] = useState(false);
   const [currentRound, setCurrentRound] = useState(1);
   const [viewingRound, setViewingRound] = useState(1); // For viewing table distribution
   const [eventStatus, setEventStatus] = useState<"pending" | "active" | "completed">("pending");
@@ -4338,6 +4340,12 @@ const EventDetail = () => {
                         </Tooltip>
                       </TooltipProvider>
                     )}
+
+                    <Button variant="outline" size="sm" onClick={() => setShowPayments(true)}>
+                      <CreditCard className="w-4 h-4 sm:mr-2" />
+                      <span className="hidden sm:inline">Pagos</span>
+                    </Button>
+                    <PaymentsHistoryDialog open={showPayments} onOpenChange={setShowPayments} participants={participants as any} />
 
                     {/* Check-in controls dropdown */}
                     {eventStatus === "pending" && participants.length > 0 && (
