@@ -8,6 +8,7 @@ import {
   Repeat,
   Smartphone,
   Sparkles,
+  Coffee,
   Star,
   Timer,
   Users,
