@@ -254,8 +254,15 @@ export function EditableImage({
   });
   const srcSet = getResponsiveImageSrcSet(
     finalSrc,
-    widths ?? [480, 768, 1080, 1600, 2000],
-    { quality, resize },
+    widths ?? [480, 768, 1080, 1600],
+    {
+      quality,
+      resize,
+      ratio:
+        typeof width === "number" && typeof height === "number" && width > 0
+          ? height / width
+          : undefined,
+    },
   );
 
   return (

@@ -96,7 +96,7 @@ export function MediaCard({
           <>
             <img
               src={getOptimizedImageUrl(image, { width: 720, height: 405 })}
-              srcSet={getResponsiveImageSrcSet(image, [360, 540, 720, 1080], { height: 405 })}
+              srcSet={getResponsiveImageSrcSet(image, [360, 540, 720, 1080], { ratio: 405 / 720 })}
               sizes="(min-width: 1024px) 30vw, (min-width: 640px) 45vw, 100vw"
               alt={title ?? ""}
               loading="lazy"
