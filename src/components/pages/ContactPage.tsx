@@ -51,6 +51,7 @@ export function ContactPage() {
       <section className="bg-gradient-hero">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-16 md:pt-24 pb-12 text-center">
           <EditableText id="contact.hero.eyebrow" as="span" className="inline-flex items-center gap-2 rounded-full bg-primary-soft/60 px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-coral-deep">
+            <Mail className="h-3.5 w-3.5" />
             {or(hero.eyebrow, t.contact.eyebrow)}
           </EditableText>
           <EditableText id="contact.hero.title" as="h1" className="mt-5 text-5xl sm:text-6xl font-display font-semibold text-foreground">
