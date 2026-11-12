@@ -21,7 +21,7 @@ export function BlogPostPage({ post }: { post: BlogPostFull }) {
         {post.cover_image_url && (
           <div className="relative w-full aspect-[21/9] md:aspect-[21/8] overflow-hidden bg-muted">
             <img
-              src={getOptimizedImageUrl(post.cover_image_url, { width: 1440, height: 810, quality: 80 })}
+              src={getOptimizedImageUrl(post.cover_image_url, { width: 1440, ratio: 810 / 1440, quality: 80 })}
               srcSet={getResponsiveImageSrcSet(post.cover_image_url, [640, 960, 1280, 1440], {
                 height: 810,
                 quality: 80,

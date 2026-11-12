@@ -30,7 +30,7 @@ function HeroBlock({ data }: { data: BlockData["hero"] }) {
   return (
     <section className="relative w-full min-h-[55vh] md:min-h-[70vh] flex overflow-hidden bg-ink">
       {data.image_url && (
-        <img loading="eager" fetchPriority="high" decoding="async" src={getOptimizedImageUrl(data.image_url, { width: 1440, height: 900, quality: 80 })} srcSet={getResponsiveImageSrcSet(data.image_url, [640, 960, 1280, 1440], { height: 900, quality: 80 })} sizes="100vw" alt="" className="absolute inset-0 w-full h-full object-cover" />
+        <img loading="eager" fetchPriority="high" decoding="async" src={getOptimizedImageUrl(data.image_url, { width: 1440, height: 900, quality: 80 })} srcSet={getResponsiveImageSrcSet(data.image_url, [640, 960, 1280, 1440], { ratio: 900 / 1440, quality: 80 })} sizes="100vw" alt="" className="absolute inset-0 w-full h-full object-cover" />
       )}
       <div className="absolute inset-0 bg-ink" style={{ opacity: overlay }} />
       <div className={`relative z-10 mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 py-20 md:py-28 flex flex-col justify-center w-full ${align}`}>
