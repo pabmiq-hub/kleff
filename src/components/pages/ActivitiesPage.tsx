@@ -9,7 +9,6 @@ import {
   HeartHandshake,
   MapPin,
   Sparkles,
-  Dices,
   Trophy,
   Users,
 } from "lucide-react";

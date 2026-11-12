@@ -2,7 +2,6 @@ import { useState, type SyntheticEvent } from "react";
 import { useRouterState } from "@tanstack/react-router";
 import {
   Sparkles,
-  Newspaper,
   ExternalLink,
   Instagram,
   Newspaper,
