@@ -8,6 +8,7 @@ import {
   Repeat,
   Smartphone,
   Sparkles,
+  Coffee,
   Star,
   Timer,
   Users,
@@ -356,7 +357,7 @@ export function SlowFriendingPage() {
         <div className="relative mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 pt-16 md:pt-24 pb-20 grid lg:grid-cols-12 gap-10 items-center">
           <div className="lg:col-span-7">
             <span className="inline-flex items-center gap-2 rounded-full bg-coral text-cream border-2 border-ink px-4 py-1.5 text-xs font-bold uppercase tracking-widest shadow-tactile-sm">
-              <Sparkles className="h-3.5 w-3.5" /> {c.eyebrow}
+              <Coffee className="h-3.5 w-3.5" /> {c.eyebrow}
             </span>
             <h1 className="mt-6 text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-display font-semibold leading-[0.98] tracking-tight">
               {c.title}

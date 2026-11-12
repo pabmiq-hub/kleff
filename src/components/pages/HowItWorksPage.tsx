@@ -1,6 +1,7 @@
 import { useState } from "react";
 import {
   Sparkles,
+  Puzzle,
   Heart,
   Users,
   MapPin,
@@ -272,7 +273,7 @@ export function HowItWorksPage() {
       <section className="relative bg-cream overflow-hidden">
         <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 pt-16 md:pt-24 pb-20 text-center">
           <span className="inline-flex items-center gap-2 rounded-full bg-coral/10 border-2 border-coral/30 px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-coral-deep">
-            <Sparkles className="h-3.5 w-3.5" />
+            <Puzzle className="h-3.5 w-3.5" />
             <EditableText id="how.hero.eyebrow" as="span">{or(hero.eyebrow, t.how.eyebrow)}</EditableText>
           </span>
           <EditableText id="how.hero.title" as="h1" className="mt-6 text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-display font-semibold leading-[0.98] tracking-tight">
