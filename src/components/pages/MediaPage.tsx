@@ -330,7 +330,10 @@ export function MediaPage() {
                       >
                         {post.thumbnailUrl ? (
                           <img
-                            src={post.thumbnailUrl}
+                            src={post.thumbnailUrl.replace("class=squareMedium", "class=squareSmall")}
+                            width={240}
+                            height={240}
+                            decoding="async"
                             alt={post.caption.slice(0, 120) || "@kleff.bcn"}
                             loading="lazy"
                             className="absolute inset-0 h-full w-full object-cover group-hover:scale-105 transition-transform duration-500"
