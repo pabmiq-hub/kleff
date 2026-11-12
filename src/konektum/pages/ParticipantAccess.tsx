@@ -1503,7 +1503,7 @@ const ParticipantAccess = () => {
                       {eventLang === 'en' ? `Flechazos: ${crushSlotsLeft} available` : `Flechazos: ${crushSlotsLeft} disponibles`}
                     </span>
                   )}
-                  {repeatEnabled && (
+                  {repeatEnabled && eventStatus !== 'completed' && (
                     <span className="inline-flex items-center gap-1 rounded-full border border-violet-300 bg-violet-50 dark:bg-violet-950/20 px-2.5 py-1 text-violet-700 dark:text-violet-300">
                       <Repeat2 className="w-3.5 h-3.5" />
                       {eventLang === 'en' ? `Repeats: ${repeatSlotsLeft} available` : `Repetir: ${repeatSlotsLeft} disponibles`}
@@ -1701,7 +1701,7 @@ const ParticipantAccess = () => {
                                       );
                                     })()}
 
-                                    {crushEnabled && wantsRomance(verifiedParticipant?.preference) && wantsRomance(tablemate.preference) && (() => {
+                                    {crushEnabled && ms.canShowDating && (() => {
                                       const thisCrush = crushesSent.find(c => c.targetId === ms.participantId);
                                       if (!thisCrush && crushSlotsLeft <= 0) return null;
                                       if (thisCrush) {
@@ -1912,7 +1912,7 @@ const ParticipantAccess = () => {
                   </div>
                 </div>
 
-                {repeatEnabled && (
+                {repeatEnabled && eventStatus !== 'completed' && (
                   <div className="rounded-lg border p-4 bg-muted/30">
                     <div className="flex items-start gap-2">
                       <Repeat2 className="w-4 h-4 text-primary mt-0.5" />
@@ -1940,8 +1940,8 @@ const ParticipantAccess = () => {
                         </p>
                         <p className="text-xs text-muted-foreground mt-1">
                           {eventLang === 'es'
-                            ? 'Solo disponible si buscas ligue/romance y con personas que también lo buscan. Tienes 1 Flechazo por evento: se envía una solicitud no anónima por correo electrónico (verá tu nombre). Si acepta, os intercambiaremos los teléfonos por email y coincidiréis en la próxima ronda.'
-                            : 'Only available if you and the other person are looking for dating/romance. You have 1 Flechazo per event: a non-anonymous email request is sent (they will see your name). If accepted, we will share phone numbers by email and pair you in the next round.'}
+                            ? 'Solo disponible si buscas ligue/romance y con personas que también lo buscan. Tienes 1 Flechazo por evento: se envía una solicitud no anónima por correo electrónico (verá tu nombre). Si acepta, os intercambiaremos los teléfonos por email' + (eventStatus === 'completed' ? '.' : ' y coincidiréis en la próxima ronda.')
+                            : 'Only available if you and the other person are looking for dating/romance. You have 1 Flechazo per event: a non-anonymous email request is sent (they will see your name). If accepted, we will share phone numbers by email' + (eventStatus === 'completed' ? '.' : ' and pair you in the next round.')}
                         </p>
                       </div>
                     </div>

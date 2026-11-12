@@ -1188,7 +1188,7 @@ const ParticipantSelect = () => {
                   </button>
                 );
               })()}
-              {crushEnabled && wantsRomance(verifiedParticipant?.preference) && wantsRomance(person.preference) && (() => {
+              {crushEnabled && selectionState.canShowDating && (() => {
                 const thisCrush = crushesSent.find(c => c.targetId === person.id);
                 if (!thisCrush && crushSlotsLeft <= 0) return null;
                 return thisCrush ? (
@@ -1410,7 +1410,7 @@ const ParticipantSelect = () => {
               <p className="text-sm text-center text-muted-foreground">{t.select.matchHint}</p>
               {repeatEnabled && (() => {
                 const hasRemainingRounds = eventStatus !== 'completed' && currentRound < totalRounds;
-                if (!hasRemainingRounds && repeatsSent.length === 0) return null;
+                if (!hasRemainingRounds) return null;
                 return (
                   <div className="text-xs text-center text-violet-700 dark:text-violet-400 flex items-center justify-center gap-1.5 font-medium">
                     <Repeat2 className="w-3.5 h-3.5" />
