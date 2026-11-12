@@ -55,7 +55,7 @@ import AddProfessionalParticipantModal, { type ProfessionalParticipant as ModalP
 import ExcelPreviewModal from "@/konektum/components/event/ExcelPreviewModal";
 import ExclusionsManager from "@/konektum/components/event/ExclusionsManager";
 import InclusionsManager from "@/konektum/components/event/InclusionsManager";
-import { loadInclusions, computeInclusionGroups, buildInclusionGroupIndex } from "@/konektum/lib/inclusions";
+import { loadInclusions, computeInclusionGroups, buildInclusionGroupIndex, enforceInclusionGroups } from "@/konektum/lib/inclusions";
 import { parseExcelFile, Participant } from "@/konektum/lib/excelParser";
 import { exportMatchesToCSV, exportMatchesToExcel } from "@/konektum/lib/exportMatches";
 import { exportTableAssignmentsToExcel } from "@/konektum/lib/exportTableAssignments";
@@ -1112,10 +1112,22 @@ const EventDetail = () => {
     const inclusionGroups = inclusionGroupsArg ?? computeInclusionGroups(inclusions);
 
     const runGenerator = (list: DbParticipant[], parity: boolean): TableGenerationResult => {
-      if (rotationMode === "all_rotate") {
-        return generateAllRotateTables(list, numRounds, tableSize, relaxConstraints, parity, previousEncountersMap, avoidEncountersMode, groupRoundsConfig, gameMode, inclusionGroups);
+      const res = rotationMode === "all_rotate"
+        ? generateAllRotateTables(list, numRounds, tableSize, relaxConstraints, parity, previousEncountersMap, avoidEncountersMode, groupRoundsConfig, gameMode, inclusionGroups)
+        : generateFixedHostTables(list, numRounds, tableSize, relaxConstraints, parity, previousEncountersMap, avoidEncountersMode, groupRoundsConfig, gameMode, inclusionGroups);
+      if (!inclusionGroups.length) return res;
+      const ids = new Set(list.map((p) => p.id));
+      const groups = inclusionGroups.map((g) => g.filter((id) => ids.has(id))).filter((g) => g.length > 1);
+      const byId = new Map(list.map((p) => [p.id, p]));
+      const failed = enforceInclusionGroups(res.tables, groups, {
+        lockFirstSeat: rotationMode !== "all_rotate",
+        parityOf: (pid) => parityGroup(byId.get(pid)?.gender),
+      });
+      if (failed.length) {
+        const names = failed.map((g) => g.map((pid) => byId.get(pid)?.name ?? "?").join(" + ")).join(", ");
+        return { ...res, hasIncomplete: true, incompleteInfo: [res.incompleteInfo, `No se pudieron sentar juntas estas inclusiones: ${names}.`].filter(Boolean).join(" ") };
       }
-      return generateFixedHostTables(list, numRounds, tableSize, relaxConstraints, parity, previousEncountersMap, avoidEncountersMode, groupRoundsConfig, gameMode, inclusionGroups);
+      return res;
     };
 
     // 100% same-gender tables: generate each gender universe separately and merge

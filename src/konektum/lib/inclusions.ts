@@ -177,3 +177,55 @@ export function buildPairRowsForGroup(
   }
   return rows;
 }
+
+/**
+ * Final safety net: guarantees every inclusion group sits at the same table
+ * in every round by swapping split members with non-grouped people
+ * (preferring someone of the same parity group so gender balance holds).
+ * In fixed-host mode seat 0 (the host) never moves.
+ * Returns the ids of groups that could not be joined.
+ */
+export function enforceInclusionGroups<T extends { id: string }>(
+  rounds: { round: number; tables: T[][] }[],
+  groups: string[][],
+  opts: { lockFirstSeat?: boolean; parityOf?: (id: string) => string } = {}
+): string[][] {
+  const failed: string[][] = [];
+  const grouped = new Set(groups.flat());
+  const parity = opts.parityOf ?? (() => "");
+  for (const r of rounds) {
+    const tables = r.tables;
+    for (const group of groups) {
+      const where = new Map<string, [number, number]>();
+      tables.forEach((t, ti) => t.forEach((p, si) => { if (group.includes(p.id)) where.set(p.id, [ti, si]); }));
+      if (where.size < 2) continue;
+      const tableIdx = new Set([...where.values()].map(([ti]) => ti));
+      if (tableIdx.size === 1) continue;
+      const locked = (ti: number, si: number) => !!opts.lockFirstSeat && si === 0 && tables[ti].length > 1;
+      const lockedTables = new Set([...where.values()].filter(([ti, si]) => locked(ti, si)).map(([ti]) => ti));
+      if (lockedTables.size > 1) { failed.push(group); continue; }
+      const counts = (ti: number) => [...where.values()].filter(([t]) => t === ti).length;
+      const candidates = (lockedTables.size ? [...lockedTables] : [...tableIdx].sort((a, b) => counts(b) - counts(a)))
+        .concat(lockedTables.size ? [] : tables.map((_, i) => i).filter((i) => !tableIdx.has(i)));
+      let done = false;
+      for (const target of candidates) {
+        const movers = [...where.entries()].filter(([, [ti]]) => ti !== target);
+        if (movers.some(([, [ti, si]]) => locked(ti, si))) continue;
+        const free = tables[target].map((p, si) => ({ p, si })).filter(({ p, si }) => !grouped.has(p.id) && !locked(target, si));
+        if (free.length < movers.length) continue;
+        for (const [id, [ti, si]] of movers) {
+          let k = free.findIndex(({ p }) => parity(p.id) === parity(id));
+          if (k < 0) k = 0;
+          const { si: tsi } = free.splice(k, 1)[0];
+          const a = tables[ti][si];
+          tables[ti][si] = tables[target][tsi];
+          tables[target][tsi] = a;
+        }
+        done = true;
+        break;
+      }
+      if (!done) failed.push(group);
+    }
+  }
+  return failed;
+}
