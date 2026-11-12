@@ -1,9 +1,16 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { getPageContent } from "@/lib/content.functions";
+import { listTeamMembersPublic, type TeamMemberRow } from "@/lib/team.functions";
 import { AboutPage } from "@/components/pages/AboutPage";
 
 export const Route = createFileRoute("/en/about")({
-  loader: () => getPageContent({ data: { pageKey: "about", locale: "en" } }).then((pageContent) => ({ pageContent })),
+  loader: async () => {
+    const [pageContent, team] = await Promise.all([
+      getPageContent({ data: { pageKey: "about", locale: "en" } }),
+      listTeamMembersPublic().catch(() => [] as TeamMemberRow[]),
+    ]);
+    return { pageContent, team };
+  },
   head: () => ({
     meta: [
       { title: "About — KLEFF" },

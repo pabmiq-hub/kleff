@@ -74,7 +74,7 @@ export function BlogListPage({ posts }: { posts: BlogPostSummary[] }) {
                     <img
                       src={getOptimizedImageUrl(p.cover_image_url, { width: 720, height: 450 })}
                       srcSet={getResponsiveImageSrcSet(p.cover_image_url, [360, 540, 720, 1080], {
-                        height: 450,
+                        ratio: 450 / 720,
                       })}
                       sizes="(min-width: 1024px) 30vw, (min-width: 640px) 45vw, 100vw"
                       alt={p.title}

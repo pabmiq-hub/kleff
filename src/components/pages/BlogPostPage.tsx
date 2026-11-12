@@ -23,7 +23,7 @@ export function BlogPostPage({ post }: { post: BlogPostFull }) {
             <img
               src={getOptimizedImageUrl(post.cover_image_url, { width: 1440, height: 810, quality: 80 })}
               srcSet={getResponsiveImageSrcSet(post.cover_image_url, [640, 960, 1280, 1440], {
-                height: 810,
+                ratio: 810 / 1440,
                 quality: 80,
               })}
               sizes="100vw"

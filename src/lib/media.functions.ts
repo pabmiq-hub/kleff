@@ -39,8 +39,8 @@ async function fetchBeholdPosts(): Promise<InstagramPost[]> {
     const posts: InstagramPost[] = raw.map((p: any) => {
       const sizes = p?.sizes ?? {};
       const thumb =
-        sizes.medium?.mediaUrl ??
         sizes.small?.mediaUrl ??
+        sizes.medium?.mediaUrl ??
         sizes.large?.mediaUrl ??
         p?.mediaUrl ??
         "";

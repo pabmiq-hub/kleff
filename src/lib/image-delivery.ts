@@ -40,11 +40,17 @@ export function getOptimizedImageUrl(
 export function getResponsiveImageSrcSet(
   source: string | null | undefined,
   widths: readonly number[],
-  options: Omit<ImageTransformOptions, "width"> = {},
+  options: Omit<ImageTransformOptions, "width" | "height"> & { ratio?: number } = {},
 ): string | undefined {
   if (!source || UNSUPPORTED_TRANSFORM.test(source) || !source.includes("/storage/v1/")) return undefined;
+  const { ratio, ...rest } = options;
+  // A fixed height across breakpoints would distort every variant and defeat
+  // the CDN cache; derive each height from the aspect ratio instead.
   return widths
-    .map((width) => `${getOptimizedImageUrl(source, { ...options, width })} ${width}w`)
+    .map((width) => {
+      const height = ratio ? Math.round(width * ratio) : undefined;
+      return `${getOptimizedImageUrl(source, { ...rest, width, height })} ${width}w`;
+    })
     .join(", ");
 }
 

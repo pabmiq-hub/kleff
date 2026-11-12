@@ -1,9 +1,8 @@
 import { Link } from "@tanstack/react-router";
 import { ArrowRight, Calendar, Globe2, Sparkles, Dice5, ExternalLink } from "lucide-react";
 import { useI18n } from "@/i18n/I18nProvider";
-import { useEffect, useState } from "react";
-import { useServerFn } from "@tanstack/react-start";
-import { listTeamMembersPublic, type TeamMemberRow } from "@/lib/team.functions";
+import { useRouterState } from "@tanstack/react-router";
+import type { TeamMemberRow } from "@/lib/team.functions";
 
 const HERO_IMAGE_DEFAULT =
   "https://vkxogcfrbphhwdwzcnmt.supabase.co/storage/v1/object/public/media/cms/kleff-estacio-espai-juegos-de-mesa-2-estacio-nk0knd.jpg";
@@ -133,11 +132,16 @@ export function AboutPage() {
   const mission = useSectionContent("about.mission");
   const manifesto = useSectionContent("about.manifesto");
   const cta = useSectionContent("about.cta");
-  const loadTeam = useServerFn(listTeamMembersPublic);
-  const [dbTeam, setDbTeam] = useState<TeamMemberRow[] | null>(null);
-  useEffect(() => {
-    loadTeam().then(setDbTeam).catch(() => setDbTeam([]));
-  }, [loadTeam]);
+  // Team rows arrive with the page from the server so photos start loading immediately.
+  const dbTeam = useRouterState({
+    select: (s) => {
+      for (const m of s.matches) {
+        const ld = m.loaderData as { team?: TeamMemberRow[] } | undefined;
+        if (ld && Array.isArray(ld.team)) return ld.team;
+      }
+      return null;
+    },
+  });
   const team: TeamMember[] = (dbTeam && dbTeam.length > 0)
     ? dbTeam.map((r) => ({
         name: r.name,
@@ -194,8 +198,10 @@ export function AboutPage() {
                 id="about.hero.image"
                 src={or(hero.image, HERO_IMAGE_DEFAULT)}
                 alt="L'Estació de França — sede de KLEFF"
-                width={1600}
-                height={1200}
+                width={1080}
+                height={810}
+                widths={[480, 768, 1080, 1440]}
+                sizes="(min-width: 1024px) 40vw, 100vw"
                 loading="eager"
                 fetchPriority="high"
                 decoding="async"
