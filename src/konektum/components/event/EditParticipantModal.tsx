@@ -48,6 +48,7 @@ interface ParticipantData {
   gender: string | null;
   phone: string | null;
   checked_in: boolean;
+  exclude_from_matches?: boolean | null;
   verification_code?: string | null;
   birth_date?: string | null;
   is_returning_participant?: boolean | null;
@@ -130,6 +131,7 @@ const EditParticipantModal = ({
   
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
+  const [excludeFromMatches, setExcludeFromMatches] = useState<boolean>(participant.exclude_from_matches === true);
 
   // Wrapped (interests) state
   const wrappedQuestionList: WrappedQuestion[] = wrappedEnabled ? getWrappedQuestions(wrappedQuestions) : [];
@@ -360,6 +362,7 @@ const EditParticipantModal = ({
     }
 
 
+    updateData.exclude_from_matches = excludeFromMatches;
     const { error } = await supabase
       .from("participants")
       .update(updateData)
@@ -805,6 +808,14 @@ const EditParticipantModal = ({
             </div>
           )}
 
+
+          <label className="flex items-start gap-3 rounded-md border border-border p-3 text-sm cursor-pointer">
+            <input type="checkbox" className="mt-1" checked={excludeFromMatches} onChange={(e) => setExcludeFromMatches(e.target.checked)} />
+            <span>
+              <span className="font-medium">Excluir de coincidencias</span>
+              <span className="block text-muted-foreground">No compartir sus datos: no aparecerá en ningún correo de coincidencias ni recibirá el suyo.</span>
+            </span>
+          </label>
 
           <DialogFooter className="gap-2">
             <Button type="button" variant="outline" onClick={onClose}>

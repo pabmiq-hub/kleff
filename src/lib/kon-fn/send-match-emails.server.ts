@@ -546,6 +546,19 @@ const handler = async (req: Request): Promise<Response> => {
     const { data: selections } = await supabase.from("participant_selections").select("selector_id, selected_id, selection_type, is_super_like").eq("event_id", event_id);
     // Load crush (Flechazo) requests so they can produce matches automatically
     const { data: crushRequests } = await supabase.from("crush_requests").select("requester_id, target_id, status").eq("event_id", event_id).eq("status", "accepted");
+    // Participants who asked not to share their data: never part of any match, nor recipients
+    const { data: excludedRows } = await supabase.from("participants").select("id").eq("event_id", event_id).eq("exclude_from_matches", true);
+    const excludedIds = new Set(((excludedRows || []) as Array<{ id: string }>).map((r) => r.id));
+    if (excludedIds.size > 0) {
+      participants = participants.filter((p) => !excludedIds.has(p.id));
+      for (const arr of [selections, crushRequests] as any[]) {
+        if (!arr) continue;
+        for (let i = arr.length - 1; i >= 0; i--) {
+          const r = arr[i];
+          if (excludedIds.has(r.selector_id ?? r.requester_id) || excludedIds.has(r.selected_id ?? r.target_id)) arr.splice(i, 1);
+        }
+      }
+    }
     
     // For professional events, get table assignments to find connections
     const { data: tableAssignments } = isProfessional 
