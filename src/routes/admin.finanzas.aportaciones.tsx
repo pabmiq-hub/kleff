@@ -65,14 +65,16 @@ function AportacionesPage() {
     try {
       await save({
         data: {
+          ...(editingId ? { id: editingId } : {}),
           fecha: form.fecha,
           importe: Number(form.importe),
           categoria_id: form.categoria_id || null,
           concepto: form.concepto || null,
         },
       });
-      toast.success("Aportación registrada");
+      toast.success(editingId ? "Aportación actualizada" : "Aportación registrada");
       setOpen(false);
+      setEditingId(null);
       setForm({ fecha: todayISO(), importe: "", categoria_id: "", concepto: "" });
       await reload();
     } catch (e) {

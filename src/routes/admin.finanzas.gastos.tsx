@@ -70,6 +70,7 @@ function GastosPage() {
     try {
       await save({
         data: {
+          ...(editingId ? { id: editingId } : {}),
           fecha: form.fecha,
           importe: Number(form.importe),
           categoria_id: form.categoria_id || null,
@@ -78,8 +79,9 @@ function GastosPage() {
           adjunto_url: form.adjunto_url || null,
         },
       });
-      toast.success("Gasto registrado");
+      toast.success(editingId ? "Gasto actualizado" : "Gasto registrado");
       setOpen(false);
+      setEditingId(null);
       setForm(EMPTY);
       await reload();
     } catch (e) {
