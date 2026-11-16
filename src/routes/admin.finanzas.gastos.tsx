@@ -99,7 +99,7 @@ function GastosPage() {
           {rows.length} gastos · total <strong>{eur(total)}</strong>
         </p>
         {canFinanzasWrite && (
-          <Button onClick={() => setOpen(true)}>
+          <Button onClick={openNew}>
             <Plus className="h-4 w-4 mr-1" /> Añadir gasto
           </Button>
         )}
@@ -137,6 +137,9 @@ function GastosPage() {
                 <TableCell className="text-right font-semibold">{eur(g.importe)}</TableCell>
                 {canFinanzasWrite && (
                   <TableCell className="text-right">
+                    <Button size="icon" variant="ghost" onClick={() => openEdit(g)} title="Editar">
+                      <Pencil className="h-4 w-4" />
+                    </Button>
                     <Button
                       size="icon"
                       variant="ghost"
@@ -158,7 +161,7 @@ function GastosPage() {
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Nuevo gasto</DialogTitle>
+            <DialogTitle>{editingId ? "Editar gasto" : "Nuevo gasto"}</DialogTitle>
           </DialogHeader>
           <div className="space-y-3">
             <div className="grid grid-cols-2 gap-3">
