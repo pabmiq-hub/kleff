@@ -20,7 +20,7 @@ export const Route = createFileRoute("/admin/registrations/")({
 type FormRow = {
   id: string; slug: string; title: string; kind: "form" | "external";
   is_published: boolean; external_mode: string | null;
-  created_at: string; max_responses: number | null; closes_at: string | null; event_date: string | null; participants: number;
+  created_at: string; max_responses: number | null; closes_at: string | null; event_date: string | null; event_location: string | null; participants: number;
 };
 
 function AdminRegistrations() {
