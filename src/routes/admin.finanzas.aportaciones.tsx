@@ -16,7 +16,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Trash2 } from "lucide-react";
+import { Pencil, Plus, Trash2 } from "lucide-react";
 import { eur, fechaCorta, todayISO } from "@/lib/finanzas-ui";
 
 export const Route = createFileRoute("/admin/finanzas/aportaciones")({ component: AportacionesPage });
@@ -31,7 +31,25 @@ function AportacionesPage() {
   const [rows, setRows] = useState<Aportacion[]>([]);
   const [cats, setCats] = useState<Categoria[]>([]);
   const [open, setOpen] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState({ fecha: todayISO(), importe: "", categoria_id: "", concepto: "" });
+
+  const openNew = () => {
+    setEditingId(null);
+    setForm({ fecha: todayISO(), importe: "", categoria_id: "", concepto: "" });
+    setOpen(true);
+  };
+
+  const openEdit = (r: Aportacion) => {
+    setEditingId(r.id);
+    setForm({
+      fecha: r.fecha,
+      importe: String(r.importe),
+      categoria_id: r.categoria_id ?? "",
+      concepto: r.concepto ?? "",
+    });
+    setOpen(true);
+  };
 
   const reload = useCallback(async () => {
     const [a, c] = await Promise.all([list(), listCats()]);
@@ -47,14 +65,16 @@ function AportacionesPage() {
     try {
       await save({
         data: {
+          ...(editingId ? { id: editingId } : {}),
           fecha: form.fecha,
           importe: Number(form.importe),
           categoria_id: form.categoria_id || null,
           concepto: form.concepto || null,
         },
       });
-      toast.success("Aportación registrada");
+      toast.success(editingId ? "Aportación actualizada" : "Aportación registrada");
       setOpen(false);
+      setEditingId(null);
       setForm({ fecha: todayISO(), importe: "", categoria_id: "", concepto: "" });
       await reload();
     } catch (e) {
@@ -72,7 +92,7 @@ function AportacionesPage() {
           {rows.length} aportaciones · total <strong>{eur(total)}</strong>
         </p>
         {canFinanzasWrite && (
-          <Button onClick={() => setOpen(true)}>
+          <Button onClick={openNew}>
             <Plus className="h-4 w-4 mr-1" /> Añadir aportación
           </Button>
         )}
@@ -98,6 +118,9 @@ function AportacionesPage() {
                 <TableCell className="text-right font-semibold">{eur(r.importe)}</TableCell>
                 {canFinanzasWrite && (
                   <TableCell className="text-right">
+                    <Button size="icon" variant="ghost" onClick={() => openEdit(r)} title="Editar">
+                      <Pencil className="h-4 w-4" />
+                    </Button>
                     <Button
                       size="icon"
                       variant="ghost"
@@ -119,7 +142,7 @@ function AportacionesPage() {
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Nueva aportación</DialogTitle>
+            <DialogTitle>{editingId ? "Editar aportación" : "Nueva aportación"}</DialogTitle>
           </DialogHeader>
           <div className="space-y-3">
             <div>

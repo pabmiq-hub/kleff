@@ -17,7 +17,7 @@ import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ImagePicker } from "@/components/cms/ImagePicker";
-import { Plus, Trash2 } from "lucide-react";
+import { Pencil, Plus, Trash2 } from "lucide-react";
 import { eur, fechaCorta, todayISO } from "@/lib/finanzas-ui";
 
 export const Route = createFileRoute("/admin/finanzas/gastos")({ component: GastosPage });
@@ -34,7 +34,27 @@ function GastosPage() {
   const [rows, setRows] = useState<Gasto[]>([]);
   const [cats, setCats] = useState<Categoria[]>([]);
   const [open, setOpen] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState(EMPTY);
+
+  const openNew = () => {
+    setEditingId(null);
+    setForm(EMPTY);
+    setOpen(true);
+  };
+
+  const openEdit = (g: Gasto) => {
+    setEditingId(g.id);
+    setForm({
+      fecha: g.fecha,
+      importe: String(g.importe),
+      categoria_id: g.categoria_id ?? "",
+      descripcion: g.descripcion ?? "",
+      proveedor: g.proveedor ?? "",
+      adjunto_url: g.adjunto_url ?? "",
+    });
+    setOpen(true);
+  };
 
   const reload = useCallback(async () => {
     const [g, c] = await Promise.all([list(), listCats()]);
@@ -50,6 +70,7 @@ function GastosPage() {
     try {
       await save({
         data: {
+          ...(editingId ? { id: editingId } : {}),
           fecha: form.fecha,
           importe: Number(form.importe),
           categoria_id: form.categoria_id || null,
@@ -58,8 +79,9 @@ function GastosPage() {
           adjunto_url: form.adjunto_url || null,
         },
       });
-      toast.success("Gasto registrado");
+      toast.success(editingId ? "Gasto actualizado" : "Gasto registrado");
       setOpen(false);
+      setEditingId(null);
       setForm(EMPTY);
       await reload();
     } catch (e) {
@@ -77,7 +99,7 @@ function GastosPage() {
           {rows.length} gastos · total <strong>{eur(total)}</strong>
         </p>
         {canFinanzasWrite && (
-          <Button onClick={() => setOpen(true)}>
+          <Button onClick={openNew}>
             <Plus className="h-4 w-4 mr-1" /> Añadir gasto
           </Button>
         )}
@@ -115,6 +137,9 @@ function GastosPage() {
                 <TableCell className="text-right font-semibold">{eur(g.importe)}</TableCell>
                 {canFinanzasWrite && (
                   <TableCell className="text-right">
+                    <Button size="icon" variant="ghost" onClick={() => openEdit(g)} title="Editar">
+                      <Pencil className="h-4 w-4" />
+                    </Button>
                     <Button
                       size="icon"
                       variant="ghost"
@@ -136,7 +161,7 @@ function GastosPage() {
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Nuevo gasto</DialogTitle>
+            <DialogTitle>{editingId ? "Editar gasto" : "Nuevo gasto"}</DialogTitle>
           </DialogHeader>
           <div className="space-y-3">
             <div className="grid grid-cols-2 gap-3">
