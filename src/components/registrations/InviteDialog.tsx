@@ -100,15 +100,21 @@ export function InviteDialog({ open, onOpenChange, forms }: { open: boolean; onO
             ))}
           </div>
           {targetKind === "form" ? (
-            <select value={targetId} onChange={(e) => setTargetId(e.target.value)} className="w-full h-10 rounded-md border border-ink/15 bg-white px-3 text-sm">
-              <option value="">Elige un evento abierto…</option>
-              {openTargets.map((f) => <option key={f.id} value={f.id}>{f.title}{f.event_date ? ` — ${new Date(f.event_date).toLocaleDateString("es-ES")}` : ""}</option>)}
-            </select>
+            <div className="grid gap-2">
+              <select value={targetId} onChange={(e) => setTargetId(e.target.value)} className="w-full h-10 rounded-md border border-ink/15 bg-white px-3 text-sm">
+                <option value="">Elige un evento abierto…</option>
+                {openTargets.map((f) => <option key={f.id} value={f.id}>{f.title}{f.event_date ? ` — ${new Date(f.event_date).toLocaleDateString("es-ES")}` : ""}</option>)}
+              </select>
+              {targetId && (
+                <Input value={location} onChange={(e) => setLocation(e.target.value)} placeholder="Ubicación (opcional), p. ej. L'Estació Espai Gastronòmic" className="bg-white border-ink/15" />
+              )}
+            </div>
           ) : (
             <div className="grid gap-2">
               <Input value={extUrl} onChange={(e) => setExtUrl(e.target.value)} placeholder="https://…" className="bg-white border-ink/15" />
               <Input value={extTitle} onChange={(e) => setExtTitle(e.target.value)} placeholder="Título del evento" className="bg-white border-ink/15" />
-              <Input value={extDate} onChange={(e) => setExtDate(e.target.value)} placeholder="Fecha y lugar (opcional), p. ej. Sábado 14 nov · 18:00" className="bg-white border-ink/15" />
+              <Input value={extDate} onChange={(e) => setExtDate(e.target.value)} placeholder="Fecha y hora (opcional), p. ej. Sábado 14 nov · 18:00" className="bg-white border-ink/15" />
+              <Input value={location} onChange={(e) => setLocation(e.target.value)} placeholder="Ubicación (opcional), p. ej. L'Estació Espai Gastronòmic" className="bg-white border-ink/15" />
             </div>
           )}
           <Input value={buttonLabel} onChange={(e) => setButtonLabel(e.target.value)} placeholder="Texto del botón" className="bg-white border-ink/15" />
