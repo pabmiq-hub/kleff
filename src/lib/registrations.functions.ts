@@ -496,12 +496,12 @@ export const adminListForms = createServerFn({ method: "POST" })
     const allowed = await allowedFormIds(context.userId);
     let query = supabaseAdmin
       .from("registration_forms")
-      .select("id, slug, title, kind, is_published, external_mode, created_at, max_responses, closes_at, event_date")
+      .select("id, slug, title, kind, is_published, external_mode, created_at, max_responses, closes_at, event_date, event_location")
       .order("created_at", { ascending: false });
     if (allowed !== "all") query = query.in("id", allowed);
     const { data, error } = await query;
     if (error) throw new Error(error.message);
-    const rows = (data ?? []) as unknown as Array<{ id: string; slug: string; title: string; kind: "form" | "external"; is_published: boolean; external_mode: string | null; created_at: string; max_responses: number | null; closes_at: string | null; event_date: string | null }>;
+    const rows = (data ?? []) as unknown as Array<{ id: string; slug: string; title: string; kind: "form" | "external"; is_published: boolean; external_mode: string | null; created_at: string; max_responses: number | null; closes_at: string | null; event_date: string | null; event_location: string | null }>;
     const ids = rows.map((d) => d.id);
     let participantCounts: Record<string, number> = {};
     if (ids.length) {
@@ -1285,8 +1285,8 @@ const inviteSchema = z.object({
   all_sources: z.boolean().default(false),
   include_cancelled: z.boolean().default(false),
   target: z.discriminatedUnion("kind", [
-    z.object({ kind: z.literal("form"), form_id: z.string().uuid() }),
-    z.object({ kind: z.literal("external"), url: z.string().url().max(1000), title: z.string().min(1).max(200), date_label: z.string().max(200).optional() }),
+    z.object({ kind: z.literal("form"), form_id: z.string().uuid(), location: z.string().max(300).nullable().optional() }),
+    z.object({ kind: z.literal("external"), url: z.string().url().max(1000), title: z.string().min(1).max(200), date_label: z.string().max(200).optional(), location: z.string().max(300).optional() }),
   ]),
   button_label: z.string().max(80).optional(),
   subject: z.string().max(200).default(""),
@@ -1302,16 +1302,17 @@ async function resolveInvite(data: InviteInput) {
   let target: { title: string; url: string; dateLabel: string | null; location: string | null; formId: string | null };
   if (data.target.kind === "form") {
     const f = await loadFormOrThrow(data.target.form_id);
+    const override = data.target.location;
     target = {
       title: f.title,
       url: `${siteUrl()}/${f.slug}`,
       dateLabel: f.event_date ? formatMadrid(f.event_date) : null,
-      location: f.event_location ?? null,
+      location: override !== undefined && override !== null ? override.trim() || null : f.event_location ?? null,
       formId: f.id,
     };
   } else {
     if (!isSafeHttpUrl(data.target.url)) throw new Error("Enlace externo no válido");
-    target = { title: data.target.title, url: data.target.url, dateLabel: data.target.date_label?.trim() || null, location: null, formId: null };
+    target = { title: data.target.title, url: data.target.url, dateLabel: data.target.date_label?.trim() || null, location: data.target.location?.trim() || null, formId: null };
   }
 
   let q = supabaseAdmin.from("registration_responses").select("email_contact, data, created_at, cancelled_at, form_id").not("email_contact", "is", null);

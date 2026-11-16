@@ -10,7 +10,7 @@ import { Switch } from "@/components/ui/switch";
 import { RichTextEditor } from "@/components/cms/RichTextEditor";
 import { adminPreviewInvite, adminSendInvite } from "@/lib/registrations.functions";
 
-type FormRow = { id: string; title: string; slug: string; kind: "form" | "external"; is_published: boolean; event_date: string | null; closes_at: string | null; participants: number };
+type FormRow = { id: string; title: string; slug: string; kind: "form" | "external"; is_published: boolean; event_date: string | null; event_location: string | null; closes_at: string | null; participants: number };
 
 export function InviteDialog({ open, onOpenChange, forms }: { open: boolean; onOpenChange: (v: boolean) => void; forms: FormRow[] }) {
   const previewFn = useServerFn(adminPreviewInvite);
@@ -23,6 +23,7 @@ export function InviteDialog({ open, onOpenChange, forms }: { open: boolean; onO
   const [extUrl, setExtUrl] = useState("");
   const [extTitle, setExtTitle] = useState("");
   const [extDate, setExtDate] = useState("");
+  const [location, setLocation] = useState("");
   const [allSources, setAllSources] = useState(false);
   const [sources, setSources] = useState<string[]>([]);
   const [includeCancelled, setIncludeCancelled] = useState(false);
@@ -40,8 +41,8 @@ export function InviteDialog({ open, onOpenChange, forms }: { open: boolean; onO
     all_sources: allSources,
     include_cancelled: includeCancelled,
     target: targetKind === "form"
-      ? { kind: "form" as const, form_id: targetId }
-      : { kind: "external" as const, url: extUrl.trim(), title: extTitle.trim(), date_label: extDate.trim() || undefined },
+      ? { kind: "form" as const, form_id: targetId, location: location.trim() }
+      : { kind: "external" as const, url: extUrl.trim(), title: extTitle.trim(), date_label: extDate.trim() || undefined, location: location.trim() || undefined },
     button_label: buttonLabel,
     subject,
     body_html: body,
@@ -57,12 +58,15 @@ export function InviteDialog({ open, onOpenChange, forms }: { open: boolean; onO
     }, 500);
     return () => clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open, targetKind, targetId, extUrl, extTitle, extDate, allSources, sources, includeCancelled, buttonLabel, body]);
+  }, [open, targetKind, targetId, extUrl, extTitle, extDate, location, allSources, sources, includeCancelled, buttonLabel, body]);
 
   useEffect(() => {
-    if (targetKind === "form" && targetId && !subject) {
+    if (targetKind === "form" && targetId) {
       const f = native.find((x) => x.id === targetId);
-      if (f) setSubject(`¡Te invitamos a ${f.title}!`);
+      if (f) {
+        if (!subject) setSubject(`¡Te invitamos a ${f.title}!`);
+        setLocation(f.event_location ?? "");
+      }
     }
   }, [targetId]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -90,21 +94,27 @@ export function InviteDialog({ open, onOpenChange, forms }: { open: boolean; onO
           <Label className="text-xs uppercase tracking-wider text-ink/60">1. Evento al que invitas</Label>
           <div className="flex gap-2">
             {(["form", "external"] as const).map((k) => (
-              <button key={k} onClick={() => setTargetKind(k)} className={`flex-1 px-3 py-2 rounded-lg border text-sm ${targetKind === k ? "border-coral bg-coral/5" : "border-ink/15 text-ink/70"}`}>
+              <button key={k} onClick={() => { setTargetKind(k); setLocation(""); }} className={`flex-1 px-3 py-2 rounded-lg border text-sm ${targetKind === k ? "border-coral bg-coral/5" : "border-ink/15 text-ink/70"}`}>
                 {k === "form" ? "Evento de KLEFF" : "Enlace externo"}
               </button>
             ))}
           </div>
           {targetKind === "form" ? (
-            <select value={targetId} onChange={(e) => setTargetId(e.target.value)} className="w-full h-10 rounded-md border border-ink/15 bg-white px-3 text-sm">
-              <option value="">Elige un evento abierto…</option>
-              {openTargets.map((f) => <option key={f.id} value={f.id}>{f.title}{f.event_date ? ` — ${new Date(f.event_date).toLocaleDateString("es-ES")}` : ""}</option>)}
-            </select>
+            <div className="grid gap-2">
+              <select value={targetId} onChange={(e) => setTargetId(e.target.value)} className="w-full h-10 rounded-md border border-ink/15 bg-white px-3 text-sm">
+                <option value="">Elige un evento abierto…</option>
+                {openTargets.map((f) => <option key={f.id} value={f.id}>{f.title}{f.event_date ? ` — ${new Date(f.event_date).toLocaleDateString("es-ES")}` : ""}</option>)}
+              </select>
+              {targetId && (
+                <Input value={location} onChange={(e) => setLocation(e.target.value)} placeholder="Ubicación (opcional), p. ej. L'Estació Espai Gastronòmic" className="bg-white border-ink/15" />
+              )}
+            </div>
           ) : (
             <div className="grid gap-2">
               <Input value={extUrl} onChange={(e) => setExtUrl(e.target.value)} placeholder="https://…" className="bg-white border-ink/15" />
               <Input value={extTitle} onChange={(e) => setExtTitle(e.target.value)} placeholder="Título del evento" className="bg-white border-ink/15" />
-              <Input value={extDate} onChange={(e) => setExtDate(e.target.value)} placeholder="Fecha y lugar (opcional), p. ej. Sábado 14 nov · 18:00" className="bg-white border-ink/15" />
+              <Input value={extDate} onChange={(e) => setExtDate(e.target.value)} placeholder="Fecha y hora (opcional), p. ej. Sábado 14 nov · 18:00" className="bg-white border-ink/15" />
+              <Input value={location} onChange={(e) => setLocation(e.target.value)} placeholder="Ubicación (opcional), p. ej. L'Estació Espai Gastronòmic" className="bg-white border-ink/15" />
             </div>
           )}
           <Input value={buttonLabel} onChange={(e) => setButtonLabel(e.target.value)} placeholder="Texto del botón" className="bg-white border-ink/15" />
