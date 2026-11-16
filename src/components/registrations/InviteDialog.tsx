@@ -10,7 +10,7 @@ import { Switch } from "@/components/ui/switch";
 import { RichTextEditor } from "@/components/cms/RichTextEditor";
 import { adminPreviewInvite, adminSendInvite } from "@/lib/registrations.functions";
 
-type FormRow = { id: string; title: string; slug: string; kind: "form" | "external"; is_published: boolean; event_date: string | null; closes_at: string | null; participants: number };
+type FormRow = { id: string; title: string; slug: string; kind: "form" | "external"; is_published: boolean; event_date: string | null; event_location: string | null; closes_at: string | null; participants: number };
 
 export function InviteDialog({ open, onOpenChange, forms }: { open: boolean; onOpenChange: (v: boolean) => void; forms: FormRow[] }) {
   const previewFn = useServerFn(adminPreviewInvite);
@@ -23,6 +23,7 @@ export function InviteDialog({ open, onOpenChange, forms }: { open: boolean; onO
   const [extUrl, setExtUrl] = useState("");
   const [extTitle, setExtTitle] = useState("");
   const [extDate, setExtDate] = useState("");
+  const [location, setLocation] = useState("");
   const [allSources, setAllSources] = useState(false);
   const [sources, setSources] = useState<string[]>([]);
   const [includeCancelled, setIncludeCancelled] = useState(false);
@@ -40,8 +41,8 @@ export function InviteDialog({ open, onOpenChange, forms }: { open: boolean; onO
     all_sources: allSources,
     include_cancelled: includeCancelled,
     target: targetKind === "form"
-      ? { kind: "form" as const, form_id: targetId }
-      : { kind: "external" as const, url: extUrl.trim(), title: extTitle.trim(), date_label: extDate.trim() || undefined },
+      ? { kind: "form" as const, form_id: targetId, location: location.trim() }
+      : { kind: "external" as const, url: extUrl.trim(), title: extTitle.trim(), date_label: extDate.trim() || undefined, location: location.trim() || undefined },
     button_label: buttonLabel,
     subject,
     body_html: body,
@@ -57,12 +58,15 @@ export function InviteDialog({ open, onOpenChange, forms }: { open: boolean; onO
     }, 500);
     return () => clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open, targetKind, targetId, extUrl, extTitle, extDate, allSources, sources, includeCancelled, buttonLabel, body]);
+  }, [open, targetKind, targetId, extUrl, extTitle, extDate, location, allSources, sources, includeCancelled, buttonLabel, body]);
 
   useEffect(() => {
-    if (targetKind === "form" && targetId && !subject) {
+    if (targetKind === "form" && targetId) {
       const f = native.find((x) => x.id === targetId);
-      if (f) setSubject(`¡Te invitamos a ${f.title}!`);
+      if (f) {
+        if (!subject) setSubject(`¡Te invitamos a ${f.title}!`);
+        setLocation(f.event_location ?? "");
+      }
     }
   }, [targetId]); // eslint-disable-line react-hooks/exhaustive-deps
 
