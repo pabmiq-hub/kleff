@@ -34,7 +34,27 @@ function GastosPage() {
   const [rows, setRows] = useState<Gasto[]>([]);
   const [cats, setCats] = useState<Categoria[]>([]);
   const [open, setOpen] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState(EMPTY);
+
+  const openNew = () => {
+    setEditingId(null);
+    setForm(EMPTY);
+    setOpen(true);
+  };
+
+  const openEdit = (g: Gasto) => {
+    setEditingId(g.id);
+    setForm({
+      fecha: g.fecha,
+      importe: String(g.importe),
+      categoria_id: g.categoria_id ?? "",
+      descripcion: g.descripcion ?? "",
+      proveedor: g.proveedor ?? "",
+      adjunto_url: g.adjunto_url ?? "",
+    });
+    setOpen(true);
+  };
 
   const reload = useCallback(async () => {
     const [g, c] = await Promise.all([list(), listCats()]);

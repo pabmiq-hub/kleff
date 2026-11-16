@@ -31,7 +31,25 @@ function AportacionesPage() {
   const [rows, setRows] = useState<Aportacion[]>([]);
   const [cats, setCats] = useState<Categoria[]>([]);
   const [open, setOpen] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState({ fecha: todayISO(), importe: "", categoria_id: "", concepto: "" });
+
+  const openNew = () => {
+    setEditingId(null);
+    setForm({ fecha: todayISO(), importe: "", categoria_id: "", concepto: "" });
+    setOpen(true);
+  };
+
+  const openEdit = (r: Aportacion) => {
+    setEditingId(r.id);
+    setForm({
+      fecha: r.fecha,
+      importe: String(r.importe),
+      categoria_id: r.categoria_id ?? "",
+      concepto: r.concepto ?? "",
+    });
+    setOpen(true);
+  };
 
   const reload = useCallback(async () => {
     const [a, c] = await Promise.all([list(), listCats()]);
