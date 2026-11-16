@@ -1302,16 +1302,17 @@ async function resolveInvite(data: InviteInput) {
   let target: { title: string; url: string; dateLabel: string | null; location: string | null; formId: string | null };
   if (data.target.kind === "form") {
     const f = await loadFormOrThrow(data.target.form_id);
+    const override = data.target.location;
     target = {
       title: f.title,
       url: `${siteUrl()}/${f.slug}`,
       dateLabel: f.event_date ? formatMadrid(f.event_date) : null,
-      location: f.event_location ?? null,
+      location: override !== undefined && override !== null ? override.trim() || null : f.event_location ?? null,
       formId: f.id,
     };
   } else {
     if (!isSafeHttpUrl(data.target.url)) throw new Error("Enlace externo no válido");
-    target = { title: data.target.title, url: data.target.url, dateLabel: data.target.date_label?.trim() || null, location: null, formId: null };
+    target = { title: data.target.title, url: data.target.url, dateLabel: data.target.date_label?.trim() || null, location: data.target.location?.trim() || null, formId: null };
   }
 
   let q = supabaseAdmin.from("registration_responses").select("email_contact, data, created_at, cancelled_at, form_id").not("email_contact", "is", null);
