@@ -17,7 +17,7 @@ import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ImagePicker } from "@/components/cms/ImagePicker";
-import { Plus, Trash2 } from "lucide-react";
+import { Pencil, Plus, Trash2 } from "lucide-react";
 import { eur, fechaCorta, todayISO } from "@/lib/finanzas-ui";
 
 export const Route = createFileRoute("/admin/finanzas/gastos")({ component: GastosPage });
