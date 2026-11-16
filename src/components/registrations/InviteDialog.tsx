@@ -94,7 +94,7 @@ export function InviteDialog({ open, onOpenChange, forms }: { open: boolean; onO
           <Label className="text-xs uppercase tracking-wider text-ink/60">1. Evento al que invitas</Label>
           <div className="flex gap-2">
             {(["form", "external"] as const).map((k) => (
-              <button key={k} onClick={() => setTargetKind(k)} className={`flex-1 px-3 py-2 rounded-lg border text-sm ${targetKind === k ? "border-coral bg-coral/5" : "border-ink/15 text-ink/70"}`}>
+              <button key={k} onClick={() => { setTargetKind(k); setLocation(""); }} className={`flex-1 px-3 py-2 rounded-lg border text-sm ${targetKind === k ? "border-coral bg-coral/5" : "border-ink/15 text-ink/70"}`}>
                 {k === "form" ? "Evento de KLEFF" : "Enlace externo"}
               </button>
             ))}
