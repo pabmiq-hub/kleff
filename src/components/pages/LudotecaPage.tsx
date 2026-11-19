@@ -1,5 +1,6 @@
-import { useEffect, useMemo, useState } from "react";
-import { Search, Users, Clock, Brain, Star, ExternalLink, RefreshCw, Filter, X, Sparkles, MapPin } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { toast } from "sonner";
+import { Search, Users, Clock, Brain, Star, ExternalLink, RefreshCw, Filter, X, Share2, Sparkles, MapPin } from "lucide-react";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useI18n } from "@/i18n/I18nProvider";
@@ -239,14 +240,59 @@ export function LudotecaPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
-  const [players, setPlayers] = useState<string | null>(null);
-  const [duration, setDuration] = useState<string | null>(null);
-  const [weight, setWeight] = useState<string | null>(null);
-  const [type, setType] = useState<string | null>(null);
-  const [mechanic, setMechanic] = useState<string | null>(null);
+  const [players, setPlayers] = useState<string[]>([]);
+  const [duration, setDuration] = useState<string[]>([]);
+  const [weight, setWeight] = useState<string[]>([]);
+  const [type, setType] = useState<string[]>([]);
+  const [mechanic, setMechanic] = useState<string[]>([]);
   const [sort, setSort] = useState<"alpha" | "alpha-desc" | "rating" | "weight-asc" | "weight-desc">("alpha");
   const [showFilters, setShowFilters] = useState(true);
   const [recoOpen, setRecoOpen] = useState(false);
+  const urlReady = useRef(false);
+  const toggle = (set: (fn: (v: string[]) => string[]) => void, k: string) =>
+    set((v) => (v.includes(k) ? v.filter((x) => x !== k) : [...v, k]));
+
+  // Read filters from the URL once after hydration.
+  useEffect(() => {
+    const sp = new URLSearchParams(window.location.search);
+    const arr = (k: string) => (sp.get(k) ?? "").split(",").map((x) => x.trim()).filter(Boolean);
+    setSearch(sp.get("q") ?? "");
+    setPlayers(arr("jugadores"));
+    setDuration(arr("duracion"));
+    setWeight(arr("dificultad"));
+    setType(arr("tipo"));
+    setMechanic(arr("mecanica"));
+    urlReady.current = true;
+  }, []);
+
+  const buildQuery = () => {
+    const sp = new URLSearchParams();
+    if (search.trim()) sp.set("q", search.trim());
+    if (players.length) sp.set("jugadores", players.join(","));
+    if (duration.length) sp.set("duracion", duration.join(","));
+    if (weight.length) sp.set("dificultad", weight.join(","));
+    if (type.length) sp.set("tipo", type.join(","));
+    if (mechanic.length) sp.set("mecanica", mechanic.join(","));
+    return sp.toString().replace(/%2C/g, ",");
+  };
+
+  useEffect(() => {
+    if (!urlReady.current) return;
+    const qs = buildQuery();
+    const url = window.location.pathname + (qs ? `?${qs}` : "") + window.location.hash;
+    window.history.replaceState(window.history.state, "", url);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [search, players, duration, weight, type, mechanic]);
+
+  const share = async () => {
+    const qs = buildQuery();
+    const url = window.location.origin + window.location.pathname + (qs ? `?${qs}` : "");
+    const copied = { es: "¡Enlace copiado!", en: "Link copied!", ca: "Enllaç copiat!" }[locale];
+    if (navigator.share && window.matchMedia("(pointer: coarse)").matches) {
+      try { await navigator.share({ title: document.title, url }); return; } catch { /* cancelled */ }
+    }
+    try { await navigator.clipboard.writeText(url); toast.success(copied); } catch { window.prompt("", url); }
+  };
 
   const TT = {
     es: { reco: "Recomiéndame un juego similar", legend: "Cómo encontrar un juego" },
@@ -299,21 +345,21 @@ export function LudotecaPage() {
         const hay = `${g.title} ${(g.mechanics ?? []).join(" ")} ${(g.categories ?? []).join(" ")}`.toLowerCase();
         if (!hay.includes(q)) return false;
       }
-      if (players) {
-        const bucket = PLAYER_BUCKETS.find((b) => b.key === players);
-        if (bucket && !bucket.test(g)) return false;
+      if (players.length) {
+        const bs = PLAYER_BUCKETS.filter((b) => players.includes(b.key));
+        if (bs.length && !bs.some((b) => b.test(g))) return false;
       }
-      if (duration) {
-        const bucket = DURATION_BUCKETS.find((b) => b.key === duration);
+      if (duration.length) {
+        const bs = DURATION_BUCKETS.filter((b) => duration.includes(b.key));
         const m = g.duration_minutes ?? g.max_playtime ?? g.min_playtime ?? 0;
-        if (bucket && !bucket.test(m)) return false;
+        if (bs.length && !bs.some((b) => b.test(m))) return false;
       }
-      if (weight) {
-        const bucket = WEIGHT_BUCKETS.find((b) => b.key === weight);
-        if (bucket && (g.bgg_weight == null || !bucket.test(g.bgg_weight))) return false;
+      if (weight.length) {
+        const bs = WEIGHT_BUCKETS.filter((b) => weight.includes(b.key));
+        if (bs.length && (g.bgg_weight == null || !bs.some((b) => b.test(g.bgg_weight!)))) return false;
       }
-      if (type && g.bgg_type !== type) return false;
-      if (mechanic && !(g.mechanics ?? []).includes(mechanic)) return false;
+      if (type.length && !type.includes(g.bgg_type ?? "")) return false;
+      if (mechanic.length && !mechanic.every((m) => (g.mechanics ?? []).includes(m))) return false;
       return true;
     });
     const collator = new Intl.Collator(locale, { sensitivity: "base", numeric: true });
@@ -340,14 +386,14 @@ export function LudotecaPage() {
 
   const clearFilters = () => {
     setSearch("");
-    setPlayers(null);
-    setDuration(null);
-    setWeight(null);
-    setType(null);
-    setMechanic(null);
+    setPlayers([]);
+    setDuration([]);
+    setWeight([]);
+    setType([]);
+    setMechanic([]);
   };
 
-  const hasActiveFilters = search || players || duration || weight || type || mechanic;
+  const hasActiveFilters = !!(search || players.length || duration.length || weight.length || type.length || mechanic.length);
 
   return (
     <SiteLayout>
@@ -388,6 +434,11 @@ export function LudotecaPage() {
                 className="rounded-2xl h-12 font-bold text-coral-deep hover:bg-coral/10"
               >
                 <X className="h-4 w-4 mr-1" /> {t.clear}
+              </Button>
+            )}
+            {hasActiveFilters && (
+              <Button variant="outline" onClick={share} className="border-2 border-ink rounded-2xl h-12 font-bold">
+                <Share2 className="h-4 w-4 mr-2" /> {{ es: "Compartir", en: "Share", ca: "Compartir" }[locale]}
               </Button>
             )}
           </div>
@@ -452,7 +503,7 @@ export function LudotecaPage() {
               <p className="text-[10px] font-bold uppercase tracking-widest text-foreground/60 mb-2">{t.players}</p>
               <div className="flex flex-wrap gap-2">
                 {PLAYER_BUCKETS.map((b) => (
-                  <FilterChip key={b.key} active={players === b.key} onClick={() => setPlayers(players === b.key ? null : b.key)}>
+                  <FilterChip key={b.key} active={players.includes(b.key)} onClick={() => toggle(setPlayers, b.key)}>
                     {"labelKey" in b && b.labelKey ? t[b.labelKey] : b.label}
                   </FilterChip>
                 ))}
@@ -464,7 +515,7 @@ export function LudotecaPage() {
               </p>
               <div className="flex flex-wrap gap-2">
                 {DURATION_BUCKETS.map((b) => (
-                  <FilterChip key={b.key} active={duration === b.key} onClick={() => setDuration(duration === b.key ? null : b.key)}>
+                  <FilterChip key={b.key} active={duration.includes(b.key)} onClick={() => toggle(setDuration, b.key)}>
                     {b.label}
                   </FilterChip>
                 ))}
@@ -474,7 +525,7 @@ export function LudotecaPage() {
               <p className="text-[10px] font-bold uppercase tracking-widest text-foreground/60 mb-2">{t.weight} (BGG)</p>
               <div className="flex flex-wrap gap-2">
                 {WEIGHT_BUCKETS.map((b) => (
-                  <FilterChip key={b.key} active={weight === b.key} onClick={() => setWeight(weight === b.key ? null : b.key)}>
+                  <FilterChip key={b.key} active={weight.includes(b.key)} onClick={() => toggle(setWeight, b.key)}>
                     {b.label}
                   </FilterChip>
                 ))}
@@ -485,7 +536,7 @@ export function LudotecaPage() {
                 <p className="text-[10px] font-bold uppercase tracking-widest text-foreground/60 mb-2">{t.type}</p>
                 <div className="flex flex-wrap gap-2">
                   {types.map((tp) => (
-                    <FilterChip key={tp} active={type === tp} onClick={() => setType(type === tp ? null : tp)}>
+                    <FilterChip key={tp} active={type.includes(tp)} onClick={() => toggle(setType, tp)}>
                       {tp}
                     </FilterChip>
                   ))}
@@ -497,7 +548,7 @@ export function LudotecaPage() {
                 <p className="text-[10px] font-bold uppercase tracking-widest text-foreground/60 mb-2">{t.mechanic}</p>
                 <div className="flex flex-wrap gap-2">
                   {mechanics.map((m) => (
-                    <FilterChip key={m} active={mechanic === m} onClick={() => setMechanic(mechanic === m ? null : m)}>
+                    <FilterChip key={m} active={mechanic.includes(m)} onClick={() => toggle(setMechanic, m)}>
                       {m}
                     </FilterChip>
                   ))}
