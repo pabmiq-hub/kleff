@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { ArrowLeft, Camera, Settings2, Check, Clock, Instagram, MessageCircle, Send, Shuffle, Target, Ticket, Trophy, Users } from "lucide-react";
+import { ArrowLeft, HelpCircle, Camera, Settings2, Check, Clock, Instagram, MessageCircle, Send, Shuffle, Target, Ticket, Trophy, Users } from "lucide-react";
 import { toast } from "sonner";
 import { createContext, useContext } from "react";
 import type { RetoLang } from "@/lib/retos";
@@ -40,6 +40,19 @@ const EN: Record<string, string> = {
   "Copiar código": "Copy code",
   "Código copiado": "Code copied",
   "Empezar misiones": "Start missions",
+  "Tus 3 misiones secretas": "Your 3 secret missions",
+  "Al entrar recibes 3 misiones secretas de conexión y varias misiones sociales. No reveles las secretas: juega, habla y comparte mesa con la gente del evento para cumplirlas.": "You get 3 secret connection missions and several social missions. Don't reveal the secret ones: play, chat and share a table with people at the event to complete them.",
+  "Confirmación cruzada": "Cross-confirmation",
+  "Algunas misiones necesitan a otra persona. Cuando la cumplas, pulsa «Completar» y elige su pseudónimo. A esa persona le aparecerá un aviso para confirmarlo y, en cuanto confirme, recibís vuestro número.": "Some missions need another person. When you complete one, tap “Complete” and pick their nickname. They'll get a notice to confirm it, and once they do, you both get your number.",
+  "Números y sorteo": "Numbers and raffle",
+  "Cada misión cumplida te da números para el sorteo del evento. En la pestaña «Sorteo» verás tus números y cuáles salen premiados.": "Every completed mission gives you numbers for the event raffle. In the “Raffle” tab you'll see your numbers and the winning ones.",
+  "Personas y mensajes": "People and messages",
+  "En «Personas» verás a todos por su avatar y pseudónimo. En «Mensajes» puedes escribirles para quedar o coordinaros.": "In “People” you'll see everyone by avatar and nickname. In “Messages” you can write to them to meet up or coordinate.",
+  "Saltar": "Skip",
+  "Anterior": "Back",
+  "Siguiente": "Next",
+  "¡A jugar!": "Let's play!",
+  "Cómo funciona": "How it works",
   "Tu código de acceso": "Your access code",
   "código": "code",
   "Misiones": "Missions",
@@ -135,15 +148,16 @@ function RetoPage() {
   const [lang, setLangState] = useState<RetoLang>("es");
   useEffect(() => { const l = localStorage.getItem(`${key}-lang`); if (l === "en" || l === "es") setLangState(l); else if (navigator.language?.toLowerCase().startsWith("en")) setLangState("en"); }, [key]);
   const setLang = useCallback((l: RetoLang) => { localStorage.setItem(`${key}-lang`, l); setLangState(l); }, [key]);
-  const save = (t: string | null) => { if (t) localStorage.setItem(key, t); else localStorage.removeItem(key); setToken(t); };
-  return <LangCtx.Provider value={{ lang, setLang }}><RetoInner ev={ev} slug={slug} token={token} save={save} /></LangCtx.Provider>;
+  const [fresh, setFresh] = useState(false);
+  const save = (t: string | null, isNew = false) => { if (t) localStorage.setItem(key, t); else localStorage.removeItem(key); setFresh(!!t && isNew); setToken(t); };
+  return <LangCtx.Provider value={{ lang, setLang }}><RetoInner ev={ev} slug={slug} token={token} save={save} fresh={fresh} /></LangCtx.Provider>;
 }
 
-function RetoInner({ ev, slug, token, save }: { ev: ReturnType<typeof Route.useLoaderData>; slug: string; token: string | null | undefined; save: (t: string | null) => void }) {
+function RetoInner({ ev, slug, token, save, fresh }: { ev: ReturnType<typeof Route.useLoaderData>; slug: string; token: string | null | undefined; save: (t: string | null, isNew?: boolean) => void; fresh: boolean }) {
   const t = useT();
   if (!ev) return <Shell><div className="grid min-h-[60vh] place-items-center p-6 text-center text-muted-foreground">{t("Este reto no existe o aún no está publicado.")}</div></Shell>;
   if (token === undefined) return <Shell><div className="p-6 text-center text-muted-foreground">{t("Cargando…")}</div></Shell>;
-  return <Shell>{token ? <Dashboard token={token} onLogout={() => save(null)} /> : <Welcome ev={ev} slug={slug} onToken={save} />}</Shell>;
+  return <Shell>{token ? <Dashboard token={token} onLogout={() => save(null)} firstTime={fresh} /> : <Welcome ev={ev} slug={slug} onToken={save} />}</Shell>;
 }
 
 function Shell({ children }: { children: React.ReactNode }) {
@@ -160,7 +174,7 @@ async function compressImage(file: File): Promise<string> {
   return c.toDataURL("image/jpeg", 0.8);
 }
 
-function Welcome({ ev, slug, onToken }: { ev: NonNullable<ReturnType<typeof Route.useLoaderData>>; slug: string; onToken: (t: string) => void }) {
+function Welcome({ ev, slug, onToken }: { ev: NonNullable<ReturnType<typeof Route.useLoaderData>>; slug: string; onToken: (t: string, isNew?: boolean) => void }) {
   const t = useT();
   const join = useServerFn(retosJoin);
   const { lang } = useContext(LangCtx);
@@ -240,7 +254,7 @@ function Welcome({ ev, slug, onToken }: { ev: NonNullable<ReturnType<typeof Rout
             <p className="text-sm">{t("Guarda tu código. Lo necesitarás si cambias de móvil o se borra el navegador.")}</p>
             <div className="rounded-xl border-2 border-dashed border-primary p-4 font-mono text-3xl tracking-[0.3em]">{created.code}</div>
             <Button variant="outline" className="w-full" onClick={() => { void navigator.clipboard?.writeText(created.code); toast.success("Código copiado"); }}>{t("Copiar código")}</Button>
-            <Button className="h-12 w-full text-base" onClick={() => onToken(created.token)}>{t("Empezar misiones")}</Button>
+            <Button className="h-12 w-full text-base" onClick={() => onToken(created.token, true)}>{t("Empezar misiones")}</Button>
           </div>
         )}
         {step === "recover" && (
@@ -259,8 +273,9 @@ function Welcome({ ev, slug, onToken }: { ev: NonNullable<ReturnType<typeof Rout
 // ---------- Panel del participante ----------
 type Tab = "misiones" | "personas" | "mensajes" | "numeros";
 
-function Dashboard({ token, onLogout }: { token: string; onLogout: () => void }) {
+function Dashboard({ token, onLogout, firstTime }: { token: string; onLogout: () => void; firstTime: boolean }) {
   const t = useT();
+  const [tour, setTour] = useState(firstTime);
   const fetchDash = useServerFn(retosDashboard);
   const setLanguage = useServerFn(retosSetLanguage);
   const { setLang } = useContext(LangCtx);
@@ -285,6 +300,7 @@ function Dashboard({ token, onLogout }: { token: string; onLogout: () => void })
           <div className="truncate text-xs text-muted-foreground">{d.event.title} · {t("código")} {d.me.access_code}</div>
         </div>
         <LangSwitch onChange={async (l) => { try { await setLanguage({ data: { token, language: l } }); await load(); } catch (e) { err(e); } }} />
+        <button aria-label={t("Cómo funciona")} onClick={() => setTour(true)} className="shrink-0 text-muted-foreground hover:text-foreground"><HelpCircle className="h-5 w-5" /></button>
         <Badge className="shrink-0"><Ticket className="mr-1 h-3 w-3" />{d.tickets.length}</Badge>
       </header>
 
@@ -309,6 +325,42 @@ function Dashboard({ token, onLogout }: { token: string; onLogout: () => void })
           </button>
         ))}
       </nav>
+      {tour && <Onboarding onClose={() => setTour(false)} />}
+    </div>
+  );
+}
+
+const TOUR = [
+  { Icon: Target, title: "Tus 3 misiones secretas", body: "Al entrar recibes 3 misiones secretas de conexión y varias misiones sociales. No reveles las secretas: juega, habla y comparte mesa con la gente del evento para cumplirlas." },
+  { Icon: Users, title: "Confirmación cruzada", body: "Algunas misiones necesitan a otra persona. Cuando la cumplas, pulsa «Completar» y elige su pseudónimo. A esa persona le aparecerá un aviso para confirmarlo y, en cuanto confirme, recibís vuestro número." },
+  { Icon: Ticket, title: "Números y sorteo", body: "Cada misión cumplida te da números para el sorteo del evento. En la pestaña «Sorteo» verás tus números y cuáles salen premiados." },
+  { Icon: MessageCircle, title: "Personas y mensajes", body: "En «Personas» verás a todos por su avatar y pseudónimo. En «Mensajes» puedes escribirles para quedar o coordinaros." },
+] as const;
+
+function Onboarding({ onClose }: { onClose: () => void }) {
+  const t = useT();
+  const [i, setI] = useState(0);
+  const [x0, setX0] = useState<number | null>(null);
+  const step = TOUR[i]!;
+  const last = i === TOUR.length - 1;
+  const go = (n: number) => setI(Math.max(0, Math.min(TOUR.length - 1, n)));
+  return (
+    <div className="fixed inset-0 z-50 flex items-end justify-center bg-background/80 backdrop-blur-sm sm:items-center" role="dialog" aria-modal="true">
+      <div className="mx-auto w-full max-w-md rounded-t-2xl border bg-card p-6 pb-[calc(1.5rem+env(safe-area-inset-bottom))] shadow-lg sm:rounded-2xl"
+        onTouchStart={(e) => setX0(e.touches[0]?.clientX ?? null)}
+        onTouchEnd={(e) => { const x1 = e.changedTouches[0]?.clientX; if (x0 !== null && x1 !== undefined && Math.abs(x1 - x0) > 50) go(i + (x1 < x0 ? 1 : -1)); setX0(null); }}>
+        <div className="mb-2 flex justify-end"><button className="text-sm text-muted-foreground underline" onClick={onClose}>{t("Saltar")}</button></div>
+        <div key={i} className="animate-in fade-in slide-in-from-right-4 text-center duration-300">
+          <div className="mx-auto mb-4 grid h-16 w-16 place-items-center rounded-full bg-primary/10 text-primary"><step.Icon className="h-8 w-8" /></div>
+          <h2 className="mb-2 text-xl font-semibold">{t(step.title)}</h2>
+          <p className="min-h-[7rem] text-sm leading-relaxed text-muted-foreground">{t(step.body)}</p>
+        </div>
+        <div className="my-4 flex justify-center gap-2">{TOUR.map((_, k) => <button key={k} aria-label={String(k + 1)} onClick={() => go(k)} className={`h-2 rounded-full transition-all ${k === i ? "w-6 bg-primary" : "w-2 bg-muted"}`} />)}</div>
+        <div className="flex gap-2">
+          {i > 0 && <Button variant="outline" className="h-12 flex-1" onClick={() => go(i - 1)}>{t("Anterior")}</Button>}
+          <Button className="h-12 flex-1" onClick={() => (last ? onClose() : go(i + 1))}>{t(last ? "¡A jugar!" : "Siguiente")}</Button>
+        </div>
+      </div>
     </div>
   );
 }
