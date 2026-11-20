@@ -21,3 +21,17 @@ describe("retos", () => {
     expect(pickTicket(t, new Set(["a", "b"]))).toBeNull();
   });
 });
+
+import { missionText, defaultMissions as dm } from "./retos";
+describe("misiones bilingües", () => {
+  it("muestra el inglés si el participante eligió inglés y hay traducción", () => {
+    expect(missionText({ title: "Hola", title_en: "Hello" }, "en")).toBe("Hello");
+    expect(missionText({ title: "Hola", title_en: "Hello" }, "es")).toBe("Hola");
+  });
+  it("usa el castellano si falta la traducción", () => {
+    expect(missionText({ title: "Hola", title_en: null }, "en")).toBe("Hola");
+  });
+  it("las 34 misiones predefinidas tienen traducción", () => {
+    expect(dm().filter((m) => m.title_en.trim()).length).toBe(34);
+  });
+});

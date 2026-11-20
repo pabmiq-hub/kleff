@@ -11,13 +11,13 @@ export function nicknameKey(v: string) {
 }
 
 export type MissionKind = "follow" | "post" | "story" | "ludoya" | "custom" | "connection";
-export type MissionSeed = { category: "social" | "conexion"; kind: MissionKind; title: string };
+export type MissionSeed = { category: "social" | "conexion"; kind: MissionKind; title: string; title_en: string };
 
 export const DEFAULT_SOCIAL_MISSIONS: MissionSeed[] = [
-  { category: "social", kind: "follow", title: "Sigue en Instagram a las cuentas del reto" },
-  { category: "social", kind: "post", title: "Haz una publicación en redes etiquetando a las cuentas del reto" },
-  { category: "social", kind: "story", title: "Sube una historia etiquetando a las cuentas del reto" },
-  { category: "social", kind: "ludoya", title: "Registra en Ludoya una partida jugada hoy" },
+  { category: "social", kind: "follow", title: "Sigue en Instagram a las cuentas del reto", title_en: "Follow the challenge accounts on Instagram" },
+  { category: "social", kind: "post", title: "Haz una publicación en redes etiquetando a las cuentas del reto", title_en: "Make a social media post tagging the challenge accounts" },
+  { category: "social", kind: "story", title: "Sube una historia etiquetando a las cuentas del reto", title_en: "Post a story tagging the challenge accounts" },
+  { category: "social", kind: "ludoya", title: "Registra en Ludoya una partida jugada hoy", title_en: "Log a game you played today on Ludoya" },
 ];
 
 export const DEFAULT_CONNECTION_MISSIONS: string[] = [
@@ -53,8 +53,41 @@ export const DEFAULT_CONNECTION_MISSIONS: string[] = [
   "Invéntate una palabra y haz que otro jugador te pregunte qué significa.",
 ];
 
+export const DEFAULT_CONNECTION_MISSIONS_EN: string[] = [
+  "Make another person playing with you yawn.",
+  "Get another person playing with you to finish your sentence.",
+  "Tell the other players it smells like dog poo. Get at least two of them to check their shoes.",
+  "Get another person playing with you to argue with you about which way is North.",
+  "Convince another person playing with you that there is a new game area outside. If they follow you, show them this mission.",
+  "Pretend you have something in your eye. Get another person playing with you to check it.",
+  "Get another person playing with you to tell you their age.",
+  "Hide this card in another player's food and stay to watch when they find it.",
+  "Get another person playing with you to try to touch their nose with their tongue.",
+  "Hide this card in a game box. Get another person playing with you to find it.",
+  "Build a tower of balanced objects and get another person playing with you to knock it over.",
+  "Get another person playing with you to scratch your back.",
+  "Get another person playing with you to repeat what they said. Twice.",
+  "Get another person playing with you to visit the TikTok account: @kleff.bcn",
+  "Get another person playing with you to accuse you of cheating.",
+  "Get another person playing with you to take a selfie with you. It must be on their phone.",
+  "Get another person playing with you to fist-bump you. Twice.",
+  "Get a player to compliment your hair.",
+  "Misquote a film line and get another player to correct you.",
+  "Get a player to high-five you twice during the game night.",
+  "Get a player to tell you \"you're not ugly\".",
+  "Get a player to hit you.",
+  "Get a player to ask you if you're crying.",
+  "Get a player to confess a crime.",
+  "Get a player to tie a knot in a balloon.",
+  "Tell a player something is voice-activated. Get them to try it.",
+  "Get a player to say something in another language.",
+  "Get a player to imitate you.",
+  "Get a player to say \"game over\".",
+  "Make up a word and get another player to ask you what it means."
+];
+
 export function defaultMissions(): MissionSeed[] {
-  return [...DEFAULT_SOCIAL_MISSIONS, ...DEFAULT_CONNECTION_MISSIONS.map((title) => ({ category: "conexion" as const, kind: "connection" as const, title }))];
+  return [...DEFAULT_SOCIAL_MISSIONS, ...DEFAULT_CONNECTION_MISSIONS.map((title, i) => ({ category: "conexion" as const, kind: "connection" as const, title, title_en: DEFAULT_CONNECTION_MISSIONS_EN[i] ?? "" }))];
 }
 
 /** Elige `n` misiones distintas al azar, priorizando las menos repartidas para variar entre participantes. */
@@ -77,3 +110,9 @@ export function pickTicket<T extends { id: string }>(tickets: T[], alreadyWon: S
 }
 
 export const isAvatarDataUrl = (v: string) => /^data:image\/(png|jpeg|webp|svg\+xml)[;,]/.test(v) && v.length < 300_000;
+
+export type RetoLang = "es" | "en";
+/** Texto de la misión en el idioma del participante; si falta la traducción, se usa el castellano. */
+export function missionText(m: { title: string; title_en?: string | null }, lang: RetoLang) {
+  return lang === "en" && m.title_en?.trim() ? m.title_en : m.title;
+}

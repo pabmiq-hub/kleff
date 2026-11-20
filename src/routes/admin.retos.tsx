@@ -180,20 +180,20 @@ type Mission = Detail["missions"][number];
 function Missions({ d, reload }: { d: Detail; reload: () => void }) {
   const save = useServerFn(retosAdminSaveMission);
   const del = useServerFn(retosAdminDeleteMission);
-  const [edit, setEdit] = useState<{ id?: string; category: "social" | "conexion"; title: string; tickets: number; active: boolean } | null>(null);
+  const [edit, setEdit] = useState<{ id?: string; category: "social" | "conexion"; title: string; title_en: string; tickets: number; active: boolean } | null>(null);
   const done = useMemo(() => { const m = new Map<string, number>(); for (const c of d.completions) if (c.status === "confirmed") m.set(c.mission_id, (m.get(c.mission_id) ?? 0) + 1); return m; }, [d]);
   const toggle = async (m: Mission) => { try { await save({ data: { eventId: d.event.id, id: m.id, category: m.category as "social", title: m.title, tickets: m.tickets, active: !m.active } }); reload(); } catch (e) { err(e); } };
   const section = (cat: "social" | "conexion", label: string) => (
     <div className="space-y-2">
-      <div className="flex items-center justify-between"><h3 className="font-medium">{label}</h3><Button size="sm" variant="outline" onClick={() => setEdit({ category: cat, title: "", tickets: 1, active: true })}><Plus className="mr-1 h-4 w-4" />Nueva</Button></div>
+      <div className="flex items-center justify-between"><h3 className="font-medium">{label}</h3><Button size="sm" variant="outline" onClick={() => setEdit({ category: cat, title: "", title_en: "", tickets: 1, active: true })}><Plus className="mr-1 h-4 w-4" />Nueva</Button></div>
       <div className="divide-y rounded-lg border bg-card">
         {d.missions.filter((m) => m.category === cat).map((m) => (
           <div key={m.id} className={`flex items-center gap-3 p-3 ${m.active ? "" : "opacity-50"}`}>
             <Switch checked={m.active} onCheckedChange={() => toggle(m)} />
-            <div className="min-w-0 flex-1 text-sm">{m.title}</div>
+            <div className="min-w-0 flex-1 text-sm">{m.title}{!m.title_en && <span className="ml-2 text-xs text-muted-foreground">(sin inglés)</span>}</div>
             <Badge variant="secondary" className="shrink-0"><Ticket className="mr-1 h-3 w-3" />{m.tickets}</Badge>
             <span className="w-10 shrink-0 text-right text-xs text-muted-foreground" title="Completadas">✓{done.get(m.id) ?? 0}</span>
-            <Button size="icon" variant="ghost" onClick={() => setEdit({ id: m.id, category: m.category as "social", title: m.title, tickets: m.tickets, active: m.active })}><Pencil className="h-4 w-4" /></Button>
+            <Button size="icon" variant="ghost" onClick={() => setEdit({ id: m.id, category: m.category as "social", title: m.title, title_en: m.title_en ?? "", tickets: m.tickets, active: m.active })}><Pencil className="h-4 w-4" /></Button>
             <Button size="icon" variant="ghost" onClick={async () => { if (!confirm("¿Eliminar esta misión?")) return; try { await del({ data: { id: m.id } }); reload(); } catch (e) { err(e); } }}><Trash2 className="h-4 w-4" /></Button>
           </div>
         ))}
@@ -208,10 +208,11 @@ function Missions({ d, reload }: { d: Detail; reload: () => void }) {
         <DialogContent>
           <DialogHeader><DialogTitle>{edit?.id ? "Editar misión" : "Nueva misión"}</DialogTitle></DialogHeader>
           {edit && <div className="space-y-3">
-            <div><Label>Texto</Label><textarea className="min-h-24 w-full rounded-md border bg-background p-2 text-sm" value={edit.title} onChange={(e) => setEdit({ ...edit, title: e.target.value })} /></div>
+            <div><Label>Texto en castellano</Label><textarea className="min-h-24 w-full rounded-md border bg-background p-2 text-sm" value={edit.title} onChange={(e) => setEdit({ ...edit, title: e.target.value })} /></div>
+            <div><Label>Texto en inglés (opcional)</Label><textarea className="min-h-24 w-full rounded-md border bg-background p-2 text-sm" value={edit.title_en} onChange={(e) => setEdit({ ...edit, title_en: e.target.value })} placeholder="Si lo dejas vacío, se mostrará en castellano" /></div>
             <div className="w-40"><Label>Números para el sorteo</Label><Input type="number" min={0} max={100} value={edit.tickets} onChange={(e) => setEdit({ ...edit, tickets: Number(e.target.value) })} /></div>
           </div>}
-          <DialogFooter><Button disabled={!edit || edit.title.trim().length < 3} onClick={async () => { if (!edit) return; try { await save({ data: { eventId: d.event.id, id: edit.id ?? null, category: edit.category, title: edit.title, tickets: edit.tickets, active: edit.active } }); setEdit(null); reload(); } catch (e) { err(e); } }}>Guardar</Button></DialogFooter>
+          <DialogFooter><Button disabled={!edit || edit.title.trim().length < 3} onClick={async () => { if (!edit) return; try { await save({ data: { eventId: d.event.id, id: edit.id ?? null, category: edit.category, title: edit.title, title_en: edit.title_en, tickets: edit.tickets, active: edit.active } }); setEdit(null); reload(); } catch (e) { err(e); } }}>Guardar</Button></DialogFooter>
         </DialogContent>
       </Dialog>
     </div>

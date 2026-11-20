@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
-import { defaultMissions, isAvatarDataUrl, makeAccessCode, nicknameKey, normalizeRetoSlug, pickMissions, pickTicket, retoSlugSchema } from "./retos";
+import { defaultMissions, isAvatarDataUrl, makeAccessCode, nicknameKey, missionText, normalizeRetoSlug, pickMissions, pickTicket, retoSlugSchema } from "./retos";
 
 async function admin(context: { supabase: any; userId: string }) {
   const { data: role, error } = await context.supabase.from("user_roles").select("role").eq("user_id", context.userId).eq("role", "super_admin").maybeSingle();
@@ -69,7 +69,7 @@ export const retosAdminDuplicate = createServerFn({ method: "POST" })
     const taken = check(await db.from("reto_events").select("slug").like("slug", `${slug}%`)) as any[];
     if (taken.length) slug = `${slug}-${taken.length + 1}`;
     const ev = check(await db.from("reto_events").insert({ title: `${src.title} (copia)`, slug, event_date: src.event_date, location: src.location, cover_url: src.cover_url, status: "draft", social_accounts: src.social_accounts, connection_per_person: src.connection_per_person }).select("id").single()) as any;
-    const ms = check(await db.from("reto_missions").select("category,kind,title,tickets,active,sort_order").eq("event_id", data.id)) as any[];
+    const ms = check(await db.from("reto_missions").select("category,kind,title,title_en,tickets,active,sort_order").eq("event_id", data.id)) as any[];
     if (ms.length) check(await db.from("reto_missions").insert(ms.map((m) => ({ ...m, event_id: ev.id }))));
     return { id: ev.id as string };
   });
@@ -90,7 +90,7 @@ export const retosAdminGet = createServerFn({ method: "GET" })
     const db = await admin(context);
     const [ev, ms, ps, cs, ts, ds] = await Promise.all([
       db.from("reto_events").select("*").eq("id", data.id).single(),
-      db.from("reto_missions").select("id,category,kind,title,tickets,active,sort_order").eq("event_id", data.id).order("sort_order"),
+      db.from("reto_missions").select("id,category,kind,title,title_en,tickets,active,sort_order").eq("event_id", data.id).order("sort_order"),
       db.from("reto_participants").select("id,nickname,avatar_url,extra_tickets,created_at,access_code").eq("event_id", data.id).order("created_at"),
       db.from("reto_completions").select("id,mission_id,participant_id,partner_ids,evidence,status,created_at").eq("event_id", data.id).order("created_at", { ascending: false }),
       db.from("reto_tickets").select("id,participant_id,number,source").eq("event_id", data.id).order("number"),
@@ -99,7 +99,7 @@ export const retosAdminGet = createServerFn({ method: "GET" })
     const event = check(ev) as any;
     return {
       event: { id: event.id, title: event.title, slug: event.slug, event_date: event.event_date, location: event.location, cover_url: event.cover_url, status: event.status, social_accounts: event.social_accounts as string[], connection_per_person: event.connection_per_person as number },
-      missions: check(ms) as { id: string; category: string; kind: string; title: string; tickets: number; active: boolean; sort_order: number }[],
+      missions: check(ms) as { id: string; category: string; kind: string; title: string; title_en: string | null; tickets: number; active: boolean; sort_order: number }[],
       participants: check(ps) as { id: string; nickname: string; avatar_url: string | null; extra_tickets: number; created_at: string; access_code: string }[],
       completions: check(cs) as { id: string; mission_id: string; participant_id: string; partner_ids: string[]; evidence: string | null; status: string; created_at: string }[],
       tickets: check(ts) as { id: string; participant_id: string; number: number; source: string }[],
@@ -119,10 +119,10 @@ export const retosAdminUpdate = createServerFn({ method: "POST" })
 
 export const retosAdminSaveMission = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => z.object({ eventId: uuid, id: uuid.nullish(), category: z.enum(["social", "conexion"]), title: z.string().trim().min(3).max(400), tickets: z.number().int().min(0).max(100), active: z.boolean() }).parse(d))
+  .inputValidator((d: unknown) => z.object({ eventId: uuid, id: uuid.nullish(), category: z.enum(["social", "conexion"]), title: z.string().trim().min(3).max(400), title_en: z.string().trim().max(400).nullish(), tickets: z.number().int().min(0).max(100), active: z.boolean() }).parse(d))
   .handler(async ({ data, context }) => {
     const db = await admin(context);
-    const row = { title: data.title, tickets: data.tickets, active: data.active };
+    const row = { title: data.title, ...(data.title_en !== undefined ? { title_en: data.title_en || null } : {}), tickets: data.tickets, active: data.active };
     if (data.id) check(await db.from("reto_missions").update(row).eq("id", data.id).eq("event_id", data.eventId));
     else check(await db.from("reto_missions").insert({ ...row, event_id: data.eventId, category: data.category, kind: data.category === "conexion" ? "connection" : "custom", sort_order: 1000 + (Date.now() % 1e6) }));
     return { ok: true };
@@ -208,13 +208,13 @@ export const retosPublicEvent = createServerFn({ method: "GET" })
   });
 
 async function me(db: any, token: string) {
-  const p = check(await db.from("reto_participants").select("id,event_id,nickname,avatar_url,access_code").eq("token", token).maybeSingle()) as any;
+  const p = check(await db.from("reto_participants").select("id,event_id,nickname,avatar_url,access_code,language").eq("token", token).maybeSingle()) as any;
   if (!p) throw new Error("Tu acceso ha caducado. Vuelve a entrar con tu código.");
-  return p as { id: string; event_id: string; nickname: string; avatar_url: string | null; access_code: string };
+  return p as { id: string; event_id: string; nickname: string; avatar_url: string | null; access_code: string; language: "es" | "en" };
 }
 
 export const retosJoin = createServerFn({ method: "POST" })
-  .inputValidator((d: unknown) => z.object({ slug: z.string().max(60), nickname: z.string().trim().min(2).max(30), avatar: z.string().max(300_000) }).parse(d))
+  .inputValidator((d: unknown) => z.object({ slug: z.string().max(60), nickname: z.string().trim().min(2).max(30), avatar: z.string().max(300_000), language: z.enum(["es", "en"]).default("es") }).parse(d))
   .handler(async ({ data }) => {
     if (!isAvatarDataUrl(data.avatar)) throw new Error("Elige una imagen de perfil.");
     const db = await pub();
@@ -225,7 +225,7 @@ export const retosJoin = createServerFn({ method: "POST" })
     if (dup) throw new Error("Ese pseudónimo ya está en uso. Prueba con otro.");
     let p: any = null;
     for (let i = 0; i < 5 && !p; i++) {
-      const r = await db.from("reto_participants").insert({ event_id: ev.id, nickname: data.nickname, nickname_key: key, avatar_url: data.avatar, token: crypto.randomUUID() + crypto.randomUUID(), access_code: makeAccessCode() }).select("id,token,access_code").single();
+      const r = await db.from("reto_participants").insert({ event_id: ev.id, nickname: data.nickname, nickname_key: key, avatar_url: data.avatar, language: data.language, token: crypto.randomUUID() + crypto.randomUUID(), access_code: makeAccessCode() }).select("id,token,access_code").single();
       if (r.error?.code === "23505" && /nickname/.test(r.error.message)) throw new Error("Ese pseudónimo ya está en uso. Prueba con otro.");
       if (!r.error) p = r.data;
     }
@@ -258,7 +258,7 @@ export const retosDashboard = createServerFn({ method: "POST" })
     const [ev, ps, ms, as, cs, ts, ds, msgs] = await Promise.all([
       db.from("reto_events").select("title,slug,status,social_accounts,event_date,location").eq("id", p.event_id).single(),
       db.from("reto_participants").select("id,nickname,avatar_url").eq("event_id", p.event_id).order("nickname"),
-      db.from("reto_missions").select("id,category,kind,title,tickets").eq("event_id", p.event_id).eq("active", true).order("sort_order"),
+      db.from("reto_missions").select("id,category,kind,title,title_en,tickets").eq("event_id", p.event_id).eq("active", true).order("sort_order"),
       db.from("reto_assignments").select("mission_id").eq("participant_id", p.id),
       db.from("reto_completions").select("id,mission_id,participant_id,partner_ids,status,evidence,created_at").eq("event_id", p.event_id).or(`participant_id.eq.${p.id},partner_ids.cs.{${p.id}}`),
       db.from("reto_tickets").select("id,number,source").eq("participant_id", p.id).order("number"),
@@ -275,16 +275,16 @@ export const retosDashboard = createServerFn({ method: "POST" })
     const toConfirm = completions.filter((c) => c.participant_id !== p.id && c.status === "pending");
     const unread = new Map<string, number>();
     for (const m of check(msgs) as any[]) if (m.to_id === p.id && !m.read_at) unread.set(m.from_id, (unread.get(m.from_id) ?? 0) + 1);
-    const titleOf = new Map(allMissions.map((m) => [m.id, m.title]));
+    const titleOf = new Map(allMissions.map((m) => [m.id, missionText(m, p.language)]));
     return {
-      me: { id: p.id, nickname: p.nickname, avatar_url: p.avatar_url, access_code: p.access_code },
+      me: { id: p.id, nickname: p.nickname, avatar_url: p.avatar_url, access_code: p.access_code, language: p.language },
       event: { title: event.title as string, slug: event.slug as string, open: event.status === "open", social_accounts: event.social_accounts as string[], event_date: event.event_date as string | null, location: event.location as string | null },
       participants: (check(ps) as any[]).map((x) => ({ id: x.id as string, nickname: x.nickname as string, avatar_url: x.avatar_url as string | null, unread: unread.get(x.id) ?? 0 })),
       missions: missions.map((m) => {
         const c = mine.find((x) => x.mission_id === m.id && x.status !== "rejected") ?? ludoyaTagged.find((x) => x.mission_id === m.id && m.kind === "ludoya");
-        return { id: m.id as string, category: m.category as string, kind: m.kind as string, title: m.title as string, tickets: m.tickets as number, status: (c?.status ?? "todo") as "todo" | "pending" | "confirmed", partnerIds: (c?.partner_ids ?? []) as string[] };
+        return { id: m.id as string, category: m.category as string, kind: m.kind as string, title: missionText(m, p.language) as string, tickets: m.tickets as number, status: (c?.status ?? "todo") as "todo" | "pending" | "confirmed", partnerIds: (c?.partner_ids ?? []) as string[] };
       }),
-      toConfirm: toConfirm.map((c) => ({ id: c.id as string, from: c.participant_id as string, title: (titleOf.get(c.mission_id) ?? "Misión") as string })),
+      toConfirm: toConfirm.map((c) => ({ id: c.id as string, from: c.participant_id as string, title: (titleOf.get(c.mission_id) ?? (p.language === "en" ? "Mission" : "Misión")) as string })),
       tickets: (check(ts) as any[]).map((t) => ({ number: t.number as number, source: t.source as string })),
       draws: (check(ds) as any[]).map((d) => ({ id: d.id as string, prize: d.prize as string | null, number: d.reto_tickets?.number as number, mine: d.reto_tickets?.participant_id === p.id })),
     };
@@ -359,5 +359,14 @@ export const retosSendMessage = createServerFn({ method: "POST" })
     const to = check(await db.from("reto_participants").select("id").eq("id", data.toId).eq("event_id", p.event_id).maybeSingle());
     if (!to) throw new Error("Participante no encontrado.");
     check(await db.from("reto_messages").insert({ event_id: p.event_id, from_id: p.id, to_id: data.toId, body: data.body }));
+    return { ok: true };
+  });
+
+export const retosSetLanguage = createServerFn({ method: "POST" })
+  .inputValidator((d: unknown) => z.object({ token: tokenS, language: z.enum(["es", "en"]) }).parse(d))
+  .handler(async ({ data }) => {
+    const db = await pub();
+    const p = await me(db, data.token);
+    check(await db.from("reto_participants").update({ language: data.language }).eq("id", p.id));
     return { ok: true };
   });
