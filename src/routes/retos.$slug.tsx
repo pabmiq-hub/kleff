@@ -1,14 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { createAvatar } from "@dicebear/core";
-import { avataaars } from "@dicebear/collection";
+import { AvatarEditor, avatarUri, randomAvatarConfig, type AvatarConfig } from "@/components/retos/AvatarEditor";
 import { retosSetLanguage, retosPublicEvent, retosJoin, retosRecover, retosDashboard, retosComplete, retosConfirm, retosMessages, retosSendMessage } from "@/lib/retos.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { ArrowLeft, Camera, Check, Clock, Instagram, MessageCircle, Send, Shuffle, Target, Ticket, Trophy, Users } from "lucide-react";
+import { ArrowLeft, Camera, Settings2, Check, Clock, Instagram, MessageCircle, Send, Shuffle, Target, Ticket, Trophy, Users } from "lucide-react";
 import { toast } from "sonner";
 import { createContext, useContext } from "react";
 import type { RetoLang } from "@/lib/retos";
@@ -28,7 +27,10 @@ const EN: Record<string, string> = {
   "Volver": "Back",
   "Tu avatar": "Your avatar",
   "Otro avatar": "Another avatar",
+  "Aleatorio": "Random",
+  "Personalizar": "Customise",
   "Mi foto": "My photo",
+  "Subir foto": "Upload photo",
   "Pseudónimo": "Nickname",
   "Ej. MeepleVeloz": "E.g. SpeedyMeeple",
   "No pedimos tu nombre, correo ni teléfono.": "We don't ask for your name, email or phone.",
@@ -165,14 +167,15 @@ function Welcome({ ev, slug, onToken }: { ev: NonNullable<ReturnType<typeof Rout
   const recover = useServerFn(retosRecover);
   const [step, setStep] = useState<"ask" | "member" | "create" | "recover" | "code">("ask");
   const [nickname, setNickname] = useState("");
-  const [seed, setSeed] = useState("kleff");
+  const [cfg, setCfg] = useState<AvatarConfig | null>(null);
+  const [editing, setEditing] = useState(false);
   const [photo, setPhoto] = useState<string | null>(null);
   const [code, setCode] = useState("");
   const [created, setCreated] = useState<{ token: string; code: string } | null>(null);
   const [busy, setBusy] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
-  useEffect(() => { setSeed(Math.random().toString(36).slice(2)); }, []);
-  const generated = useMemo(() => createAvatar(avataaars, { seed }).toDataUri(), [seed]);
+  useEffect(() => { setCfg(randomAvatarConfig()); }, []);
+  const generated = useMemo(() => (cfg ? avatarUri(cfg) : ""), [cfg]);
   const avatar = photo ?? generated;
 
   return (
@@ -208,9 +211,11 @@ function Welcome({ ev, slug, onToken }: { ev: NonNullable<ReturnType<typeof Rout
           <div className="space-y-4">
             <div className="flex flex-col items-center gap-3">
               <img src={avatar} alt={t("Tu avatar")} className="h-28 w-28 rounded-full border-4 border-primary/20 bg-muted object-cover" />
-              <div className="flex gap-2">
-                <Button type="button" variant="outline" size="sm" onClick={() => { setPhoto(null); setSeed(Math.random().toString(36).slice(2)); }}><Shuffle className="mr-1 h-4 w-4" />{t("Otro avatar")}</Button>
-                <Button type="button" variant="outline" size="sm" onClick={() => fileRef.current?.click()}><Camera className="mr-1 h-4 w-4" />{t("Mi foto")}</Button>
+              <div className="flex flex-wrap justify-center gap-2">
+                <Button type="button" variant="outline" size="sm" onClick={() => { setPhoto(null); setCfg(randomAvatarConfig()); }}><Shuffle className="mr-1 h-4 w-4" />{t("Aleatorio")}</Button>
+                <Button type="button" variant="outline" size="sm" onClick={() => setEditing(true)}><Settings2 className="mr-1 h-4 w-4" />{t("Personalizar")}</Button>
+                <Button type="button" variant="outline" size="sm" onClick={() => fileRef.current?.click()}><Camera className="mr-1 h-4 w-4" />{t("Subir foto")}</Button>
+                {cfg && <AvatarEditor open={editing} onOpenChange={setEditing} initial={cfg} lang={lang} onSave={(c) => { setPhoto(null); setCfg(c); }} />}
                 <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={async (e) => { const f = e.target.files?.[0]; if (f) { try { setPhoto(await compressImage(f)); } catch { toast.error("No se ha podido leer la imagen."); } } }} />
               </div>
             </div>
