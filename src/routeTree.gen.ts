@@ -52,6 +52,7 @@ import { Route as AdminMembersRouteImport } from './routes/admin.members'
 import { Route as AdminPollsRouteImport } from './routes/admin.polls'
 import { Route as AdminRegistrationsRouteImport } from './routes/admin.registrations'
 import { Route as AdminRentalsRouteImport } from './routes/admin.rentals'
+import { Route as AdminRetosRouteImport } from './routes/admin.retos'
 import { Route as AdminTeamRouteImport } from './routes/admin.team'
 import { Route as AdminUsuariosRouteImport } from './routes/admin.usuarios'
 import { Route as AppIndexRouteImport } from './routes/app.index'
@@ -101,6 +102,7 @@ import { Route as EnTournamentsRouteImport } from './routes/en.tournaments'
 import { Route as InscripcionSlugRouteImport } from './routes/inscripcion.$slug'
 import { Route as InviteTokenRouteImport } from './routes/invite.$token'
 import { Route as JSlugRouteImport } from './routes/j.$slug'
+import { Route as RetosSlugRouteImport } from './routes/retos.$slug'
 import { Route as VerificarIdRouteImport } from './routes/verificar.$id'
 import { Route as EventSlugCancelarParticipantIdRouteImport } from './routes/$eventSlug.cancelar.$participantId'
 import { Route as ActividadesJuegosIndexRouteImport } from './routes/actividades_.juegos.index'
@@ -386,6 +388,11 @@ const AdminRentalsRoute = AdminRentalsRouteImport.update({
   path: '/rentals',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminRetosRoute = AdminRetosRouteImport.update({
+  id: '/retos',
+  path: '/retos',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminTeamRoute = AdminTeamRouteImport.update({
   id: '/team',
   path: '/team',
@@ -629,6 +636,11 @@ const InviteTokenRoute = InviteTokenRouteImport.update({
 const JSlugRoute = JSlugRouteImport.update({
   id: '/j/$slug',
   path: '/j/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RetosSlugRoute = RetosSlugRouteImport.update({
+  id: '/retos/$slug',
+  path: '/retos/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
 const VerificarIdRoute = VerificarIdRouteImport.update({
@@ -1033,6 +1045,7 @@ export interface FileRoutesByFullPath {
   '/admin/polls': typeof AdminPollsRoute
   '/admin/registrations': typeof AdminRegistrationsRouteWithChildren
   '/admin/rentals': typeof AdminRentalsRouteWithChildren
+  '/admin/retos': typeof AdminRetosRoute
   '/admin/team': typeof AdminTeamRoute
   '/admin/usuarios': typeof AdminUsuariosRoute
   '/app/carnet': typeof AppCarnetRoute
@@ -1079,6 +1092,7 @@ export interface FileRoutesByFullPath {
   '/inscripcion/$slug': typeof InscripcionSlugRoute
   '/invite/$token': typeof InviteTokenRoute
   '/j/$slug': typeof JSlugRoute
+  '/retos/$slug': typeof RetosSlugRoute
   '/verificar/$id': typeof VerificarIdRoute
   '/admin/': typeof AdminIndexRoute
   '/app/': typeof AppIndexRoute
@@ -1187,6 +1201,7 @@ export interface FileRoutesByTo {
   '/admin/karma': typeof AdminKarmaRoute
   '/admin/members': typeof AdminMembersRoute
   '/admin/polls': typeof AdminPollsRoute
+  '/admin/retos': typeof AdminRetosRoute
   '/admin/team': typeof AdminTeamRoute
   '/admin/usuarios': typeof AdminUsuariosRoute
   '/app/carnet': typeof AppCarnetRoute
@@ -1232,6 +1247,7 @@ export interface FileRoutesByTo {
   '/inscripcion/$slug': typeof InscripcionSlugRoute
   '/invite/$token': typeof InviteTokenRoute
   '/j/$slug': typeof JSlugRoute
+  '/retos/$slug': typeof RetosSlugRoute
   '/verificar/$id': typeof VerificarIdRoute
   '/admin': typeof AdminIndexRoute
   '/app': typeof AppIndexRoute
@@ -1349,6 +1365,7 @@ export interface FileRoutesById {
   '/admin/polls': typeof AdminPollsRoute
   '/admin/registrations': typeof AdminRegistrationsRouteWithChildren
   '/admin/rentals': typeof AdminRentalsRouteWithChildren
+  '/admin/retos': typeof AdminRetosRoute
   '/admin/team': typeof AdminTeamRoute
   '/admin/usuarios': typeof AdminUsuariosRoute
   '/app/carnet': typeof AppCarnetRoute
@@ -1395,6 +1412,7 @@ export interface FileRoutesById {
   '/inscripcion/$slug': typeof InscripcionSlugRoute
   '/invite/$token': typeof InviteTokenRoute
   '/j/$slug': typeof JSlugRoute
+  '/retos/$slug': typeof RetosSlugRoute
   '/verificar/$id': typeof VerificarIdRoute
   '/admin/': typeof AdminIndexRoute
   '/app/': typeof AppIndexRoute
@@ -1513,6 +1531,7 @@ export interface FileRouteTypes {
     | '/admin/polls'
     | '/admin/registrations'
     | '/admin/rentals'
+    | '/admin/retos'
     | '/admin/team'
     | '/admin/usuarios'
     | '/app/carnet'
@@ -1559,6 +1578,7 @@ export interface FileRouteTypes {
     | '/inscripcion/$slug'
     | '/invite/$token'
     | '/j/$slug'
+    | '/retos/$slug'
     | '/verificar/$id'
     | '/admin/'
     | '/app/'
@@ -1667,6 +1687,7 @@ export interface FileRouteTypes {
     | '/admin/karma'
     | '/admin/members'
     | '/admin/polls'
+    | '/admin/retos'
     | '/admin/team'
     | '/admin/usuarios'
     | '/app/carnet'
@@ -1712,6 +1733,7 @@ export interface FileRouteTypes {
     | '/inscripcion/$slug'
     | '/invite/$token'
     | '/j/$slug'
+    | '/retos/$slug'
     | '/verificar/$id'
     | '/admin'
     | '/app'
@@ -1828,6 +1850,7 @@ export interface FileRouteTypes {
     | '/admin/polls'
     | '/admin/registrations'
     | '/admin/rentals'
+    | '/admin/retos'
     | '/admin/team'
     | '/admin/usuarios'
     | '/app/carnet'
@@ -1874,6 +1897,7 @@ export interface FileRouteTypes {
     | '/inscripcion/$slug'
     | '/invite/$token'
     | '/j/$slug'
+    | '/retos/$slug'
     | '/verificar/$id'
     | '/admin/'
     | '/app/'
@@ -2016,6 +2040,7 @@ export interface RootRouteChildren {
   InscripcionSlugRoute: typeof InscripcionSlugRoute
   InviteTokenRoute: typeof InviteTokenRoute
   JSlugRoute: typeof JSlugRoute
+  RetosSlugRoute: typeof RetosSlugRoute
   VerificarIdRoute: typeof VerificarIdRoute
   CaIndexRoute: typeof CaIndexRoute
   EnIndexRoute: typeof EnIndexRoute
@@ -2350,6 +2375,13 @@ declare module '@tanstack/react-router' {
       path: '/rentals'
       fullPath: '/admin/rentals'
       preLoaderRoute: typeof AdminRentalsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/retos': {
+      id: '/admin/retos'
+      path: '/retos'
+      fullPath: '/admin/retos'
+      preLoaderRoute: typeof AdminRetosRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/team': {
@@ -2693,6 +2725,13 @@ declare module '@tanstack/react-router' {
       path: '/j/$slug'
       fullPath: '/j/$slug'
       preLoaderRoute: typeof JSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/retos/$slug': {
+      id: '/retos/$slug'
+      path: '/retos/$slug'
+      fullPath: '/retos/$slug'
+      preLoaderRoute: typeof RetosSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/verificar/$id': {
@@ -3307,6 +3346,7 @@ interface AdminRouteChildren {
   AdminPollsRoute: typeof AdminPollsRoute
   AdminRegistrationsRoute: typeof AdminRegistrationsRouteWithChildren
   AdminRentalsRoute: typeof AdminRentalsRouteWithChildren
+  AdminRetosRoute: typeof AdminRetosRoute
   AdminTeamRoute: typeof AdminTeamRoute
   AdminUsuariosRoute: typeof AdminUsuariosRoute
   AdminIndexRoute: typeof AdminIndexRoute
@@ -3328,6 +3368,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminPollsRoute: AdminPollsRoute,
   AdminRegistrationsRoute: AdminRegistrationsRouteWithChildren,
   AdminRentalsRoute: AdminRentalsRouteWithChildren,
+  AdminRetosRoute: AdminRetosRoute,
   AdminTeamRoute: AdminTeamRoute,
   AdminUsuariosRoute: AdminUsuariosRoute,
   AdminIndexRoute: AdminIndexRoute,
@@ -3451,6 +3492,7 @@ const rootRouteChildren: RootRouteChildren = {
   InscripcionSlugRoute: InscripcionSlugRoute,
   InviteTokenRoute: InviteTokenRoute,
   JSlugRoute: JSlugRoute,
+  RetosSlugRoute: RetosSlugRoute,
   VerificarIdRoute: VerificarIdRoute,
   CaIndexRoute: CaIndexRoute,
   EnIndexRoute: EnIndexRoute,
