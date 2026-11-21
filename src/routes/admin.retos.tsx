@@ -124,7 +124,7 @@ function toLocalInput(iso: string | null) {
 function Settings({ d, reload }: { d: Detail; reload: () => void }) {
   const save = useServerFn(retosAdminUpdate);
   const e = d.event;
-  const [f, setF] = useState({ title: e.title, slug: e.slug, date: toLocalInput(e.event_date), location: e.location ?? "", cover_url: e.cover_url ?? "", status: e.status, accounts: e.social_accounts.join(", "), per: e.connection_per_person });
+  const [f, setF] = useState({ title: e.title, slug: e.slug, date: toLocalInput(e.event_date), location: e.location ?? "", cover_url: e.cover_url ?? "", status: e.status, accounts: e.social_accounts.join(", "), per: e.connection_per_person, signup: e.signup_ticket });
   const [uploading, setUploading] = useState(false);
   const qrRef = useRef<HTMLDivElement>(null);
   const url = `https://kleff.es/${f.slug}`;
@@ -138,7 +138,7 @@ function Settings({ d, reload }: { d: Detail; reload: () => void }) {
   };
   const submit = async () => {
     try {
-      await save({ data: { id: e.id, title: f.title, slug: f.slug, event_date: f.date ? new Date(f.date).toISOString() : null, location: f.location, cover_url: f.cover_url, status: f.status as "open", social_accounts: f.accounts.split(/[,\s]+/).filter(Boolean), connection_per_person: Number(f.per) } });
+      await save({ data: { id: e.id, title: f.title, slug: f.slug, event_date: f.date ? new Date(f.date).toISOString() : null, location: f.location, cover_url: f.cover_url, status: f.status as "open", social_accounts: f.accounts.split(/[,\s]+/).filter(Boolean), connection_per_person: Number(f.per), signup_ticket: f.signup } });
       toast.success("Guardado");
       reload();
     } catch (x) { err(x); }
@@ -162,6 +162,7 @@ function Settings({ d, reload }: { d: Detail; reload: () => void }) {
           <div className="sm:col-span-2"><Label>Cuentas de Instagram a seguir</Label><Input value={f.accounts} onChange={(x) => setF({ ...f, accounts: x.target.value })} placeholder="kleff.bcn, otra.cuenta" /></div>
         </div>
         <div className="w-48"><Label>Misiones de conexión por persona</Label><Input type="number" min={0} max={10} value={f.per} onChange={(x) => setF({ ...f, per: Number(x.target.value) })} /></div>
+        <label className="flex items-center gap-3 rounded-md border p-3 text-sm"><Switch checked={f.signup} onCheckedChange={(v) => setF({ ...f, signup: v })} /><span><span className="font-medium">Número de sorteo al registrarse</span><br /><span className="text-muted-foreground">Cada participante recibe 1 número solo por crear su perfil. Afecta a los nuevos registros.</span></span></label>
         <Button onClick={submit} disabled={uploading}>{uploading ? "Subiendo imagen…" : "Guardar"}</Button>
       </div>
       <div className="space-y-2 rounded-lg border bg-card p-4 text-center">

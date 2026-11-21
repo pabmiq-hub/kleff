@@ -35,6 +35,7 @@ const eventInput = z.object({
   status: z.enum(["draft", "open", "closed"]).default("open"),
   social_accounts: z.array(z.string().trim().min(1).max(60)).max(10).default(["kleff.bcn"]),
   connection_per_person: z.number().int().min(0).max(10).default(3),
+  signup_ticket: z.boolean().default(false),
 });
 const cleanEvent = (d: z.infer<typeof eventInput>) => ({
   ...d, cover_url: d.cover_url || null, location: d.location || null, event_date: d.event_date || null,
@@ -68,7 +69,7 @@ export const retosAdminDuplicate = createServerFn({ method: "POST" })
     let slug = normalizeRetoSlug(`${src.slug}-copia`).slice(0, 40);
     const taken = check(await db.from("reto_events").select("slug").like("slug", `${slug}%`)) as any[];
     if (taken.length) slug = `${slug}-${taken.length + 1}`;
-    const ev = check(await db.from("reto_events").insert({ title: `${src.title} (copia)`, slug, event_date: src.event_date, location: src.location, cover_url: src.cover_url, status: "draft", social_accounts: src.social_accounts, connection_per_person: src.connection_per_person }).select("id").single()) as any;
+    const ev = check(await db.from("reto_events").insert({ title: `${src.title} (copia)`, slug, event_date: src.event_date, location: src.location, cover_url: src.cover_url, status: "draft", social_accounts: src.social_accounts, connection_per_person: src.connection_per_person, signup_ticket: src.signup_ticket ?? false }).select("id").single()) as any;
     const ms = check(await db.from("reto_missions").select("category,kind,title,title_en,tickets,active,sort_order").eq("event_id", data.id)) as any[];
     if (ms.length) check(await db.from("reto_missions").insert(ms.map((m) => ({ ...m, event_id: ev.id }))));
     return { id: ev.id as string };
@@ -98,7 +99,7 @@ export const retosAdminGet = createServerFn({ method: "GET" })
     ]);
     const event = check(ev) as any;
     return {
-      event: { id: event.id, title: event.title, slug: event.slug, event_date: event.event_date, location: event.location, cover_url: event.cover_url, status: event.status, social_accounts: event.social_accounts as string[], connection_per_person: event.connection_per_person as number },
+      event: { id: event.id, title: event.title, slug: event.slug, event_date: event.event_date, location: event.location, cover_url: event.cover_url, status: event.status, social_accounts: event.social_accounts as string[], connection_per_person: event.connection_per_person as number, signup_ticket: !!event.signup_ticket },
       missions: check(ms) as { id: string; category: string; kind: string; title: string; title_en: string | null; tickets: number; active: boolean; sort_order: number }[],
       participants: check(ps) as { id: string; nickname: string; avatar_url: string | null; extra_tickets: number; created_at: string; access_code: string }[],
       completions: check(cs) as { id: string; mission_id: string; participant_id: string; partner_ids: string[]; evidence: string | null; status: string; created_at: string }[],
@@ -218,7 +219,7 @@ export const retosJoin = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     if (!isAvatarDataUrl(data.avatar)) throw new Error("Elige una imagen de perfil.");
     const db = await pub();
-    const ev = check(await db.from("reto_events").select("id,status,connection_per_person").eq("slug", data.slug).maybeSingle()) as any;
+    const ev = check(await db.from("reto_events").select("id,status,connection_per_person,signup_ticket").eq("slug", data.slug).maybeSingle()) as any;
     if (!ev || ev.status !== "open") throw new Error("Este reto no está abierto.");
     const key = nicknameKey(data.nickname);
     const dup = check(await db.from("reto_participants").select("id").eq("event_id", ev.id).eq("nickname_key", key).maybeSingle());
@@ -236,6 +237,7 @@ export const retosJoin = createServerFn({ method: "POST" })
     for (const u of used) usage.set(u.mission_id, (usage.get(u.mission_id) ?? 0) + 1);
     const picks = pickMissions(pool, usage, ev.connection_per_person ?? 3);
     if (picks.length) check(await db.from("reto_assignments").insert(picks.map((m) => ({ participant_id: p.id, mission_id: m.id }))));
+    if (ev.signup_ticket) await award(db, ev.id, p.id, 1, "signup", null);
     return { token: p.token as string, accessCode: p.access_code as string };
   });
 
