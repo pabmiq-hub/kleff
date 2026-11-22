@@ -1,4 +1,5 @@
 // @ts-nocheck
+import { resolveEventLang, readStoredEventLang, storeEventLang, EventLangSwitch } from "@/konektum/i18n/eventLanguage";
 import { useState, useEffect } from "react";
 import { useParams, useSearchParams } from "@/konektum/router";
 import { Button } from "@/konektum/ui/button";
@@ -25,6 +26,7 @@ const ParticipantTables = () => {
   const { toast } = useToast();
   
   const [eventLang, setEventLang] = useState<Language>("es");
+  const [langChoice, setLangChoice] = useState(false);
   const t = translations[eventLang];
 
   const [verificationCode, setVerificationCode] = useState(searchParams.get('code') || "");
@@ -56,7 +58,7 @@ const ParticipantTables = () => {
 
       const { data, error } = await (supabase as any)
         .from("events_public")
-        .select("id, status, language")
+        .select("id, status, language, language_choice_enabled")
         .eq("id", eventId)
         .single();
 
@@ -66,9 +68,8 @@ const ParticipantTables = () => {
         return;
       }
 
-      if (data.language === 'en' || data.language === 'es') {
-        setEventLang(data.language as Language);
-      }
+      setLangChoice(data.language_choice_enabled === true);
+      setEventLang(resolveEventLang(data.language, data.language_choice_enabled, readStoredEventLang(eventId)));
 
       setEventExists(true);
       setEventStatus(data.status);
@@ -247,6 +248,7 @@ const ParticipantTables = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      {langChoice && <EventLangSwitch lang={eventLang} onChange={(l) => { setEventLang(l); storeEventLang(eventId, l); }} />}
         <BrandedHeader logoUrl={eb.logoUrl} companyName={eb.companyName} isWhiteLabel={eb.isWhiteLabel} centered />
 
       <main className="container mx-auto px-4 py-8 max-w-md">

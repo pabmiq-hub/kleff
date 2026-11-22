@@ -1,4 +1,5 @@
 // @ts-nocheck
+import { resolveEventLang, readStoredEventLang, storeEventLang, EventLangSwitch } from "@/konektum/i18n/eventLanguage";
 import { useState, useEffect } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { getKonQuotaAvailability } from "@/lib/kon-public.functions";
@@ -148,6 +149,7 @@ const ParticipantJoin = ({
 
   // Event language
   const [eventLang, setEventLang] = useState<Language>("es");
+  const [langChoice, setLangChoice] = useState(false);
   const t = translations[eventLang];
 
   // Event registration customization
@@ -239,7 +241,7 @@ const ParticipantJoin = ({
 
       const { data, error } = await (supabase as any)
         .from("events_public")
-        .select("id, name, date, status, language, event_time, event_location, custom_age_ranges, custom_genders, custom_preferences, custom_dating_preferences, registration_requirements_enabled, slot_quotas, quota_waitlist_enabled, registration_subtitle, registration_description, module, professional_config, custom_registration_form, registration_open, waitlist_enabled, wrapped_enabled, wrapped_questions, social_game, languages_enabled, available_languages, payment_tracking_enabled, payment_amount_cents, payment_currency, payment_instructions, registration_highlights")
+        .select("id, name, date, status, language, event_time, event_location, custom_age_ranges, custom_genders, custom_preferences, custom_dating_preferences, registration_requirements_enabled, slot_quotas, quota_waitlist_enabled, registration_subtitle, registration_description, module, professional_config, custom_registration_form, registration_open, waitlist_enabled, wrapped_enabled, wrapped_questions, social_game, languages_enabled, available_languages, payment_tracking_enabled, payment_amount_cents, payment_currency, payment_instructions, registration_highlights, language_choice_enabled")
         .eq("id", eventId)
         .single();
 
@@ -297,7 +299,8 @@ const ParticipantJoin = ({
       }
       
       // Set event language
-      const lang: Language = (data.language === 'en' || data.language === 'es') ? data.language as Language : 'es';
+      const lang: Language = resolveEventLang(data.language, data.language_choice_enabled, readStoredEventLang(eventId));
+      setLangChoice(data.language_choice_enabled === true);
       setEventLang(lang);
       const isEn = lang === 'en';
       
@@ -1189,6 +1192,7 @@ const ParticipantJoin = ({
 
   return (
     <div className="min-h-screen bg-background" lang={eventLang}>
+      {langChoice && <EventLangSwitch lang={eventLang} onChange={(l) => { setEventLang(l); storeEventLang(eventId, l); }} />}
       <BrandedHeader logoUrl={eb.logoUrl} companyName={eb.companyName} isWhiteLabel={eb.isWhiteLabel} centered />
 
       <main className="container mx-auto px-3 sm:px-6 py-6 sm:py-10 max-w-3xl">

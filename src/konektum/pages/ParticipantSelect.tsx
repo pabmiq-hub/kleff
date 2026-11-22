@@ -1,4 +1,5 @@
 // @ts-nocheck
+import { resolveEventLang, readStoredEventLang, storeEventLang, EventLangSwitch } from "@/konektum/i18n/eventLanguage";
 import { useState, useEffect, useRef } from "react";
 import { useParams, Link } from "@/konektum/router";
 import { Button } from "@/konektum/ui/button";
@@ -154,6 +155,7 @@ const ParticipantSelect = () => {
   const { toast } = useToast();
 
   const [eventLang, setEventLang] = useState<Language>("es");
+  const [langChoice, setLangChoice] = useState(false);
   const t = translations[eventLang];
 
   useEffect(() => {
@@ -167,7 +169,7 @@ const ParticipantSelect = () => {
       try {
         const { data: event, error } = await (supabase as any)
           .from('events_public')
-          .select('status, current_round, rounds, language, super_like_enabled, repeat_request_enabled, crush_enabled, selection_closed_at')
+          .select('status, current_round, rounds, language, super_like_enabled, repeat_request_enabled, crush_enabled, selection_closed_at, language_choice_enabled')
           .eq('id', eventId)
           .single();
 
@@ -177,9 +179,8 @@ const ParticipantSelect = () => {
           return;
         }
 
-        if (event.language === 'en' || event.language === 'es') {
-          setEventLang(event.language as Language);
-        }
+        setLangChoice(event.language_choice_enabled === true);
+        setEventLang(resolveEventLang(event.language, event.language_choice_enabled, readStoredEventLang(eventId)));
 
         setEventStatus(event.status);
         setCurrentRound(event.current_round || 0);
@@ -1010,6 +1011,7 @@ const ParticipantSelect = () => {
 
   return (
     <div className="min-h-screen bg-gradient-hero flex flex-col items-center justify-center p-4">
+      {langChoice && <EventLangSwitch lang={eventLang} onChange={(l) => { setEventLang(l); storeEventLang(eventId, l); }} />}
       <SuperLikeOnboarding open={showOnboarding} onClose={() => setShowOnboarding(false)} language={eventLang} />
       <SuperLikeConfirmDialog
         open={!!confirmSuperLikeFor}

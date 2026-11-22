@@ -189,6 +189,7 @@ const EventSettingsEditor = ({
   const [formWrappedQuestions, setFormWrappedQuestions] = useState<WrappedQuestion[]>(DEFAULT_WRAPPED_QUESTIONS);
   const [showWrappedEditor, setShowWrappedEditor] = useState(false);
   const [formLanguagesEnabled, setFormLanguagesEnabled] = useState(false);
+  const [formLangChoice, setFormLangChoice] = useState(false);
   const [formAvailableLanguages, setFormAvailableLanguages] = useState<string[]>(["es", "ca", "en"]);
   const [formCheckinMinutes, setFormCheckinMinutes] = useState(checkinOpensMinutesBefore);
   const [formCodeSendMode, setFormCodeSendMode] = useState(initialCodeSendMode);
@@ -277,7 +278,7 @@ const EventSettingsEditor = ({
     const loadExtras = async () => {
       const { data } = await supabase
         .from("events")
-        .select("slug, custom_registration_form, wrapped_enabled, wrapped_questions, social_game, languages_enabled, available_languages, table_gender_mode, primary_target_gender, secondary_slug, secondary_event_name, secondary_registration_subtitle, secondary_registration_description, secondary_target_gender")
+        .select("slug, custom_registration_form, wrapped_enabled, wrapped_questions, social_game, languages_enabled, available_languages, language_choice_enabled, table_gender_mode, primary_target_gender, secondary_slug, secondary_event_name, secondary_registration_subtitle, secondary_registration_description, secondary_target_gender")
         .eq("id", eventId)
         .single();
 
@@ -301,6 +302,7 @@ const EventSettingsEditor = ({
       setFormSocialGame(normalizeIcebreakers((data as any)?.social_game));
       setFormWrappedQuestions(getWrappedQuestions((data as any)?.wrapped_questions));
       if ((data as any)?.languages_enabled) setFormLanguagesEnabled(true);
+      setFormLangChoice((data as any)?.language_choice_enabled === true);
       if (Array.isArray((data as any)?.available_languages) && (data as any).available_languages.length > 0) {
         // Normalize legacy label values (e.g. "Castellano") to codes ("es") and dedupe
         const labelToCode: Record<string, string> = {
@@ -416,6 +418,7 @@ const EventSettingsEditor = ({
             })
           : serializeIcebreakers({ ...formSocialGame, enabled: false }),
         languages_enabled: !isProfessional ? formLanguagesEnabled : false,
+        language_choice_enabled: formLangChoice,
         available_languages: !isProfessional && formLanguagesEnabled ? formAvailableLanguages : [],
         checkin_opens_minutes_before: formCheckinMinutes,
         code_send_mode: formCodeSendMode,
@@ -1355,6 +1358,20 @@ const EventSettingsEditor = ({
               )}
             </div>
           )}
+
+          <div className="p-4 border rounded-lg">
+              <div className="flex items-center justify-between">
+                <div className="flex-1 pr-4">
+                  <Label className="text-base flex items-center gap-2">
+                    <Languages className="w-4 h-4" /> Permitir a los participantes elegir idioma (ES / EN)
+                  </Label>
+                  <p className="text-sm text-muted-foreground">
+                    Muestra un selector ES | EN en el formulario, el panel de usuario, la selección y las mesas. Los textos que has escrito tú se muestran tal cual.
+                  </p>
+                </div>
+                <Switch checked={formLangChoice} onCheckedChange={setFormLangChoice} />
+              </div>
+            </div>
 
           {!isProfessional && (
             <div className="p-4 border rounded-lg space-y-3">

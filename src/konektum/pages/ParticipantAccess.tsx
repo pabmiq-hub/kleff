@@ -1,4 +1,5 @@
 // @ts-nocheck
+import { resolveEventLang, readStoredEventLang, storeEventLang, EventLangSwitch } from "@/konektum/i18n/eventLanguage";
 import { useState, useEffect, useRef } from "react";
 import { useParams, useSearchParams, Link } from "@/konektum/router";
 import { Button } from "@/konektum/ui/button";
@@ -226,6 +227,7 @@ const ParticipantAccess = () => {
   };
 
   const [eventLang, setEventLang] = useState<Language>("es");
+  const [langChoice, setLangChoice] = useState(false);
   const t = translations[eventLang];
 
   const { toast } = useToast();
@@ -260,7 +262,7 @@ const ParticipantAccess = () => {
       try {
         const { data: event, error } = await (supabase as any)
           .from('events_public')
-          .select('status, current_round, selection_deadline_hours, selection_closed_at, scheduled_email_at, language, date, name, event_time, event_location, participants_count, checkin_opens_minutes_before, has_preliminary_tables, checkin_open, repeat_request_enabled, crush_enabled, wrapped_enabled')
+          .select('status, current_round, selection_deadline_hours, selection_closed_at, scheduled_email_at, language, date, name, event_time, event_location, participants_count, checkin_opens_minutes_before, has_preliminary_tables, checkin_open, repeat_request_enabled, crush_enabled, wrapped_enabled, language_choice_enabled')
           .eq('id', eventId)
           .single();
 
@@ -270,9 +272,8 @@ const ParticipantAccess = () => {
           return;
         }
 
-        if (event.language === 'en' || event.language === 'es') {
-          setEventLang(event.language as Language);
-        }
+        setLangChoice(event.language_choice_enabled === true);
+        setEventLang(resolveEventLang(event.language, event.language_choice_enabled, readStoredEventLang(eventId)));
 
         setEventStatus(event.status);
         setCurrentRound(event.current_round || 0);
@@ -1092,6 +1093,7 @@ const ParticipantAccess = () => {
           : "min-h-screen justify-start lg:justify-center"
       }`}
     >
+      {langChoice && <EventLangSwitch lang={eventLang} onChange={(l) => { setEventLang(l); storeEventLang(eventId, l); }} />}
 
       {/* Preliminary Round Confirmation Modal */}
       <Dialog open={showPreliminaryModal} onOpenChange={setShowPreliminaryModal}>
