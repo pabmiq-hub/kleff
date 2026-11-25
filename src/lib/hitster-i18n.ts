@@ -46,6 +46,11 @@ const DICT = {
   validateTitle: { es: "¿Has acertado?", ca: "Has encertat?", en: "Did you get it right?" },
   yourAnswerWas: { es: "Tu respuesta:", ca: "La teva resposta:", en: "Your answer:" },
   noAnswerWritten: { es: "(sin respuesta)", ca: "(sense resposta)", en: "(no answer)" },
+  noAnswerSent: {
+    es: "No enviaste respuesta en esta ronda.",
+    ca: "No vas enviar resposta en aquesta ronda.",
+    en: "You didn't submit an answer in this round.",
+  },
   yesCorrect: { es: "¡Sí, acerté!", ca: "Sí, he encertat!", en: "Yes, got it!" },
   yesExact: { es: "¡Año exacto! (+quitar cruz)", ca: "Any exacte! (+treure creu)", en: "Exact year! (+remove cross)" },
   noWrong: { es: "No acerté", ca: "No he encertat", en: "Missed it" },

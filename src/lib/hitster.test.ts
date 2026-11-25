@@ -6,7 +6,9 @@ import {
   emptyMarks,
   evaluateGameOutcome,
   generateBoard,
+  getRoundValidationProgress,
   hasBingoLine,
+  hasSubmittedAnswer,
 } from "./hitster";
 
 describe("hitster board & rules", () => {
@@ -87,5 +89,34 @@ describe("hitster board & rules", () => {
       roundCorrectIds: ["p2", "p3"],
     });
     expect(winner).toEqual({ status: "finished", winnerIds: ["p2"], tiebreakIds: [] });
+  });
+
+  it("only treats non-empty trimmed answers as submitted", () => {
+    expect(hasSubmittedAnswer(null)).toBe(false);
+    expect(hasSubmittedAnswer({ answer_text: "" })).toBe(false);
+    expect(hasSubmittedAnswer({ answer_text: "   " })).toBe(false);
+    expect(hasSubmittedAnswer({ answer_text: "1994" })).toBe(true);
+  });
+
+  it("marks round validation as allDone when every participant who answered has validated", () => {
+    const pending = getRoundValidationProgress({
+      status: "playing",
+      participants: [
+        { id: "p1", answer: { answer_text: "Grupo", is_correct: true } },
+        { id: "p2", answer: { answer_text: "Solista", is_correct: null } },
+        { id: "p3", answer: null },
+      ],
+    });
+    expect(pending).toEqual({ submitted: 2, validated: 1, allDone: false });
+
+    const done = getRoundValidationProgress({
+      status: "playing",
+      participants: [
+        { id: "p1", answer: { answer_text: "Grupo", is_correct: true } },
+        { id: "p2", answer: { answer_text: "Solista", is_correct: false } },
+        { id: "p3", answer: null },
+      ],
+    });
+    expect(done).toEqual({ submitted: 2, validated: 2, allDone: true });
   });
 });

@@ -9,6 +9,7 @@ import {
   evaluateGameOutcome,
   generateBoard,
   hasBingoLine,
+  hasSubmittedAnswer,
   hitsterSlugSchema,
   isAvatarDataUrl,
   makeAccessCode,
@@ -684,7 +685,13 @@ export const hitsterPlayerState = createServerFn({ method: "GET" })
 
 export const hitsterSubmitAnswer = createServerFn({ method: "POST" })
   .inputValidator((d: { token: string; roundId: string; answer_text: string }) =>
-    z.object({ token: tokenS, roundId: uuid, answer_text: z.string().trim().max(200) }).parse(d),
+    z
+      .object({
+        token: tokenS,
+        roundId: uuid,
+        answer_text: z.string().trim().min(1, "Escribe una respuesta antes de guardar.").max(200),
+      })
+      .parse(d),
   )
   .handler(async ({ data }) => {
     const db = await dbClient();
@@ -726,13 +733,17 @@ export const hitsterValidateAnswer = createServerFn({ method: "POST" })
     const db = await dbClient();
     const me = check(await db.from("hitster_participants").select("id,game_id").eq("token", data.token).maybeSingle()) as any;
     if (!me) throw new Error("Sesión no encontrada.");
-    const [game, round] = await Promise.all([
+    const [game, round, existing] = await Promise.all([
       db.from("hitster_games").select("side,status,tiebreak_participant_ids").eq("id", me.game_id).single().then(check),
       db.from("hitster_rounds").select("*").eq("id", data.roundId).eq("game_id", me.game_id).maybeSingle().then(check),
+      db.from("hitster_answers").select("id,answer_text").eq("round_id", data.roundId).eq("participant_id", me.id).maybeSingle().then(check),
     ]);
     if (!round || round.phase !== "validating") throw new Error("Aún no se puede validar esta ronda.");
     if (game.status === "tiebreak" && !(game.tiebreak_participant_ids as string[]).includes(me.id)) {
       throw new Error("Solo los jugadores empatados compiten en el desempate.");
+    }
+    if (!hasSubmittedAnswer(existing)) {
+      throw new Error("No enviaste respuesta en esta ronda.");
     }
 
     const cat = HITSTER_CATEGORIES[game.side as HitsterSide][round.category_key as HitsterColor];
@@ -741,17 +752,12 @@ export const hitsterValidateAnswer = createServerFn({ method: "POST" })
     check(
       await db
         .from("hitster_answers")
-        .upsert(
-          {
-            game_id: me.game_id,
-            round_id: round.id,
-            participant_id: me.id,
-            is_correct: data.is_correct,
-            is_exact_year: exact,
-            updated_at: new Date().toISOString(),
-          },
-          { onConflict: "round_id,participant_id" },
-        ),
+        .update({
+          is_correct: data.is_correct,
+          is_exact_year: exact,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", existing.id),
     );
     return { ok: true, is_exact_year: exact };
   });
@@ -769,7 +775,9 @@ export const hitsterMarkCell = createServerFn({ method: "POST" })
       db.from("hitster_answers").select("*").eq("round_id", data.roundId).eq("participant_id", me.id).maybeSingle().then(check),
     ]);
     if (!round || round.phase !== "validating") throw new Error("Esta ronda no permite marcar casillas ahora.");
-    if (!ans || ans.is_correct !== true) throw new Error("Primero valida tu respuesta como correcta.");
+    if (!hasSubmittedAnswer(ans) || ans.is_correct !== true) {
+      throw new Error("Primero valida tu respuesta como correcta.");
+    }
     if (ans.marked_cell !== null) throw new Error("Ya has marcado una casilla en esta ronda.");
 
     const board = me.board as HitsterColor[];

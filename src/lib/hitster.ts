@@ -210,6 +210,36 @@ export function pickRandomCategory(prev?: HitsterColor | null, rng: () => number
   return pool[Math.floor(rng() * pool.length)] ?? "green";
 }
 
+export function hasSubmittedAnswer(answer: { answer_text?: string | null } | null | undefined): boolean {
+  return Boolean(answer?.answer_text && answer.answer_text.trim().length > 0);
+}
+
+export interface RoundValidationProgress {
+  submitted: number;
+  validated: number;
+  allDone: boolean;
+}
+
+/** Computes how many eligible participants who sent an answer have finished validating it. */
+export function getRoundValidationProgress(params: {
+  status: HitsterStatus;
+  tiebreakIds?: readonly string[];
+  participants: readonly {
+    id: string;
+    answer: { answer_text?: string | null; is_correct: boolean | null } | null;
+  }[];
+}): RoundValidationProgress {
+  const tieSet = params.status === "tiebreak" ? new Set(params.tiebreakIds ?? []) : null;
+  const eligible = tieSet ? params.participants.filter((p) => tieSet.has(p.id)) : params.participants;
+  const withAnswer = eligible.filter((p) => hasSubmittedAnswer(p.answer));
+  const validated = withAnswer.filter((p) => p.answer?.is_correct !== null && p.answer?.is_correct !== undefined).length;
+  return {
+    submitted: withAnswer.length,
+    validated,
+    allDone: validated >= withAnswer.length,
+  };
+}
+
 export interface OutcomeEvaluation {
   status: HitsterStatus;
   winnerIds: string[];

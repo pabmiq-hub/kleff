@@ -1,9 +1,11 @@
 import { X } from "lucide-react";
-import { HITSTER_COLOR_STYLES, hasBingoLine, type HitsterColor } from "@/lib/hitster";
+import { HITSTER_COLOR_STYLES, hasBingoLine, type HitsterColor, type HitsterSide } from "@/lib/hitster";
+import { HitsterCategoryIcon } from "./HitsterCategoryIcon";
 
 interface HitsterBoardProps {
   board: HitsterColor[];
   marks: boolean[];
+  side?: HitsterSide;
   /** Highlights cells of this color and allows clicking unmarked ones (normal play). */
   activeColor?: HitsterColor | null;
   canMark?: boolean;
@@ -16,6 +18,7 @@ interface HitsterBoardProps {
 export function HitsterBoard({
   board,
   marks,
+  side,
   activeColor = null,
   canMark = false,
   punishMode = false,
@@ -53,11 +56,13 @@ export function HitsterBoard({
               !clickable ? "cursor-default" : "",
             ].join(" ")}
           >
-            {marked && (
+            {marked ? (
               <span className="flex items-center justify-center rounded-full bg-black/55 text-white p-1 shadow-sm">
                 <X className={isSmall ? "h-3 w-3 stroke-[3]" : "h-6 w-6 stroke-[3]"} />
               </span>
-            )}
+            ) : side && !isSmall ? (
+              <HitsterCategoryIcon side={side} color={color} className="h-5 w-5 text-white/55" />
+            ) : null}
           </button>
         );
       })}

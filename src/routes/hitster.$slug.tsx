@@ -6,12 +6,12 @@ import { toast } from "sonner";
 import {
   BookOpen,
   Check,
+  CheckCircle2,
   Clock,
   Grid3X3,
   Music,
   Settings2,
   Shuffle,
-  Sparkles,
   Swords,
   Trophy,
   Upload,
@@ -25,10 +25,12 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { AvatarEditor, avatarUri, randomAvatarConfig, type AvatarConfig } from "@/components/retos/AvatarEditor";
 import { HitsterBoard } from "@/components/hitster/HitsterBoard";
+import { HitsterCategoryIcon } from "@/components/hitster/HitsterCategoryIcon";
 import {
   HITSTER_CATEGORIES,
   HITSTER_COLORS,
   HITSTER_COLOR_STYLES,
+  hasSubmittedAnswer,
   type HitsterLang,
   type HitsterSide,
 } from "@/lib/hitster";
@@ -472,6 +474,7 @@ function PlayerDashboard({
 
   const activeCat = currentRound && currentRound.phase !== "closed" ? cats[currentRound.category_key] : null;
   const activeStyle = currentRound && currentRound.phase !== "closed" ? HITSTER_COLOR_STYLES[currentRound.category_key] : null;
+  const didSubmitAnswer = hasSubmittedAnswer(myAnswer);
 
   const hasUnmarkedOfActive = Boolean(
     currentRound && me.board.some((c, i) => c === currentRound.category_key && !me.marks[i]),
@@ -480,6 +483,7 @@ function PlayerDashboard({
     currentRound &&
       currentRound.phase === "validating" &&
       !isTiebreak &&
+      didSubmitAnswer &&
       myAnswer?.is_correct === true &&
       myAnswer.marked_cell === null &&
       hasUnmarkedOfActive,
@@ -549,7 +553,9 @@ function PlayerDashboard({
               <div className={`rounded-2xl border-2 p-4 space-y-3 ${activeStyle.border} ${activeStyle.soft}`}>
                 <div className="flex items-center justify-between gap-2">
                   <div className="flex items-center gap-2.5">
-                    <span className={`h-7 w-7 rounded-lg ${activeStyle.bg} shrink-0`} />
+                    <span className={`h-9 w-9 rounded-lg ${activeStyle.bg} text-white flex items-center justify-center shrink-0 shadow-sm`}>
+                      <HitsterCategoryIcon side={game.side} color={currentRound.category_key} className="h-5 w-5" />
+                    </span>
                     <div>
                       <p className="text-[11px] font-semibold uppercase text-muted-foreground">
                         {ht("roundLabel", lang)} #{currentRound.round_number}
@@ -580,7 +586,7 @@ function PlayerDashboard({
                         className="bg-background"
                         maxLength={200}
                       />
-                      <Button type="submit" disabled={submitM.isPending}>
+                      <Button type="submit" disabled={submitM.isPending || !answerDraft.trim()}>
                         {ht("saveAnswer", lang)}
                       </Button>
                     </form>
@@ -589,10 +595,16 @@ function PlayerDashboard({
                   )
                 )}
 
-                {canParticipateInRound && currentRound.phase === "validating" && myAnswer?.is_correct == null && (
+                {canParticipateInRound && currentRound.phase === "validating" && !didSubmitAnswer && (
+                  <p className="text-xs font-medium text-center text-muted-foreground py-1">
+                    {ht("noAnswerSent", lang)}
+                  </p>
+                )}
+
+                {canParticipateInRound && currentRound.phase === "validating" && didSubmitAnswer && myAnswer?.is_correct == null && (
                   <div className="rounded-xl bg-background border-2 border-primary p-4 space-y-3 animate-in zoom-in-95 duration-300">
                     <div className="flex items-center justify-center gap-2 text-primary font-display font-bold text-lg">
-                      <Sparkles className="h-5 w-5" /> {ht("validateTitle", lang)}
+                      <CheckCircle2 className="h-5 w-5" /> {ht("validateTitle", lang)}
                     </div>
                     <p className="text-xs text-center text-muted-foreground">
                       {ht("yourAnswerWas", lang)}{" "}
@@ -654,6 +666,7 @@ function PlayerDashboard({
               <HitsterBoard
                 board={me.board}
                 marks={me.marks}
+                side={game.side}
                 activeColor={currentRound && currentRound.phase !== "closed" ? currentRound.category_key : null}
                 canMark={canMarkNow}
                 onCellClick={(idx) => markM.mutate(idx)}
@@ -671,7 +684,9 @@ function PlayerDashboard({
               return (
                 <div key={c} className={`rounded-xl border-2 p-4 space-y-1.5 ${st.border} ${st.soft}`}>
                   <div className="flex items-center gap-2.5">
-                    <span className={`h-5 w-5 rounded-md ${st.bg} shrink-0`} />
+                    <span className={`h-7 w-7 rounded-md ${st.bg} text-white flex items-center justify-center shrink-0`}>
+                      <HitsterCategoryIcon side={game.side} color={c} className="h-4 w-4" />
+                    </span>
                     <h2 className="font-display font-bold text-base">{def.name[lang]}</h2>
                   </div>
                   <p className="text-sm text-foreground/85 leading-relaxed">{def.description[lang]}</p>
