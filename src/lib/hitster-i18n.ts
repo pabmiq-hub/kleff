@@ -97,6 +97,35 @@ const DICT = {
     en: "Live progress of all players:",
   },
   lineDone: { es: "¡Línea!", ca: "Línia!", en: "Line!" },
+  tutorialOpenLabel: { es: "Cómo jugar", ca: "Com jugar", en: "How to play" },
+  tutorialSkip: { es: "Saltar", ca: "Saltar", en: "Skip" },
+  tutorialPrev: { es: "Anterior", ca: "Anterior", en: "Previous" },
+  tutorialNext: { es: "Siguiente", ca: "Següent", en: "Next" },
+  tutorialDone: { es: "¡A jugar!", ca: "A jugar!", en: "Let's play!" },
+  tutorialStep1Title: { es: "Tu tablero 5×5", ca: "El teu tauler 5×5", en: "Your 5×5 board" },
+  tutorialStep1Body: {
+    es: "Tienes un cartón de 25 casillas (5 de cada color). El objetivo es ser el primero en completar una línea horizontal, vertical o diagonal.",
+    ca: "Tens un cartró de 25 caselles (5 de cada color). L'objectiu és ser el primer a completar una línia horitzontal, vertical o diagonal.",
+    en: "You have a 25-square board (5 of each colour). The goal is to be the first to complete a horizontal, vertical, or diagonal line.",
+  },
+  tutorialStep2Title: { es: "Rondas y temporizador", ca: "Rondes i temporitzador", en: "Rounds & timer" },
+  tutorialStep2Body: {
+    es: "Cuando el anfitrión dispara una categoría y suena la música, escribe y guarda tu respuesta antes de que acabe el tiempo. Al decir la solución, valida si acertaste para marcar una casilla de ese color.",
+    ca: "Quan l'amfitrió dispara una categoria i sona la música, escriu i desa la teva resposta abans que s'acabi el temps. Quan diguin la solució, valida si has encertat per marcar una casella d'aquest color.",
+    en: "When the host triggers a category and the song plays, type and save your answer before time runs out. Once the answer is revealed, validate whether you got it right to mark a square of that colour.",
+  },
+  tutorialStep3Title: { es: "Categorías y bonus", ca: "Categories i bonus", en: "Categories & bonus" },
+  tutorialStep3Body: {
+    es: "En la pestaña Categorías puedes consultar qué pide cada color. Si aciertas el año exacto en una categoría bonificada, podrás elegir a un rival y quitarle una cruz de su tablero.",
+    ca: "A la pestanya Categories pots consultar què demana cada color. Si encertes l'any exacte en una categoria bonificada, podràs triar un rival i treure-li una creu del seu tauler.",
+    en: "In the Categories tab you can check what each colour asks for. If you nail the exact year in a bonus category, you can pick a rival and remove a cross from their board.",
+  },
+  tutorialStep4Title: { es: "Rivales y tu código", ca: "Rivals i el teu codi", en: "Rivals & your code" },
+  tutorialStep4Body: {
+    es: "En Participantes ves en directo el tablero y progreso de los demás jugadores. Arriba tienes siempre tu código de 6 letras por si cierras el navegador y necesitas recuperar tu partida.",
+    ca: "A Participants veus en directe el tauler i el progrés dels altres jugadors. A dalt tens sempre el teu codi de 6 lletres per si tanques el navegador i necessites recuperar la partida.",
+    en: "In Players you can watch everyone's board and progress live. Your 6-letter code stays at the top in case you close the browser and need to recover your game.",
+  },
 } as const;
 
 export type HitsterTKey = keyof typeof DICT;

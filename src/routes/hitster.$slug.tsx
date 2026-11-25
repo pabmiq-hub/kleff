@@ -9,6 +9,7 @@ import {
   CheckCircle2,
   Clock,
   Grid3X3,
+  HelpCircle,
   Music,
   Settings2,
   Shuffle,
@@ -26,6 +27,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { AvatarEditor, avatarUri, randomAvatarConfig, type AvatarConfig } from "@/components/retos/AvatarEditor";
 import { HitsterBoard } from "@/components/hitster/HitsterBoard";
 import { HitsterCategoryIcon } from "@/components/hitster/HitsterCategoryIcon";
+import { HitsterOnboarding } from "@/components/hitster/HitsterOnboarding";
 import {
   HITSTER_CATEGORIES,
   HITSTER_COLORS,
@@ -129,6 +131,7 @@ function HitsterPlayerInner() {
   const [hydrated, setHydrated] = useState(false);
   const [lang, setLang] = useState<HitsterLang>("es");
   const [justRegisteredCode, setJustRegisteredCode] = useState<string | null>(null);
+  const [firstTime, setFirstTime] = useState(false);
 
   useEffect(() => {
     const saved = window.localStorage.getItem(STORAGE_PREFIX + slug);
@@ -168,7 +171,10 @@ function HitsterPlayerInner() {
         onJoined={(t, code, isNew) => {
           window.localStorage.setItem(STORAGE_PREFIX + slug, t);
           setToken(t);
-          if (isNew) setJustRegisteredCode(code);
+          if (isNew) {
+            setJustRegisteredCode(code);
+            setFirstTime(true);
+          }
         }}
       />
     );
@@ -197,6 +203,8 @@ function HitsterPlayerInner() {
       slug={slug}
       token={token}
       lang={lang}
+      firstTime={firstTime}
+      onTutorialClosed={() => setFirstTime(false)}
       onLangChange={handleLangChange}
       onSessionInvalid={() => {
         window.localStorage.removeItem(STORAGE_PREFIX + slug);
@@ -368,12 +376,16 @@ function PlayerDashboard({
   slug,
   token,
   lang,
+  firstTime,
+  onTutorialClosed,
   onLangChange,
   onSessionInvalid,
 }: {
   slug: string;
   token: string;
   lang: HitsterLang;
+  firstTime: boolean;
+  onTutorialClosed: () => void;
   onLangChange: (l: HitsterLang) => void;
   onSessionInvalid: () => void;
 }) {
@@ -390,6 +402,7 @@ function PlayerDashboard({
   const [nowTick, setNowTick] = useState(Date.now());
   const [punishOpen, setPunishOpen] = useState(false);
   const [punishRivalId, setPunishRivalId] = useState<string | null>(null);
+  const [tutorialOpen, setTutorialOpen] = useState(firstTime);
 
   const qKey = ["hitster-player", slug, token];
   const { data, isLoading } = useQuery({
@@ -512,7 +525,17 @@ function PlayerDashboard({
               </p>
             </div>
           </div>
-          <LangSwitch lang={lang} onChange={onLangChange} />
+          <div className="flex items-center gap-2 shrink-0">
+            <LangSwitch lang={lang} onChange={onLangChange} />
+            <button
+              type="button"
+              aria-label={ht("tutorialOpenLabel", lang)}
+              onClick={() => setTutorialOpen(true)}
+              className="text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <HelpCircle className="h-5 w-5" />
+            </button>
+          </div>
         </div>
       </header>
 
@@ -796,6 +819,16 @@ function PlayerDashboard({
           })}
         </div>
       </nav>
+
+      {tutorialOpen && (
+        <HitsterOnboarding
+          lang={lang}
+          onClose={() => {
+            setTutorialOpen(false);
+            onTutorialClosed();
+          }}
+        />
+      )}
     </div>
   );
 }
