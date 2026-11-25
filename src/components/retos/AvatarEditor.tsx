@@ -46,23 +46,36 @@ export function avatarUri(c: AvatarConfig): string {
   } as Parameters<typeof createAvatar>[1]).toDataUri();
 }
 
-const LABELS: Record<string, [string, string]> = {
-  top: ["Pelo / sombrero", "Hair / hat"], eyes: ["Ojos", "Eyes"], eyebrows: ["Cejas", "Eyebrows"], mouth: ["Boca / expresión", "Mouth / expression"],
-  facialHair: ["Barba / bigote", "Beard / moustache"], accessories: ["Gafas", "Glasses"], clothing: ["Ropa", "Clothes"],
-  skinColor: ["Tono de piel", "Skin tone"], hairColor: ["Color de pelo", "Hair colour"], clothesColor: ["Color de ropa", "Clothes colour"],
+const LABELS: Record<string, Record<"es" | "ca" | "en", string>> = {
+  top: { es: "Pelo / sombrero", ca: "Cabell / barret", en: "Hair / hat" },
+  eyes: { es: "Ojos", ca: "Ulls", en: "Eyes" },
+  eyebrows: { es: "Cejas", ca: "Celles", en: "Eyebrows" },
+  mouth: { es: "Boca / expresión", ca: "Boca / expressió", en: "Mouth / expression" },
+  facialHair: { es: "Barba / bigote", ca: "Barba / bigoti", en: "Beard / moustache" },
+  accessories: { es: "Gafas", ca: "Ulleres", en: "Glasses" },
+  clothing: { es: "Ropa", ca: "Roba", en: "Clothes" },
+  skinColor: { es: "Tono de piel", ca: "To de pell", en: "Skin tone" },
+  hairColor: { es: "Color de pelo", ca: "Color de cabell", en: "Hair colour" },
+  clothesColor: { es: "Color de ropa", ca: "Color de roba", en: "Clothes colour" },
+};
+const UI_TEXT = {
+  title: { es: "Personalizar avatar", ca: "Personalitzar avatar", en: "Customise avatar" },
+  none: { es: "Ninguno", ca: "Cap", en: "None" },
+  random: { es: "Aleatorio", ca: "Aleatori", en: "Random" },
+  save: { es: "Guardar avatar", ca: "Desar avatar", en: "Save avatar" },
 };
 
-export function AvatarEditor({ open, onOpenChange, initial, onSave, lang }: { open: boolean; onOpenChange: (o: boolean) => void; initial: AvatarConfig; onSave: (c: AvatarConfig) => void; lang: "es" | "en" }) {
+export function AvatarEditor({ open, onOpenChange, initial, onSave, lang }: { open: boolean; onOpenChange: (o: boolean) => void; initial: AvatarConfig; onSave: (c: AvatarConfig) => void; lang: "es" | "ca" | "en" }) {
   const [cfg, setCfg] = useState(initial);
   const [prevOpen, setPrevOpen] = useState(open);
   if (open !== prevOpen) { setPrevOpen(open); if (open) setCfg(initial); }
   const uri = useMemo(() => avatarUri(cfg), [cfg]);
-  const L = (k: string) => (LABELS[k] ?? [k, k])[lang === "en" ? 1 : 0];
+  const L = (k: string) => LABELS[k]?.[lang] ?? k;
   const step = (k: OptKey, d: number) => setCfg((c) => { const a = OPTS[k] as readonly string[]; const i = a.indexOf(c[k]); return { ...c, [k]: a[(i + d + a.length) % a.length] as string }; });
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent side="bottom" className="max-h-[92dvh] overflow-y-auto rounded-t-2xl">
-        <SheetHeader><SheetTitle>{lang === "en" ? "Customise avatar" : "Personalizar avatar"}</SheetTitle></SheetHeader>
+        <SheetHeader><SheetTitle>{UI_TEXT.title[lang]}</SheetTitle></SheetHeader>
         <div className="sticky top-0 z-10 flex justify-center bg-background py-3">
           <img src={uri} alt="" className="h-28 w-28 rounded-full border-4 border-primary/20 bg-muted" />
         </div>
@@ -72,7 +85,7 @@ export function AvatarEditor({ open, onOpenChange, initial, onSave, lang }: { op
             return (
               <div key={k} className="flex items-center justify-between gap-2 rounded-lg border p-2">
                 <Button type="button" size="icon" variant="ghost" aria-label={`${L(k)} −`} onClick={() => step(k, -1)}><ChevronLeft className="h-5 w-5" /></Button>
-                <div className="text-center"><p className="text-sm font-medium">{L(k)}</p><p className="text-xs text-muted-foreground">{cfg[k] === "none" ? (lang === "en" ? "None" : "Ninguno") : `${a.indexOf(cfg[k]) + 1} / ${a.length}`}</p></div>
+                <div className="text-center"><p className="text-sm font-medium">{L(k)}</p><p className="text-xs text-muted-foreground">{cfg[k] === "none" ? UI_TEXT.none[lang] : `${a.indexOf(cfg[k]) + 1} / ${a.length}`}</p></div>
                 <Button type="button" size="icon" variant="ghost" aria-label={`${L(k)} +`} onClick={() => step(k, 1)}><ChevronRight className="h-5 w-5" /></Button>
               </div>
             );
@@ -91,8 +104,8 @@ export function AvatarEditor({ open, onOpenChange, initial, onSave, lang }: { op
           ))}
         </div>
         <div className="sticky bottom-0 flex gap-2 bg-background py-3">
-          <Button type="button" variant="outline" className="flex-1" onClick={() => setCfg(randomAvatarConfig())}>{lang === "en" ? "Random" : "Aleatorio"}</Button>
-          <Button type="button" className="flex-1" onClick={() => { onSave(cfg); onOpenChange(false); }}>{lang === "en" ? "Save avatar" : "Guardar avatar"}</Button>
+          <Button type="button" variant="outline" className="flex-1" onClick={() => setCfg(randomAvatarConfig())}>{UI_TEXT.random[lang]}</Button>
+          <Button type="button" className="flex-1" onClick={() => { onSave(cfg); onOpenChange(false); }}>{UI_TEXT.save[lang]}</Button>
         </div>
       </SheetContent>
     </Sheet>

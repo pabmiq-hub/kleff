@@ -678,6 +678,248 @@ export type Database = {
           },
         ]
       }
+      hitster_answers: {
+        Row: {
+          answer_text: string
+          created_at: string
+          game_id: string
+          id: string
+          is_correct: boolean | null
+          is_exact_year: boolean
+          marked_cell: number | null
+          participant_id: string
+          punished_cell: number | null
+          punished_participant_id: string | null
+          round_id: string
+          updated_at: string
+        }
+        Insert: {
+          answer_text?: string
+          created_at?: string
+          game_id: string
+          id?: string
+          is_correct?: boolean | null
+          is_exact_year?: boolean
+          marked_cell?: number | null
+          participant_id: string
+          punished_cell?: number | null
+          punished_participant_id?: string | null
+          round_id: string
+          updated_at?: string
+        }
+        Update: {
+          answer_text?: string
+          created_at?: string
+          game_id?: string
+          id?: string
+          is_correct?: boolean | null
+          is_exact_year?: boolean
+          marked_cell?: number | null
+          participant_id?: string
+          punished_cell?: number | null
+          punished_participant_id?: string | null
+          round_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hitster_answers_game_id_fkey"
+            columns: ["game_id"]
+            isOneToOne: false
+            referencedRelation: "hitster_games"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hitster_answers_participant_id_fkey"
+            columns: ["participant_id"]
+            isOneToOne: false
+            referencedRelation: "hitster_participants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hitster_answers_punished_participant_id_fkey"
+            columns: ["punished_participant_id"]
+            isOneToOne: false
+            referencedRelation: "hitster_participants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hitster_answers_round_id_fkey"
+            columns: ["round_id"]
+            isOneToOne: false
+            referencedRelation: "hitster_rounds"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      hitster_collaborators: {
+        Row: {
+          email: string
+          game_id: string
+          id: string
+          invited_at: string
+          token: string
+        }
+        Insert: {
+          email: string
+          game_id: string
+          id?: string
+          invited_at?: string
+          token: string
+        }
+        Update: {
+          email?: string
+          game_id?: string
+          id?: string
+          invited_at?: string
+          token?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hitster_collaborators_game_id_fkey"
+            columns: ["game_id"]
+            isOneToOne: false
+            referencedRelation: "hitster_games"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      hitster_games: {
+        Row: {
+          created_at: string
+          current_round_id: string | null
+          id: string
+          side: string
+          slug: string
+          status: string
+          tiebreak_participant_ids: string[]
+          timer_seconds: number
+          title: string
+          updated_at: string
+          winner_participant_ids: string[]
+        }
+        Insert: {
+          created_at?: string
+          current_round_id?: string | null
+          id?: string
+          side?: string
+          slug: string
+          status?: string
+          tiebreak_participant_ids?: string[]
+          timer_seconds?: number
+          title: string
+          updated_at?: string
+          winner_participant_ids?: string[]
+        }
+        Update: {
+          created_at?: string
+          current_round_id?: string | null
+          id?: string
+          side?: string
+          slug?: string
+          status?: string
+          tiebreak_participant_ids?: string[]
+          timer_seconds?: number
+          title?: string
+          updated_at?: string
+          winner_participant_ids?: string[]
+        }
+        Relationships: []
+      }
+      hitster_participants: {
+        Row: {
+          access_code: string
+          avatar_url: string
+          board: Json
+          created_at: string
+          game_id: string
+          id: string
+          language: string
+          marks: Json
+          nickname: string
+          nickname_key: string
+          token: string
+        }
+        Insert: {
+          access_code: string
+          avatar_url: string
+          board: Json
+          created_at?: string
+          game_id: string
+          id?: string
+          language?: string
+          marks: Json
+          nickname: string
+          nickname_key: string
+          token: string
+        }
+        Update: {
+          access_code?: string
+          avatar_url?: string
+          board?: Json
+          created_at?: string
+          game_id?: string
+          id?: string
+          language?: string
+          marks?: Json
+          nickname?: string
+          nickname_key?: string
+          token?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hitster_participants_game_id_fkey"
+            columns: ["game_id"]
+            isOneToOne: false
+            referencedRelation: "hitster_games"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      hitster_rounds: {
+        Row: {
+          category_key: string
+          created_at: string
+          ends_at: string
+          game_id: string
+          id: string
+          phase: string
+          revealed_at: string | null
+          round_number: number
+          started_at: string
+        }
+        Insert: {
+          category_key: string
+          created_at?: string
+          ends_at: string
+          game_id: string
+          id?: string
+          phase?: string
+          revealed_at?: string | null
+          round_number: number
+          started_at?: string
+        }
+        Update: {
+          category_key?: string
+          created_at?: string
+          ends_at?: string
+          game_id?: string
+          id?: string
+          phase?: string
+          revealed_at?: string | null
+          round_number?: number
+          started_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hitster_rounds_game_id_fkey"
+            columns: ["game_id"]
+            isOneToOne: false
+            referencedRelation: "hitster_games"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       id_document_audit: {
         Row: {
           accessed_at: string

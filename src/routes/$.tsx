@@ -7,6 +7,7 @@ import { CustomPage } from "@/components/pages/CustomPage";
 import { getPublishedForm } from "@/lib/registrations.functions";
 import { resolveKonEvent } from "@/lib/kon-public.functions";
 import { retosResolveSlug } from "@/lib/retos.functions";
+import { hitsterResolveSlug } from "@/lib/hitster.functions";
 import { PublicRegistrationPage } from "@/components/pages/PublicRegistrationPage";
 import { PublicEventPage } from "@/konektum/pages/PublicEventPage";
 import ParticipantJoin from "@/konektum/pages/ParticipantJoin";
@@ -72,6 +73,9 @@ export const Route = createFileRoute("/$")({
           // 5) Reto (misiones) at root -> /retos/<slug>.
           const reto = await retosResolveSlug({ data: { slug: slugCandidate } });
           if (reto) throw redirect({ to: "/retos/$slug", params: { slug: reto.slug }, replace: true });
+          // 6) Hitster game at root -> /hitster/<slug>.
+          const hitster = await hitsterResolveSlug({ data: { slug: slugCandidate } });
+          if (hitster) throw redirect({ to: "/hitster/$slug", params: { slug: hitster.slug }, replace: true });
         }
 
       }

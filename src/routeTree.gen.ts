@@ -45,6 +45,7 @@ import { Route as AdminBlogRouteImport } from './routes/admin.blog'
 import { Route as AdminConcursoRouteImport } from './routes/admin.concurso'
 import { Route as AdminContentRouteImport } from './routes/admin.content'
 import { Route as AdminFinanzasRouteImport } from './routes/admin.finanzas'
+import { Route as AdminHitsterRouteImport } from './routes/admin.hitster'
 import { Route as AdminInvitationsRouteImport } from './routes/admin.invitations'
 import { Route as AdminKarmaRouteImport } from './routes/admin.karma'
 import { Route as AdminKonektumRouteImport } from './routes/admin.konektum'
@@ -99,6 +100,8 @@ import { Route as EnPrivacyRouteImport } from './routes/en.privacy'
 import { Route as EnSlowFriendingRouteImport } from './routes/en.slow-friending'
 import { Route as EnTermsRouteImport } from './routes/en.terms'
 import { Route as EnTournamentsRouteImport } from './routes/en.tournaments'
+import { Route as HitsterHostTokenRouteImport } from './routes/hitster-host.$token'
+import { Route as HitsterSlugRouteImport } from './routes/hitster.$slug'
 import { Route as InscripcionSlugRouteImport } from './routes/inscripcion.$slug'
 import { Route as InviteTokenRouteImport } from './routes/invite.$token'
 import { Route as JSlugRouteImport } from './routes/j.$slug'
@@ -351,6 +354,11 @@ const AdminContentRoute = AdminContentRouteImport.update({
 const AdminFinanzasRoute = AdminFinanzasRouteImport.update({
   id: '/finanzas',
   path: '/finanzas',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminHitsterRoute = AdminHitsterRouteImport.update({
+  id: '/hitster',
+  path: '/hitster',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminInvitationsRoute = AdminInvitationsRouteImport.update({
@@ -621,6 +629,16 @@ const EnTermsRoute = EnTermsRouteImport.update({
 const EnTournamentsRoute = EnTournamentsRouteImport.update({
   id: '/en/tournaments',
   path: '/en/tournaments',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HitsterHostTokenRoute = HitsterHostTokenRouteImport.update({
+  id: '/hitster-host/$token',
+  path: '/hitster-host/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HitsterSlugRoute = HitsterSlugRouteImport.update({
+  id: '/hitster/$slug',
+  path: '/hitster/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
 const InscripcionSlugRoute = InscripcionSlugRouteImport.update({
@@ -1038,6 +1056,7 @@ export interface FileRoutesByFullPath {
   '/admin/concurso': typeof AdminConcursoRoute
   '/admin/content': typeof AdminContentRouteWithChildren
   '/admin/finanzas': typeof AdminFinanzasRouteWithChildren
+  '/admin/hitster': typeof AdminHitsterRoute
   '/admin/invitations': typeof AdminInvitationsRoute
   '/admin/karma': typeof AdminKarmaRoute
   '/admin/konektum': typeof AdminKonektumRouteWithChildren
@@ -1089,6 +1108,8 @@ export interface FileRoutesByFullPath {
   '/en/slow-friending': typeof EnSlowFriendingRoute
   '/en/terms': typeof EnTermsRoute
   '/en/tournaments': typeof EnTournamentsRoute
+  '/hitster-host/$token': typeof HitsterHostTokenRoute
+  '/hitster/$slug': typeof HitsterSlugRoute
   '/inscripcion/$slug': typeof InscripcionSlugRoute
   '/invite/$token': typeof InviteTokenRoute
   '/j/$slug': typeof JSlugRoute
@@ -1197,6 +1218,7 @@ export interface FileRoutesByTo {
   '/$eventSlug/seleccion': typeof EventSlugSeleccionRoute
   '/$eventSlug/usuario': typeof EventSlugUsuarioRoute
   '/admin/concurso': typeof AdminConcursoRoute
+  '/admin/hitster': typeof AdminHitsterRoute
   '/admin/invitations': typeof AdminInvitationsRoute
   '/admin/karma': typeof AdminKarmaRoute
   '/admin/members': typeof AdminMembersRoute
@@ -1244,6 +1266,8 @@ export interface FileRoutesByTo {
   '/en/slow-friending': typeof EnSlowFriendingRoute
   '/en/terms': typeof EnTermsRoute
   '/en/tournaments': typeof EnTournamentsRoute
+  '/hitster-host/$token': typeof HitsterHostTokenRoute
+  '/hitster/$slug': typeof HitsterSlugRoute
   '/inscripcion/$slug': typeof InscripcionSlugRoute
   '/invite/$token': typeof InviteTokenRoute
   '/j/$slug': typeof JSlugRoute
@@ -1358,6 +1382,7 @@ export interface FileRoutesById {
   '/admin/concurso': typeof AdminConcursoRoute
   '/admin/content': typeof AdminContentRouteWithChildren
   '/admin/finanzas': typeof AdminFinanzasRouteWithChildren
+  '/admin/hitster': typeof AdminHitsterRoute
   '/admin/invitations': typeof AdminInvitationsRoute
   '/admin/karma': typeof AdminKarmaRoute
   '/admin/konektum': typeof AdminKonektumRouteWithChildren
@@ -1409,6 +1434,8 @@ export interface FileRoutesById {
   '/en/slow-friending': typeof EnSlowFriendingRoute
   '/en/terms': typeof EnTermsRoute
   '/en/tournaments': typeof EnTournamentsRoute
+  '/hitster-host/$token': typeof HitsterHostTokenRoute
+  '/hitster/$slug': typeof HitsterSlugRoute
   '/inscripcion/$slug': typeof InscripcionSlugRoute
   '/invite/$token': typeof InviteTokenRoute
   '/j/$slug': typeof JSlugRoute
@@ -1524,6 +1551,7 @@ export interface FileRouteTypes {
     | '/admin/concurso'
     | '/admin/content'
     | '/admin/finanzas'
+    | '/admin/hitster'
     | '/admin/invitations'
     | '/admin/karma'
     | '/admin/konektum'
@@ -1575,6 +1603,8 @@ export interface FileRouteTypes {
     | '/en/slow-friending'
     | '/en/terms'
     | '/en/tournaments'
+    | '/hitster-host/$token'
+    | '/hitster/$slug'
     | '/inscripcion/$slug'
     | '/invite/$token'
     | '/j/$slug'
@@ -1683,6 +1713,7 @@ export interface FileRouteTypes {
     | '/$eventSlug/seleccion'
     | '/$eventSlug/usuario'
     | '/admin/concurso'
+    | '/admin/hitster'
     | '/admin/invitations'
     | '/admin/karma'
     | '/admin/members'
@@ -1730,6 +1761,8 @@ export interface FileRouteTypes {
     | '/en/slow-friending'
     | '/en/terms'
     | '/en/tournaments'
+    | '/hitster-host/$token'
+    | '/hitster/$slug'
     | '/inscripcion/$slug'
     | '/invite/$token'
     | '/j/$slug'
@@ -1843,6 +1876,7 @@ export interface FileRouteTypes {
     | '/admin/concurso'
     | '/admin/content'
     | '/admin/finanzas'
+    | '/admin/hitster'
     | '/admin/invitations'
     | '/admin/karma'
     | '/admin/konektum'
@@ -1894,6 +1928,8 @@ export interface FileRouteTypes {
     | '/en/slow-friending'
     | '/en/terms'
     | '/en/tournaments'
+    | '/hitster-host/$token'
+    | '/hitster/$slug'
     | '/inscripcion/$slug'
     | '/invite/$token'
     | '/j/$slug'
@@ -2037,6 +2073,8 @@ export interface RootRouteChildren {
   EnSlowFriendingRoute: typeof EnSlowFriendingRoute
   EnTermsRoute: typeof EnTermsRoute
   EnTournamentsRoute: typeof EnTournamentsRoute
+  HitsterHostTokenRoute: typeof HitsterHostTokenRoute
+  HitsterSlugRoute: typeof HitsterSlugRoute
   InscripcionSlugRoute: typeof InscripcionSlugRoute
   InviteTokenRoute: typeof InviteTokenRoute
   JSlugRoute: typeof JSlugRoute
@@ -2326,6 +2364,13 @@ declare module '@tanstack/react-router' {
       path: '/finanzas'
       fullPath: '/admin/finanzas'
       preLoaderRoute: typeof AdminFinanzasRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/hitster': {
+      id: '/admin/hitster'
+      path: '/hitster'
+      fullPath: '/admin/hitster'
+      preLoaderRoute: typeof AdminHitsterRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/invitations': {
@@ -2704,6 +2749,20 @@ declare module '@tanstack/react-router' {
       path: '/en/tournaments'
       fullPath: '/en/tournaments'
       preLoaderRoute: typeof EnTournamentsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/hitster-host/$token': {
+      id: '/hitster-host/$token'
+      path: '/hitster-host/$token'
+      fullPath: '/hitster-host/$token'
+      preLoaderRoute: typeof HitsterHostTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/hitster/$slug': {
+      id: '/hitster/$slug'
+      path: '/hitster/$slug'
+      fullPath: '/hitster/$slug'
+      preLoaderRoute: typeof HitsterSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/inscripcion/$slug': {
@@ -3339,6 +3398,7 @@ interface AdminRouteChildren {
   AdminConcursoRoute: typeof AdminConcursoRoute
   AdminContentRoute: typeof AdminContentRouteWithChildren
   AdminFinanzasRoute: typeof AdminFinanzasRouteWithChildren
+  AdminHitsterRoute: typeof AdminHitsterRoute
   AdminInvitationsRoute: typeof AdminInvitationsRoute
   AdminKarmaRoute: typeof AdminKarmaRoute
   AdminKonektumRoute: typeof AdminKonektumRouteWithChildren
@@ -3361,6 +3421,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminConcursoRoute: AdminConcursoRoute,
   AdminContentRoute: AdminContentRouteWithChildren,
   AdminFinanzasRoute: AdminFinanzasRouteWithChildren,
+  AdminHitsterRoute: AdminHitsterRoute,
   AdminInvitationsRoute: AdminInvitationsRoute,
   AdminKarmaRoute: AdminKarmaRoute,
   AdminKonektumRoute: AdminKonektumRouteWithChildren,
@@ -3489,6 +3550,8 @@ const rootRouteChildren: RootRouteChildren = {
   EnSlowFriendingRoute: EnSlowFriendingRoute,
   EnTermsRoute: EnTermsRoute,
   EnTournamentsRoute: EnTournamentsRoute,
+  HitsterHostTokenRoute: HitsterHostTokenRoute,
+  HitsterSlugRoute: HitsterSlugRoute,
   InscripcionSlugRoute: InscripcionSlugRoute,
   InviteTokenRoute: InviteTokenRoute,
   JSlugRoute: JSlugRoute,

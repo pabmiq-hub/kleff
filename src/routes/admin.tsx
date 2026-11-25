@@ -20,7 +20,7 @@ import {
   KeyRound,
   Menu,
   X,
-  Drama, Target,
+  Drama, Target, Music,
 } from "lucide-react";
 
 export const Route = createFileRoute("/admin")({
@@ -78,6 +78,7 @@ function AdminLayout() {
         { label: "Konektum", to: "/admin/konektum", icon: <Heart className="h-4 w-4" />, show: can("konektum") },
         { label: "Juegos", to: "/actividades/juegos", icon: <Drama className="h-4 w-4" />, show: sa },
         { label: "Retos", to: "/admin/retos", icon: <Target className="h-4 w-4" />, show: sa },
+        { label: "Hitster", to: "/admin/hitster", icon: <Music className="h-4 w-4" />, show: sa },
         { label: "Alquiler", to: "/admin/rentals", icon: <Dices className="h-4 w-4" />, show: sa },
       ],
     },
