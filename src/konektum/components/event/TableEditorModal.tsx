@@ -5,7 +5,7 @@ import { Button } from "@/konektum/ui/button";
 import { Badge } from "@/konektum/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/konektum/ui/select";
 import { Card, CardContent } from "@/konektum/ui/card";
-import { UserMinus, ArrowRightLeft, UserPlus, Table2, Users, Trash2, Plus } from "lucide-react";
+import { UserMinus, ArrowRightLeft, UserPlus, Table2, Users, Trash2, Plus, Undo2 } from "lucide-react";
 import { Separator } from "@/konektum/ui/separator";
 import {
   AlertDialog,
@@ -41,6 +41,7 @@ interface TableEditorModalProps {
   confirmations?: Record<string, boolean>;
   onSave: (updatedRoundData: RoundData) => void;
   onClose: () => void;
+  isSaving?: boolean;
 }
 
 type EditAction = 
@@ -57,16 +58,19 @@ const TableEditorModal = ({
   confirmations,
   onSave,
   onClose,
+  isSaving = false,
 }: TableEditorModalProps) => {
   const [editedTables, setEditedTables] = useState<TableMember[][]>([]);
   const [moveParticipant, setMoveParticipant] = useState<{ id: string; name: string; fromTable: number } | null>(null);
   const [addToTable, setAddToTable] = useState<number | null>(null);
   const [showAllParticipants, setShowAllParticipants] = useState(false);
   const [editedConfirmations, setEditedConfirmations] = useState<Record<string, boolean>>({});
+  const [undoSteps, setUndoSteps] = useState<{ tables: TableMember[][]; confirmations: Record<string, boolean> }[]>([]);
 
   useEffect(() => {
     if (open && roundData) {
       setEditedTables(roundData.tables.map(t => [...t]));
+      setUndoSteps([]);
       setMoveParticipant(null);
       setAddToTable(null);
       setShowAllParticipants(false);
@@ -87,6 +91,7 @@ const TableEditorModal = ({
   );
 
   const handleRemove = (tableIndex: number, participantId: string) => {
+    rememberStep();
     setEditedTables(prev => 
       prev.map((table, idx) => 
         idx === tableIndex ? table.filter(p => p.id !== participantId) : table
@@ -97,6 +102,7 @@ const TableEditorModal = ({
   const handleMove = (toTableIndex: number) => {
     if (!moveParticipant) return;
     const { id, name, fromTable } = moveParticipant;
+    rememberStep();
     
     setEditedTables(prev => 
       prev.map((table, idx) => {
@@ -111,6 +117,7 @@ const TableEditorModal = ({
   const handleAdd = (tableIndex: number, participantId: string) => {
     const participant = allParticipants.find(p => p.id === participantId);
     if (!participant) return;
+    rememberStep();
     
     setEditedTables(prev =>
       prev.map((table, idx) =>
@@ -121,22 +128,39 @@ const TableEditorModal = ({
   };
 
   const handleAddTable = () => {
+    rememberStep();
     setEditedTables(prev => [...prev, []]);
   };
 
   const handleDeleteTable = (tableIndex: number) => {
+    rememberStep();
     setEditedTables(prev => prev.filter((_, idx) => idx !== tableIndex));
     setMoveParticipant(null);
     setAddToTable(null);
   };
 
   const setAttendance = (participantId: string, value: boolean | null) => {
+    rememberStep();
     setEditedConfirmations(prev => {
       const next = { ...prev };
       if (value === null) delete next[participantId];
       else next[participantId] = value;
       return next;
     });
+  };
+
+  const rememberStep = () => {
+    setUndoSteps(prev => [...prev, structuredClone({ tables: editedTables, confirmations: editedConfirmations })]);
+  };
+
+  const undoStep = () => {
+    const previous = undoSteps.at(-1);
+    if (!previous) return;
+    setEditedTables(previous.tables);
+    setEditedConfirmations(previous.confirmations);
+    setUndoSteps(prev => prev.slice(0, -1));
+    setMoveParticipant(null);
+    setAddToTable(null);
   };
 
   const handleSave = () => {
@@ -153,7 +177,7 @@ const TableEditorModal = ({
 
 
   return (
-    <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
+    <Dialog open={open} onOpenChange={(v) => !v && !isSaving && onClose()}>
       <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
@@ -208,6 +232,7 @@ const TableEditorModal = ({
           </Card>
         )}
 
+        <fieldset disabled={isSaving} className="contents">
         <div className="space-y-3">
           {editedTables.map((table, tableIndex) => (
             <Card key={tableIndex} className="border">
@@ -371,11 +396,15 @@ const TableEditorModal = ({
             </Card>
           ))}
         </div>
+        </fieldset>
 
         <DialogFooter className="gap-2">
-          <Button variant="outline" onClick={onClose}>Cancelar</Button>
-          <Button variant="hero" onClick={handleSave} disabled={!hasChanges}>
-            Guardar cambios
+          <Button variant="outline" onClick={undoStep} disabled={undoSteps.length === 0 || isSaving}>
+            <Undo2 className="w-4 h-4 mr-2" />Deshacer
+          </Button>
+          <Button variant="outline" onClick={onClose} disabled={isSaving}>Cancelar</Button>
+          <Button variant="hero" onClick={handleSave} disabled={!hasChanges || isSaving}>
+            {isSaving ? "Guardando…" : "Guardar cambios"}
           </Button>
         </DialogFooter>
       </DialogContent>

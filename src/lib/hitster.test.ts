@@ -1,4 +1,3 @@
-// @ts-expect-error vitest is executed via bunx and not in package.json dependencies
 import { describe, expect, it } from "vitest";
 import {
   HITSTER_CATEGORIES,

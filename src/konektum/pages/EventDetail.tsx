@@ -14,6 +14,7 @@ import {
 } from "@/konektum/ui/dropdown-menu";
 import TableAssignmentModal from "@/konektum/components/event/TableAssignmentModal";
 import TableEditorModal from "@/konektum/components/event/TableEditorModal";
+import { readTableUndo, writeTableUndo, sameTableState, restoreTableRound, type TableUndoEntry } from "@/konektum/lib/tableUndo";
 import EventAnalytics from "@/konektum/components/event/EventAnalytics";
 import EventEngagementInsights from "@/konektum/components/event/EventEngagementInsights";
 import EventSettingsTabs from "@/konektum/components/event/EventSettingsTabs";
@@ -292,6 +293,23 @@ const EventDetail = () => {
   const [selectedWaitlistEntry, setSelectedWaitlistEntry] = useState<any | null>(null);
   const [showTableEditor, setShowTableEditor] = useState(false);
   const [editingRoundData, setEditingRoundData] = useState<any>(null);
+  const [tableUndo, setTableUndo] = useState<Record<string, TableUndoEntry>>({});
+  const [isSavingTables, setIsSavingTables] = useState(false);
+  const tableWriteLock = useRef(false);
+
+  useEffect(() => {
+    setTableUndo(id ? readTableUndo(id) : {});
+  }, [id]);
+
+  const rememberTableUndo = (round: number, entry: TableUndoEntry | null) => {
+    setTableUndo(prev => {
+      const next = { ...prev };
+      if (entry) next[round] = structuredClone(entry);
+      else delete next[round];
+      if (id) writeTableUndo(id, next);
+      return next;
+    });
+  };
   
   
   // Participant filters - Social
@@ -3636,10 +3654,28 @@ const EventDetail = () => {
   };
 
   const handleTableEditorSave = async (updatedRoundData: any) => {
-    if (!id) return;
+    if (!id || tableWriteLock.current) return;
+    const preliminary = updatedRoundData?.__preliminary || updatedRoundData?.round === 0;
+    const round = preliminary ? 0 : updatedRoundData.round;
+    const field = preliminary ? "preliminary_round" : "tables";
+    tableWriteLock.current = true;
+    setIsSavingTables(true);
+    try {
+      const { data: latest, error: readError } = await supabase.from("events").select(field).eq("id", id).single();
+      if (readError || !latest) throw new Error("No se pudieron leer las mesas actuales");
+      const currentValue = latest[field];
+      const before = preliminary
+        ? { ...currentValue, round: 0 }
+        : currentValue?.find((r: any) => r.round === round);
+      const expected = preliminary
+        ? { ...editingRoundData?.__baseline, round: 0 }
+        : editingRoundData;
+      if (!before || !sameTableState(before, expected)) {
+        throw new Error("Las mesas han cambiado desde que abriste el editor. Ciérralo y recarga el evento antes de editar.");
+      }
 
     // Preliminary round (Round 0) writes to preliminary_round.tables
-    if (updatedRoundData?.__preliminary || updatedRoundData?.round === 0) {
+    if (preliminary) {
       if (!eventData?.preliminary_round) return;
       const newTables: any[][] = updatedRoundData.tables || [];
       const newConfirmations = updatedRoundData.confirmations ?? eventData.preliminary_round.confirmations ?? {};
@@ -3657,14 +3693,12 @@ const EventDetail = () => {
         dismissed_tables: newDismissed,
       };
 
-      const { error } = await supabase
+      const { data: saved, error } = await supabase
         .from("events")
         .update({ preliminary_round: updatedPrelim } as any)
-        .eq("id", id);
-      if (error) {
-        toast({ title: "Error", description: "No se pudieron guardar los cambios", variant: "destructive" });
-        return;
-      }
+        .eq("id", id).eq(field, JSON.stringify(currentValue)).select(field).maybeSingle();
+      if (error || !saved) throw new Error("No se guardó: las mesas han cambiado o no tienes acceso. Recarga el evento.");
+      rememberTableUndo(0, { round: 0, before, after: { ...saved.preliminary_round, round: 0 } });
       setEventData(prev => prev ? { ...prev, preliminary_round: updatedPrelim } : prev);
       setShowTableEditor(false);
       setEditingRoundData(null);
@@ -3673,23 +3707,82 @@ const EventDetail = () => {
     }
 
     if (!eventData?.tables) return;
-    const updatedTables = (eventData.tables as any[]).map((rd: any) =>
+    const updatedTables = currentValue.map((rd: any) =>
       rd.round === updatedRoundData.round ? updatedRoundData : rd
     );
-    const { error } = await supabase
+    const { data: saved, error } = await supabase
       .from("events")
       .update({ tables: updatedTables })
-      .eq("id", id);
-    if (error) {
-      toast({ title: "Error", description: "No se pudieron guardar los cambios", variant: "destructive" });
-      return;
-    }
+      .eq("id", id).eq(field, JSON.stringify(currentValue)).select(field).maybeSingle();
+    if (error || !saved) throw new Error("No se guardó: las mesas han cambiado o no tienes acceso. Recarga el evento.");
+    const after = saved.tables.find((rd: any) => rd.round === round);
+    rememberTableUndo(round, { round, before, after });
     setEventData(prev => prev ? { ...prev, tables: updatedTables } : prev);
     setShowTableEditor(false);
     setEditingRoundData(null);
     toast({ title: "Mesas actualizadas", description: `Ronda ${updatedRoundData.round} actualizada correctamente` });
+    } catch (error) {
+      toast({ title: "No se pudieron guardar las mesas", description: error instanceof Error ? error.message : "Inténtalo de nuevo", variant: "destructive" });
+    } finally {
+      tableWriteLock.current = false;
+      setIsSavingTables(false);
+    }
   };
 
+  const handleUndoTables = async (round: number) => {
+    const entry = tableUndo[round];
+    if (!id || !entry || tableWriteLock.current) return;
+    tableWriteLock.current = true;
+    setIsSavingTables(true);
+    const field = round === 0 ? "preliminary_round" : "tables";
+    try {
+      const { data: latest, error: readError } = await supabase.from("events").select(field).eq("id", id).single();
+      if (readError || !latest) throw new Error("No se pudieron leer las mesas actuales");
+      const currentValue = latest[field];
+      let restored;
+      if (round === 0) {
+        if (!sameTableState({ ...currentValue, round: 0 }, entry.after)) {
+          throw new Error("La ronda preliminar ha cambiado después. No se deshace para no perder esos cambios.");
+        }
+        const { round: ignoredRound, ...previous } = entry.before;
+        restored = previous;
+      } else {
+        restored = restoreTableRound(currentValue ?? [], entry);
+        if (!restored) throw new Error("Esta ronda ha cambiado después. No se deshace para no perder esos cambios.");
+      }
+      const { data: saved, error } = await supabase.from("events").update({ [field]: restored })
+        .eq("id", id).eq(field, JSON.stringify(currentValue)).select(field).maybeSingle();
+      if (error || !saved) throw new Error("No se pudo deshacer. Recarga el evento y vuelve a intentarlo.");
+      setEventData(prev => prev ? { ...prev, [field]: saved[field] } : prev);
+      rememberTableUndo(round, null);
+      toast({ title: "Cambio deshecho", description: round === 0 ? "Mesas de la ronda preliminar restauradas" : `Mesas de la ronda ${round} restauradas` });
+    } catch (error) {
+      toast({ title: "No se pudo deshacer", description: error instanceof Error ? error.message : "Inténtalo de nuevo", variant: "destructive" });
+    } finally {
+      tableWriteLock.current = false;
+      setIsSavingTables(false);
+    }
+  };
+
+  const undoTablesButton = (round: number) => (
+    <AlertDialog>
+      <AlertDialogTrigger asChild>
+        <Button variant="outline" size="sm" disabled={!tableUndo[round] || isSavingTables} title="Deshacer el último guardado de mesas de esta ronda en esta pestaña">
+          <RotateCcw className="w-4 h-4 mr-2" />Deshacer
+        </Button>
+      </AlertDialogTrigger>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>¿Deshacer el último cambio de mesas?</AlertDialogTitle>
+          <AlertDialogDescription>Se recuperará la distribución anterior al último guardado de esta ronda. No se modificarán otras rondas, pagos ni el temporizador.</AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Cancelar</AlertDialogCancel>
+          <AlertDialogAction onClick={() => handleUndoTables(round)}>Deshacer cambio</AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
 
   // Cancelled participants (opted out via cancellation link) - shown in their own section
   const cancelledParticipants = participants.filter(p => p.cancelled_at);
@@ -5637,12 +5730,14 @@ const EventDetail = () => {
                                 round: 0,
                                 tables: (eventData.preliminary_round?.tables || []).map((t: any[]) => [...t]),
                                 __preliminary: true,
+                                __baseline: structuredClone(eventData.preliminary_round),
                               } as any);
                               setShowTableEditor(true);
                             }}
                           >
                             ✏️ Editar mesas
                           </Button>
+                          {undoTablesButton(0)}
                         </h3>
                         {/* Confirmation status summary */}
                         {eventData.preliminary_round.confirmations && Object.keys(eventData.preliminary_round.confirmations).length > 0 && (
@@ -5835,7 +5930,7 @@ const EventDetail = () => {
 
                    <Card>
                     <CardHeader>
-                      <div className="flex items-center justify-between">
+                      <div className="flex flex-wrap items-center justify-between gap-3">
                         <div>
                           <CardTitle className="flex items-center gap-2">
                             Ronda {viewingRound}
@@ -5876,6 +5971,7 @@ const EventDetail = () => {
                             Editar mesas
                           </Button>
                         )}
+                        {(eventStatus === "active" || eventStatus === "completed") && undoTablesButton(viewingRound)}
                         {eventStatus === "active" && completedRounds.length === 0 && (
                           <AlertDialog>
                             <AlertDialogTrigger asChild>
@@ -6544,6 +6640,7 @@ const EventDetail = () => {
           isPreliminary={!!(editingRoundData as any)?.__preliminary || editingRoundData?.round === 0}
           confirmations={eventData?.preliminary_round?.confirmations || {}}
           onSave={handleTableEditorSave}
+          isSaving={isSavingTables}
           onClose={() => { setShowTableEditor(false); setEditingRoundData(null); }}
         />
 
