@@ -1,3 +1,5 @@
+- [x] Konektum: solo quitar última ronda futura, sin renumerar ni tocar temporizador; distinguir ronda visible/actual y corrección manual confirmada, reglas probadas.
+- [ ] Konektum rondas: verificar borrado y corrección guardados desde administración; falta sesión de administrador en la base propia, el navegador redirige al acceso.
 - [x] Konektum: deshacer movimientos en el editor y último guardado por ronda, conservado en la misma pestaña al recargar; restauración y protección ante cambios posteriores probadas, editor móvil verificado sin modificar eventos reales.
 - [ ] Konektum deshacer: verificar guardado y restauración desde administración con sesión propia (no disponible); las ediciones anteriores no tienen historial recuperable.
 - [x] Juegos: enlaces cortos /j/ con nombre elegido al crear o editable en Invitaciones; nombres automáticos para partidas existentes/nuevas, unicidad y formato en base activa; 8 pruebas unitarias y 5 de integración de nombres, 5 de inscripción, enlaces cortos/largos/cambiados/cerrados verificados a 360px/1280px y cambio anónimo rechazado (401); partidas temporales eliminadas.

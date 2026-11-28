@@ -14,6 +14,7 @@ import {
 } from "@/konektum/ui/dropdown-menu";
 import TableAssignmentModal from "@/konektum/components/event/TableAssignmentModal";
 import TableEditorModal from "@/konektum/components/event/TableEditorModal";
+import { lastRemovableRound, pendingRoundDeletion, correctedRoundState } from "@/konektum/lib/roundControl";
 import { readTableUndo, writeTableUndo, sameTableState, restoreTableRound, type TableUndoEntry } from "@/konektum/lib/tableUndo";
 import EventAnalytics from "@/konektum/components/event/EventAnalytics";
 import EventEngagementInsights from "@/konektum/components/event/EventEngagementInsights";
@@ -263,6 +264,9 @@ const EventDetail = () => {
   const [showPayments, setShowPayments] = useState(false);
   const [currentRound, setCurrentRound] = useState(1);
   const [viewingRound, setViewingRound] = useState(1); // For viewing table distribution
+  const [roundControlBusy, setRoundControlBusy] = useState(false);
+  const [correctionRound, setCorrectionRound] = useState<number | null>(null);
+  useEffect(() => { setViewingRound(currentRound); }, [currentRound, id]);
   const [eventStatus, setEventStatus] = useState<"pending" | "active" | "completed">("pending");
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingExcel, setIsLoadingExcel] = useState(false);
@@ -456,37 +460,9 @@ const EventDetail = () => {
       draft_round: (event as any).draft_round ?? null,
     });
     setEventStatus(event.status as "pending" | "active" | "completed");
-    // Load current_round and completed_rounds from database
+    // Loading must never silently advance a completed round or reset its timer.
     const loadedCompleted: number[] = (event.completed_rounds as number[]) || [];
-    const availableRounds: number[] = Array.isArray(event.tables)
-      ? (event.tables as any[]).map((t: any) => t?.round).filter((r: any) => typeof r === "number")
-      : [];
-    let loadedRound = event.current_round || 1;
-    // Self-heal: deleting/renumbering rounds can leave current_round pointing at a
-    // round that is already completed or no longer exists, which freezes the timer
-    // and hides the active round from participants.
-    const isBroken =
-      loadedCompleted.includes(loadedRound) ||
-      (availableRounds.length > 0 && !availableRounds.includes(loadedRound));
-    if (isBroken && availableRounds.length > 0) {
-      const nextRound =
-        availableRounds.find((r) => !loadedCompleted.includes(r)) ??
-        availableRounds[availableRounds.length - 1];
-      if (nextRound !== loadedRound) {
-        loadedRound = nextRound;
-        await supabase
-          .from("events")
-          .update({
-            current_round: nextRound,
-            round_started_at: null,
-            round_paused_at: null,
-            round_elapsed_seconds: 0,
-          })
-          .eq("id", id);
-      }
-    }
-    setCurrentRound(loadedRound);
-    setViewingRound(loadedRound);
+    setCurrentRound(event.current_round || 1);
     setCompletedRounds(loadedCompleted);
 
     // Load participants
@@ -3098,7 +3074,6 @@ const EventDetail = () => {
     }
 
     setEventData(prev => prev ? { ...prev, tables: updatedTables, rounds: newRoundsCount, draft_round: newRoundNumber } : prev);
-    setViewingRound(newRoundNumber);
     if (incrementTotal) {
       toast({ 
         title: `Ronda ${newRoundNumber} generada en borrador`,
@@ -3107,83 +3082,67 @@ const EventDetail = () => {
     }
   };
 
+  // Read current state and compare-and-swap every round-control field. A stale
+  // panel must not delete a round another organizer has started/completed.
+  const saveRoundControl = async (buildUpdate: (fresh: any) => any) => {
+    const { data: fresh, error: readError } = await supabase.from("events")
+      .select("tables,rounds,current_round,completed_rounds,draft_round,status,round_started_at,round_paused_at,round_elapsed_seconds")
+      .eq("id", id).single();
+    if (readError || !fresh) throw new Error("No se pudo comprobar el estado de las rondas.");
+    if (!sameTableState(fresh.tables, eventData?.tables) ||
+        (fresh.current_round || 1) !== currentRound ||
+        !sameTableState(fresh.completed_rounds || [], completedRounds) ||
+        fresh.status !== eventStatus) {
+      throw new Error("Las rondas han cambiado. Recarga el panel antes de continuar.");
+    }
+    const update = buildUpdate(fresh);
+    let query = supabase.from("events").update(update).eq("id", id);
+    for (const [key, value] of Object.entries(fresh)) {
+      query = value === null ? query.is(key, null)
+        : query.eq(key, typeof value === "object" ? JSON.stringify(value) : value);
+    }
+    const { data: saved, error } = await query.select("id").maybeSingle();
+    if (error || !saved) throw new Error("No se guardó: el evento ha cambiado. Recarga el panel y vuelve a intentarlo.");
+    return update;
+  };
+
   const handleDeleteRound = async (roundNumber: number) => {
-    if (!eventData?.tables || !Array.isArray(eventData.tables) || !id) return;
-    const currentTables = eventData.tables as any[];
-    if (currentTables.length <= 1) {
-      toast({ title: "No permitido", description: "Debe haber al menos una ronda", variant: "destructive" });
-      return;
-    }
+    if (!eventData || !id || roundControlBusy) return;
+    setRoundControlBusy(true);
+    try {
+      const update = await saveRoundControl(fresh => {
+        const patch = pendingRoundDeletion(fresh, roundNumber);
+        if (!patch) throw new Error("Solo se puede quitar la última ronda pendiente, nunca una ronda actual o completada.");
+        return patch;
+      });
+      setEventData(prev => prev ? { ...prev, ...update } : prev);
+      setViewingRound(currentRound);
+      rememberTableUndo(roundNumber, null);
+      toast({ title: `Ronda ${roundNumber} eliminada`, description: "La ronda actual, su temporizador y las rondas jugadas no han cambiado." });
+    } catch (error) {
+      toast({ title: "No se eliminó la ronda", description: error instanceof Error ? error.message : "Inténtalo de nuevo.", variant: "destructive" });
+    } finally { setRoundControlBusy(false); }
+  };
 
-    // Remove the round and re-number subsequent rounds
-    const updatedTables = currentTables
-      .filter((rd: any) => rd.round !== roundNumber)
-      .map((rd: any, idx: number) => ({ ...rd, round: idx + 1 }));
-
-    const newRoundsCount = updatedTables.length;
-    const newCompletedRounds = completedRounds
-      .filter(r => r !== roundNumber)
-      .map(r => {
-        // Re-map completed round numbers
-        const original = currentTables.findIndex((t: any) => t.round === r);
-        return original >= 0 ? updatedTables[currentTables.slice(0, original + 1).filter((t: any) => t.round !== roundNumber).length - 1]?.round || r : r;
-      })
-      .filter(r => r <= newRoundsCount);
-
-    // Simpler approach: recalculate completed rounds based on new numbering
-    const originalOrder = currentTables.map((t: any) => t.round);
-    const keptOriginalRounds = originalOrder.filter((r: number) => r !== roundNumber);
-    const remappedCompleted = completedRounds
-      .filter(r => r !== roundNumber)
-      .map(r => keptOriginalRounds.indexOf(r) + 1)
-      .filter(r => r > 0);
-
-    // Point the active round at the first round that is still pending, so the
-    // timer and the participant view never get stuck on a completed round.
-    const allRoundNumbers = updatedTables.map((rd: any) => rd.round as number);
-    const newCurrentRound =
-      allRoundNumbers.find((r) => !remappedCompleted.includes(r)) ?? newRoundsCount;
-
-    // Drop a draft pointer that no longer matches an existing round.
-    const previousDraft = (eventData as any)?.draft_round ?? null;
-    const keptDraft =
-      previousDraft && previousDraft !== roundNumber
-        ? keptOriginalRounds.indexOf(previousDraft) + 1 || null
-        : null;
-    const newDraftRound = keptDraft && keptDraft === newCurrentRound ? keptDraft : null;
-
-    const { error } = await supabase
-      .from("events")
-      .update({ 
-        tables: updatedTables, 
-        rounds: newRoundsCount, 
-        current_round: newCurrentRound,
-        completed_rounds: remappedCompleted,
-        draft_round: newDraftRound,
-        round_started_at: null,
-        round_paused_at: null,
-        round_elapsed_seconds: 0,
-      })
-      .eq("id", id);
-
-    if (error) {
-      toast({ title: "Error", description: "No se pudo eliminar la ronda", variant: "destructive" });
-      return;
-    }
-
-    setEventData(prev => prev ? {
-      ...prev,
-      tables: updatedTables,
-      rounds: newRoundsCount,
-      draft_round: newDraftRound,
-      round_started_at: null,
-      round_paused_at: null,
-      round_elapsed_seconds: 0,
-    } : prev);
-    setCurrentRound(newCurrentRound);
-    setCompletedRounds(remappedCompleted);
-    setViewingRound(Math.min(viewingRound, newRoundsCount));
-    toast({ title: "Ronda eliminada", description: `Se eliminó la ronda ${roundNumber} y se renumeraron las restantes.` });
+  const handleCorrectRound = async () => {
+    if (!eventData || !id || correctionRound === null || roundControlBusy) return;
+    setRoundControlBusy(true);
+    try {
+      const update = await saveRoundControl(fresh => {
+        if (fresh.status !== "active") throw new Error("Solo se puede corregir un evento activo.");
+        const corrected = correctedRoundState(fresh.tables, correctionRound, fresh.completed_rounds || []);
+        if (!corrected) throw new Error("Esta ronda no existe.");
+        return { ...corrected, draft_round: fresh.draft_round };
+      });
+      setEventData(prev => prev ? { ...prev, ...update } : prev);
+      setCurrentRound(update.current_round);
+      setViewingRound(update.current_round);
+      setCompletedRounds(update.completed_rounds);
+      setCorrectionRound(null);
+      toast({ title: `Ronda actual corregida a ${update.current_round}`, description: "Temporizador reiniciado, sin arrancar. Las mesas y los encuentros registrados se conservan." });
+    } catch (error) {
+      toast({ title: "No se cambió la ronda", description: error instanceof Error ? error.message : "Inténtalo de nuevo.", variant: "destructive" });
+    } finally { setRoundControlBusy(false); }
   };
 
   const markNoShowParticipants = async () => {
@@ -5494,7 +5453,7 @@ const EventDetail = () => {
                     roundDuration={Math.floor((eventData.round_duration || 300) / 60)}
                     activeRound={currentRound}
                     completedRounds={completedRounds}
-                    totalRounds={tables.length}
+                    totalRounds={Math.max(eventData.rounds || 0, ...tables.map(t => t.round))}
                     roundStartedAt={eventData.round_started_at}
                     roundPausedAt={eventData.round_paused_at}
                     roundElapsedSeconds={eventData.round_elapsed_seconds}
@@ -5848,13 +5807,13 @@ const EventDetail = () => {
                       return (
                         <Button
                           key={table.round}
-                          variant={viewingRound === table.round ? "default" : "outline"}
+                          variant={viewingRound === table.round ? "secondary" : "outline"}
                           size="sm"
                           onClick={() => setViewingRound(table.round)}
-                          className="relative"
+                          className={viewingRound === table.round ? "relative ring-2 ring-foreground/30" : "relative"}
                         >
                           {isCompleted && <Check className="w-3 h-3 mr-1 text-green-500" />}
-                          {isActive && <span className="w-2 h-2 rounded-full bg-primary animate-pulse mr-1" />}
+                          {isActive && <Badge variant="default" className="mr-1">Actual</Badge>}
                           Ronda {table.round}
                           {isPending && <Lock className="w-3 h-3 ml-1 opacity-50" />}
                         </Button>
@@ -5866,35 +5825,40 @@ const EventDetail = () => {
                           variant="outline"
                           size="sm"
                           onClick={() => handleAddRound()}
+                          disabled={roundControlBusy}
                           className="border-dashed"
                         >
                           <Plus className="w-3 h-3 mr-1" />
                           Ronda
                         </Button>
-                        {tables.length > 1 && (
+                        {lastRemovableRound(tables, currentRound, completedRounds, eventStatus) !== null && (
                           <AlertDialog>
                             <AlertDialogTrigger asChild>
                               <Button
                                 variant="outline"
                                 size="sm"
-                                className="border-dashed text-destructive hover:text-destructive"
+                                className="h-auto min-h-9 max-w-full whitespace-normal border-dashed py-2 text-destructive hover:text-destructive"
+                                disabled={roundControlBusy}
                               >
                                 <Trash2 className="w-3 h-3 mr-1" />
-                                Quitar R{viewingRound}
+                                Quitar última ronda pendiente (R{lastRemovableRound(tables, currentRound, completedRounds, eventStatus)})
                               </Button>
                             </AlertDialogTrigger>
                             <AlertDialogContent>
                               <AlertDialogHeader>
-                                <AlertDialogTitle>¿Eliminar Ronda {viewingRound}?</AlertDialogTitle>
+                                <AlertDialogTitle>¿Quitar la última ronda pendiente?</AlertDialogTitle>
                                 <AlertDialogDescription>
-                                  Se eliminará la Ronda {viewingRound} y se renumerarán las rondas restantes.
-                                  {completedRounds.includes(viewingRound) && " Esta ronda ya fue completada — los encuentros registrados no se eliminarán."}
+                                  Se eliminarán las mesas de la Ronda {lastRemovableRound(tables, currentRound, completedRounds, eventStatus)}. No se renumerarán las rondas jugadas ni se cambiará la ronda actual o su temporizador.
                                 </AlertDialogDescription>
                               </AlertDialogHeader>
                               <AlertDialogFooter>
                                 <AlertDialogCancel>Cancelar</AlertDialogCancel>
                                 <AlertDialogAction
-                                  onClick={() => handleDeleteRound(viewingRound)}
+                                  disabled={roundControlBusy}
+                                  onClick={() => {
+                                    const target = lastRemovableRound(tables, currentRound, completedRounds, eventStatus);
+                                    if (target !== null) void handleDeleteRound(target);
+                                  }}
                                   className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                                 >
                                   Eliminar ronda
@@ -5906,6 +5870,42 @@ const EventDetail = () => {
                       </>
                     )}
                   </div>
+
+                  <div className="flex flex-wrap items-center gap-3 text-sm">
+                    <p className="text-muted-foreground">
+                      Viendo mesas de <strong className="text-foreground">Ronda {viewingRound}</strong>
+                      {eventStatus === "active" && <> · Ronda actual: <strong className="text-primary">{currentRound}</strong>{completedRounds.includes(currentRound) ? " (completada)" : eventData.draft_round === currentRound ? " (borrador)" : eventData.round_started_at ? eventData.round_paused_at ? " (en pausa)" : " (en juego)" : " (sin iniciar)"}</>}
+                    </p>
+                    {viewingRound !== currentRound && eventStatus === "active" && (
+                      <Button variant="outline" size="sm" onClick={() => setViewingRound(currentRound)}><Eye className="w-4 h-4 mr-2" />Ver ronda actual</Button>
+                    )}
+                    {eventStatus === "active" && (
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="outline" size="sm" disabled={roundControlBusy}><Settings2 className="w-4 h-4 mr-2" />Corregir ronda actual</Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent>
+                          {tables.map(rd => <DropdownMenuItem key={rd.round} onSelect={() => setCorrectionRound(rd.round)}>Ronda {rd.round}{rd.round === currentRound ? " · actual" : ""}</DropdownMenuItem>)}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    )}
+                  </div>
+                  <AlertDialog open={correctionRound !== null} onOpenChange={open => { if (!open && !roundControlBusy) setCorrectionRound(null); }}>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>¿Establecer Ronda {correctionRound} como actual?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          El temporizador se reiniciará y quedará sin iniciar. Esta ronda y las siguientes dejarán de estar marcadas como completadas. Se conservarán todas las mesas y los encuentros registrados; los participantes verán la ronda seleccionada si está publicada.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel disabled={roundControlBusy}>Cancelar</AlertDialogCancel>
+                        <AlertDialogAction disabled={roundControlBusy} onClick={e => { e.preventDefault(); void handleCorrectRound(); }}>
+                          {roundControlBusy ? "Guardando…" : "Corregir ronda"}
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
 
                   {/* Legend */}
                   <Card className="bg-muted/30">
