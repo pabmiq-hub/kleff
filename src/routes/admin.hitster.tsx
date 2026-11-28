@@ -22,6 +22,11 @@ export const Route = createFileRoute("/admin/hitster")({
   head: () => ({
     meta: [
       { title: "Hitster · Administración — KLEFF" },
+      { name: "description", content: "Control de partidas, participantes e historial de respuestas de Hitster en KLEFF." },
+      { property: "og:title", content: "Hitster · Administración — KLEFF" },
+      { property: "og:description", content: "Control de partidas y respuestas de Hitster en KLEFF." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
       { name: "robots", content: "noindex, nofollow" },
     ],
   }),

@@ -789,6 +789,8 @@ export type Database = {
           created_at: string
           current_round_id: string | null
           id: string
+          play_number: number
+          round_offset: number
           side: string
           slug: string
           status: string
@@ -802,6 +804,8 @@ export type Database = {
           created_at?: string
           current_round_id?: string | null
           id?: string
+          play_number?: number
+          round_offset?: number
           side?: string
           slug: string
           status?: string
@@ -815,6 +819,8 @@ export type Database = {
           created_at?: string
           current_round_id?: string | null
           id?: string
+          play_number?: number
+          round_offset?: number
           side?: string
           slug?: string
           status?: string
@@ -884,6 +890,7 @@ export type Database = {
           game_id: string
           id: string
           phase: string
+          play_number: number
           revealed_at: string | null
           round_number: number
           started_at: string
@@ -895,6 +902,7 @@ export type Database = {
           game_id: string
           id?: string
           phase?: string
+          play_number?: number
           revealed_at?: string | null
           round_number: number
           started_at?: string
@@ -906,6 +914,7 @@ export type Database = {
           game_id?: string
           id?: string
           phase?: string
+          play_number?: number
           revealed_at?: string | null
           round_number?: number
           started_at?: string
@@ -4870,6 +4879,10 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      hitster_restart_game: {
+        Args: { p_expected_play: number; p_game_id: string }
+        Returns: undefined
       }
       is_super_admin: { Args: never; Returns: boolean }
       karma_active_season: { Args: never; Returns: string }

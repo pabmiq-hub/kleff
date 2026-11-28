@@ -320,13 +320,14 @@ export const hitsterHostGet = createServerFn({ method: "GET" })
         status: game.status as HitsterStatus,
         timer_seconds: game.timer_seconds as number,
         current_round_id: game.current_round_id as string | null,
+        play_number: game.play_number as number,
         winner_participant_ids: (game.winner_participant_ids ?? []) as string[],
         tiebreak_participant_ids: (game.tiebreak_participant_ids ?? []) as string[],
       },
       currentRound: currentRound
         ? {
             id: currentRound.id as string,
-            round_number: currentRound.round_number as number,
+            round_number: Number(currentRound.round_number) - Number(game.round_offset ?? 0),
             category_key: currentRound.category_key as HitsterColor,
             phase: currentRound.phase as HitsterRoundPhase,
             started_at: currentRound.started_at as string,
@@ -402,9 +403,46 @@ export const hitsterHostStartGame = createServerFn({ method: "POST" })
       await db
         .from("hitster_games")
         .update({ status: "playing", updated_at: new Date().toISOString() })
-        .eq("id", data.gameId),
+        .eq("id", data.gameId)
+        .eq("status", "draft"),
     );
     return { ok: true };
+  });
+
+export const hitsterHostRestartGame = createServerFn({ method: "POST" })
+  .inputValidator((d: { gameId: string; playNumber: number; collabToken?: string }) =>
+    z.object({ gameId: uuid, playNumber: z.number().int().positive(), collabToken: tokenS.optional() }).parse(d),
+  )
+  .handler(async ({ data }) => {
+    const { db } = await assertHost(data.gameId, data.collabToken);
+    check(await db.rpc("hitster_restart_game", { p_game_id: data.gameId, p_expected_play: data.playNumber }));
+    return { ok: true };
+  });
+
+export const hitsterHostAnswerHistory = createServerFn({ method: "GET" })
+  .inputValidator((d: { gameId: string; participantId: string; collabToken?: string }) =>
+    z.object({ gameId: uuid, participantId: uuid, collabToken: tokenS.optional() }).parse(d),
+  )
+  .handler(async ({ data }) => {
+    const { db } = await assertHost(data.gameId, data.collabToken);
+    const rows = check(await db.from("hitster_answers")
+      .select("answer_text,is_correct,is_exact_year,marked_cell,created_at,hitster_rounds!inner(round_number,category_key,play_number)")
+      .eq("game_id", data.gameId).eq("participant_id", data.participantId)
+      .order("created_at", { ascending: false })) as any[];
+    const rounds = check(await db.from("hitster_rounds").select("round_number,play_number")
+      .eq("game_id", data.gameId).order("round_number")) as { round_number: number; play_number: number }[];
+    const first = new Map<number, number>();
+    for (const r of rounds) if (!first.has(r.play_number)) first.set(r.play_number, r.round_number);
+    return rows.map((a) => ({
+      answer_text: String(a.answer_text),
+      is_correct: a.is_correct as boolean | null,
+      is_exact_year: Boolean(a.is_exact_year),
+      marked_cell: a.marked_cell as number | null,
+      created_at: String(a.created_at),
+      category_key: a.hitster_rounds.category_key as HitsterColor,
+      play_number: Number(a.hitster_rounds.play_number),
+      round_number: Number(a.hitster_rounds.round_number) - (first.get(a.hitster_rounds.play_number) ?? 1) + 1,
+    }));
   });
 
 export const hitsterHostTriggerCategory = createServerFn({ method: "POST" })
@@ -414,11 +452,7 @@ export const hitsterHostTriggerCategory = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const { db } = await assertHost(data.gameId, data.collabToken);
     let game = check(await db.from("hitster_games").select("*").eq("id", data.gameId).single()) as any;
-    if (game.status === "draft") {
-      game = check(
-        await db.from("hitster_games").update({ status: "playing", updated_at: new Date().toISOString() }).eq("id", game.id).select("*").single(),
-      );
-    }
+    if (game.status === "draft") throw new Error("Pulsa Empezar partida antes de disparar una categoría.");
     if (game.status === "finished") throw new Error("La partida ya tiene ganador.");
 
     // Close previous open round and evaluate victory/tiebreak before starting a new one.
@@ -441,6 +475,7 @@ export const hitsterHostTriggerCategory = createServerFn({ method: "POST" })
         .insert({
           game_id: game.id,
           round_number: (lastRound?.round_number ?? 0) + 1,
+          play_number: game.play_number,
           category_key: category,
           phase: "answering",
           started_at: now.toISOString(),
@@ -651,7 +686,7 @@ export const hitsterPlayerState = createServerFn({ method: "GET" })
       currentRound: currentRound
         ? {
             id: currentRound.id as string,
-            round_number: currentRound.round_number as number,
+            round_number: Number(currentRound.round_number) - Number(game.round_offset ?? 0),
             category_key: currentRound.category_key as HitsterColor,
             phase: currentRound.phase as HitsterRoundPhase,
             ends_at: currentRound.ends_at as string,

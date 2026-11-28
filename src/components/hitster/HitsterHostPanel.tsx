@@ -13,8 +13,10 @@ import {
   Dices,
   Download,
   Eye,
+  History,
   Mail,
   Play,
+  RotateCcw,
   Settings,
   Trash2,
   Trophy,
@@ -25,6 +27,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
   HITSTER_CATEGORIES,
   HITSTER_COLORS,
@@ -41,6 +44,8 @@ import {
   hitsterHostGet,
   hitsterHostRevealAnswer,
   hitsterHostStartGame,
+  hitsterHostRestartGame,
+  hitsterHostAnswerHistory,
   hitsterHostTriggerCategory,
   hitsterHostUpdateSettings,
 } from "@/lib/hitster.functions";
@@ -65,6 +70,8 @@ export function HitsterHostPanel({ gameId, collabToken, onBack }: HitsterHostPan
   const getFn = useServerFn(hitsterHostGet);
   const updateFn = useServerFn(hitsterHostUpdateSettings);
   const startFn = useServerFn(hitsterHostStartGame);
+  const restartFn = useServerFn(hitsterHostRestartGame);
+  const historyFn = useServerFn(hitsterHostAnswerHistory);
   const triggerFn = useServerFn(hitsterHostTriggerCategory);
   const revealFn = useServerFn(hitsterHostRevealAnswer);
   const delPFn = useServerFn(hitsterHostDeleteParticipant);
@@ -85,6 +92,17 @@ export function HitsterHostPanel({ gameId, collabToken, onBack }: HitsterHostPan
   const [syncedId, setSyncedId] = useState<string | null>(null);
   const [collabEmail, setCollabEmail] = useState("");
   const [showQr, setShowQr] = useState(false);
+  const [restartOpen, setRestartOpen] = useState(false);
+  const [historyParticipant, setHistoryParticipant] = useState<{ id: string; nickname: string } | null>(null);
+  const history = useQuery({
+    queryKey: ["hitster-answer-history", gameId, collabToken ?? "admin", historyParticipant?.id],
+    queryFn: () => {
+      if (!historyParticipant) throw new Error("Selecciona un participante.");
+      return historyFn({ data: { gameId, collabToken, participantId: historyParticipant.id } });
+    },
+    enabled: Boolean(historyParticipant),
+    refetchInterval: historyParticipant ? 2000 : false,
+  });
   const [nowTick, setNowTick] = useState(Date.now());
   const qrRef = useRef<HTMLDivElement>(null);
 
@@ -114,6 +132,15 @@ export function HitsterHostPanel({ gameId, collabToken, onBack }: HitsterHostPan
   const startGame = useMutation({
     mutationFn: () => startFn({ data: { gameId, collabToken } }),
     onSuccess: () => { toast.success("Partida iniciada"); invalidate(); },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const restartGame = useMutation({
+    mutationFn: () => {
+      if (!data) throw new Error("No se pudo cargar la partida.");
+      return restartFn({ data: { gameId, collabToken, playNumber: data.game.play_number } });
+    },
+    onSuccess: () => { setRestartOpen(false); toast.success("Todo listo para empezar de nuevo"); invalidate(); },
     onError: (e: Error) => toast.error(e.message),
   });
 
@@ -206,6 +233,7 @@ export function HitsterHostPanel({ gameId, collabToken, onBack }: HitsterHostPan
               </Badge>
               <Badge variant="outline">Cara {game.side} · {game.side === "A" ? "Principiante" : "Experto"}</Badge>
               <Badge variant="outline"><Clock className="h-3 w-3 mr-1" /> {game.timer_seconds}s</Badge>
+              <Badge variant="outline">Partida {game.play_number}</Badge>
             </div>
           </div>
         </div>
@@ -260,6 +288,11 @@ export function HitsterHostPanel({ gameId, collabToken, onBack }: HitsterHostPan
       <div className="rounded-xl border bg-card p-5 space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <h2 className="font-display text-lg font-semibold">Control de partida</h2>
+          {game.status !== "draft" && (
+            <Button variant="outline" onClick={() => setRestartOpen(true)} disabled={restartGame.isPending}>
+              <RotateCcw className="h-4 w-4 mr-2" /> Volver a jugar
+            </Button>
+          )}
           {game.status === "draft" ? (
             <Button size="lg" onClick={() => startGame.mutate()} disabled={startGame.isPending}>
               <Play className="h-4 w-4 mr-2" /> Empezar partida
@@ -384,7 +417,7 @@ export function HitsterHostPanel({ gameId, collabToken, onBack }: HitsterHostPan
                 {currentRound && (
                   <div className="rounded-lg bg-muted/60 px-2.5 py-1.5 text-xs flex items-center justify-between gap-2">
                     <span className={`truncate ${answered ? "text-foreground" : "text-muted-foreground italic"}`}>
-                      {answered ? p.answer!.answer_text : "Sin respuesta"}
+                      {answered ? p.answer?.answer_text : "Sin respuesta"}
                     </span>
                     {p.answer?.is_correct === true && <Check className="h-4 w-4 text-emerald-600 shrink-0" />}
                     {p.answer?.is_correct === false && <X className="h-4 w-4 text-destructive shrink-0" />}
@@ -394,6 +427,9 @@ export function HitsterHostPanel({ gameId, collabToken, onBack }: HitsterHostPan
                   </div>
                 )}
                 <HitsterBoard board={p.board} marks={p.marks} size="sm" />
+                <Button variant="outline" size="sm" className="w-full" onClick={() => setHistoryParticipant({ id: p.id, nickname: p.nickname })}>
+                  <History className="h-4 w-4 mr-2" /> Historial de respuestas
+                </Button>
               </div>
               );
             })}
@@ -515,6 +551,45 @@ export function HitsterHostPanel({ gameId, collabToken, onBack }: HitsterHostPan
           </details>
         )}
       </div>
+      <Dialog open={restartOpen} onOpenChange={(open) => { if (!restartGame.isPending) setRestartOpen(open); }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>¿Volver a jugar?</DialogTitle>
+            <DialogDescription>Se quitarán todas las cruces y se reiniciarán el temporizador y los ganadores. Se conservarán los participantes, sus tableros, códigos, colaboradores y el mismo enlace. Las respuestas anteriores seguirán en el historial.</DialogDescription>
+          </DialogHeader>
+          <p className="text-sm">La partida quedará esperando hasta que pulses «Empezar partida».</p>
+          <DialogFooter>
+            <Button variant="outline" disabled={restartGame.isPending} onClick={() => setRestartOpen(false)}>Cancelar</Button>
+            <Button disabled={restartGame.isPending} onClick={() => restartGame.mutate()}><RotateCcw className="h-4 w-4 mr-2" />{restartGame.isPending ? "Reiniciando…" : "Volver a jugar"}</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      <Dialog open={Boolean(historyParticipant)} onOpenChange={(open) => { if (!open) setHistoryParticipant(null); }}>
+        <DialogContent className="max-w-2xl max-h-[85dvh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Respuestas de {historyParticipant?.nickname}</DialogTitle>
+            <DialogDescription>Más recientes primero. El resultado indica la validación realizada por el participante.</DialogDescription>
+          </DialogHeader>
+          {history.isPending ? <p className="text-sm text-muted-foreground">Cargando respuestas…</p> : history.error ? <p className="text-sm text-destructive">{history.error.message}</p> : !history.data?.length ? <p className="text-sm text-muted-foreground">Todavía no ha enviado respuestas.</p> : (
+            <ol className="divide-y">
+              {history.data.map((a, i) => (
+                <li key={`${a.play_number}-${a.round_number}-${i}`} className="py-3 space-y-2">
+                  <div className="flex flex-wrap justify-between gap-2 text-xs text-muted-foreground">
+                    <span className="flex items-center gap-2"><span className={`h-6 w-6 rounded flex items-center justify-center ${HITSTER_COLOR_STYLES[a.category_key].soft}`}><HitsterCategoryIcon side={game.side} color={a.category_key} className="h-4 w-4" /></span>Partida {a.play_number} · Ronda {a.round_number} · {cats[a.category_key].name.es}</span>
+                    <time dateTime={a.created_at}>{new Date(a.created_at).toLocaleString("es-ES")}</time>
+                  </div>
+                  <p className="text-sm font-medium whitespace-pre-wrap break-words">{a.answer_text}</p>
+                  <div className="flex flex-wrap gap-2">
+                    <Badge variant={a.is_correct === false ? "destructive" : "secondary"}>{a.is_correct === true ? "Validada como correcta" : a.is_correct === false ? "Validada como incorrecta" : "Sin validar"}</Badge>
+                    {a.is_exact_year && <Badge variant="outline">Año exacto</Badge>}
+                    {a.marked_cell !== null && <Badge variant="outline">Casilla marcada: {a.marked_cell + 1}</Badge>}
+                  </div>
+                </li>
+              ))}
+            </ol>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

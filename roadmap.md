@@ -1,3 +1,4 @@
+- [x] Hitster: volver a jugar conservando accesos, tableros, colaboradores y enlace; esperar «Empezar partida» y reiniciar ronda 1; historial por participante de partidas anteriores; 12 pruebas y flujo con jugador/anfitrión en ordenador y móvil verificados, datos de prueba eliminados; pendiente publicar.
 - [x] Konektum: solo quitar última ronda futura, sin renumerar ni tocar temporizador; distinguir ronda visible/actual y corrección manual confirmada, reglas probadas.
 - [ ] Konektum rondas: verificar borrado y corrección guardados desde administración; falta sesión de administrador en la base propia, el navegador redirige al acceso.
 - [x] Konektum: deshacer movimientos en el editor y último guardado por ronda, conservado en la misma pestaña al recargar; restauración y protección ante cambios posteriores probadas, editor móvil verificado sin modificar eventos reales.
